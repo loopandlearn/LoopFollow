@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Oxygen",
+        "repositoryURL": "https://github.com/mpangburn/Oxygen.git",
+        "state": {
+          "branch": "master",
+          "revision": "b3c7a6ead1400e4799b16755d23c9905040d4acc",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,22 @@
+PODS:
+  - Charts (3.5.0):
+    - Charts/Core (= 3.5.0)
+  - Charts/Core (3.5.0)
+  - Eureka (5.2.1)
+
+DEPENDENCIES:
+  - Charts
+  - Eureka
+
+SPEC REPOS:
+  trunk:
+    - Charts
+    - Eureka
+
+SPEC CHECKSUMS:
+  Charts: 40a08591df1f8ad5c223ddedfb1a06da92f24f7c
+  Eureka: c883105488e05bc65539f583246ecf9657cabbfe
+
+PODFILE CHECKSUM: 7665842405edac4f27ad84d4b66d6d57d5a4e5aa
+
+COCOAPODS: 1.9.3

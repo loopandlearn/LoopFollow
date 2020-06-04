@@ -1,0 +1,6 @@
+framework module Pods_LoopFollow {
+  umbrella header "Pods-LoopFollow-umbrella.h"
+
+  export *
+  module * { export * }
+}
