@@ -3,31 +3,62 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
 		FC9788182485969B00A7906C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9788172485969B00A7906C /* AppDelegate.swift */; };
 		FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9788192485969B00A7906C /* SceneDelegate.swift */; };
-		FC97881C2485969B00A7906C /* FirstViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC97881B2485969B00A7906C /* FirstViewController.swift */; };
-		FC97881E2485969B00A7906C /* SecondViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC97881D2485969B00A7906C /* SecondViewController.swift */; };
+		FC97881C2485969B00A7906C /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC97881B2485969B00A7906C /* MainViewController.swift */; };
+		FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC97881D2485969B00A7906C /* NightScoutViewController.swift */; };
 		FC9788212485969B00A7906C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC97881F2485969B00A7906C /* Main.storyboard */; };
 		FC9788242485969B00A7906C /* LoopFollow.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC9788222485969B00A7906C /* LoopFollow.xcdatamodeld */; };
 		FC9788262485969C00A7906C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC9788252485969C00A7906C /* Assets.xcassets */; };
 		FC9788292485969C00A7906C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC9788272485969C00A7906C /* LaunchScreen.storyboard */; };
+		FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6884F248935D800A0279D /* AlarmViewController.swift */; };
+		FCC6885A2489554800A0279D /* BackgroundTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTask.swift */; };
+		FCC6885C2489559400A0279D /* blank.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885B2489559400A0279D /* blank.wav */; };
+		FCC6885E24896A6C00A0279D /* silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885D24896A6C00A0279D /* silence.mp3 */; };
+		FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886424898EEE00A0279D /* UserDefaults.swift */; };
+		FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886624898F8000A0279D /* UserDefaultsValue.swift */; };
+		FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */; };
+		FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886A24898FD800A0279D /* ObservationToken.swift */; };
+		FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886C2489909D00A0279D /* AnyConvertible.swift */; };
+		FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886E2489A53800A0279D /* AppConstants.swift */; };
+		FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCFEEC9D2486E68E00402A7F /* WebKit.framework */; };
+		FCFEECA02488157B00402A7F /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEEC9F2488157B00402A7F /* Chart.swift */; };
+		FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEECA1248857A600402A7F /* SettingsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		FC9788142485969B00A7906C /* LoopFollow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LoopFollow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
+		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
+		FC8DEEE62485D1ED0075863F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FC9788142485969B00A7906C /* Loop Follow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Loop Follow.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC9788172485969B00A7906C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FC9788192485969B00A7906C /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		FC97881B2485969B00A7906C /* FirstViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstViewController.swift; sourceTree = "<group>"; };
-		FC97881D2485969B00A7906C /* SecondViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondViewController.swift; sourceTree = "<group>"; };
+		FC97881B2485969B00A7906C /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		FC97881D2485969B00A7906C /* NightScoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScoutViewController.swift; sourceTree = "<group>"; };
 		FC9788202485969B00A7906C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FC9788232485969B00A7906C /* LoopFollow.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LoopFollow.xcdatamodel; sourceTree = "<group>"; };
 		FC9788252485969C00A7906C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC9788282485969C00A7906C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		FC97882A2485969C00A7906C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FCC6884F248935D800A0279D /* AlarmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmViewController.swift; sourceTree = "<group>"; };
+		FCC688592489554800A0279D /* BackgroundTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTask.swift; sourceTree = "<group>"; };
+		FCC6885B2489559400A0279D /* blank.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blank.wav; sourceTree = "<group>"; };
+		FCC6885D24896A6C00A0279D /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
+		FCC6886424898EEE00A0279D /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
+		FCC6886624898F8000A0279D /* UserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValue.swift; sourceTree = "<group>"; };
+		FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValueGroups.swift; sourceTree = "<group>"; };
+		FCC6886A24898FD800A0279D /* ObservationToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationToken.swift; sourceTree = "<group>"; };
+		FCC6886C2489909D00A0279D /* AnyConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyConvertible.swift; sourceTree = "<group>"; };
+		FCC6886E2489A53800A0279D /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
+		FCC688702489A57C00A0279D /* Loop Follow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Follow.entitlements"; sourceTree = "<group>"; };
+		FCFEEC9D2486E68E00402A7F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		FCFEEC9F2488157B00402A7F /* Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
+		FCFEECA1248857A600402A7F /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,42 +66,93 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */,
+				3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6A5880E0B811AF443B05AB02 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FCFEEC9D2486E68E00402A7F /* WebKit.framework */,
+				A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8E32230C453C93FDCE59C2B9 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */,
+				059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		FC8DEEE32485D1680075863F /* LoopFollow */ = {
+			isa = PBXGroup;
+			children = (
+				FCC688702489A57C00A0279D /* Loop Follow.entitlements */,
+				FCC688542489367300A0279D /* helpers */,
+				FCC688512489363F00A0279D /* repository */,
+				FC8DEEE62485D1ED0075863F /* Info.plist */,
+				FC9788172485969B00A7906C /* AppDelegate.swift */,
+				FC9788192485969B00A7906C /* SceneDelegate.swift */,
+				FC97881B2485969B00A7906C /* MainViewController.swift */,
+				FC97881D2485969B00A7906C /* NightScoutViewController.swift */,
+				FC97881F2485969B00A7906C /* Main.storyboard */,
+				FC9788252485969C00A7906C /* Assets.xcassets */,
+				FC9788272485969C00A7906C /* LaunchScreen.storyboard */,
+				FC9788222485969B00A7906C /* LoopFollow.xcdatamodeld */,
+				FCFEECA1248857A600402A7F /* SettingsViewController.swift */,
+				FCC6884F248935D800A0279D /* AlarmViewController.swift */,
+			);
+			path = LoopFollow;
+			sourceTree = "<group>";
+		};
 		FC97880B2485969B00A7906C = {
 			isa = PBXGroup;
 			children = (
-				FC9788162485969B00A7906C /* LoopFollow */,
+				FC8DEEE32485D1680075863F /* LoopFollow */,
 				FC9788152485969B00A7906C /* Products */,
+				8E32230C453C93FDCE59C2B9 /* Pods */,
+				6A5880E0B811AF443B05AB02 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
 		FC9788152485969B00A7906C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FC9788142485969B00A7906C /* LoopFollow.app */,
+				FC9788142485969B00A7906C /* Loop Follow.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		FC9788162485969B00A7906C /* LoopFollow */ = {
+		FCC688512489363F00A0279D /* repository */ = {
 			isa = PBXGroup;
 			children = (
-				FC9788172485969B00A7906C /* AppDelegate.swift */,
-				FC9788192485969B00A7906C /* SceneDelegate.swift */,
-				FC97881B2485969B00A7906C /* FirstViewController.swift */,
-				FC97881D2485969B00A7906C /* SecondViewController.swift */,
-				FC97881F2485969B00A7906C /* Main.storyboard */,
-				FC9788252485969C00A7906C /* Assets.xcassets */,
-				FC9788272485969C00A7906C /* LaunchScreen.storyboard */,
-				FC97882A2485969C00A7906C /* Info.plist */,
-				FC9788222485969B00A7906C /* LoopFollow.xcdatamodeld */,
+				FCC6886424898EEE00A0279D /* UserDefaults.swift */,
 			);
-			path = LoopFollow;
+			path = repository;
+			sourceTree = "<group>";
+		};
+		FCC688542489367300A0279D /* helpers */ = {
+			isa = PBXGroup;
+			children = (
+				FCC6886E2489A53800A0279D /* AppConstants.swift */,
+				FCC6886624898F8000A0279D /* UserDefaultsValue.swift */,
+				FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */,
+				FCC6886A24898FD800A0279D /* ObservationToken.swift */,
+				FCC6886C2489909D00A0279D /* AnyConvertible.swift */,
+				FCC6885D24896A6C00A0279D /* silence.mp3 */,
+				FCC6885B2489559400A0279D /* blank.wav */,
+				FCC688592489554800A0279D /* BackgroundTask.swift */,
+				FCFEEC9F2488157B00402A7F /* Chart.swift */,
+			);
+			path = helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -80,9 +162,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FC97882D2485969C00A7906C /* Build configuration list for PBXNativeTarget "LoopFollow" */;
 			buildPhases = (
+				B038D39450A1F9A97D2B8BA4 /* [CP] Check Pods Manifest.lock */,
 				FC9788102485969B00A7906C /* Sources */,
 				FC9788112485969B00A7906C /* Frameworks */,
 				FC9788122485969B00A7906C /* Resources */,
+				04DA71CCA0280FA5FA2DF7A6 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -90,7 +174,7 @@
 			);
 			name = LoopFollow;
 			productName = LoopFollow;
-			productReference = FC9788142485969B00A7906C /* LoopFollow.app */;
+			productReference = FC9788142485969B00A7906C /* Loop Follow.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -131,6 +215,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCC6885E24896A6C00A0279D /* silence.mp3 in Resources */,
+				FCC6885C2489559400A0279D /* blank.wav in Resources */,
 				FC9788292485969C00A7906C /* LaunchScreen.storyboard in Resources */,
 				FC9788262485969C00A7906C /* Assets.xcassets in Resources */,
 				FC9788212485969B00A7906C /* Main.storyboard in Resources */,
@@ -139,15 +225,67 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		04DA71CCA0280FA5FA2DF7A6 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-LoopFollow/Pods-LoopFollow-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-LoopFollow/Pods-LoopFollow-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LoopFollow/Pods-LoopFollow-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B038D39450A1F9A97D2B8BA4 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-LoopFollow-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		FC9788102485969B00A7906C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FC97881E2485969B00A7906C /* SecondViewController.swift in Sources */,
+				FCC6885A2489554800A0279D /* BackgroundTask.swift in Sources */,
+				FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */,
+				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
+				FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */,
+				FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */,
+				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,
 				FC9788242485969B00A7906C /* LoopFollow.xcdatamodeld in Sources */,
-				FC97881C2485969B00A7906C /* FirstViewController.swift in Sources */,
+				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
+				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
+				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
+				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
+				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
+				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -290,8 +428,10 @@
 		};
 		FC97882E2485969C00A7906C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 96ZGUPW5TE;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
@@ -300,7 +440,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fawcett.LoopFollow;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Loop Follow";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -308,8 +448,10 @@
 		};
 		FC97882F2485969C00A7906C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 96ZGUPW5TE;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
@@ -318,7 +460,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fawcett.LoopFollow;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Loop Follow";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

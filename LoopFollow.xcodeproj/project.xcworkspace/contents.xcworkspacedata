@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:../../../NightscoutKit/NightscoutKit.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "self:LoopFollow.xcodeproj">
    </FileRef>
 </Workspace>
