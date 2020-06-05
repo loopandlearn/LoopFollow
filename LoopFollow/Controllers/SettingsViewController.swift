@@ -36,7 +36,7 @@ class SettingsViewController: FormViewController {
                         UserDefaultsRepository.backgroundRefresh.value = value
                 }
             <<< SliderRow() { row in
-                row.title = "Background Refresh (Minutes)"
+                row.title = "Refresh Minutes"
                 row.tag = "backgroundRefreshFrequency"
                 row.steps = 19
                 row.value = Float(UserDefaultsRepository.backgroundRefreshFrequency.value)
