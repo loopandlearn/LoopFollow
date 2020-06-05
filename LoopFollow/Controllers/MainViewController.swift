@@ -463,6 +463,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
         //24 Hour Small Graph
         let line2 = LineChartDataSet(entries:bgChartEntry, label: "Number")
         line2.drawCirclesEnabled = false
+        line2.setDrawHighlightIndicators(false)
         line2.lineWidth = 1
         for i in 1..<colors.count{
             line2.addColor(colors[i])
