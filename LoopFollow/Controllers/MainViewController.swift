@@ -86,7 +86,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
         //Bind info data
         infoTable.rowHeight = 25
         infoTable.dataSource = self
-
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -108,8 +108,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     // Timer
-    fileprivate func startTimer() {
-        timer = Timer.scheduledTimer(timeInterval: timeInterval,
+    fileprivate func startTimer(time: TimeInterval) {
+        timer = Timer.scheduledTimer(timeInterval: time,
                                      target: self,
                                      selector: #selector(MainViewController.timerDidEnd(_:)),
                                      userInfo: nil,
@@ -117,14 +117,19 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     @objc func appMovedToBackground() {
-          // timer.invalidate()
-        backgroundTask.startBackgroundTask()
+        timer.invalidate()
+        if UserDefaultsRepository.backgroundRefresh.value {
+            backgroundTask.startBackgroundTask()
+            startTimer(time: TimeInterval(UserDefaultsRepository.backgroundRefreshFrequency.value))
+        }
     }
 
    @objc func appCameToForeground() {
-        backgroundTask.stopBackgroundTask()
-        //timer.invalidate()
-        startTimer()
+       if UserDefaultsRepository.backgroundRefresh.value {
+            backgroundTask.stopBackgroundTask()
+            timer.invalidate()
+        }
+        startTimer(time: timeInterval)
         loadBGData(urlUser: urlUser)
         loadDeviceStatus(urlUser: urlUser)
     
@@ -480,7 +485,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
     
     func updateBadge(entries: [sgvData]) {
         UIApplication.shared.applicationIconBadgeNumber = 0
-        if entries.count > 0 {
+        if entries.count > 0 && UserDefaultsRepository.appBadge.value {
             let latestBG = entries[0].sgv
             UIApplication.shared.applicationIconBadgeNumber = latestBG
         }
@@ -500,7 +505,10 @@ class MainViewController: UIViewController, UITableViewDataSource {
             if mmol {
                 userUnit = " mmol/L"
             }
-            UIApplication.shared.applicationIconBadgeNumber = latestBG
+            if UserDefaultsRepository.appBadge.value {
+                UIApplication.shared.applicationIconBadgeNumber = latestBG
+            }
+            
             BGText.text = bgOutputFormat(bg: Double(latestBG), mmol: mmol)
             MinAgoText.text = String(Int(deltaTime)) + " min ago"
             print(String(Int(deltaTime)) + " min ago")
