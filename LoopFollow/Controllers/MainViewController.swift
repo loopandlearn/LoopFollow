@@ -18,6 +18,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
     @IBOutlet weak var BGChartFull: LineChartView!
     @IBOutlet weak var MinAgoText: UILabel!
     @IBOutlet weak var infoTable: UITableView!
+    @IBOutlet weak var Console: UITableViewCell!
     
     //NS BG Struct
     struct sgvData: Codable {
@@ -67,6 +68,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
         infoData(name: "CAGE", value: "") //8
     ]
     
+    var bgData: [sgvData] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -90,7 +93,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        Reload()
+        nightscoutLoader()
     }
     
     
@@ -117,10 +120,11 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     @objc func appMovedToBackground() {
+        tabBarController?.selectedIndex = 0
         timer.invalidate()
         if UserDefaultsRepository.backgroundRefresh.value {
             backgroundTask.startBackgroundTask()
-            startTimer(time: TimeInterval(UserDefaultsRepository.backgroundRefreshFrequency.value))
+            startTimer(time: TimeInterval(UserDefaultsRepository.backgroundRefreshFrequency.value*60))
         }
     }
 
@@ -130,28 +134,79 @@ class MainViewController: UIViewController, UITableViewDataSource {
             timer.invalidate()
         }
         startTimer(time: timeInterval)
-        loadBGData(urlUser: urlUser)
-        loadDeviceStatus(urlUser: urlUser)
+        nightscoutLoader()
     
    }
     
     // check whether new Values should be retrieved
     @objc func timerDidEnd(_ timer:Timer) {
         print("timer ended")
-        Reload()
+        nightscoutLoader()
     }
     
-    func Reload() {
-        loadBGData(urlUser: urlUser)
-        clearLastInfoData()
-        loadDeviceStatus(urlUser: urlUser)
-        loadTempBasals(urlUser: urlUser)
+    func nightscoutLoader() {
+        
+        var needsLoaded: Bool = false
+        var onlyPullLastRecord = false
+        if bgData.count > 0 {
+            let now = NSDate().timeIntervalSince1970
+            let lastReadingTime = bgData[bgData.count - 1].date
+            let secondsAgo = now - lastReadingTime
+            if secondsAgo >= 5*60 {
+                needsLoaded = true
+                if secondsAgo < 10*60 {
+                    onlyPullLastRecord = true
+                }
+            }
+        } else {
+            needsLoaded = true
+        }
+        if needsLoaded {
+            loadBGData(urlUser: urlUser, onlyPullLastRecord: onlyPullLastRecord)
+            clearLastInfoData()
+            loadDeviceStatus(urlUser: urlUser)
+            loadTempBasals(urlUser: urlUser)
+        } else {
+            updateMinAgo()
+        }
+        
     }
     
+    // Post process new NS Data and feed all updates
+    func ProcessNSData(data: [sgvData], onlyPullLastRecord: Bool){
+        if !onlyPullLastRecord {
+            bgData.removeAll()
+        }
+            for i in 0..<data.count{
+               var dateString = data[data.count - 1 - i].date / 1000
+                dateString.round(FloatingPointRoundingRule.toNearestOrEven)
+                let reading = sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
+            bgData.append(reading)
+           }
+            
+           if self.backgroundTask.player.isPlaying {
+                 self.updateBadge(entries: bgData)
+              } else {
+                  self.updateBG(entries: bgData)
+                  self.createGraph(entries: bgData)
+              }
+       }
+    
+    //update Min Ago
+    func updateMinAgo(){
+        let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
+        MinAgoText.text = String(Int(deltaTime)) + " min ago"
+    }
 
     // Main NS Data Pull
-    func loadBGData(urlUser: String) {
-        let points = String(self.graphHours * 12 + 1)
+    func loadBGData(urlUser: String, onlyPullLastRecord: Bool = false) {
+        
+        var points = "1"
+        if !onlyPullLastRecord {
+             points = String(self.graphHours * 12 + 1)
+        }
+        
+        
         var urlBGDataPath: String = urlUser + "/api/v1/entries/sgv.json?"
         if token == "" {
             urlBGDataPath = urlBGDataPath + "count=" + points
@@ -179,14 +234,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             let entriesResponse = try? decoder.decode([sgvData].self, from: data)
             if let entriesResponse = entriesResponse {
                 DispatchQueue.main.async {
-                    if self.backgroundTask.player.isPlaying {
-                        self.updateBadge(entries: entriesResponse)
-                    } else {
-                        self.updateBG(entries: entriesResponse)
-                        self.createGraph(entries: entriesResponse)
-                    }
-                   
-                    
+                    self.ProcessNSData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
                 }
             }
             else
@@ -198,14 +246,14 @@ class MainViewController: UIViewController, UITableViewDataSource {
         getBGTask.resume()
     }
     
+   
+    
     //Clear the info data before next pull
     func clearLastInfoData(){
        for i in 0..<tableData.count{
         tableData[i].value = ""
         }
     }
-    
-    
     
     // NS Device Status Pull
     func loadDeviceStatus(urlUser: String) {
@@ -404,15 +452,15 @@ class MainViewController: UIViewController, UITableViewDataSource {
         var bgChartEntry = [ChartDataEntry]()
         var colors = [NSUIColor]()
         for i in 0..<entries.count{
-            var dateString = String(entries[entries.count - 1 - i].date).prefix(10)
+            var dateString = String(entries[i].date).prefix(10)
             let dateSecondsOnly = Double(String(dateString))!
             
-            let value = ChartDataEntry(x: Double(dateSecondsOnly), y: Double(entries[entries.count - 1 - i].sgv))
+            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
             bgChartEntry.append(value)
             
-            if Double(entries[entries.count - 1 - i].sgv) > 180 {
+            if Double(entries[i].sgv) >= Double(UserDefaultsRepository.alertHigh.value) {
                 colors.append(NSUIColor.yellow)
-            } else if Double(entries[entries.count - 1 - i].sgv) < 70 {
+            } else if Double(entries[i].sgv) <= Double(UserDefaultsRepository.alertLow.value) {
                 colors.append(NSUIColor.red)
             } else {
                 colors.append(NSUIColor.green)
@@ -444,10 +492,25 @@ class MainViewController: UIViewController, UITableViewDataSource {
         data.addDataSet(line1)
         data.setValueFont(UIFont(name: UIFont.systemFont(ofSize: 10).fontName, size: 10)!)
         data.setDrawValues(false)
+        
+        //Add lower red line based on low alert value
+        let ll = ChartLimitLine()
+        ll.limit = Double(UserDefaultsRepository.alertLow.value)
+        ll.lineColor = NSUIColor.red
+        BGChart.rightAxis.addLimitLine(ll)
+        
+        //Add upper yellow line based on low alert value
+        let ul = ChartLimitLine()
+        ul.limit = Double(UserDefaultsRepository.alertHigh.value)
+        ul.lineColor = NSUIColor.yellow
+        BGChart.rightAxis.addLimitLine(ul)
+        
         BGChart.xAxis.valueFormatter = ChartXValueFormatter()
         BGChart.xAxis.granularity = 1800
-        BGChart.xAxis.labelTextColor = NSUIColor.white
-        BGChart.rightAxis.labelTextColor = NSUIColor.white
+        BGChart.xAxis.labelTextColor = NSUIColor.label
+        BGChart.xAxis.labelPosition = XAxis.LabelPosition.bottom
+        BGChart.rightAxis.labelTextColor = NSUIColor.label
+        BGChart.rightAxis.axisMinimum = 40
         BGChart.leftAxis.enabled = false
         BGChart.legend.enabled = false
         BGChart.scaleYEnabled = false
@@ -480,27 +543,27 @@ class MainViewController: UIViewController, UITableViewDataSource {
         BGChartFull.scaleXEnabled = false
         BGChartFull.drawGridBackgroundEnabled = false
         BGChartFull.data = data2
-        
       
     }
     
     func updateBadge(entries: [sgvData]) {
-        UIApplication.shared.applicationIconBadgeNumber = 0
         if entries.count > 0 && UserDefaultsRepository.appBadge.value {
             let latestBG = entries[0].sgv
             UIApplication.shared.applicationIconBadgeNumber = latestBG
+        } else {
+            UIApplication.shared.applicationIconBadgeNumber = 0
         }
         print("updated badge")
     }
     
     func updateBG (entries: [sgvData]) {
         if consoleLogging == true {print("in update BG")}
-        UIApplication.shared.applicationIconBadgeNumber = 0
         if entries.count > 0 {
-            let latestBG = entries[0].sgv
-            let priorBG = entries[1].sgv
+            let latestEntryi = entries.count - 1
+            let latestBG = entries[latestEntryi].sgv
+            let priorBG = entries[latestEntryi - 1].sgv
             let deltaBG = latestBG - priorBG as Int
-            let lastBGTime = entries[0].date / 1000 //NS has different units
+            let lastBGTime = entries[latestEntryi].date //NS has different units
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
             var userUnit = " mg/dL"
             if mmol {
@@ -508,6 +571,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
             }
             if UserDefaultsRepository.appBadge.value {
                 UIApplication.shared.applicationIconBadgeNumber = latestBG
+            } else {
+                UIApplication.shared.applicationIconBadgeNumber = 0
             }
             
             BGText.text = bgOutputFormat(bg: Double(latestBG), mmol: mmol)
@@ -536,8 +601,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             return
         }
         
-        
-        if consoleLogging == true {print("end update bg")}
+        checkAlarms(bgs: entries)
     }
 
     func bgOutputFormat(bg: Double, mmol: Bool) -> String {
@@ -557,5 +621,47 @@ class MainViewController: UIViewController, UITableViewDataSource {
         return graphics[value]!
     }
     
+    func checkAlarms(bgs: [sgvData]) {
+        let dateFormatter : DateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        let date = Date()
+        let dateString = dateFormatter.string(from: date)
+        let interval = date.timeIntervalSince1970
+        
+        let now = Date()
+        if UserDefaultsRepository.alertUrgentLowActive.value &&
+            bgs[0].sgv <= UserDefaultsRepository.alertUrgentLow.value &&
+            now > UserDefaultsRepository.alertUrgentLowSnoozedTime.value{
+            print(dateString + " urgent low")
+            tableData.append(infoData(name: dateString, value: "urgent low"))
+                //AlarmSound.play()
+        }
+        
+        if UserDefaultsRepository.alertLowActive.value &&
+            bgs[0].sgv <= UserDefaultsRepository.alertLow.value &&
+            now > UserDefaultsRepository.alertLowSnoozedTime.value{
+                print(dateString + " low")
+            tableData.append(infoData(name: dateString, value: "low"))
+                //AlarmSound.play()
+        }
+        
+        if UserDefaultsRepository.alertHighActive.value &&
+            bgs[0].sgv >= UserDefaultsRepository.alertHigh.value &&
+            now > UserDefaultsRepository.alertHighSnoozedTime.value{
+                print(dateString + " high")
+            tableData.append(infoData(name: dateString, value: "high"))
+                //AlarmSound.play()
+        }
+        
+        if UserDefaultsRepository.alertUrgentHighActive.value &&
+            bgs[0].sgv >= UserDefaultsRepository.alertUrgentHigh.value &&
+            now > UserDefaultsRepository.alertUrgentHighSnoozedTime.value{
+                print(dateString + " urgent high")
+            tableData.append(infoData(name: dateString, value: "urgent high"))
+                //AlarmSound.play()
+        }
+        
+        
+    }
 }
 

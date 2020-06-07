@@ -9,9 +9,12 @@
 import UIKit
 import WebKit
 
-class NightscoutViewController: UIViewController {
+
+
+class NightscoutViewController: UIViewController, WKUIDelegate {
 
     @IBOutlet weak var webView: WKWebView!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,12 +25,23 @@ class NightscoutViewController: UIViewController {
         refreshControl.addTarget(self, action: #selector(reloadWebView(_:)), for: .valueChanged)
         webView.scrollView.addSubview(refreshControl)
         
+        self.webView.uiDelegate = self
     }
 
     @objc func reloadWebView(_ sender: UIRefreshControl) {
         webView.reload()
         sender.endRefreshing()
     }
+    
+    // this handles target=_blank links by opening them in the same view
+    func webView(webView: WKWebView!, createWebViewWithConfiguration configuration: WKWebViewConfiguration!, forNavigationAction navigationAction: WKNavigationAction!, windowFeatures: WKWindowFeatures!) -> WKWebView! {
+        if let frame = navigationAction.targetFrame,
+            frame.isMainFrame {
+            return nil
+        }
+        // for _blank target or non-mainFrame target
+        webView.load(navigationAction.request)
+        return nil    }
 
 }
 
