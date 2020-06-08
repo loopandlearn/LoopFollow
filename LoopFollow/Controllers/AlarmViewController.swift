@@ -6,11 +6,36 @@
 //  Copyright © 2020 Jon Fawcett. All rights reserved.
 //
 
+
 import UIKit
 import Eureka
 
 class AlarmViewController: FormViewController {
-
+    
+    
+    func reloadSnoozeTime(key: String, setNil: Bool, value: Date = Date()) {
+        
+            if let row = form.rowBy(tag: key) as? DateTimeInlineRow {
+                if setNil {
+                    row.value = nil
+                } else {
+                   row.value = value
+                }
+                
+                row.reload()
+            }
+               
+    }
+    
+    func reloadIsSnoozed(key: String, value: Bool) {
+        
+            if let row = form.rowBy(tag: key) as? SwitchRow {
+            row.value = value
+            row.reload()
+            }
+    }
+    
+   // static let shared = AlarmViewController()
 
     @IBAction func unwindToAlarms(sender: UIStoryboardSegue)
      {
@@ -19,571 +44,909 @@ class AlarmViewController: FormViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        buildTemporaryAlert()
+        buildUrgentLow()
+        buildLow()
+        buildHigh()
+        buildUrgentHigh()
+        buildFastAlert()
+        buildMissedReadings()
+        buildNotLooping()
+        buildMissedBolus()
+        buildAppInactive()
+        buildSage()
+        buildCage()
         
         
+    }
+
+    
+    func buildTemporaryAlert(){
         form
-            
-            +++ Section(header: "Temporary Alert", footer: "Temporary Alert will trigger once and disable. Disabling Alert Below BG will trigger it as a high alert above the BG.")
-                       <<< SwitchRow("temporaryAlert"){ row in
-                           row.title = "Active"
-                           row.tag = "temporaryAlertActive"
-                           row.value = UserDefaultsRepository.alertTemporaryActive.value
-                           }.onChange { [weak self] row in
-                                   guard let value = row.value else { return }
-                                   UserDefaultsRepository.alertTemporaryActive.value = value
-                           }
-                            <<< SwitchRow("temporaryAlertHigh"){ row in
-                            row.title = "Alert Below BG"
-                            row.tag = "temporaryAlertBelow"
-                            row.hidden = "$temporaryAlertActive == false"
-                            row.value = UserDefaultsRepository.alertTemporaryBelow.value
-                            }.onChange { [weak self] row in
-                                    guard let value = row.value else { return }
-                                    UserDefaultsRepository.alertTemporaryBelow.value = value
-                            }
-                       <<< StepperRow() { row in
-                           row.title = "BG"
-                           row.tag = "temporaryAlertBG"
-                           row.cell.stepper.stepValue = 1
-                           row.cell.stepper.minimumValue = 40
-                           row.cell.stepper.maximumValue = 400
-                           row.value = Double(UserDefaultsRepository.alertTemporary.value)
-                           row.hidden = "$temporaryAlertActive == false"
-                           row.displayValueFor = { value in
-                               guard let value = value else { return nil }
-                               return "\(Int(value))"
-                           }
+
+
+        +++ Section(header: "Temporary Alert", footer: "Temporary Alert will trigger once and disable. Disabling Alert Below BG will trigger it as a high alert above the BG.")
+                   <<< SwitchRow("alertTemporaryActive"){ row in
+                       row.title = "Active"
+                       row.value = UserDefaultsRepository.alertTemporaryActive.value
                        }.onChange { [weak self] row in
                                guard let value = row.value else { return }
-                               UserDefaultsRepository.alertTemporary.value = Int(value)
+                               UserDefaultsRepository.alertTemporaryActive.value = value
                        }
-            
-            +++ Section("Main Alerts")
-           /* <<< ButtonRow("Create New Alarm") {
-                $0.title = $0.tag
-                $0.presentationMode = .segueName(segueName: "AlarmEditingViewControllerSegue", onDismiss: nil)
-            }*/
-            <<< SwitchRow("urgentLowAlert"){ row in
-                row.title = "Urgent Low"
-                row.tag = "urgentLowAlertActive"
-                row.value = UserDefaultsRepository.alertUrgentLowActive.value
-                }.onChange { [weak self] row in
-                        guard let value = row.value else { return }
-                        UserDefaultsRepository.alertUrgentLowActive.value = value
-                }
-            <<< StepperRow() { row in
-                row.title = "     BG"
-                row.tag = "urgentLowAlertBG"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 40
-                row.cell.stepper.maximumValue = 80
-                row.value = Double(UserDefaultsRepository.alertUrgentLow.value)
-                row.hidden = "$urgentLowAlertActive == false"
-                row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return "\(Int(value))"
-                }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertUrgentLow.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "     Snooze"
-                row.tag = "urgentLowAlertSnooze"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 5
-                row.cell.stepper.maximumValue = 15
-                row.value = Double(UserDefaultsRepository.alertUrgentLowSnooze.value)
-                row.hidden = "$urgentLowAlertActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertUrgentLowSnooze.value = Int(value)
-            }
-
-            <<< SwitchRow("lowAlert"){ row in
-                row.title = "Low"
-                row.tag = "lowAlertActive"
-                row.value = UserDefaultsRepository.alertLowActive.value
-                }.onChange { [weak self] row in
-                        guard let value = row.value else { return }
-                        UserDefaultsRepository.alertLowActive.value = value
-                }
-            <<< StepperRow() { row in
-                row.title = "     BG"
-                row.tag = "lowAlertBG"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 40
-                row.cell.stepper.maximumValue = 120
-                row.value = Double(UserDefaultsRepository.alertLow.value)
-                row.hidden = "$lowAlertActive == false"
-                row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return "\(Int(value))"
-                }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertLow.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "     Snooze"
-                row.tag = "lowAlertSnooze"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 5
-                row.cell.stepper.maximumValue = 30
-                row.value = Double(UserDefaultsRepository.alertLowSnooze.value)
-                row.hidden = "$lowAlertActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertLowSnooze.value = Int(value)
-            }
-            <<< SwitchRow("highAlert"){ row in
-                row.title = "High"
-                row.tag = "highAlertActive"
-                row.value = UserDefaultsRepository.alertHighActive.value
-                }.onChange { [weak self] row in
-                        guard let value = row.value else { return }
-                        UserDefaultsRepository.alertHighActive.value = value
-                }
-            
-            <<< StepperRow() { row in
-                row.title = "     BG"
-                row.tag = "highAlertBG"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 120
-                row.cell.stepper.maximumValue = 300
-                row.value = Double(UserDefaultsRepository.alertHigh.value)
-                row.hidden = "$highAlertActive == false"
-                row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return "\(Int(value))"
-                }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertHigh.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "     Persistent For"
-                row.tag = "highAlertBGPersistent"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 0
-                row.cell.stepper.maximumValue = 120
-                row.value = Double(UserDefaultsRepository.alertHighPersistent.value)
-                row.hidden = "$highAlertActive == false"
-                row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return "\(Int(value))"
-                }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertHighPersistent.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "     Snooze"
-                row.tag = "highAlertSnooze"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 10
-                row.cell.stepper.maximumValue = 120
-                row.value = Double(UserDefaultsRepository.alertHighSnooze.value)
-                row.hidden = "$highAlertActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertHighSnooze.value = Int(value)
-            }
-            <<< SwitchRow("urgentHighAlert"){ row in
-                    row.title = "Urgent High"
-                    row.tag = "urgentHighAlertActive"
-                    row.value = UserDefaultsRepository.alertUrgentHighActive.value
-                    }.onChange { [weak self] row in
-                            guard let value = row.value else { return }
-                            UserDefaultsRepository.alertUrgentHighActive.value = value
-                    }
-            <<< StepperRow() { row in
-                row.title = "     BG"
-                row.tag = "UrgentHighAlertBG"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 120
-                row.cell.stepper.maximumValue = 350
-                row.value = Double(UserDefaultsRepository.alertUrgentHigh.value)
-                row.hidden = "$urgentHighAlertActive == false"
-                row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return "\(Int(value))"
-                }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertUrgentHigh.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "     Snooze"
-                row.tag = "urgentHighAlertSnooze"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 10
-                row.cell.stepper.maximumValue = 120
-                row.value = Double(UserDefaultsRepository.alertUrgentHighSnooze.value)
-                row.hidden = "$urgentHighAlertActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertUrgentHighSnooze.value = Int(value)
-            }
-            
-            +++ Section(header: "Fast Rise/Drop Alert", footer: "Alert when BG is changing fast over consecutive readings. Optional: only alert when Dropping and below a specific BG or Rising and above a specific BG")
-            <<< SwitchRow("fastChangingAlert"){ row in
-                    row.title = "Active"
-                    row.tag = "fastChangingAlertActive"
-                    row.value = UserDefaultsRepository.alertFastActive.value
-                    }.onChange { [weak self] row in
-                            guard let value = row.value else { return }
-                            UserDefaultsRepository.alertFastActive.value = value
-                    }
-            <<< StepperRow() { row in
-                row.title = "Delta"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 3
-                row.cell.stepper.maximumValue = 20
-                row.value = Double(UserDefaultsRepository.alertFastDelta.value)
-                row.hidden = "$fastChangingAlertActive == false"
-                row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return "\(Int(value))"
-                }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertFastDelta.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "# Readings"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 2
-                row.cell.stepper.maximumValue = 4
-                row.value = Double(UserDefaultsRepository.alertFastReadings.value)
-                row.hidden = "$fastChangingAlertActive == false"
-                row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return "\(Int(value))"
-                }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertFastReadings.value = Int(value)
-            }
-            <<< SwitchRow("fastUseLimits"){ row in
-            row.title = "Use BG Limits"
-            row.tag = "fastUseLimitsActive"
-            row.hidden = "$fastChangingAlertActive == false"
-            row.value = UserDefaultsRepository.alertFastUseLimits.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertFastUseLimits.value = value
-            }
-            <<< StepperRow() { row in
-                row.title = "Dropping Below BG"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 50
-                row.cell.stepper.maximumValue = 200
-                row.value = Double(UserDefaultsRepository.alertFastLowerLimit.value)
-                row.hidden = "$fastChangingAlertActive == false || $fastUseLimitsActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertFastLowerLimit.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "Rising Above BG"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 100
-                row.cell.stepper.maximumValue = 300
-                row.value = Double(UserDefaultsRepository.alertFastUpperLimit.value)
-                row.hidden = "$fastChangingAlertActive == false || $fastUseLimitsActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertFastUpperLimit.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "Snooze"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 5
-                row.cell.stepper.maximumValue = 60
-                row.value = Double(UserDefaultsRepository.alertFastSnooze.value)
-                row.hidden = "$fastChangingAlertActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertFastSnooze.value = Int(value)
-            }
-
-            
-               
-        
-            +++ Section(header: "Missed Readings", footer: "Alert when there have been no BG readings for X minutes")
-            
-                <<< SwitchRow("missedReadingAlert"){ row in
-                        row.title = "Active"
-                        row.tag = "missedReadingAlertActive"
-                        row.value = UserDefaultsRepository.alertMissedReadingActive.value
+                        <<< SwitchRow("alertTemporaryBelow"){ row in
+                        row.title = "Alert Below BG"
+                        row.hidden = "$alertTemporaryActive == false"
+                        row.value = UserDefaultsRepository.alertTemporaryBelow.value
                         }.onChange { [weak self] row in
                                 guard let value = row.value else { return }
-                                UserDefaultsRepository.alertMissedReadingActive.value = value
+                                UserDefaultsRepository.alertTemporaryBelow.value = value
                         }
+                   <<< StepperRow("alertTemporaryBG") { row in
+                       row.title = "BG"
+                       row.cell.stepper.stepValue = 1
+                       row.cell.stepper.minimumValue = 40
+                       row.cell.stepper.maximumValue = 400
+                       row.value = Double(UserDefaultsRepository.alertTemporaryBG.value)
+                       row.hidden = "$alertTemporaryActive == false"
+                       row.displayValueFor = { value in
+                           guard let value = value else { return nil }
+                           return "\(Int(value))"
+                       }
+                   }.onChange { [weak self] row in
+                           guard let value = row.value else { return }
+                           UserDefaultsRepository.alertTemporaryBG.value = Int(value)
+                   }
+    }
+    
+    func buildUrgentLow(){
+        form
+            +++ Section(header: "Urgent Low Alert", footer: "Alerts when BG drops below value")
+        <<< SwitchRow("alertUrgentLowActive"){ row in
+            row.title = "Active"
+            row.value = UserDefaultsRepository.alertUrgentLowActive.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertUrgentLowActive.value = value
+            }
+        <<< StepperRow("alertUrgentLowBG") { row in
+            row.title = "BG"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 40
+            row.cell.stepper.maximumValue = 80
+            row.value = Double(UserDefaultsRepository.alertUrgentLowBG.value)
+            row.hidden = "$alertUrgentLowActive == false"
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertUrgentLowBG.value = Int(value)
+        }
+        <<< StepperRow("alertUrgentLowSnooze") { row in
+            row.title = "Default Snooze"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 15
+            row.value = Double(UserDefaultsRepository.alertUrgentLowSnooze.value)
+            row.hidden = "$alertUrgentLowActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertUrgentLowSnooze.value = Int(value)
+        }
+        <<< DateTimeInlineRow("alertUrgentLowSnoozedTime") { row in
+            row.title = "Snoozed Until"
+            row.hidden = "$alertUrgentLowActive == false"
             
-                <<< StepperRow() { row in
-                    row.title = "Time"
-                    row.tag = "missedReadingTime"
-                    row.cell.stepper.stepValue = 5
-                    row.cell.stepper.minimumValue = 10
-                    row.cell.stepper.maximumValue = 120
-                    row.value = Double(UserDefaultsRepository.alertMissedReading.value)
-                    row.hidden = "$missedReadingAlertActive == false"
-                    row.displayValueFor = { value in
-                            guard let value = value else { return nil }
-                            return "\(Int(value))"
-                        }
+            if (UserDefaultsRepository.alertUrgentLowSnoozedTime.value != nil) {
+                row.value = UserDefaultsRepository.alertUrgentLowSnoozedTime.value
+            }
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertUrgentLowSnoozedTime.value = value
+                UserDefaultsRepository.alertUrgentLowIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertUrgentLowIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+        }
+            
+        <<< SwitchRow("alertUrgentLowIsSnoozed"){ row in
+            row.title = "Is Snoozed"
+            row.value = UserDefaultsRepository.alertUrgentLowIsSnoozed.value
+            row.hidden = "$alertUrgentLowActive == false || $alertUrgentLowSnoozedTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertUrgentLowIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertUrgentLowSnoozedTime.setNil(key: "alertUrgentLowSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertUrgentLowSnoozedTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
+    
+    func buildLow(){
+        form
+            +++ Section(header: "Low Alert", footer: "Alerts when BG drops below value")
+        <<< SwitchRow("alertLowActive"){ row in
+            row.title = "Active"
+            row.value = UserDefaultsRepository.alertLowActive.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertLowActive.value = value
+            }
+        <<< StepperRow("alertLowBG") { row in
+            row.title = "BG"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 40
+            row.cell.stepper.maximumValue = 120
+            row.value = Double(UserDefaultsRepository.alertLowBG.value)
+            row.hidden = "$alertLowActive == false"
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertLowBG.value = Int(value)
+        }
+        <<< StepperRow("alertLowSnooze") { row in
+            row.title = "Snooze"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 30
+            row.value = Double(UserDefaultsRepository.alertLowSnooze.value)
+            row.hidden = "$alertLowActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertLowSnooze.value = Int(value)
+        }
+        <<< DateTimeInlineRow("alertLowSnoozedTime") { row in
+            row.title = "Snoozed Until"
+            row.hidden = "$alertLowActive == false"
+           if (UserDefaultsRepository.alertLowSnoozedTime.value != nil) {
+                row.value = UserDefaultsRepository.alertLowSnoozedTime.value
+            }
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertLowSnoozedTime.value = value
+                UserDefaultsRepository.alertLowIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertLowIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+        }
+        <<< SwitchRow("alertLowIsSnoozed"){ row in
+            row.title = "Is Snoozed"
+            row.value = UserDefaultsRepository.alertLowIsSnoozed.value
+            row.hidden = "$alertLowActive == false || $alertLowSnoozedTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertLowIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertLowSnoozedTime.setNil(key: "alertLowSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertLowSnoozedTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
+    
+    func buildHigh(){
+        form
+        +++ Section(header: "High Alert", footer: "Alerts when BG rises above value. If Persistence is set greater than 0, it will not alert until BG has been high for that many minutes.")
+        <<< SwitchRow("alertHighActive"){ row in
+            row.title = "High"
+            row.value = UserDefaultsRepository.alertHighActive.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertHighActive.value = value
+            }
+        
+        <<< StepperRow("alertHighBG") { row in
+            row.title = "BG"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 120
+            row.cell.stepper.maximumValue = 300
+            row.value = Double(UserDefaultsRepository.alertHighBG.value)
+            row.hidden = "$alertHighActive == false"
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertHighBG.value = Int(value)
+        }
+        <<< StepperRow("alertHighPersistent") { row in
+            row.title = "Persistent For"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 0
+            row.cell.stepper.maximumValue = 120
+            row.value = Double(UserDefaultsRepository.alertHighPersistent.value)
+            row.hidden = "$alertHighActive == false"
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertHighPersistent.value = Int(value)
+        }
+        <<< StepperRow("alertHighSnooze") { row in
+            row.title = "Snooze"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 10
+            row.cell.stepper.maximumValue = 120
+            row.value = Double(UserDefaultsRepository.alertHighSnooze.value)
+            row.hidden = "$alertHighActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertHighSnooze.value = Int(value)
+        }
+        <<< DateTimeInlineRow("alertHighSnoozedTime") { row in
+            row.title = "Snoozed Until"
+            row.hidden = "$alertHighActive == false"
+            if (UserDefaultsRepository.alertHighSnoozedTime.value != nil) {
+                row.value = UserDefaultsRepository.alertHighSnoozedTime.value
+            }
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertHighSnoozedTime.value = value
+                UserDefaultsRepository.alertHighIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertHighIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+        }
+        <<< SwitchRow("alertHighIsSnoozed"){ row in
+            row.title = "Is Snoozed"
+            row.value = UserDefaultsRepository.alertHighIsSnoozed.value
+            row.hidden = "$alertHighActive == false || $alertHighSnoozedTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertHighIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertHighSnoozedTime.setNil(key: "alertHighSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertHighSnoozedTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
+    
+    func buildUrgentHigh(){
+        form
+            +++ Section(header: "Urgent High Alert", footer: "Alerts when BG rises above value.")
+        <<< SwitchRow("alertUrgentHighActive"){ row in
+                row.title = "Urgent High"
+                row.value = UserDefaultsRepository.alertUrgentHighActive.value
                 }.onChange { [weak self] row in
                         guard let value = row.value else { return }
-                        UserDefaultsRepository.alertMissedReading.value = Int(value)
+                        UserDefaultsRepository.alertUrgentHighActive.value = value
                 }
-                <<< StepperRow() { row in
-                    row.title = "Snooze"
-                    row.tag = "missedReadingAlertSnooze"
-                    row.cell.stepper.stepValue = 5
-                    row.cell.stepper.minimumValue = 10
-                    row.cell.stepper.maximumValue = 180
-                    row.value = Double(UserDefaultsRepository.alertMissedReadingSnooze.value)
-                    row.hidden = "$missedReadingAlertActive == false"
-                    row.displayValueFor = { value in
-                            guard let value = value else { return nil }
-                            return "\(Int(value))"
-                        }
+        <<< StepperRow("alertUrgentHighBG") { row in
+            row.title = "BG"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 120
+            row.cell.stepper.maximumValue = 350
+            row.value = Double(UserDefaultsRepository.alertUrgentHighBG.value)
+            row.hidden = "$alertUrgentHighActive == false"
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertUrgentHighBG.value = Int(value)
+        }
+        <<< StepperRow("alertUrgentHighSnooze") { row in
+            row.title = "Snooze"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 10
+            row.cell.stepper.maximumValue = 120
+            row.value = Double(UserDefaultsRepository.alertUrgentHighSnooze.value)
+            row.hidden = "$alertUrgentHighActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertUrgentHighSnooze.value = Int(value)
+        }
+        <<< DateTimeInlineRow("alertUrgentHighSnoozedTime") { row in
+            row.title = "Snoozed Until"
+            row.hidden = "$alertUrgentHighActive == false"
+            if (UserDefaultsRepository.alertUrgentHighSnoozedTime.value != nil) {
+                row.value = UserDefaultsRepository.alertUrgentHighSnoozedTime.value
+            }
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertUrgentHighSnoozedTime.value = value
+                UserDefaultsRepository.alertUrgentHighIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertUrgentHighIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+        }
+        <<< SwitchRow("alertUrgentHighIsSnoozed"){ row in
+            row.title = "Is Snoozed"
+            row.value = UserDefaultsRepository.alertUrgentHighIsSnoozed.value
+            row.hidden = "$alertUrgentHighActive == false || $alertUrgentHighSnoozedTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertUrgentHighIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertUrgentHighSnoozedTime.setNil(key: "alertUrgentHighSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertUrgentHighSnoozedTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
+    
+    func buildFastAlert(){
+        form
+        +++ Section(header: "Fast Rise/Drop Alert", footer: "Alert when BG is changing fast over consecutive readings. Optional: only alert when Dropping and below a specific BG or Rising and above a specific BG")
+        <<< SwitchRow("alertFastActive"){ row in
+                row.title = "Active"
+                row.value = UserDefaultsRepository.alertFastActive.value
                 }.onChange { [weak self] row in
                         guard let value = row.value else { return }
-                        UserDefaultsRepository.alertMissedReadingSnooze.value = Int(value)
+                        UserDefaultsRepository.alertFastActive.value = value
                 }
-
-            
-            +++ Section(header: "Not Looping", footer: "Alert when Loop has not completed a successful Loop for X minutes")
-            <<< SwitchRow("notLoopingAlert"){ row in
+        <<< StepperRow("alertFastDelta") { row in
+            row.title = "Delta"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 3
+            row.cell.stepper.maximumValue = 20
+            row.value = Double(UserDefaultsRepository.alertFastDelta.value)
+            row.hidden = "$alertFastActive == false"
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertFastDelta.value = Int(value)
+        }
+        <<< StepperRow("alertFastReadings") { row in
+            row.title = "# Readings"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 2
+            row.cell.stepper.maximumValue = 4
+            row.value = Double(UserDefaultsRepository.alertFastReadings.value)
+            row.hidden = "$alertFastActive == false"
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertFastReadings.value = Int(value)
+        }
+        <<< SwitchRow("alertFastUseLimits"){ row in
+        row.title = "Use BG Limits"
+        row.hidden = "$alertFastActive == false"
+        row.value = UserDefaultsRepository.alertFastUseLimits.value
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertFastUseLimits.value = value
+        }
+        <<< StepperRow("alertFastLowerLimit") { row in
+            row.title = "Dropping Below BG"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 50
+            row.cell.stepper.maximumValue = 200
+            row.value = Double(UserDefaultsRepository.alertFastLowerLimit.value)
+            row.hidden = "$alertFastActive == false || $alertFastUseLimits == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertFastLowerLimit.value = Int(value)
+        }
+        <<< StepperRow("alertFastUpperLimit") { row in
+            row.title = "Rising Above BG"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 100
+            row.cell.stepper.maximumValue = 300
+            row.value = Double(UserDefaultsRepository.alertFastUpperLimit.value)
+            row.hidden = "$alertFastActive == false || $alertFastUseLimits == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertFastUpperLimit.value = Int(value)
+        }
+        <<< StepperRow("alertFastSnooze") { row in
+            row.title = "Snooze"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 60
+            row.value = Double(UserDefaultsRepository.alertFastSnooze.value)
+            row.hidden = "$alertFastActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertFastSnooze.value = Int(value)
+        }
+        <<< DateTimeInlineRow("alertFastSnoozedTime") { row in
+            row.title = "Snoozed Until"
+            row.hidden = "$alertFastActive == false"
+           if (UserDefaultsRepository.alertFastSnoozedTime.value != nil) {
+                row.value = UserDefaultsRepository.alertFastSnoozedTime.value
+            }
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertFastSnoozedTime.value = value
+                UserDefaultsRepository.alertFastIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertFastIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+        }
+        <<< SwitchRow("alertFastIsSnoozed"){ row in
+            row.title = "Is Snoozed"
+            row.value = UserDefaultsRepository.alertFastIsSnoozed.value
+            row.hidden = "$alertFastActive == false || $alertFastSnoozedTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertFastIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertFastSnoozedTime.setNil(key: "alertFastSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertFastSnoozedTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
+    
+    func buildMissedReadings(){
+        form
+            +++ Section(header: "Missed Readings", footer: "Alert when there have been no BG readings for X minutes")
+        
+            <<< SwitchRow("alertMissedReadingActive"){ row in
                     row.title = "Active"
-                    row.tag = "notLoopingAlertActive"
-                    row.value = UserDefaultsRepository.alertNotLoopingActive.value
+                    row.value = UserDefaultsRepository.alertMissedReadingActive.value
                     }.onChange { [weak self] row in
                             guard let value = row.value else { return }
-                            UserDefaultsRepository.alertNotLoopingActive.value = value
+                            UserDefaultsRepository.alertMissedReadingActive.value = value
                     }
-            <<< StepperRow() { row in
+        
+            <<< StepperRow("alertMissedReading") { row in
                 row.title = "Time"
-                row.tag = "notLoopingAlertTime"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 10
-                row.cell.stepper.maximumValue = 60
-                row.value = Double(UserDefaultsRepository.alertNotLooping.value)
-                row.hidden = "$notLoopingAlertActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertNotLooping.value = Int(value)
-            }
-            
-            <<< SwitchRow("notLoopingUseLimits"){ row in
-            row.title = "Use BG Limits"
-            row.tag = "notLoopingUseLimitsActive"
-            row.hidden = "$notLoopingAlertActive == false"
-            row.value = UserDefaultsRepository.alertNotLoopingUseLimits.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertNotLoopingUseLimits.value = value
-            }
-            <<< StepperRow() { row in
-                row.title = "Below BG"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 50
-                row.cell.stepper.maximumValue = 200
-                row.value = Double(UserDefaultsRepository.alertNotLoopingLowerLimit.value)
-                row.hidden = "$notLoopingAlertActive == false || $notLoopingUseLimitsActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertNotLoopingLowerLimit.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "Above BG"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 100
-                row.cell.stepper.maximumValue = 300
-                row.value = Double(UserDefaultsRepository.alertNotLoopingUpperLimit.value)
-                row.hidden = "$notLoopingAlertActive == false || $notLoopingUseLimitsActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertNotLoopingUpperLimit.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "Snooze"
-                row.tag = "notLoopingAlertSnooze"
                 row.cell.stepper.stepValue = 5
                 row.cell.stepper.minimumValue = 10
                 row.cell.stepper.maximumValue = 120
-                row.value = Double(UserDefaultsRepository.alertNotLoopingSnooze.value)
-                row.hidden = "$notLoopingAlertActive == false"
+                row.value = Double(UserDefaultsRepository.alertMissedReading.value)
+                row.hidden = "$alertMissedReadingActive == false"
                 row.displayValueFor = { value in
                         guard let value = value else { return nil }
                         return "\(Int(value))"
                     }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertNotLoopingSnooze.value = Int(value)
+                    UserDefaultsRepository.alertMissedReading.value = Int(value)
             }
-
-        
-            +++ Section(header: "Missed Bolus", footer: "Alert after X minutes when carbs are entered with no Bolus. Optional: Ignore low treatment carbs under a certain BG")
-            <<< SwitchRow("Missed Bolus"){ row in
-                    row.title = "Active"
-                    row.tag = "missedBolusAlertActive"
-                    row.value = UserDefaultsRepository.alertMissedBolusActive.value
-                    }.onChange { [weak self] row in
-                            guard let value = row.value else { return }
-                            UserDefaultsRepository.alertMissedBolusActive.value = value
-                    }
-            <<< StepperRow() { row in
-                row.title = "Time"
-                row.tag = "missedBolusTime"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 5
-                row.cell.stepper.maximumValue = 60
-                row.value = Double(UserDefaultsRepository.alertMissedBolus.value)
-                row.hidden = "$missedBolusAlertActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedBolus.value = Int(value)
-            }
-            <<< SwitchRow("Missed Bolus Grams"){ row in
-            row.title = "Ignore Low Treatments"
-            row.tag = "missedBolusLowGramsActive"
-                row.hidden = "$missedBolusAlertActive == false"
-            row.value = UserDefaultsRepository.alertMissedBolusLowGramsActive.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedBolusLowGramsActive.value = value
-            }
-            
-            <<< StepperRow() { row in
-                row.title = "Ignore Under Grams"
-                row.tag = "missedBolusLowGrams"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 1
-                row.cell.stepper.maximumValue = 15
-                row.value = Double(UserDefaultsRepository.alertMissedBolusLowGrams.value)
-                row.hidden = "$missedBolusLowGramsActive == false || $missedBolusAlertActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedBolusLowGrams.value = Int(value)
-            }
-            <<< StepperRow() { row in
-                row.title = "Ignore Under BG"
-                row.tag = "missedBolusLowGramsBG"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 40
-                row.cell.stepper.maximumValue = 100
-                row.value = Double(UserDefaultsRepository.alertMissedBolusLowGramsBG.value)
-                row.hidden = "$missedBolusLowGramsActive == false || $missedBolusAlertActive == false"
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedBolusLowGramsBG.value = Int(value)
-            }
-            
-            <<< StepperRow() { row in
+            <<< StepperRow("alertMissedReadingSnooze") { row in
                 row.title = "Snooze"
-                row.tag = "missedBolusAlertSnooze"
                 row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 5
-                row.cell.stepper.maximumValue = 60
-                row.value = Double(UserDefaultsRepository.alertMissedBolusSnooze.value)
-                row.hidden = "$missedBolusAlertActive == false"
+                row.cell.stepper.minimumValue = 10
+                row.cell.stepper.maximumValue = 180
+                row.value = Double(UserDefaultsRepository.alertMissedReadingSnooze.value)
+                row.hidden = "$alertMissedReadingActive == false"
                 row.displayValueFor = { value in
                         guard let value = value else { return nil }
                         return "\(Int(value))"
                     }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedBolusSnooze.value = Int(value)
+                    UserDefaultsRepository.alertMissedReadingSnooze.value = Int(value)
             }
-
-            
-             +++ Section(header: "App Inactive", footer: "Attempt to alert if IOS kills the app in the background")
-            <<< SwitchRow("inactiveAlert"){ row in
-            row.title = "Active"
-            row.tag = "inactiveAlertActive"
-            row.value = UserDefaultsRepository.alertAppInactive.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertAppInactive.value = value
+        <<< DateTimeInlineRow("alertMissedReadingSnoozedTime") { row in
+            row.title = "Snoozed Until"
+            row.hidden = "$alertMissedReadingActive == false"
+           if (UserDefaultsRepository.alertMissedReadingSnoozedTime.value != nil) {
+                row.value = UserDefaultsRepository.alertMissedReadingSnoozedTime.value
             }
-            
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertMissedReadingSnoozedTime.value = value
+                UserDefaultsRepository.alertMissedReadingIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertMissedReadingIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+        }
+        <<< SwitchRow("alertMissedReadingIsSnoozed"){ row in
+            row.title = "Is Snoozed"
+            row.value = UserDefaultsRepository.alertMissedReadingIsSnoozed.value
+            row.hidden = "$alertMissedReadingActive == false || $alertMissedReadingSnoozedTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertMissedReadingIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertMissedReadingSnoozedTime.setNil(key: "alertMissedReadingSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertMissedReadingSnoozedTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
+    
+    func buildNotLooping(){
+        form
+            +++ Section(header: "Not Looping", footer: "Alert when Loop has not completed a successful Loop for X minutes")
+        <<< SwitchRow("alertNotLoopingActive"){ row in
+                row.title = "Active"
+                row.value = UserDefaultsRepository.alertNotLoopingActive.value
+                }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.alertNotLoopingActive.value = value
+                }
+        <<< StepperRow("alertNotLooping") { row in
+            row.title = "Time"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 10
+            row.cell.stepper.maximumValue = 60
+            row.value = Double(UserDefaultsRepository.alertNotLooping.value)
+            row.hidden = "$alertNotLoopingActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertNotLooping.value = Int(value)
+        }
         
+        <<< SwitchRow("alertNotLoopingUseLimits"){ row in
+        row.title = "Use BG Limits"
+        row.hidden = "$alertNotLoopingActive == false"
+        row.value = UserDefaultsRepository.alertNotLoopingUseLimits.value
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertNotLoopingUseLimits.value = value
+        }
+        <<< StepperRow("alertNotLoopingLowerLimit") { row in
+            row.title = "Below BG"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 50
+            row.cell.stepper.maximumValue = 200
+            row.value = Double(UserDefaultsRepository.alertNotLoopingLowerLimit.value)
+            row.hidden = "$alertNotLoopingActive == false || $alertNotLoopingUseLimits == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertNotLoopingLowerLimit.value = Int(value)
+        }
+        <<< StepperRow("alertNotLoopingUpperLimit") { row in
+            row.title = "Above BG"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 100
+            row.cell.stepper.maximumValue = 300
+            row.value = Double(UserDefaultsRepository.alertNotLoopingUpperLimit.value)
+            row.hidden = "$alertNotLoopingActive == false || $alertNotLoopingUseLimits == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertNotLoopingUpperLimit.value = Int(value)
+        }
+        <<< StepperRow("alertNotLoopingSnooze") { row in
+            row.title = "Snooze"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 10
+            row.cell.stepper.maximumValue = 120
+            row.value = Double(UserDefaultsRepository.alertNotLoopingSnooze.value)
+            row.hidden = "$alertNotLoopingActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertNotLoopingSnooze.value = Int(value)
+        }
+        <<< DateTimeInlineRow("alertNotLoopingSnoozedTime") { row in
+            row.title = "Snoozed Until"
+            row.hidden = "$alertNotLoopingActive == false"
+           if (UserDefaultsRepository.alertNotLoopingSnoozedTime.value != nil) {
+                row.value = UserDefaultsRepository.alertNotLoopingSnoozedTime.value
+            }
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertNotLoopingSnoozedTime.value = value
+                UserDefaultsRepository.alertNotLoopingIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertNotLoopingIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+        }
+        <<< SwitchRow("alertNotLoopingIsSnoozed"){ row in
+            row.title = "Is Snoozed"
+            row.value = UserDefaultsRepository.alertNotLoopingIsSnoozed.value
+            row.hidden = "$alertNotLoopingActive == false || $alertNotLoopingSnoozedTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertNotLoopingIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertNotLoopingSnoozedTime.setNil(key: "alertNotLoopingSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertNotLoopingSnoozedTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
+    
+    func buildMissedBolus(){
+        form
+            +++ Section(header: "Missed Bolus", footer: "Alert after X minutes when carbs are entered with no Bolus. Optional: Ignore low treatment carbs under a certain BG")
+        <<< SwitchRow("alertMissedBolusActive"){ row in
+                row.title = "Active"
+                row.value = UserDefaultsRepository.alertMissedBolusActive.value
+                }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.alertMissedBolusActive.value = value
+                }
+        <<< StepperRow("alertMissedBolus") { row in
+            row.title = "Time"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 60
+            row.value = Double(UserDefaultsRepository.alertMissedBolus.value)
+            row.hidden = "$alertMissedBolusActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertMissedBolus.value = Int(value)
+        }
+        <<< SwitchRow("alertMissedBolusLowGramsActive"){ row in
+        row.title = "Ignore Low Treatments"
+            row.hidden = "$alertMissedBolusActive == false"
+        row.value = UserDefaultsRepository.alertMissedBolusLowGramsActive.value
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertMissedBolusLowGramsActive.value = value
+        }
         
-        +++ Section("Reminder Alerts")
+        <<< StepperRow("alertMissedBolusLowGrams") { row in
+            row.title = "Ignore Under Grams"
+            row.tag = "missedBolusLowGrams"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 1
+            row.cell.stepper.maximumValue = 15
+            row.value = Double(UserDefaultsRepository.alertMissedBolusLowGrams.value)
+            row.hidden = "$alertMissedBolusLowGramsActive == false || $alertMissedBolusActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertMissedBolusLowGrams.value = Int(value)
+        }
+        <<< StepperRow("alertMissedBolusLowGramsBG") { row in
+            row.title = "Ignore Under BG"
+            row.tag = "missedBolusLowGramsBG"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 40
+            row.cell.stepper.maximumValue = 100
+            row.value = Double(UserDefaultsRepository.alertMissedBolusLowGramsBG.value)
+            row.hidden = "$alertMissedBolusLowGramsActive == false || $alertMissedBolusActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertMissedBolusLowGramsBG.value = Int(value)
+        }
         
-            <<< SwitchRow("sageAlert"){ row in
-                    row.title = "Sensor Change"
-                    row.tag = "sageAlertActive"
+        <<< StepperRow("alertMissedBolusSnooze") { row in
+            row.title = "Snooze"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 60
+            row.value = Double(UserDefaultsRepository.alertMissedBolusSnooze.value)
+            row.hidden = "$alertMissedBolusActive == false"
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertMissedBolusSnooze.value = Int(value)
+        }
+        <<< DateTimeInlineRow("alertMissedBolusSnoozedTime") { row in
+            row.title = "Snoozed Until"
+            row.hidden = "$alertMissedBolusActive == false"
+           if (UserDefaultsRepository.alertMissedBolusSnoozedTime.value != nil) {
+                row.value = UserDefaultsRepository.alertMissedBolusSnoozedTime.value
+            }
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertMissedBolusSnoozedTime.value = value
+                UserDefaultsRepository.alertMissedBolusIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertMissedBolusIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+        }
+        <<< SwitchRow("alertMissedBolusIsSnoozed"){ row in
+            row.title = "Is Snoozed"
+            row.value = UserDefaultsRepository.alertMissedBolusIsSnoozed.value
+            row.hidden = "$alertMissedBolusActive == false || $alertMissedBolusSnoozedTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertMissedBolusIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertMissedBolusSnoozedTime.setNil(key: "alertMissedBolusSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertMissedBolusSnoozedTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
+    
+    func buildAppInactive(){
+         form
+            +++ Section(header: "App Inactive", footer: "Attempt to alert if IOS kills the app in the background")
+        <<< SwitchRow("alertAppInactive"){ row in
+        row.title = "Active"
+        row.value = UserDefaultsRepository.alertAppInactive.value
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertAppInactive.value = value
+        }
+    }
+    
+    func buildSage(){
+            form
+                +++ Section(header: "Sensor Change Reminder", footer: "Alert for 10 Day Sensor Change. Values are in Hours.")
+        
+            <<< SwitchRow("alertSAGEActive"){ row in
+                    row.title = "Active"
                     row.value = UserDefaultsRepository.alertSAGEActive.value
                     }.onChange { [weak self] row in
                             guard let value = row.value else { return }
                             UserDefaultsRepository.alertSAGEActive.value = value
                     }
         
-            <<< StepperRow() { row in
-                row.title = "          Time"
-                row.tag = "sageTime"
+            <<< StepperRow("alertSAGE") { row in
+                row.title = "Time"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
                 row.value = Double(UserDefaultsRepository.alertSAGE.value)
-                row.hidden = "$sageAlertActive == false"
+                row.hidden = "$alertSAGEActive == false"
                 row.displayValueFor = { value in
                         guard let value = value else { return nil }
                         return "\(Int(value))"
@@ -592,14 +955,13 @@ class AlarmViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertSAGE.value = Int(value)
             }
-            <<< StepperRow() { row in
-                row.title = "          Snooze"
-                row.tag = "sageAlertSnoozed"
+            <<< StepperRow("alertSAGESnooze") { row in
+                row.title = "Snooze"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
                 row.value = Double(UserDefaultsRepository.alertSAGESnooze.value)
-                row.hidden = "$sageAlertActive == false"
+                row.hidden = "$alertSAGEActive == false"
                 row.displayValueFor = { value in
                         guard let value = value else { return nil }
                         return "\(Int(value))"
@@ -608,30 +970,67 @@ class AlarmViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertSAGESnooze.value = Int(value)
             }
-        <<< LabelRow("sageDescription") { row in
-            row.title = "Alert X hours before 10 Day Sensor Change. Values are in Hours."
-            row.cell.textLabel?.numberOfLines = 0
-            row.cell.backgroundColor = UIColor.systemGroupedBackground
-            row.cell.textLabel?.font = UIFont.systemFont(ofSize: UIFont.smallSystemFontSize)
+        <<< DateTimeInlineRow("alertSAGESnoozedTime") { row in
+            row.title = "Snoozed Until"
+            row.hidden = "$alertSAGEActive == false"
+           if (UserDefaultsRepository.alertSAGESnoozedTime.value != nil) {
+                row.value = UserDefaultsRepository.alertSAGESnoozedTime.value
+            }
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertSAGESnoozedTime.value = value
+                UserDefaultsRepository.alertSAGEIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertSAGEIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
         }
-        
-        <<< SwitchRow("cageAlert"){ row in
+        <<< SwitchRow("alertSAGEIsSnoozed"){ row in
+            row.title = "Is Snoozed"
+            row.value = UserDefaultsRepository.alertSAGEIsSnoozed.value
+            row.hidden = "$alertSAGEActive == false || $alertSAGESnoozedTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertSAGEIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertSAGESnoozedTime.setNil(key: "alertSAGESnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertSAGESnoozedTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
+    
+    func buildCage(){
+        form
+            +++ Section(header: "Canula Change Reminder", footer: "Alert for Canula Change. Values are in Hours.")
+        <<< SwitchRow("alertCAGEActive"){ row in
                     row.title = "Pump Change"
-                    row.tag = "cageAlertActive"
                     row.value = UserDefaultsRepository.alertCAGEActive.value
                     }.onChange { [weak self] row in
                             guard let value = row.value else { return }
                             UserDefaultsRepository.alertCAGEActive.value = value
                     }
         
-            <<< StepperRow() { row in
+            <<< StepperRow("alertCAGE") { row in
                 row.title = "          Time"
-                row.tag = "cageTime"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
                 row.value = Double(UserDefaultsRepository.alertCAGE.value)
-                row.hidden = "$cageAlertActive == false"
+                row.hidden = "$alertCAGEActive == false"
                 row.displayValueFor = { value in
                         guard let value = value else { return nil }
                         return "\(Int(value))"
@@ -640,14 +1039,13 @@ class AlarmViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertCAGE.value = Int(value)
             }
-            <<< StepperRow() { row in
+            <<< StepperRow("alertCAGESnooze") { row in
                 row.title = "          Snooze"
-                row.tag = "cageAlertSnoozed"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
                 row.value = Double(UserDefaultsRepository.alertCAGESnooze.value)
-                row.hidden = "$cageAlertActive == false"
+                row.hidden = "$alertCAGEActive == false"
                 row.displayValueFor = { value in
                         guard let value = value else { return nil }
                         return "\(Int(value))"
@@ -656,13 +1054,47 @@ class AlarmViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertCAGESnooze.value = Int(value)
             }
-        <<< LabelRow("cageDescription") { row in
-            row.title = "Alert X hours before 3 Day Pump Change. Values are in Hours."
-            row.cell.textLabel?.numberOfLines = 0
-            row.cell.backgroundColor = UIColor.systemGroupedBackground
-            row.cell.textLabel?.font = UIFont.systemFont(ofSize: UIFont.smallSystemFontSize)
-        }
-        
+        <<< DateTimeInlineRow("alertCAGESnoozedTime") { row in
+                   row.title = "Snoozed Until"
+                   row.hidden = "$alertCAGEActive == false"
+                  if (UserDefaultsRepository.alertCAGESnoozedTime.value != nil) {
+                       row.value = UserDefaultsRepository.alertCAGESnoozedTime.value
+                   }
+                   row.minuteInterval = 5
+                   row.noValueDisplayText = "Not Snoozed"
+                   }
+                   .onChange { [weak self] row in
+                       guard let value = row.value else { return }
+                       UserDefaultsRepository.alertCAGESnoozedTime.value = value
+                       UserDefaultsRepository.alertCAGEIsSnoozed.value = true
+                       let otherRow = self?.form.rowBy(tag: "alertCAGEIsSnoozed") as! SwitchRow
+                       otherRow.value = true
+                       otherRow.reload()
+                   }
+                   .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                       inlineRow.cellUpdate() { cell, row in
+                           cell.datePicker.datePickerMode = .dateAndTime
+                       }
+                       let color = cell.detailTextLabel?.textColor
+                       row.onCollapseInlineRow { cell, _, _ in
+                           cell.detailTextLabel?.textColor = color
+                       }
+                       cell.detailTextLabel?.textColor = cell.tintColor
+               }
+               <<< SwitchRow("alertCAGEIsSnoozed"){ row in
+                   row.title = "Is Snoozed"
+                   row.value = UserDefaultsRepository.alertCAGEIsSnoozed.value
+                   row.hidden = "$alertCAGEActive == false || $alertCAGESnoozedTime == nil"
+               }.onChange { [weak self] row in
+                       guard let value = row.value else { return }
+                       UserDefaultsRepository.alertCAGEIsSnoozed.value = value
+                       if !value {
+                           UserDefaultsRepository.alertCAGESnoozedTime.setNil(key: "alertCAGESnoozedTime")
+                           let otherRow = self?.form.rowBy(tag: "alertCAGESnoozedTime") as! DateTimeInlineRow
+                          otherRow.value = nil
+                          otherRow.reload()
+                       }
+               }
     }
 
 

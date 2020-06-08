@@ -11,13 +11,14 @@ import Foundation
 /// A type that presents a key and a mutable value (type erased key-value)
 protocol UserDefaultsAnyValue {
     var key: String { get }
-    var anyValue: Any { get set }
+    var anyValue: Any? { get set }
 }
 
 /// A value holder that keeps its internal data (the value) synchronized with its UserDefaults value. The value is read from UserDefaults on initialization (if exists, otherwise a default value is used) and written when the value changes. Also a custom validation & onChange closure can be set on initialization.
 ///
 /// Another feature of this class is that when the value changes, the change can be observed by multiple observers. There are two observation levels: the instance level, when the observers register directly to the UserDefaultsValue instance, and group level, if the UserDefaultsValue instance is embeded in a group (UserDefaultsValueGroups class manages the groups). It is very convenient to declare related values in the same group, so when one of them changes, the group observers are notified that a change occured in that group (no need to observe each particular UserDefaultsValue instance).
 class UserDefaultsValue<T: AnyConvertible & Equatable> : UserDefaultsAnyValue {
+    
     
     // user defaults key (UserDefaultsAnyValue protocol implementation)
     let key: String
@@ -57,7 +58,7 @@ class UserDefaultsValue<T: AnyConvertible & Equatable> : UserDefaultsAnyValue {
     }
     
     /// get/set the value from Any value (UserDefaultsAnyValue protocol implementation)
-    var anyValue: Any {
+    var anyValue: Any? {
         get {
             return self.value.toAny()
         }
@@ -121,6 +122,10 @@ class UserDefaultsValue<T: AnyConvertible & Equatable> : UserDefaultsAnyValue {
         return ObservationToken { [weak self] in
             self?.observers.removeValue(forKey: id)
         }
+    }
+    
+    func setNil(key: String){
+        UserDefaultsValue.defaults.removeObject(forKey: key)
     }
 }
 

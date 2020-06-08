@@ -53,6 +53,7 @@ class SettingsViewController: FormViewController {
                         guard let value = row.value else { return }
                         UserDefaultsRepository.appBadge.value = value
                 }
+
             
         +++ Section("Graph Settings")
             <<< SwitchRow("switchRowDots"){ row in

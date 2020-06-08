@@ -9,6 +9,7 @@
 import UIKit
 import Charts
 
+
 class MainViewController: UIViewController, UITableViewDataSource {
     
     @IBOutlet weak var BGText: UILabel!
@@ -19,6 +20,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
     @IBOutlet weak var MinAgoText: UILabel!
     @IBOutlet weak var infoTable: UITableView!
     @IBOutlet weak var Console: UITableViewCell!
+    @IBOutlet weak var DragBar: UIImageView!
     
     //NS BG Struct
     struct sgvData: Codable {
@@ -32,6 +34,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
         var name: String
         var value: String
     }
+
     
     // Variables for BG Charts
     public var numPoints: Int = 13
@@ -70,9 +73,16 @@ class MainViewController: UIViewController, UITableViewDataSource {
     
     var bgData: [sgvData] = []
     
+    var snoozeTabItem: UITabBarItem = UITabBarItem()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        let tabBarControllerItems = self.tabBarController?.tabBar.items
+        if let arrayOfTabBarItems = tabBarControllerItems as! AnyObject as? NSArray{
+            snoozeTabItem = arrayOfTabBarItems[2] as! UITabBarItem
+        }
+        snoozeTabItem.isEnabled = false;
         
         UNUserNotificationCenter.current().requestAuthorization(options: .badge) { (granted, error) in
             if error != nil {
@@ -168,6 +178,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
             loadTempBasals(urlUser: urlUser)
         } else {
             updateMinAgo()
+            clearOldSnoozes()
+            checkAlarms(bgs: bgData)
         }
         
     }
@@ -184,13 +196,13 @@ class MainViewController: UIViewController, UITableViewDataSource {
             bgData.append(reading)
            }
             
-           if self.backgroundTask.player.isPlaying {
+
                  self.updateBadge(entries: bgData)
-              } else {
                   self.updateBG(entries: bgData)
                   self.createGraph(entries: bgData)
-              }
+                  
        }
+    
     
     //update Min Ago
     func updateMinAgo(){
@@ -451,16 +463,19 @@ class MainViewController: UIViewController, UITableViewDataSource {
     func createGraph(entries: [sgvData]){
         var bgChartEntry = [ChartDataEntry]()
         var colors = [NSUIColor]()
+        var maxBG: Int = 250
         for i in 0..<entries.count{
             var dateString = String(entries[i].date).prefix(10)
             let dateSecondsOnly = Double(String(dateString))!
-            
+            if entries[i].sgv > maxBG {
+                maxBG = entries[i].sgv
+            }
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
             bgChartEntry.append(value)
             
-            if Double(entries[i].sgv) >= Double(UserDefaultsRepository.alertHigh.value) {
+            if Double(entries[i].sgv) >= Double(UserDefaultsRepository.alertHighBG.value) {
                 colors.append(NSUIColor.yellow)
-            } else if Double(entries[i].sgv) <= Double(UserDefaultsRepository.alertLow.value) {
+            } else if Double(entries[i].sgv) <= Double(UserDefaultsRepository.alertLowBG.value) {
                 colors.append(NSUIColor.red)
             } else {
                 colors.append(NSUIColor.green)
@@ -495,13 +510,13 @@ class MainViewController: UIViewController, UITableViewDataSource {
         
         //Add lower red line based on low alert value
         let ll = ChartLimitLine()
-        ll.limit = Double(UserDefaultsRepository.alertLow.value)
+        ll.limit = Double(UserDefaultsRepository.alertLowBG.value)
         ll.lineColor = NSUIColor.red
         BGChart.rightAxis.addLimitLine(ll)
         
         //Add upper yellow line based on low alert value
         let ul = ChartLimitLine()
-        ul.limit = Double(UserDefaultsRepository.alertHigh.value)
+        ul.limit = Double(UserDefaultsRepository.alertHighBG.value)
         ul.lineColor = NSUIColor.yellow
         BGChart.rightAxis.addLimitLine(ul)
         
@@ -510,7 +525,11 @@ class MainViewController: UIViewController, UITableViewDataSource {
         BGChart.xAxis.labelTextColor = NSUIColor.label
         BGChart.xAxis.labelPosition = XAxis.LabelPosition.bottom
         BGChart.rightAxis.labelTextColor = NSUIColor.label
+        
         BGChart.rightAxis.axisMinimum = 40
+        BGChart.leftAxis.axisMinimum = 40
+        BGChart.rightAxis.axisMaximum = Double(maxBG)
+        BGChart.leftAxis.axisMaximum = Double(maxBG)
         BGChart.leftAxis.enabled = false
         BGChart.legend.enabled = false
         BGChart.scaleYEnabled = false
@@ -546,9 +565,10 @@ class MainViewController: UIViewController, UITableViewDataSource {
       
     }
     
+    
     func updateBadge(entries: [sgvData]) {
         if entries.count > 0 && UserDefaultsRepository.appBadge.value {
-            let latestBG = entries[0].sgv
+            let latestBG = entries[entries.count - 1].sgv
             UIApplication.shared.applicationIconBadgeNumber = latestBG
         } else {
             UIApplication.shared.applicationIconBadgeNumber = 0
@@ -622,45 +642,161 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     func checkAlarms(bgs: [sgvData]) {
-        let dateFormatter : DateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
         let date = Date()
-        let dateString = dateFormatter.string(from: date)
-        let interval = date.timeIntervalSince1970
+        let now = date.timeIntervalSince1970
+        let currentBG = bgs[bgs.count - 1].sgv
+        let currentBGTime = bgs[bgs.count - 1].date
+        var alarmTriggered = false
         
-        let now = Date()
-        if UserDefaultsRepository.alertUrgentLowActive.value &&
-            bgs[0].sgv <= UserDefaultsRepository.alertUrgentLow.value &&
-            now > UserDefaultsRepository.alertUrgentLowSnoozedTime.value{
-            print(dateString + " urgent low")
-            tableData.append(infoData(name: dateString, value: "urgent low"))
-                //AlarmSound.play()
+        
+        clearOldSnoozes()
+        
+        // BG Based Alarms
+        // Check to make sure it is a current reading
+        if now - currentBGTime <= (5*60) {
+            
+            // trigger temporary alert first
+            if UserDefaultsRepository.alertTemporaryActive.value {
+                if UserDefaultsRepository.alertTemporaryBelow.value {
+                    if currentBG < UserDefaultsRepository.alertTemporaryBG.value {
+                        UserDefaultsRepository.alertTemporaryActive.value = false
+                        AlarmSound.whichAlarm = "Temporary"
+                        triggerAlarm()
+                        return
+                    }
+                } else{
+                    if currentBG > UserDefaultsRepository.alertTemporaryBG.value {
+                      tabBarController?.selectedIndex = 2
+                        AlarmSound.whichAlarm = "Temporary Alert"
+                        triggerAlarm()
+                        return
+                   }
+                }
+            }
+            
+            // Check Urgent Low
+            if UserDefaultsRepository.alertUrgentLowActive.value &&
+            currentBG <= UserDefaultsRepository.alertUrgentLowBG.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
+                AlarmSound.whichAlarm = "Urgent Low Alert"
+                triggerAlarm()
+                return
+            }
+            
+            // Check Low
+            if UserDefaultsRepository.alertLowActive.value &&
+            currentBG <= UserDefaultsRepository.alertLowBG.value && !UserDefaultsRepository.alertLowIsSnoozed.value {
+                AlarmSound.whichAlarm = "Low Alert"
+                triggerAlarm()
+                return
+            }
+            
+            // Check High
+            if UserDefaultsRepository.alertHighActive.value &&
+            currentBG >= UserDefaultsRepository.alertHighBG.value && !UserDefaultsRepository.alertHighIsSnoozed.value {
+                AlarmSound.whichAlarm = "High Alert"
+                triggerAlarm()
+                return
+            }
+            
+            // Check Urgent High
+            if UserDefaultsRepository.alertUrgentHighActive.value &&
+            currentBG >= UserDefaultsRepository.alertUrgentHighBG.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
+                AlarmSound.whichAlarm = "Urgent High Alert"
+                triggerAlarm()
+                return
+            }
         }
         
-        if UserDefaultsRepository.alertLowActive.value &&
-            bgs[0].sgv <= UserDefaultsRepository.alertLow.value &&
-            now > UserDefaultsRepository.alertLowSnoozedTime.value{
-                print(dateString + " low")
-            tableData.append(infoData(name: dateString, value: "low"))
-                //AlarmSound.play()
-        }
         
-        if UserDefaultsRepository.alertHighActive.value &&
-            bgs[0].sgv >= UserDefaultsRepository.alertHigh.value &&
-            now > UserDefaultsRepository.alertHighSnoozedTime.value{
-                print(dateString + " high")
-            tableData.append(infoData(name: dateString, value: "high"))
-                //AlarmSound.play()
-        }
+    }
+    
+    func triggerAlarm()
+    {
+        guard let snoozer = self.tabBarController!.viewControllers?[1] as? SnoozeViewController else { return }
+        snoozer.updateDisplayWhenTriggered(bgVal: BGText.text ?? "", directionVal: DirectionText.text ?? "", deltaVal: DeltaText.text ?? "", minAgoVal: MinAgoText.text ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        snoozeTabItem.isEnabled = true;
+        tabBarController?.selectedIndex = 2
+        AlarmSound.play()
+    }
+    
+    func clearOldSnoozes(){
+        let date = Date()
+        let now = date.timeIntervalSince1970
+        var needsReload: Bool = false
+        guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
         
-        if UserDefaultsRepository.alertUrgentHighActive.value &&
-            bgs[0].sgv >= UserDefaultsRepository.alertUrgentHigh.value &&
-            now > UserDefaultsRepository.alertUrgentHighSnoozedTime.value{
-                print(dateString + " urgent high")
-            tableData.append(infoData(name: dateString, value: "urgent high"))
-                //AlarmSound.play()
+        if date > UserDefaultsRepository.alertUrgentLowSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertUrgentLowSnoozedTime.setNil(key: "alertUrgentLowSnoozedTime")
+            UserDefaultsRepository.alertUrgentLowIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertUrgentLowSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertUrgentLowIsSnoozed", value: false)
+          
         }
-        
+        if date > UserDefaultsRepository.alertLowSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertLowSnoozedTime.setNil(key: "alertLowSnoozedTime")
+            UserDefaultsRepository.alertLowIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertLowSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertLowIsSnoozed", value: false)
+       
+        }
+        if date > UserDefaultsRepository.alertHighSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertHighSnoozedTime.setNil(key: "alertHighSnoozedTime")
+            UserDefaultsRepository.alertHighIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertHighSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertHighIsSnoozed", value: false)
+          
+        }
+        if date > UserDefaultsRepository.alertUrgentHighSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertUrgentHighSnoozedTime.setNil(key: "alertUrgentHighSnoozedTime")
+            UserDefaultsRepository.alertUrgentHighIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertUrgentHighSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertUrgentHighIsSnoozed", value: false)
+          
+        }
+        if date > UserDefaultsRepository.alertFastSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertFastSnoozedTime.setNil(key: "alertFastSnoozedTime")
+            UserDefaultsRepository.alertFastIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertFastSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertFastIsSnoozed", value: false)
+           
+        }
+        if date > UserDefaultsRepository.alertMissedReadingSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertMissedReadingSnoozedTime.setNil(key: "alertMissedReadingSnoozedTime")
+            UserDefaultsRepository.alertMissedReadingIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertMissedReadingSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertMissedReadingIsSnoozed", value: false)
+          
+        }
+        if date > UserDefaultsRepository.alertNotLoopingSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertNotLoopingSnoozedTime.setNil(key: "alertNotLoopingSnoozedTime")
+            UserDefaultsRepository.alertNotLoopingIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertNotLoopingSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertNotLoopingIsSnoozed", value: false)
+         
+            
+        }
+        if date > UserDefaultsRepository.alertMissedBolusSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertMissedBolusSnoozedTime.setNil(key: "alertMissedBolusSnoozedTime")
+            UserDefaultsRepository.alertMissedBolusIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertMissedBolusSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertMissedBolusIsSnoozed", value: false)
+
+        }
+        if date > UserDefaultsRepository.alertSAGESnoozedTime.value ?? date {
+            UserDefaultsRepository.alertSAGESnoozedTime.setNil(key: "alertSAGESnoozedTime")
+            UserDefaultsRepository.alertSAGEIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertSAGESnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertSAGEIsSnoozed", value: false)
+  
+        }
+        if date > UserDefaultsRepository.alertCAGESnoozedTime.value ?? date {
+            UserDefaultsRepository.alertCAGESnoozedTime.setNil(key: "alertCAGESnoozedTime")
+            UserDefaultsRepository.alertCAGEIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertCAGESnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertCAGEIsSnoozed", value: false)
+
+        }
+
         
     }
 }

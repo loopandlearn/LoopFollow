@@ -23,6 +23,7 @@ class AlarmSound {
     static var isMuted: Bool {
         return self.muted
     }
+    static var whichAlarm: String = "none"
     
     static var isTesting: Bool = false
     
@@ -32,14 +33,14 @@ class AlarmSound {
     
     static let vibrate = UserDefaultsValue<Bool>(key: "vibrate", default: true)
     
-    static let overrideSystemOutputVolume = UserDefaultsValue<Bool>(key: "overrideSystemOutputVolume", default: false)
+    static let overrideSystemOutputVolume = UserDefaultsValue<Bool>(key: "overrideSystemOutputVolume", default: true)
     static let systemOutputVolume = UserDefaultsValue<Float>(key: "systemOutputVolume", default: 0.7)
     
     fileprivate static var systemOutputVolumeBeforeOverride: Float?
     
     fileprivate static var playingTimer: Timer?
     
-    fileprivate static let soundURL = Bundle.main.url(forResource: "alarm", withExtension: "mp3")!
+    fileprivate static let soundURL = Bundle.main.url(forResource: "Indeed", withExtension: "caf")!
     fileprivate static var audioPlayer: AVAudioPlayer?
     fileprivate static let audioPlayerDelegate = AudioPlayerDelegate()
     
