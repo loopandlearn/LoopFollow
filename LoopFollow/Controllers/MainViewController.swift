@@ -58,6 +58,11 @@ class MainViewController: UIViewController, UITableViewDataSource {
     // check every 30 Seconds whether new bgvalues should be retrieved
     let timeInterval: TimeInterval = 30.0
     
+    // Check Alarms Timer
+    // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
+    var checkAlarmTimer = Timer()
+    var checkAlarmInterval: TimeInterval = 60.0
+    
     // Info Table Setup
     var tableData = [
         infoData(name: "IOB", value: ""), //0
@@ -129,6 +134,20 @@ class MainViewController: UIViewController, UITableViewDataSource {
                                      repeats: true)
     }
     
+    // Timer
+    func startCheckAlarmTimer(time: TimeInterval) {
+        checkAlarmTimer = Timer.scheduledTimer(timeInterval: time,
+                                     target: self,
+                                     selector: #selector(MainViewController.checkAlarmTimerDidEnd(_:)),
+                                     userInfo: nil,
+                                     repeats: false)
+    }
+    
+    // check whether new Values should be retrieved
+    @objc func checkAlarmTimerDidEnd(_ timer:Timer) {
+        print("check alarm timer ended")
+    }
+    
     @objc func appMovedToBackground() {
         tabBarController?.selectedIndex = 0
         timer.invalidate()
@@ -175,7 +194,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             loadBGData(urlUser: urlUser, onlyPullLastRecord: onlyPullLastRecord)
             clearLastInfoData()
             loadDeviceStatus(urlUser: urlUser)
-            loadTempBasals(urlUser: urlUser)
+           // loadTempBasals(urlUser: urlUser)
         } else {
             updateMinAgo()
             clearOldSnoozes()
@@ -212,7 +231,6 @@ class MainViewController: UIViewController, UITableViewDataSource {
 
     // Main NS Data Pull
     func loadBGData(urlUser: String, onlyPullLastRecord: Bool = false) {
-        
         var points = "1"
         if !onlyPullLastRecord {
              points = String(self.graphHours * 12 + 1)
@@ -258,7 +276,6 @@ class MainViewController: UIViewController, UITableViewDataSource {
         getBGTask.resume()
     }
     
-   
     
     //Clear the info data before next pull
     func clearLastInfoData(){
@@ -361,6 +378,49 @@ class MainViewController: UIViewController, UITableViewDataSource {
         }
         basalTask.resume()
     }
+    
+    func loadBoluses(urlUser: String){
+        
+        var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=2020-06-08T00:00:00"
+        var urlBGDataPath: String = urlUser + "/api/v1/treatments.json?"
+        if token == "" {
+            urlBGDataPath = urlBGDataPath + searchString
+        }
+        else
+        {
+            urlBGDataPath = urlBGDataPath + "token=" + token + searchString
+        }
+        guard let urlBGData = URL(string: urlBGDataPath) else {
+            return
+        }
+        var request = URLRequest(url: urlBGData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        
+        let getTask = URLSession.shared.dataTask(with: request) { data, response, error in
+            if self.consoleLogging == true {print("start meal bolus url")}
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([sgvData].self, from: data)
+            if let entriesResponse = entriesResponse {
+                DispatchQueue.main.async {
+                   // self.ProcessNSData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
+                }
+            }
+            else
+            {
+                
+                return
+            }
+        }
+        getTask.resume()
+    }
+    
     
     // Parse Device Status Data
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
@@ -565,7 +625,6 @@ class MainViewController: UIViewController, UITableViewDataSource {
       
     }
     
-    
     func updateBadge(entries: [sgvData]) {
         if entries.count > 0 && UserDefaultsRepository.appBadge.value {
             let latestBG = entries[entries.count - 1].sgv
@@ -642,9 +701,19 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     func checkAlarms(bgs: [sgvData]) {
+        
+        // Don't check or fire alarms within 1 minute of prior alarm
+        if checkAlarmTimer.isValid {  return }
+        
         let date = Date()
         let now = date.timeIntervalSince1970
         let currentBG = bgs[bgs.count - 1].sgv
+        let lastBG = bgs[bgs.count - 2].sgv
+        guard let deltas: [Int] = [
+            bgs[bgs.count - 1].sgv - bgs[bgs.count - 2].sgv,
+            bgs[bgs.count - 2].sgv - bgs[bgs.count - 3].sgv,
+            bgs[bgs.count - 3].sgv - bgs[bgs.count - 4].sgv
+            ] else {}
         let currentBGTime = bgs[bgs.count - 1].date
         var alarmTriggered = false
         
@@ -675,7 +744,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             }
             
             // Check Urgent Low
-            if UserDefaultsRepository.alertUrgentLowActive.value &&
+            if UserDefaultsRepository.alertUrgentLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
             currentBG <= UserDefaultsRepository.alertUrgentLowBG.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
                 AlarmSound.whichAlarm = "Urgent Low Alert"
                 triggerAlarm()
@@ -683,7 +752,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             }
             
             // Check Low
-            if UserDefaultsRepository.alertLowActive.value &&
+            if UserDefaultsRepository.alertLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
             currentBG <= UserDefaultsRepository.alertLowBG.value && !UserDefaultsRepository.alertLowIsSnoozed.value {
                 AlarmSound.whichAlarm = "Low Alert"
                 triggerAlarm()
@@ -691,7 +760,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             }
             
             // Check High
-            if UserDefaultsRepository.alertHighActive.value &&
+            if UserDefaultsRepository.alertHighActive.value && !UserDefaultsRepository.alertHighIsSnoozed.value &&
             currentBG >= UserDefaultsRepository.alertHighBG.value && !UserDefaultsRepository.alertHighIsSnoozed.value {
                 AlarmSound.whichAlarm = "High Alert"
                 triggerAlarm()
@@ -699,12 +768,57 @@ class MainViewController: UIViewController, UITableViewDataSource {
             }
             
             // Check Urgent High
-            if UserDefaultsRepository.alertUrgentHighActive.value &&
+            if UserDefaultsRepository.alertUrgentHighActive.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value &&
             currentBG >= UserDefaultsRepository.alertUrgentHighBG.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
                 AlarmSound.whichAlarm = "Urgent High Alert"
                 triggerAlarm()
                 return
             }
+            
+            // Check Fast Drop
+            if UserDefaultsRepository.alertFastDropActive.value && !UserDefaultsRepository.alertFastDropIsSnoozed.value {
+                // make sure limit is off or BG is below value
+                if (!UserDefaultsRepository.alertFastDropUseLimit.value) || (UserDefaultsRepository.alertFastDropUseLimit.value && currentBG < UserDefaultsRepository.alertFastDropBelowBG.value) {
+                    let compare = 0 - UserDefaultsRepository.alertFastDropDelta.value
+                    
+                    //check last 2/3/4 readings
+                    if (UserDefaultsRepository.alertFastDropReadings.value == 2 && deltas[0] <= compare)
+                    || (UserDefaultsRepository.alertFastDropReadings.value == 3 && deltas[0] <= compare && deltas[1] <= compare)
+                    || (UserDefaultsRepository.alertFastDropReadings.value == 4 && deltas[0] <= compare && deltas[1] <= compare && deltas[2] <= compare) {
+                        AlarmSound.whichAlarm = "Fast Drop Alert"
+                        triggerAlarm()
+                        return
+                    }
+                }
+            }
+            
+            // Check Fast Rise
+            if UserDefaultsRepository.alertFastRiseActive.value && !UserDefaultsRepository.alertFastRiseIsSnoozed.value {
+                // make sure limit is off or BG is above value
+                if (!UserDefaultsRepository.alertFastRiseUseLimit.value) || (UserDefaultsRepository.alertFastRiseUseLimit.value && currentBG < UserDefaultsRepository.alertFastRiseAboveBG.value) {
+                    let compare = UserDefaultsRepository.alertFastDropDelta.value
+                    
+                    //check last 2/3/4 readings
+                    if (UserDefaultsRepository.alertFastRiseReadings.value == 2 && deltas[0] >= compare)
+                    || (UserDefaultsRepository.alertFastRiseReadings.value == 3 && deltas[0] >= compare && deltas[1] >= compare)
+                    || (UserDefaultsRepository.alertFastRiseReadings.value == 4 && deltas[0] >= compare && deltas[1] >= compare && deltas[2] >= compare) {
+                        AlarmSound.whichAlarm = "Fast Rise Alert"
+                        triggerAlarm()
+                        return
+                    }
+                }
+            }
+            
+
+            
+        } else {
+            //check for missed reading alert
+            
+            if UserDefaultsRepository.alertMissedBolusActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
+                AlarmSound.whichAlarm = "Missed Reading Alert"
+                    triggerAlarm()
+                    return
+                }
         }
         
         
@@ -712,7 +826,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
     
     func triggerAlarm()
     {
-        guard let snoozer = self.tabBarController!.viewControllers?[1] as? SnoozeViewController else { return }
+        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.updateDisplayWhenTriggered(bgVal: BGText.text ?? "", directionVal: DirectionText.text ?? "", deltaVal: DeltaText.text ?? "", minAgoVal: MinAgoText.text ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozeTabItem.isEnabled = true;
         tabBarController?.selectedIndex = 2
@@ -753,11 +867,18 @@ class MainViewController: UIViewController, UITableViewDataSource {
             alarms.reloadIsSnoozed(key: "alertUrgentHighIsSnoozed", value: false)
           
         }
-        if date > UserDefaultsRepository.alertFastSnoozedTime.value ?? date {
-            UserDefaultsRepository.alertFastSnoozedTime.setNil(key: "alertFastSnoozedTime")
-            UserDefaultsRepository.alertFastIsSnoozed.value = false
-            alarms.reloadSnoozeTime(key: "alertFastSnoozedTime", setNil: true)
-            alarms.reloadIsSnoozed(key: "alertFastIsSnoozed", value: false)
+        if date > UserDefaultsRepository.alertFastDropSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertFastDropSnoozedTime.setNil(key: "alertFastDropSnoozedTime")
+            UserDefaultsRepository.alertFastDropIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertFastDropSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertFastDropIsSnoozed", value: false)
+           
+        }
+        if date > UserDefaultsRepository.alertFastRiseSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertFastRiseSnoozedTime.setNil(key: "alertFastRiseSnoozedTime")
+            UserDefaultsRepository.alertFastRiseIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertFastRiseSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertFastRiseIsSnoozed", value: false)
            
         }
         if date > UserDefaultsRepository.alertMissedReadingSnoozedTime.value ?? date {

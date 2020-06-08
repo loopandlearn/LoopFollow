@@ -13,6 +13,7 @@ import UIKit
 class SnoozeViewController: UIViewController {
 
     var snoozeTabItem: UITabBarItem = UITabBarItem()
+    var mainTabItem: UITabBarItem = UITabBarItem()
     
     @IBOutlet weak var SnoozeButton: UIButton!
 
@@ -24,17 +25,26 @@ class SnoozeViewController: UIViewController {
     
     @IBAction func SnoozeButton(_ sender: UIButton) {
         AlarmSound.stop()
-        setSnoozeTime()
-        tabBarController?.selectedIndex = 0
+        
+        guard let mainVC = self.tabBarController!.viewControllers?[0] as? MainViewController else { return }
+        mainVC.startCheckAlarmTimer(time: mainVC.checkAlarmInterval)
+        
         let tabBarControllerItems = self.tabBarController?.tabBar.items
         if let arrayOfTabBarItems = tabBarControllerItems as! AnyObject as? NSArray{
             snoozeTabItem = arrayOfTabBarItems[2] as! UITabBarItem
+            
         }
+        
+        
+        setSnoozeTime()
+        tabBarController?.selectedIndex = 0
+        
         snoozeTabItem.isEnabled = false;
         
     }
     
     func updateDisplayWhenTriggered(bgVal: String, directionVal: String, deltaVal: String, minAgoVal: String, alertLabelVal: String){
+        loadViewIfNeeded()
         BGLabel.text = bgVal
         DirectionLabel.text = directionVal
         DeltaLabel.text = deltaVal
@@ -71,8 +81,26 @@ class SnoozeViewController: UIViewController {
             UserDefaultsRepository.alertUrgentHighSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertUrgentHighSnooze.value * 60))
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertUrgentHighIsSnoozed", value: true)
-            alarms.reloadSnoozeTime(key: "alertUrgentHighIsSnoozed", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertUrgentHighSnooze.value * 60)))
-        }
+            alarms.reloadSnoozeTime(key: "alertUrgentHighSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertUrgentHighSnooze.value * 60)))
+        } else if AlarmSound.whichAlarm == "Fast Drop Alert" {
+            UserDefaultsRepository.alertFastDropIsSnoozed.value = false
+            UserDefaultsRepository.alertFastDropSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertFastDropSnooze.value * 60))
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertFastDropIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertFastDropSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertFastDropSnooze.value * 60)))
+        } else if AlarmSound.whichAlarm == "Fast Rise Alert" {
+            UserDefaultsRepository.alertFastRiseIsSnoozed.value = false
+            UserDefaultsRepository.alertFastRiseSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertFastRiseSnooze.value * 60))
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertFastRiseIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertFastRiseSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertFastRiseSnooze.value * 60)))
+        }  else if AlarmSound.whichAlarm == "Missed Reading Alert" {
+           UserDefaultsRepository.alertMissedReadingIsSnoozed.value = false
+           UserDefaultsRepository.alertMissedReadingSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertMissedReadingSnooze.value * 60))
+           guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+           alarms.reloadIsSnoozed(key: "alertMissedReadingIsSnoozed", value: true)
+           alarms.reloadSnoozeTime(key: "alertMissedReadingSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertMissedReadingSnooze.value * 60)))
+       }
     }
     
     override func viewDidLoad() {
