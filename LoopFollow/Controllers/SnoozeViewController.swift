@@ -59,43 +59,43 @@ class SnoozeViewController: UIViewController {
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertTemporaryActive", value: false)
         } else if AlarmSound.whichAlarm == "Urgent Low Alert" {
-            UserDefaultsRepository.alertUrgentLowIsSnoozed.value = false
+            UserDefaultsRepository.alertUrgentLowIsSnoozed.value = true
             UserDefaultsRepository.alertUrgentLowSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertUrgentLowSnooze.value * 60))
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertUrgentLowIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertUrgentLowSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertUrgentLowSnooze.value * 60)))
         } else if AlarmSound.whichAlarm == "Low Alert" {
-            UserDefaultsRepository.alertLowIsSnoozed.value = false
+            UserDefaultsRepository.alertLowIsSnoozed.value = true
             UserDefaultsRepository.alertLowSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertLowSnooze.value * 60))
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertLowIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertLowSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertLowSnooze.value * 60)))
         } else if AlarmSound.whichAlarm == "High Alert" {
-            UserDefaultsRepository.alertHighIsSnoozed.value = false
+            UserDefaultsRepository.alertHighIsSnoozed.value = true
             UserDefaultsRepository.alertHighSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertHighSnooze.value * 60))
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertHighIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertHighSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertHighSnooze.value * 60)))
         } else if AlarmSound.whichAlarm == "Urgent High Alert" {
-            UserDefaultsRepository.alertUrgentHighIsSnoozed.value = false
+            UserDefaultsRepository.alertUrgentHighIsSnoozed.value = true
             UserDefaultsRepository.alertUrgentHighSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertUrgentHighSnooze.value * 60))
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertUrgentHighIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertUrgentHighSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertUrgentHighSnooze.value * 60)))
         } else if AlarmSound.whichAlarm == "Fast Drop Alert" {
-            UserDefaultsRepository.alertFastDropIsSnoozed.value = false
+            UserDefaultsRepository.alertFastDropIsSnoozed.value = true
             UserDefaultsRepository.alertFastDropSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertFastDropSnooze.value * 60))
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertFastDropIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertFastDropSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertFastDropSnooze.value * 60)))
         } else if AlarmSound.whichAlarm == "Fast Rise Alert" {
-            UserDefaultsRepository.alertFastRiseIsSnoozed.value = false
+            UserDefaultsRepository.alertFastRiseIsSnoozed.value = true
             UserDefaultsRepository.alertFastRiseSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertFastRiseSnooze.value * 60))
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertFastRiseIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertFastRiseSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertFastRiseSnooze.value * 60)))
         }  else if AlarmSound.whichAlarm == "Missed Reading Alert" {
-           UserDefaultsRepository.alertMissedReadingIsSnoozed.value = false
+           UserDefaultsRepository.alertMissedReadingIsSnoozed.value = true
            UserDefaultsRepository.alertMissedReadingSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertMissedReadingSnooze.value * 60))
            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
            alarms.reloadIsSnoozed(key: "alertMissedReadingIsSnoozed", value: true)

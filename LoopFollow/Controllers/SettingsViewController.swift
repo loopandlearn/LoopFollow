@@ -70,7 +70,35 @@ class SettingsViewController: FormViewController {
                         guard let value = row.value else { return }
                         UserDefaultsRepository.showLines.value = value
                         
+            }
+            <<< StepperRow("lowLine") { row in
+                row.title = "Low Line Value"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 150
+                row.cell.stepper.maximumValue = 400
+                row.value = Double(UserDefaultsRepository.lowLine.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
                 }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.lowLine.value = Int(value)
+            }
+            <<< StepperRow("highLine") { row in
+                row.title = "High Line Value"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 150
+                row.cell.stepper.maximumValue = 400
+                row.value = Double(UserDefaultsRepository.highLine.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.highLine.value = Int(value)
+            }
         
          }
         

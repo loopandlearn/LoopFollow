@@ -18,6 +18,8 @@ class UserDefaultsRepository {
     static let showDots = UserDefaultsValue<Bool>(key: "showDots", default: true)
     static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
+    static let lowLine = UserDefaultsValue<Int>(key: "lowLine", default: 70)
+    static let highLine = UserDefaultsValue<Int>(key: "highLine", default: 180)
     
     // General Settings
     static let backgroundRefreshFrequency = UserDefaultsValue<Int>(key: "backgroundRefreshFrequency", default: 1)

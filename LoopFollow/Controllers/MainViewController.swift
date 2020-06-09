@@ -194,6 +194,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             loadBGData(urlUser: urlUser, onlyPullLastRecord: onlyPullLastRecord)
             clearLastInfoData()
             loadDeviceStatus(urlUser: urlUser)
+           // loadBoluses(urlUser: urlUser)
            // loadTempBasals(urlUser: urlUser)
         } else {
             updateMinAgo()
@@ -204,22 +205,27 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     // Post process new NS Data and feed all updates
-    func ProcessNSData(data: [sgvData], onlyPullLastRecord: Bool){
+    func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
         if !onlyPullLastRecord {
             bgData.removeAll()
+        } else if bgData[bgData.count - 1].date != data[0].date {
+            bgData.removeFirst()
+        } else {
+            self.updateBadge(entries: bgData)
+            self.updateBG(entries: bgData)
+            self.createGraph(entries: bgData)
+            return
         }
-            for i in 0..<data.count{
-               var dateString = data[data.count - 1 - i].date / 1000
-                dateString.round(FloatingPointRoundingRule.toNearestOrEven)
-                let reading = sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
-            bgData.append(reading)
-           }
-            
 
-                 self.updateBadge(entries: bgData)
-                  self.updateBG(entries: bgData)
-                  self.createGraph(entries: bgData)
-                  
+        for i in 0..<data.count{
+            var dateString = data[data.count - 1 - i].date / 1000
+            dateString.round(FloatingPointRoundingRule.toNearestOrEven)
+            let reading = sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
+            bgData.append(reading)
+        }
+        self.updateBadge(entries: bgData)
+        self.updateBG(entries: bgData)
+        self.createGraph(entries: bgData)
        }
     
     
@@ -264,7 +270,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             let entriesResponse = try? decoder.decode([sgvData].self, from: data)
             if let entriesResponse = entriesResponse {
                 DispatchQueue.main.async {
-                    self.ProcessNSData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
+                    self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
                 }
             }
             else
@@ -380,8 +386,16 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     func loadBoluses(urlUser: String){
+        var calendar = Calendar.current
+        let today = Date()
+        let midnight = calendar.startOfDay(for: today)
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        let formattedDate = dateFormatter.string(from: yesterday)
         
-        var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=2020-06-08T00:00:00"
+        var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=" + formattedDate
         var urlBGDataPath: String = urlUser + "/api/v1/treatments.json?"
         if token == "" {
             urlBGDataPath = urlBGDataPath + searchString
@@ -570,13 +584,13 @@ class MainViewController: UIViewController, UITableViewDataSource {
         
         //Add lower red line based on low alert value
         let ll = ChartLimitLine()
-        ll.limit = Double(UserDefaultsRepository.alertLowBG.value)
+        ll.limit = Double(UserDefaultsRepository.lowLine.value)
         ll.lineColor = NSUIColor.red
         BGChart.rightAxis.addLimitLine(ll)
         
         //Add upper yellow line based on low alert value
         let ul = ChartLimitLine()
-        ul.limit = Double(UserDefaultsRepository.alertHighBG.value)
+        ul.limit = Double(UserDefaultsRepository.highLine.value)
         ul.lineColor = NSUIColor.yellow
         BGChart.rightAxis.addLimitLine(ul)
         
@@ -694,7 +708,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     func bgDirectionGraphic(_ value:String)->String {
-        let graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
+        let //graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
+        graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
         
         
         return graphics[value]!
@@ -795,7 +810,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             // Check Fast Rise
             if UserDefaultsRepository.alertFastRiseActive.value && !UserDefaultsRepository.alertFastRiseIsSnoozed.value {
                 // make sure limit is off or BG is above value
-                if (!UserDefaultsRepository.alertFastRiseUseLimit.value) || (UserDefaultsRepository.alertFastRiseUseLimit.value && currentBG < UserDefaultsRepository.alertFastRiseAboveBG.value) {
+                if (!UserDefaultsRepository.alertFastRiseUseLimit.value) || (UserDefaultsRepository.alertFastRiseUseLimit.value && currentBG > UserDefaultsRepository.alertFastRiseAboveBG.value) {
                     let compare = UserDefaultsRepository.alertFastDropDelta.value
                     
                     //check last 2/3/4 readings

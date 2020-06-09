@@ -11,7 +11,7 @@ import WebKit
 
 
 
-class NightscoutViewController: UIViewController, WKUIDelegate {
+class NightscoutViewController: UIViewController {
 
     @IBOutlet weak var webView: WKWebView!
     
@@ -19,6 +19,11 @@ class NightscoutViewController: UIViewController, WKUIDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         guard let myUrl = URL(string: UserDefaultsRepository.url.value) else { return  }
+        
+
+        webView.configuration.preferences.javaScriptEnabled = true
+        webView.navigationDelegate = self
+        webView.uiDelegate = self
         webView.load(URLRequest(url: myUrl))
         
         let refreshControl = UIRefreshControl()
@@ -42,6 +47,55 @@ class NightscoutViewController: UIViewController, WKUIDelegate {
         // for _blank target or non-mainFrame target
         webView.load(navigationAction.request)
         return nil    }
-
 }
 
+// MARK:- WKUIDelegate implementation
+extension NightscoutViewController: WKNavigationDelegate, WKUIDelegate {
+    
+    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+        
+        let alertCtrl = UIAlertController(title: nil, message: message, preferredStyle: .actionSheet)
+        
+        alertCtrl.addAction(UIAlertAction(title: "OK", style: .default) { action in
+            completionHandler(true)
+        })
+
+        alertCtrl.addAction(UIAlertAction(title: "Cancel", style: .cancel) { action in
+            completionHandler(false)
+        })
+        
+        present(alertCtrl, animated: true)
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        
+        guard let _ = navigationAction.request.url else {
+            decisionHandler(.cancel)
+            return
+        }
+     
+        decisionHandler(.allow)
+    }
+    
+    func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebView.NavigationType) -> Bool {
+        
+        guard let url = request.url else {
+            return false
+        }
+        
+        NSLog("Should start: \(url.absoluteString)")
+        return true
+    }
+    
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        
+        if navigationAction.targetFrame == nil {
+            webView.load(navigationAction.request)
+        }
+        
+        return nil
+    }
+    
+
+ 
+}
