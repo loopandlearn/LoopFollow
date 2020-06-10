@@ -29,12 +29,10 @@ class AlarmSound {
     
     //static let volumeChangeDetector = VolumeChangeDetector()
     
-    static let fadeInTimeInterval = UserDefaultsValue<TimeInterval>(key: "fadeInTimeInterval", default: 0)  // fade-in time interval in seconds
-    
-    static let vibrate = UserDefaultsValue<Bool>(key: "vibrate", default: true)
-    
-    static let overrideSystemOutputVolume = UserDefaultsValue<Bool>(key: "overrideSystemOutputVolume", default: true)
-    static let systemOutputVolume = UserDefaultsValue<Float>(key: "systemOutputVolume", default: 0.7)
+    static let fadeInTimeInterval = UserDefaultsRepository.fadeInTimeInterval
+    static let vibrate = UserDefaultsRepository.vibrate
+    static let overrideSystemOutputVolume = UserDefaultsRepository.overrideSystemOutputVolume
+    static let systemOutputVolume = UserDefaultsRepository.systemOutputVolume
     
     fileprivate static var systemOutputVolumeBeforeOverride: Float?
     

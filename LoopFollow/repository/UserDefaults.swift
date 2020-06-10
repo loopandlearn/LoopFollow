@@ -27,6 +27,11 @@ class UserDefaultsRepository {
     static let appBadge = UserDefaultsValue<Bool>(key: "appBadge", default: true)
     
     // Alarm Settings
+    static let systemOutputVolume = UserDefaultsValue<Float>(key: "systemOutputVolume", default: 0.5)
+    static let fadeInTimeInterval = UserDefaultsValue<TimeInterval>(key: "fadeInTimeInterval", default: 0)
+    static let vibrate = UserDefaultsValue<Bool>(key: "vibrate", default: true)
+    static let overrideSystemOutputVolume = UserDefaultsValue<Bool>(key: "overrideSystemOutputVolume", default: true)
+    
     
     // Alerts
     static let alertSnoozeAllTime = UserDefaultsValue<Date?>(key: "alertSnoozeAllTime", default: nil)

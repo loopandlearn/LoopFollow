@@ -10,7 +10,7 @@ import UIKit
 import Charts
 
 
-class MainViewController: UIViewController, UITableViewDataSource {
+class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate {
     
     @IBOutlet weak var BGText: UILabel!
     @IBOutlet weak var DeltaText: UILabel!
@@ -21,6 +21,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
     @IBOutlet weak var infoTable: UITableView!
     @IBOutlet weak var Console: UITableViewCell!
     @IBOutlet weak var DragBar: UIImageView!
+    @IBOutlet weak var PredictionLabel: UILabel!
+    @IBOutlet weak var LoopStatusLabel: UILabel!
     
     //NS BG Struct
     struct sgvData: Codable {
@@ -40,7 +42,6 @@ class MainViewController: UIViewController, UITableViewDataSource {
         var value: String
     }
 
-    
     // Variables for BG Charts
     public var numPoints: Int = 13
     public var linePlotData: [Double] = []
@@ -76,9 +77,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
         infoData(name: "Override", value: ""), //3
         infoData(name: "Battery", value: ""), //4
         infoData(name: "Pump", value: ""), //5
-        infoData(name: "Loop", value: ""), //6
-        infoData(name: "SAGE", value: ""), //7
-        infoData(name: "CAGE", value: "") //8
+        infoData(name: "SAGE", value: ""), //6
+        infoData(name: "CAGE", value: "") //7
     ]
     
     var bgData: [sgvData] = []
@@ -88,20 +88,20 @@ class MainViewController: UIViewController, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Disable the snoozer tab unless an alarm is active
         let tabBarControllerItems = self.tabBarController?.tabBar.items
         if let arrayOfTabBarItems = tabBarControllerItems as! AnyObject as? NSArray{
             snoozeTabItem = arrayOfTabBarItems[2] as! UITabBarItem
         }
         snoozeTabItem.isEnabled = false;
         
+        // Grant Badge Access
         UNUserNotificationCenter.current().requestAuthorization(options: .badge) { (granted, error) in
             if error != nil {
-                // success!
             }
         }
         
-        // ToDo: Should continue running in background
-        // stop timer when app enters in background, start is again when becomes active
+        // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
@@ -113,6 +113,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        // Pull fresh data when view appears
         nightscoutLoader()
     }
     
@@ -130,7 +131,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
         return cell
     }
     
-    // Timer
+    // NS Loader Timer
     fileprivate func startTimer(time: TimeInterval) {
         timer = Timer.scheduledTimer(timeInterval: time,
                                      target: self,
@@ -139,7 +140,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
                                      repeats: true)
     }
     
-    // Timer
+    // Check Alarm Timer
     func startCheckAlarmTimer(time: TimeInterval) {
         checkAlarmTimer = Timer.scheduledTimer(timeInterval: time,
                                      target: self,
@@ -148,13 +149,16 @@ class MainViewController: UIViewController, UITableViewDataSource {
                                      repeats: false)
     }
     
-    // check whether new Values should be retrieved
+    // Nothing should be done when this timer ends because it just blocks the alarms from firing when it's active
     @objc func checkAlarmTimerDidEnd(_ timer:Timer) {
         print("check alarm timer ended")
     }
     
     @objc func appMovedToBackground() {
+        // We want to always come back to the home screen
         tabBarController?.selectedIndex = 0
+        
+        // Cancel the current timer and start a fresh background timer using the settings value only if background task is enabled
         timer.invalidate()
         if UserDefaultsRepository.backgroundRefresh.value {
             backgroundTask.startBackgroundTask()
@@ -162,26 +166,30 @@ class MainViewController: UIViewController, UITableViewDataSource {
         }
     }
 
-   @objc func appCameToForeground() {
-       if UserDefaultsRepository.backgroundRefresh.value {
+    @objc func appCameToForeground() {
+        // Cancel the background tasks, start a fresh timer, and immediately check for new data
+        if UserDefaultsRepository.backgroundRefresh.value {
             backgroundTask.stopBackgroundTask()
             timer.invalidate()
         }
         startTimer(time: timeInterval)
         nightscoutLoader()
+
+    }
     
-   }
-    
-    // check whether new Values should be retrieved
+    // Check for new data when timer ends
     @objc func timerDidEnd(_ timer:Timer) {
         print("timer ended")
         nightscoutLoader()
     }
     
+    // Main loader for all data
     func nightscoutLoader() {
         
         var needsLoaded: Bool = false
         var onlyPullLastRecord = false
+        
+        // If we have existing data and it's within 5 minutes, we aren't going to do a network call
         if bgData.count > 0 {
             let now = NSDate().timeIntervalSince1970
             let lastReadingTime = bgData[bgData.count - 1].date
@@ -195,6 +203,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
         } else {
             needsLoaded = true
         }
+        
+        // Only do the network calls if we don't have a current reading
         if needsLoaded {
             loadBGData(urlUser: urlUser, onlyPullLastRecord: onlyPullLastRecord)
             clearLastInfoData()
@@ -204,6 +214,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
            // loadBoluses(urlUser: urlUser)
            // loadTempBasals(urlUser: urlUser)
         } else {
+            // We're still going to process the Min Ago display and alarm sections without a network call. A snoozer could have expired during since the last call
             updateMinAgo()
             clearOldSnoozes()
             checkAlarms(bgs: bgData)
@@ -211,21 +222,69 @@ class MainViewController: UIViewController, UITableViewDataSource {
         
     }
     
-    // Post process new NS Data and feed all updates
+    // Main NS BG Data Pull
+    func loadBGData(urlUser: String, onlyPullLastRecord: Bool = false) {
+
+        // Set the count= in the url either to pull 24 hours or only the last record
+        var points = "1"
+        if !onlyPullLastRecord {
+            points = String(self.graphHours * 12 + 1)
+        }
+
+        // URL processor
+        var urlBGDataPath: String = urlUser + "/api/v1/entries/sgv.json?"
+        if token == "" {
+            urlBGDataPath = urlBGDataPath + "count=" + points
+        } else {
+            urlBGDataPath = urlBGDataPath + "token=" + token + "&count=" + points
+        }
+        guard let urlBGData = URL(string: urlBGDataPath) else { return }
+        var request = URLRequest(url: urlBGData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+
+        // Downloader
+        let getBGTask = URLSession.shared.dataTask(with: request) { data, response, error in
+            if self.consoleLogging == true {print("start bg url")}
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([sgvData].self, from: data)
+            if let entriesResponse = entriesResponse {
+                DispatchQueue.main.async {
+                    // trigger the processor for the data after downloading.
+                    self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
+                }
+            } else {
+                return
+            }
+        }
+        getBGTask.resume()
+    }
+       
+    // Primary processor for what to do with the downloaded NS BG data
     func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
         var pullDate = data[data.count - 1].date / 1000
         pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
+        
+        // If we already have data, we're going to pop it to the end and remove the first. If we have old or no data, we'll destroy the whole array and start over. This is simpler than determining how far back we need to get new data from in case Dex back-filled readings
         if !onlyPullLastRecord {
             bgData.removeAll()
         } else if bgData[bgData.count - 1].date != pullDate {
             bgData.removeFirst()
         } else {
+            // Update the badge, bg, graph settings even if we don't have a new reading.
             self.updateBadge(entries: bgData)
             self.updateBG(entries: bgData)
             self.createGraph(entries: bgData)
             return
         }
-
+        
+        // loop through the data so we can reverse the order to oldest first for the graph and convert the NS timestamp to seconds instead of milliseconds. Makes date comparisons easier for everything else.
         for i in 0..<data.count{
             var dateString = data[data.count - 1 - i].date / 1000
             dateString.round(FloatingPointRoundingRule.toNearestOrEven)
@@ -237,111 +296,301 @@ class MainViewController: UIViewController, UITableViewDataSource {
         self.createGraph(entries: bgData)
        }
     
-    
-    //update Min Ago
+    //update Min Ago Text. We need to call this separately because it updates between readings
     func updateMinAgo(){
         let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
         MinAgoText.text = String(Int(deltaTime)) + " min ago"
     }
-
-    // Main NS Data Pull
-    func loadBGData(urlUser: String, onlyPullLastRecord: Bool = false) {
-        var points = "1"
-        if !onlyPullLastRecord {
-             points = String(self.graphHours * 12 + 1)
-        }
-        
-        
-        var urlBGDataPath: String = urlUser + "/api/v1/entries/sgv.json?"
-        if token == "" {
-            urlBGDataPath = urlBGDataPath + "count=" + points
-        }
-        else
-        {
-            urlBGDataPath = urlBGDataPath + "token=" + token + "&count=" + points
-        }
-        guard let urlBGData = URL(string: urlBGDataPath) else {
-            return
-        }
-        var request = URLRequest(url: urlBGData)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        
-        let getBGTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            if self.consoleLogging == true {print("start bg url")}
-            guard error == nil else {
-                return
-            }
-            guard let data = data else {
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([sgvData].self, from: data)
-            if let entriesResponse = entriesResponse {
-                DispatchQueue.main.async {
-                    self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
-                }
-            }
-            else
-            {
-                
-                return
-            }
-        }
-        getBGTask.resume()
-    }
     
-    
-    //Clear the info data before next pull
+    //Clear the info data before next pull. This ensures we aren't displaying old data if something fails.
     func clearLastInfoData(){
-       for i in 0..<tableData.count{
-        tableData[i].value = ""
+        for i in 0..<tableData.count{
+            tableData[i].value = ""
         }
     }
     
-    // NS Device Status Pull
+    // NS Device Status Pull from NS
     func loadDeviceStatus(urlUser: String) {
         var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
         if token != "" {
             urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?token=" + token + "&count=1"
         }
-        
         let escapedAddress = urlStringDeviceStatus.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
         guard let urlDeviceStatus = URL(string: escapedAddress!) else {
             return
         }
-        
         if consoleLogging == true {print("entered device status task.")}
         var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
         requestDeviceStatus.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
-            if self.consoleLogging == true {print("in update loop.")}
+        if self.consoleLogging == true {print("in device status loop.")}
+        guard error == nil else {
+            return
+        }
+        guard let data = data else {
+            return
+        }
+            
+        let json = try? JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]]
+        if let json = json {
+            DispatchQueue.main.async {
+                self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
+            }
+        } else {
+            return
+        }
+        if self.consoleLogging == true {print("finish pump update")}}
+        deviceStatusTask.resume()
+    }
+    
+    // Parse Device Status Data
+    func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
+        if consoleLogging == true {print("in updatePump")}
+        if jsonDeviceStatus.count == 0 {
+            return
+        }
+        
+        //only grabbing one record since ns sorts by {created_at : -1}
+        let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
+        
+        //pump and uploader
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate,
+                                   .withTime,
+                                   .withDashSeparatorInDate,
+                                   .withColonSeparatorInTime]
+        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String : AnyObject]? {
+            if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
+                if let reservoirData = lastPumpRecord["reservoir"] as? Double
+                {
+                    tableData[5].value = String(format:"%.0f", reservoirData) + "U"
+                } else {
+                    tableData[5].value = "50+U"
+                }
+                
+                if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
+                    let upbat = uploader["battery"] as! Double
+                    tableData[4].value = String(format:"%.0f", upbat) + "%"
+                }
+            }
+        }
+            
+        // Loop
+        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
+            if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
+                
+                if let failure = lastLoopRecord["failureReason"] {
+                    LoopStatusLabel.text = "⚠"
+                }
+                else
+                {
+                    if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        if let lastTempBasal = enacted["rate"] as? Double {
+                            tableData[2].value = String(format:"%.1f", lastTempBasal)
+                        }
+                    }
+                    if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
+                        tableData[0].value = String(format:"%.1f", (iobdata["iob"] as! Double))
+                    }
+                    if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
+                        tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
+                    }
+                    if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
+                        let prediction = predictdata["values"] as! [Double]
+                        PredictionLabel.text = String(Int(prediction.last!))
+                        PredictionLabel.textColor = UIColor.systemPurple
+                        
+                    }
+                    
+                    
+                    
+                    if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
+                        if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
+                            if tempBasalTime > lastLoopTime {
+                                LoopStatusLabel.text = "⏀"
+                               } else {
+                                LoopStatusLabel.text = "↻"
+                            }
+                        }
+                       
+                    } else {
+                        LoopStatusLabel.text = "↻"
+                    }
+                    
+                }
+            }
+            
+        }
+        
+        var oText = "" as String
+               
+               if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
+                   if let lastOverrideTime = formatter.date(from: (lastOverride["timestamp"] as! String))?.timeIntervalSince1970  {
+                   }
+                   if lastOverride["active"] as! Bool {
+                       
+                       let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
+                       if let multiplier = lastOverride["multiplier"] as? Double {
+                                              oText += String(format:"%.1f", multiplier*100)
+                                          }
+                                          else
+                                          {
+                                              oText += String(format:"%.1f", 100)
+                                          }
+                       oText += "% ("
+                       let minValue = lastCorrection["minValue"] as! Double
+                       let maxValue = lastCorrection["maxValue"] as! Double
+                       oText += bgOutputFormat(bg: minValue, mmol: mmol) + "-" + bgOutputFormat(bg: maxValue, mmol: mmol) + ")"
+                      
+                    tableData[3].value =  oText
+                   }
+               }
+        
+        infoTable.reloadData()
+        }
+    
+    // Get last CAGE entry
+    func loadCage(urlUser: String) {
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
+        if token != "" {
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Site%20Change&count=1"
+        }
+
+        guard let urlData = URL(string: urlString) else {
+            return
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if self.consoleLogging == true {print("start cage url")}
             guard error == nil else {
                 return
             }
             guard let data = data else {
-                
                 return
             }
-            
-            let json = try? JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]]
-            
-            if let json = json {
+
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([cageData].self, from: data)
+            if let entriesResponse = entriesResponse {
                 DispatchQueue.main.async {
-                    self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
+                    self.updateCage(data: entriesResponse)
                 }
-            }
-            else
-            {
-               
+            } else {
                 return
             }
-            if self.consoleLogging == true {print("finish pump update")}
         }
-        deviceStatusTask.resume()
+        task.resume()
     }
-    
+     
+    // Parse Cage Data
+    func updateCage(data: [cageData]) {
+        if consoleLogging == true {print("in updateCage")}
+        if data.count == 0 {
+            return
+        }
+
+        let lastCageString = data[0].created_at
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate,
+                                .withTime,
+                                .withDashSeparatorInDate,
+                                .withColonSeparatorInTime]
+        if let cageTime = formatter.date(from: (lastCageString))?.timeIntervalSince1970 {
+            let now = NSDate().timeIntervalSince1970
+            let secondsAgo = now - cageTime
+            //let days = 24 * 60 * 60
+
+            let formatter = DateComponentsFormatter()
+            formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
+            formatter.allowedUnits = [ .hour, .minute ] // Units to display in the formatted string
+            formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
+
+            let formattedDuration = formatter.string(from: secondsAgo)
+            tableData[7].value = formattedDuration ?? ""
+        }
+        infoTable.reloadData()
+    }
+     
+    // Get last SAGE entry
+    func loadSage(urlUser: String) {
+        var dayComponent    = DateComponents()
+        dayComponent.day    = -10 // For removing 10 days
+        let theCalendar     = Calendar.current
+
+        let startDate    = theCalendar.date(byAdding: dayComponent, to: Date())!
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        var startDateString = dateFormatter.string(from: startDate)
+
+
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+        if token != "" {
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+        }
+
+        guard let urlData = URL(string: urlString) else {
+            return
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if self.consoleLogging == true {print("start cage url")}
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([cageData].self, from: data)
+            if let entriesResponse = entriesResponse {
+                DispatchQueue.main.async {
+                    self.updateSage(data: entriesResponse)
+                }
+            } else {
+                return
+            }
+        }
+        task.resume()
+    }
+     
+    // Parse Sage Data
+    func updateSage(data: [cageData]) {
+        if consoleLogging == true {print("in updateSage")}
+        if data.count == 0 {
+            return
+        }
+
+        var lastSageString = data[0].created_at
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate,
+                             .withTime,
+                             .withDashSeparatorInDate,
+                             .withColonSeparatorInTime]
+        if let cageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
+            let now = NSDate().timeIntervalSince1970
+            let secondsAgo = now - cageTime
+            let days = 24 * 60 * 60
+
+            let formatter = DateComponentsFormatter()
+            formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
+            formatter.allowedUnits = [ .day, .hour] // Units to display in the formatted string
+            formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
+
+            let formattedDuration = formatter.string(from: secondsAgo)
+            tableData[6].value = formattedDuration ?? ""
+        }
+        infoTable.reloadData()
+    }
+     
     // Need to figure out the date to pull only last 24 hours
+    // NOT IMPLEMENTED YET
     func loadTempBasals(urlUser: String) {
         var dayComponent    = DateComponents()
         dayComponent.day    = -1 // For removing one day (yesterday): -1
@@ -393,158 +642,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
         }
         basalTask.resume()
     }
-    
-    // Get last CAGE entry
-    func loadCage(urlUser: String) {
-        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
-        if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Site%20Change&count=1"
-        }
-        
-        guard let urlData = URL(string: urlString) else {
-            return
-        }
-        var request = URLRequest(url: urlData)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if self.consoleLogging == true {print("start cage url")}
-            guard error == nil else {
-                return
-            }
-            guard let data = data else {
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([cageData].self, from: data)
-            if let entriesResponse = entriesResponse {
-                DispatchQueue.main.async {
-                    self.updateCage(data: entriesResponse)
-                }
-            }
-            else
-            {
-                
-                return
-            }
-        }
-        task.resume()
-    }
-    
-    // Parse Cage Data
-    func updateCage(data: [cageData]) {
-        if consoleLogging == true {print("in updateCage")}
-        if data.count == 0 {
-            return
-        }
-        
-        var lastCageString = data[0].created_at
-        
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate,
-                                   .withTime,
-                                   .withDashSeparatorInDate,
-                                   .withColonSeparatorInTime]
-        if let cageTime = formatter.date(from: (lastCageString as! String))?.timeIntervalSince1970 {
-            let now = NSDate().timeIntervalSince1970
-            let secondsAgo = now - cageTime
-            let days = 24 * 60 * 60
-
-            let formatter = DateComponentsFormatter()
-            formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
-            formatter.allowedUnits = [ .hour, .minute ] // Units to display in the formatted string
-            formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
-
-            let formattedDuration = formatter.string(from: secondsAgo)
-            tableData[8].value = formattedDuration ?? ""
-        }
-        infoTable.reloadData()
-
-   
-    }
-    
-    // Get last SAGE entry
-    func loadSage(urlUser: String) {
-        var dayComponent    = DateComponents()
-            dayComponent.day    = -10 // For removing 10 days
-            let theCalendar     = Calendar.current
-        
-        let startDate    = theCalendar.date(byAdding: dayComponent, to: Date())!
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-        var startDateString = dateFormatter.string(from: startDate)
-
-        
-        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
-        if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
-        }
-        
-        guard let urlData = URL(string: urlString) else {
-            return
-        }
-        var request = URLRequest(url: urlData)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if self.consoleLogging == true {print("start cage url")}
-            guard error == nil else {
-                return
-            }
-            guard let data = data else {
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([cageData].self, from: data)
-            if let entriesResponse = entriesResponse {
-                DispatchQueue.main.async {
-                    self.updateSage(data: entriesResponse)
-                }
-            }
-            else
-            {
-                
-                return
-            }
-        }
-        task.resume()
-    }
-    
-    // Parse Sage Data
-    func updateSage(data: [cageData]) {
-        if consoleLogging == true {print("in updateSage")}
-        if data.count == 0 {
-            return
-        }
-        
-        var lastSageString = data[0].created_at
-        
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate,
-                                    .withTime,
-                                    .withDashSeparatorInDate,
-                                    .withColonSeparatorInTime]
-        if let cageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
-            let now = NSDate().timeIntervalSince1970
-            let secondsAgo = now - cageTime
-            let days = 24 * 60 * 60
-
-            let formatter = DateComponentsFormatter()
-            formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
-        formatter.allowedUnits = [ .day, .hour] // Units to display in the formatted string
-            formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
-
-            let formattedDuration = formatter.string(from: secondsAgo)
-            tableData[7].value = formattedDuration ?? ""
-        }
-        infoTable.reloadData()
-
-    
-    }
-    
-    
+  
+    // NOT IMPLEMENTED YET
     func loadBoluses(urlUser: String){
         var calendar = Calendar.current
         let today = Date()
@@ -594,111 +693,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
         }
         getTask.resume()
     }
-    
-    
-    // Parse Device Status Data
-    func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
-        if consoleLogging == true {print("in updatePump")}
-        if jsonDeviceStatus.count == 0 {
-            return
-        }
-        
-        //only grabbing one record since ns sorts by {created_at : -1}
-        let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
-        
-        //pump and uploader
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate,
-                                   .withTime,
-                                   .withDashSeparatorInDate,
-                                   .withColonSeparatorInTime]
-        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String : AnyObject]? {
-            if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
-                if let reservoirData = lastPumpRecord["reservoir"] as? Double
-                {
-                    tableData[5].value = String(format:"%.0f", reservoirData) + "U"
-                } else {
-                    tableData[5].value = "50+U"
-                   
-                }
-                
-                if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
-                    let upbat = uploader["battery"] as! Double
-                  //  BatteryText.text! += " " + String(format:"%.0f", upbat) + "%"
-                    tableData[4].value = String(format:"%.0f", upbat) + "%"
-                }
-                
-            }
-        }
-            
-        // Loop
-        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
-            if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
-                
-                if let failure = lastLoopRecord["failureReason"] {
-                    tableData[6].value = "⚠"
-                }
-                else
-                {
-                    if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        if let lastTempBasal = enacted["rate"] as? Double {
-                            tableData[2].value = String(format:"%.1f", lastTempBasal)
-                        }
-                    }
-                    if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.1f", (iobdata["iob"] as! Double))
-                    }
-                    if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
-                    }
-                    if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
-                       // let prediction = predictdata["values"] as! [Double]
-                       // loopStatusText += " EBG " + bgOutputFormat(bg: prediction.last!, mmol: mmol)
-                    }
-                    
-                    if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
-                        if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
-                            if tempBasalTime > lastLoopTime {
-                                tableData[6].value = "⏀"
-                               } else {
-                                   tableData[6].value = "↻"
-                            }
-                        }
-                       
-                    }
-                    
-                }
-            }
-            
-        }
-        
-        var oText = "" as String
-               
-               if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
-                   if let lastOverrideTime = formatter.date(from: (lastOverride["timestamp"] as! String))?.timeIntervalSince1970  {
-                   }
-                   if lastOverride["active"] as! Bool {
-                       
-                       let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
-                       if let multiplier = lastOverride["multiplier"] as? Double {
-                                              oText += String(format:"%.1f", multiplier*100)
-                                          }
-                                          else
-                                          {
-                                              oText += String(format:"%.1f", 100)
-                                          }
-                       oText += "% ("
-                       let minValue = lastCorrection["minValue"] as! Double
-                       let maxValue = lastCorrection["maxValue"] as! Double
-                       oText += bgOutputFormat(bg: minValue, mmol: mmol) + "-" + bgOutputFormat(bg: maxValue, mmol: mmol) + ")"
-                      
-                    tableData[3].value =  oText
-                   }
-               }
-        
-        infoTable.reloadData()
-        }
-        
+
     func stringFromTimeInterval(interval: TimeInterval) -> String {
         let interval = Int(interval)
         let minutes = (interval / 60) % 60

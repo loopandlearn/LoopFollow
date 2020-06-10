@@ -54,6 +54,43 @@ class SettingsViewController: FormViewController {
                         UserDefaultsRepository.appBadge.value = value
                 }
 
+        +++ Section("Alarm Settings")
+            <<< SwitchRow("overrideSystemOutputVolume"){ row in
+                row.title = "Override System Volume"
+                row.value = UserDefaultsRepository.overrideSystemOutputVolume.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.overrideSystemOutputVolume.value = value
+                }
+            <<< StepperRow("systemOutputVolume") { row in
+                  row.title = "Volume Level"
+                row.cell.stepper.stepValue = 0.05
+                  row.cell.stepper.minimumValue = 0
+                  row.cell.stepper.maximumValue = 1
+                  row.value = Double(UserDefaultsRepository.systemOutputVolume.value)
+                  row.hidden = "$overrideSystemOutputVolume == false"
+                    row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value*100))%"
+                    }
+              }.onChange { [weak self] row in
+                      guard let value = row.value else { return }
+                      UserDefaultsRepository.systemOutputVolume.value = Float(value)
+              }
+            <<< StepperRow("fadeInTimeInterval") { row in
+                row.title = "Fade-in Seconds"
+                row.cell.stepper.stepValue = 5
+                row.cell.stepper.minimumValue = 0
+                row.cell.stepper.maximumValue = 60
+                row.value = Double(UserDefaultsRepository.fadeInTimeInterval.value)
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.fadeInTimeInterval.value = TimeInterval(value)
+            }
             
         +++ Section("Graph Settings")
             <<< SwitchRow("switchRowDots"){ row in
