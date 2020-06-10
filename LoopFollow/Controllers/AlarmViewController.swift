@@ -463,7 +463,7 @@ class AlarmViewController: FormViewController {
         form
         +++ Section(header: "High Alert", footer: "Alerts when BG rises above value. If Persistence is set greater than 0, it will not alert until BG has been high for that many minutes.")
         <<< SwitchRow("alertHighActive"){ row in
-            row.title = "High"
+            row.title = "Active"
             row.value = UserDefaultsRepository.alertHighActive.value
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
@@ -574,7 +574,7 @@ class AlarmViewController: FormViewController {
         form
             +++ Section(header: "Urgent High Alert", footer: "Alerts when BG rises above value.")
         <<< SwitchRow("alertUrgentHighActive"){ row in
-                row.title = "Urgent High"
+                row.title = "Active"
                 row.value = UserDefaultsRepository.alertUrgentHighActive.value
                 }.onChange { [weak self] row in
                         guard let value = row.value else { return }
@@ -1412,9 +1412,9 @@ class AlarmViewController: FormViewController {
     
     func buildCage(){
         form
-            +++ Section(header: "Canula Change Reminder", footer: "Alert for Canula Change. Values are in Hours.")
+            +++ Section(header: "Pump Change Reminder", footer: "Alert for Canula Change. Values are in Hours.")
         <<< SwitchRow("alertCAGEActive"){ row in
-                    row.title = "Pump Change"
+                    row.title = "Active"
                     row.value = UserDefaultsRepository.alertCAGEActive.value
                     }.onChange { [weak self] row in
                             guard let value = row.value else { return }
