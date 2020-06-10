@@ -82,6 +82,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     ]
     
     var bgData: [sgvData] = []
+    var predictionData: [Double] = []
     
     var snoozeTabItem: UITabBarItem = UITabBarItem()
     
@@ -206,9 +207,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         // Only do the network calls if we don't have a current reading
         if needsLoaded {
+            loadDeviceStatus(urlUser: urlUser)
             loadBGData(urlUser: urlUser, onlyPullLastRecord: onlyPullLastRecord)
             clearLastInfoData()
-            loadDeviceStatus(urlUser: urlUser)
             loadCage(urlUser: urlUser)
             loadSage(urlUser: urlUser)
            // loadBoluses(urlUser: urlUser)
@@ -399,6 +400,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                         let prediction = predictdata["values"] as! [Double]
                         PredictionLabel.text = String(Int(prediction.last!))
                         PredictionLabel.textColor = UIColor.systemPurple
+                        predictionData.removeAll()
+                        var i = 0
+                        while i < 12 {
+                            predictionData.append(prediction[i])
+                            i += 1
+                        }
                         
                     }
                     
@@ -722,6 +729,28 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 colors.append(NSUIColor.green)
             }
         }
+        
+        // Add Prediction Data
+        if predictionData.count > 0 {
+            var startingTime = bgChartEntry[bgChartEntry.count - 1].x + 300
+            var i = 0
+            // Add 1 hour of predictions
+            while i < 12 {
+                var predictionVal = Double(predictionData[i])
+                // Below can be turned on to prevent out of range opn the graph if needed.
+                if predictionVal > 400 {
+               //     predictionVal = 400
+                } else if predictionVal < 0 {
+                //    predictionVal = 0
+                }
+                let value = ChartDataEntry(x: startingTime + 5, y: predictionVal)
+                bgChartEntry.append(value)
+                colors.append(NSUIColor.systemPurple)
+                startingTime += 300
+                i += 1
+            }
+        }
+        
         let line1 = LineChartDataSet(entries:bgChartEntry, label: "")
         line1.circleRadius = 3
         line1.circleColors = [NSUIColor.green]
@@ -778,10 +807,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         BGChart.setExtraOffsets(left: 10, top: 10, right: 10, bottom: 10)
         BGChart.setVisibleXRangeMinimum(10)
         if firstStart {
-            BGChart.zoom(scaleX: 20, scaleY: 1, x: 1, y: 1)
+            BGChart.zoom(scaleX: 18, scaleY: 1, x: 1, y: 1)
             firstStart = false
         }
-        BGChart.moveViewToX(BGChart.chartXMax)
+        // 7000 only shows 30 minutes of the hour predictions, leaving the rest on the right of the screen requiring a scroll
+        BGChart.moveViewToX(BGChart.chartXMax - 7000)
         
         //24 Hour Small Graph
         let line2 = LineChartDataSet(entries:bgChartEntry, label: "Number")
