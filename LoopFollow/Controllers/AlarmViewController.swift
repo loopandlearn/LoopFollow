@@ -12,6 +12,115 @@ import Eureka
 
 class AlarmViewController: FormViewController {
     
+    var soundFiles: [String] = [
+        "Alarm_Buzzer",
+        "Alarm_Clock",
+        "Alert_Tone_Busy",
+        "Alert_Tone_Ringtone_1",
+        "Alert_Tone_Ringtone_2",
+        "Alien_Siren",
+        "Ambulance",
+        "Analog_Watch_Alarm",
+        "Big_Clock_Ticking",
+        "Burglar_Alarm_Siren_1",
+        "Burglar_Alarm_Siren_2",
+        "Cartoon_Ascend_Climb_Sneaky",
+        "Cartoon_Ascend_Then_Descend",
+        "Cartoon_Bounce_To_Ceiling",
+        "Cartoon_Dreamy_Glissando_Harp",
+        "Cartoon_Fail_Strings_Trumpet",
+        "Cartoon_Machine_Clumsy_Loop",
+        "Cartoon_Siren",
+        "Cartoon_Tip_Toe_Sneaky_Walk",
+        "Cartoon_Uh_Oh",
+        "Cartoon_Villain_Horns",
+        "Cell_Phone_Ring_Tone",
+        "Chimes_Glassy",
+        "Computer_Magic",
+        "CSFX-2_Alarm",
+        "Cuckoo_Clock",
+        "Dhol_Shuffleloop",
+        "Discreet",
+        "Early_Sunrise",
+        "Emergency_Alarm_Carbon_Monoxide",
+        "Emergency_Alarm_Siren",
+        "Emergency_Alarm",
+        "Ending_Reached",
+        "Fly",
+        "Ghost_Hover",
+        "Good_Morning",
+        "Hell_Yeah_Somewhat_Calmer",
+        "In_A_Hurry",
+        "Indeed",
+        "Insistently",
+        "Jingle_All_The_Way",
+        "Laser_Shoot",
+        "Machine_Charge",
+        "Magical_Twinkle",
+        "Marching_Heavy_Footed_Fat_Elephants",
+        "Marimba_Descend",
+        "Marimba_Flutter_or_Shake",
+        "Martian_Gun",
+        "Martian_Scanner",
+        "Metallic",
+        "Nightguard",
+        "Not_Kiddin",
+        "Open_Your_Eyes_And_See",
+        "Orchestral_Horns",
+        "Oringz",
+        "Pager_Beeps",
+        "Remembers_Me_Of_Asia",
+        "Rise_And_Shine",
+        "Rush",
+        "Sci-Fi_Air_Raid_Alarm",
+        "Sci-Fi_Alarm_Loop_1",
+        "Sci-Fi_Alarm_Loop_2",
+        "Sci-Fi_Alarm_Loop_3",
+        "Sci-Fi_Alarm_Loop_4",
+        "Sci-Fi_Alarm",
+        "Sci-Fi_Computer_Console_Alarm",
+        "Sci-Fi_Console_Alarm",
+        "Sci-Fi_Eerie_Alarm",
+        "Sci-Fi_Engine_Shut_Down",
+        "Sci-Fi_Incoming_Message_Alert",
+        "Sci-Fi_Spaceship_Message",
+        "Sci-Fi_Spaceship_Warm_Up",
+        "Sci-Fi_Warning",
+        "Signature_Corporate",
+        "Siri_Alert_Calibration_Needed",
+        "Siri_Alert_Device_Muted",
+        "Siri_Alert_Glucose_Dropping_Fast",
+        "Siri_Alert_Glucose_Rising_Fast",
+        "Siri_Alert_High_Glucose",
+        "Siri_Alert_Low_Glucose",
+        "Siri_Alert_Missed_Readings",
+        "Siri_Alert_Transmitter_Battery_Low",
+        "Siri_Alert_Urgent_High_Glucose",
+        "Siri_Alert_Urgent_Low_Glucose",
+        "Siri_Calibration_Needed",
+        "Siri_Device_Muted",
+        "Siri_Glucose_Dropping_Fast",
+        "Siri_Glucose_Rising_Fast",
+        "Siri_High_Glucose",
+        "Siri_Low_Glucose",
+        "Siri_Missed_Readings",
+        "Siri_Transmitter_Battery_Low",
+        "Siri_Urgent_High_Glucose",
+        "Siri_Urgent_Low_Glucose",
+        "Soft_Marimba_Pad_Positive",
+        "Soft_Warm_Airy_Optimistic",
+        "Soft_Warm_Airy_Reassuring",
+        "Store_Door_Chime",
+        "Sunny",
+        "Thunder_Sound_FX",
+        "Time_Has_Come",
+        "Tornado_Siren",
+        "Two_Turtle_Doves",
+        "Unpaved",
+        "Wake_Up_Will_You",
+        "Win_Gain",
+        "Wrong_Answer"
+    ]
     
     func reloadSnoozeTime(key: String, setNil: Bool, value: Date = Date()) {
         
@@ -53,9 +162,9 @@ class AlarmViewController: FormViewController {
         buildFastDropAlert()
         buildFastRiseAlert()
         buildMissedReadings()
-        buildNotLooping()
-        buildMissedBolus()
-        buildAppInactive()
+  //      buildNotLooping()
+ //       buildMissedBolus()
+  //      buildAppInactive()
         buildSage()
         buildCage()
         
@@ -144,6 +253,18 @@ class AlarmViewController: FormViewController {
                            guard let value = row.value else { return }
                            UserDefaultsRepository.alertTemporaryBG.value = Int(value)
                    }
+                    <<< PickerInputRow<String>("alertTemporarySound") { row in
+                        row.title = "Sound"
+                        row.options = soundFiles
+                        row.hidden = "$alertTemporaryActive == false"
+                        row.value = UserDefaultsRepository.alertTemporarySound.value
+                    }.onChange { [weak self] row in
+                            guard let value = row.value else { return }
+                            UserDefaultsRepository.alertTemporarySound.value = value
+                        AlarmSound.setSoundFile(str: value)
+                        AlarmSound.stop()
+                        AlarmSound.playTest()
+                    }
     }
     
     func buildUrgentLow(){
@@ -186,6 +307,18 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertUrgentLowSnooze.value = Int(value)
         }
+            <<< PickerInputRow<String>("alertUrgentLowSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertUrgentLowActive == false"
+                row.value = UserDefaultsRepository.alertUrgentLowSound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertUrgentLowSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
         <<< DateTimeInlineRow("alertUrgentLowSnoozedTime") { row in
             row.title = "Snoozed Until"
             row.hidden = "$alertUrgentLowActive == false"
@@ -271,6 +404,18 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertLowSnooze.value = Int(value)
         }
+            <<< PickerInputRow<String>("alertLowSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertLowActive == false"
+                row.value = UserDefaultsRepository.alertLowSound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertLowSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
         <<< DateTimeInlineRow("alertLowSnoozedTime") { row in
             row.title = "Snoozed Until"
             row.hidden = "$alertLowActive == false"
@@ -370,6 +515,18 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertHighSnooze.value = Int(value)
         }
+            <<< PickerInputRow<String>("alertHighSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertHighActive == false"
+                row.value = UserDefaultsRepository.alertHighSound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertHighSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
         <<< DateTimeInlineRow("alertHighSnoozedTime") { row in
             row.title = "Snoozed Until"
             row.hidden = "$alertHighActive == false"
@@ -453,6 +610,18 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertUrgentHighSnooze.value = Int(value)
         }
+            <<< PickerInputRow<String>("alertUrgentHighSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertUrgentHighActive == false"
+                row.value = UserDefaultsRepository.alertUrgentHighSound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertUrgentHighSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
         <<< DateTimeInlineRow("alertUrgentHighSnoozedTime") { row in
             row.title = "Snoozed Until"
             row.hidden = "$alertUrgentHighActive == false"
@@ -575,6 +744,18 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastDropSnooze.value = Int(value)
         }
+            <<< PickerInputRow<String>("alertFastDropSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertFastDropActive == false"
+                row.value = UserDefaultsRepository.alertFastDropSound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertFastDropSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
         <<< DateTimeInlineRow("alertFastDropSnoozedTime") { row in
             row.title = "Snoozed Until"
             row.hidden = "$alertFastDropActive == false"
@@ -697,6 +878,18 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastRiseSnooze.value = Int(value)
         }
+            <<< PickerInputRow<String>("alertFastRiseSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertFastRiseActive == false"
+                row.value = UserDefaultsRepository.alertFastRiseSound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertFastRiseSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
         <<< DateTimeInlineRow("alertFastRiseSnoozedTime") { row in
             row.title = "Snoozed Until"
             row.hidden = "$alertFastRiseActive == false"
@@ -781,6 +974,18 @@ class AlarmViewController: FormViewController {
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedReadingSnooze.value = Int(value)
+            }
+            <<< PickerInputRow<String>("alertMissedReadingSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertMissedReadingActive == false"
+                row.value = UserDefaultsRepository.alertMissedReadingSound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMissedReadingSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
             }
         <<< DateTimeInlineRow("alertMissedReadingSnoozedTime") { row in
             row.title = "Snoozed Until"
@@ -904,6 +1109,18 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertNotLoopingSnooze.value = Int(value)
         }
+            <<< PickerInputRow<String>("alertNotLoopingSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertNotLoopingActive == false"
+                row.value = UserDefaultsRepository.alertNotLoopingSound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertNotLoopingSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
         <<< DateTimeInlineRow("alertNotLoopingSnoozedTime") { row in
             row.title = "Snoozed Until"
             row.hidden = "$alertNotLoopingActive == false"
@@ -1029,6 +1246,18 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertMissedBolusSnooze.value = Int(value)
         }
+            <<< PickerInputRow<String>("alertMissedBolusSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertMissedBolusActive == false"
+                row.value = UserDefaultsRepository.alertMissedBolusSound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMissedBolusSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
         <<< DateTimeInlineRow("alertMissedBolusSnoozedTime") { row in
             row.title = "Snoozed Until"
             row.hidden = "$alertMissedBolusActive == false"
@@ -1126,6 +1355,18 @@ class AlarmViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertSAGESnooze.value = Int(value)
             }
+                <<< PickerInputRow<String>("alertSAGESound") { row in
+                    row.title = "Sound"
+                    row.options = soundFiles
+                    row.hidden = "$alertSAGEActive == false"
+                    row.value = UserDefaultsRepository.alertSAGESound.value
+                }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.alertSAGESound.value = value
+                    AlarmSound.setSoundFile(str: value)
+                    AlarmSound.stop()
+                    AlarmSound.playTest()
+                }
         <<< DateTimeInlineRow("alertSAGESnoozedTime") { row in
             row.title = "Snoozed Until"
             row.hidden = "$alertSAGEActive == false"
@@ -1181,7 +1422,7 @@ class AlarmViewController: FormViewController {
                     }
         
             <<< StepperRow("alertCAGE") { row in
-                row.title = "          Time"
+                row.title = "Time"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
@@ -1196,7 +1437,7 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertCAGE.value = Int(value)
             }
             <<< StepperRow("alertCAGESnooze") { row in
-                row.title = "          Snooze"
+                row.title = "Snooze"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
@@ -1209,6 +1450,18 @@ class AlarmViewController: FormViewController {
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertCAGESnooze.value = Int(value)
+            }
+            <<< PickerInputRow<String>("alertCAGESound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.hidden = "$alertCAGEActive == false"
+                row.value = UserDefaultsRepository.alertCAGESound.value
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertCAGESound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
             }
         <<< DateTimeInlineRow("alertCAGESnoozedTime") { row in
                    row.title = "Snoozed Until"

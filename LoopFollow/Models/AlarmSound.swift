@@ -24,7 +24,7 @@ class AlarmSound {
         return self.muted
     }
     static var whichAlarm: String = "none"
-    
+    static var soundFile = "Indeed"
     static var isTesting: Bool = false
     
     //static let volumeChangeDetector = VolumeChangeDetector()
@@ -38,7 +38,7 @@ class AlarmSound {
     
     fileprivate static var playingTimer: Timer?
     
-    fileprivate static let soundURL = Bundle.main.url(forResource: "Indeed", withExtension: "caf")!
+    fileprivate static var soundURL = Bundle.main.url(forResource: "Indeed", withExtension: "caf")!
     fileprivate static var audioPlayer: AVAudioPlayer?
     fileprivate static let audioPlayerDelegate = AudioPlayerDelegate()
     
@@ -51,6 +51,10 @@ class AlarmSound {
         self.audioPlayer?.volume = 0
         self.muted = true
         self.restoreSystemOutputVolume()
+    }
+    
+    static func setSoundFile(str: String) {
+        self.soundURL = Bundle.main.url(forResource: str, withExtension: "caf")!
     }
     
     /*
@@ -74,6 +78,47 @@ class AlarmSound {
         
         self.restoreSystemOutputVolume()
     }
+    
+    static func playTest() {
+        
+        guard !self.isPlaying else {
+            return
+        }
+        
+        do {
+            self.audioPlayer = try AVAudioPlayer(contentsOf: self.soundURL)
+            self.audioPlayer!.delegate = self.audioPlayerDelegate
+            
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playback)))
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            // Play endless loops
+            //self.audioPlayer!.numberOfLoops = 1
+            self.audioPlayer?.numberOfLoops = 0
+            
+            // init volume before start playing (mute if fade-in)
+            
+            self.audioPlayer!.volume = (self.muted || (self.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
+            
+            if !self.audioPlayer!.prepareToPlay() {
+                NSLog("AlarmSound - audio player failed preparing to play")
+            }
+            
+            if self.audioPlayer!.play() {
+                if !self.isPlaying {
+                    NSLog("AlarmSound - not playing after calling play")
+                    NSLog("AlarmSound - rate value: \(self.audioPlayer!.rate)")
+                }
+            } else {
+                NSLog("AlarmSound - audio player failed to play")
+            }
+            
+            
+        } catch let error {
+            NSLog("AlarmSound - unable to play sound; error: \(error)")
+        }
+    }
+    
     
     static func play() {
         
