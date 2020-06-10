@@ -634,8 +634,9 @@ class MainViewController: UIViewController, UITableViewDataSource {
         // Loop
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
+                
                 if let failure = lastLoopRecord["failureReason"] {
-                    tableData[6].value = "x"
+                    tableData[6].value = "⚠"
                 }
                 else
                 {
@@ -656,9 +657,14 @@ class MainViewController: UIViewController, UITableViewDataSource {
                     }
                     
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
-                        tableData[6].value = "⏀"
-                    } else {
-                        tableData[6].value = "↻"
+                        if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
+                            if tempBasalTime > lastLoopTime {
+                                tableData[6].value = "⏀"
+                               } else {
+                                   tableData[6].value = "↻"
+                            }
+                        }
+                       
                     }
                     
                 }
