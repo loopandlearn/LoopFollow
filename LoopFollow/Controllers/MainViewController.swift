@@ -505,6 +505,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                                 .withTime,
                                 .withDashSeparatorInDate,
                                 .withColonSeparatorInTime]
+        UserDefaultsRepository.alertCageInsertTime.value = formatter.date(from: (lastCageString))?.timeIntervalSince1970 as! TimeInterval
         if let cageTime = formatter.date(from: (lastCageString))?.timeIntervalSince1970 {
             let now = NSDate().timeIntervalSince1970
             let secondsAgo = now - cageTime
@@ -580,9 +581,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                              .withTime,
                              .withDashSeparatorInDate,
                              .withColonSeparatorInTime]
-        if let cageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
+        UserDefaultsRepository.alertSageInsertTime.value = formatter.date(from: (lastSageString))?.timeIntervalSince1970 as! TimeInterval
+        if let sageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
             let now = NSDate().timeIntervalSince1970
-            let secondsAgo = now - cageTime
+            let secondsAgo = now - sageTime
             let days = 24 * 60 * 60
 
             let formatter = DateComponentsFormatter()
@@ -1028,16 +1030,41 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             
 
             
-        } else {
-            //check for missed reading alert
-            
-            if UserDefaultsRepository.alertMissedBolusActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
-                AlarmSound.whichAlarm = "Missed Reading Alert"
-                    triggerAlarm()
-                    return
-                }
         }
         
+        // These only get checked and fire if a BG reading doesn't fire
+        //check for missed reading alert
+        if UserDefaultsRepository.alertMissedBolusActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
+            AlarmSound.whichAlarm = "Missed Reading Alert"
+                triggerAlarm()
+                return
+        }
+        
+        // Check Sage
+        if UserDefaultsRepository.alertSAGEActive.value {
+            var insertTime = Double(UserDefaultsRepository.alertSageInsertTime.value)
+            var alertDistance = Double(UserDefaultsRepository.alertSAGE.value * 60 * 60)
+            var delta = now - insertTime
+            var tenDays = 10 * 24 * 60 * 60
+            if Double(tenDays) - Double(delta) <= alertDistance {
+                AlarmSound.whichAlarm = "Sensor Change Alert"
+                triggerAlarm()
+                return
+            }
+        }
+        
+        // Check Cage
+        if UserDefaultsRepository.alertCAGEActive.value {
+            var insertTime = Double(UserDefaultsRepository.alertCageInsertTime.value)
+            var alertDistance = Double(UserDefaultsRepository.alertCAGE.value * 60 * 60)
+            var delta = now - insertTime
+            var tenDays = 3 * 24 * 60 * 60
+            if Double(tenDays) - Double(delta) <= alertDistance {
+                AlarmSound.whichAlarm = "Pump Change Alert"
+                triggerAlarm()
+                return
+            }
+        }
         
     }
     

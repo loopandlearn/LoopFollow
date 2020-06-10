@@ -100,7 +100,19 @@ class SnoozeViewController: UIViewController {
            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
            alarms.reloadIsSnoozed(key: "alertMissedReadingIsSnoozed", value: true)
            alarms.reloadSnoozeTime(key: "alertMissedReadingSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertMissedReadingSnooze.value * 60)))
-       }
+       }  else if AlarmSound.whichAlarm == "Sensor Change Alert" {
+                UserDefaultsRepository.alertSAGEIsSnoozed.value = true
+                UserDefaultsRepository.alertSAGESnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertSAGESnooze.value * 60 * 60))
+                guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+                alarms.reloadIsSnoozed(key: "alertSAGEIsSnoozed", value: true)
+                alarms.reloadSnoozeTime(key: "alertSAGESnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertSAGESnooze.value * 60 * 60)))
+        } else if AlarmSound.whichAlarm == "Pump Change Alert" {
+                       UserDefaultsRepository.alertCAGEIsSnoozed.value = true
+                       UserDefaultsRepository.alertCAGESnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertCAGESnooze.value * 60 * 60))
+                       guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+                       alarms.reloadIsSnoozed(key: "alertCAGEIsSnoozed", value: true)
+                       alarms.reloadSnoozeTime(key: "alertCAGESnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertCAGESnooze.value * 60 * 60)))
+                   }
     }
     
     override func viewDidLoad() {
