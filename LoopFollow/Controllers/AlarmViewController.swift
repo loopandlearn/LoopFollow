@@ -44,6 +44,7 @@ class AlarmViewController: FormViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        buildSnoozeAll()
         buildTemporaryAlert()
         buildUrgentLow()
         buildLow()
@@ -61,6 +62,52 @@ class AlarmViewController: FormViewController {
         
     }
 
+    func buildSnoozeAll(){
+        form
+            +++ Section(header: "Snooze All", footer: "Snooze All Alerts")
+        <<< DateTimeInlineRow("alertSnoozeAllTime") { row in
+            row.title = "Snooze All Until"
+            
+            if (UserDefaultsRepository.alertSnoozeAllTime.value != nil) {
+                row.value = UserDefaultsRepository.alertSnoozeAllTime.value
+            }
+            row.minuteInterval = 5
+            row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertSnoozeAllTime.value = value
+                UserDefaultsRepository.alertSnoozeAllIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertSnoozeAllIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+        }
+            
+        <<< SwitchRow("alertSnoozeAllIsSnoozed"){ row in
+            row.title = "All Alerts Snoozed"
+            row.value = UserDefaultsRepository.alertSnoozeAllIsSnoozed.value
+            row.hidden = "$alertSnoozeAllTime == nil"
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertSnoozeAllIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertSnoozeAllTime.setNil(key: "alertSnoozeAllTime")
+                    let otherRow = self?.form.rowBy(tag: "alertSnoozeAllTime") as! DateTimeInlineRow
+                   otherRow.value = nil
+                   otherRow.reload()
+                }
+        }
+    }
     
     func buildTemporaryAlert(){
         form

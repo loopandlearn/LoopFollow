@@ -29,6 +29,9 @@ class UserDefaultsRepository {
     // Alarm Settings
     
     // Alerts
+    static let alertSnoozeAllTime = UserDefaultsValue<Date?>(key: "alertSnoozeAllTime", default: nil)
+    static let alertSnoozeAllIsSnoozed = UserDefaultsValue<Bool>(key: "alertSnoozeAllIsSnoozed", default: false)
+    
     static let alertUrgentLowActive = UserDefaultsValue<Bool>(key: "alertUrgentLowActive", default: true)
     static let alertUrgentLowBG = UserDefaultsValue<Int>(key: "alertUrgentLowBG", default: 55)
     static let alertUrgentLowSnooze = UserDefaultsValue<Int>(key: "alertUrgentLowSnooze", default: 5)

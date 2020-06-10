@@ -72,7 +72,7 @@ class SettingsViewController: FormViewController {
                         
             }
             <<< StepperRow("lowLine") { row in
-                row.title = "Low Line Value"
+                row.title = "Low BG Display Value"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 150
                 row.cell.stepper.maximumValue = 400
@@ -86,7 +86,7 @@ class SettingsViewController: FormViewController {
                     UserDefaultsRepository.lowLine.value = Int(value)
             }
             <<< StepperRow("highLine") { row in
-                row.title = "High Line Value"
+                row.title = "High BG Display Value"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 150
                 row.cell.stepper.maximumValue = 400

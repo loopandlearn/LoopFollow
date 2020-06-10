@@ -29,6 +29,11 @@ class MainViewController: UIViewController, UITableViewDataSource {
         var direction: String?
     }
     
+    //NS Cage Struct
+    struct cageData: Codable {
+        var created_at: String
+    }
+    
     // Data Table Struct
     struct infoData {
         var name: String
@@ -194,6 +199,8 @@ class MainViewController: UIViewController, UITableViewDataSource {
             loadBGData(urlUser: urlUser, onlyPullLastRecord: onlyPullLastRecord)
             clearLastInfoData()
             loadDeviceStatus(urlUser: urlUser)
+            loadCage(urlUser: urlUser)
+            loadSage(urlUser: urlUser)
            // loadBoluses(urlUser: urlUser)
            // loadTempBasals(urlUser: urlUser)
         } else {
@@ -206,9 +213,11 @@ class MainViewController: UIViewController, UITableViewDataSource {
     
     // Post process new NS Data and feed all updates
     func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
+        var pullDate = data[data.count - 1].date / 1000
+        pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
         if !onlyPullLastRecord {
             bgData.removeAll()
-        } else if bgData[bgData.count - 1].date != data[0].date {
+        } else if bgData[bgData.count - 1].date != pullDate {
             bgData.removeFirst()
         } else {
             self.updateBadge(entries: bgData)
@@ -302,7 +311,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             return
         }
         
-        if consoleLogging == true {print("entered 2nd task.")}
+        if consoleLogging == true {print("entered device status task.")}
         var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
         requestDeviceStatus.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
@@ -384,6 +393,157 @@ class MainViewController: UIViewController, UITableViewDataSource {
         }
         basalTask.resume()
     }
+    
+    // Get last CAGE entry
+    func loadCage(urlUser: String) {
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
+        if token != "" {
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Site%20Change&count=1"
+        }
+        
+        guard let urlData = URL(string: urlString) else {
+            return
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if self.consoleLogging == true {print("start cage url")}
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([cageData].self, from: data)
+            if let entriesResponse = entriesResponse {
+                DispatchQueue.main.async {
+                    self.updateCage(data: entriesResponse)
+                }
+            }
+            else
+            {
+                
+                return
+            }
+        }
+        task.resume()
+    }
+    
+    // Parse Cage Data
+    func updateCage(data: [cageData]) {
+        if consoleLogging == true {print("in updateCage")}
+        if data.count == 0 {
+            return
+        }
+        
+        var lastCageString = data[0].created_at
+        
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate,
+                                   .withTime,
+                                   .withDashSeparatorInDate,
+                                   .withColonSeparatorInTime]
+        if let cageTime = formatter.date(from: (lastCageString as! String))?.timeIntervalSince1970 {
+            let now = NSDate().timeIntervalSince1970
+            let secondsAgo = now - cageTime
+            let days = 24 * 60 * 60
+
+            let formatter = DateComponentsFormatter()
+            formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
+            formatter.allowedUnits = [ .hour, .minute ] // Units to display in the formatted string
+            formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
+
+            let formattedDuration = formatter.string(from: secondsAgo)
+            tableData[8].value = formattedDuration ?? ""
+        }
+        infoTable.reloadData()
+
+   
+    }
+    
+    // Get last SAGE entry
+    func loadSage(urlUser: String) {
+        var dayComponent    = DateComponents()
+            dayComponent.day    = -10 // For removing 10 days
+            let theCalendar     = Calendar.current
+        
+        let startDate    = theCalendar.date(byAdding: dayComponent, to: Date())!
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+        var startDateString = dateFormatter.string(from: startDate)
+
+        
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+        if token != "" {
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+        }
+        
+        guard let urlData = URL(string: urlString) else {
+            return
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if self.consoleLogging == true {print("start cage url")}
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([cageData].self, from: data)
+            if let entriesResponse = entriesResponse {
+                DispatchQueue.main.async {
+                    self.updateSage(data: entriesResponse)
+                }
+            }
+            else
+            {
+                
+                return
+            }
+        }
+        task.resume()
+    }
+    
+    // Parse Sage Data
+    func updateSage(data: [cageData]) {
+        if consoleLogging == true {print("in updateSage")}
+        if data.count == 0 {
+            return
+        }
+        
+        var lastSageString = data[0].created_at
+        
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate,
+                                    .withTime,
+                                    .withDashSeparatorInDate,
+                                    .withColonSeparatorInTime]
+        if let cageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
+            let now = NSDate().timeIntervalSince1970
+            let secondsAgo = now - cageTime
+            let days = 24 * 60 * 60
+
+            let formatter = DateComponentsFormatter()
+            formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
+        formatter.allowedUnits = [ .day, .hour] // Units to display in the formatted string
+            formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
+
+            let formattedDuration = formatter.string(from: secondsAgo)
+            tableData[7].value = formattedDuration ?? ""
+        }
+        infoTable.reloadData()
+
+    
+    }
+    
     
     func loadBoluses(urlUser: String){
         var calendar = Calendar.current
@@ -470,12 +630,12 @@ class MainViewController: UIViewController, UITableViewDataSource {
                 
             }
         }
-                
+            
+        // Loop
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
                 if let failure = lastLoopRecord["failureReason"] {
-                    
-                    //LoopStatusText.text! += " Failure "
+                    tableData[6].value = "x"
                 }
                 else
                 {
@@ -493,6 +653,12 @@ class MainViewController: UIViewController, UITableViewDataSource {
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
                        // let prediction = predictdata["values"] as! [Double]
                        // loopStatusText += " EBG " + bgOutputFormat(bg: prediction.last!, mmol: mmol)
+                    }
+                    
+                    if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
+                        tableData[6].value = "⏀"
+                    } else {
+                        tableData[6].value = "↻"
                     }
                     
                 }
@@ -547,9 +713,9 @@ class MainViewController: UIViewController, UITableViewDataSource {
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
             bgChartEntry.append(value)
             
-            if Double(entries[i].sgv) >= Double(UserDefaultsRepository.alertHighBG.value) {
+            if Double(entries[i].sgv) >= Double(UserDefaultsRepository.highLine.value) {
                 colors.append(NSUIColor.yellow)
-            } else if Double(entries[i].sgv) <= Double(UserDefaultsRepository.alertLowBG.value) {
+            } else if Double(entries[i].sgv) <= Double(UserDefaultsRepository.lowLine.value) {
                 colors.append(NSUIColor.red)
             } else {
                 colors.append(NSUIColor.green)
@@ -671,7 +837,7 @@ class MainViewController: UIViewController, UITableViewDataSource {
             BGText.text = bgOutputFormat(bg: Double(latestBG), mmol: mmol)
             MinAgoText.text = String(Int(deltaTime)) + " min ago"
             print(String(Int(deltaTime)) + " min ago")
-            if let directionBG = entries[0].direction {
+            if let directionBG = entries[latestEntryi].direction {
                 DirectionText.text = bgDirectionGraphic(directionBG)
             }
             else
@@ -734,6 +900,11 @@ class MainViewController: UIViewController, UITableViewDataSource {
         
         
         clearOldSnoozes()
+        
+        // Exit if all is snoozed
+        if UserDefaultsRepository.alertSnoozeAllIsSnoozed.value {
+            return
+        }
         
         // BG Based Alarms
         // Check to make sure it is a current reading
@@ -853,6 +1024,14 @@ class MainViewController: UIViewController, UITableViewDataSource {
         let now = date.timeIntervalSince1970
         var needsReload: Bool = false
         guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+        
+        if date > UserDefaultsRepository.alertSnoozeAllTime.value ?? date {
+            UserDefaultsRepository.alertSnoozeAllTime.setNil(key: "alertSnoozeAllTime")
+            UserDefaultsRepository.alertSnoozeAllIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertSnoozeAllTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertSnoozeAllIsSnoozed", value: false)
+          
+        }
         
         if date > UserDefaultsRepository.alertUrgentLowSnoozedTime.value ?? date {
             UserDefaultsRepository.alertUrgentLowSnoozedTime.setNil(key: "alertUrgentLowSnoozedTime")
