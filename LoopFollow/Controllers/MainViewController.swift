@@ -1034,7 +1034,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         // These only get checked and fire if a BG reading doesn't fire
         //check for missed reading alert
-        if UserDefaultsRepository.alertMissedBolusActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
+        if UserDefaultsRepository.alertMissedReadingActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
             AlarmSound.whichAlarm = "Missed Reading Alert"
                 triggerAlarm(sound: UserDefaultsRepository.alertMissedReadingSound.value)
                 return
@@ -1074,6 +1074,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         snoozer.updateDisplayWhenTriggered(bgVal: BGText.text ?? "", directionVal: DirectionText.text ?? "", deltaVal: DeltaText.text ?? "", minAgoVal: MinAgoText.text ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozeTabItem.isEnabled = true;
         tabBarController?.selectedIndex = 2
+        AlarmSound.setSoundFile(str: sound)
         AlarmSound.play()
     }
     
