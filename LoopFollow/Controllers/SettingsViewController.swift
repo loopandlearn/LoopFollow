@@ -27,6 +27,17 @@ class SettingsViewController: FormViewController {
                 UserDefaultsRepository.url.value = value.lowercased()
                 }
         +++ Section("General Settings")
+            <<< SwitchRow("screenlockSwitchState") { row in
+                row.title = "Keep Screen Active"
+                row.value = UserDefaultsRepository.screenlockSwitchState.value
+                }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    
+                    if value {
+                        UserDefaultsRepository.screenlockSwitchState.value = value
+                    }
+                }
+            
             <<< SwitchRow("backgroundRefresh"){ row in
                 row.title = "Background Refresh"
                 row.tag = "backgroundRefresh"
