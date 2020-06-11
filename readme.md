@@ -13,4 +13,4 @@ low alert for the BG you want to wake up to and close Loop.
 
 Special thanks to Spike-App, NSApple, and Nightguard for helping me figure out how to do a lot of the code for this.
 
-If you want to contribute, the most pressing needs are to make the code cleaner and more efficient and get some major details like Bolus/Basal graph and mg/DL vs mmol added.
+If you want to contribute, the biggest needs today are to make the code cleaner and more efficient, get some major details like Bolus/Basal graph and mg/DL vs mmol added, and create the basis for a watch app.
