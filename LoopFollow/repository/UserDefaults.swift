@@ -27,6 +27,7 @@ class UserDefaultsRepository {
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
     static let appBadge = UserDefaultsValue<Bool>(key: "appBadge", default: true)
     static let dimScreenWhenIdle = UserDefaultsValue<Int>(key: "dimScreenWhenIdle", default: 0)
+    static let forceDarkMode = UserDefaultsValue<Bool>(key: "forceDarkMode", default: true)
     static let screenlockSwitchState = UserDefaultsValue<Bool>(
         key: "screenlockSwitchState",
         default: UIApplication.shared.isIdleTimerDisabled,

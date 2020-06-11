@@ -18,6 +18,9 @@ class NightscoutViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if UserDefaultsRepository.forceDarkMode.value {
+            overrideUserInterfaceStyle = .dark
+        }
         guard let myUrl = URL(string: UserDefaultsRepository.url.value) else { return  }
         
 

@@ -152,7 +152,9 @@ class AlarmViewController: FormViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        if UserDefaultsRepository.forceDarkMode.value {
+            overrideUserInterfaceStyle = .dark
+        }
         buildSnoozeAll()
         buildTemporaryAlert()
         buildUrgentLow()

@@ -103,7 +103,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        if UserDefaultsRepository.forceDarkMode.value {
+            overrideUserInterfaceStyle = .dark
+            self.tabBarController?.overrideUserInterfaceStyle = .dark
+        }
         // Disable the snoozer tab unless an alarm is active
         let tabBarControllerItems = self.tabBarController?.tabBar.items
         if let arrayOfTabBarItems = tabBarControllerItems as! AnyObject as? NSArray{

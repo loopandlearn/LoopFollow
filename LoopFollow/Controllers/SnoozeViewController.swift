@@ -117,7 +117,9 @@ class SnoozeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        if UserDefaultsRepository.forceDarkMode.value {
+            overrideUserInterfaceStyle = .dark
+        }
         SnoozeButton.layer.cornerRadius = 5
         SnoozeButton.contentEdgeInsets = UIEdgeInsets(top: 10,left: 10,bottom: 10,right: 10)
         

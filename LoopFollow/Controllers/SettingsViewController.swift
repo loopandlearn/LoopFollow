@@ -15,6 +15,9 @@ class SettingsViewController: FormViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if UserDefaultsRepository.forceDarkMode.value {
+            overrideUserInterfaceStyle = .dark
+        }
         
 
         form +++ Section("Nightscout Settings")
@@ -27,6 +30,16 @@ class SettingsViewController: FormViewController {
                 UserDefaultsRepository.url.value = value.lowercased()
                 }
         +++ Section("General Settings")
+            <<< SwitchRow("forceDarkMode") { row in
+            row.title = "Always Use Dark Mode (Restart App)"
+            row.value = UserDefaultsRepository.forceDarkMode.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                
+                if value {
+                    UserDefaultsRepository.forceDarkMode.value = value
+                }
+            }
             <<< SwitchRow("screenlockSwitchState") { row in
                 row.title = "Keep Screen Active"
                 row.value = UserDefaultsRepository.screenlockSwitchState.value
