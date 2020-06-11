@@ -675,8 +675,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
     }
     
-    func createBasalIncrements()
-    {
+    func createBasalIncrements() {
         // remove old entries
         
         // Get the starting time for first BG entry
