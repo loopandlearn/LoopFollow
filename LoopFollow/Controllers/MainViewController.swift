@@ -401,8 +401,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                         PredictionLabel.text = String(Int(prediction.last!))
                         PredictionLabel.textColor = UIColor.systemPurple
                         predictionData.removeAll()
-                        var i = 0
-                        while i < 12 {
+                        var i = 1
+                        while i <= 12 {
                             predictionData.append(prediction[i])
                             i += 1
                         }
