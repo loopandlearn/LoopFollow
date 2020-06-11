@@ -8,9 +8,15 @@
 
 import UIKit
 import Eureka
+import EventKit
+import EventKitUI
 
 class SettingsViewController: FormViewController {
 
+    struct cal {
+        var title: String
+        var identifier: String
+    }
 
     
     override func viewDidLoad() {
@@ -19,7 +25,16 @@ class SettingsViewController: FormViewController {
             overrideUserInterfaceStyle = .dark
         }
         
-
+        //array of calendars
+        let store = EKEventStore()
+        let ekCalendars = store.calendars(for: EKEntityType.event)
+        var calendars: [cal] = []
+        for i in 0..<ekCalendars.count{
+            
+            let item = cal(title: ekCalendars[i].title, identifier: ekCalendars[i].calendarIdentifier)
+            calendars.append(item)
+        }
+      
         form +++ Section("Nightscout Settings")
             <<< TextRow(){ row in
                 row.title = "URL"
@@ -159,6 +174,37 @@ class SettingsViewController: FormViewController {
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.highLine.value = Int(value)
+            }
+        
+        
+            +++ Section(header: "Watch Settings", footer: "Add the Apple calendar complication to your watch face for BG, Trend, Delta, COB, and IOB updated every 5 minutes. It is recommended to create a new calendar called 'Loop' and modify the calendar settings in the iPhone Watch App to only display the Loop calendar on your watch")
+            <<< SwitchRow("writeCalendarEvent"){ row in
+                row.title = "BG to Calendar"
+                row.value = UserDefaultsRepository.writeCalendarEvent.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.writeCalendarEvent.value = value
+                }
+            <<< PickerInputRow<String>("calendarIdentifier") { row in
+                row.title = "Calendar"
+                row.options = calendars.map { $0.identifier }
+                row.hidden = "$writeCalendarEvent == false"
+                row.value = UserDefaultsRepository.calendarIdentifier.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    let matching = calendars
+                    .flatMap { $0 }
+                        .filter { $0.identifier.range(of: value) != nil || $0.title.range(of: value) != nil }
+                    if matching.count > 0 {
+
+                        return "\(String(matching[0].title))"
+                    } else {
+                        return " - "
+                    }
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.calendarIdentifier.value = value
             }
         
          }

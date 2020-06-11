@@ -35,6 +35,13 @@ class UserDefaultsRepository {
             UIApplication.shared.isIdleTimerDisabled = screenlock
     })
     
+    
+    // Watch Calendar Settings
+    static let calendarIdentifier = UserDefaultsValue<String>(key: "calendarIdentifier", default: "")
+    static let savedEventID = UserDefaultsValue<String>(key: "savedEventID", default: "")
+    static let lastCalendarStartDate = UserDefaultsValue<Date?>(key: "lastCalendarStartDate", default: nil)
+    static let writeCalendarEvent = UserDefaultsValue<Bool>(key: "writeCalendarEvent", default: false)
+    
     // Alarm Settings
     static let systemOutputVolume = UserDefaultsValue<Float>(key: "systemOutputVolume", default: 0.5)
     static let fadeInTimeInterval = UserDefaultsValue<TimeInterval>(key: "fadeInTimeInterval", default: 0)

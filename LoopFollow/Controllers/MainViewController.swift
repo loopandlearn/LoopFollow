@@ -8,6 +8,7 @@
 
 import UIKit
 import Charts
+import EventKit
 
 
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate {
@@ -98,6 +99,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalDataStruct] = []
     var predictionData: [Double] = []
+    
+    // calendar setup
+    let store = EKEventStore()
     
     var snoozeTabItem: UITabBarItem = UITabBarItem()
     
@@ -315,6 +319,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         self.updateBadge(entries: bgData)
         self.updateBG(entries: bgData)
         self.createGraph(entries: bgData)
+        if UserDefaultsRepository.writeCalendarEvent.value {
+            self.writeCalendar()
+        }
        }
     
     //update Min Ago Text. We need to call this separately because it updates between readings
@@ -987,12 +994,61 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
     
-    func bgDirectionGraphic(_ value:String)->String {
+    func bgDirectionGraphic(_ value:String)->String
+    {
         let //graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
         graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
         
         
         return graphics[value]!
+    }
+    
+    // Write calendar. Not implemented yet
+    func writeCalendar() {
+        store.requestAccess(to: .event) {(granted, error) in
+        if !granted { return }
+            
+        // Create Event info
+           // eventTitle = BGText.text + " " + DirectionText.text + " " + DeltaText.text + "\nC:" + tableData[1].value + "g I:" + tableData[0].value + "u"
+            let deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
+            var deltaString = ""
+            if deltaBG < 0 {
+                deltaString = String(deltaBG)
+            }
+            else
+            {
+                deltaString = "+" + String(deltaBG)
+            }
+            let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
+            var eventTitle = String(self.bgData[self.bgData.count - 1].sgv) + " "
+            eventTitle += direction + " "
+            eventTitle += deltaString + "\n"
+            eventTitle += "C:" + self.tableData[1].value + "g "
+            eventTitle += "I: " + self.tableData[0].value + "u"
+            var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
+            
+        // Delete Last Event
+            let eventToRemove = self.store.event(withIdentifier: UserDefaultsRepository.savedEventID.value)
+            if eventToRemove != nil {
+                do {
+                    try self.store.remove(eventToRemove!, span: .thisEvent, commit: true)
+                } catch {
+                    // Display error to user
+                }
+            }
+        // Write New Event
+            var event = EKEvent(eventStore: self.store)
+            event.title = eventTitle
+            event.startDate = eventStartDate
+            event.endDate = event.startDate.addingTimeInterval(60*10) //Add 10 minutes
+            event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
+            do {
+                try self.store.save(event, span: .thisEvent, commit: true)
+                UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
+            } catch {
+                // Display error to user
+            }
+        }
     }
     
     func checkAlarms(bgs: [sgvData]) {
