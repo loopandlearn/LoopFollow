@@ -318,6 +318,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertUrgentLowActive == false"
                 row.value = UserDefaultsRepository.alertUrgentLowSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertUrgentLowSound.value = value
@@ -415,6 +419,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertLowActive == false"
                 row.value = UserDefaultsRepository.alertLowSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertLowSound.value = value
@@ -526,6 +534,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertHighActive == false"
                 row.value = UserDefaultsRepository.alertHighSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertHighSound.value = value
@@ -621,6 +633,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertUrgentHighActive == false"
                 row.value = UserDefaultsRepository.alertUrgentHighSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertUrgentHighSound.value = value
@@ -755,6 +771,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertFastDropActive == false"
                 row.value = UserDefaultsRepository.alertFastDropSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertFastDropSound.value = value
@@ -889,6 +909,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertFastRiseActive == false"
                 row.value = UserDefaultsRepository.alertFastRiseSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertFastRiseSound.value = value
@@ -986,6 +1010,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertMissedReadingActive == false"
                 row.value = UserDefaultsRepository.alertMissedReadingSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedReadingSound.value = value
@@ -1120,6 +1148,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertNotLoopingActive == false"
                 row.value = UserDefaultsRepository.alertNotLoopingSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertNotLoopingSound.value = value
@@ -1257,6 +1289,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertMissedBolusActive == false"
                 row.value = UserDefaultsRepository.alertMissedBolusSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedBolusSound.value = value
@@ -1366,6 +1402,10 @@ class AlarmViewController: FormViewController {
                     row.options = soundFiles
                     row.hidden = "$alertSAGEActive == false"
                     row.value = UserDefaultsRepository.alertSAGESound.value
+                    row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                        return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                    }
                 }.onChange { [weak self] row in
                         guard let value = row.value else { return }
                         UserDefaultsRepository.alertSAGESound.value = value
@@ -1462,6 +1502,10 @@ class AlarmViewController: FormViewController {
                 row.options = soundFiles
                 row.hidden = "$alertCAGEActive == false"
                 row.value = UserDefaultsRepository.alertCAGESound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertCAGESound.value = value
