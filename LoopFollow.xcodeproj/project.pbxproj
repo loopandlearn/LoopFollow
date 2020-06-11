@@ -134,6 +134,7 @@
 		FC9788242485969B00A7906C /* LoopFollow.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC9788222485969B00A7906C /* LoopFollow.xcdatamodeld */; };
 		FC9788262485969C00A7906C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC9788252485969C00A7906C /* Assets.xcassets */; };
 		FC9788292485969C00A7906C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC9788272485969C00A7906C /* LaunchScreen.storyboard */; };
+		FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */; };
 		FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6884F248935D800A0279D /* AlarmViewController.swift */; };
 		FCC6885A2489554800A0279D /* BackgroundTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTask.swift */; };
 		FCC6885C2489559400A0279D /* blank.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885B2489559400A0279D /* blank.wav */; };
@@ -282,6 +283,7 @@
 		FC9788232485969B00A7906C /* LoopFollow.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LoopFollow.xcdatamodel; sourceTree = "<group>"; };
 		FC9788252485969C00A7906C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC9788282485969C00A7906C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryKeyPath.swift; sourceTree = "<group>"; };
 		FCC6884F248935D800A0279D /* AlarmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmViewController.swift; sourceTree = "<group>"; };
 		FCC688592489554800A0279D /* BackgroundTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTask.swift; sourceTree = "<group>"; };
 		FCC6885B2489559400A0279D /* blank.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blank.wav; sourceTree = "<group>"; };
@@ -517,6 +519,7 @@
 				FCC6885B2489559400A0279D /* blank.wav */,
 				FCC688592489554800A0279D /* BackgroundTask.swift */,
 				FCFEEC9F2488157B00402A7F /* Chart.swift */,
+				FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -790,6 +793,7 @@
 				FC7CE598248B0AF2001F83B8 /* AlarmEditing.swift in Sources */,
 				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
+				FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,

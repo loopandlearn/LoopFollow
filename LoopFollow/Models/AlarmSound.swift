@@ -98,7 +98,7 @@ class AlarmSound {
             
             // init volume before start playing (mute if fade-in)
             
-            self.audioPlayer!.volume = (self.muted || (self.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
+            //self.audioPlayer!.volume = (self.muted || (self.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
             
             if !self.audioPlayer!.prepareToPlay() {
                 NSLog("AlarmSound - audio player failed preparing to play")

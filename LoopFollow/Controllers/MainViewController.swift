@@ -36,6 +36,19 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         var created_at: String
     }
     
+    //NS Basal Profile Struct
+    struct basalProfileStruct: Codable {
+        var value: Double
+        var time: String
+        var timeAsSeconds: Double
+    }
+    
+    //NS Basal Data  Struct
+    struct basalDataStruct: Codable {
+        var value: Double
+        var date: TimeInterval
+    }
+    
     // Data Table Struct
     struct infoData {
         var name: String
@@ -82,6 +95,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     ]
     
     var bgData: [sgvData] = []
+    var basalProfile: [basalProfileStruct] = []
+    var basalData: [basalDataStruct] = []
     var predictionData: [Double] = []
     
     var snoozeTabItem: UITabBarItem = UITabBarItem()
@@ -212,13 +227,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             clearLastInfoData()
             loadCage(urlUser: urlUser)
             loadSage(urlUser: urlUser)
+            loadProfile(urlUser: urlUser)
            // loadBoluses(urlUser: urlUser)
            // loadTempBasals(urlUser: urlUser)
         } else {
-            // We're still going to process the Min Ago display and alarm sections without a network call. A snoozer could have expired during since the last call
+            loadDeviceStatus(urlUser: urlUser)
             updateMinAgo()
             clearOldSnoozes()
             checkAlarms(bgs: bgData)
+            loadProfile(urlUser: urlUser)
         }
         
     }
@@ -598,6 +615,67 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.reloadData()
     }
      
+    // Load Current Profile
+    func loadProfile(urlUser: String) {
+        let urlString = urlUser + "/api/v1/profile/current.json"
+        let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
+        guard let url = URL(string: escapedAddress!) else {
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+            
+            
+            let json = try? JSONSerialization.jsonObject(with: data) as! Dictionary<String, Any>
+            
+            if let json = json {
+                DispatchQueue.main.async {
+                    self.updateProfile(jsonDeviceStatus: json)
+                }
+            } else {
+                return
+            }
+        }
+        task.resume()
+    }
+    
+    // Parse Basal schedule from the profile
+    func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
+   
+        if jsonDeviceStatus.count == 0 {
+            return
+        }
+        let basal = jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
+        for i in 0..<basal.count {
+            let dict = basal[i] as! Dictionary<String, Any>
+            let thisValue = dict[keyPath: "value"] as! Double
+            let thisTime = dict[keyPath: "time"] as! String
+            let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
+            let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
+            basalProfile.append(entry)
+        }
+        
+    }
+    
+    func createBasalIncrements()
+    {
+        // remove old entries
+        
+        // Get the starting time for first BG entry
+        
+        // cycle through temp basals
+        
+        // if a temp basal doesn't exist, check for the scheduled basal based on time
+    }
+    
     // Need to figure out the date to pull only last 24 hours
     // NOT IMPLEMENTED YET
     func loadTempBasals(urlUser: String) {

@@ -258,6 +258,10 @@ class AlarmViewController: FormViewController {
                         row.options = soundFiles
                         row.hidden = "$alertTemporaryActive == false"
                         row.value = UserDefaultsRepository.alertTemporarySound.value
+                        row.displayValueFor = { value in
+                        guard let value = value else { return nil }
+                            return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                        }
                     }.onChange { [weak self] row in
                             guard let value = row.value else { return }
                             UserDefaultsRepository.alertTemporarySound.value = value
