@@ -133,11 +133,18 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.rowHeight = 25
         infoTable.dataSource = self
         
+        // Load Data
+        nightscoutLoader()
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        // set screen lock
+        UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
+        
         // Pull fresh data when view appears
-        nightscoutLoader()
+        // moved this to didload, timer end, and foreground
+        //nightscoutLoader()
     }
     
     
@@ -178,6 +185,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     @objc func appMovedToBackground() {
+        // Allow screen to turn off
+        UIApplication.shared.isIdleTimerDisabled = false;
+        
         // We want to always come back to the home screen
         tabBarController?.selectedIndex = 0
         
@@ -190,6 +200,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     @objc func appCameToForeground() {
+        // reset screenlock state if needed
+        UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
+        
         // Cancel the background tasks, start a fresh timer, and immediately check for new data
         if UserDefaultsRepository.backgroundRefresh.value {
             backgroundTask.stopBackgroundTask()
@@ -1067,7 +1080,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let currentBGTime = bgs[bgs.count - 1].date
         var alarmTriggered = false
         
-        
         clearOldSnoozes()
         
         // Exit if all is snoozed
@@ -1075,24 +1087,25 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return
         }
         
+        
         // BG Based Alarms
-        // Check to make sure it is a current reading
-        if now - currentBGTime <= (5*60) {
+        // Check to make sure it is a current reading and has not already triggered alarm from this reading
+        if now - currentBGTime <= (5*60) && currentBGTime > UserDefaultsRepository.snoozedBGReadingTime.value as! TimeInterval {
             
             // trigger temporary alert first
             if UserDefaultsRepository.alertTemporaryActive.value {
                 if UserDefaultsRepository.alertTemporaryBelow.value {
                     if currentBG < UserDefaultsRepository.alertTemporaryBG.value {
                         UserDefaultsRepository.alertTemporaryActive.value = false
-                        AlarmSound.whichAlarm = "Temporary"
-                        triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value)
+                        AlarmSound.whichAlarm = "Temporary Alert"
+                        triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value, snooozedBGReadingTime: currentBGTime)
                         return
                     }
                 } else{
                     if currentBG > UserDefaultsRepository.alertTemporaryBG.value {
                       tabBarController?.selectedIndex = 2
                         AlarmSound.whichAlarm = "Temporary Alert"
-                        triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value)
+                        triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value, snooozedBGReadingTime: currentBGTime)
                         return
                    }
                 }
@@ -1102,7 +1115,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if UserDefaultsRepository.alertUrgentLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
             currentBG <= UserDefaultsRepository.alertUrgentLowBG.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
                 AlarmSound.whichAlarm = "Urgent Low Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertUrgentLowSound.value)
+                triggerAlarm(sound: UserDefaultsRepository.alertUrgentLowSound.value, snooozedBGReadingTime: currentBGTime)
                 return
             }
             
@@ -1110,7 +1123,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if UserDefaultsRepository.alertLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
             currentBG <= UserDefaultsRepository.alertLowBG.value && !UserDefaultsRepository.alertLowIsSnoozed.value {
                 AlarmSound.whichAlarm = "Low Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertLowSound.value)
+                triggerAlarm(sound: UserDefaultsRepository.alertLowSound.value, snooozedBGReadingTime: currentBGTime)
                 return
             }
             
@@ -1118,7 +1131,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if UserDefaultsRepository.alertHighActive.value && !UserDefaultsRepository.alertHighIsSnoozed.value &&
             currentBG >= UserDefaultsRepository.alertHighBG.value && !UserDefaultsRepository.alertHighIsSnoozed.value {
                 AlarmSound.whichAlarm = "High Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value)
+                triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime)
                 return
             }
             
@@ -1126,7 +1139,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if UserDefaultsRepository.alertUrgentHighActive.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value &&
             currentBG >= UserDefaultsRepository.alertUrgentHighBG.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
                 AlarmSound.whichAlarm = "Urgent High Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value)
+                triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime)
                 return
             }
             
@@ -1141,7 +1154,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     || (UserDefaultsRepository.alertFastDropReadings.value == 3 && deltas[0] <= compare && deltas[1] <= compare)
                     || (UserDefaultsRepository.alertFastDropReadings.value == 4 && deltas[0] <= compare && deltas[1] <= compare && deltas[2] <= compare) {
                         AlarmSound.whichAlarm = "Fast Drop Alert"
-                        triggerAlarm(sound: UserDefaultsRepository.alertFastDropSound.value)
+                        triggerAlarm(sound: UserDefaultsRepository.alertFastDropSound.value, snooozedBGReadingTime: currentBGTime)
                         return
                     }
                 }
@@ -1158,7 +1171,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     || (UserDefaultsRepository.alertFastRiseReadings.value == 3 && deltas[0] >= compare && deltas[1] >= compare)
                     || (UserDefaultsRepository.alertFastRiseReadings.value == 4 && deltas[0] >= compare && deltas[1] >= compare && deltas[2] >= compare) {
                         AlarmSound.whichAlarm = "Fast Rise Alert"
-                        triggerAlarm(sound: UserDefaultsRepository.alertFastRiseSound.value)
+                        triggerAlarm(sound: UserDefaultsRepository.alertFastRiseSound.value, snooozedBGReadingTime: currentBGTime)
                         return
                     }
                 }
@@ -1172,7 +1185,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         //check for missed reading alert
         if UserDefaultsRepository.alertMissedReadingActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
             AlarmSound.whichAlarm = "Missed Reading Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertMissedReadingSound.value)
+                triggerAlarm(sound: UserDefaultsRepository.alertMissedReadingSound.value, snooozedBGReadingTime: nil)
                 return
         }
         
@@ -1184,7 +1197,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             var tenDays = 10 * 24 * 60 * 60
             if Double(tenDays) - Double(delta) <= alertDistance {
                 AlarmSound.whichAlarm = "Sensor Change Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertSAGESound.value)
+                triggerAlarm(sound: UserDefaultsRepository.alertSAGESound.value, snooozedBGReadingTime: nil)
                 return
             }
         }
@@ -1197,19 +1210,22 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             var tenDays = 3 * 24 * 60 * 60
             if Double(tenDays) - Double(delta) <= alertDistance {
                 AlarmSound.whichAlarm = "Pump Change Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertCAGESound.value)
+                triggerAlarm(sound: UserDefaultsRepository.alertCAGESound.value, snooozedBGReadingTime: nil)
                 return
             }
         }
         
     }
     
-    func triggerAlarm(sound: String)
+    func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?)
     {
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.updateDisplayWhenTriggered(bgVal: BGText.text ?? "", directionVal: DirectionText.text ?? "", deltaVal: DeltaText.text ?? "", minAgoVal: MinAgoText.text ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozeTabItem.isEnabled = true;
         tabBarController?.selectedIndex = 2
+        if snooozedBGReadingTime != nil {
+            UserDefaultsRepository.snoozedBGReadingTime.value = snooozedBGReadingTime
+        }
         AlarmSound.setSoundFile(str: sound)
         AlarmSound.play()
     }

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
+		FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTaskAudio.swift */; };
 		FC7CE518248ABE37001F83B8 /* Siri_Alert_Calibration_Needed.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4A9248ABE2B001F83B8 /* Siri_Alert_Calibration_Needed.caf */; };
 		FC7CE519248ABE37001F83B8 /* Rise_And_Shine.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4AA248ABE2B001F83B8 /* Rise_And_Shine.caf */; };
 		FC7CE51A248ABE37001F83B8 /* Jingle_All_The_Way.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4AB248ABE2B001F83B8 /* Jingle_All_The_Way.caf */; };
@@ -136,7 +137,6 @@
 		FC9788292485969C00A7906C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC9788272485969C00A7906C /* LaunchScreen.storyboard */; };
 		FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */; };
 		FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6884F248935D800A0279D /* AlarmViewController.swift */; };
-		FCC6885A2489554800A0279D /* BackgroundTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTask.swift */; };
 		FCC6885C2489559400A0279D /* blank.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885B2489559400A0279D /* blank.wav */; };
 		FCC6885E24896A6C00A0279D /* silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885D24896A6C00A0279D /* silence.mp3 */; };
 		FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886424898EEE00A0279D /* UserDefaults.swift */; };
@@ -285,7 +285,7 @@
 		FC9788282485969C00A7906C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryKeyPath.swift; sourceTree = "<group>"; };
 		FCC6884F248935D800A0279D /* AlarmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmViewController.swift; sourceTree = "<group>"; };
-		FCC688592489554800A0279D /* BackgroundTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTask.swift; sourceTree = "<group>"; };
+		FCC688592489554800A0279D /* BackgroundTaskAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskAudio.swift; sourceTree = "<group>"; };
 		FCC6885B2489559400A0279D /* blank.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blank.wav; sourceTree = "<group>"; };
 		FCC6885D24896A6C00A0279D /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
 		FCC6886424898EEE00A0279D /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
@@ -517,7 +517,7 @@
 				FCC6886C2489909D00A0279D /* AnyConvertible.swift */,
 				FCC6885D24896A6C00A0279D /* silence.mp3 */,
 				FCC6885B2489559400A0279D /* blank.wav */,
-				FCC688592489554800A0279D /* BackgroundTask.swift */,
+				FCC688592489554800A0279D /* BackgroundTaskAudio.swift */,
 				FCFEEC9F2488157B00402A7F /* Chart.swift */,
 				FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */,
 			);
@@ -778,7 +778,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FCC6885A2489554800A0279D /* BackgroundTask.swift in Sources */,
 				FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */,
 				FC7CE59F248D8D23001F83B8 /* SnoozeViewController.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
@@ -799,6 +798,7 @@
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				FC7CE588248ABE5A001F83B8 /* Alarms.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
+				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

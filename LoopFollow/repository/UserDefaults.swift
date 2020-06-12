@@ -50,6 +50,8 @@ class UserDefaultsRepository {
     
     
     // Alerts
+    static let snoozedBGReadingTime = UserDefaultsValue<TimeInterval?>(key: "snoozedBGReadingTime", default: 0)
+    
     static let alertCageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertCageInsertTime", default: 0)
     static let alertSageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0)
     
