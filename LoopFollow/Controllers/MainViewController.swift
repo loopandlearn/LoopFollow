@@ -134,7 +134,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.dataSource = self
         
         // Load Data
-        nightscoutLoader()
+        appCameToForeground()
         
     }
     
@@ -220,7 +220,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     // Main loader for all data
-    func nightscoutLoader() {
+    func nightscoutLoader(forceLoad: Bool = false) {
         
         var needsLoaded: Bool = false
         var onlyPullLastRecord = false
@@ -240,6 +240,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             needsLoaded = true
         }
         
+        if forceLoad { needsLoaded = true}
         // Only do the network calls if we don't have a current reading
         if needsLoaded {
             loadDeviceStatus(urlUser: urlUser)
@@ -824,11 +825,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             bgChartEntry.append(value)
             
             if Double(entries[i].sgv) >= Double(UserDefaultsRepository.highLine.value) {
-                colors.append(NSUIColor.yellow)
+                colors.append(NSUIColor.systemYellow)
             } else if Double(entries[i].sgv) <= Double(UserDefaultsRepository.lowLine.value) {
-                colors.append(NSUIColor.red)
+                colors.append(NSUIColor.systemRed)
             } else {
-                colors.append(NSUIColor.green)
+                colors.append(NSUIColor.systemGreen)
             }
         }
         
@@ -839,7 +840,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             // Add 1 hour of predictions
             while i < 12 {
                 var predictionVal = Double(predictionData[i])
-                // Below can be turned on to prevent out of range opn the graph if needed.
+                // Below can be turned on to prevent out of range on the graph if desired.
+                // It currently just drops them out of view
                 if predictionVal > 400 {
                //     predictionVal = 400
                 } else if predictionVal < 0 {
@@ -855,7 +857,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         let line1 = LineChartDataSet(entries:bgChartEntry, label: "")
         line1.circleRadius = 3
-        line1.circleColors = [NSUIColor.green]
+        line1.circleColors = [NSUIColor.systemGreen]
         line1.drawCircleHoleEnabled = false
         if UserDefaultsRepository.showLines.value {
             line1.lineWidth = 2
@@ -883,13 +885,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         //Add lower red line based on low alert value
         let ll = ChartLimitLine()
         ll.limit = Double(UserDefaultsRepository.lowLine.value)
-        ll.lineColor = NSUIColor.red
+        ll.lineColor = NSUIColor.systemRed
         BGChart.rightAxis.addLimitLine(ll)
         
         //Add upper yellow line based on low alert value
         let ul = ChartLimitLine()
         ul.limit = Double(UserDefaultsRepository.highLine.value)
-        ul.lineColor = NSUIColor.yellow
+        ul.lineColor = NSUIColor.systemYellow
         BGChart.rightAxis.addLimitLine(ul)
         
         BGChart.xAxis.valueFormatter = ChartXValueFormatter()
@@ -908,6 +910,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         BGChart.data = data
         BGChart.setExtraOffsets(left: 10, top: 10, right: 10, bottom: 10)
         BGChart.setVisibleXRangeMinimum(10)
+        BGChart.drawGridBackgroundEnabled = true
+        BGChart.gridBackgroundColor = NSUIColor.secondarySystemBackground
         if firstStart {
             BGChart.zoom(scaleX: 18, scaleY: 1, x: 1, y: 1)
             firstStart = false
@@ -968,6 +972,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             
             BGText.text = bgOutputFormat(bg: Double(latestBG), mmol: mmol)
+            setBGTextColor()
+
             MinAgoText.text = String(Int(deltaTime)) + " min ago"
             print(String(Int(deltaTime)) + " min ago")
             if let directionBG = entries[latestEntryi].direction {
@@ -996,6 +1002,22 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         checkAlarms(bgs: entries)
     }
 
+    func setBGTextColor() {
+        let latestBG = bgData[bgData.count - 1].sgv
+        if UserDefaultsRepository.colorBGText.value {
+            if latestBG >= UserDefaultsRepository.highLine.value {
+                BGText.textColor = NSUIColor.systemYellow
+            } else if latestBG <= UserDefaultsRepository.lowLine.value {
+                BGText.textColor = NSUIColor.systemRed
+            } else {
+                BGText.textColor = NSUIColor.systemGreen
+            }
+        } else {
+            BGText.textColor = NSUIColor.label
+        }
+        
+    }
+    
     func bgOutputFormat(bg: Double, mmol: Bool) -> String {
         if !mmol {
             return String(format:"%.0f", bg)
@@ -1015,7 +1037,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return graphics[value]!
     }
     
-    // Write calendar. Not implemented yet
+    // Write calendar
     func writeCalendar() {
         store.requestAccess(to: .event) {(granted, error) in
         if !granted { return }
@@ -1113,10 +1135,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             
             // Check Urgent Low
             if UserDefaultsRepository.alertUrgentLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
-            currentBG <= UserDefaultsRepository.alertUrgentLowBG.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
-                AlarmSound.whichAlarm = "Urgent Low Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertUrgentLowSound.value, snooozedBGReadingTime: currentBGTime)
-                return
+            currentBG <= UserDefaultsRepository.alertUrgentLowBG.value {
+                // Separating this makes it so the low or drop alerts won't trigger if they already snoozed the urgent low
+                if !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
+                    AlarmSound.whichAlarm = "Urgent Low Alert"
+                    triggerAlarm(sound: UserDefaultsRepository.alertUrgentLowSound.value, snooozedBGReadingTime: currentBGTime)
+                    return
+                } else {
+                    return
+                }
             }
             
             // Check Low
@@ -1127,6 +1154,20 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 return
             }
             
+            // Check Urgent High
+            if UserDefaultsRepository.alertUrgentHighActive.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value &&
+            currentBG >= UserDefaultsRepository.alertUrgentHighBG.value {
+                // Separating this makes it so the high or rise alerts won't trigger if they already snoozed the urgent low
+                if !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
+                        AlarmSound.whichAlarm = "Urgent High Alert"
+                        triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime)
+                        return
+                } else {
+                    return
+                }
+                
+            }
+            
             // Check High
             if UserDefaultsRepository.alertHighActive.value && !UserDefaultsRepository.alertHighIsSnoozed.value &&
             currentBG >= UserDefaultsRepository.alertHighBG.value && !UserDefaultsRepository.alertHighIsSnoozed.value {
@@ -1135,13 +1176,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 return
             }
             
-            // Check Urgent High
-            if UserDefaultsRepository.alertUrgentHighActive.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value &&
-            currentBG >= UserDefaultsRepository.alertUrgentHighBG.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
-                AlarmSound.whichAlarm = "Urgent High Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime)
-                return
-            }
+            
             
             // Check Fast Drop
             if UserDefaultsRepository.alertFastDropActive.value && !UserDefaultsRepository.alertFastDropIsSnoozed.value {
