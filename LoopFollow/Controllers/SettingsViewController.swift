@@ -101,12 +101,12 @@ class SettingsViewController: FormViewController {
                         guard let value = row.value else { return }
                         UserDefaultsRepository.overrideSystemOutputVolume.value = value
                 }
-            <<< StepperRow("systemOutputVolume") { row in
+            <<< StepperRow("forcedOutputVolume") { row in
                   row.title = "Volume Level"
                 row.cell.stepper.stepValue = 0.05
                   row.cell.stepper.minimumValue = 0
                   row.cell.stepper.maximumValue = 1
-                  row.value = Double(UserDefaultsRepository.systemOutputVolume.value)
+                  row.value = Double(UserDefaultsRepository.forcedOutputVolume.value)
                   row.hidden = "$overrideSystemOutputVolume == false"
                     row.displayValueFor = { value in
                     guard let value = value else { return nil }
@@ -114,9 +114,9 @@ class SettingsViewController: FormViewController {
                     }
               }.onChange { [weak self] row in
                       guard let value = row.value else { return }
-                      UserDefaultsRepository.systemOutputVolume.value = Float(value)
+                      UserDefaultsRepository.forcedOutputVolume.value = Float(value)
               }
-            <<< StepperRow("fadeInTimeInterval") { row in
+           /* <<< StepperRow("fadeInTimeInterval") { row in
                 row.title = "Fade-in Seconds"
                 row.cell.stepper.stepValue = 5
                 row.cell.stepper.minimumValue = 0
@@ -129,7 +129,7 @@ class SettingsViewController: FormViewController {
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.fadeInTimeInterval.value = TimeInterval(value)
-            }
+            }*/
             
         +++ Section("Graph Settings")
             <<< SwitchRow("switchRowDots"){ row in

@@ -29,10 +29,7 @@ class AlarmSound {
     
     //static let volumeChangeDetector = VolumeChangeDetector()
     
-    static let fadeInTimeInterval = UserDefaultsRepository.fadeInTimeInterval
     static let vibrate = UserDefaultsRepository.vibrate
-    static let overrideSystemOutputVolume = UserDefaultsRepository.overrideSystemOutputVolume
-    static let systemOutputVolume = UserDefaultsRepository.systemOutputVolume
     
     fileprivate static var systemOutputVolumeBeforeOverride: Float?
     
@@ -61,8 +58,8 @@ class AlarmSound {
      * Sets the volume of the alarm back to the volume before it has been muted.
      */
     static func unmuteVolume() {
-        if self.fadeInTimeInterval.value > 0 {
-            self.audioPlayer?.setVolume(1.0, fadeDuration: self.fadeInTimeInterval.value)
+        if UserDefaultsRepository.fadeInTimeInterval.value > 0 {
+            self.audioPlayer?.setVolume(1.0, fadeDuration: UserDefaultsRepository.fadeInTimeInterval.value)
         } else {
             self.audioPlayer?.volume = 1.0
         }
@@ -98,7 +95,7 @@ class AlarmSound {
             
             // init volume before start playing (mute if fade-in)
             
-            //self.audioPlayer!.volume = (self.muted || (self.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
+            //self.audioPlayer!.volume = (self.muted || (UserDefaultsRepository.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
             
             if !self.audioPlayer!.prepareToPlay() {
                 NSLog("AlarmSound - audio player failed preparing to play")
@@ -136,9 +133,13 @@ class AlarmSound {
             // Play endless loops
             self.audioPlayer!.numberOfLoops = -1
             
-            // init volume before start playing (mute if fade-in)
+            // Store existing volume
+            if self.systemOutputVolumeBeforeOverride == nil {
+                self.systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
+            }
             
-            self.audioPlayer!.volume = (self.muted || (self.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
+            // init volume before start playing (mute if fade-in)
+            //self.audioPlayer!.volume = (self.muted || (UserDefaultsRepository.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
             
             if !self.audioPlayer!.prepareToPlay() {
                 NSLog("AlarmSound - audio player failed preparing to play")
@@ -155,9 +156,14 @@ class AlarmSound {
             
             
             // do fade-in
-            if !self.muted && (self.fadeInTimeInterval.value > 0) {
-                self.audioPlayer!.setVolume(1.0, fadeDuration: self.fadeInTimeInterval.value)
+            //if !self.muted && (UserDefaultsRepository.fadeInTimeInterval.value > 0) {
+            //    self.audioPlayer!.setVolume(1.0, fadeDuration: UserDefaultsRepository.fadeInTimeInterval.value)
+            //}
+            
+            if UserDefaultsRepository.overrideSystemOutputVolume.value {
+                MPVolumeView.setVolume(UserDefaultsRepository.forcedOutputVolume.value)
             }
+            
             
             //self.playingTimer = Timer.schedule(repeatInterval: 1.0, handler: self.onPlayingTimer)
             
@@ -178,17 +184,19 @@ class AlarmSound {
             return
         }
         
-        if self.overrideSystemOutputVolume.value {
+        if UserDefaultsRepository.overrideSystemOutputVolume.value {
 
             // keep the system output volume before overriding it
             if self.systemOutputVolumeBeforeOverride == nil {
-               // self.systemOutputVolumeBeforeOverride = MPVolumeView.volume
+                //self.systemOutputVolumeBeforeOverride = MPVolumeView.volume
+                self.systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
             }
             
-            // override the system output volume
-           // if MPVolumeView.volume != self.systemOutputVolume.value {
+             // override the system output volume
+            MPVolumeView.setVolume(UserDefaultsRepository.systemOutputVolume.value)
+           // if MPVolumeView.volume != UserDefaultsRepository.systemOutputVolume.value {
             //    self.volumeChangeDetector.isActive = false
-            //    MPVolumeView.volume = self.systemOutputVolume.value
+            //    MPVolumeView.volume = UserDefaultsRepository.systemOutputVolume.value
            // } else {
             
                 // listen to user volume changes
@@ -203,7 +211,7 @@ class AlarmSound {
     
     fileprivate static func restoreSystemOutputVolume() {
         
-        guard self.overrideSystemOutputVolume.value else {
+        guard UserDefaultsRepository.overrideSystemOutputVolume.value else {
             return
         }
         
@@ -211,9 +219,9 @@ class AlarmSound {
        // self.volumeChangeDetector.isActive = false
         
         // restore system output volume with its value before overriding it
-        //if let volumeBeforeOverride = self.systemOutputVolumeBeforeOverride {
-        //    MPVolumeView.volume = volumeBeforeOverride
-       // }
+        if let volumeBeforeOverride = self.systemOutputVolumeBeforeOverride {
+            MPVolumeView.setVolume(volumeBeforeOverride)
+        }
         
         self.systemOutputVolumeBeforeOverride = nil
     }
@@ -253,4 +261,23 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertFromAVAudioSessionCategory(_ input: AVAudioSession.Category) -> String {
 	return input.rawValue
+}
+
+
+extension MPVolumeView {
+    static func setVolume(_ volume: Float) {
+        // Need to use the MPVolumeView in order to change volume, but don't care about UI set so frame to .zero
+        let volumeView = MPVolumeView(frame: .zero)
+        // Search for the slider
+        let slider = volumeView.subviews.first(where: { $0 is UISlider }) as? UISlider
+        // Update the slider value with the desired volume.
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
+            slider?.value = volume
+        }
+        // Optional - Remove the HUD
+        if let app = UIApplication.shared.delegate as? AppDelegate, let window = app.window {
+            volumeView.alpha = 0.000001
+            window.addSubview(volumeView)
+        }
+    }
 }

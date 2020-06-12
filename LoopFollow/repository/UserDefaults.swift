@@ -47,6 +47,7 @@ class UserDefaultsRepository {
     static let fadeInTimeInterval = UserDefaultsValue<TimeInterval>(key: "fadeInTimeInterval", default: 0)
     static let vibrate = UserDefaultsValue<Bool>(key: "vibrate", default: true)
     static let overrideSystemOutputVolume = UserDefaultsValue<Bool>(key: "overrideSystemOutputVolume", default: true)
+    static let forcedOutputVolume = UserDefaultsValue<Float>(key: "forcedOutputVolume", default: 0.5)
     
     
     // Alerts
