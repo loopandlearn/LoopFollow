@@ -113,7 +113,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         // Disable the snoozer tab unless an alarm is active
         let tabBarControllerItems = self.tabBarController?.tabBar.items
-        if let arrayOfTabBarItems = tabBarControllerItems as! AnyObject as? NSArray{
+        if let arrayOfTabBarItems = tabBarControllerItems as AnyObject as? NSArray{
             snoozeTabItem = arrayOfTabBarItems[2] as! UITabBarItem
         }
         snoozeTabItem.isEnabled = false;
@@ -372,7 +372,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return
         }
             
-        let json = try? JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]]
+            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
         if let json = json {
             DispatchQueue.main.async {
                 self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
@@ -1191,10 +1191,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         // Check Sage
         if UserDefaultsRepository.alertSAGEActive.value {
-            var insertTime = Double(UserDefaultsRepository.alertSageInsertTime.value)
-            var alertDistance = Double(UserDefaultsRepository.alertSAGE.value * 60 * 60)
-            var delta = now - insertTime
-            var tenDays = 10 * 24 * 60 * 60
+            let insertTime = Double(UserDefaultsRepository.alertSageInsertTime.value)
+            let alertDistance = Double(UserDefaultsRepository.alertSAGE.value * 60 * 60)
+            let delta = now - insertTime
+            let tenDays = 10 * 24 * 60 * 60
             if Double(tenDays) - Double(delta) <= alertDistance {
                 AlarmSound.whichAlarm = "Sensor Change Alert"
                 triggerAlarm(sound: UserDefaultsRepository.alertSAGESound.value, snooozedBGReadingTime: nil)
@@ -1204,10 +1204,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         // Check Cage
         if UserDefaultsRepository.alertCAGEActive.value {
-            var insertTime = Double(UserDefaultsRepository.alertCageInsertTime.value)
-            var alertDistance = Double(UserDefaultsRepository.alertCAGE.value * 60 * 60)
-            var delta = now - insertTime
-            var tenDays = 3 * 24 * 60 * 60
+            let insertTime = Double(UserDefaultsRepository.alertCageInsertTime.value)
+            let alertDistance = Double(UserDefaultsRepository.alertCAGE.value * 60 * 60)
+            let delta = now - insertTime
+            let tenDays = 3 * 24 * 60 * 60
             if Double(tenDays) - Double(delta) <= alertDistance {
                 AlarmSound.whichAlarm = "Pump Change Alert"
                 triggerAlarm(sound: UserDefaultsRepository.alertCAGESound.value, snooozedBGReadingTime: nil)
