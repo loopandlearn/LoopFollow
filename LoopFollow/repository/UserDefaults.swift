@@ -23,6 +23,7 @@ class UserDefaultsRepository {
     static let highLine = UserDefaultsValue<Int>(key: "highLine", default: 180)
     
     // General Settings
+    static let colorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
     static let backgroundRefreshFrequency = UserDefaultsValue<Int>(key: "backgroundRefreshFrequency", default: 1)
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
     static let appBadge = UserDefaultsValue<Bool>(key: "appBadge", default: true)
