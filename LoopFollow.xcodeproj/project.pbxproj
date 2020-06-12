@@ -120,11 +120,9 @@
 		FC7CE584248ABE37001F83B8 /* Oringz.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE515248ABE37001F83B8 /* Oringz.caf */; };
 		FC7CE585248ABE37001F83B8 /* Siri_Glucose_Dropping_Fast.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE516248ABE37001F83B8 /* Siri_Glucose_Dropping_Fast.caf */; };
 		FC7CE586248ABE37001F83B8 /* Martian_Gun.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE517248ABE37001F83B8 /* Martian_Gun.caf */; };
-		FC7CE588248ABE5A001F83B8 /* Alarms.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE587248ABE5A001F83B8 /* Alarms.swift */; };
 		FC7CE58A248ABEA3001F83B8 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
 		FC7CE58D248ABEF2001F83B8 /* alarm.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE58B248ABEF1001F83B8 /* alarm.mp3 */; };
 		FC7CE58E248ABEF2001F83B8 /* alarm-notification.m4a in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE58C248ABEF1001F83B8 /* alarm-notification.m4a */; };
-		FC7CE598248B0AF2001F83B8 /* AlarmEditing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE597248B0AF2001F83B8 /* AlarmEditing.swift */; };
 		FC7CE59C248D33A9001F83B8 /* dragbar.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE59B248D33A9001F83B8 /* dragbar.png */; };
 		FC7CE59F248D8D23001F83B8 /* SnoozeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE59E248D8D23001F83B8 /* SnoozeViewController.swift */; };
 		FC9788182485969B00A7906C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9788172485969B00A7906C /* AppDelegate.swift */; };
@@ -145,7 +143,6 @@
 		FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886A24898FD800A0279D /* ObservationToken.swift */; };
 		FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886C2489909D00A0279D /* AnyConvertible.swift */; };
 		FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886E2489A53800A0279D /* AppConstants.swift */; };
-		FCC68874248A75D000A0279D /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC68873248A75D000A0279D /* NightScout.swift */; };
 		FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCFEEC9D2486E68E00402A7F /* WebKit.framework */; };
 		FCFEECA02488157B00402A7F /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEEC9F2488157B00402A7F /* Chart.swift */; };
 		FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEECA1248857A600402A7F /* SettingsViewController.swift */; };
@@ -266,11 +263,9 @@
 		FC7CE515248ABE37001F83B8 /* Oringz.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Oringz.caf; sourceTree = "<group>"; };
 		FC7CE516248ABE37001F83B8 /* Siri_Glucose_Dropping_Fast.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Siri_Glucose_Dropping_Fast.caf; sourceTree = "<group>"; };
 		FC7CE517248ABE37001F83B8 /* Martian_Gun.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Martian_Gun.caf; sourceTree = "<group>"; };
-		FC7CE587248ABE5A001F83B8 /* Alarms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarms.swift; sourceTree = "<group>"; };
 		FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlarmSound.swift; sourceTree = "<group>"; };
 		FC7CE58B248ABEF1001F83B8 /* alarm.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = alarm.mp3; sourceTree = "<group>"; };
 		FC7CE58C248ABEF1001F83B8 /* alarm-notification.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = "alarm-notification.m4a"; sourceTree = "<group>"; };
-		FC7CE597248B0AF2001F83B8 /* AlarmEditing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmEditing.swift; sourceTree = "<group>"; };
 		FC7CE59B248D33A9001F83B8 /* dragbar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dragbar.png; sourceTree = "<group>"; };
 		FC7CE59E248D8D23001F83B8 /* SnoozeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozeViewController.swift; sourceTree = "<group>"; };
 		FC8DEEE62485D1ED0075863F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -295,7 +290,6 @@
 		FCC6886C2489909D00A0279D /* AnyConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyConvertible.swift; sourceTree = "<group>"; };
 		FCC6886E2489A53800A0279D /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		FCC688702489A57C00A0279D /* Loop Follow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Follow.entitlements"; sourceTree = "<group>"; };
-		FCC68873248A75D000A0279D /* NightScout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScout.swift; sourceTree = "<group>"; };
 		FCFEEC9D2486E68E00402A7F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		FCFEEC9F2488157B00402A7F /* Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
 		FCFEECA1248857A600402A7F /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -531,7 +525,6 @@
 				FC97881D2485969B00A7906C /* NightScoutViewController.swift */,
 				FCFEECA1248857A600402A7F /* SettingsViewController.swift */,
 				FCC6884F248935D800A0279D /* AlarmViewController.swift */,
-				FC7CE597248B0AF2001F83B8 /* AlarmEditing.swift */,
 				FC7CE59E248D8D23001F83B8 /* SnoozeViewController.swift */,
 			);
 			path = Controllers;
@@ -541,8 +534,6 @@
 			isa = PBXGroup;
 			children = (
 				FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */,
-				FCC68873248A75D000A0279D /* NightScout.swift */,
-				FC7CE587248ABE5A001F83B8 /* Alarms.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -781,7 +772,6 @@
 				FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */,
 				FC7CE59F248D8D23001F83B8 /* SnoozeViewController.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
-				FCC68874248A75D000A0279D /* NightScout.swift in Sources */,
 				FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */,
 				FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */,
 				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,
@@ -789,14 +779,12 @@
 				FC9788242485969B00A7906C /* LoopFollow.xcdatamodeld in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
 				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
-				FC7CE598248B0AF2001F83B8 /* AlarmEditing.swift in Sources */,
 				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
 				FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
-				FC7CE588248ABE5A001F83B8 /* Alarms.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 			);
