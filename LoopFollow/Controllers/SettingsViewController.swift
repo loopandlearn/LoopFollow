@@ -88,16 +88,19 @@ class SettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.backgroundRefresh.value = value
             }
-        <<< SliderRow() { row in
+        <<< StepperRow("backgroundRefreshFrequency") { row in
             row.title = "Refresh Minutes"
             row.tag = "backgroundRefreshFrequency"
-            row.steps = 19
-            row.value = Float(UserDefaultsRepository.backgroundRefreshFrequency.value)
+            row.cell.stepper.stepValue = 0.25
+            row.cell.stepper.minimumValue = 0.25
+            row.cell.stepper.maximumValue = 10
+            row.value = Double(UserDefaultsRepository.backgroundRefreshFrequency.value)
             row.hidden = "$backgroundRefresh == false"
-        }.cellSetup { cell, row in
-            cell.slider.minimumValue = 0.5
-            cell.slider.maximumValue = 10
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.backgroundRefreshFrequency.value = value
         }
+            
         <<< SwitchRow("appBadge"){ row in
             row.title = "Display App Badge"
             row.tag = "appBadge"
