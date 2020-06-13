@@ -38,7 +38,7 @@ class BackgroundTask {
             let bundle = Bundle.main.path(forResource: "blank", ofType: "wav")
             let alertSound = URL(fileURLWithPath: bundle!)
            // try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback)
-            try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: .mixWithOthers)
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: .mixWithOthers)
             try AVAudioSession.sharedInstance().setActive(true)
             try self.player = AVAudioPlayer(contentsOf: alertSound)
             // Play audio forever by setting num of loops to -1

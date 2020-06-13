@@ -1045,6 +1045,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Create Event info
            // eventTitle = BGText.text + " " + DirectionText.text + " " + DeltaText.text + "\nC:" + tableData[1].value + "g I:" + tableData[0].value + "u"
             let deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
+            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
             var deltaString = ""
             if deltaBG < 0 {
                 deltaString = String(deltaBG)
@@ -1054,12 +1055,25 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 deltaString = "+" + String(deltaBG)
             }
             let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
-            var eventTitle = String(self.bgData[self.bgData.count - 1].sgv) + " "
+            var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
+            var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
+            var eventTitle = ""
+            eventTitle += String(self.bgData[self.bgData.count - 1].sgv) + " "
             eventTitle += direction + " "
-            eventTitle += deltaString + "\n"
+            eventTitle += deltaString + " "
+            if deltaTime > 5 {
+                // write old BG reading and continue pushing out end date to show last entry
+                eventTitle += ": " + String(Int(deltaTime)) + " min"
+                eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
+            } else {
+                
+            }
+            
+            eventTitle += "\n"
             eventTitle += "C:" + self.tableData[1].value + "g "
             eventTitle += "I: " + self.tableData[0].value + "u"
-            var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
+            
+            
             
         // Delete Last Event
             let eventToRemove = self.store.event(withIdentifier: UserDefaultsRepository.savedEventID.value)
@@ -1074,7 +1088,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             var event = EKEvent(eventStore: self.store)
             event.title = eventTitle
             event.startDate = eventStartDate
-            event.endDate = event.startDate.addingTimeInterval(60*10) //Add 10 minutes
+            event.endDate = eventEndDate
             event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
             do {
                 try self.store.save(event, span: .thisEvent, commit: true)
