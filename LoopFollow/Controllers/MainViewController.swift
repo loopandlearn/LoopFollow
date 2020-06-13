@@ -422,6 +422,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Loop
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
+
+                UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
                 
                 if let failure = lastLoopRecord["failureReason"] {
                     LoopStatusLabel.text = "⚠"
@@ -468,7 +470,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     }
                     
                 }
+                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 10 {
+                    LoopStatusLabel.text = "⚠"
+                }
             }
+            
+            
             
         }
         
@@ -1067,8 +1074,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 // write old BG reading and continue pushing out end date to show last entry
                 eventTitle += ": " + String(Int(deltaTime)) + " min"
                 eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
-            } else {
-                
             }
             
             eventTitle += "\n"
@@ -1233,6 +1238,26 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         
         // These only get checked and fire if a BG reading doesn't fire
+        if UserDefaultsRepository.alertNotLoopingActive.value
+            && !UserDefaultsRepository.alertNotLoopingIsSnoozed.value
+            && (Double(now - UserDefaultsRepository.alertLastLoopTime.value) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
+            && UserDefaultsRepository.alertLastLoopTime.value > 0 {
+            
+            var trigger = true
+            if (UserDefaultsRepository.alertNotLoopingUseLimits.value
+                && (
+                    (currentBG <= UserDefaultsRepository.alertNotLoopingUpperLimit.value
+                    && currentBG >= UserDefaultsRepository.alertNotLoopingLowerLimit.value) ||
+                    // Ignore Limits if BG reading is older than non looping time
+                    (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
+                ) ||
+                !UserDefaultsRepository.alertNotLoopingUseLimits.value) {
+                    AlarmSound.whichAlarm = "Not Looping Alert"
+                    triggerAlarm(sound: UserDefaultsRepository.alertNotLoopingSound.value, snooozedBGReadingTime: nil)
+                    return
+            }
+        }
+        
         //check for missed reading alert
         if UserDefaultsRepository.alertMissedReadingActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
             AlarmSound.whichAlarm = "Missed Reading Alert"
