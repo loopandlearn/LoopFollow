@@ -194,8 +194,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Cancel the current timer and start a fresh background timer using the settings value only if background task is enabled
         timer.invalidate()
         if UserDefaultsRepository.backgroundRefresh.value {
+            timer.invalidate()
             backgroundTask.startBackgroundTask()
-            startTimer(time: TimeInterval(UserDefaultsRepository.backgroundRefreshFrequency.value*60))
+            let refresh = UserDefaultsRepository.backgroundRefreshFrequency.value * 60
+            startTimer(time: TimeInterval(refresh))
         }
     }
 
