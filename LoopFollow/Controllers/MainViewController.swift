@@ -1077,8 +1077,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             
             eventTitle += "\n"
-            eventTitle += "C:" + self.tableData[1].value + "g "
-            eventTitle += "I: " + self.tableData[0].value + "u"
+            if self.tableData[1].value != "" {
+               eventTitle += "C:" + self.tableData[1].value + "g "
+            }
+            if self.tableData[0].value != "" {
+                eventTitle += "I: " + self.tableData[0].value + "u"
+            }
+            
             
             
             
@@ -1266,7 +1271,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         
         // Check Sage
-        if UserDefaultsRepository.alertSAGEActive.value {
+        if UserDefaultsRepository.alertSAGEActive.value && !UserDefaultsRepository.alertSAGEIsSnoozed.value {
             let insertTime = Double(UserDefaultsRepository.alertSageInsertTime.value)
             let alertDistance = Double(UserDefaultsRepository.alertSAGE.value * 60 * 60)
             let delta = now - insertTime
@@ -1279,7 +1284,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         
         // Check Cage
-        if UserDefaultsRepository.alertCAGEActive.value {
+        if UserDefaultsRepository.alertCAGEActive.value && !UserDefaultsRepository.alertCAGEIsSnoozed.value {
             let insertTime = Double(UserDefaultsRepository.alertCageInsertTime.value)
             let alertDistance = Double(UserDefaultsRepository.alertCAGE.value * 60 * 60)
             let delta = now - insertTime
