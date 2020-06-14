@@ -886,6 +886,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         data.setValueFont(UIFont(name: UIFont.systemFont(ofSize: 10).fontName, size: 10)!)
         data.setDrawValues(false)
         
+        // Clear limit lines so they don't add multiples when changing the settings
+        BGChart.rightAxis.removeAllLimitLines()
+        
         //Add lower red line based on low alert value
         let ll = ChartLimitLine()
         ll.limit = Double(UserDefaultsRepository.lowLine.value)
