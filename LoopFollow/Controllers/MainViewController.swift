@@ -118,11 +118,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         snoozeTabItem.isEnabled = false;
         
-        // Grant Badge Access
-        UNUserNotificationCenter.current().requestAuthorization(options: .badge) { (granted, error) in
-            if error != nil {
-            }
-        }
         
         // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
