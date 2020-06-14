@@ -199,7 +199,7 @@ class SettingsViewController: FormViewController {
         <<< StepperRow("highLine") { row in
             row.title = "High BG Display Value"
             row.cell.stepper.stepValue = 1
-            row.cell.stepper.minimumValue = 150
+            row.cell.stepper.minimumValue = 120
             row.cell.stepper.maximumValue = 400
             row.value = Double(UserDefaultsRepository.highLine.value)
             row.displayValueFor = { value in
