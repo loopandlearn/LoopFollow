@@ -908,7 +908,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         BGChart.xAxis.labelTextColor = NSUIColor.label
         BGChart.xAxis.labelPosition = XAxis.LabelPosition.bottom
         BGChart.rightAxis.labelTextColor = NSUIColor.label
-        
+        BGChart.rightAxis.labelPosition = YAxis.LabelPosition.insideChart
         BGChart.rightAxis.axisMinimum = 40
         BGChart.leftAxis.axisMinimum = 40
         BGChart.rightAxis.axisMaximum = Double(maxBG)
