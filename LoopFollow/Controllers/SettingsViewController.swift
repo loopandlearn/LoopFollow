@@ -36,6 +36,14 @@ class SettingsViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.url.value = value.lowercased()
                 }
+            <<< TextRow(){ row in
+                row.title = "NS Token"
+                row.placeholder = ""
+                row.value = UserDefaultsRepository.token.value
+            }.onChange { row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.token.value = value.lowercased()
+                }
         
 
         buildGeneralSettings()
