@@ -11,6 +11,8 @@ And there are some functions I've always wished for and not found anywhere such 
 for those nights when Loop is stuck on high and you open loop with a correction. This lets you set a higher
 low alert for the BG you want to wake up to and close Loop.
 
+Build Instruction Video: https://youtu.be/sdF5v2eGGyA
+
 Special thanks to Spike-App, NSApple, and Nightguard for helping me figure out how to do a lot of the code for this.
 
 If you want to contribute, the biggest needs today are to make the code cleaner and more efficient, get some major details like Bolus/Basal graph and mg/DL vs mmol added, and create the basis for a watch app.
