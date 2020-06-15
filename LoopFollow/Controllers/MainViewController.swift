@@ -1181,7 +1181,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             // Check Urgent High
             if UserDefaultsRepository.alertUrgentHighActive.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value &&
             currentBG >= UserDefaultsRepository.alertUrgentHighBG.value {
-                // Separating this makes it so the high or rise alerts won't trigger if they already snoozed the urgent low
+                // Separating this makes it so the high or rise alerts won't trigger if they already snoozed the urgent high
                 if !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
                         AlarmSound.whichAlarm = "Urgent High Alert"
                         triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime)
@@ -1193,11 +1193,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             
             // Check High
-            if UserDefaultsRepository.alertHighActive.value && !UserDefaultsRepository.alertHighIsSnoozed.value &&
-            currentBG >= UserDefaultsRepository.alertHighBG.value && !UserDefaultsRepository.alertHighIsSnoozed.value {
-                AlarmSound.whichAlarm = "High Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime)
-                return
+            let persistentReadings = Int(UserDefaultsRepository.alertHighPersistent.value / 5)
+            let persistentBG = bgData[bgData.count - 1 - persistentReadings].sgv
+            if UserDefaultsRepository.alertHighActive.value &&
+                !UserDefaultsRepository.alertHighIsSnoozed.value &&
+                currentBG >= UserDefaultsRepository.alertHighBG.value &&
+                persistentBG >= UserDefaultsRepository.alertHighBG.value &&
+                !UserDefaultsRepository.alertHighIsSnoozed.value {
+                    AlarmSound.whichAlarm = "High Alert"
+                    triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime)
+                    return
             }
             
             
