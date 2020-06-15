@@ -166,7 +166,7 @@ class AlarmViewController: FormViewController {
         buildMissedReadings()
         buildNotLooping()
  //       buildMissedBolus()
-  //      buildAppInactive()
+        buildAppInactive()
         buildSage()
         buildCage()
         
