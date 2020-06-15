@@ -27,8 +27,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("User has declined notifications")
             }
         }
-        
+         
         return true
+    }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        if UserDefaultsRepository.alertAppInactive.value {
+            AlarmSound.setSoundFile(str: "Alarm_Buzzer")
+            AlarmSound.playTerminated()
+        }
     }
 
     // MARK: UISceneSession Lifecycle
