@@ -38,9 +38,12 @@ class SettingsViewController: FormViewController {
                 }
             <<< TextRow(){ row in
                 row.title = "NS Token"
-                row.placeholder = ""
+                row.placeholder = "Leave blank if not using tokens"
                 row.value = UserDefaultsRepository.token.value
             }.onChange { row in
+                if row.value == nil {
+                    UserDefaultsRepository.token.value = ""
+                }
                 guard let value = row.value else { return }
                 UserDefaultsRepository.token.value = value
                 }
