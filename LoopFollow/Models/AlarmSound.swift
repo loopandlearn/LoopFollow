@@ -172,6 +172,50 @@ class AlarmSound {
         }
     }
     
+    static func playTerminated() {
+        
+        guard !self.isPlaying else {
+            return
+        }
+        
+        do {
+            self.audioPlayer = try AVAudioPlayer(contentsOf: self.soundURL)
+            self.audioPlayer!.delegate = self.audioPlayerDelegate
+            
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playback)))
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            // Play endless loops
+            self.audioPlayer!.numberOfLoops = 2
+            
+            // Store existing volume
+            if self.systemOutputVolumeBeforeOverride == nil {
+                self.systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
+            }
+            
+            
+            if !self.audioPlayer!.prepareToPlay() {
+                NSLog("Terminate AlarmSound - audio player failed preparing to play")
+            }
+            
+            if self.audioPlayer!.play() {
+                if !self.isPlaying {
+                    NSLog("Terminate AlarmSound - not playing after calling play")
+                    NSLog("Terminate AlarmSound - rate value: \(self.audioPlayer!.rate)")
+                }
+            } else {
+                NSLog("Terminate AlarmSound - audio player failed to play")
+            }
+            
+            
+            MPVolumeView.setVolume(1.0)
+           
+            
+        } catch let error {
+            NSLog("Terminate AlarmSound - unable to play sound; error: \(error)")
+        }
+    }
+    
     fileprivate static func onPlayingTimer(timer: Timer?) {
         
         // player should be playing, not muted!

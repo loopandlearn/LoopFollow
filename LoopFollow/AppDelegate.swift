@@ -8,16 +8,39 @@
 
 import UIKit
 import CoreData
+import UserNotifications
+import EventKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    let notificationCenter = UNUserNotificationCenter.current()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
+        
+        let options: UNAuthorizationOptions = [.alert, .sound, .badge]
+        notificationCenter.requestAuthorization(options: options) {
+            (didAllow, error) in
+            if !didAllow {
+                print("User has declined notifications")
+            }
+        }
+        let store = EKEventStore()
+        store.requestAccess(to: .event) {(granted, error) in
+        if !granted { return }
+            }
+         
         return true
+    }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        if UserDefaultsRepository.alertAppInactive.value {
+            AlarmSound.setSoundFile(str: "Alarm_Buzzer")
+            AlarmSound.playTerminated()
+        }
     }
 
     // MARK: UISceneSession Lifecycle
@@ -100,4 +123,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 }
-

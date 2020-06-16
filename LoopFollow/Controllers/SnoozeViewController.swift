@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+import UserNotifications
 
 
 class SnoozeViewController: UIViewController {
@@ -50,6 +50,27 @@ class SnoozeViewController: UIViewController {
         DeltaLabel.text = deltaVal
         MinAgoLabel.text = minAgoVal
         AlertLabel.text = alertLabelVal
+        sendNotification(self, bgVal: bgVal, directionVal: directionVal, deltaVal: deltaVal, minAgoVal: minAgoVal, alertLabelVal: alertLabelVal)
+    }
+    
+    func sendNotification(_ sender: Any, bgVal: String, directionVal: String, deltaVal: String, minAgoVal: String, alertLabelVal: String) {
+        // 1
+        let content = UNMutableNotificationContent()
+        content.title = alertLabelVal
+        content.subtitle += bgVal + " "
+        content.subtitle += directionVal + " "
+        content.subtitle += deltaVal
+        //content.body = minAgoVal + " Min Ago"
+        
+        // show this notification 0 seconds from now
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+        // choose a random identifier
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+
+        // add our notification request
+        UNUserNotificationCenter.current().add(request)
+        
     }
     
     func setSnoozeTime()

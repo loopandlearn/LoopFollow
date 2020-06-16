@@ -29,6 +29,8 @@ class UserDefaultsRepository {
     static let appBadge = UserDefaultsValue<Bool>(key: "appBadge", default: true)
     static let dimScreenWhenIdle = UserDefaultsValue<Int>(key: "dimScreenWhenIdle", default: 0)
     static let forceDarkMode = UserDefaultsValue<Bool>(key: "forceDarkMode", default: true)
+    static let persistentNotification = UserDefaultsValue<Bool>(key: "persistentNotification", default: false)
+    static let persistentNotificationLastBGTime = UserDefaultsValue<TimeInterval>(key: "persistentNotificationLastBGTime", default: 0)
     static let screenlockSwitchState = UserDefaultsValue<Bool>(
         key: "screenlockSwitchState",
         default: UIApplication.shared.isIdleTimerDisabled,
@@ -42,6 +44,8 @@ class UserDefaultsRepository {
     static let savedEventID = UserDefaultsValue<String>(key: "savedEventID", default: "")
     static let lastCalendarStartDate = UserDefaultsValue<Date?>(key: "lastCalendarStartDate", default: nil)
     static let writeCalendarEvent = UserDefaultsValue<Bool>(key: "writeCalendarEvent", default: false)
+    static let watchLine1 = UserDefaultsValue<String>(key: "watchLine1", default: "%BG% %DIRECTION% %DELTA% %MINAGO%")
+    static let watchLine2 = UserDefaultsValue<String>(key: "watchLine2", default: "C:%COB% I:%IOB% B:%BASAL%")
     
     // Alarm Settings
     static let systemOutputVolume = UserDefaultsValue<Float>(key: "systemOutputVolume", default: 0.5)
