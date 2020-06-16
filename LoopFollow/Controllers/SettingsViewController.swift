@@ -42,7 +42,7 @@ class SettingsViewController: FormViewController {
                 row.value = UserDefaultsRepository.token.value
             }.onChange { row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.token.value = value.lowercased()
+                UserDefaultsRepository.token.value = value
                 }
         
 
@@ -277,7 +277,7 @@ class SettingsViewController: FormViewController {
             row.value = UserDefaultsRepository.watchLine1.value
         }.onChange { row in
             guard let value = row.value else { return }
-            UserDefaultsRepository.watchLine1.value = value.lowercased()
+            UserDefaultsRepository.watchLine1.value = value
         }
         <<< TextRow("watchLine2"){ row in
             row.title = "Line 2"
@@ -285,7 +285,7 @@ class SettingsViewController: FormViewController {
             row.value = UserDefaultsRepository.watchLine2.value
         }.onChange { row in
             guard let value = row.value else { return }
-            UserDefaultsRepository.watchLine2.value = value.lowercased()
+            UserDefaultsRepository.watchLine2.value = value
         }
     }
  
