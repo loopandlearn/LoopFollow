@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 import UserNotifications
+import EventKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -27,6 +28,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("User has declined notifications")
             }
         }
+        let store = EKEventStore()
+        store.requestAccess(to: .event) {(granted, error) in
+        if !granted { return }
+            }
          
         return true
     }
