@@ -27,7 +27,7 @@ class SettingsViewController: FormViewController {
         
         
       
-        form +++ Section("Nightscout Settings")
+        form +++ Section(header: "Nightscout Settings", footer: "Changing Nightscout settings requires an app restart.")
             <<< TextRow(){ row in
                 row.title = "URL"
                 row.placeholder = "https://mycgm.herokuapp.com"
