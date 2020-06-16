@@ -70,12 +70,19 @@ class SettingsViewController: FormViewController {
             guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
             mainScreen.setBGTextColor()
         }
-            <<< SwitchRow("forceDarkMode") { row in
+        <<< SwitchRow("forceDarkMode") { row in
         row.title = "Force Dark Mode (Restart App)"
         row.value = UserDefaultsRepository.forceDarkMode.value
         }.onChange { [weak self] row in
             guard let value = row.value else { return }
                 UserDefaultsRepository.forceDarkMode.value = value
+        }
+        <<< SwitchRow("persistentNotification") { row in
+        row.title = "Persistent Notification"
+        row.value = UserDefaultsRepository.persistentNotification.value
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+                UserDefaultsRepository.persistentNotification.value = value
         }
         <<< SwitchRow("screenlockSwitchState") { row in
             row.title = "Keep Screen Active"
@@ -235,7 +242,7 @@ class SettingsViewController: FormViewController {
         }
         
         form
-        +++ Section(header: "Watch Settings", footer: "Add the Apple calendar complication to your watch face for BG, Trend, Delta, COB, and IOB updated every 5 minutes. It is recommended to create a new calendar called 'Loop' and modify the calendar settings in the iPhone Watch App to only display the Loop calendar on your watch")
+        +++ Section(header: "Watch Settings", footer: "Add the Apple calendar complication to your watch face for BG, Trend, Delta, COB, and IOB updated every 5 minutes. It is recommended to create a new calendar called 'Loop' and modify the calendar settings in the iPhone Watch App to only display the Loop calendar on your watch. Available variables are: %BG%, %DIRECTION%, %DELTA%, %MINAGO%, %IOB%, %COB%, %BASAL%. ** %MINAGO% only displays if it is an old reading")
         <<< SwitchRow("writeCalendarEvent"){ row in
             row.title = "BG to Calendar"
             row.value = UserDefaultsRepository.writeCalendarEvent.value
@@ -263,6 +270,22 @@ class SettingsViewController: FormViewController {
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.calendarIdentifier.value = value
+        }
+        <<< TextRow("watchLine1"){ row in
+            row.title = "Line 1"
+            row.hidden = "$writeCalendarEvent == false"
+            row.value = UserDefaultsRepository.watchLine1.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.watchLine1.value = value.lowercased()
+        }
+        <<< TextRow("watchLine2"){ row in
+            row.title = "Line 2"
+            row.hidden = "$writeCalendarEvent == false"
+            row.value = UserDefaultsRepository.watchLine2.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.watchLine2.value = value.lowercased()
         }
     }
  
