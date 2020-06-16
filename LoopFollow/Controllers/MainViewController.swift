@@ -66,7 +66,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var graphHours:Int=24
     var mmol = false as Bool
     var urlUser = UserDefaultsRepository.url.value as String
-    var token = "" as String
+    var token = UserDefaultsRepository.token.value as String
     var defaults : UserDefaults?
     let consoleLogging = true
     var timeofLastBGUpdate = 0 as TimeInterval
@@ -118,11 +118,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         snoozeTabItem.isEnabled = false;
         
-        // Grant Badge Access
-        UNUserNotificationCenter.current().requestAuthorization(options: .badge) { (granted, error) in
-            if error != nil {
-            }
-        }
         
         // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
@@ -891,6 +886,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         data.setValueFont(UIFont(name: UIFont.systemFont(ofSize: 10).fontName, size: 10)!)
         data.setDrawValues(false)
         
+        // Clear limit lines so they don't add multiples when changing the settings
+        BGChart.rightAxis.removeAllLimitLines()
+        
         //Add lower red line based on low alert value
         let ll = ChartLimitLine()
         ll.limit = Double(UserDefaultsRepository.lowLine.value)
@@ -1052,7 +1050,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if !granted { return }
             
         // Create Event info
-           // eventTitle = BGText.text + " " + DirectionText.text + " " + DeltaText.text + "\nC:" + tableData[1].value + "g I:" + tableData[0].value + "u"
             let deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
             var deltaString = ""
@@ -1064,9 +1061,39 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 deltaString = "+" + String(deltaBG)
             }
             let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
+            
+            
             var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
             var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
-            var eventTitle = ""
+            var  eventTitle = UserDefaultsRepository.watchLine1.value + "\n" + UserDefaultsRepository.watchLine2.value
+            eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: String(self.bgData[self.bgData.count - 1].sgv))
+            eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
+            eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
+            var minAgo = ""
+            if deltaTime > 5 {
+                // write old BG reading and continue pushing out end date to show last entry
+                minAgo = String(Int(deltaTime)) + " min"
+                eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
+            }
+            var cob = "0"
+            if self.tableData[1].value != "" {
+                cob = self.tableData[1].value
+            }
+            var basal = "~"
+            if self.tableData[2].value != "" {
+                basal = self.tableData[2].value
+            }
+            var iob = "0"
+            if self.tableData[0].value != "" {
+                iob = self.tableData[0].value
+            }
+            eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
+            eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
+            eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: cob)
+            eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal)
+            
+            // old
+            /*
             eventTitle += String(self.bgData[self.bgData.count - 1].sgv) + " "
             eventTitle += direction + " "
             eventTitle += deltaString + " "
@@ -1083,6 +1110,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if self.tableData[0].value != "" {
                 eventTitle += "I: " + self.tableData[0].value + "u"
             }
+            */
             
             
             
@@ -1131,7 +1159,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         clearOldSnoozes()
         
         // Exit if all is snoozed
+        // still send persistent notification with all snoozed
         if UserDefaultsRepository.alertSnoozeAllIsSnoozed.value {
+            persistentNotification(bgTime: currentBGTime)
             return
         }
         
@@ -1183,7 +1213,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             // Check Urgent High
             if UserDefaultsRepository.alertUrgentHighActive.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value &&
             currentBG >= UserDefaultsRepository.alertUrgentHighBG.value {
-                // Separating this makes it so the high or rise alerts won't trigger if they already snoozed the urgent low
+                // Separating this makes it so the high or rise alerts won't trigger if they already snoozed the urgent high
                 if !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
                         AlarmSound.whichAlarm = "Urgent High Alert"
                         triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime)
@@ -1195,11 +1225,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             
             // Check High
-            if UserDefaultsRepository.alertHighActive.value && !UserDefaultsRepository.alertHighIsSnoozed.value &&
-            currentBG >= UserDefaultsRepository.alertHighBG.value && !UserDefaultsRepository.alertHighIsSnoozed.value {
-                AlarmSound.whichAlarm = "High Alert"
-                triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime)
-                return
+            let persistentReadings = Int(UserDefaultsRepository.alertHighPersistent.value / 5)
+            let persistentBG = bgData[bgData.count - 1 - persistentReadings].sgv
+            if UserDefaultsRepository.alertHighActive.value &&
+                !UserDefaultsRepository.alertHighIsSnoozed.value &&
+                currentBG >= UserDefaultsRepository.alertHighBG.value &&
+                persistentBG >= UserDefaultsRepository.alertHighBG.value &&
+                !UserDefaultsRepository.alertHighIsSnoozed.value {
+                    AlarmSound.whichAlarm = "High Alert"
+                    triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime)
+                    return
             }
             
             
@@ -1296,6 +1331,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         }
         
+        // still send persistent notification if no alarms trigger and persistent notification is on
+        persistentNotification(bgTime: currentBGTime)
+        
     }
     
     func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?)
@@ -1309,6 +1347,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         AlarmSound.setSoundFile(str: sound)
         AlarmSound.play()
+    }
+    
+    func persistentNotification(bgTime: TimeInterval)
+    {
+        if UserDefaultsRepository.persistentNotification.value && bgTime > UserDefaultsRepository.persistentNotificationLastBGTime.value {
+            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+            snoozer.sendNotification(self, bgVal: BGText.text ?? "", directionVal: DirectionText.text ?? "", deltaVal: DeltaText.text ?? "", minAgoVal: MinAgoText.text ?? "", alertLabelVal: "Latest BG")
+        }
     }
     
     func clearOldSnoozes(){

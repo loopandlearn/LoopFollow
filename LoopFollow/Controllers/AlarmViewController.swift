@@ -166,7 +166,7 @@ class AlarmViewController: FormViewController {
         buildMissedReadings()
         buildNotLooping()
  //       buildMissedBolus()
-  //      buildAppInactive()
+        buildAppInactive()
         buildSage()
         buildCage()
         
@@ -388,7 +388,7 @@ class AlarmViewController: FormViewController {
             row.title = "BG"
             row.cell.stepper.stepValue = 1
             row.cell.stepper.minimumValue = 40
-            row.cell.stepper.maximumValue = 120
+            row.cell.stepper.maximumValue = 150
             row.value = Double(UserDefaultsRepository.alertLowBG.value)
             row.hidden = "$alertLowActive == false"
             row.displayValueFor = { value in
@@ -739,7 +739,7 @@ class AlarmViewController: FormViewController {
         <<< StepperRow("alertFastDropBelowBG") { row in
             row.title = "Dropping Below BG"
             row.cell.stepper.stepValue = 1
-            row.cell.stepper.minimumValue = 100
+            row.cell.stepper.minimumValue = 40
             row.cell.stepper.maximumValue = 300
             row.value = Double(UserDefaultsRepository.alertFastDropBelowBG.value)
             row.hidden = "$alertFastDropActive == false || $alertFastDropUseLimit == false"
@@ -877,7 +877,7 @@ class AlarmViewController: FormViewController {
         <<< StepperRow("alertFastRiseAboveBG") { row in
             row.title = "Rising Above BG"
             row.cell.stepper.stepValue = 1
-            row.cell.stepper.minimumValue = 100
+            row.cell.stepper.minimumValue = 40
             row.cell.stepper.maximumValue = 300
             row.value = Double(UserDefaultsRepository.alertFastRiseAboveBG.value)
             row.hidden = "$alertFastRiseActive == false || $alertFastRiseUseLimit == false"

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
 		FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTaskAudio.swift */; };
+		FC5A5C3D2497B229009C550E /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FC5A5C3C2497B229009C550E /* Config.xcconfig */; };
 		FC7CE518248ABE37001F83B8 /* Siri_Alert_Calibration_Needed.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4A9248ABE2B001F83B8 /* Siri_Alert_Calibration_Needed.caf */; };
 		FC7CE519248ABE37001F83B8 /* Rise_And_Shine.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4AA248ABE2B001F83B8 /* Rise_And_Shine.caf */; };
 		FC7CE51A248ABE37001F83B8 /* Jingle_All_The_Way.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4AB248ABE2B001F83B8 /* Jingle_All_The_Way.caf */; };
@@ -152,6 +153,7 @@
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
+		FC5A5C3C2497B229009C550E /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		FC7CE4A9248ABE2B001F83B8 /* Siri_Alert_Calibration_Needed.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Siri_Alert_Calibration_Needed.caf; sourceTree = "<group>"; };
 		FC7CE4AA248ABE2B001F83B8 /* Rise_And_Shine.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Rise_And_Shine.caf; sourceTree = "<group>"; };
 		FC7CE4AB248ABE2B001F83B8 /* Jingle_All_The_Way.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Jingle_All_The_Way.caf; sourceTree = "<group>"; };
@@ -478,6 +480,7 @@
 		FC97880B2485969B00A7906C = {
 			isa = PBXGroup;
 			children = (
+				FC5A5C3C2497B229009C550E /* Config.xcconfig */,
 				FC8DEEE32485D1680075863F /* LoopFollow */,
 				FC9788152485969B00A7906C /* Products */,
 				8E32230C453C93FDCE59C2B9 /* Pods */,
@@ -674,6 +677,7 @@
 				FC7CE532248ABE37001F83B8 /* Siri_High_Glucose.caf in Resources */,
 				FC7CE555248ABE37001F83B8 /* Sci-Fi_Incoming_Message_Alert.caf in Resources */,
 				FC7CE518248ABE37001F83B8 /* Siri_Alert_Calibration_Needed.caf in Resources */,
+				FC5A5C3D2497B229009C550E /* Config.xcconfig in Resources */,
 				FC7CE550248ABE37001F83B8 /* Siri_Alert_High_Glucose.caf in Resources */,
 				FC7CE525248ABE37001F83B8 /* Sci-Fi_Warning.caf in Resources */,
 				FC7CE556248ABE37001F83B8 /* Sci-Fi_Console_Alarm.caf in Resources */,
@@ -814,6 +818,7 @@
 /* Begin XCBuildConfiguration section */
 		FC97882B2485969C00A7906C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FC5A5C3C2497B229009C550E /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -874,6 +879,7 @@
 		};
 		FC97882C2485969C00A7906C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FC5A5C3C2497B229009C550E /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -933,13 +939,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 96ZGUPW5TE;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.fawcett.LoopFollow;
 				PRODUCT_NAME = "Loop Follow";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -953,13 +958,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 96ZGUPW5TE;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.fawcett.LoopFollow;
 				PRODUCT_NAME = "Loop Follow";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
