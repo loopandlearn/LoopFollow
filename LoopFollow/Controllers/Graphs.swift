@@ -28,8 +28,8 @@ extension MainViewController {
         for i in 0..<entries.count{
             var dateString = String(entries[i].date).prefix(10)
             let dateSecondsOnly = Double(String(dateString))!
-            if entries[i].sgv > maxBG {
-                maxBG = entries[i].sgv + 20
+            if entries[i].sgv > maxBG - 40 {
+                maxBG = entries[i].sgv + 40
             }
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
             bgChartEntry.append(value)
@@ -72,6 +72,8 @@ extension MainViewController {
         lineBG.drawCircleHoleEnabled = false
         lineBG.axisDependency = YAxis.AxisDependency.right
         lineBG.highlightEnabled = false
+        lineBG.drawValuesEnabled = false
+        
         if UserDefaultsRepository.showLines.value {
             lineBG.lineWidth = 2
         } else {
@@ -111,6 +113,7 @@ extension MainViewController {
         lineBasal.drawCirclesEnabled = false
         lineBasal.axisDependency = YAxis.AxisDependency.left
         lineBasal.highlightEnabled = false
+        lineBasal.drawValuesEnabled = false
         
         // Boluses
         var chartEntryBolus = [ChartDataEntry]()
@@ -119,7 +122,7 @@ extension MainViewController {
             chartEntryBolus.append(value)
         }
         let lineBolus = LineChartDataSet(entries:chartEntryBolus, label: "")
-        lineBolus.circleRadius = 8
+        lineBolus.circleRadius = 7
         lineBolus.circleColors = [NSUIColor.systemBlue.withAlphaComponent(0.75)]
         lineBolus.drawCircleHoleEnabled = false
         lineBolus.setDrawHighlightIndicators(false)
@@ -127,6 +130,10 @@ extension MainViewController {
         lineBolus.drawCirclesEnabled = true
         lineBolus.lineWidth = 0
         lineBolus.axisDependency = YAxis.AxisDependency.right
+        lineBolus.valueFormatter = ChartYDataValueFormatter()
+        lineBolus.drawValuesEnabled = true
+        lineBolus.valueTextColor = NSUIColor.label
+
         
         // Carbs
         var chartEntryCarbs = [ChartDataEntry]()
@@ -135,7 +142,7 @@ extension MainViewController {
             chartEntryCarbs.append(value)
         }
         let lineCarbs = LineChartDataSet(entries:chartEntryCarbs, label: "")
-        lineCarbs.circleRadius = 8
+        lineCarbs.circleRadius = 7
         lineCarbs.circleColors = [NSUIColor.systemOrange.withAlphaComponent(0.75)]
         lineCarbs.drawCircleHoleEnabled = false
         lineCarbs.setDrawHighlightIndicators(false)
@@ -143,6 +150,9 @@ extension MainViewController {
         lineCarbs.drawCirclesEnabled = true
         lineCarbs.lineWidth = 0
         lineCarbs.axisDependency = YAxis.AxisDependency.right
+        lineCarbs.valueFormatter = ChartYDataValueFormatter()
+        lineCarbs.drawValuesEnabled = true
+        lineCarbs.valueTextColor = NSUIColor.label
         
         // Setup the chart data of all lines
         let data = LineChartData()
@@ -150,8 +160,7 @@ extension MainViewController {
         data.addDataSet(lineBasal)
         data.addDataSet(lineBolus)
         data.addDataSet(lineCarbs)
-        data.setValueFont(UIFont(name: UIFont.systemFont(ofSize: 10).fontName, size: 10)!)
-        data.setDrawValues(false)
+        data.setValueFont(UIFont.systemFont(ofSize: 12))
         
         
         // Add marker popups for bolus and carbs

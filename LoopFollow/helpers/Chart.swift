@@ -25,6 +25,19 @@ final class ChartXValueFormatter: IAxisValueFormatter {
     }
 }
 
+final class ChartYDataValueFormatter: IValueFormatter {
+    func stringForValue(_ value: Double, entry: ChartDataEntry, dataSetIndex: Int, viewPortHandler: ViewPortHandler?) -> String {
+        if entry.data != nil {
+            return entry.data as? String ?? ""
+        } else {
+            return ""
+        }
+    }
+    
+   
+}
+
+
 
 class ChartMarker: MarkerView {
     private var text = String()
