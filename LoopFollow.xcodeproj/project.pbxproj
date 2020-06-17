@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
+		FC16A97A24996673003D6245 /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97924996673003D6245 /* NightScout.swift */; };
+		FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
+		FC16A97D24996747003D6245 /* Alarms.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97C24996747003D6245 /* Alarms.swift */; };
+		FC16A97F249969E2003D6245 /* Graphs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97E249969E2003D6245 /* Graphs.swift */; };
+		FC16A98124996C07003D6245 /* DateTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A98024996C07003D6245 /* DateTime.swift */; };
 		FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTaskAudio.swift */; };
 		FC5A5C3D2497B229009C550E /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FC5A5C3C2497B229009C550E /* Config.xcconfig */; };
 		FC7CE518248ABE37001F83B8 /* Siri_Alert_Calibration_Needed.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4A9248ABE2B001F83B8 /* Siri_Alert_Calibration_Needed.caf */; };
@@ -121,7 +126,6 @@
 		FC7CE584248ABE37001F83B8 /* Oringz.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE515248ABE37001F83B8 /* Oringz.caf */; };
 		FC7CE585248ABE37001F83B8 /* Siri_Glucose_Dropping_Fast.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE516248ABE37001F83B8 /* Siri_Glucose_Dropping_Fast.caf */; };
 		FC7CE586248ABE37001F83B8 /* Martian_Gun.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE517248ABE37001F83B8 /* Martian_Gun.caf */; };
-		FC7CE58A248ABEA3001F83B8 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
 		FC7CE58D248ABEF2001F83B8 /* alarm.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE58B248ABEF1001F83B8 /* alarm.mp3 */; };
 		FC7CE58E248ABEF2001F83B8 /* alarm-notification.m4a in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE58C248ABEF1001F83B8 /* alarm-notification.m4a */; };
 		FC7CE59C248D33A9001F83B8 /* dragbar.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE59B248D33A9001F83B8 /* dragbar.png */; };
@@ -131,7 +135,6 @@
 		FC97881C2485969B00A7906C /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC97881B2485969B00A7906C /* MainViewController.swift */; };
 		FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC97881D2485969B00A7906C /* NightScoutViewController.swift */; };
 		FC9788212485969B00A7906C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC97881F2485969B00A7906C /* Main.storyboard */; };
-		FC9788242485969B00A7906C /* LoopFollow.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC9788222485969B00A7906C /* LoopFollow.xcdatamodeld */; };
 		FC9788262485969C00A7906C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC9788252485969C00A7906C /* Assets.xcassets */; };
 		FC9788292485969C00A7906C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC9788272485969C00A7906C /* LaunchScreen.storyboard */; };
 		FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */; };
@@ -153,6 +156,10 @@
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
+		FC16A97924996673003D6245 /* NightScout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScout.swift; sourceTree = "<group>"; };
+		FC16A97C24996747003D6245 /* Alarms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarms.swift; sourceTree = "<group>"; };
+		FC16A97E249969E2003D6245 /* Graphs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphs.swift; sourceTree = "<group>"; };
+		FC16A98024996C07003D6245 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
 		FC5A5C3C2497B229009C550E /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		FC7CE4A9248ABE2B001F83B8 /* Siri_Alert_Calibration_Needed.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Siri_Alert_Calibration_Needed.caf; sourceTree = "<group>"; };
 		FC7CE4AA248ABE2B001F83B8 /* Rise_And_Shine.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Rise_And_Shine.caf; sourceTree = "<group>"; };
@@ -277,7 +284,6 @@
 		FC97881B2485969B00A7906C /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		FC97881D2485969B00A7906C /* NightScoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScoutViewController.swift; sourceTree = "<group>"; };
 		FC9788202485969B00A7906C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		FC9788232485969B00A7906C /* LoopFollow.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LoopFollow.xcdatamodel; sourceTree = "<group>"; };
 		FC9788252485969C00A7906C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC9788282485969C00A7906C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryKeyPath.swift; sourceTree = "<group>"; };
@@ -326,6 +332,28 @@
 				059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		FC16A97624995FEE003D6245 /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				FC97881F2485969B00A7906C /* Main.storyboard */,
+				FC9788172485969B00A7906C /* AppDelegate.swift */,
+				FC9788192485969B00A7906C /* SceneDelegate.swift */,
+				FC9788272485969C00A7906C /* LaunchScreen.storyboard */,
+			);
+			path = Application;
+			sourceTree = "<group>";
+		};
+		FC16A9782499657E003D6245 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */,
+				FC16A97924996673003D6245 /* NightScout.swift */,
+				FC16A97C24996747003D6245 /* Alarms.swift */,
+				FC16A97E249969E2003D6245 /* Graphs.swift */,
+			);
+			path = Controllers;
 			sourceTree = "<group>";
 		};
 		FC7CE4A8248ABE0D001F83B8 /* Alarm Sounds */ = {
@@ -451,6 +479,10 @@
 		FC7CE59A248D334B001F83B8 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				FCC6885D24896A6C00A0279D /* silence.mp3 */,
+				FCC6885B2489559400A0279D /* blank.wav */,
+				FC7CE4A8248ABE0D001F83B8 /* Alarm Sounds */,
+				FC9788252485969C00A7906C /* Assets.xcassets */,
 				FC7CE59B248D33A9001F83B8 /* dragbar.png */,
 			);
 			path = Resources;
@@ -459,20 +491,15 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				FCC688702489A57C00A0279D /* Loop Follow.entitlements */,
+				FC8DEEE62485D1ED0075863F /* Info.plist */,
 				FC7CE59A248D334B001F83B8 /* Resources */,
-				FC7CE4A8248ABE0D001F83B8 /* Alarm Sounds */,
-				FCC68871248A736700A0279D /* Controllers */,
+				FCC68871248A736700A0279D /* ViewControllers */,
+				FC16A9782499657E003D6245 /* Controllers */,
 				FCC688542489367300A0279D /* helpers */,
 				FCC68872248A748A00A0279D /* Models */,
-				FCC688702489A57C00A0279D /* Loop Follow.entitlements */,
 				FCC688512489363F00A0279D /* repository */,
-				FC8DEEE62485D1ED0075863F /* Info.plist */,
-				FC9788172485969B00A7906C /* AppDelegate.swift */,
-				FC9788192485969B00A7906C /* SceneDelegate.swift */,
-				FC97881F2485969B00A7906C /* Main.storyboard */,
-				FC9788252485969C00A7906C /* Assets.xcassets */,
-				FC9788272485969C00A7906C /* LaunchScreen.storyboard */,
-				FC9788222485969B00A7906C /* LoopFollow.xcdatamodeld */,
+				FC16A97624995FEE003D6245 /* Application */,
 			);
 			path = LoopFollow;
 			sourceTree = "<group>";
@@ -499,6 +526,8 @@
 		FCC688512489363F00A0279D /* repository */ = {
 			isa = PBXGroup;
 			children = (
+				FCC6886624898F8000A0279D /* UserDefaultsValue.swift */,
+				FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */,
 				FCC6886424898EEE00A0279D /* UserDefaults.swift */,
 			);
 			path = repository;
@@ -508,20 +537,17 @@
 			isa = PBXGroup;
 			children = (
 				FCC6886E2489A53800A0279D /* AppConstants.swift */,
-				FCC6886624898F8000A0279D /* UserDefaultsValue.swift */,
-				FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */,
 				FCC6886A24898FD800A0279D /* ObservationToken.swift */,
 				FCC6886C2489909D00A0279D /* AnyConvertible.swift */,
-				FCC6885D24896A6C00A0279D /* silence.mp3 */,
-				FCC6885B2489559400A0279D /* blank.wav */,
 				FCC688592489554800A0279D /* BackgroundTaskAudio.swift */,
 				FCFEEC9F2488157B00402A7F /* Chart.swift */,
 				FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */,
+				FC16A98024996C07003D6245 /* DateTime.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
 		};
-		FCC68871248A736700A0279D /* Controllers */ = {
+		FCC68871248A736700A0279D /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
 				FC97881B2485969B00A7906C /* MainViewController.swift */,
@@ -530,13 +556,12 @@
 				FCC6884F248935D800A0279D /* AlarmViewController.swift */,
 				FC7CE59E248D8D23001F83B8 /* SnoozeViewController.swift */,
 			);
-			path = Controllers;
+			path = ViewControllers;
 			sourceTree = "<group>";
 		};
 		FCC68872248A748A00A0279D /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -778,18 +803,21 @@
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */,
 				FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */,
+				FC16A97A24996673003D6245 /* NightScout.swift in Sources */,
 				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,
-				FC7CE58A248ABEA3001F83B8 /* AlarmSound.swift in Sources */,
-				FC9788242485969B00A7906C /* LoopFollow.xcdatamodeld in Sources */,
+				FC16A97D24996747003D6245 /* Alarms.swift in Sources */,
+				FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
 				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
 				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
+				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
 				FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
+				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -992,19 +1020,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		FC9788222485969B00A7906C /* LoopFollow.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				FC9788232485969B00A7906C /* LoopFollow.xcdatamodel */,
-			);
-			currentVersion = FC9788232485969B00A7906C /* LoopFollow.xcdatamodel */;
-			path = LoopFollow.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = FC97880C2485969B00A7906C /* Project object */;
 }

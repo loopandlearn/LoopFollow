@@ -27,7 +27,7 @@ class SettingsViewController: FormViewController {
         
         
       
-        form +++ Section("Nightscout Settings")
+        form +++ Section(header: "Nightscout Settings", footer: "Changing Nightscout settings requires an app restart.")
             <<< TextRow(){ row in
                 row.title = "URL"
                 row.placeholder = "https://mycgm.herokuapp.com"
@@ -38,9 +38,12 @@ class SettingsViewController: FormViewController {
                 }
             <<< TextRow(){ row in
                 row.title = "NS Token"
-                row.placeholder = ""
+                row.placeholder = "Leave blank if not using tokens"
                 row.value = UserDefaultsRepository.token.value
             }.onChange { row in
+                if row.value == nil {
+                    UserDefaultsRepository.token.value = ""
+                }
                 guard let value = row.value else { return }
                 UserDefaultsRepository.token.value = value
                 }
