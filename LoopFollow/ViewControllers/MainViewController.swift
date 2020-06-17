@@ -101,6 +101,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
     var predictionData: [Double] = []
+    var chartData = LineChartData()
+    let chartDispatch = DispatchGroup()
+    var newBGPulled = false
     
     // calendar setup
     let store = EKEventStore()
@@ -111,7 +114,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         super.viewDidLoad()
         
         BGChart.delegate = self
-        BasalChart.delegate = self
         
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
@@ -134,12 +136,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.rowHeight = 25
         infoTable.dataSource = self
         
-        // Add empty datasets from load
-        mainGraphData.addDataSet(mainBGLine)
-        mainGraphData.addDataSet(mainBasalLine)
-        
         // Load Data
         appCameToForeground()
+        
         
     }
     

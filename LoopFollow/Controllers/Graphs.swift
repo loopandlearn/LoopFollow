@@ -15,7 +15,7 @@ extension MainViewController {
     
     // rewrite this func
     func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
-        print("chartTranslated")
+        
         
         if  chartView == BGChart {
             let currentMatrix = chartView.viewPortHandler.touchMatrix
@@ -26,7 +26,10 @@ extension MainViewController {
         }
     }
     
-    func createGraph(entries: [sgvData]){
+
+    
+    func createGraph(newBGLoaded: Bool = false){
+        let entries = bgData
         var bgChartEntry = [ChartDataEntry]()
         var colors = [NSUIColor]()
         var maxBG: Int = 250
@@ -34,7 +37,7 @@ extension MainViewController {
             var dateString = String(entries[i].date).prefix(10)
             let dateSecondsOnly = Double(String(dateString))!
             if entries[i].sgv > maxBG {
-                maxBG = entries[i].sgv
+                maxBG = entries[i].sgv + 20
             }
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
             bgChartEntry.append(value)
@@ -96,6 +99,42 @@ extension MainViewController {
         data.addDataSet(line1)
         data.setValueFont(UIFont(name: UIFont.systemFont(ofSize: 10).fontName, size: 10)!)
         data.setDrawValues(false)
+        line1.axisDependency = YAxis.AxisDependency.right
+        //chartData.addDataSet(line1)
+        
+        // Basal graph
+        var chartEntry = [ChartDataEntry]()
+        var maxBasal = 1.0
+        for i in 0..<basalData.count{
+            let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate))
+            chartEntry.append(value)
+            if basalData[i].basalRate  > maxBasal {
+                maxBasal = basalData[i].basalRate
+            }
+        }
+        let lineB = LineChartDataSet(entries:chartEntry, label: "")
+        lineB.circleRadius = 3
+        lineB.circleColors = [NSUIColor.systemBlue]
+        lineB.drawCircleHoleEnabled = false
+        lineB.setDrawHighlightIndicators(false)
+        lineB.setColor(NSUIColor.systemBlue, alpha: 0.5)
+        lineB.lineWidth = 0
+        lineB.drawFilledEnabled = true
+        lineB.fillColor = NSUIColor.systemBlue.withAlphaComponent(0.8)
+        lineB.drawCirclesEnabled = false
+        data.addDataSet(lineB)
+        data.setValueFont(UIFont(name: UIFont.systemFont(ofSize: 10).fontName, size: 10)!)
+        data.setDrawValues(false)
+        //chartData.addDataSet(line1)
+        
+        lineB.axisDependency = YAxis.AxisDependency.left
+        BGChart.leftAxis.enabled = true
+        BGChart.leftAxis.labelPosition = YAxis.LabelPosition.insideChart
+        BGChart.leftAxis.axisMaximum = maxBasal
+        BGChart.leftAxis.axisMinimum = 0.0
+        BGChart.leftAxis.drawGridLinesEnabled = false
+        
+        
         
         // Clear limit lines so they don't add multiples when changing the settings
         BGChart.rightAxis.removeAllLimitLines()
@@ -103,13 +142,13 @@ extension MainViewController {
         //Add lower red line based on low alert value
         let ll = ChartLimitLine()
         ll.limit = Double(UserDefaultsRepository.lowLine.value)
-        ll.lineColor = NSUIColor.systemRed
+        ll.lineColor = NSUIColor.systemRed.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ll)
         
         //Add upper yellow line based on low alert value
         let ul = ChartLimitLine()
         ul.limit = Double(UserDefaultsRepository.highLine.value)
-        ul.lineColor = NSUIColor.systemYellow
+        ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
         
         BGChart.xAxis.valueFormatter = ChartXValueFormatter()
@@ -119,13 +158,15 @@ extension MainViewController {
         BGChart.rightAxis.labelTextColor = NSUIColor.label
         BGChart.rightAxis.labelPosition = YAxis.LabelPosition.insideChart
         BGChart.rightAxis.axisMinimum = 40
-        BGChart.leftAxis.axisMinimum = 40
+        //BGChart.leftAxis.axisMinimum = 40
         BGChart.rightAxis.axisMaximum = Double(maxBG)
-        BGChart.leftAxis.axisMaximum = Double(maxBG)
-        BGChart.leftAxis.enabled = false
+        //BGChart.leftAxis.axisMaximum = Double(maxBG)
+        //BGChart.leftAxis.enabled = false
         BGChart.legend.enabled = false
         BGChart.scaleYEnabled = false
         BGChart.data = data
+        
+        
         BGChart.setExtraOffsets(left: 10, top: 10, right: 10, bottom: 10)
         BGChart.setVisibleXRangeMinimum(10)
         BGChart.drawGridBackgroundEnabled = true
@@ -134,13 +175,17 @@ extension MainViewController {
             BGChart.zoom(scaleX: 18, scaleY: 1, x: 1, y: 1)
             firstGraphLoad = false
         }
-        BGChart.moveViewToX(dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7))
+        if newBGLoaded {
+            //BGChart.moveViewToX(dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7))
+            BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
+        }
         
-
+        
         
         createSmallBGGraph(bgChartEntry: bgChartEntry, colors: colors)
-      
+        
     }
+    
     
     func createSmallBGGraph(bgChartEntry: [ChartDataEntry], colors: [NSUIColor]){
         //24 Hour Small Graph
@@ -166,25 +211,39 @@ extension MainViewController {
     }
     
     func createBasalGraph(entries: [basalGraphStruct]){
+        
         var chartEntry = [ChartDataEntry]()
+        var maxBasal = 1.0
         for i in 0..<entries.count{
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].basalRate))
             chartEntry.append(value)
+            if entries[i].basalRate  > maxBasal {
+                maxBasal = entries[i].basalRate
+            }
         }
         let line1 = LineChartDataSet(entries:chartEntry, label: "")
         line1.circleRadius = 3
         line1.circleColors = [NSUIColor.systemBlue]
         line1.drawCircleHoleEnabled = false
         line1.setDrawHighlightIndicators(false)
-        line1.setColor(NSUIColor.systemBlue, alpha: 1.0)
-        line1.lineWidth = 3
+        line1.setColor(NSUIColor.systemBlue, alpha: 0.5)
+        line1.lineWidth = 0
         line1.drawFilledEnabled = true
-        line1.fillColor = NSUIColor.systemBlue
+        line1.fillColor = NSUIColor.systemBlue.withAlphaComponent(0.8)
         line1.drawCirclesEnabled = false
         let data = LineChartData()
         data.addDataSet(line1)
         data.setValueFont(UIFont(name: UIFont.systemFont(ofSize: 10).fontName, size: 10)!)
         data.setDrawValues(false)
+        chartData.addDataSet(line1)
+        
+        line1.axisDependency = YAxis.AxisDependency.left
+        BGChart.leftAxis.enabled = true
+        BGChart.leftAxis.labelPosition = YAxis.LabelPosition.insideChart
+        BGChart.leftAxis.axisMaximum = maxBasal
+        BGChart.leftAxis.axisMinimum = 0.0
+        BGChart.leftAxis.drawGridLinesEnabled = false
+        
         
         BasalChart.xAxis.valueFormatter = ChartXValueFormatter()
         BasalChart.xAxis.granularity = 1800
@@ -205,6 +264,6 @@ extension MainViewController {
             firstBasalGraphLoad = false
         }
         BasalChart.moveViewToX(dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7))
-        
+       
     }
 }

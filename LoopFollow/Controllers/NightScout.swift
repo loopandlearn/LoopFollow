@@ -12,6 +12,7 @@ import UIKit
 
 extension MainViewController {
     
+    
     // Main loader for all data
     func nightscoutLoader(forceLoad: Bool = false) {
         
@@ -34,6 +35,10 @@ extension MainViewController {
             needsLoaded = true
         }
         
+        // reset the chart data before loading
+        chartData.clearValues()
+
+        
         if forceLoad { needsLoaded = true}
         // Only do the network calls if we don't have a current reading
         if needsLoaded {
@@ -45,23 +50,31 @@ extension MainViewController {
             loadCage(urlUser: urlUser)
             loadSage(urlUser: urlUser)
             
+            chartDispatch.notify(queue: .main){
+                self.createGraph(newBGLoaded: needsLoaded)
+            }
+            
            // loadBoluses(urlUser: urlUser)
            
         } else {
             loadProfile(urlUser: urlUser)
             loadTempBasals(urlUser: urlUser)
             loadDeviceStatus(urlUser: urlUser)
+           
             updateMinAgo()
             clearOldSnoozes()
             checkAlarms(bgs: bgData)
             loadProfile(urlUser: urlUser)
+            chartDispatch.notify(queue: .main){
+                self.createGraph(newBGLoaded: needsLoaded)
+            }
         }
         
     }
     
     // Main NS BG Data Pull
     func loadBGData(urlUser: String, onlyPullLastRecord: Bool = false) {
-
+        chartDispatch.enter()
         // Set the count= in the url either to pull 24 hours or only the last record
         var points = "1"
         if !onlyPullLastRecord {
@@ -129,10 +142,11 @@ extension MainViewController {
         }
         self.updateBadge(entries: bgData)
         self.updateBG(entries: bgData)
-        self.createGraph(entries: bgData)
+        //self.createGraph(entries: bgData)
         if UserDefaultsRepository.writeCalendarEvent.value {
             self.writeCalendar()
         }
+        chartDispatch.leave()
        }
     
     func updateBG (entries: [sgvData]) {
@@ -482,7 +496,7 @@ extension MainViewController {
        
       // Load Current Profile
       func loadProfile(urlUser: String) {
-          
+          chartDispatch.enter()
           let urlString = urlUser + "/api/v1/profile/current.json"
           let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
           guard let url = URL(string: escapedAddress!) else {
@@ -515,7 +529,7 @@ extension MainViewController {
       
       // Parse Basal schedule from the profile
       func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
-     
+        
           if jsonDeviceStatus.count == 0 {
               return
           }
@@ -528,11 +542,13 @@ extension MainViewController {
               let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
               basalProfile.append(entry)
           }
+        chartDispatch.leave()
           
       }
       
 
       func loadTempBasals(urlUser: String) {
+        chartDispatch.enter()
           let today = Date()
             let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
             
@@ -575,7 +591,7 @@ extension MainViewController {
       }
       
       func updateBasals(entries: [[String:AnyObject]]) {
-          
+        
           // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
           basalData.removeAll()
           
@@ -714,6 +730,7 @@ extension MainViewController {
         basalData.append(endDot)
         */
         createBasalGraph(entries: basalData)
+        chartDispatch.leave()
       }
     
       // NOT IMPLEMENTED YET
