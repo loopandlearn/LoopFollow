@@ -70,6 +70,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var firstGraphLoad: Bool = true
     var firstBasalGraphLoad: Bool = true
     var minAgoBG: Double = 0.0
+    var currentOverride = 0.0
     
     // Vars for NS Pull
     var graphHours:Int=24
@@ -324,6 +325,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: String(self.bgData[self.bgData.count - 1].sgv))
             eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
             eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
+            if self.currentOverride != 1.0 {
+                let val = Int( self.currentOverride*100)
+               // let overrideText = String(format:"%f1", self.currentOverride*100)
+                let text = String(val) + "%"
+                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: text)
+            }
             var minAgo = ""
             if deltaTime > 5 {
                 // write old BG reading and continue pushing out end date to show last entry

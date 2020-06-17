@@ -337,7 +337,7 @@ extension MainViewController {
           }
           
           var oText = "" as String
-                 
+            currentOverride = 1.0
                  if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
                      if let lastOverrideTime = formatter.date(from: (lastOverride["timestamp"] as! String))?.timeIntervalSince1970  {
                      }
@@ -345,12 +345,13 @@ extension MainViewController {
                          
                          let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
                          if let multiplier = lastOverride["multiplier"] as? Double {
-                                                oText += String(format:"%.1f", multiplier*100)
-                                            }
-                                            else
-                                            {
-                                                oText += String(format:"%.1f", 100)
-                                            }
+                            currentOverride = multiplier
+                            oText += String(format:"%.1f", multiplier*100)
+                        }
+                        else
+                        {
+                            oText += String(format:"%.1f", 100)
+                        }
                          oText += "% ("
                          let minValue = lastCorrection["minValue"] as! Double
                          let maxValue = lastCorrection["maxValue"] as! Double
