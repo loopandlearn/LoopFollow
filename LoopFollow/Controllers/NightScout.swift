@@ -772,7 +772,7 @@ extension MainViewController {
                 lastFoundIndex = sgv.foundIndex
                 
                  // Make the dot
-                let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 10))
                  bolusData.append(dot)
             }
 
@@ -841,7 +841,7 @@ extension MainViewController {
                 lastFoundIndex = sgv.foundIndex
                 
                  // Make the dot
-                let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv - 15))
                  carbData.append(dot)
             }
 
