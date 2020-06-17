@@ -322,8 +322,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 deltaString = "+" + String(deltaBG)
             }
             let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
-            
-            
+
             var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
             var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
             var  eventTitle = UserDefaultsRepository.watchLine1.value + "\n" + UserDefaultsRepository.watchLine2.value
@@ -396,6 +395,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
             } catch {
                 // Display error to user
+                print(error)
             }
         }
     }

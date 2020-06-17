@@ -118,7 +118,7 @@ extension MainViewController {
         // Boluses
         var chartEntryBolus = [ChartDataEntry]()
         for i in 0..<bolusData.count{
-            let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv), data: String(bolusData[i].value))
+            let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + 10), data: String(bolusData[i].value))
             chartEntryBolus.append(value)
         }
         let lineBolus = LineChartDataSet(entries:chartEntryBolus, label: "")
@@ -138,7 +138,7 @@ extension MainViewController {
         // Carbs
         var chartEntryCarbs = [ChartDataEntry]()
         for i in 0..<carbData.count{
-            let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv), data: String(carbData[i].value))
+            let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + 30), data: String(carbData[i].value))
             chartEntryCarbs.append(value)
         }
         let lineCarbs = LineChartDataSet(entries:chartEntryCarbs, label: "")
@@ -164,8 +164,9 @@ extension MainViewController {
         
         
         // Add marker popups for bolus and carbs
-        let marker = PillMarker(color: .secondarySystemBackground, font: UIFont.boldSystemFont(ofSize: 14), textColor: .label)
-        BGChart.marker = marker
+        // Changed to display values
+        //let marker = PillMarker(color: .secondarySystemBackground, font: UIFont.boldSystemFont(ofSize: 14), textColor: .label)
+        //BGChart.marker = marker
         
         // Clear limit lines so they don't add multiples when changing the settings
         BGChart.rightAxis.removeAllLimitLines()
