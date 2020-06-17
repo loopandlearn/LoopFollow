@@ -63,9 +63,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     public var linePlotDataTime: [Double] = []
     var firstGraphLoad: Bool = true
     var firstBasalGraphLoad: Bool = true
-    var mainGraphData = LineChartData()
-    var mainBGLine = LineChartDataSet()
-    var mainBasalLine = LineChartDataSet()
     
     // Vars for NS Pull
     var graphHours:Int=24
