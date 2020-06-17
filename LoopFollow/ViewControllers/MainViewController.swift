@@ -24,7 +24,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var DragBar: UIImageView!
     @IBOutlet weak var PredictionLabel: UILabel!
     @IBOutlet weak var LoopStatusLabel: UILabel!
-    @IBOutlet weak var BasalChart: LineChartView!
     
     //NS BG Struct
     struct sgvData: Codable {
@@ -51,6 +50,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         var date: TimeInterval
     }
     
+    //NS Bolus Data  Struct
+    struct bolusCarbGraphStruct: Codable {
+        var value: Double
+        var date: TimeInterval
+        var sgv: Int
+    }
+    
     // Data Table Struct
     struct infoData {
         var name: String
@@ -63,6 +69,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     public var linePlotDataTime: [Double] = []
     var firstGraphLoad: Bool = true
     var firstBasalGraphLoad: Bool = true
+    var minAgoBG: Double = 0.0
     
     // Vars for NS Pull
     var graphHours:Int=24
@@ -100,6 +107,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var bgData: [sgvData] = []
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
+    var bolusData: [bolusCarbGraphStruct] = []
+    var carbData: [bolusCarbGraphStruct] = []
     var predictionData: [Double] = []
     var chartData = LineChartData()
     let chartDispatch = DispatchGroup()
@@ -228,6 +237,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     //update Min Ago Text. We need to call this separately because it updates between readings
     func updateMinAgo(){
         let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
+        minAgoBG = Double(TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date)
         MinAgoText.text = String(Int(deltaTime)) + " min ago"
     }
     
@@ -247,7 +257,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     
     
-    func updateBadge(entries: [sgvData]) {
+    func updateBadge() {
+        let entries = bgData
         if entries.count > 0 && UserDefaultsRepository.appBadge.value {
             let latestBG = entries[entries.count - 1].sgv
             UIApplication.shared.applicationIconBadgeNumber = latestBG

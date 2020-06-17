@@ -48,4 +48,14 @@ class dateTimeUtils {
         return utcTime
     }
     
+    static func nowMinus24HoursTimeInterval() -> String {
+        let today = Date()
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
+        let yesterdayString = dateFormatter.string(from: yesterday)
+        return yesterdayString
+    }
+    
 }
