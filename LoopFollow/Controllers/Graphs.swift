@@ -206,33 +206,5 @@ extension MainViewController {
         }
         BasalChart.moveViewToX(dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7))
         
-        // Bar Chart Build
-        /*var chartEntry = [BarChartDataEntry]()
-        for i in 0..<entries.count{
-            let value = BarChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].basalRate))
-            chartEntry.append(value)
-        }
-        let bar1 = BarChartDataSet(entries:chartEntry, label: "")
-        bar1.setColor(NSUIColor.systemBlue, alpha: 0.5)
-        let data = BarChartData()
-        data.addDataSet(bar1)
-        data.setValueFont(UIFont(name: UIFont.systemFont(ofSize: 10).fontName, size: 10)!)
-        data
-        data.barWidth = 290
-        BasalChart.xAxis.valueFormatter = ChartXValueFormatter()
-        BasalChart.xAxis.granularity = 1800
-        BasalChart.data = data
-        BasalChart.legend.enabled = false
-        BasalChart.xAxis.drawGridLinesEnabled = false
-        BasalChart.leftAxis.drawGridLinesEnabled = false
-        BasalChart.rightAxis.drawGridLinesEnabled = false
-        BasalChart.leftAxis.enabled = false
-        BasalChart.scaleYEnabled = false
-        if firstBasalGraphLoad {
-            BasalChart.zoom(scaleX: 18, scaleY: 1, x: 1, y: 1)
-            firstBasalGraphLoad = false
-        }
-        BasalChart.moveViewToX(BGChart.chartXMax)
-        */
     }
 }
