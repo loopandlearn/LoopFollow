@@ -139,6 +139,9 @@ extension MainViewController {
             bgData.removeAll()
         } else if bgData[bgData.count - 1].date != pullDate {
             bgData.removeFirst()
+            if data.count > 0 && UserDefaultsRepository.speakBG.value {
+                speakBG(sgv: data[data.count - 1].sgv)
+            }
         } else {
             // Update the badge, bg, graph settings even if we don't have a new reading.
             self.updateBadge()
