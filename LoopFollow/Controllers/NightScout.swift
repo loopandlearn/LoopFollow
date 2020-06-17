@@ -68,6 +68,7 @@ extension MainViewController {
             webLoadNSCarbs()
            
             chartDispatch.notify(queue: .main){
+                
                 self.createGraph()
                 self.updateMinAgo()
                 self.clearOldSnoozes()
@@ -93,7 +94,11 @@ extension MainViewController {
         } else {
             urlBGDataPath = urlBGDataPath + "token=" + token + "&count=" + points
         }
-        guard let urlBGData = URL(string: urlBGDataPath) else { return }
+        guard let urlBGData = URL(string: urlBGDataPath) else {
+            
+            return
+            
+        }
         var request = URLRequest(url: urlBGData)
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
 
@@ -101,9 +106,11 @@ extension MainViewController {
         let getBGTask = URLSession.shared.dataTask(with: request) { data, response, error in
             if self.consoleLogging == true {print("start bg url")}
             guard error == nil else {
+
                 return
             }
             guard let data = data else {
+
                 return
             }
 
@@ -123,6 +130,7 @@ extension MainViewController {
        
     // NS BG Data Response processor
     func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
+        defer { chartDispatch.leave() }
         var pullDate = data[data.count - 1].date / 1000
         pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
         
@@ -145,7 +153,6 @@ extension MainViewController {
             let reading = sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
             bgData.append(reading)
         }
-        chartDispatch.leave()
        }
     
     // NS BG Data Front end updater
@@ -201,6 +208,7 @@ extension MainViewController {
     
      // NS Device Status Web Call
       func webLoadNSDeviceStatus() {
+        self.chartDispatch.enter()
         let urlUser = UserDefaultsRepository.url.value
           var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
           if token != "" {
@@ -208,7 +216,8 @@ extension MainViewController {
           }
           let escapedAddress = urlStringDeviceStatus.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
           guard let urlDeviceStatus = URL(string: escapedAddress!) else {
-              return
+              
+            return
           }
           if consoleLogging == true {print("entered device status task.")}
           var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
@@ -216,10 +225,10 @@ extension MainViewController {
           let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
           if self.consoleLogging == true {print("in device status loop.")}
           guard error == nil else {
-              return
+            return
           }
           guard let data = data else {
-              return
+            return
           }
               
               let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
@@ -228,7 +237,7 @@ extension MainViewController {
                   self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
               }
           } else {
-              return
+            return
           }
           if self.consoleLogging == true {print("finish pump update")}}
           deviceStatusTask.resume()
@@ -236,9 +245,10 @@ extension MainViewController {
       
       // NS Device Status Response Processor
       func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
+        defer { chartDispatch.leave() }
           if consoleLogging == true {print("in updatePump")}
           if jsonDeviceStatus.count == 0 {
-              return
+            return
           }
           
           //only grabbing one record since ns sorts by {created_at : -1}
@@ -498,21 +508,21 @@ extension MainViewController {
        
       // NS Profile Web Call
       func webLoadNSProfile() {
-          chartDispatch.enter()
+          self.chartDispatch.enter()
         let urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
           let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
           guard let url = URL(string: escapedAddress!) else {
-              return
+            return
           }
           
           var request = URLRequest(url: url)
           request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
           let task = URLSession.shared.dataTask(with: request) { data, response, error in
               guard error == nil else {
-                  return
+                return
               }
               guard let data = data else {
-                  return
+                return
               }
               
               
@@ -523,7 +533,7 @@ extension MainViewController {
                       self.updateProfile(jsonDeviceStatus: json)
                   }
               } else {
-                  return
+                return
               }
           }
           task.resume()
@@ -531,7 +541,7 @@ extension MainViewController {
       
       // NS Profile Response Processor
       func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
-        
+        defer { chartDispatch.leave() }
           if jsonDeviceStatus.count == 0 {
               return
           }
@@ -544,13 +554,12 @@ extension MainViewController {
               let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
               basalProfile.append(entry)
           }
-        chartDispatch.leave()
           
       }
       
         // NS Temp Basal Web Call
       func WebLoadNSTempBasals() {
-        chartDispatch.enter()
+        self.chartDispatch.enter()
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
 
         var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[eventType][$eq]=Temp%20Basal&find[created_at][$gte]=" + yesterdayString
@@ -588,7 +597,7 @@ extension MainViewController {
       
     // NS Temp Basal Response Processor
       func updateBasals(entries: [[String:AnyObject]]) {
-        
+        defer { chartDispatch.leave() }
           // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
           basalData.removeAll()
           
@@ -708,12 +717,11 @@ extension MainViewController {
             
         
  
-        chartDispatch.leave()
       }
     
     // NS Bolus Web Call
       func webLoadNSBoluses(){
-        chartDispatch.enter()
+        self.chartDispatch.enter()
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Correction%20Bolus&find[created_at][$gte]=" + yesterdayString
@@ -726,17 +734,17 @@ extension MainViewController {
               urlDataPath = urlDataPath + "token=" + token + "&" + searchString
           }
           guard let urlData = URL(string: urlDataPath) else {
-              return
+            return
           }
           var request = URLRequest(url: urlData)
            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
            let task = URLSession.shared.dataTask(with: request) { data, response, error in
           
                guard error == nil else {
-                   return
+                return
                }
                guard let data = data else {
-                   return
+                return
                }
                    
                let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
@@ -745,7 +753,7 @@ extension MainViewController {
                        self.processNSBolus(entries: json)
                    }
                } else {
-                   return
+                return
                }
            }
            task.resume()
@@ -753,7 +761,7 @@ extension MainViewController {
     
     // NS Meal Bolus Response Processor
          func processNSBolus(entries: [[String:AnyObject]]) {
-           
+            defer { chartDispatch.leave() }
              // because it's a small array, we're going to destroy and reload every time.
              bolusData.removeAll()
              var lastFoundIndex = 0
@@ -772,17 +780,17 @@ extension MainViewController {
                 lastFoundIndex = sgv.foundIndex
                 
                  // Make the dot
-                let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 10))
+                let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
                  bolusData.append(dot)
             }
 
-           chartDispatch.leave()
+           
          }
     
     
     // NS Carb Web Call
       func webLoadNSCarbs(){
-        chartDispatch.enter()
+        self.chartDispatch.enter()
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=" + yesterdayString
@@ -795,17 +803,17 @@ extension MainViewController {
               urlDataPath = urlDataPath + "token=" + token + "&" + searchString
           }
           guard let urlData = URL(string: urlDataPath) else {
-              return
+            return
           }
           var request = URLRequest(url: urlData)
            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
            let task = URLSession.shared.dataTask(with: request) { data, response, error in
           
                guard error == nil else {
-                   return
+                return
                }
                guard let data = data else {
-                   return
+                return
                }
                    
                let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
@@ -814,7 +822,7 @@ extension MainViewController {
                        self.processNSCarbs(entries: json)
                    }
                } else {
-                   return
+                return
                }
            }
            task.resume()
@@ -822,7 +830,7 @@ extension MainViewController {
     
     // NS Carb Bolus Response Processor
          func processNSCarbs(entries: [[String:AnyObject]]) {
-           
+           defer { chartDispatch.leave() }
              // because it's a small array, we're going to destroy and reload every time.
              carbData.removeAll()
              var lastFoundIndex = 0
@@ -841,10 +849,10 @@ extension MainViewController {
                 lastFoundIndex = sgv.foundIndex
                 
                  // Make the dot
-                let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv - 15))
+                let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
                  carbData.append(dot)
             }
 
-           chartDispatch.leave()
+
          }
 }
