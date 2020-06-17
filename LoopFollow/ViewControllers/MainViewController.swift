@@ -146,7 +146,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.dataSource = self
         
         // Load Data
-        appCameToForeground()
+        nightscoutLoader()
         
         
     }
@@ -155,9 +155,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // set screen lock
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
         
-        // Pull fresh data when view appears
-        // moved this to didload, timer end, and foreground
-        //nightscoutLoader()
     }
     
     
@@ -224,8 +221,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             timer.invalidate()
         }
         startTimer(time: timeInterval)
-        nightscoutLoader()
-
     }
     
     // Check for new data when timer ends
