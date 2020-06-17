@@ -103,8 +103,15 @@
                                 </subviews>
                             </stackView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="51B-JU-npv" customClass="LineChartView" customModule="Charts">
-                                <rect key="frame" x="8" y="312" width="398" height="425"/>
+                                <rect key="frame" x="8" y="312" width="398" height="297"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="AOf-kb-6CI" userLabel="BasalChart" customClass="LineChartView" customModule="Charts">
+                                <rect key="frame" x="8" y="617" width="398" height="120"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" priority="750" constant="120" id="qWe-ZM-8HL"/>
+                                </constraints>
                             </view>
                             <view autoresizesSubviews="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Nml-lr-dgQ" userLabel="BGChartFull" customClass="LineChartView" customModule="Charts">
                                 <rect key="frame" x="8" y="745" width="398" height="60"/>
@@ -118,13 +125,16 @@
                         <constraints>
                             <constraint firstItem="51B-JU-npv" firstAttribute="top" secondItem="mJy-Ly-Jze" secondAttribute="bottom" constant="8" id="2Qj-m5-4Yj"/>
                             <constraint firstItem="PQr-Ze-W5v" firstAttribute="trailing" secondItem="Nml-lr-dgQ" secondAttribute="trailing" constant="8" id="5dn-w0-XWn"/>
+                            <constraint firstItem="AOf-kb-6CI" firstAttribute="top" secondItem="51B-JU-npv" secondAttribute="bottom" constant="8" id="8aC-1I-XGc"/>
                             <constraint firstItem="Nml-lr-dgQ" firstAttribute="leading" secondItem="PQr-Ze-W5v" secondAttribute="leading" constant="8" id="D6D-3r-YIy"/>
+                            <constraint firstItem="AOf-kb-6CI" firstAttribute="leading" secondItem="PQr-Ze-W5v" secondAttribute="leading" constant="8" id="KGd-6a-HA1"/>
                             <constraint firstItem="PQr-Ze-W5v" firstAttribute="trailing" secondItem="mJy-Ly-Jze" secondAttribute="trailing" constant="8" id="KcX-yW-Vnd"/>
                             <constraint firstItem="PQr-Ze-W5v" firstAttribute="bottom" secondItem="Nml-lr-dgQ" secondAttribute="bottom" constant="8" id="Sb3-4z-Qup"/>
                             <constraint firstItem="mJy-Ly-Jze" firstAttribute="leading" secondItem="PQr-Ze-W5v" secondAttribute="leading" constant="8" id="b30-Y0-qsu"/>
                             <constraint firstItem="51B-JU-npv" firstAttribute="leading" secondItem="PQr-Ze-W5v" secondAttribute="leading" constant="8" id="dfE-Q6-SML"/>
-                            <constraint firstItem="Nml-lr-dgQ" firstAttribute="top" secondItem="51B-JU-npv" secondAttribute="bottom" constant="8" id="hdx-AR-c3V"/>
+                            <constraint firstItem="Nml-lr-dgQ" firstAttribute="top" secondItem="AOf-kb-6CI" secondAttribute="bottom" constant="8" id="oLY-NQ-TFm"/>
                             <constraint firstItem="PQr-Ze-W5v" firstAttribute="trailing" secondItem="51B-JU-npv" secondAttribute="trailing" constant="8" id="oqO-3J-e8a"/>
+                            <constraint firstItem="PQr-Ze-W5v" firstAttribute="trailing" secondItem="AOf-kb-6CI" secondAttribute="trailing" constant="8" id="xBV-Eb-pEs"/>
                             <constraint firstItem="mJy-Ly-Jze" firstAttribute="top" secondItem="PQr-Ze-W5v" secondAttribute="top" constant="8" id="xem-Lc-bdU"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="PQr-Ze-W5v"/>
@@ -134,6 +144,7 @@
                         <outlet property="BGChart" destination="51B-JU-npv" id="oF1-UA-KHE"/>
                         <outlet property="BGChartFull" destination="Nml-lr-dgQ" id="Z21-fG-GK9"/>
                         <outlet property="BGText" destination="vXU-IW-GOL" id="2aC-pv-Qbg"/>
+                        <outlet property="BasalChart" destination="AOf-kb-6CI" id="Qsl-jz-Qfj"/>
                         <outlet property="DeltaText" destination="sb7-g9-JNv" id="h7s-Yj-i4M"/>
                         <outlet property="DirectionText" destination="4sd-6h-LSj" id="lB5-Z0-p25"/>
                         <outlet property="LoopStatusLabel" destination="XEm-uK-Xui" id="EBm-Ta-tZ1"/>
