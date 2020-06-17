@@ -202,8 +202,8 @@ extension MainViewController {
         
         BGChart.legend.enabled = false
         BGChart.scaleYEnabled = false
-        BGChart.drawGridBackgroundEnabled = true
-        BGChart.gridBackgroundColor = NSUIColor.secondarySystemBackground
+        BGChart.drawGridBackgroundEnabled = false
+        //BGChart.gridBackgroundColor = NSUIColor.secondarySystemBackground
         
         BGChart.data = data
         

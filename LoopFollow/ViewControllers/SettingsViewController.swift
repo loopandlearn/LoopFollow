@@ -130,6 +130,13 @@ class SettingsViewController: FormViewController {
                     guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
                     mainScreen.nightscoutLoader(forceLoad: true)
         }
+        <<< SwitchRow("speakBG"){ row in
+            row.title = "Speak BG"
+            row.value = UserDefaultsRepository.speakBG.value
+        }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.speakBG.value = value
+        }
     }
     
     func buildAlarmSettings() {
