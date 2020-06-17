@@ -134,8 +134,8 @@ extension MainViewController {
             BGChart.zoom(scaleX: 18, scaleY: 1, x: 1, y: 1)
             firstGraphLoad = false
         }
-        // 7000 only shows 30 minutes of the hour predictions, leaving the rest on the right of the screen requiring a scroll
-        BGChart.moveViewToX(Date().timeIntervalSince1970)
+        BGChart.moveViewToX(dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7))
+        
 
         
         createSmallBGGraph(bgChartEntry: bgChartEntry, colors: colors)
@@ -204,8 +204,7 @@ extension MainViewController {
             BasalChart.zoom(scaleX: 18, scaleY: 1, x: 1, y: 1)
             firstBasalGraphLoad = false
         }
-        // 7000 only shows 30 minutes of the hour predictions, leaving the rest on the right of the screen requiring a scroll
-        BasalChart.moveViewToX(Date().timeIntervalSince1970)
+        BasalChart.moveViewToX(dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7))
         
         // Bar Chart Build
         /*var chartEntry = [BarChartDataEntry]()

@@ -37,9 +37,15 @@ class dateTimeUtils {
         return midnightTimeInterval
     }
     
-    static func getNowTimeInterval() -> TimeInterval {
-        let now = Date().timeIntervalSince1970
-        return now
+    static func getNowTimeIntervalUTC() -> TimeInterval {
+        let now = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        let utc = formatter.string(from: now)
+        let day = formatter.date(from: utc)
+        guard let utcTime = day?.timeIntervalSince1970 else { return 0 }
+        return utcTime
     }
     
 }

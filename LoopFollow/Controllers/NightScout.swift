@@ -649,9 +649,9 @@ extension MainViewController {
               basalData.append(startDot)
             
             // Make the ending dot
-            // If it's the last one and not ended yet, extend it for 1 hour to matc the prediction length. Otherwise let it end
-            if i == entries.count - 1 && dateTimeStamp + duration <= Date().timeIntervalSince1970 {
-                lastEndDot = Date().timeIntervalSince1970 + (60 * 60)
+            // If it's the last one and not ended yet, extend it for 1 hour to match the prediction length. Otherwise let it end
+            if i == entries.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
+                lastEndDot = Date().timeIntervalSince1970 + (55 * 60)
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
             }
@@ -662,7 +662,7 @@ extension MainViewController {
           }
         
         // If last scheduled basal was prior to right now, we need to create one last scheduled entry
-        if lastEndDot <= Date().timeIntervalSince1970 {
+        if lastEndDot <= dateTimeUtils.getNowTimeIntervalUTC() {
             var scheduled = 0.0
                 // cycle through basal profiles.
                 // TODO figure out how to deal with profile changes that happen mid-gap
