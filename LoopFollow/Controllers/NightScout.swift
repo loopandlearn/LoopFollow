@@ -80,7 +80,7 @@ extension MainViewController {
     
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
-        chartDispatch.enter()
+        
         // Set the count= in the url either to pull 24 hours or only the last record
         var points = "1"
         if !onlyPullLastRecord {
@@ -103,15 +103,18 @@ extension MainViewController {
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
 
         // Downloader
+        chartDispatch.enter()
         let getBGTask = URLSession.shared.dataTask(with: request) { data, response, error in
             if self.consoleLogging == true {print("start bg url")}
             guard error == nil else {
-
+                self.chartDispatch.leave()
                 return
+                
             }
             guard let data = data else {
-
+                self.chartDispatch.leave()
                 return
+                
             }
 
             let decoder = JSONDecoder()
@@ -123,7 +126,9 @@ extension MainViewController {
                     self.chartDispatch.leave()
                 }
             } else {
+                self.chartDispatch.leave()
                 return
+                
             }
         }
         getBGTask.resume()
@@ -208,7 +213,6 @@ extension MainViewController {
     
      // NS Device Status Web Call
       func webLoadNSDeviceStatus() {
-        self.chartDispatch.enter()
         let urlUser = UserDefaultsRepository.url.value
           var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
           if token != "" {
@@ -220,28 +224,36 @@ extension MainViewController {
             return
           }
           if consoleLogging == true {print("entered device status task.")}
-          var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
-          requestDeviceStatus.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-          let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
-          if self.consoleLogging == true {print("in device status loop.")}
-          guard error == nil else {
-            return
-          }
-          guard let data = data else {
-            return
-          }
-              
-              let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
-          if let json = json {
-              DispatchQueue.main.async {
-                  self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
+          
+            
+            var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
+            requestDeviceStatus.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            
+            self.chartDispatch.enter()
+            let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
+            if self.consoleLogging == true {print("in device status loop.")}
+            guard error == nil else {
+                self.chartDispatch.leave()
+                return
+            }
+            guard let data = data else {
+                self.chartDispatch.leave()
+                return
+            }
+
+
+            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            if let json = json {
+                DispatchQueue.main.async {
+                    self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
                     self.chartDispatch.leave()
-              }
-          } else {
-            return
-          }
-          if self.consoleLogging == true {print("finish pump update")}}
-          deviceStatusTask.resume()
+                }
+            } else {
+                self.chartDispatch.leave()
+                return
+            }
+            if self.consoleLogging == true {print("finish pump update")}}
+            deviceStatusTask.resume()
       }
       
       // NS Device Status Response Processor
@@ -508,7 +520,7 @@ extension MainViewController {
        
       // NS Profile Web Call
       func webLoadNSProfile() {
-          self.chartDispatch.enter()
+          
         let urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
           let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
           guard let url = URL(string: escapedAddress!) else {
@@ -517,11 +529,14 @@ extension MainViewController {
           
           var request = URLRequest(url: url)
           request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-          let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            self.chartDispatch.enter()
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
               guard error == nil else {
+                self.chartDispatch.leave()
                 return
               }
               guard let data = data else {
+                self.chartDispatch.leave()
                 return
               }
               
@@ -534,6 +549,7 @@ extension MainViewController {
                     self.chartDispatch.leave()
                   }
               } else {
+                self.chartDispatch.leave()
                 return
               }
           }
@@ -559,7 +575,7 @@ extension MainViewController {
       
         // NS Temp Basal Web Call
       func WebLoadNSTempBasals() {
-        self.chartDispatch.enter()
+        
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
 
         var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[eventType][$eq]=Temp%20Basal&find[created_at][$gte]=" + yesterdayString
@@ -574,12 +590,15 @@ extension MainViewController {
           
             var request = URLRequest(url: urlData)
             request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+                self.chartDispatch.enter()
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
            
                 guard error == nil else {
+                   self.chartDispatch.leave()
                     return
                 }
                 guard let data = data else {
+                    self.chartDispatch.leave()
                     return
                 }
                     
@@ -590,6 +609,7 @@ extension MainViewController {
                         self.chartDispatch.leave()
                     }
                 } else {
+                   self.chartDispatch.leave()
                     return
                 }
             }
@@ -721,7 +741,7 @@ extension MainViewController {
     
     // NS Bolus Web Call
       func webLoadNSBoluses(){
-        self.chartDispatch.enter()
+        
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Correction%20Bolus&find[created_at][$gte]=" + yesterdayString
@@ -738,12 +758,15 @@ extension MainViewController {
           }
           var request = URLRequest(url: urlData)
            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-           let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        self.chartDispatch.enter()
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
           
                guard error == nil else {
+                self.chartDispatch.leave()
                 return
                }
                guard let data = data else {
+                self.chartDispatch.leave()
                 return
                }
                    
@@ -754,6 +777,7 @@ extension MainViewController {
                     self.chartDispatch.leave()
                    }
                } else {
+                self.chartDispatch.leave()
                 return
                }
            }
@@ -790,7 +814,7 @@ extension MainViewController {
     
     // NS Carb Web Call
       func webLoadNSCarbs(){
-        self.chartDispatch.enter()
+        
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=" + yesterdayString
@@ -807,12 +831,15 @@ extension MainViewController {
           }
           var request = URLRequest(url: urlData)
            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        self.chartDispatch.enter()
            let task = URLSession.shared.dataTask(with: request) { data, response, error in
           
                guard error == nil else {
+                self.chartDispatch.leave()
                 return
                }
                guard let data = data else {
+                self.chartDispatch.leave()
                 return
                }
                    
@@ -823,6 +850,7 @@ extension MainViewController {
                     self.chartDispatch.leave()
                    }
                } else {
+                self.chartDispatch.leave()
                 return
                }
            }
