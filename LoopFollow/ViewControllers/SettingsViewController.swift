@@ -131,6 +131,13 @@ class SettingsViewController: FormViewController {
                     guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
                     mainScreen.nightscoutLoader(forceLoad: true)
         }
+        <<< SwitchRow("speakBG"){ row in
+            row.title = "Speak BG"
+            row.value = UserDefaultsRepository.speakBG.value
+        }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.speakBG.value = value
+        }
     }
     
     func buildAlarmSettings() {
@@ -246,7 +253,7 @@ class SettingsViewController: FormViewController {
         }
         
         form
-        +++ Section(header: "Watch Settings", footer: "Add the Apple calendar complication to your watch face for BG, Trend, Delta, COB, and IOB updated every 5 minutes. It is recommended to create a new calendar called 'Loop' and modify the calendar settings in the iPhone Watch App to only display the Loop calendar on your watch. Available variables are: %BG%, %DIRECTION%, %DELTA%, %MINAGO%, %IOB%, %COB%, %BASAL%. ** %MINAGO% only displays if it is an old reading")
+       +++ Section(header: "Watch Settings", footer: "Add the Apple calendar complication to your watch face for BG, Trend, Delta, COB, and IOB updated every 5 minutes. It is recommended to create a new calendar called 'Loop' and modify the calendar settings in the iPhone Watch App to only display the Loop calendar on your watch. Available variables are: %BG%, %DIRECTION%, %DELTA%, %MINAGO%, %IOB%, %COB%, %BASAL%, and %OVERRIDE% (only displays the percentage). ** %MINAGO% only displays if it is an old reading")
         <<< SwitchRow("writeCalendarEvent"){ row in
             row.title = "BG to Calendar"
             row.value = UserDefaultsRepository.writeCalendarEvent.value

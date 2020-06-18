@@ -140,6 +140,13 @@ class SnoozeViewController: UIViewController {
                        alarms.reloadIsSnoozed(key: "alertNotLoopingIsSnoozed", value: true)
                        alarms.reloadSnoozeTime(key: "alertNotLoopingSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertNotLoopingSnooze.value * 60 * 60)))
        }
+        else if AlarmSound.whichAlarm == "Missed Bolus Alert" {
+                        UserDefaultsRepository.alertMissedBolusIsSnoozed.value = true
+                        UserDefaultsRepository.alertMissedBolusSnoozedTime.value = Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertMissedBolusSnooze.value * 60 * 60))
+                        guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+                        alarms.reloadIsSnoozed(key: "alertMissedBolusIsSnoozed", value: true)
+                        alarms.reloadSnoozeTime(key: "alertMissedBolusSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertMissedBolusSnooze.value * 60 * 60)))
+        }
     }
     
     override func viewDidLoad() {
