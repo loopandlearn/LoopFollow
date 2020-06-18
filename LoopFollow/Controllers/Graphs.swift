@@ -89,9 +89,11 @@ extension MainViewController {
         lineBG.setDrawHighlightIndicators(false)
         lineBG.valueFont.withSize(50)
         
-        for i in 1..<colors.count{
-            lineBG.addColor(colors[i])
-            lineBG.circleColors.append(colors[i])
+        if colors.count > 0 {
+            for i in 1..<colors.count{
+                lineBG.addColor(colors[i])
+                lineBG.circleColors.append(colors[i])
+            }
         }
         
 
