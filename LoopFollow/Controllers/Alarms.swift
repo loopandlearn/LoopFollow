@@ -170,6 +170,55 @@ extension MainViewController {
                        return
                }
            }
+        
+        // check for missed bolus - Only checks within 1 hour of carb entry
+        if UserDefaultsRepository.alertMissedBolusActive.value {
+            if carbData.count > 0  {
+                let lastCarb = carbData[carbData.count - 1].value
+                let lastCarbTime = carbData[carbData.count - 1].date
+                let now = dateTimeUtils.getNowTimeIntervalUTC()
+                
+                if lastCarbTime > (now - (60 * 60)) {
+                    // If low grams is active, the carbs and BG must both be higher
+                    if (UserDefaultsRepository.alertMissedBolusLowGramsActive.value &&
+                        lastCarb >= Double(UserDefaultsRepository.alertMissedBolusLowGrams.value) &&
+                        currentBG >= UserDefaultsRepository.alertMissedBolusLowGramsBG.value) ||
+                        !UserDefaultsRepository.alertMissedBolusLowGramsActive.value {
+                        
+                        // There is a current carb but no boluses at all
+                        if bolusData.count < 1 && ((now - lastCarbTime) < (60 * 60)) {
+                            AlarmSound.whichAlarm = "Missed Bolus Alert"
+                            triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil)
+                            return
+                        } else {
+                            
+                            // Get the latest bolus over the small bolus exclusion
+                            var lastBolus = 0.0
+                            var lastBolusTime = 0.0
+                            var i = 1
+                            while lastBolus < UserDefaultsRepository.alertMissedBolusIgnoreBolus.value {
+                                lastBolus = bolusData[bolusData.count - i].value
+                                lastBolusTime = bolusData[bolusData.count - i].date
+                                i += 1
+                            }
+                            
+                            // Calclulate the prebolus by moving the carbs back in time the allowed amount.
+                            // This lets us only need to check that the recent bolus is after it.
+                            if (lastCarbTime - Double(UserDefaultsRepository.alertMissedBolusPrebolus.value * 60)) > lastBolusTime  {
+                                AlarmSound.whichAlarm = "Missed Bolus Alert"
+                               triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil)
+                               return
+                            }
+                            
+                        }
+                    }
+                }
+                
+                
+                
+                
+            }
+        }
            
            //check for missed reading alert
            if UserDefaultsRepository.alertMissedReadingActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {

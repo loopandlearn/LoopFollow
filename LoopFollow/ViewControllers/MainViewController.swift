@@ -70,7 +70,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var firstGraphLoad: Bool = true
     var firstBasalGraphLoad: Bool = true
     var minAgoBG: Double = 0.0
-    var currentOverride = 0.0
+    var currentOverride = 1.0
     
     // Vars for NS Pull
     var graphHours:Int=24
