@@ -103,16 +103,16 @@ extension MainViewController {
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
 
         // Downloader
-        chartDispatch.enter()
+       
         let getBGTask = URLSession.shared.dataTask(with: request) { data, response, error in
             if self.consoleLogging == true {print("start bg url")}
             guard error == nil else {
-                self.chartDispatch.leave()
+               
                 return
                 
             }
             guard let data = data else {
-                self.chartDispatch.leave()
+                
                 return
                 
             }
@@ -123,10 +123,10 @@ extension MainViewController {
                 DispatchQueue.main.async {
                     // trigger the processor for the data after downloading.
                     self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
-                    self.chartDispatch.leave()
+                   
                 }
             } else {
-                self.chartDispatch.leave()
+                
                 return
                 
             }
@@ -229,15 +229,13 @@ extension MainViewController {
             var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
             requestDeviceStatus.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
             
-            self.chartDispatch.enter()
+         
             let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
             if self.consoleLogging == true {print("in device status loop.")}
             guard error == nil else {
-                self.chartDispatch.leave()
                 return
             }
             guard let data = data else {
-                self.chartDispatch.leave()
                 return
             }
 
@@ -246,10 +244,8 @@ extension MainViewController {
             if let json = json {
                 DispatchQueue.main.async {
                     self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
-                    self.chartDispatch.leave()
                 }
             } else {
-                self.chartDispatch.leave()
                 return
             }
             if self.consoleLogging == true {print("finish pump update")}}
@@ -529,14 +525,11 @@ extension MainViewController {
           
           var request = URLRequest(url: url)
           request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-            self.chartDispatch.enter()
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
               guard error == nil else {
-                self.chartDispatch.leave()
                 return
               }
               guard let data = data else {
-                self.chartDispatch.leave()
                 return
               }
               
@@ -546,10 +539,8 @@ extension MainViewController {
               if let json = json {
                   DispatchQueue.main.async {
                       self.updateProfile(jsonDeviceStatus: json)
-                    self.chartDispatch.leave()
                   }
               } else {
-                self.chartDispatch.leave()
                 return
               }
           }
@@ -590,15 +581,12 @@ extension MainViewController {
           
             var request = URLRequest(url: urlData)
             request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-                self.chartDispatch.enter()
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
            
                 guard error == nil else {
-                   self.chartDispatch.leave()
                     return
                 }
                 guard let data = data else {
-                    self.chartDispatch.leave()
                     return
                 }
                     
@@ -606,10 +594,8 @@ extension MainViewController {
                 if let json = json {
                     DispatchQueue.main.async {
                         self.updateBasals(entries: json)
-                        self.chartDispatch.leave()
                     }
                 } else {
-                   self.chartDispatch.leave()
                     return
                 }
             }
@@ -758,15 +744,12 @@ extension MainViewController {
           }
           var request = URLRequest(url: urlData)
            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        self.chartDispatch.enter()
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
           
                guard error == nil else {
-                self.chartDispatch.leave()
                 return
                }
                guard let data = data else {
-                self.chartDispatch.leave()
                 return
                }
                    
@@ -774,10 +757,8 @@ extension MainViewController {
                if let json = json {
                    DispatchQueue.main.async {
                        self.processNSBolus(entries: json)
-                    self.chartDispatch.leave()
                    }
                } else {
-                self.chartDispatch.leave()
                 return
                }
            }
@@ -834,15 +815,12 @@ extension MainViewController {
           }
           var request = URLRequest(url: urlData)
            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        self.chartDispatch.enter()
            let task = URLSession.shared.dataTask(with: request) { data, response, error in
           
                guard error == nil else {
-                self.chartDispatch.leave()
                 return
                }
                guard let data = data else {
-                self.chartDispatch.leave()
                 return
                }
                    
@@ -850,10 +828,8 @@ extension MainViewController {
                if let json = json {
                    DispatchQueue.main.async {
                        self.processNSCarbs(entries: json)
-                    self.chartDispatch.leave()
                    }
                } else {
-                self.chartDispatch.leave()
                 return
                }
            }
