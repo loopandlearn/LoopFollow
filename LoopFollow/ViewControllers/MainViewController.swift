@@ -88,6 +88,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // check every 30 Seconds whether new bgvalues should be retrieved
     let timeInterval: TimeInterval = 30.0
     
+    // View Delay Timer
+    var viewTimer = Timer()
+    let viewTimeInterval: TimeInterval = 5.0
+    
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
     var checkAlarmTimer = Timer()
@@ -171,6 +175,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return cell
     }
     
+    
     // NS Loader Timer
     fileprivate func startTimer(time: TimeInterval) {
         timer = Timer.scheduledTimer(timeInterval: time,
@@ -188,6 +193,30 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                                      userInfo: nil,
                                      repeats: false)
     }
+    
+    // NS Loader Timer
+     func startViewTimer(time: TimeInterval) {
+        timer = Timer.scheduledTimer(timeInterval: time,
+                                     target: self,
+                                     selector: #selector(MainViewController.viewTimerDidEnd(_:)),
+                                     userInfo: nil,
+                                     repeats: true)
+    }
+    
+    // Check for new data when timer ends
+       @objc func viewTimerDidEnd(_ timer:Timer) {
+           if bgData.count > 0 {
+               self.clearOldSnoozes()
+                self.checkAlarms(bgs: bgData)
+                self.updateMinAgo()
+                self.updateBadge()
+               self.viewUpdateNSBG()
+               if UserDefaultsRepository.writeCalendarEvent.value {
+                   self.writeCalendar()
+               }
+               self.createGraph()
+           }
+       }
     
     // Nothing should be done when this timer ends because it just blocks the alarms from firing when it's active
     @objc func checkAlarmTimerDidEnd(_ timer:Timer) {
@@ -333,7 +362,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
             }
             var minAgo = ""
-            if deltaTime > 5 {
+            if deltaTime > 9 {
                 // write old BG reading and continue pushing out end date to show last entry
                 minAgo = String(Int(deltaTime)) + " min"
                 eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
