@@ -20,31 +20,33 @@ extension MainViewController {
     func createGraph(){
         self.BGChart.clear()
         
-        // Create the BG Graph Data
         let entries = bgData
         var bgChartEntry = [ChartDataEntry]()
         var colors = [NSUIColor]()
         var maxBG: Int = 250
-        for i in 0..<entries.count{
-            var dateString = String(entries[i].date).prefix(10)
-            let dateSecondsOnly = Double(String(dateString))!
-            if entries[i].sgv > maxBG - 40 {
-                maxBG = entries[i].sgv + 40
-            }
-            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
-            bgChartEntry.append(value)
-            
-            if Double(entries[i].sgv) >= Double(UserDefaultsRepository.highLine.value) {
-                colors.append(NSUIColor.systemYellow)
-            } else if Double(entries[i].sgv) <= Double(UserDefaultsRepository.lowLine.value) {
-                colors.append(NSUIColor.systemRed)
-            } else {
-                colors.append(NSUIColor.systemGreen)
+        if bgData.count > 0 {
+            // Create the BG Graph Data
+            for i in 0..<entries.count{
+                var dateString = String(entries[i].date).prefix(10)
+                let dateSecondsOnly = Double(String(dateString))!
+                if entries[i].sgv > maxBG - 40 {
+                    maxBG = entries[i].sgv + 40
+                }
+                let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
+                bgChartEntry.append(value)
+                
+                if Double(entries[i].sgv) >= Double(UserDefaultsRepository.highLine.value) {
+                    colors.append(NSUIColor.systemYellow)
+                } else if Double(entries[i].sgv) <= Double(UserDefaultsRepository.lowLine.value) {
+                    colors.append(NSUIColor.systemRed)
+                } else {
+                    colors.append(NSUIColor.systemGreen)
+                }
             }
         }
-        
+            
         // Add Prediction Data
-        if predictionData.count > 0 {
+        if predictionData.count > 0 && bgChartEntry.count > 0 {
             var startingTime = bgChartEntry[bgChartEntry.count - 1].x + 300
             var i = 0
             // Add 1 hour of predictions
@@ -64,45 +66,48 @@ extension MainViewController {
                 i += 1
             }
         }
-        
-        // Setup BG line details
-        let lineBG = LineChartDataSet(entries:bgChartEntry, label: "")
-        lineBG.circleRadius = 3
-        lineBG.circleColors = [NSUIColor.systemGreen]
-        lineBG.drawCircleHoleEnabled = false
-        lineBG.axisDependency = YAxis.AxisDependency.right
-        lineBG.highlightEnabled = false
-        lineBG.drawValuesEnabled = false
-        
-        if UserDefaultsRepository.showLines.value {
-            lineBG.lineWidth = 2
-        } else {
-            lineBG.lineWidth = 0
-        }
-        if UserDefaultsRepository.showDots.value {
-            lineBG.drawCirclesEnabled = true
-        } else {
-            lineBG.drawCirclesEnabled = false
-        }
-        lineBG.setDrawHighlightIndicators(false)
-        lineBG.valueFont.withSize(50)
-        
-        for i in 1..<colors.count{
-            lineBG.addColor(colors[i])
-            lineBG.circleColors.append(colors[i])
-        }
+            
+            // Setup BG line details
+            let lineBG = LineChartDataSet(entries:bgChartEntry, label: "")
+            lineBG.circleRadius = 3
+            lineBG.circleColors = [NSUIColor.systemGreen]
+            lineBG.drawCircleHoleEnabled = false
+            lineBG.axisDependency = YAxis.AxisDependency.right
+            lineBG.highlightEnabled = false
+            lineBG.drawValuesEnabled = false
+            
+            if UserDefaultsRepository.showLines.value {
+                lineBG.lineWidth = 2
+            } else {
+                lineBG.lineWidth = 0
+            }
+            if UserDefaultsRepository.showDots.value {
+                lineBG.drawCirclesEnabled = true
+            } else {
+                lineBG.drawCirclesEnabled = false
+            }
+            lineBG.setDrawHighlightIndicators(false)
+            lineBG.valueFont.withSize(50)
+            
+            for i in 1..<colors.count{
+                lineBG.addColor(colors[i])
+                lineBG.circleColors.append(colors[i])
+            }
         
 
-        // create Basal graph data
-        var chartEntry = [ChartDataEntry]()
         var maxBasal = 1.0
-        for i in 0..<basalData.count{
-            let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate))
-            chartEntry.append(value)
-            if basalData[i].basalRate  > maxBasal {
-                maxBasal = basalData[i].basalRate
+        var chartEntry = [ChartDataEntry]()
+        if basalData.count > 0 {
+            // create Basal graph data
+            for i in 0..<basalData.count{
+                let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate))
+                chartEntry.append(value)
+                if basalData[i].basalRate  > maxBasal {
+                    maxBasal = basalData[i].basalRate
+                }
             }
         }
+        
         // Setup Basal line details
         let lineBasal = LineChartDataSet(entries:chartEntry, label: "")
         lineBasal.setDrawHighlightIndicators(false)
@@ -117,9 +122,11 @@ extension MainViewController {
         
         // Boluses
         var chartEntryBolus = [ChartDataEntry]()
-        for i in 0..<bolusData.count{
-            let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + 10), data: String(bolusData[i].value))
-            chartEntryBolus.append(value)
+        if bolusData.count > 0 {
+            for i in 0..<bolusData.count{
+                let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + 10), data: String(bolusData[i].value))
+                chartEntryBolus.append(value)
+            }
         }
         let lineBolus = LineChartDataSet(entries:chartEntryBolus, label: "")
         lineBolus.circleRadius = 7
@@ -137,9 +144,11 @@ extension MainViewController {
         
         // Carbs
         var chartEntryCarbs = [ChartDataEntry]()
-        for i in 0..<carbData.count{
-            let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + 30), data: String(carbData[i].value))
-            chartEntryCarbs.append(value)
+        if carbData.count > 0 {
+            for i in 0..<carbData.count{
+                let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + 30), data: String(carbData[i].value))
+                chartEntryCarbs.append(value)
+            }
         }
         let lineCarbs = LineChartDataSet(entries:chartEntryCarbs, label: "")
         lineCarbs.circleRadius = 7
@@ -167,6 +176,8 @@ extension MainViewController {
         // Changed to display values
         //let marker = PillMarker(color: .secondarySystemBackground, font: UIFont.boldSystemFont(ofSize: 14), textColor: .label)
         //BGChart.marker = marker
+        
+        
         
         // Clear limit lines so they don't add multiples when changing the settings
         BGChart.rightAxis.removeAllLimitLines()
@@ -219,8 +230,10 @@ extension MainViewController {
         }
         
         
+        if bgData.count > 0 {
+            createSmallBGGraph(bgChartEntry: bgChartEntry, colors: colors)
+        }
         
-        createSmallBGGraph(bgChartEntry: bgChartEntry, colors: colors)
         
     }
     

@@ -38,7 +38,6 @@ extension MainViewController {
         // Only do the network calls if we don't have a current reading
         if needsLoaded {
             self.clearLastInfoData()
-            // Dispatch and process json for all web calls before proceeeding
             webLoadNSProfile()
             WebLoadNSTempBasals()
             webLoadNSDeviceStatus()
@@ -49,7 +48,7 @@ extension MainViewController {
             webLoadNSCage()
             webLoadNSSage()
             
-            chartDispatch.notify(queue: .main){
+            if bgData.count > 0 {
                 self.updateBadge()
                 self.viewUpdateNSBG()
                 if UserDefaultsRepository.writeCalendarEvent.value {
@@ -60,27 +59,28 @@ extension MainViewController {
             
            
         } else {
-            // Dispatch and process json for all web calls before proceeeding
+            
             webLoadNSProfile()
             WebLoadNSTempBasals()
             webLoadNSDeviceStatus()
             webLoadNSBoluses()
             webLoadNSCarbs()
            
-            chartDispatch.notify(queue: .main){
-                
+            if bgData.count > 0 {
+                self.viewUpdateNSBG()
                 self.createGraph()
                 self.updateMinAgo()
                 self.clearOldSnoozes()
                 self.checkAlarms(bgs: self.bgData)
             }
+                
+            
         }
         
     }
     
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
-        chartDispatch.enter()
         // Set the count= in the url either to pull 24 hours or only the last record
         var points = "1"
         if !onlyPullLastRecord {
@@ -130,7 +130,6 @@ extension MainViewController {
        
     // NS BG Data Response processor
     func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
-        defer { chartDispatch.leave() }
         var pullDate = data[data.count - 1].date / 1000
         pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
         
@@ -211,7 +210,6 @@ extension MainViewController {
     
      // NS Device Status Web Call
       func webLoadNSDeviceStatus() {
-        self.chartDispatch.enter()
         let urlUser = UserDefaultsRepository.url.value
           var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
           if token != "" {
@@ -248,7 +246,6 @@ extension MainViewController {
       
       // NS Device Status Response Processor
       func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
-        defer { chartDispatch.leave() }
           if consoleLogging == true {print("in updatePump")}
           if jsonDeviceStatus.count == 0 {
             return
@@ -512,7 +509,6 @@ extension MainViewController {
        
       // NS Profile Web Call
       func webLoadNSProfile() {
-          self.chartDispatch.enter()
         let urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
           let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
           guard let url = URL(string: escapedAddress!) else {
@@ -545,7 +541,6 @@ extension MainViewController {
       
       // NS Profile Response Processor
       func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
-        defer { chartDispatch.leave() }
           if jsonDeviceStatus.count == 0 {
               return
           }
@@ -563,7 +558,6 @@ extension MainViewController {
       
         // NS Temp Basal Web Call
       func WebLoadNSTempBasals() {
-        self.chartDispatch.enter()
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
 
         var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[eventType][$eq]=Temp%20Basal&find[created_at][$gte]=" + yesterdayString
@@ -601,7 +595,6 @@ extension MainViewController {
       
     // NS Temp Basal Response Processor
       func updateBasals(entries: [[String:AnyObject]]) {
-        defer { chartDispatch.leave() }
           // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
           basalData.removeAll()
           
@@ -725,7 +718,6 @@ extension MainViewController {
     
     // NS Bolus Web Call
       func webLoadNSBoluses(){
-        self.chartDispatch.enter()
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Correction%20Bolus&find[created_at][$gte]=" + yesterdayString
@@ -765,7 +757,6 @@ extension MainViewController {
     
     // NS Meal Bolus Response Processor
          func processNSBolus(entries: [[String:AnyObject]]) {
-            defer { chartDispatch.leave() }
              // because it's a small array, we're going to destroy and reload every time.
              bolusData.removeAll()
              var lastFoundIndex = 0
@@ -780,11 +771,15 @@ extension MainViewController {
                  let dateTimeStamp = dateString!.timeIntervalSince1970
                  let bolus = currentEntry?["insulin"] as! Double
                 
-                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-                lastFoundIndex = sgv.foundIndex
-                
                  // Make the dot
-                let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                 var dot: bolusCarbGraphStruct
+                  if bgData.count > 0 {
+                       let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+                       lastFoundIndex = sgv.foundIndex
+                       dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                  } else {
+                       dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: 100)
+                   }
                  bolusData.append(dot)
             }
 
@@ -794,7 +789,6 @@ extension MainViewController {
     
     // NS Carb Web Call
       func webLoadNSCarbs(){
-        self.chartDispatch.enter()
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=" + yesterdayString
@@ -834,7 +828,6 @@ extension MainViewController {
     
     // NS Carb Bolus Response Processor
          func processNSCarbs(entries: [[String:AnyObject]]) {
-           defer { chartDispatch.leave() }
              // because it's a small array, we're going to destroy and reload every time.
              carbData.removeAll()
              var lastFoundIndex = 0
@@ -849,11 +842,17 @@ extension MainViewController {
                  let dateTimeStamp = dateString!.timeIntervalSince1970
                  let carbs = currentEntry?["carbs"] as! Double
                 
-                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-                lastFoundIndex = sgv.foundIndex
+                // Make the dot
+                var dot: bolusCarbGraphStruct
+               if bgData.count > 0 {
+                    let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+                    lastFoundIndex = sgv.foundIndex
+                     dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+               } else {
+                     dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: 100)
+                }
+                 
                 
-                 // Make the dot
-                let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
                  carbData.append(dot)
             }
 
