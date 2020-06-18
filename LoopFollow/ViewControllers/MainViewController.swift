@@ -24,7 +24,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var DragBar: UIImageView!
     @IBOutlet weak var PredictionLabel: UILabel!
     @IBOutlet weak var LoopStatusLabel: UILabel!
-    @IBOutlet weak var BasalChart: LineChartView!
     
     //NS BG Struct
     struct sgvData: Codable {
@@ -51,6 +50,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         var date: TimeInterval
     }
     
+    //NS Bolus Data  Struct
+    struct bolusCarbGraphStruct: Codable {
+        var value: Double
+        var date: TimeInterval
+        var sgv: Int
+    }
+    
     // Data Table Struct
     struct infoData {
         var name: String
@@ -63,9 +69,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     public var linePlotDataTime: [Double] = []
     var firstGraphLoad: Bool = true
     var firstBasalGraphLoad: Bool = true
-    var mainGraphData = LineChartData()
-    var mainBGLine = LineChartDataSet()
-    var mainBasalLine = LineChartDataSet()
+    var minAgoBG: Double = 0.0
     
     // Vars for NS Pull
     var graphHours:Int=24
@@ -103,7 +107,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var bgData: [sgvData] = []
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
+    var bolusData: [bolusCarbGraphStruct] = []
+    var carbData: [bolusCarbGraphStruct] = []
     var predictionData: [Double] = []
+    var chartData = LineChartData()
+    let chartDispatch = DispatchGroup()
+    var newBGPulled = false
     
     // calendar setup
     let store = EKEventStore()
@@ -114,7 +123,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         super.viewDidLoad()
         
         BGChart.delegate = self
-        BasalChart.delegate = self
         
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
@@ -137,12 +145,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.rowHeight = 25
         infoTable.dataSource = self
         
-        // Add empty datasets from load
-        mainGraphData.addDataSet(mainBGLine)
-        mainGraphData.addDataSet(mainBasalLine)
-        
         // Load Data
-        appCameToForeground()
+        nightscoutLoader()
+        
         
     }
     
@@ -150,9 +155,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // set screen lock
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
         
-        // Pull fresh data when view appears
-        // moved this to didload, timer end, and foreground
-        //nightscoutLoader()
     }
     
     
@@ -219,8 +221,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             timer.invalidate()
         }
         startTimer(time: timeInterval)
-        nightscoutLoader()
-
     }
     
     // Check for new data when timer ends
@@ -232,6 +232,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     //update Min Ago Text. We need to call this separately because it updates between readings
     func updateMinAgo(){
         let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
+        minAgoBG = Double(TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date)
         MinAgoText.text = String(Int(deltaTime)) + " min ago"
     }
     
@@ -251,7 +252,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     
     
-    func updateBadge(entries: [sgvData]) {
+    func updateBadge() {
+        let entries = bgData
         if entries.count > 0 && UserDefaultsRepository.appBadge.value {
             let latestBG = entries[entries.count - 1].sgv
             UIApplication.shared.applicationIconBadgeNumber = latestBG
@@ -315,8 +317,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 deltaString = "+" + String(deltaBG)
             }
             let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
-            
-            
+
             var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
             var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
             var  eventTitle = UserDefaultsRepository.watchLine1.value + "\n" + UserDefaultsRepository.watchLine2.value
@@ -389,6 +390,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
             } catch {
                 // Display error to user
+                print(error)
             }
         }
     }
