@@ -165,7 +165,7 @@ class AlarmViewController: FormViewController {
         buildFastRiseAlert()
         buildMissedReadings()
         buildNotLooping()
- //       buildMissedBolus()
+        buildMissedBolus()
         buildAppInactive()
         buildSage()
         buildCage()
@@ -1204,7 +1204,7 @@ class AlarmViewController: FormViewController {
     
     func buildMissedBolus(){
         form
-            +++ Section(header: "Missed Bolus", footer: "Alert after X minutes when carbs are entered with no Bolus. Optional: Ignore low treatment carbs under a certain BG")
+            +++ Section(header: "Missed Bolus", footer: "Alert after X minutes when carbs are entered with no Bolus. Options to Ignore low treatment carbs under a certain BG, ignore small boluses, and consider boluses within a certain amount of time before the carbs as a prebolus.")
         <<< SwitchRow("alertMissedBolusActive"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertMissedBolusActive.value
@@ -1227,6 +1227,32 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertMissedBolus.value = Int(value)
         }
+            <<< StepperRow("alertMissedBolusPrebolus") { row in
+                row.title = "Prebolus Max Time"
+                row.cell.stepper.stepValue = 5
+                row.cell.stepper.minimumValue = 1
+                row.cell.stepper.maximumValue = 45
+                row.value = Double(UserDefaultsRepository.alertMissedBolusPrebolus.value)
+                row.hidden = "$alertMissedBolusActive == false"
+                row.displayValueFor = { value in
+                        guard let value = value else { return nil }
+                        return "\(Int(value))"
+                    }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMissedBolusPrebolus.value = Int(value)
+            }
+            <<< StepperRow("alertMissedBolusIgnoreBolus") { row in
+                row.title = "Ignore Bolus <="
+                row.cell.stepper.stepValue = 0.05
+                row.cell.stepper.minimumValue = 0.05
+                row.cell.stepper.maximumValue = 2
+                row.value = Double(UserDefaultsRepository.alertMissedBolusIgnoreBolus.value)
+                row.hidden = "$alertMissedBolusActive == false"
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMissedBolusIgnoreBolus.value = value
+            }
         <<< SwitchRow("alertMissedBolusLowGramsActive"){ row in
         row.title = "Ignore Low Treatments"
             row.hidden = "$alertMissedBolusActive == false"
