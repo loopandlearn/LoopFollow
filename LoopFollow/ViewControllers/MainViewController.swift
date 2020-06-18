@@ -200,7 +200,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                                      target: self,
                                      selector: #selector(MainViewController.viewTimerDidEnd(_:)),
                                      userInfo: nil,
-                                     repeats: true)
+                                     repeats: false)
     }
     
     // Check for new data when timer ends
