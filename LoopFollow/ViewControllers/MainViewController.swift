@@ -152,9 +152,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.dataSource = self
         
         // Load Data
-        nightscoutLoader()
-        
-        
+        if UserDefaultsRepository.url.value != "" {
+            nightscoutLoader()
+        } 
     }
     
     override func viewWillAppear(_ animated: Bool) {
