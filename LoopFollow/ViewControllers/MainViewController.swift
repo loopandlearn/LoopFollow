@@ -70,7 +70,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var firstGraphLoad: Bool = true
     var firstBasalGraphLoad: Bool = true
     var minAgoBG: Double = 0.0
-    var currentOverride = 0.0
     
     // Vars for NS Pull
     var graphHours:Int=24
@@ -112,6 +111,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var carbData: [bolusCarbGraphStruct] = []
     var predictionData: [Double] = []
     var chartData = LineChartData()
+    let chartDispatch = DispatchGroup()
     var newBGPulled = false
     
     // calendar setup
@@ -123,12 +123,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         super.viewDidLoad()
         
         BGChart.delegate = self
-        var noDataText = "Chart will load momentarily"
-        if UserDefaultsRepository.url.value == "" {
-            noDataText = "Please set Nightscout URL"
-        }
-        BGChart.noDataText = noDataText
-        BGChartFull.noDataText = noDataText
         
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
@@ -330,16 +324,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: String(self.bgData[self.bgData.count - 1].sgv))
             eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
             eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
-            if self.currentOverride != 1.0 {
-                let val = Int( self.currentOverride*100)
-               // let overrideText = String(format:"%f1", self.currentOverride*100)
-                let text = String(val) + "%"
-                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: text)
-            } else {
-                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
-            }
             var minAgo = ""
-            if deltaTime > 9 {
+            if deltaTime > 5 {
                 // write old BG reading and continue pushing out end date to show last entry
                 minAgo = String(Int(deltaTime)) + " min"
                 eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))

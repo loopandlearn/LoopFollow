@@ -38,6 +38,7 @@ extension MainViewController {
         // Only do the network calls if we don't have a current reading
         if needsLoaded {
             self.clearLastInfoData()
+            // Dispatch and process json for all web calls before proceeeding
             webLoadNSProfile()
             WebLoadNSTempBasals()
             webLoadNSDeviceStatus()
@@ -48,7 +49,7 @@ extension MainViewController {
             webLoadNSCage()
             webLoadNSSage()
             
-            if bgData.count > 0 {
+            chartDispatch.notify(queue: .main){
                 self.updateBadge()
                 self.viewUpdateNSBG()
                 if UserDefaultsRepository.writeCalendarEvent.value {
@@ -59,29 +60,27 @@ extension MainViewController {
             
            
         } else {
-            
+            // Dispatch and process json for all web calls before proceeeding
             webLoadNSProfile()
             WebLoadNSTempBasals()
             webLoadNSDeviceStatus()
             webLoadNSBoluses()
             webLoadNSCarbs()
            
-            if bgData.count > 0 {
-                self.viewUpdateNSBG()
+            chartDispatch.notify(queue: .main){
+                
                 self.createGraph()
                 self.updateMinAgo()
                 self.clearOldSnoozes()
                 self.checkAlarms(bgs: self.bgData)
             }
-                
-            
         }
         
     }
     
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
-
+        
         // Set the count= in the url either to pull 24 hours or only the last record
         var points = "1"
         if !onlyPullLastRecord {
@@ -141,9 +140,6 @@ extension MainViewController {
             bgData.removeAll()
         } else if bgData[bgData.count - 1].date != pullDate {
             bgData.removeFirst()
-            if data.count > 0 && UserDefaultsRepository.speakBG.value {
-                speakBG(sgv: data[data.count - 1].sgv)
-            }
         } else {
             // Update the badge, bg, graph settings even if we don't have a new reading.
             self.updateBadge()
@@ -157,11 +153,6 @@ extension MainViewController {
             dateString.round(FloatingPointRoundingRule.toNearestOrEven)
             let reading = sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
             bgData.append(reading)
-        }
-        
-        if firstGraphLoad {
-            viewUpdateNSBG()
-            createGraph()
         }
        }
     
@@ -354,7 +345,7 @@ extension MainViewController {
           }
           
           var oText = "" as String
-            currentOverride = 1.0
+                 
                  if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
                      if let lastOverrideTime = formatter.date(from: (lastOverride["timestamp"] as! String))?.timeIntervalSince1970  {
                      }
@@ -362,13 +353,12 @@ extension MainViewController {
                          
                          let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
                          if let multiplier = lastOverride["multiplier"] as? Double {
-                            currentOverride = multiplier
-                            oText += String(format:"%.1f", multiplier*100)
-                        }
-                        else
-                        {
-                            oText += String(format:"%.1f", 100)
-                        }
+                                                oText += String(format:"%.1f", multiplier*100)
+                                            }
+                                            else
+                                            {
+                                                oText += String(format:"%.1f", 100)
+                                            }
                          oText += "% ("
                          let minValue = lastCorrection["minValue"] as! Double
                          let maxValue = lastCorrection["maxValue"] as! Double
@@ -526,7 +516,7 @@ extension MainViewController {
        
       // NS Profile Web Call
       func webLoadNSProfile() {
-
+          
         let urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
           let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
           guard let url = URL(string: escapedAddress!) else {
@@ -581,7 +571,7 @@ extension MainViewController {
       
         // NS Temp Basal Web Call
       func WebLoadNSTempBasals() {
-
+        
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
 
         var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[eventType][$eq]=Temp%20Basal&find[created_at][$gte]=" + yesterdayString
@@ -747,7 +737,7 @@ extension MainViewController {
     
     // NS Bolus Web Call
       func webLoadNSBoluses(){
-
+        
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Correction%20Bolus&find[created_at][$gte]=" + yesterdayString
@@ -806,19 +796,15 @@ extension MainViewController {
                  let dateTimeStamp = dateString!.timeIntervalSince1970
                  let bolus = currentEntry?["insulin"] as! Double
                 
-                 // Make the dot
-                 var dot: bolusCarbGraphStruct
-                  if bgData.count > 0 {
-                       let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-                       lastFoundIndex = sgv.foundIndex
-                       dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                  } else {
-                       dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: 100)
-                   }
+                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+                lastFoundIndex = sgv.foundIndex
+                
                 if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                    // Make the dot
+                   let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
                     bolusData.append(dot)
                 }
-
+                
             }
 
            
@@ -827,7 +813,7 @@ extension MainViewController {
     
     // NS Carb Web Call
       func webLoadNSCarbs(){
-
+        
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=" + yesterdayString
@@ -886,19 +872,13 @@ extension MainViewController {
                  let dateTimeStamp = dateString!.timeIntervalSince1970
                  let carbs = currentEntry?["carbs"] as! Double
                 
-                // Make the dot
-                var dot: bolusCarbGraphStruct
-               if bgData.count > 0 {
-                    let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-                    lastFoundIndex = sgv.foundIndex
-                     dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-               } else {
-                     dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: 100)
-                }
-                 
+                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+                lastFoundIndex = sgv.foundIndex
+                
                 if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                 carbData.append(dot)
-
+                     // Make the dot
+                    let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                     carbData.append(dot)
                 }
             }
 
