@@ -120,6 +120,7 @@ extension MainViewController {
                 DispatchQueue.main.async {
                     // trigger the processor for the data after downloading.
                     self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
+                    self.chartDispatch.leave()
                 }
             } else {
                 return
@@ -130,7 +131,6 @@ extension MainViewController {
        
     // NS BG Data Response processor
     func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
-        defer { chartDispatch.leave() }
         var pullDate = data[data.count - 1].date / 1000
         pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
         
@@ -235,6 +235,7 @@ extension MainViewController {
           if let json = json {
               DispatchQueue.main.async {
                   self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
+                    self.chartDispatch.leave()
               }
           } else {
             return
@@ -245,7 +246,6 @@ extension MainViewController {
       
       // NS Device Status Response Processor
       func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
-        defer { chartDispatch.leave() }
           if consoleLogging == true {print("in updatePump")}
           if jsonDeviceStatus.count == 0 {
             return
@@ -531,6 +531,7 @@ extension MainViewController {
               if let json = json {
                   DispatchQueue.main.async {
                       self.updateProfile(jsonDeviceStatus: json)
+                    self.chartDispatch.leave()
                   }
               } else {
                 return
@@ -541,7 +542,6 @@ extension MainViewController {
       
       // NS Profile Response Processor
       func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
-        defer { chartDispatch.leave() }
           if jsonDeviceStatus.count == 0 {
               return
           }
@@ -587,6 +587,7 @@ extension MainViewController {
                 if let json = json {
                     DispatchQueue.main.async {
                         self.updateBasals(entries: json)
+                        self.chartDispatch.leave()
                     }
                 } else {
                     return
@@ -597,7 +598,6 @@ extension MainViewController {
       
     // NS Temp Basal Response Processor
       func updateBasals(entries: [[String:AnyObject]]) {
-        defer { chartDispatch.leave() }
           // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
           basalData.removeAll()
           
@@ -751,6 +751,7 @@ extension MainViewController {
                if let json = json {
                    DispatchQueue.main.async {
                        self.processNSBolus(entries: json)
+                    self.chartDispatch.leave()
                    }
                } else {
                 return
@@ -761,7 +762,6 @@ extension MainViewController {
     
     // NS Meal Bolus Response Processor
          func processNSBolus(entries: [[String:AnyObject]]) {
-            defer { chartDispatch.leave() }
              // because it's a small array, we're going to destroy and reload every time.
              bolusData.removeAll()
              var lastFoundIndex = 0
@@ -820,6 +820,7 @@ extension MainViewController {
                if let json = json {
                    DispatchQueue.main.async {
                        self.processNSCarbs(entries: json)
+                    self.chartDispatch.leave()
                    }
                } else {
                 return
@@ -830,7 +831,6 @@ extension MainViewController {
     
     // NS Carb Bolus Response Processor
          func processNSCarbs(entries: [[String:AnyObject]]) {
-           defer { chartDispatch.leave() }
              // because it's a small array, we're going to destroy and reload every time.
              carbData.removeAll()
              var lastFoundIndex = 0
