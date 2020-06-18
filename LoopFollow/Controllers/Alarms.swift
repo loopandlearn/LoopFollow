@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import AVFoundation
 
 extension MainViewController {
     
@@ -315,8 +315,15 @@ extension MainViewController {
               alarms.reloadIsSnoozed(key: "alertCAGEIsSnoozed", value: false)
 
           }
-
-          
+        
       }
+    
+    func speakBG(sgv: Int) {
+           var speechSynthesizer = AVSpeechSynthesizer()
+           var speechUtterance: AVSpeechUtterance = AVSpeechUtterance(string: "Current BG is " + String(sgv))
+           speechUtterance.rate = AVSpeechUtteranceMaximumSpeechRate / 2
+           speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+           speechSynthesizer.speak(speechUtterance)
+       }
     
 }
