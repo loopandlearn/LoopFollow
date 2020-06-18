@@ -49,7 +49,7 @@ extension MainViewController {
             webLoadNSCage()
             webLoadNSSage()
             
-            chartDispatch.notify(queue: .main){
+            if bgData.count > 0 {
                 self.updateBadge()
                 self.viewUpdateNSBG()
                 if UserDefaultsRepository.writeCalendarEvent.value {
@@ -67,7 +67,7 @@ extension MainViewController {
             webLoadNSBoluses()
             webLoadNSCarbs()
            
-            chartDispatch.notify(queue: .main){
+            if bgData.count > 0 {
                 
                 self.createGraph()
                 self.updateMinAgo()
@@ -153,6 +153,11 @@ extension MainViewController {
             dateString.round(FloatingPointRoundingRule.toNearestOrEven)
             let reading = sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
             bgData.append(reading)
+        }
+        
+        if firstGraphLoad {
+            viewUpdateNSBG()
+            createGraph()
         }
        }
     

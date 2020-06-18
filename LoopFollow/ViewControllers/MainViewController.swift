@@ -111,7 +111,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var carbData: [bolusCarbGraphStruct] = []
     var predictionData: [Double] = []
     var chartData = LineChartData()
-    let chartDispatch = DispatchGroup()
     var newBGPulled = false
     
     // calendar setup
