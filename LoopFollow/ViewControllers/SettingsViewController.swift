@@ -34,7 +34,8 @@ class SettingsViewController: FormViewController {
                 row.value = UserDefaultsRepository.url.value
             }.onChange { row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.url.value = value.lowercased()
+                let urlNSInput = value.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
+                UserDefaultsRepository.url.value = urlNSInput.lowercased()
                 }
             <<< TextRow(){ row in
                 row.title = "NS Token"
