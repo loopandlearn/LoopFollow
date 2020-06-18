@@ -49,15 +49,7 @@ extension MainViewController {
             webLoadNSCage()
             webLoadNSSage()
             
-            if bgData.count > 0 {
-                self.updateBadge()
-                self.viewUpdateNSBG()
-                if UserDefaultsRepository.writeCalendarEvent.value {
-                    self.writeCalendar()
-                }
-                self.createGraph()
-            }
-            
+            self.startViewTimer(time: viewTimeInterval)
            
         } else {
             // Dispatch and process json for all web calls before proceeeding
@@ -68,7 +60,7 @@ extension MainViewController {
             webLoadNSCarbs()
            
             if bgData.count > 0 {
-                
+                self.viewUpdateNSBG()
                 self.createGraph()
                 self.updateMinAgo()
                 self.clearOldSnoozes()
