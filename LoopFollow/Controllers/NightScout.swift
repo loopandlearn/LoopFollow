@@ -229,11 +229,9 @@ extension MainViewController {
             let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
             if self.consoleLogging == true {print("in device status loop.")}
             guard error == nil else {
-                
                 return
             }
             guard let data = data else {
-                
                 return
             }
 
@@ -242,10 +240,8 @@ extension MainViewController {
             if let json = json {
                 DispatchQueue.main.async {
                     self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
-                    
                 }
             } else {
-                
                 return
             }
             if self.consoleLogging == true {print("finish pump update")}}
@@ -525,14 +521,11 @@ extension MainViewController {
           
           var request = URLRequest(url: url)
           request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-           
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
               guard error == nil else {
-               
                 return
               }
               guard let data = data else {
-                
                 return
               }
               
@@ -542,10 +535,8 @@ extension MainViewController {
               if let json = json {
                   DispatchQueue.main.async {
                       self.updateProfile(jsonDeviceStatus: json)
-                    
                   }
               } else {
-                
                 return
               }
           }
@@ -586,15 +577,12 @@ extension MainViewController {
           
             var request = URLRequest(url: urlData)
             request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-                
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
            
                 guard error == nil else {
-                   
                     return
                 }
                 guard let data = data else {
-                    
                     return
                 }
                     
@@ -602,10 +590,8 @@ extension MainViewController {
                 if let json = json {
                     DispatchQueue.main.async {
                         self.updateBasals(entries: json)
-                       
                     }
                 } else {
-                  
                     return
                 }
             }
@@ -754,15 +740,12 @@ extension MainViewController {
           }
           var request = URLRequest(url: urlData)
            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-      
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
           
                guard error == nil else {
-               
                 return
                }
                guard let data = data else {
-                
                 return
                }
                    
@@ -770,10 +753,8 @@ extension MainViewController {
                if let json = json {
                    DispatchQueue.main.async {
                        self.processNSBolus(entries: json)
-                    
                    }
                } else {
-              
                 return
                }
            }
@@ -830,15 +811,12 @@ extension MainViewController {
           }
           var request = URLRequest(url: urlData)
            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        
            let task = URLSession.shared.dataTask(with: request) { data, response, error in
           
                guard error == nil else {
-                
                 return
                }
                guard let data = data else {
-               
                 return
                }
                    
@@ -846,10 +824,8 @@ extension MainViewController {
                if let json = json {
                    DispatchQueue.main.async {
                        self.processNSCarbs(entries: json)
-                    
                    }
                } else {
-               
                 return
                }
            }
