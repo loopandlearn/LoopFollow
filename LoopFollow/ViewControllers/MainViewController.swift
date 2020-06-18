@@ -330,6 +330,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                // let overrideText = String(format:"%f1", self.currentOverride*100)
                 let text = String(val) + "%"
                 eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: text)
+            } else {
+                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
             }
             var minAgo = ""
             if deltaTime > 5 {
