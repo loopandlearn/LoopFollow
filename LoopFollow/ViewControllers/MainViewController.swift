@@ -112,7 +112,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var carbData: [bolusCarbGraphStruct] = []
     var predictionData: [Double] = []
     var chartData = LineChartData()
-    let chartDispatch = DispatchGroup()
     var newBGPulled = false
     
     // calendar setup
@@ -124,6 +123,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         super.viewDidLoad()
         
         BGChart.delegate = self
+        var noDataText = "Chart will load momentarily"
+        if UserDefaultsRepository.url.value == "" {
+            noDataText = "Please set Nightscout URL"
+        }
+        BGChart.noDataText = noDataText
+        BGChartFull.noDataText = noDataText
         
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
@@ -334,7 +339,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
             }
             var minAgo = ""
-            if deltaTime > 5 {
+            if deltaTime > 9 {
                 // write old BG reading and continue pushing out end date to show last entry
                 minAgo = String(Int(deltaTime)) + " min"
                 eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
