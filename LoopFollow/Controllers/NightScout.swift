@@ -155,6 +155,11 @@ extension MainViewController {
             let reading = sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
             bgData.append(reading)
         }
+        
+        if firstGraphLoad {
+            viewUpdateNSBG()
+            createGraph()
+        }
        }
     
     // NS BG Data Front end updater
@@ -780,7 +785,9 @@ extension MainViewController {
                   } else {
                        dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: 100)
                    }
-                 bolusData.append(dot)
+                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                    bolusData.append(dot)
+                }
             }
 
            
@@ -852,8 +859,9 @@ extension MainViewController {
                      dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: 100)
                 }
                  
-                
+                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                  carbData.append(dot)
+                }
             }
 
 
