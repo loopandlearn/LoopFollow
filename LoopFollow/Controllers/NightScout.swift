@@ -349,7 +349,7 @@ extension MainViewController {
           }
           
           var oText = "" as String
-                 
+        currentOverride = 1.0
                  if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
                      if let lastOverrideTime = formatter.date(from: (lastOverride["timestamp"] as! String))?.timeIntervalSince1970  {
                      }
@@ -357,6 +357,7 @@ extension MainViewController {
                          
                          let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
                          if let multiplier = lastOverride["multiplier"] as? Double {
+                            currentOverride = multiplier
                                                 oText += String(format:"%.1f", multiplier*100)
                                             }
                                             else
@@ -633,7 +634,7 @@ extension MainViewController {
               } else {
                   duration = dateTimeStamp + 60
               }
-              
+            
               // This adds scheduled basal wherever there is a break between temps. can't check the prior ending on the first item. it is 24 hours old, so it isn't important for display anyway
               if i > 0 {
                   let priorEntry = entries[entries.count - i] as [String : AnyObject]?
@@ -688,6 +689,22 @@ extension MainViewController {
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
             }
+            
+            // Double check for overlaps of incorrect ended TBRs and sent it to end when the next one starts if it finds a discrepancy
+            if i < entries.count - 1 {
+                let nextEntry = entries[entries.count - 2 - i] as [String : AnyObject]?
+                let nextBasalDate = nextEntry?["timestamp"] as! String
+                let nextStrippedZone = String(nextBasalDate.dropLast())
+                let nextDateFormatter = DateFormatter()
+                nextDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+                nextDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+                let nextDateString = dateFormatter.date(from: nextStrippedZone)
+                let nextDateTimeStamp = nextDateString!.timeIntervalSince1970
+                if nextDateTimeStamp < (dateTimeStamp + (duration * 60)) {
+                    lastEndDot = nextDateTimeStamp
+                }
+            }
+            
             let endDot = basalGraphStruct(basalRate: basalRate, date: Double(lastEndDot))
             basalData.append(endDot)
             
