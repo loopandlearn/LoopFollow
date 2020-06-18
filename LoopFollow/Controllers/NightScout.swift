@@ -803,9 +803,12 @@ extension MainViewController {
                 let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
                 lastFoundIndex = sgv.foundIndex
                 
-                 // Make the dot
-                let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                 bolusData.append(dot)
+                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                    // Make the dot
+                   let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                    bolusData.append(dot)
+                }
+                
             }
 
            
@@ -876,9 +879,11 @@ extension MainViewController {
                 let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
                 lastFoundIndex = sgv.foundIndex
                 
-                 // Make the dot
-                let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                 carbData.append(dot)
+                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                     // Make the dot
+                    let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                     carbData.append(dot)
+                }
             }
 
 
