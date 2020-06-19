@@ -13,7 +13,7 @@ extension MainViewController {
     
     
     func checkAlarms(bgs: [sgvData]) {
-           
+           print("ALARMS --- Checking")
            // Don't check or fire alarms within 1 minute of prior alarm
            if checkAlarmTimer.isValid {  return }
            
@@ -262,7 +262,7 @@ extension MainViewController {
     func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?)
     {
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.updateDisplayWhenTriggered(bgVal: BGText.text ?? "", directionVal: DirectionText.text ?? "", deltaVal: DeltaText.text ?? "", minAgoVal: MinAgoText.text ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        snoozer.updateDisplayWhenTriggered(bgVal: String(bgData[bgData.count - 1].sgv), directionVal: DirectionText.text ?? "", deltaVal: DeltaText.text ?? "", minAgoVal: MinAgoText.text ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozeTabItem.isEnabled = true;
         tabBarController?.selectedIndex = 2
         if snooozedBGReadingTime != nil {

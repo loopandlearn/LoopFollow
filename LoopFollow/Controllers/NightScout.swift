@@ -12,6 +12,38 @@ import UIKit
 
 extension MainViewController {
     
+    //NS BG Struct
+    struct sgvData: Codable {
+        var sgv: Int
+        var date: TimeInterval
+        var direction: String?
+    }
+    
+    //NS Cage Struct
+    struct cageData: Codable {
+        var created_at: String
+    }
+    
+    //NS Basal Profile Struct
+    struct basalProfileStruct: Codable {
+        var value: Double
+        var time: String
+        var timeAsSeconds: Double
+    }
+    
+    //NS Basal Data  Struct
+    struct basalGraphStruct: Codable {
+        var basalRate: Double
+        var date: TimeInterval
+    }
+    
+    //NS Bolus Data  Struct
+    struct bolusCarbGraphStruct: Codable {
+        var value: Double
+        var date: TimeInterval
+        var sgv: Int
+    }
+    
     
     // Main loader for all data
     func nightscoutLoader(forceLoad: Bool = false) {
@@ -35,10 +67,10 @@ extension MainViewController {
         }
         
         if forceLoad { needsLoaded = true}
-        // Only do the network calls if we don't have a current reading
+        // Only update if we don't have a current reading
         if needsLoaded {
             self.clearLastInfoData()
-            // Dispatch and process json for all web calls before proceeeding
+            
             webLoadNSProfile()
             WebLoadNSTempBasals()
             webLoadNSDeviceStatus()
@@ -52,27 +84,23 @@ extension MainViewController {
             self.startViewTimer(time: viewTimeInterval)
            
         } else {
-            // Dispatch and process json for all web calls before proceeeding
-            webLoadNSProfile()
-            WebLoadNSTempBasals()
             webLoadNSDeviceStatus()
             webLoadNSBoluses()
             webLoadNSCarbs()
-           
-            if bgData.count > 0 {
-                self.viewUpdateNSBG()
-                self.createGraph()
-                self.updateMinAgo()
-                self.clearOldSnoozes()
-                self.checkAlarms(bgs: self.bgData)
-            }
+            
         }
         
+        if bgData.count > 0 {
+            self.updateMinAgo()
+            self.checkAlarms(bgs: self.bgData)
+        }
+        
+
     }
     
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
-        
+        print("Enter BG Web Call")
         // Set the count= in the url either to pull 24 hours or only the last record
         var points = "1"
         if !onlyPullLastRecord {
@@ -124,6 +152,7 @@ extension MainViewController {
        
     // NS BG Data Response processor
     func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
+        print("Enter BG Processor")
         var pullDate = data[data.count - 1].date / 1000
         pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
         
@@ -136,9 +165,11 @@ extension MainViewController {
                 speakBG(sgv: data[data.count - 1].sgv)
             }
         } else {
-            // Update the badge, bg, graph settings even if we don't have a new reading.
-            self.updateBadge()
-            self.viewUpdateNSBG()
+            if data.count > 0 {
+                self.updateBadge(val: data[data.count - 1].sgv)
+            }
+            
+           // self.viewUpdateNSBG()
             return
         }
         
@@ -151,6 +182,7 @@ extension MainViewController {
         }
         
         if firstGraphLoad {
+            print("Do ViewUpdateNSBG and CreateGraph first load")
             viewUpdateNSBG()
             createGraph()
         }
@@ -158,6 +190,7 @@ extension MainViewController {
     
     // NS BG Data Front end updater
     func viewUpdateNSBG () {
+        print("Enter BG View Update")
         let entries = bgData
         if entries.count > 0 {
             let latestEntryi = entries.count - 1
@@ -170,17 +203,10 @@ extension MainViewController {
             if mmol {
                 userUnit = " mmol/L"
             }
-            if UserDefaultsRepository.appBadge.value {
-                UIApplication.shared.applicationIconBadgeNumber = latestBG
-            } else {
-                UIApplication.shared.applicationIconBadgeNumber = 0
-            }
             
             BGText.text = bgOutputFormat(bg: Double(latestBG), mmol: mmol)
             setBGTextColor()
 
-            MinAgoText.text = String(Int(deltaTime)) + " min ago"
-            print(String(Int(deltaTime)) + " min ago")
             if let directionBG = entries[latestEntryi].direction {
                 DirectionText.text = bgDirectionGraphic(directionBG)
             }
@@ -204,11 +230,11 @@ extension MainViewController {
             return
         }
         
-        checkAlarms(bgs: entries)
     }
     
      // NS Device Status Web Call
       func webLoadNSDeviceStatus() {
+        print("Enter download device status")
         let urlUser = UserDefaultsRepository.url.value
           var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
           if token != "" {
@@ -250,6 +276,7 @@ extension MainViewController {
       
       // NS Device Status Response Processor
       func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
+        print("Enter process device status")
           if consoleLogging == true {print("in updatePump")}
           if jsonDeviceStatus.count == 0 {
             return
@@ -364,6 +391,7 @@ extension MainViewController {
       
       // NS Cage Web Call
       func webLoadNSCage() {
+        print("enter download cage")
         let urlUser = UserDefaultsRepository.url.value
           var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
           if token != "" {
@@ -400,6 +428,7 @@ extension MainViewController {
        
       // NS Cage Response Processor
       func updateCage(data: [cageData]) {
+        print("enter process cage")
           if consoleLogging == true {print("in updateCage")}
           if data.count == 0 {
               return
@@ -431,6 +460,7 @@ extension MainViewController {
        
       // NS Sage Web Call
       func webLoadNSSage() {
+        print("enter download sage")
           var dayComponent    = DateComponents()
           dayComponent.day    = -10 // For removing 10 days
           let theCalendar     = Calendar.current
@@ -476,6 +506,7 @@ extension MainViewController {
        
       // NS Sage Response Processor
       func updateSage(data: [cageData]) {
+        print("enter update sage")
           if consoleLogging == true {print("in updateSage")}
           if data.count == 0 {
               return
@@ -507,6 +538,7 @@ extension MainViewController {
        
       // NS Profile Web Call
       func webLoadNSProfile() {
+        print("enter download profile")
           
         let urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
           let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
@@ -540,6 +572,7 @@ extension MainViewController {
       
       // NS Profile Response Processor
       func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
+        print("enter process profile")
           if jsonDeviceStatus.count == 0 {
               return
           }
@@ -552,11 +585,11 @@ extension MainViewController {
               let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
               basalProfile.append(entry)
           }
-          
       }
       
         // NS Temp Basal Web Call
       func WebLoadNSTempBasals() {
+        print("enter download basals")
         if !UserDefaultsRepository.downloadBasal.value { return }
         
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
@@ -596,6 +629,7 @@ extension MainViewController {
       
     // NS Temp Basal Response Processor
       func updateBasals(entries: [[String:AnyObject]]) {
+        print("enter process basal")
           // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
           basalData.removeAll()
           
@@ -730,11 +764,11 @@ extension MainViewController {
              }
             
         
- 
       }
     
     // NS Bolus Web Call
       func webLoadNSBoluses(){
+        print("enter download bolus")
         if !UserDefaultsRepository.downloadBolus.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
@@ -775,6 +809,7 @@ extension MainViewController {
     
     // NS Meal Bolus Response Processor
          func processNSBolus(entries: [[String:AnyObject]]) {
+            print("enter process bolus")
              // because it's a small array, we're going to destroy and reload every time.
              bolusData.removeAll()
              var lastFoundIndex = 0
@@ -800,12 +835,12 @@ extension MainViewController {
                 
             }
 
-           
          }
     
     
     // NS Carb Web Call
       func webLoadNSCarbs(){
+        print("enter download carbs")
         if !UserDefaultsRepository.downloadCarbs.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
@@ -846,6 +881,7 @@ extension MainViewController {
     
     // NS Carb Bolus Response Processor
          func processNSCarbs(entries: [[String:AnyObject]]) {
+            print("enter process carbs")
              // because it's a small array, we're going to destroy and reload every time.
              carbData.removeAll()
              var lastFoundIndex = 0
@@ -869,7 +905,6 @@ extension MainViewController {
                      carbData.append(dot)
                 }
             }
-
 
          }
 }
