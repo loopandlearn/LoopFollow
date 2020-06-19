@@ -46,7 +46,7 @@ extension MainViewController {
         }
         
         // Add Prediction Data
-        if predictionData.count > 0 && bgData.count > 0 {
+        if predictionData.count > 0 && bgData.count > 0 && UserDefaultsRepository.graphPrediction.value {
             var startingTime = bgChartEntry[bgChartEntry.count - 1].x + 300
             var i = 0
             // Add 1 hour of predictions
@@ -100,7 +100,7 @@ extension MainViewController {
         // create Basal graph data
         var chartEntry = [ChartDataEntry]()
         var maxBasal = 1.0
-        if basalData.count > 0 {
+        if basalData.count > 0  && UserDefaultsRepository.graphBasal.value {
             for i in 0..<basalData.count{
                 let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate))
                 chartEntry.append(value)
@@ -123,7 +123,7 @@ extension MainViewController {
         
         // Boluses
         var chartEntryBolus = [ChartDataEntry]()
-        if bolusData.count > 0 {
+        if bolusData.count > 0  && UserDefaultsRepository.graphBolus.value {
             for i in 0..<bolusData.count{
                 let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + 10), data: String(bolusData[i].value))
                 chartEntryBolus.append(value)
@@ -145,7 +145,7 @@ extension MainViewController {
         
         // Carbs
         var chartEntryCarbs = [ChartDataEntry]()
-        if carbData.count > 0 {
+        if carbData.count > 0  && UserDefaultsRepository.graphCarbs.value {
             for i in 0..<carbData.count{
                 let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + 30), data: String(carbData[i].value))
                 chartEntryCarbs.append(value)
