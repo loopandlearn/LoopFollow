@@ -70,6 +70,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var firstGraphLoad: Bool = true
     var firstBasalGraphLoad: Bool = true
     var minAgoBG: Double = 0.0
+    var currentOverride = 1.0
     
     // Vars for NS Pull
     var graphHours:Int=24
@@ -86,6 +87,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var timer = Timer()
     // check every 30 Seconds whether new bgvalues should be retrieved
     let timeInterval: TimeInterval = 30.0
+    
+    // View Delay Timer
+    var viewTimer = Timer()
+    let viewTimeInterval: TimeInterval = 5.0
     
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
@@ -111,7 +116,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var carbData: [bolusCarbGraphStruct] = []
     var predictionData: [Double] = []
     var chartData = LineChartData()
-    let chartDispatch = DispatchGroup()
     var newBGPulled = false
     
     // calendar setup
@@ -145,9 +149,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.rowHeight = 25
         infoTable.dataSource = self
         
+        startTimer(time: timeInterval)
         // Load Data
-        nightscoutLoader()
-        
+        if UserDefaultsRepository.url.value != "" {
+            nightscoutLoader()
+        }
         
     }
     
@@ -171,6 +177,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return cell
     }
     
+    
     // NS Loader Timer
     fileprivate func startTimer(time: TimeInterval) {
         timer = Timer.scheduledTimer(timeInterval: time,
@@ -182,12 +189,38 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Check Alarm Timer
     func startCheckAlarmTimer(time: TimeInterval) {
+        
         checkAlarmTimer = Timer.scheduledTimer(timeInterval: time,
                                      target: self,
                                      selector: #selector(MainViewController.checkAlarmTimerDidEnd(_:)),
                                      userInfo: nil,
                                      repeats: false)
     }
+    
+    // NS Loader Timer
+     func startViewTimer(time: TimeInterval) {
+        timer = Timer.scheduledTimer(timeInterval: time,
+                                     target: self,
+                                     selector: #selector(MainViewController.viewTimerDidEnd(_:)),
+                                     userInfo: nil,
+                                     repeats: false)
+        
+    }
+    
+    // Check for new data when timer ends
+       @objc func viewTimerDidEnd(_ timer:Timer) {
+           if bgData.count > 0 {
+               self.clearOldSnoozes()
+                self.checkAlarms(bgs: bgData)
+                self.updateMinAgo()
+                self.updateBadge()
+               self.viewUpdateNSBG()
+               if UserDefaultsRepository.writeCalendarEvent.value {
+                   self.writeCalendar()
+               }
+               self.createGraph()
+           }
+       }
     
     // Nothing should be done when this timer ends because it just blocks the alarms from firing when it's active
     @objc func checkAlarmTimerDidEnd(_ timer:Timer) {
@@ -324,8 +357,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: String(self.bgData[self.bgData.count - 1].sgv))
             eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
             eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
+            if self.currentOverride != 1.0 {
+                let val = Int( self.currentOverride*100)
+               // let overrideText = String(format:"%f1", self.currentOverride*100)
+                let text = String(val) + "%"
+                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: text)
+            } else {
+                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
+            }
             var minAgo = ""
-            if deltaTime > 5 {
+            if deltaTime > 9 {
                 // write old BG reading and continue pushing out end date to show last entry
                 minAgo = String(Int(deltaTime)) + " min"
                 eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
@@ -346,27 +387,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
             eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: cob)
             eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal)
-            
-            // old
-            /*
-            eventTitle += String(self.bgData[self.bgData.count - 1].sgv) + " "
-            eventTitle += direction + " "
-            eventTitle += deltaString + " "
-            if deltaTime > 5 {
-                // write old BG reading and continue pushing out end date to show last entry
-                eventTitle += ": " + String(Int(deltaTime)) + " min"
-                eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
-            }
-            
-            eventTitle += "\n"
-            if self.tableData[1].value != "" {
-               eventTitle += "C:" + self.tableData[1].value + "g "
-            }
-            if self.tableData[0].value != "" {
-                eventTitle += "I: " + self.tableData[0].value + "u"
-            }
-            */
-            
             
             
             

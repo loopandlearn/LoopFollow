@@ -24,6 +24,7 @@ class UserDefaultsRepository {
     
     // General Settings
     static let colorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
+    static let speakBG = UserDefaultsValue<Bool>(key: "speakBG", default: false)
     static let backgroundRefreshFrequency = UserDefaultsValue<Double>(key: "backgroundRefreshFrequency", default: 1)
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
     static let appBadge = UserDefaultsValue<Bool>(key: "appBadge", default: true)
@@ -37,6 +38,17 @@ class UserDefaultsRepository {
         onChange: { screenlock in
             UIApplication.shared.isIdleTimerDisabled = screenlock
     })
+    
+    // Debug Settings
+        static let downloadBasal = UserDefaultsValue<Bool>(key: "downloadBasal", default: true)
+        static let downloadBolus = UserDefaultsValue<Bool>(key: "downloadBolus", default: true)
+        static let downloadCarbs = UserDefaultsValue<Bool>(key: "downloadCarbs", default: true)
+        static let downloadPrediction = UserDefaultsValue<Bool>(key: "downloadPrediction", default: true)
+       static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
+        static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
+        static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
+        static let graphPrediction = UserDefaultsValue<Bool>(key: "graphPrediction", default: true)
+    
     
     
     // Watch Calendar Settings
@@ -139,6 +151,8 @@ class UserDefaultsRepository {
     static let alertMissedBolusActive = UserDefaultsValue<Bool>(key: "alertMissedBolusActive", default: false)
     static let alertMissedBolus = UserDefaultsValue<Int>(key: "alertMissedBolus", default: 10)
     static let alertMissedBolusSnooze = UserDefaultsValue<Int>(key: "alertMissedBolusSnooze", default: 10)
+    static let alertMissedBolusPrebolus = UserDefaultsValue<Int>(key: "alertMissedBolusPrebolus", default: 20)
+    static let alertMissedBolusIgnoreBolus = UserDefaultsValue<Double>(key: "alertMissedBolusIgnoreBolus", default: 0.5)
     static let alertMissedBolusLowGramsActive = UserDefaultsValue<Bool>(key: "alertMissedBolusLowGramsActive", default: false)
     static let alertMissedBolusLowGrams = UserDefaultsValue<Int>(key: "alertMissedBolusLowGrams", default: 10)
     static let alertMissedBolusLowGramsBG = UserDefaultsValue<Int>(key: "alertMissedBolusLowGramsBG", default: 70)
