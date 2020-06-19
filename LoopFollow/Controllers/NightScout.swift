@@ -253,92 +253,86 @@ extension MainViewController {
           if consoleLogging == true {print("in updatePump")}
           if jsonDeviceStatus.count == 0 {
             return
-          }
+        }
           
-          //only grabbing one record since ns sorts by {created_at : -1}
-          let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
-          
-          //pump and uploader
-          let formatter = ISO8601DateFormatter()
-          formatter.formatOptions = [.withFullDate,
-                                     .withTime,
-                                     .withDashSeparatorInDate,
-                                     .withColonSeparatorInTime]
-          if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String : AnyObject]? {
-              if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
-                  if let reservoirData = lastPumpRecord["reservoir"] as? Double
-                  {
-                      tableData[5].value = String(format:"%.0f", reservoirData) + "U"
-                  } else {
-                      tableData[5].value = "50+U"
-                  }
-                  
-                  if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
-                      let upbat = uploader["battery"] as! Double
-                      tableData[4].value = String(format:"%.0f", upbat) + "%"
-                  }
-              }
-          }
-              
-          // Loop
-          if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
-              if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
+        //only grabbing one record since ns sorts by {created_at : -1}
+        let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
 
-                  UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
-                  
-                  if let failure = lastLoopRecord["failureReason"] {
-                      LoopStatusLabel.text = "⚠"
-                  }
-                  else
-                  {
-                      if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                          if let lastTempBasal = enacted["rate"] as? Double {
-                         //     tableData[2].value = String(format:"%.1f", lastTempBasal)
-                          }
-                      }
-                      if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                          tableData[0].value = String(format:"%.1f", (iobdata["iob"] as! Double))
-                      }
-                      if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
-                          tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
-                      }
-                      if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
-                          let prediction = predictdata["values"] as! [Double]
-                          PredictionLabel.text = String(Int(prediction.last!))
-                          PredictionLabel.textColor = UIColor.systemPurple
-                          predictionData.removeAll()
-                          var i = 1
-                          while i <= 12 {
-                              predictionData.append(prediction[i])
-                              i += 1
-                          }
-                          
-                      }
-                      
-                      
-                      
-                      if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
-                          if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
-                              if tempBasalTime > lastLoopTime {
-                                  LoopStatusLabel.text = "⏀"
-                                 } else {
-                                  LoopStatusLabel.text = "↻"
-                              }
-                          }
-                         
-                      } else {
-                          LoopStatusLabel.text = "↻"
-                      }
-                      
-                  }
-                  if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 10 {
-                      LoopStatusLabel.text = "⚠"
-                  }
-              }
+        //pump and uploader
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate,
+                                 .withTime,
+                                 .withDashSeparatorInDate,
+                                 .withColonSeparatorInTime]
+        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String : AnyObject]? {
+            if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
+                if let reservoirData = lastPumpRecord["reservoir"] as? Double {
+                    tableData[5].value = String(format:"%.0f", reservoirData) + "U"
+                } else {
+                    tableData[5].value = "50+U"
+                }
+
+                if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
+                    let upbat = uploader["battery"] as! Double
+                    tableData[4].value = String(format:"%.0f", upbat) + "%"
+                }
+            }
+        }
               
-              
-              
-          }
+        // Loop
+        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
+            if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
+                UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+                if let failure = lastLoopRecord["failureReason"] {
+                    LoopStatusLabel.text = "X"
+                } else {
+                    if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        if let lastTempBasal = enacted["rate"] as? Double {
+                            // tableData[2].value = String(format:"%.1f", lastTempBasal)
+                        }
+                    }
+                    if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
+                        tableData[0].value = String(format:"%.1f", (iobdata["iob"] as! Double))
+                    }
+                    if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
+                        tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
+                    }
+                    if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
+                        let prediction = predictdata["values"] as! [Double]
+                        PredictionLabel.text = String(Int(prediction.last!))
+                        PredictionLabel.textColor = UIColor.systemPurple
+                        predictionData.removeAll()
+                        if UserDefaultsRepository.downloadPrediction.value {
+                        var i = 1
+                        while i <= 12 {
+                            predictionData.append(prediction[i])
+                            i += 1
+                        }
+                        }
+                    }
+                    if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
+                        if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
+                            var lastBGTime = lastLoopTime
+                            if bgData.count > 0 {
+                                lastBGTime = bgData[bgData.count - 1].date
+                            }
+                            if tempBasalTime > lastBGTime {
+                                LoopStatusLabel.text = "⏀"
+                            } else {
+                                LoopStatusLabel.text = "↻"
+                            }
+                        }
+                    } else {
+                        LoopStatusLabel.text = "↻"
+                    }
+
+                }
+
+                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 10 {
+                    LoopStatusLabel.text = "⚠"
+                }
+            } // end lastLoopTime
+        } // end lastLoop Record
           
           var oText = "" as String
         currentOverride = 1.0
@@ -563,6 +557,7 @@ extension MainViewController {
       
         // NS Temp Basal Web Call
       func WebLoadNSTempBasals() {
+        if !UserDefaultsRepository.downloadBasal.value { return }
         
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
 
@@ -740,7 +735,7 @@ extension MainViewController {
     
     // NS Bolus Web Call
       func webLoadNSBoluses(){
-        
+        if !UserDefaultsRepository.downloadBolus.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Correction%20Bolus&find[created_at][$gte]=" + yesterdayString
@@ -811,7 +806,7 @@ extension MainViewController {
     
     // NS Carb Web Call
       func webLoadNSCarbs(){
-        
+        if !UserDefaultsRepository.downloadCarbs.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
           var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=" + yesterdayString

@@ -149,10 +149,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.rowHeight = 25
         infoTable.dataSource = self
         
+        startTimer(time: timeInterval)
         // Load Data
         if UserDefaultsRepository.url.value != "" {
             nightscoutLoader()
-        } 
+        }
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -187,6 +189,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Check Alarm Timer
     func startCheckAlarmTimer(time: TimeInterval) {
+        
         checkAlarmTimer = Timer.scheduledTimer(timeInterval: time,
                                      target: self,
                                      selector: #selector(MainViewController.checkAlarmTimerDidEnd(_:)),
@@ -201,6 +204,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                                      selector: #selector(MainViewController.viewTimerDidEnd(_:)),
                                      userInfo: nil,
                                      repeats: false)
+        
     }
     
     // Check for new data when timer ends

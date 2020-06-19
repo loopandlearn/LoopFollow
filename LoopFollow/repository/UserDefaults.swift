@@ -39,6 +39,17 @@ class UserDefaultsRepository {
             UIApplication.shared.isIdleTimerDisabled = screenlock
     })
     
+    // Debug Settings
+        static let downloadBasal = UserDefaultsValue<Bool>(key: "downloadBasal", default: true)
+        static let downloadBolus = UserDefaultsValue<Bool>(key: "downloadBolus", default: true)
+        static let downloadCarbs = UserDefaultsValue<Bool>(key: "downloadCarbs", default: true)
+        static let downloadPrediction = UserDefaultsValue<Bool>(key: "downloadPrediction", default: true)
+       static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
+        static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
+        static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
+        static let graphPrediction = UserDefaultsValue<Bool>(key: "graphPrediction", default: true)
+    
+    
     
     // Watch Calendar Settings
     static let calendarIdentifier = UserDefaultsValue<String>(key: "calendarIdentifier", default: "")

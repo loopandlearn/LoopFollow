@@ -54,7 +54,7 @@ class SettingsViewController: FormViewController {
         buildAlarmSettings()
         buildGraphSettings()
         buildWatchSettings()
-        
+        buildDebugSettings()
         
         
             
@@ -300,6 +300,67 @@ class SettingsViewController: FormViewController {
         }
     }
  
+    func buildDebugSettings() {
+        form
+            +++ Section("Debug Settings")
 
+        <<< SwitchRow("downloadBasal"){ row in
+            row.title = "Download Basal"
+            row.value = UserDefaultsRepository.downloadBasal.value
+        }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.downloadBasal.value = value
+            }
+            <<< SwitchRow("graphBasal"){ row in
+            row.title = "Graph Basal"
+            row.value = UserDefaultsRepository.graphBasal.value
+        }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.graphBasal.value = value
+            }
+            <<< SwitchRow("downloadBolus"){ row in
+                row.title = "Download Bolus"
+                row.value = UserDefaultsRepository.downloadBolus.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.downloadBolus.value = value
+                }
+           <<< SwitchRow("graphBolus"){ row in
+               row.title = "Graph Bolus"
+               row.value = UserDefaultsRepository.graphBolus.value
+           }.onChange { [weak self] row in
+                       guard let value = row.value else { return }
+                       UserDefaultsRepository.graphBolus.value = value
+               }
+            <<< SwitchRow("downloadCarbs"){ row in
+                row.title = "Download Carbs"
+                row.value = UserDefaultsRepository.downloadCarbs.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.downloadCarbs.value = value
+                }
+              <<< SwitchRow("graphCarbs"){ row in
+                  row.title = "Graph Carbs"
+                  row.value = UserDefaultsRepository.graphCarbs.value
+              }.onChange { [weak self] row in
+                          guard let value = row.value else { return }
+                          UserDefaultsRepository.graphCarbs.value = value
+                  }
+            
+        <<< SwitchRow("downloadPrediction"){ row in
+                 row.title = "Download Prediction"
+                 row.value = UserDefaultsRepository.downloadPrediction.value
+             }.onChange { [weak self] row in
+                         guard let value = row.value else { return }
+                         UserDefaultsRepository.downloadPrediction.value = value
+                 }
+        <<< SwitchRow("graphPrediction"){ row in
+            row.title = "Graph Prediction"
+            row.value = UserDefaultsRepository.graphPrediction.value
+        }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.graphPrediction.value = value
+            }
+    }
 
 }
