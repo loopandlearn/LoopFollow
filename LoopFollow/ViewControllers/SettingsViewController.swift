@@ -34,8 +34,14 @@ class SettingsViewController: FormViewController {
                 row.value = UserDefaultsRepository.url.value
             }.onChange { row in
                 guard let value = row.value else { return }
-                let urlNSInput = value.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
+                // check the format of the URL entered by the user and trim away any spaces or "/" at the end
+                var urlNSInput = value.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
+                if urlNSInput.last == "/" {
+                    urlNSInput = String(urlNSInput.dropLast())
+                }
                 UserDefaultsRepository.url.value = urlNSInput.lowercased()
+                // set the row value back to the correctly formatted URL so that the user immediately sees how it should have been written
+                row.value = UserDefaultsRepository.url.value
                 }
             <<< TextRow(){ row in
                 row.title = "NS Token"
