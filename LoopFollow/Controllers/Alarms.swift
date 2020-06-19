@@ -196,7 +196,7 @@ extension MainViewController {
                             var lastBolus = 0.0
                             var lastBolusTime = 0.0
                             var i = 1
-                            while lastBolus < UserDefaultsRepository.alertMissedBolusIgnoreBolus.value {
+                            while lastBolus > UserDefaultsRepository.alertMissedBolusIgnoreBolus.value {
                                 lastBolus = bolusData[bolusData.count - i].value
                                 lastBolusTime = bolusData[bolusData.count - i].date
                                 i += 1
@@ -204,7 +204,8 @@ extension MainViewController {
                             
                             // Calclulate the prebolus by moving the carbs back in time the allowed amount.
                             // This lets us only need to check that the recent bolus is after it.
-                            if (lastCarbTime - Double(UserDefaultsRepository.alertMissedBolusPrebolus.value * 60)) > lastBolusTime  {
+                            if ((lastCarbTime - Double(UserDefaultsRepository.alertMissedBolusPrebolus.value * 60)) > lastBolusTime) &&
+                                lastCarbTime + Double(UserDefaultsRepository.alertMissedBolusPrebolus.value * 60) > (dateTimeUtils.getNowTimeIntervalUTC()) {
                                 AlarmSound.whichAlarm = "Missed Bolus Alert"
                                triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil)
                                return

@@ -222,6 +222,7 @@ extension MainViewController {
             {
                 self.DeltaText.text = "+" + String(deltaBG)
             }
+            self.updateBadge(val: latestBG)
         
         }
         else
