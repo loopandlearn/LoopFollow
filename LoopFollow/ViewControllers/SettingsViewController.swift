@@ -205,6 +205,30 @@ class SettingsViewController: FormViewController {
             mainScreen.nightscoutLoader(forceLoad: true)
                     
         }
+        <<< StepperRow("minBGScale") { row in
+            row.title = "Min BG Scale"
+            row.cell.stepper.stepValue = 10
+            row.cell.stepper.minimumValue = Double(UserDefaultsRepository.highLine.value)
+            row.cell.stepper.maximumValue = 400
+            row.value = Double(UserDefaultsRepository.minBGScale.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.minBGScale.value = Int(value)
+        }
+        <<< StepperRow("minBasalScale") { row in
+            row.title = "Min Basal Scale"
+            row.cell.stepper.stepValue = 0.5
+            row.cell.stepper.minimumValue = 0.5
+            row.cell.stepper.maximumValue = 20
+            row.value = Double(UserDefaultsRepository.minBasalScale.value)
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.minBasalScale.value = value
+        }
         <<< StepperRow("lowLine") { row in
             row.title = "Low BG Display Value"
             row.cell.stepper.stepValue = 1
@@ -253,7 +277,7 @@ class SettingsViewController: FormViewController {
         }
         
         form
-       +++ Section(header: "Watch Settings", footer: "Add the Apple calendar complication to your watch face for BG, Trend, Delta, COB, and IOB updated every 5 minutes. It is recommended to create a new calendar called 'Loop' and modify the calendar settings in the iPhone Watch App to only display the Loop calendar on your watch. Available variables are: %BG%, %DIRECTION%, %DELTA%, %MINAGO%, %IOB%, %COB%, %BASAL%, and %OVERRIDE% (only displays the percentage). ** %MINAGO% only displays if it is an old reading")
+       +++ Section(header: "Watch Settings", footer: "Add the Apple calendar complication to your watch face for BG, Trend, Delta, COB, and IOB updated every 5 minutes. It is recommended to create a new calendar called 'Loop' and modify the calendar settings in the iPhone Watch App to only display the Loop calendar on your watch. Available variables are: %BG%, %DIRECTION%, %DELTA%, %MINAGO%, %IOB%, %COB%, %BASAL%, %LOOP%, and %OVERRIDE% (only displays the percentage). ** %MINAGO% only displays if it is an old reading")
         <<< SwitchRow("writeCalendarEvent"){ row in
             row.title = "BG to Calendar"
             row.value = UserDefaultsRepository.writeCalendarEvent.value

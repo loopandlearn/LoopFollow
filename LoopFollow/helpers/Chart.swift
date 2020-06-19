@@ -10,6 +10,7 @@ import Foundation
 import Charts
 
 final class ChartXValueFormatter: IAxisValueFormatter {
+    
 
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
         

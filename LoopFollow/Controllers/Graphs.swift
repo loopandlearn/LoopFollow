@@ -14,18 +14,31 @@ import UIKit
 extension MainViewController {
     
 
+    func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
+        if chartView == BGChartFull {
+            BGChart.moveViewToX(entry.x)
+        }
+    }
     
+    func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
+        if chartView == BGChart {
+            let currentMatrix = chartView.viewPortHandler.touchMatrix
+            //BGChartFull.viewPortHandler.refresh(newMatrix: currentMatrix, chart: BGChartFull, invalidate: true)
+            //BGChartFull.highlightValue(x: Double(currentMatrix.tx), y: Double(currentMatrix.ty), dataSetIndex: 0)
+        }
+    }
 
     
     func createGraph(){
         self.BGChart.clear()
-        
+        print("enter graph")
         // Create the BG Graph Data
         let entries = bgData
         var bgChartEntry = [ChartDataEntry]()
         var colors = [NSUIColor]()
-        var maxBG: Int = 250
+        var maxBG: Int = UserDefaultsRepository.minBGScale.value
         if bgData.count > 0 {
+            print("graph - bg")
             for i in 0..<entries.count{
                 var dateString = String(entries[i].date).prefix(10)
                 let dateSecondsOnly = Double(String(dateString))!
@@ -47,6 +60,7 @@ extension MainViewController {
         
         // Add Prediction Data
         if predictionData.count > 0 && bgData.count > 0 && UserDefaultsRepository.graphPrediction.value {
+            print("graph prediction")
             var startingTime = bgChartEntry[bgChartEntry.count - 1].x + 300
             var i = 0
             // Add 1 hour of predictions
@@ -90,6 +104,7 @@ extension MainViewController {
         lineBG.valueFont.withSize(50)
         
         if colors.count > 0 {
+            print("graph colors")
             for i in 1..<colors.count{
                 lineBG.addColor(colors[i])
                 lineBG.circleColors.append(colors[i])
@@ -99,8 +114,9 @@ extension MainViewController {
 
         // create Basal graph data
         var chartEntry = [ChartDataEntry]()
-        var maxBasal = 1.0
+        var maxBasal = UserDefaultsRepository.minBasalScale.value
         if basalData.count > 0  && UserDefaultsRepository.graphBasal.value {
+            print("graph basal")
             for i in 0..<basalData.count{
                 let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate))
                 chartEntry.append(value)
@@ -124,8 +140,13 @@ extension MainViewController {
         // Boluses
         var chartEntryBolus = [ChartDataEntry]()
         if bolusData.count > 0  && UserDefaultsRepository.graphBolus.value {
+            print("graph bolus")
             for i in 0..<bolusData.count{
-                let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + 10), data: String(bolusData[i].value))
+                let formatter = NumberFormatter()
+                formatter.minimumFractionDigits = 0
+                formatter.maximumFractionDigits = 2
+                formatter.minimumIntegerDigits = 1
+                let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + 10), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
                 chartEntryBolus.append(value)
             }
         }
@@ -146,8 +167,13 @@ extension MainViewController {
         // Carbs
         var chartEntryCarbs = [ChartDataEntry]()
         if carbData.count > 0  && UserDefaultsRepository.graphCarbs.value {
+            print("graph carbs")
             for i in 0..<carbData.count{
-                let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + 30), data: String(carbData[i].value))
+                let formatter = NumberFormatter()
+                formatter.minimumFractionDigits = 0
+                formatter.maximumFractionDigits = 2
+                formatter.minimumIntegerDigits = 1
+                let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + 30), data: formatter.string(from: NSNumber(value: carbData[i].value)))
                 chartEntryCarbs.append(value)
             }
         }
@@ -237,11 +263,17 @@ extension MainViewController {
     
     
     func createSmallBGGraph(bgChartEntry: [ChartDataEntry], colors: [NSUIColor]){
+        print("small graph")
         //24 Hour Small Graph
         let line2 = LineChartDataSet(entries:bgChartEntry, label: "Number")
         line2.drawCirclesEnabled = false
-        line2.setDrawHighlightIndicators(false)
-        line2.lineWidth = 1
+        //line2.setDrawHighlightIndicators(false)
+        line2.highlightEnabled = true
+        line2.drawHorizontalHighlightIndicatorEnabled = false
+        line2.drawVerticalHighlightIndicatorEnabled = false
+        line2.highlightColor = NSUIColor.label
+        line2.drawValuesEnabled = false
+        line2.lineWidth = 2
         for i in 1..<colors.count{
             line2.addColor(colors[i])
             line2.circleColors.append(colors[i])
@@ -249,6 +281,7 @@ extension MainViewController {
         
         let data2 = LineChartData()
         data2.addDataSet(line2)
+        BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false
         BGChartFull.rightAxis.enabled = false
         BGChartFull.xAxis.enabled = false

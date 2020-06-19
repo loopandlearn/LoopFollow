@@ -25,37 +25,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var PredictionLabel: UILabel!
     @IBOutlet weak var LoopStatusLabel: UILabel!
     
-    //NS BG Struct
-    struct sgvData: Codable {
-        var sgv: Int
-        var date: TimeInterval
-        var direction: String?
-    }
     
-    //NS Cage Struct
-    struct cageData: Codable {
-        var created_at: String
-    }
-    
-    //NS Basal Profile Struct
-    struct basalProfileStruct: Codable {
-        var value: Double
-        var time: String
-        var timeAsSeconds: Double
-    }
-    
-    //NS Basal Data  Struct
-    struct basalGraphStruct: Codable {
-        var basalRate: Double
-        var date: TimeInterval
-    }
-    
-    //NS Bolus Data  Struct
-    struct bolusCarbGraphStruct: Codable {
-        var value: Double
-        var date: TimeInterval
-        var sgv: Int
-    }
     
     // Data Table Struct
     struct infoData {
@@ -127,6 +97,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         super.viewDidLoad()
         
         BGChart.delegate = self
+        BGChartFull.delegate = self
         
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
@@ -209,11 +180,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Check for new data when timer ends
        @objc func viewTimerDidEnd(_ timer:Timer) {
-           if bgData.count > 0 {
-               self.clearOldSnoozes()
+        print("view timer ended")
+        if bgData.count > 0 {
                 self.checkAlarms(bgs: bgData)
                 self.updateMinAgo()
-                self.updateBadge()
+            self.updateBadge(val: bgData[bgData.count - 1].sgv)
                self.viewUpdateNSBG()
                if UserDefaultsRepository.writeCalendarEvent.value {
                    self.writeCalendar()
@@ -258,7 +229,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Check for new data when timer ends
     @objc func timerDidEnd(_ timer:Timer) {
-        print("timer ended")
+        print("main timer ended")
+        self.clearOldSnoozes()
         nightscoutLoader()
     }
 
@@ -285,10 +257,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     
     
-    func updateBadge() {
-        let entries = bgData
-        if entries.count > 0 && UserDefaultsRepository.appBadge.value {
-            let latestBG = entries[entries.count - 1].sgv
+    func updateBadge(val: Int) {
+        if UserDefaultsRepository.appBadge.value {
+            let latestBG = val
             UIApplication.shared.applicationIconBadgeNumber = latestBG
         } else {
             UIApplication.shared.applicationIconBadgeNumber = 0
@@ -365,6 +336,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             } else {
                 eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
             }
+            eventTitle = eventTitle.replacingOccurrences(of: "%LOOP%", with: self.LoopStatusLabel.text ?? "")
             var minAgo = ""
             if deltaTime > 9 {
                 // write old BG reading and continue pushing out end date to show last entry

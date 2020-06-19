@@ -19,6 +19,8 @@ class UserDefaultsRepository {
     static let showDots = UserDefaultsValue<Bool>(key: "showDots", default: true)
     static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
+    static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
+    static let minBGScale = UserDefaultsValue<Int>(key: "minBGScale", default: 250)
     static let lowLine = UserDefaultsValue<Int>(key: "lowLine", default: 70)
     static let highLine = UserDefaultsValue<Int>(key: "highLine", default: 180)
     
