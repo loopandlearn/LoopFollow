@@ -172,7 +172,7 @@ extension MainViewController {
            }
         
         // check for missed bolus - Only checks within 1 hour of carb entry
-        if UserDefaultsRepository.alertMissedBolusActive.value {
+        if UserDefaultsRepository.alertMissedBolusActive.value && !UserDefaultsRepository.alertMissedBolusIsSnoozed.value {
             if carbData.count > 0  {
                 let lastCarb = carbData[carbData.count - 1].value
                 let lastCarbTime = carbData[carbData.count - 1].date
@@ -186,7 +186,7 @@ extension MainViewController {
                         !UserDefaultsRepository.alertMissedBolusLowGramsActive.value {
                         
                         // There is a current carb but no boluses at all
-                        if bolusData.count < 1 && ((now - lastCarbTime) < (60 * 60)) {
+                        if bolusData.count < 1 {
                             AlarmSound.whichAlarm = "Missed Bolus Alert"
                             triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil)
                             return
