@@ -67,35 +67,39 @@ extension MainViewController {
         }
         
         if forceLoad { needsLoaded = true}
-        // Only update if we don't have a current reading
+        // Only update if we don't have a current reading or forced to load
         if needsLoaded {
             self.clearLastInfoData()
-            
-            webLoadNSProfile()
-            WebLoadNSTempBasals()
             webLoadNSDeviceStatus()
             webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
-            webLoadNSBoluses()
-            webLoadNSCarbs()
-            
+            webLoadNSProfile()
+            if UserDefaultsRepository.downloadBasal.value {
+                WebLoadNSTempBasals()
+            }
+            if UserDefaultsRepository.downloadBolus.value {
+                webLoadNSBoluses()
+            }
+            if UserDefaultsRepository.downloadCarbs.value {
+                webLoadNSCarbs()
+            }
             webLoadNSCage()
             webLoadNSSage()
             
+            // Give the alarms and calendar 15 seconds delay to allow time for data to compile
             self.startViewTimer(time: viewTimeInterval)
-           
         } else {
-            webLoadNSDeviceStatus()
-            webLoadNSBoluses()
-            webLoadNSCarbs()
+            // Things to do if we already have data and don't need a network call
+            // Leaving all downloads off for right now.
+            /*
+             webLoadNSDeviceStatus()
             
+            if UserDefaultsRepository.downloadBolus.value {
+                webLoadNSBoluses()
+            }
+            if UserDefaultsRepository.downloadCarbs.value {
+                webLoadNSCarbs()
+            }*/
         }
-        
-        if bgData.count > 0 {
-            self.updateMinAgo()
-            self.checkAlarms(bgs: self.bgData)
-        }
-        
-
     }
     
     // NS BG Data Web call
@@ -106,7 +110,7 @@ extension MainViewController {
         if !onlyPullLastRecord {
             points = String(self.graphHours * 12 + 1)
         }
-
+        
         // URL processor
         var urlBGDataPath: String = UserDefaultsRepository.url.value + "/api/v1/entries/sgv.json?"
         if token == "" {
@@ -121,7 +125,7 @@ extension MainViewController {
         }
         var request = URLRequest(url: urlBGData)
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-
+        
         // Downloader
         let getBGTask = URLSession.shared.dataTask(with: request) { data, response, error in
             if self.consoleLogging == true {print("start bg url")}
@@ -133,7 +137,7 @@ extension MainViewController {
                 return
                 
             }
-
+            
             let decoder = JSONDecoder()
             let entriesResponse = try? decoder.decode([sgvData].self, from: data)
             if let entriesResponse = entriesResponse {
@@ -149,7 +153,7 @@ extension MainViewController {
         }
         getBGTask.resume()
     }
-       
+    
     // NS BG Data Response processor
     func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
         print("Enter BG Processor")
@@ -169,7 +173,7 @@ extension MainViewController {
                 self.updateBadge(val: data[data.count - 1].sgv)
             }
             
-           // self.viewUpdateNSBG()
+            // self.viewUpdateNSBG()
             return
         }
         
@@ -181,12 +185,8 @@ extension MainViewController {
             bgData.append(reading)
         }
         
-        if firstGraphLoad {
-            print("Do ViewUpdateNSBG and CreateGraph first load")
-            viewUpdateNSBG()
-            createGraph()
-        }
-       }
+        viewUpdateNSBG()
+    }
     
     // NS BG Data Front end updater
     func viewUpdateNSBG () {
@@ -206,7 +206,7 @@ extension MainViewController {
             
             BGText.text = bgOutputFormat(bg: Double(latestBG), mmol: mmol)
             setBGTextColor()
-
+            
             if let directionBG = entries[latestEntryi].direction {
                 DirectionText.text = bgDirectionGraphic(directionBG)
             }
@@ -215,45 +215,46 @@ extension MainViewController {
                 DirectionText.text = ""
             }
             
-          if deltaBG < 0 {
-            self.DeltaText.text = String(deltaBG)
+            if deltaBG < 0 {
+                self.DeltaText.text = String(deltaBG)
             }
             else
             {
                 self.DeltaText.text = "+" + String(deltaBG)
             }
             self.updateBadge(val: latestBG)
-        
+            
         }
         else
         {
             
             return
         }
-        
+        updateBGGraph()
+        updateMinAgo()
     }
     
-     // NS Device Status Web Call
-      func webLoadNSDeviceStatus() {
+    // NS Device Status Web Call
+    func webLoadNSDeviceStatus() {
         print("Enter download device status")
         let urlUser = UserDefaultsRepository.url.value
-          var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
-          if token != "" {
-              urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?token=" + token + "&count=1"
-          }
-          let escapedAddress = urlStringDeviceStatus.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
-          guard let urlDeviceStatus = URL(string: escapedAddress!) else {
-              
+        var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
+        if token != "" {
+            urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?token=" + token + "&count=1"
+        }
+        let escapedAddress = urlStringDeviceStatus.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
+        guard let urlDeviceStatus = URL(string: escapedAddress!) else {
+            
             return
-          }
-          if consoleLogging == true {print("entered device status task.")}
-          
-            
-            var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
-            requestDeviceStatus.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-            
-            
-            let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
+        }
+        if consoleLogging == true {print("entered device status task.")}
+        
+        
+        var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
+        requestDeviceStatus.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        
+        
+        let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
             if self.consoleLogging == true {print("in device status loop.")}
             guard error == nil else {
                 return
@@ -261,8 +262,8 @@ extension MainViewController {
             guard let data = data else {
                 return
             }
-
-
+            
+            
             let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
@@ -272,26 +273,26 @@ extension MainViewController {
                 return
             }
             if self.consoleLogging == true {print("finish pump update")}}
-            deviceStatusTask.resume()
-      }
-      
-      // NS Device Status Response Processor
-      func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
+        deviceStatusTask.resume()
+    }
+    
+    // NS Device Status Response Processor
+    func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
         print("Enter process device status")
-          if consoleLogging == true {print("in updatePump")}
-          if jsonDeviceStatus.count == 0 {
+        if consoleLogging == true {print("in updatePump")}
+        if jsonDeviceStatus.count == 0 {
             return
         }
-          
+        
         //only grabbing one record since ns sorts by {created_at : -1}
         let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
-
+        
         //pump and uploader
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate,
-                                 .withTime,
-                                 .withDashSeparatorInDate,
-                                 .withColonSeparatorInTime]
+                                   .withTime,
+                                   .withDashSeparatorInDate,
+                                   .withColonSeparatorInTime]
         if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String : AnyObject]? {
             if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
@@ -299,14 +300,14 @@ extension MainViewController {
                 } else {
                     tableData[5].value = "50+U"
                 }
-
+                
                 if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
                     let upbat = uploader["battery"] as! Double
                     tableData[4].value = String(format:"%.0f", upbat) + "%"
                 }
             }
         }
-              
+        
         // Loop
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
@@ -331,11 +332,11 @@ extension MainViewController {
                         PredictionLabel.textColor = UIColor.systemPurple
                         predictionData.removeAll()
                         if UserDefaultsRepository.downloadPrediction.value {
-                        var i = 1
-                        while i <= 12 {
-                            predictionData.append(prediction[i])
-                            i += 1
-                        }
+                            var i = 1
+                            while i <= 12 {
+                                predictionData.append(prediction[i])
+                                i += 1
+                            }
                         }
                     }
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
@@ -353,328 +354,328 @@ extension MainViewController {
                     } else {
                         LoopStatusLabel.text = "↻"
                     }
-
+                    
                 }
-
+                
                 if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 10 {
                     LoopStatusLabel.text = "⚠"
                 }
             } // end lastLoopTime
         } // end lastLoop Record
-          
-          var oText = "" as String
+        
+        var oText = "" as String
         currentOverride = 1.0
-                 if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
-                     if let lastOverrideTime = formatter.date(from: (lastOverride["timestamp"] as! String))?.timeIntervalSince1970  {
-                     }
-                     if lastOverride["active"] as! Bool {
-                         
-                         let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
-                         if let multiplier = lastOverride["multiplier"] as? Double {
-                            currentOverride = multiplier
-                                                oText += String(format:"%.1f", multiplier*100)
-                                            }
-                                            else
-                                            {
-                                                oText += String(format:"%.1f", 100)
-                                            }
-                         oText += "% ("
-                         let minValue = lastCorrection["minValue"] as! Double
-                         let maxValue = lastCorrection["maxValue"] as! Double
-                         oText += bgOutputFormat(bg: minValue, mmol: mmol) + "-" + bgOutputFormat(bg: maxValue, mmol: mmol) + ")"
-                        
-                      tableData[3].value =  oText
-                     }
-                 }
-          
-          infoTable.reloadData()
-          }
-      
-      // NS Cage Web Call
-      func webLoadNSCage() {
+        if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
+            if let lastOverrideTime = formatter.date(from: (lastOverride["timestamp"] as! String))?.timeIntervalSince1970  {
+            }
+            if lastOverride["active"] as! Bool {
+                
+                let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
+                if let multiplier = lastOverride["multiplier"] as? Double {
+                    currentOverride = multiplier
+                    oText += String(format:"%.1f", multiplier*100)
+                }
+                else
+                {
+                    oText += String(format:"%.1f", 100)
+                }
+                oText += "% ("
+                let minValue = lastCorrection["minValue"] as! Double
+                let maxValue = lastCorrection["maxValue"] as! Double
+                oText += bgOutputFormat(bg: minValue, mmol: mmol) + "-" + bgOutputFormat(bg: maxValue, mmol: mmol) + ")"
+                
+                tableData[3].value =  oText
+            }
+        }
+        
+        infoTable.reloadData()
+    }
+    
+    // NS Cage Web Call
+    func webLoadNSCage() {
         print("enter download cage")
         let urlUser = UserDefaultsRepository.url.value
-          var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
-          if token != "" {
-              urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Site%20Change&count=1"
-          }
-
-          guard let urlData = URL(string: urlString) else {
-              return
-          }
-          var request = URLRequest(url: urlData)
-          request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-
-          let task = URLSession.shared.dataTask(with: request) { data, response, error in
-              if self.consoleLogging == true {print("start cage url")}
-              guard error == nil else {
-                  return
-              }
-              guard let data = data else {
-                  return
-              }
-
-              let decoder = JSONDecoder()
-              let entriesResponse = try? decoder.decode([cageData].self, from: data)
-              if let entriesResponse = entriesResponse {
-                  DispatchQueue.main.async {
-                      self.updateCage(data: entriesResponse)
-                  }
-              } else {
-                  return
-              }
-          }
-          task.resume()
-      }
-       
-      // NS Cage Response Processor
-      func updateCage(data: [cageData]) {
-        print("enter process cage")
-          if consoleLogging == true {print("in updateCage")}
-          if data.count == 0 {
-              return
-          }
-
-          let lastCageString = data[0].created_at
-
-          let formatter = ISO8601DateFormatter()
-          formatter.formatOptions = [.withFullDate,
-                                  .withTime,
-                                  .withDashSeparatorInDate,
-                                  .withColonSeparatorInTime]
-          UserDefaultsRepository.alertCageInsertTime.value = formatter.date(from: (lastCageString))?.timeIntervalSince1970 as! TimeInterval
-          if let cageTime = formatter.date(from: (lastCageString))?.timeIntervalSince1970 {
-              let now = NSDate().timeIntervalSince1970
-              let secondsAgo = now - cageTime
-              //let days = 24 * 60 * 60
-
-              let formatter = DateComponentsFormatter()
-              formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
-              formatter.allowedUnits = [ .hour, .minute ] // Units to display in the formatted string
-              formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
-
-              let formattedDuration = formatter.string(from: secondsAgo)
-              tableData[7].value = formattedDuration ?? ""
-          }
-          infoTable.reloadData()
-      }
-       
-      // NS Sage Web Call
-      func webLoadNSSage() {
-        print("enter download sage")
-          var dayComponent    = DateComponents()
-          dayComponent.day    = -10 // For removing 10 days
-          let theCalendar     = Calendar.current
-
-          let startDate    = theCalendar.date(byAdding: dayComponent, to: Date())!
-          let dateFormatter = DateFormatter()
-          dateFormatter.dateFormat = "yyyy-MM-dd"
-          var startDateString = dateFormatter.string(from: startDate)
-
-        let urlUser = UserDefaultsRepository.url.value
-          var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
-          if token != "" {
-              urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
-          }
-
-          guard let urlData = URL(string: urlString) else {
-              return
-          }
-          var request = URLRequest(url: urlData)
-          request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-
-          let task = URLSession.shared.dataTask(with: request) { data, response, error in
-              if self.consoleLogging == true {print("start cage url")}
-              guard error == nil else {
-                  return
-              }
-              guard let data = data else {
-                  return
-              }
-
-              let decoder = JSONDecoder()
-              let entriesResponse = try? decoder.decode([cageData].self, from: data)
-              if let entriesResponse = entriesResponse {
-                  DispatchQueue.main.async {
-                      self.updateSage(data: entriesResponse)
-                  }
-              } else {
-                  return
-              }
-          }
-          task.resume()
-      }
-       
-      // NS Sage Response Processor
-      func updateSage(data: [cageData]) {
-        print("enter update sage")
-          if consoleLogging == true {print("in updateSage")}
-          if data.count == 0 {
-              return
-          }
-
-          var lastSageString = data[0].created_at
-
-          let formatter = ISO8601DateFormatter()
-          formatter.formatOptions = [.withFullDate,
-                               .withTime,
-                               .withDashSeparatorInDate,
-                               .withColonSeparatorInTime]
-          UserDefaultsRepository.alertSageInsertTime.value = formatter.date(from: (lastSageString))?.timeIntervalSince1970 as! TimeInterval
-          if let sageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
-              let now = NSDate().timeIntervalSince1970
-              let secondsAgo = now - sageTime
-              let days = 24 * 60 * 60
-
-              let formatter = DateComponentsFormatter()
-              formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
-              formatter.allowedUnits = [ .day, .hour] // Units to display in the formatted string
-              formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
-
-              let formattedDuration = formatter.string(from: secondsAgo)
-              tableData[6].value = formattedDuration ?? ""
-          }
-          infoTable.reloadData()
-      }
-       
-      // NS Profile Web Call
-      func webLoadNSProfile() {
-        print("enter download profile")
-          
-        let urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
-          let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
-          guard let url = URL(string: escapedAddress!) else {
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
+        if token != "" {
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Site%20Change&count=1"
+        }
+        
+        guard let urlData = URL(string: urlString) else {
             return
-          }
-          
-          var request = URLRequest(url: url)
-          request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-              guard error == nil else {
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if self.consoleLogging == true {print("start cage url")}
+            guard error == nil else {
                 return
-              }
-              guard let data = data else {
+            }
+            guard let data = data else {
                 return
-              }
-              
-              
-              let json = try? JSONSerialization.jsonObject(with: data) as! Dictionary<String, Any>
-              
-              if let json = json {
-                  DispatchQueue.main.async {
-                      self.updateProfile(jsonDeviceStatus: json)
-                  }
-              } else {
+            }
+            
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([cageData].self, from: data)
+            if let entriesResponse = entriesResponse {
+                DispatchQueue.main.async {
+                    self.updateCage(data: entriesResponse)
+                }
+            } else {
                 return
-              }
-          }
-          task.resume()
-      }
-      
-      // NS Profile Response Processor
-      func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
+            }
+        }
+        task.resume()
+    }
+    
+    // NS Cage Response Processor
+    func updateCage(data: [cageData]) {
+        print("enter process cage")
+        if consoleLogging == true {print("in updateCage")}
+        if data.count == 0 {
+            return
+        }
+        
+        let lastCageString = data[0].created_at
+        
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate,
+                                   .withTime,
+                                   .withDashSeparatorInDate,
+                                   .withColonSeparatorInTime]
+        UserDefaultsRepository.alertCageInsertTime.value = formatter.date(from: (lastCageString))?.timeIntervalSince1970 as! TimeInterval
+        if let cageTime = formatter.date(from: (lastCageString))?.timeIntervalSince1970 {
+            let now = NSDate().timeIntervalSince1970
+            let secondsAgo = now - cageTime
+            //let days = 24 * 60 * 60
+            
+            let formatter = DateComponentsFormatter()
+            formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
+            formatter.allowedUnits = [ .day, .hour ] // Units to display in the formatted string
+            formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
+            
+            let formattedDuration = formatter.string(from: secondsAgo)
+            tableData[7].value = formattedDuration ?? ""
+        }
+        infoTable.reloadData()
+    }
+    
+    // NS Sage Web Call
+    func webLoadNSSage() {
+        print("enter download sage")
+        var dayComponent    = DateComponents()
+        dayComponent.day    = -10 // For removing 10 days
+        let theCalendar     = Calendar.current
+        
+        let startDate    = theCalendar.date(byAdding: dayComponent, to: Date())!
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        var startDateString = dateFormatter.string(from: startDate)
+        
+        let urlUser = UserDefaultsRepository.url.value
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+        if token != "" {
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+        }
+        
+        guard let urlData = URL(string: urlString) else {
+            return
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if self.consoleLogging == true {print("start cage url")}
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([cageData].self, from: data)
+            if let entriesResponse = entriesResponse {
+                DispatchQueue.main.async {
+                    self.updateSage(data: entriesResponse)
+                }
+            } else {
+                return
+            }
+        }
+        task.resume()
+    }
+    
+    // NS Sage Response Processor
+    func updateSage(data: [cageData]) {
+        print("enter update sage")
+        if consoleLogging == true {print("in updateSage")}
+        if data.count == 0 {
+            return
+        }
+        
+        var lastSageString = data[0].created_at
+        
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate,
+                                   .withTime,
+                                   .withDashSeparatorInDate,
+                                   .withColonSeparatorInTime]
+        UserDefaultsRepository.alertSageInsertTime.value = formatter.date(from: (lastSageString))?.timeIntervalSince1970 as! TimeInterval
+        if let sageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
+            let now = NSDate().timeIntervalSince1970
+            let secondsAgo = now - sageTime
+            let days = 24 * 60 * 60
+            
+            let formatter = DateComponentsFormatter()
+            formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
+            formatter.allowedUnits = [ .day, .hour] // Units to display in the formatted string
+            formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
+            
+            let formattedDuration = formatter.string(from: secondsAgo)
+            tableData[6].value = formattedDuration ?? ""
+        }
+        infoTable.reloadData()
+    }
+    
+    // NS Profile Web Call
+    func webLoadNSProfile() {
+        print("enter download profile")
+        
+        let urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
+        let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
+        guard let url = URL(string: escapedAddress!) else {
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+            
+            
+            let json = try? JSONSerialization.jsonObject(with: data) as! Dictionary<String, Any>
+            
+            if let json = json {
+                DispatchQueue.main.async {
+                    self.updateProfile(jsonDeviceStatus: json)
+                }
+            } else {
+                return
+            }
+        }
+        task.resume()
+    }
+    
+    // NS Profile Response Processor
+    func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
         print("enter process profile")
-          if jsonDeviceStatus.count == 0 {
-              return
-          }
-          let basal = jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
-          for i in 0..<basal.count {
-              let dict = basal[i] as! Dictionary<String, Any>
-              let thisValue = dict[keyPath: "value"] as! Double
-              let thisTime = dict[keyPath: "time"] as! String
-              let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
-              let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
-              basalProfile.append(entry)
-          }
-      }
-      
-        // NS Temp Basal Web Call
-      func WebLoadNSTempBasals() {
+        if jsonDeviceStatus.count == 0 {
+            return
+        }
+        let basal = jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
+        for i in 0..<basal.count {
+            let dict = basal[i] as! Dictionary<String, Any>
+            let thisValue = dict[keyPath: "value"] as! Double
+            let thisTime = dict[keyPath: "time"] as! String
+            let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
+            let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
+            basalProfile.append(entry)
+        }
+    }
+    
+    // NS Temp Basal Web Call
+    func WebLoadNSTempBasals() {
         print("enter download basals")
         if !UserDefaultsRepository.downloadBasal.value { return }
         
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
-
+        
         var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[eventType][$eq]=Temp%20Basal&find[created_at][$gte]=" + yesterdayString
-            if token != "" {
-                urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?token=" + token + "&find[eventType][$eq]=Temp%20Basal&find[created_at][$gte]=" + yesterdayString
-            }
+        if token != "" {
+            urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?token=" + token + "&find[eventType][$eq]=Temp%20Basal&find[created_at][$gte]=" + yesterdayString
+        }
+        
+        guard let urlData = URL(string: urlString) else {
+            return
+        }
+        
+        
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             
-            guard let urlData = URL(string: urlString) else {
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
                 return
             }
             
-          
-            var request = URLRequest(url: urlData)
-            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-           
-                guard error == nil else {
-                    return
+            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            if let json = json {
+                DispatchQueue.main.async {
+                    self.updateBasals(entries: json)
                 }
-                guard let data = data else {
-                    return
-                }
-                    
-                let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
-                if let json = json {
-                    DispatchQueue.main.async {
-                        self.updateBasals(entries: json)
-                    }
-                } else {
-                    return
-                }
+            } else {
+                return
             }
-            task.resume()
-      }
-      
+        }
+        task.resume()
+    }
+    
     // NS Temp Basal Response Processor
-      func updateBasals(entries: [[String:AnyObject]]) {
+    func updateBasals(entries: [[String:AnyObject]]) {
         print("enter process basal")
-          // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
-          basalData.removeAll()
-          
+        // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
+        basalData.removeAll()
+        
         var lastEndDot = 0.0
         
-          var tempArray: [basalGraphStruct] = []
-          for i in 0..<entries.count {
-              let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
-              let basalDate = currentEntry?["timestamp"] as! String
-              let strippedZone = String(basalDate.dropLast())
-              let dateFormatter = DateFormatter()
-              dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-              dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-              let dateString = dateFormatter.date(from: strippedZone)
-              let dateTimeStamp = dateString!.timeIntervalSince1970
-              let basalRate = currentEntry?["absolute"] as! Double
-                let midnightTime = dateTimeUtils.getTimeIntervalMidnightToday()
-              // Setting end dots
-              var duration = 0.0
-              // For all except the last we're going to use stored duration for end dot. For last we'll just put it 5 mintues after the entry
-              if i <= entries.count - 1 {
-                   duration = currentEntry?["duration"] as! Double
-              } else {
-                  duration = dateTimeStamp + 60
-              }
+        var tempArray: [basalGraphStruct] = []
+        for i in 0..<entries.count {
+            let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
+            let basalDate = currentEntry?["timestamp"] as! String
+            let strippedZone = String(basalDate.dropLast())
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+            let dateString = dateFormatter.date(from: strippedZone)
+            let dateTimeStamp = dateString!.timeIntervalSince1970
+            let basalRate = currentEntry?["absolute"] as! Double
+            let midnightTime = dateTimeUtils.getTimeIntervalMidnightToday()
+            // Setting end dots
+            var duration = 0.0
+            // For all except the last we're going to use stored duration for end dot. For last we'll just put it 5 mintues after the entry
+            if i <= entries.count - 1 {
+                duration = currentEntry?["duration"] as! Double
+            } else {
+                duration = dateTimeStamp + 60
+            }
             
-              // This adds scheduled basal wherever there is a break between temps. can't check the prior ending on the first item. it is 24 hours old, so it isn't important for display anyway
-              if i > 0 {
-                  let priorEntry = entries[entries.count - i] as [String : AnyObject]?
-                  let priorBasalDate = priorEntry?["timestamp"] as! String
-                  let priorStrippedZone = String(priorBasalDate.dropLast())
-                  let priorDateFormatter = DateFormatter()
-                  priorDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-                  priorDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-                  let priorDateString = dateFormatter.date(from: priorStrippedZone)
-                  let priorDateTimeStamp = priorDateString!.timeIntervalSince1970
-                 let priorDuration = priorEntry?["duration"] as! Double
+            // This adds scheduled basal wherever there is a break between temps. can't check the prior ending on the first item. it is 24 hours old, so it isn't important for display anyway
+            if i > 0 {
+                let priorEntry = entries[entries.count - i] as [String : AnyObject]?
+                let priorBasalDate = priorEntry?["timestamp"] as! String
+                let priorStrippedZone = String(priorBasalDate.dropLast())
+                let priorDateFormatter = DateFormatter()
+                priorDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+                priorDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+                let priorDateString = dateFormatter.date(from: priorStrippedZone)
+                let priorDateTimeStamp = priorDateString!.timeIntervalSince1970
+                let priorDuration = priorEntry?["duration"] as! Double
                 // if difference between time stamps is greater than the duration of the last entry, there is a gap
                 if Double( dateTimeStamp - priorDateTimeStamp ) > Double( priorDuration * 60 ) {
-                     
-                      var scheduled = 0.0
+                    
+                    var scheduled = 0.0
                     // cycle through basal profiles.
                     // TODO figure out how to deal with profile changes that happen mid-gap
-                      for b in 0..<self.basalProfile.count {
+                    for b in 0..<self.basalProfile.count {
                         let scheduleTimeYesterday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightYesterday()
                         let scheduleTimeToday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightToday()
                         // check the prior temp ending to the profile seconds from midnight
@@ -684,24 +685,24 @@ extension MainViewController {
                         if (priorDateTimeStamp + (priorDuration * 60)) >= scheduleTimeToday {
                             scheduled = basalProfile[b].value
                         }
-                          
+                        
                         // This will iterate through from midnight on and set it for the highest matching one.
-                      }
-                      // Make the starting dot at the last ending dot
-                      let startDot = basalGraphStruct(basalRate: scheduled, date: Double(priorDateTimeStamp + (priorDuration * 60)))
-                      basalData.append(startDot)
+                    }
+                    // Make the starting dot at the last ending dot
+                    let startDot = basalGraphStruct(basalRate: scheduled, date: Double(priorDateTimeStamp + (priorDuration * 60)))
+                    basalData.append(startDot)
                     
                     // Make the ending dot at the new starting dot
                     let endDot = basalGraphStruct(basalRate: scheduled, date: Double(dateTimeStamp))
                     basalData.append(endDot)
-                      
-                     
-                 }
-              }
-              
-              // Make the starting dot
-              let startDot = basalGraphStruct(basalRate: basalRate, date: Double(dateTimeStamp))
-              basalData.append(startDot)
+                    
+                    
+                }
+            }
+            
+            // Make the starting dot
+            let startDot = basalGraphStruct(basalRate: basalRate, date: Double(dateTimeStamp))
+            basalData.append(startDot)
             
             // Make the ending dot
             // If it's the last one and not ended yet, extend it for 1 hour to match the prediction length. Otherwise let it end
@@ -730,182 +731,192 @@ extension MainViewController {
             let endDot = basalGraphStruct(basalRate: basalRate, date: Double(lastEndDot))
             basalData.append(endDot)
             
-              
-          }
+            
+        }
         
         // If last scheduled basal was prior to right now, we need to create one last scheduled entry
         if lastEndDot <= dateTimeUtils.getNowTimeIntervalUTC() {
             var scheduled = 0.0
-                // cycle through basal profiles.
-                // TODO figure out how to deal with profile changes that happen mid-gap
-                  for b in 0..<self.basalProfile.count {
-                    let scheduleTimeYesterday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightYesterday()
-                    let scheduleTimeToday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightToday()
-                    // check the prior temp ending to the profile seconds from midnight
-                    if lastEndDot >= scheduleTimeYesterday {
-                        scheduled = basalProfile[b].value
-                    }
-                    if lastEndDot >= scheduleTimeToday {
-                        scheduled = basalProfile[b].value
-                    }
-                      
-                    
-                  }
-            
-                  tableData[2].value = String(format:"%.1f", scheduled)
-                  // Make the starting dot at the last ending dot
-                  let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
-                  basalData.append(startDot)
+            // cycle through basal profiles.
+            // TODO figure out how to deal with profile changes that happen mid-gap
+            for b in 0..<self.basalProfile.count {
+                let scheduleTimeYesterday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightYesterday()
+                let scheduleTimeToday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightToday()
+                // check the prior temp ending to the profile seconds from midnight
+                if lastEndDot >= scheduleTimeYesterday {
+                    scheduled = basalProfile[b].value
+                }
+                if lastEndDot >= scheduleTimeToday {
+                    scheduled = basalProfile[b].value
+                }
                 
-                // Make the ending dot 1 hour after now
-                let endDot = basalGraphStruct(basalRate: scheduled, date: Double(Date().timeIntervalSince1970))
-                basalData.append(endDot)
-                  
-                 
-             }
+                
+            }
             
-        
-      }
+            tableData[2].value = String(format:"%.1f", scheduled)
+            // Make the starting dot at the last ending dot
+            let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
+            basalData.append(startDot)
+            
+            // Make the ending dot 1 hour after now
+            let endDot = basalGraphStruct(basalRate: scheduled, date: Double(Date().timeIntervalSince1970))
+            basalData.append(endDot)
+            
+            
+        }
+        if UserDefaultsRepository.graphBasal.value {
+            updateBasalGraph()
+        }
+    }
     
     // NS Bolus Web Call
-      func webLoadNSBoluses(){
+    func webLoadNSBoluses(){
         print("enter download bolus")
         if !UserDefaultsRepository.downloadBolus.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
-          var searchString = "find[eventType]=Correction%20Bolus&find[created_at][$gte]=" + yesterdayString
-          var urlDataPath: String = urlUser + "/api/v1/treatments.json?"
-          if token == "" {
-              urlDataPath = urlDataPath + searchString
-          }
-          else
-          {
-              urlDataPath = urlDataPath + "token=" + token + "&" + searchString
-          }
-          guard let urlData = URL(string: urlDataPath) else {
+        var searchString = "find[eventType]=Correction%20Bolus&find[created_at][$gte]=" + yesterdayString
+        var urlDataPath: String = urlUser + "/api/v1/treatments.json?"
+        if token == "" {
+            urlDataPath = urlDataPath + searchString
+        }
+        else
+        {
+            urlDataPath = urlDataPath + "token=" + token + "&" + searchString
+        }
+        guard let urlData = URL(string: urlDataPath) else {
             return
-          }
-          var request = URLRequest(url: urlData)
-           request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-          
-               guard error == nil else {
+            
+            guard error == nil else {
                 return
-               }
-               guard let data = data else {
+            }
+            guard let data = data else {
                 return
-               }
-                   
-               let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
-               if let json = json {
-                   DispatchQueue.main.async {
-                       self.processNSBolus(entries: json)
-                   }
-               } else {
+            }
+            
+            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            if let json = json {
+                DispatchQueue.main.async {
+                    self.processNSBolus(entries: json)
+                }
+            } else {
                 return
-               }
-           }
-           task.resume()
-      }
+            }
+        }
+        task.resume()
+    }
     
     // NS Meal Bolus Response Processor
-         func processNSBolus(entries: [[String:AnyObject]]) {
-            print("enter process bolus")
-             // because it's a small array, we're going to destroy and reload every time.
-             bolusData.removeAll()
-             var lastFoundIndex = 0
-             for i in 0..<entries.count {
-                 let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
-                 let bolusDate = currentEntry?["timestamp"] as! String
-                 let strippedZone = String(bolusDate.dropLast())
-                 let dateFormatter = DateFormatter()
-                 dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-                 dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-                 let dateString = dateFormatter.date(from: strippedZone)
-                 let dateTimeStamp = dateString!.timeIntervalSince1970
-                 let bolus = currentEntry?["insulin"] as! Double
-                
-                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-                lastFoundIndex = sgv.foundIndex
-                
-                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                    // Make the dot
-                   let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                    bolusData.append(dot)
-                }
-                
+    func processNSBolus(entries: [[String:AnyObject]]) {
+        print("enter process bolus")
+        // because it's a small array, we're going to destroy and reload every time.
+        bolusData.removeAll()
+        var lastFoundIndex = 0
+        for i in 0..<entries.count {
+            let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
+            let bolusDate = currentEntry?["timestamp"] as! String
+            let strippedZone = String(bolusDate.dropLast())
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+            let dateString = dateFormatter.date(from: strippedZone)
+            let dateTimeStamp = dateString!.timeIntervalSince1970
+            let bolus = currentEntry?["insulin"] as! Double
+            
+            let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+            lastFoundIndex = sgv.foundIndex
+            
+            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                // Make the dot
+                let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                bolusData.append(dot)
             }
-
-         }
+            
+        }
+        
+        if UserDefaultsRepository.graphBolus.value {
+            updateBolusGraph()
+        }
+        
+    }
     
     
     // NS Carb Web Call
-      func webLoadNSCarbs(){
+    func webLoadNSCarbs(){
         print("enter download carbs")
         if !UserDefaultsRepository.downloadCarbs.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
-          var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=" + yesterdayString
-          var urlDataPath: String = urlUser + "/api/v1/treatments.json?"
-          if token == "" {
-              urlDataPath = urlDataPath + searchString
-          }
-          else
-          {
-              urlDataPath = urlDataPath + "token=" + token + "&" + searchString
-          }
-          guard let urlData = URL(string: urlDataPath) else {
+        var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=" + yesterdayString
+        var urlDataPath: String = urlUser + "/api/v1/treatments.json?"
+        if token == "" {
+            urlDataPath = urlDataPath + searchString
+        }
+        else
+        {
+            urlDataPath = urlDataPath + "token=" + token + "&" + searchString
+        }
+        guard let urlData = URL(string: urlDataPath) else {
             return
-          }
-          var request = URLRequest(url: urlData)
-           request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-           let task = URLSession.shared.dataTask(with: request) { data, response, error in
-          
-               guard error == nil else {
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            
+            guard error == nil else {
                 return
-               }
-               guard let data = data else {
+            }
+            guard let data = data else {
                 return
-               }
-                   
-               let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
-               if let json = json {
-                   DispatchQueue.main.async {
-                       self.processNSCarbs(entries: json)
-                   }
-               } else {
+            }
+            
+            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            if let json = json {
+                DispatchQueue.main.async {
+                    self.processNSCarbs(entries: json)
+                }
+            } else {
                 return
-               }
-           }
-           task.resume()
-      }
+            }
+        }
+        task.resume()
+    }
     
     // NS Carb Bolus Response Processor
-         func processNSCarbs(entries: [[String:AnyObject]]) {
-            print("enter process carbs")
-             // because it's a small array, we're going to destroy and reload every time.
-             carbData.removeAll()
-             var lastFoundIndex = 0
-             for i in 0..<entries.count {
-                 let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
-                 let bolusDate = currentEntry?["timestamp"] as! String
-                 let strippedZone = String(bolusDate.dropLast())
-                 let dateFormatter = DateFormatter()
-                 dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-                 dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-                 let dateString = dateFormatter.date(from: strippedZone)
-                 let dateTimeStamp = dateString!.timeIntervalSince1970
-                 let carbs = currentEntry?["carbs"] as! Double
-                
-                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-                lastFoundIndex = sgv.foundIndex
-                
-                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                     // Make the dot
-                    let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                     carbData.append(dot)
-                }
+    func processNSCarbs(entries: [[String:AnyObject]]) {
+        print("enter process carbs")
+        // because it's a small array, we're going to destroy and reload every time.
+        carbData.removeAll()
+        var lastFoundIndex = 0
+        for i in 0..<entries.count {
+            let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
+            let bolusDate = currentEntry?["timestamp"] as! String
+            let strippedZone = String(bolusDate.dropLast())
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+            let dateString = dateFormatter.date(from: strippedZone)
+            let dateTimeStamp = dateString!.timeIntervalSince1970
+            let carbs = currentEntry?["carbs"] as! Double
+            
+            let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+            lastFoundIndex = sgv.foundIndex
+            
+            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                // Make the dot
+                let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                carbData.append(dot)
             }
-
-         }
+        }
+        
+        if UserDefaultsRepository.graphCarbs.value {
+            updateCarbGraph()
+        }
+        
+        
+    }
 }
