@@ -192,7 +192,7 @@ class SettingsViewController: FormViewController {
                     UserDefaultsRepository.showDots.value = value
                 // Force main screen update
                 guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-                mainScreen.nightscoutLoader(forceLoad: true)
+                mainScreen.updateBGGraphSettings()
             }
         <<< SwitchRow("switchRowLines"){ row in
             row.title = "Display Lines"
@@ -202,7 +202,7 @@ class SettingsViewController: FormViewController {
                     UserDefaultsRepository.showLines.value = value
             // Force main screen update
             guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-            mainScreen.nightscoutLoader(forceLoad: true)
+            mainScreen.updateBGGraphSettings()
                     
         }
         <<< StepperRow("minBGScale") { row in
@@ -244,7 +244,7 @@ class SettingsViewController: FormViewController {
                 UserDefaultsRepository.lowLine.value = Int(value)
             // Force main screen update
             guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-            mainScreen.nightscoutLoader(forceLoad: true)
+            mainScreen.updateBGGraphSettings()
         }
         <<< StepperRow("highLine") { row in
             row.title = "High BG Display Value"
@@ -261,7 +261,7 @@ class SettingsViewController: FormViewController {
                 UserDefaultsRepository.highLine.value = Int(value)
             // Force main screen update
             guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-            mainScreen.nightscoutLoader(forceLoad: true)
+            mainScreen.updateBGGraphSettings()
         }
     }
     

@@ -60,7 +60,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // View Delay Timer
     var viewTimer = Timer()
-    let viewTimeInterval: TimeInterval = 5.0
+    let viewTimeInterval: TimeInterval = 15.0
     
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
@@ -120,6 +120,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.rowHeight = 25
         infoTable.dataSource = self
         
+        // Setup the Graph
+        createGraph()
+        createSmallBGGraph()
+        
         startTimer(time: timeInterval)
         // Load Data
         if UserDefaultsRepository.url.value != "" {
@@ -178,18 +182,17 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
     }
     
-    // Check for new data when timer ends
+    // This delays a few things to hopefully all all data to arrive.
        @objc func viewTimerDidEnd(_ timer:Timer) {
         print("view timer ended")
         if bgData.count > 0 {
                 self.checkAlarms(bgs: bgData)
                 self.updateMinAgo()
-            self.updateBadge(val: bgData[bgData.count - 1].sgv)
-               self.viewUpdateNSBG()
+                // self.updateBadge(val: bgData[bgData.count - 1].sgv)
+               //self.viewUpdateNSBG()
                if UserDefaultsRepository.writeCalendarEvent.value {
                    self.writeCalendar()
                }
-               self.createGraph()
            }
        }
     
@@ -230,15 +233,19 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // Check for new data when timer ends
     @objc func timerDidEnd(_ timer:Timer) {
         print("main timer ended")
-        self.clearOldSnoozes()
         nightscoutLoader()
     }
 
     //update Min Ago Text. We need to call this separately because it updates between readings
     func updateMinAgo(){
-        let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
-        minAgoBG = Double(TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date)
-        MinAgoText.text = String(Int(deltaTime)) + " min ago"
+        if bgData.count > 0 {
+            let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
+            minAgoBG = Double(TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date)
+            MinAgoText.text = String(Int(deltaTime)) + " min ago"
+        } else {
+            MinAgoText.text = ""
+        }
+        
     }
     
     //Clear the info data before next pull. This ensures we aren't displaying old data if something fails.
