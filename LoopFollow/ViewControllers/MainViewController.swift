@@ -87,6 +87,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var predictionData: [Double] = []
     var chartData = LineChartData()
     var newBGPulled = false
+    var latestDirectionString = ""
+    var latestMinAgoString = ""
+    var latestDeltaString = ""
+    var latestLoopStatusString = ""
+    var latestCOB = ""
+    var latestBasal = ""
+    var latestIOB = ""
     
     // calendar setup
     let store = EKEventStore()
@@ -233,6 +240,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // Check for new data when timer ends
     @objc func timerDidEnd(_ timer:Timer) {
         print("main timer ended")
+        updateMinAgo()
         nightscoutLoader()
     }
 
@@ -242,8 +250,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
             minAgoBG = Double(TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date)
             MinAgoText.text = String(Int(deltaTime)) + " min ago"
+            latestMinAgoString = String(Int(deltaTime)) + " min ago"
         } else {
             MinAgoText.text = ""
+            latestMinAgoString = ""
         }
         
     }
@@ -343,7 +353,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             } else {
                 eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
             }
-            eventTitle = eventTitle.replacingOccurrences(of: "%LOOP%", with: self.LoopStatusLabel.text ?? "")
+            eventTitle = eventTitle.replacingOccurrences(of: "%LOOP%", with: self.latestLoopStatusString)
             var minAgo = ""
             if deltaTime > 9 {
                 // write old BG reading and continue pushing out end date to show last entry
@@ -351,16 +361,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
             }
             var cob = "0"
-            if self.tableData[1].value != "" {
-                cob = self.tableData[1].value
+            if self.latestCOB != "" {
+                cob = self.latestCOB
             }
             var basal = "~"
-            if self.tableData[2].value != "" {
-                basal = self.tableData[2].value
+            if self.latestBasal != "" {
+                basal = self.latestBasal
             }
             var iob = "0"
-            if self.tableData[0].value != "" {
-                iob = self.tableData[0].value
+            if self.latestIOB != "" {
+                iob = self.latestIOB
             }
             eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
             eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
@@ -369,15 +379,22 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             
             
             
-        // Delete Last Event
-            let eventToRemove = self.store.event(withIdentifier: UserDefaultsRepository.savedEventID.value)
-            if eventToRemove != nil {
-                do {
-                    try self.store.remove(eventToRemove!, span: .thisEvent, commit: true)
-                } catch {
-                    // Display error to user
+        // Delete Events from last 2 hours and 2 hours in future
+            var deleteStartDate = Date().addingTimeInterval(-60*60*2)
+            var deleteEndDate = Date().addingTimeInterval(60*60*2)
+            var deleteCalendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value) as! EKCalendar
+            var predicate2 = self.store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
+            var eVDelete = self.store.events(matching: predicate2) as [EKEvent]?
+            if eVDelete != nil {
+                for i in eVDelete! {
+                    do {
+                        (try self.store.remove(i, span: EKSpan.thisEvent, commit: true))
+                    } catch let error {
+                        
+                    }
                 }
             }
+            
         // Write New Event
             var event = EKEvent(eventStore: self.store)
             event.title = eventTitle

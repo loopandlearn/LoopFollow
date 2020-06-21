@@ -182,8 +182,8 @@ extension MainViewController {
             if lastCarbTime > (now - (60 * 60)) {
                 // If low grams is active, the carbs and BG must both be higher
                 if (UserDefaultsRepository.alertMissedBolusLowGramsActive.value &&
-                    lastCarb >= Double(UserDefaultsRepository.alertMissedBolusLowGrams.value) &&
-                    currentBG >= UserDefaultsRepository.alertMissedBolusLowGramsBG.value) ||
+                    lastCarb > Double(UserDefaultsRepository.alertMissedBolusLowGrams.value) &&
+                    currentBG > UserDefaultsRepository.alertMissedBolusLowGramsBG.value) ||
                     !UserDefaultsRepository.alertMissedBolusLowGramsActive.value {
                     
                     // There is a current carb but no boluses at all
@@ -258,7 +258,7 @@ extension MainViewController {
     func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?)
     {
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.updateDisplayWhenTriggered(bgVal: String(bgData[bgData.count - 1].sgv), directionVal: DirectionText.text ?? "", deltaVal: DeltaText.text ?? "", minAgoVal: MinAgoText.text ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        snoozer.updateDisplayWhenTriggered(bgVal: String(bgData[bgData.count - 1].sgv), directionVal: latestDirectionString ?? "", deltaVal: latestDeltaString ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozeTabItem.isEnabled = true;
         tabBarController?.selectedIndex = 2
         if snooozedBGReadingTime != nil {
