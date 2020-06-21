@@ -268,7 +268,9 @@ extension MainViewController {
             BGChart.zoom(scaleX: 18, scaleY: 1, x: 1, y: 1)
             firstGraphLoad = false
         }
-        BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
+        if BGChart.chartXMax > dateTimeUtils.getNowTimeIntervalUTC() {
+            BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
+        }
     }
     
     func updateBasalGraph() {

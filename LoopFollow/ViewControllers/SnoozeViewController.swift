@@ -60,7 +60,6 @@ class SnoozeViewController: UIViewController {
         content.subtitle += bgVal + " "
         content.subtitle += directionVal + " "
         content.subtitle += deltaVal
-        //content.body = minAgoVal + " Min Ago"
         
         // show this notification 0 seconds from now
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)

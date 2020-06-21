@@ -86,6 +86,7 @@ extension MainViewController {
             webLoadNSSage()
             
             // Give the alarms and calendar 15 seconds delay to allow time for data to compile
+            print("Start View Timer")
             self.startViewTimer(time: viewTimeInterval)
         } else {
             // Things to do if we already have data and don't need a network call
@@ -99,6 +100,10 @@ extension MainViewController {
             if UserDefaultsRepository.downloadCarbs.value {
                 webLoadNSCarbs()
             }*/
+            if bgData.count > 0 {
+                           self.checkAlarms(bgs: bgData)
+            }
+            
         }
     }
     
@@ -157,6 +162,7 @@ extension MainViewController {
     // NS BG Data Response processor
     func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
         print("Enter BG Processor")
+        
         var pullDate = data[data.count - 1].date / 1000
         pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
         
@@ -209,18 +215,22 @@ extension MainViewController {
             
             if let directionBG = entries[latestEntryi].direction {
                 DirectionText.text = bgDirectionGraphic(directionBG)
+                latestDirectionString = bgDirectionGraphic(directionBG)
             }
             else
             {
                 DirectionText.text = ""
+                latestDirectionString = ""
             }
             
             if deltaBG < 0 {
                 self.DeltaText.text = String(deltaBG)
+                latestDeltaString = String(deltaBG)
             }
             else
             {
                 self.DeltaText.text = "+" + String(deltaBG)
+                latestDeltaString = "+" + String(deltaBG)
             }
             self.updateBadge(val: latestBG)
             
@@ -314,6 +324,7 @@ extension MainViewController {
                 UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
                 if let failure = lastLoopRecord["failureReason"] {
                     LoopStatusLabel.text = "X"
+                    latestLoopStatusString = "X"
                 } else {
                     if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         if let lastTempBasal = enacted["rate"] as? Double {
@@ -322,9 +333,11 @@ extension MainViewController {
                     }
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
                         tableData[0].value = String(format:"%.1f", (iobdata["iob"] as! Double))
+                        latestIOB = String(format:"%.1f", (iobdata["iob"] as! Double))
                     }
                     if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
                         tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
+                        latestCOB = String(format:"%.0f", cobdata["cob"] as! Double)
                     }
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
                         let prediction = predictdata["values"] as! [Double]
@@ -347,18 +360,22 @@ extension MainViewController {
                             }
                             if tempBasalTime > lastBGTime {
                                 LoopStatusLabel.text = "⏀"
+                                latestLoopStatusString = "⏀"
                             } else {
                                 LoopStatusLabel.text = "↻"
+                                latestLoopStatusString = "↻"
                             }
                         }
                     } else {
                         LoopStatusLabel.text = "↻"
+                        latestLoopStatusString = "↻"
                     }
                     
                 }
                 
                 if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 10 {
                     LoopStatusLabel.text = "⚠"
+                    latestLoopStatusString = "⚠"
                 }
             } // end lastLoopTime
         } // end lastLoop Record
@@ -709,6 +726,7 @@ extension MainViewController {
             if i == entries.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
                 lastEndDot = Date().timeIntervalSince1970 + (55 * 60)
                 tableData[2].value = String(format:"%.1f", basalRate)
+                latestBasal = String(format:"%.1f", basalRate)
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
             }
@@ -754,6 +772,7 @@ extension MainViewController {
             }
             
             tableData[2].value = String(format:"%.1f", scheduled)
+            latestBasal = String(format:"%.1f", scheduled)
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)
