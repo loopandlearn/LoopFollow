@@ -211,6 +211,14 @@ class SettingsViewController: FormViewController {
             mainScreen.updateBGGraphSettings()
                     
         }
+            <<< SwitchRow("offsetCarbsBolus"){ row in
+                row.title = "Offset Carb/Bolus Dots"
+                row.value = UserDefaultsRepository.offsetCarbsBolus.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.offsetCarbsBolus.value = value
+                        
+            }
         <<< StepperRow("minBGScale") { row in
             row.title = "Min BG Scale"
             row.cell.stepper.stepValue = 10

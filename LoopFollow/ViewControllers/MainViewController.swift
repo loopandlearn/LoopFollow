@@ -287,19 +287,20 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
 
     func setBGTextColor() {
-        let latestBG = bgData[bgData.count - 1].sgv
-        if UserDefaultsRepository.colorBGText.value {
-            if latestBG >= UserDefaultsRepository.highLine.value {
-                BGText.textColor = NSUIColor.systemYellow
-            } else if latestBG <= UserDefaultsRepository.lowLine.value {
-                BGText.textColor = NSUIColor.systemRed
+        if bgData.count > 0 {
+            let latestBG = bgData[bgData.count - 1].sgv
+            if UserDefaultsRepository.colorBGText.value {
+                if latestBG >= UserDefaultsRepository.highLine.value {
+                    BGText.textColor = NSUIColor.systemYellow
+                } else if latestBG <= UserDefaultsRepository.lowLine.value {
+                    BGText.textColor = NSUIColor.systemRed
+                } else {
+                    BGText.textColor = NSUIColor.systemGreen
+                }
             } else {
-                BGText.textColor = NSUIColor.systemGreen
+                BGText.textColor = NSUIColor.label
             }
-        } else {
-            BGText.textColor = NSUIColor.label
         }
-        
     }
     
     func bgOutputFormat(bg: Double, mmol: Bool) -> String {
