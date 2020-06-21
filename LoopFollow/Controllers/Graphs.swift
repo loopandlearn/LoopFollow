@@ -189,6 +189,11 @@ extension MainViewController {
         ul.limit = Double(UserDefaultsRepository.highLine.value)
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        
     }
     
     func updateBGGraph() {
@@ -199,10 +204,14 @@ extension MainViewController {
         mainChart.clear()
         smallChart.clear()
         var maxBG = UserDefaultsRepository.minBGScale.value
+        var maxBGOffset = 0
+        if UserDefaultsRepository.offsetCarbsBolus.value {
+            maxBGOffset = 40
+        }
         var colors = [NSUIColor]()
         for i in 0..<entries.count{
-            if entries[i].sgv > maxBG - 40 {
-                maxBG = entries[i].sgv + 40
+            if entries[i].sgv > maxBG - maxBGOffset {
+                maxBG = entries[i].sgv + maxBGOffset
             }
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
             mainChart.addEntry(value)
@@ -300,7 +309,11 @@ extension MainViewController {
             formatter.minimumFractionDigits = 0
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 1
-            let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + 10), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+            var offset = 0
+            if UserDefaultsRepository.offsetCarbsBolus.value {
+                offset = 10
+            }
+            let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + offset), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
         }
@@ -318,7 +331,11 @@ extension MainViewController {
             formatter.minimumFractionDigits = 0
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 1
-             let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + 30), data: formatter.string(from: NSNumber(value: carbData[i].value)))
+            var offset = 0
+            if UserDefaultsRepository.offsetCarbsBolus.value {
+                offset = 30
+            }
+             let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + offset), data: formatter.string(from: NSNumber(value: carbData[i].value)))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
         }
