@@ -49,9 +49,13 @@ extension MainViewController {
     func nightscoutLoader(forceLoad: Bool = false) {
         
         var needsLoaded: Bool = false
+        var staleData: Bool = false
         var onlyPullLastRecord = false
         
         // If we have existing data and it's within 5 minutes, we aren't going to do a BG network call
+        // if we have stale BG data 10 min or older, we're only going to attempt to pull BG and Loop status
+        // to not have a full refresh every 15 seconds. The remaining data will start pulling again on the
+        // next BG reading that comes in.
         if bgData.count > 0 {
             let now = NSDate().timeIntervalSince1970
             let lastReadingTime = bgData[bgData.count - 1].date
@@ -60,11 +64,14 @@ extension MainViewController {
                 needsLoaded = true
                 if secondsAgo < 10*60 {
                     onlyPullLastRecord = true
+                } else {
+                    staleData = true
                 }
             }
         } else {
             needsLoaded = true
         }
+        
         
         if forceLoad { needsLoaded = true}
         // Only update if we don't have a current reading or forced to load
@@ -72,18 +79,22 @@ extension MainViewController {
             self.clearLastInfoData()
             webLoadNSDeviceStatus()
             webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
-            webLoadNSProfile()
-            if UserDefaultsRepository.downloadBasal.value {
-                WebLoadNSTempBasals()
+            
+            if !staleData {
+                webLoadNSProfile()
+                if UserDefaultsRepository.downloadBasal.value {
+                    WebLoadNSTempBasals()
+                }
+                if UserDefaultsRepository.downloadBolus.value {
+                    webLoadNSBoluses()
+                }
+                if UserDefaultsRepository.downloadCarbs.value {
+                    webLoadNSCarbs()
+                }
+                webLoadNSCage()
+                webLoadNSSage()
             }
-            if UserDefaultsRepository.downloadBolus.value {
-                webLoadNSBoluses()
-            }
-            if UserDefaultsRepository.downloadCarbs.value {
-                webLoadNSCarbs()
-            }
-            webLoadNSCage()
-            webLoadNSSage()
+            
             
             // Give the alarms and calendar 15 seconds delay to allow time for data to compile
             print("Start View Timer")
@@ -93,15 +104,15 @@ extension MainViewController {
             // Leaving all downloads off for right now.
             /*
              webLoadNSDeviceStatus()
-            
-            if UserDefaultsRepository.downloadBolus.value {
+             
+             if UserDefaultsRepository.downloadBolus.value {
                 webLoadNSBoluses()
-            }
-            if UserDefaultsRepository.downloadCarbs.value {
+             }
+             if UserDefaultsRepository.downloadCarbs.value {
                 webLoadNSCarbs()
-            }*/
+             }*/
             if bgData.count > 0 {
-                           self.checkAlarms(bgs: bgData)
+                self.checkAlarms(bgs: bgData)
             }
             
         }
