@@ -57,7 +57,7 @@ extension NightscoutViewController: WKNavigationDelegate, WKUIDelegate {
     
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         
-        let alertCtrl = UIAlertController(title: nil, message: message, preferredStyle: .actionSheet)
+        let alertCtrl = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         
         alertCtrl.addAction(UIAlertAction(title: "OK", style: .default) { action in
             completionHandler(true)
