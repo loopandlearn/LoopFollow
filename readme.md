@@ -24,12 +24,12 @@ If you want to contribute, the biggest needs today are to make the code cleaner 
 - the standard Low/High, Urgent Low/High, and missed reading alerts. High will have a persistence option that’s still to do. Eg high for x minutes.
 - fast drop/rise alerts with BG limits. Eg Trigger fast drop only when under a BG where it’s an issue.
 - sage/cage reminder alerts for x hours before change.
-- Not Looping with Bg limits. So you can trigger the alert only if under or over a BG range.
+- Not Looping with Bg limits alert. So you can trigger the alert only if under or over a BG range.
+- Missed Bolus alert.
 - calendar entries to use watch complication with BG, arrow, delta, cob, iob and minutes ago (if old reading).
 - background silent audio to keep iOS from killing the app. It has a selectable refresh rate that should help reduce battery usage. This is why it can’t go in the App Store for just a simple download.
 
 ### New functionality under consideration
-- missed bolus alert.
 - watch app.
 - mmol support.
 - ability to pull from dex share for Bg. So it can automatically switch to dex BG display for those times when NS has delayed readings.
