@@ -38,7 +38,7 @@ extension MainViewController {
         let entries = bgData
         var bgChartEntry = [ChartDataEntry]()
         var colors = [NSUIColor]()
-        var maxBG: Int = UserDefaultsRepository.minBGScale.value
+        var maxBG: Float = UserDefaultsRepository.minBGScale.value
         
         // Setup BG line details
         let lineBG = LineChartDataSet(entries:bgChartEntry, label: "")
@@ -148,6 +148,7 @@ extension MainViewController {
         BGChart.rightAxis.labelPosition = YAxis.LabelPosition.insideChart
         BGChart.rightAxis.axisMinimum = 40
         BGChart.rightAxis.axisMaximum = Double(maxBG)
+        BGChart.rightAxis.valueFormatter = ChartYMMOLValueFormatter()
         
         BGChart.legend.enabled = false
         BGChart.scaleYEnabled = false
@@ -204,14 +205,14 @@ extension MainViewController {
         mainChart.clear()
         smallChart.clear()
         var maxBG = UserDefaultsRepository.minBGScale.value
-        var maxBGOffset = 0
+        var maxBGOffset: Float = 0.0
         if UserDefaultsRepository.offsetCarbsBolus.value {
-            maxBGOffset = 40
+            maxBGOffset = 40.0
         }
         var colors = [NSUIColor]()
         for i in 0..<entries.count{
-            if entries[i].sgv > maxBG - maxBGOffset {
-                maxBG = entries[i].sgv + maxBGOffset
+            if Float(entries[i].sgv) > maxBG - maxBGOffset {
+                maxBG = Float(entries[i].sgv) + maxBGOffset
             }
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
             mainChart.addEntry(value)

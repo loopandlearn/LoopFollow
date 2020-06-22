@@ -34,8 +34,12 @@ final class ChartYDataValueFormatter: IValueFormatter {
             return ""
         }
     }
-    
-   
+}
+
+final class ChartYMMOLValueFormatter: IAxisValueFormatter {
+    func stringForValue(_ value: Double, axis: AxisBase?) -> String {
+        return bgUnits.toDisplayUnits(String(value))
+    }
 }
 
 

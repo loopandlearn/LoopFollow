@@ -221,7 +221,7 @@ extension MainViewController {
                 userUnit = " mmol/L"
             }
             
-            BGText.text = bgOutputFormat(bg: Double(latestBG), mmol: mmol)
+            BGText.text = bgUnits.toDisplayUnits(String(latestBG))
             setBGTextColor()
             
             if let directionBG = entries[latestEntryi].direction {
@@ -235,12 +235,12 @@ extension MainViewController {
             }
             
             if deltaBG < 0 {
-                self.DeltaText.text = String(deltaBG)
+                self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
                 latestDeltaString = String(deltaBG)
             }
             else
             {
-                self.DeltaText.text = "+" + String(deltaBG)
+                self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 latestDeltaString = "+" + String(deltaBG)
             }
             self.updateBadge(val: latestBG)
@@ -354,7 +354,7 @@ extension MainViewController {
                     }
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
                         let prediction = predictdata["values"] as! [Double]
-                        PredictionLabel.text = String(Int(prediction.last!))
+                        PredictionLabel.text = bgUnits.toDisplayUnits(String(Int(prediction.last!)))
                         PredictionLabel.textColor = UIColor.systemPurple
                         predictionData.removeAll()
                         if UserDefaultsRepository.downloadPrediction.value {
@@ -412,7 +412,7 @@ extension MainViewController {
                 oText += "% ("
                 let minValue = lastCorrection["minValue"] as! Double
                 let maxValue = lastCorrection["maxValue"] as! Double
-                oText += bgOutputFormat(bg: minValue, mmol: mmol) + "-" + bgOutputFormat(bg: maxValue, mmol: mmol) + ")"
+                oText += bgUnits.toDisplayUnits(String(minValue)) + "-" + bgUnits.toDisplayUnits(String(maxValue)) + ")"
                 
                 tableData[3].value =  oText
             }

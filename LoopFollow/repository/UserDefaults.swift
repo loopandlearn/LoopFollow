@@ -14,6 +14,7 @@ class UserDefaultsRepository {
     //Nightscout Settings
     static let url = UserDefaultsValue<String>(key: "url", default: "")
     static let token = UserDefaultsValue<String>(key: "token", default: "")
+    static let units = UserDefaultsValue<String>(key: "units", default: "mg/dL")
     
     // Graph Settings
     static let showDots = UserDefaultsValue<Bool>(key: "showDots", default: true)
@@ -21,9 +22,9 @@ class UserDefaultsRepository {
     static let offsetCarbsBolus = UserDefaultsValue<Bool>(key: "offsetCarbsBolus", default: true)
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
     static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
-    static let minBGScale = UserDefaultsValue<Int>(key: "minBGScale", default: 250)
-    static let lowLine = UserDefaultsValue<Int>(key: "lowLine", default: 70)
-    static let highLine = UserDefaultsValue<Int>(key: "highLine", default: 180)
+    static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
+    static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
+    static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
     
     // General Settings
     static let colorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
@@ -82,21 +83,21 @@ class UserDefaultsRepository {
     static let alertSnoozeAllIsSnoozed = UserDefaultsValue<Bool>(key: "alertSnoozeAllIsSnoozed", default: false)
     
     static let alertUrgentLowActive = UserDefaultsValue<Bool>(key: "alertUrgentLowActive", default: false)
-    static let alertUrgentLowBG = UserDefaultsValue<Int>(key: "alertUrgentLowBG", default: 55)
+    static let alertUrgentLowBG = UserDefaultsValue<Float>(key: "alertUrgentLowBG", default: 55.0)
     static let alertUrgentLowSnooze = UserDefaultsValue<Int>(key: "alertUrgentLowSnooze", default: 5)
     static let alertUrgentLowSnoozedTime = UserDefaultsValue<Date?>(key: "alertUrgentLowSnoozedTime", default: nil)
     static let alertUrgentLowIsSnoozed = UserDefaultsValue<Bool>(key: "alertUrgentLowIsSnoozed", default: false)
     static let alertUrgentLowSound = UserDefaultsValue<String>(key: "alertUrgentLowSound", default: "Indeed")
     
     static let alertLowActive = UserDefaultsValue<Bool>(key: "alertLowActive", default: false)
-    static let alertLowBG = UserDefaultsValue<Int>(key: "alertLowBG", default: 70)
+    static let alertLowBG = UserDefaultsValue<Float>(key: "alertLowBG", default: 70.0)
     static let alertLowSnooze = UserDefaultsValue<Int>(key: "alertLowSnooze", default: 5)
     static let alertLowSnoozedTime = UserDefaultsValue<Date?>(key: "alertLowSnoozedTime", default: nil)
     static let alertLowIsSnoozed = UserDefaultsValue<Bool>(key: "alertLowIsSnoozed", default: false)
     static let alertLowSound = UserDefaultsValue<String>(key: "alertLowSound", default: "Indeed")
     
     static let alertHighActive = UserDefaultsValue<Bool>(key: "alertHighActive", default: false)
-    static let alertHighBG = UserDefaultsValue<Int>(key: "alertHighBG", default: 180)
+    static let alertHighBG = UserDefaultsValue<Float>(key: "alertHighBG", default: 180.0)
     static let alertHighPersistent = UserDefaultsValue<Int>(key: "alertHighPersistent", default: 60)
     static let alertHighSnooze = UserDefaultsValue<Int>(key: "alertHighSnooze", default: 60)
     static let alertHighSnoozedTime = UserDefaultsValue<Date?>(key: "alertHighSnoozedTime", default: nil)
@@ -104,7 +105,7 @@ class UserDefaultsRepository {
     static let alertHighSound = UserDefaultsValue<String>(key: "alertHighSound", default: "Indeed")
     
     static let alertUrgentHighActive = UserDefaultsValue<Bool>(key: "alertUrgentHighActive", default: false)
-    static let alertUrgentHighBG = UserDefaultsValue<Int>(key: "alertUrgentHighBG", default: 250)
+    static let alertUrgentHighBG = UserDefaultsValue<Float>(key: "alertUrgentHighBG", default: 250.0)
     static let alertUrgentHighSnooze = UserDefaultsValue<Int>(key: "alertUrgentHighSnooze", default: 30)
     static let alertUrgentHighSnoozedTime = UserDefaultsValue<Date?>(key: "alertUrgentHighSnoozedTime", default: nil)
     static let alertUrgentHighIsSnoozed = UserDefaultsValue<Bool>(key: "alertUrgentHighIsSnoozed", default: false)
@@ -113,20 +114,20 @@ class UserDefaultsRepository {
     
     static let alertFastDropActive = UserDefaultsValue<Bool>(key: "alertFastDropDeltaActive", default: false)
     static let alertFastDropSnooze = UserDefaultsValue<Int>(key: "alertFastDropDeltaSnooze", default: 10)
-    static let alertFastDropDelta = UserDefaultsValue<Int>(key: "alertFastDropDelta", default: 10)
+    static let alertFastDropDelta = UserDefaultsValue<Float>(key: "alertFastDropDelta", default: 10.0)
     static let alertFastDropReadings = UserDefaultsValue<Int>(key: "alertFastDropReadings", default: 3)
     static let alertFastDropUseLimit = UserDefaultsValue<Bool>(key: "alertFastDropUseLimit", default: false)
-    static let alertFastDropBelowBG = UserDefaultsValue<Int>(key: "alertFastDropBelowBG", default: 120)
+    static let alertFastDropBelowBG = UserDefaultsValue<Float>(key: "alertFastDropBelowBG", default: 120.0)
     static let alertFastDropSnoozedTime = UserDefaultsValue<Date?>(key: "alertFastDropSnoozedTime", default: nil)
     static let alertFastDropIsSnoozed = UserDefaultsValue<Bool>(key: "alertFastDropIsSnoozed", default: false)
     static let alertFastDropSound = UserDefaultsValue<String>(key: "alertFastDropSound", default: "Indeed")
     
     static let alertFastRiseActive = UserDefaultsValue<Bool>(key: "alertFastRiseDeltaActive", default: false)
     static let alertFastRiseSnooze = UserDefaultsValue<Int>(key: "alertFastRiseDeltaSnooze", default: 10)
-    static let alertFastRiseDelta = UserDefaultsValue<Int>(key: "alertFastRiseDelta", default: 10)
+    static let alertFastRiseDelta = UserDefaultsValue<Float>(key: "alertFastRiseDelta", default: 10.0)
     static let alertFastRiseReadings = UserDefaultsValue<Int>(key: "alertFastRiseReadings", default: 3)
     static let alertFastRiseUseLimit = UserDefaultsValue<Bool>(key: "alertFastRiseUseLimit", default: false)
-    static let alertFastRiseAboveBG = UserDefaultsValue<Int>(key: "alertFastRiseAboveBG", default: 200)
+    static let alertFastRiseAboveBG = UserDefaultsValue<Float>(key: "alertFastRiseAboveBG", default: 200.0)
     static let alertFastRiseSnoozedTime = UserDefaultsValue<Date?>(key: "alertFastRiseSnoozedTime", default: nil)
     static let alertFastRiseIsSnoozed = UserDefaultsValue<Bool>(key: "alertFastRiseIsSnoozed", default: false)
     static let alertFastRiseSound = UserDefaultsValue<String>(key: "alertFastRiseSound", default: "Indeed")
@@ -144,8 +145,8 @@ class UserDefaultsRepository {
     static let alertNotLooping = UserDefaultsValue<Int>(key: "alertNotLooping", default: 30)
     static let alertNotLoopingSnooze = UserDefaultsValue<Int>(key: "alertNotLoopingSnooze", default: 30)
     static let alertNotLoopingUseLimits = UserDefaultsValue<Bool>(key: "alertNotLoopingUseLimits", default: false)
-    static let alertNotLoopingLowerLimit = UserDefaultsValue<Int>(key: "alertNotLoopingBelowBG", default: 100)
-    static let alertNotLoopingUpperLimit = UserDefaultsValue<Int>(key: "alertNotLoopingAboveBG", default: 160)
+    static let alertNotLoopingLowerLimit = UserDefaultsValue<Float>(key: "alertNotLoopingBelowBG", default: 100.0)
+    static let alertNotLoopingUpperLimit = UserDefaultsValue<Float>(key: "alertNotLoopingAboveBG", default: 160.0)
     static let alertNotLoopingSnoozedTime = UserDefaultsValue<Date?>(key: "alertNotLoopingSnoozedTime", default: nil)
     static let alertNotLoopingIsSnoozed = UserDefaultsValue<Bool>(key: "alertNotLoopingIsSnoozed", default: false)
     static let alertNotLoopingSound = UserDefaultsValue<String>(key: "alertNotLoopingSound", default: "Indeed")
@@ -157,7 +158,7 @@ class UserDefaultsRepository {
     static let alertMissedBolusPrebolus = UserDefaultsValue<Int>(key: "alertMissedBolusPrebolus", default: 20)
     static let alertMissedBolusIgnoreBolus = UserDefaultsValue<Double>(key: "alertMissedBolusIgnoreBolus", default: 0.5)
     static let alertMissedBolusLowGrams = UserDefaultsValue<Int>(key: "alertMissedBolusLowGrams", default: 10)
-    static let alertMissedBolusLowGramsBG = UserDefaultsValue<Int>(key: "alertMissedBolusLowGramsBG", default: 70)
+    static let alertMissedBolusLowGramsBG = UserDefaultsValue<Float>(key: "alertMissedBolusLowGramsBG", default: 70.0)
     static let alertMissedBolusSnoozedTime = UserDefaultsValue<Date?>(key: "alertMissedBolusSnoozedTime", default: nil)
     static let alertMissedBolusIsSnoozed = UserDefaultsValue<Bool>(key: "alertMissedBolusIsSnoozed", default: false)
     static let alertMissedBolusSound = UserDefaultsValue<String>(key: "alertMissedBolusSound", default: "Indeed")
@@ -180,6 +181,6 @@ class UserDefaultsRepository {
     
     static let alertTemporaryActive = UserDefaultsValue<Bool>(key: "alertTemporaryActive", default: false)
     static let alertTemporaryBelow = UserDefaultsValue<Bool>(key: "alertTemporaryBelow", default: true)
-    static let alertTemporaryBG = UserDefaultsValue<Int>(key: "alertTemporaryBG", default: 90)
+    static let alertTemporaryBG = UserDefaultsValue<Float>(key: "alertTemporaryBG", default: 90.0)
     static let alertTemporarySound = UserDefaultsValue<String>(key: "alertTemporarySound", default: "Indeed")
 }
