@@ -337,7 +337,9 @@ extension MainViewController {
                     LoopStatusLabel.text = "X"
                     latestLoopStatusString = "X"
                 } else {
+                    var wasEnacted = false
                     if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        wasEnacted = true
                         if let lastTempBasal = enacted["rate"] as? Double {
                             // tableData[2].value = String(format:"%.1f", lastTempBasal)
                         }
@@ -369,7 +371,7 @@ extension MainViewController {
                             if bgData.count > 0 {
                                 lastBGTime = bgData[bgData.count - 1].date
                             }
-                            if tempBasalTime > lastBGTime {
+                            if tempBasalTime > lastBGTime && !wasEnacted {
                                 LoopStatusLabel.text = "⏀"
                                 latestLoopStatusString = "⏀"
                             } else {
@@ -384,7 +386,7 @@ extension MainViewController {
                     
                 }
                 
-                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 10 {
+                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
                     LoopStatusLabel.text = "⚠"
                     latestLoopStatusString = "⚠"
                 }
