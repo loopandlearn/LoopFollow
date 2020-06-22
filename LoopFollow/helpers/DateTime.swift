@@ -58,4 +58,10 @@ class dateTimeUtils {
         return yesterdayString
     }
     
+    static func printNow() -> String {
+        let date = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss"
+        return formatter.string(from: date)
+    }
 }

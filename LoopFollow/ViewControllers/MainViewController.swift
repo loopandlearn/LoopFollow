@@ -131,7 +131,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         createGraph()
         createSmallBGGraph()
         
-        startTimer(time: timeInterval)
         // Load Data
         if UserDefaultsRepository.url.value != "" {
             nightscoutLoader()
@@ -191,7 +190,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // This delays a few things to hopefully all all data to arrive.
        @objc func viewTimerDidEnd(_ timer:Timer) {
-        print("view timer ended")
+        print(dateTimeUtils.printNow() + "view timer ended")
         if bgData.count > 0 {
                 self.checkAlarms(bgs: bgData)
                 self.updateMinAgo()
@@ -234,12 +233,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             backgroundTask.stopBackgroundTask()
             timer.invalidate()
         }
-        startTimer(time: timeInterval)
+        if !timer.isValid {
+            startTimer(time: timeInterval)
+        }
+        
     }
     
     // Check for new data when timer ends
     @objc func timerDidEnd(_ timer:Timer) {
-        print("main timer ended")
+        print(dateTimeUtils.printNow() + " " + "main timer ended " + "\(Thread.current)")
         updateMinAgo()
         nightscoutLoader()
     }
@@ -324,6 +326,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Write calendar
     func writeCalendar() {
+        print(dateTimeUtils.printNow() + " " + "write calendar start " + "\(Thread.current)")
         store.requestAccess(to: .event) {(granted, error) in
         if !granted { return }
             
@@ -404,7 +407,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
             do {
                 try self.store.save(event, span: .thisEvent, commit: true)
-                UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
+                //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
             } catch {
                 // Display error to user
                 print(error)
