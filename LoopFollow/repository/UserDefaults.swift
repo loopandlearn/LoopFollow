@@ -156,7 +156,6 @@ class UserDefaultsRepository {
     static let alertMissedBolusSnooze = UserDefaultsValue<Int>(key: "alertMissedBolusSnooze", default: 10)
     static let alertMissedBolusPrebolus = UserDefaultsValue<Int>(key: "alertMissedBolusPrebolus", default: 20)
     static let alertMissedBolusIgnoreBolus = UserDefaultsValue<Double>(key: "alertMissedBolusIgnoreBolus", default: 0.5)
-    static let alertMissedBolusLowGramsActive = UserDefaultsValue<Bool>(key: "alertMissedBolusLowGramsActive", default: false)
     static let alertMissedBolusLowGrams = UserDefaultsValue<Int>(key: "alertMissedBolusLowGrams", default: 10)
     static let alertMissedBolusLowGramsBG = UserDefaultsValue<Int>(key: "alertMissedBolusLowGramsBG", default: 70)
     static let alertMissedBolusSnoozedTime = UserDefaultsValue<Date?>(key: "alertMissedBolusSnoozedTime", default: nil)

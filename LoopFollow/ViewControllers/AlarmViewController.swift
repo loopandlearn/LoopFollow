@@ -1253,23 +1253,16 @@ class AlarmViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedBolusIgnoreBolus.value = value
             }
-        <<< SwitchRow("alertMissedBolusLowGramsActive"){ row in
-        row.title = "Ignore Low Treatments"
-            row.hidden = "$alertMissedBolusActive == false"
-        row.value = UserDefaultsRepository.alertMissedBolusLowGramsActive.value
-        }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.alertMissedBolusLowGramsActive.value = value
-        }
+    
         
         <<< StepperRow("alertMissedBolusLowGrams") { row in
             row.title = "Ignore Under Grams"
             row.tag = "missedBolusLowGrams"
             row.cell.stepper.stepValue = 1
-            row.cell.stepper.minimumValue = 1
+            row.cell.stepper.minimumValue = 0
             row.cell.stepper.maximumValue = 15
             row.value = Double(UserDefaultsRepository.alertMissedBolusLowGrams.value)
-            row.hidden = "$alertMissedBolusLowGramsActive == false || $alertMissedBolusActive == false"
+            row.hidden = "$alertMissedBolusActive == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
                     return "\(Int(value))"
@@ -1285,7 +1278,7 @@ class AlarmViewController: FormViewController {
             row.cell.stepper.minimumValue = 40
             row.cell.stepper.maximumValue = 100
             row.value = Double(UserDefaultsRepository.alertMissedBolusLowGramsBG.value)
-            row.hidden = "$alertMissedBolusLowGramsActive == false || $alertMissedBolusActive == false"
+            row.hidden = "$alertMissedBolusActive == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
                     return "\(Int(value))"
