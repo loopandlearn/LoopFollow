@@ -26,36 +26,45 @@ class SettingsViewController: FormViewController {
         }
         
         
-      
-        form +++ Section(header: "Nightscout Settings", footer: "Changing Nightscout settings requires an app restart.")
-            <<< TextRow(){ row in
-                row.title = "URL"
-                row.placeholder = "https://mycgm.herokuapp.com"
-                row.value = UserDefaultsRepository.url.value
-            }.onChange { row in
-                guard let value = row.value else { return }
-                // check the format of the URL entered by the user and trim away any spaces or "/" at the end
-                var urlNSInput = value.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
-                if urlNSInput.last == "/" {
-                    urlNSInput = String(urlNSInput.dropLast())
-                }
-                UserDefaultsRepository.url.value = urlNSInput.lowercased()
-                // set the row value back to the correctly formatted URL so that the user immediately sees how it should have been written
-                row.value = UserDefaultsRepository.url.value
-                }
-            <<< TextRow(){ row in
-                row.title = "NS Token"
-                row.placeholder = "Leave blank if not using tokens"
-                row.value = UserDefaultsRepository.token.value
-            }.onChange { row in
-                if row.value == nil {
-                    UserDefaultsRepository.token.value = ""
-                }
-                guard let value = row.value else { return }
-                UserDefaultsRepository.token.value = value
-                }
         
-
+        form
+        +++ Section(header: "Nightscout Settings", footer: "Changing Nightscout settings requires an app restart.")
+        <<< TextRow(){ row in
+            row.title = "URL"
+            row.placeholder = "https://mycgm.herokuapp.com"
+            row.value = UserDefaultsRepository.url.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            // check the format of the URL entered by the user and trim away any spaces or "/" at the end
+            var urlNSInput = value.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
+            if urlNSInput.last == "/" {
+                urlNSInput = String(urlNSInput.dropLast())
+            }
+            UserDefaultsRepository.url.value = urlNSInput.lowercased()
+            // set the row value back to the correctly formatted URL so that the user immediately sees how it should have been written
+            row.value = UserDefaultsRepository.url.value
+        }
+        <<< TextRow(){ row in
+            row.title = "NS Token"
+            row.placeholder = "Leave blank if not using tokens"
+            row.value = UserDefaultsRepository.token.value
+        }.onChange { row in
+            if row.value == nil {
+                UserDefaultsRepository.token.value = ""
+            }
+            guard let value = row.value else { return }
+            UserDefaultsRepository.token.value = value
+        }
+        <<< SegmentedRow<String>("units") { row in
+            row.title = "Units"
+            row.options = ["mg/dL", "mmol/L"]
+            row.value = UserDefaultsRepository.units.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.units.value = value
+        }
+        
+        
         buildGeneralSettings()
         buildAlarmSettings()
         buildGraphSettings()
@@ -63,9 +72,9 @@ class SettingsViewController: FormViewController {
         buildDebugSettings()
         
         
-            
         
-         }
+        
+    }
     
     func buildGeneralSettings() {
         form
@@ -221,17 +230,17 @@ class SettingsViewController: FormViewController {
             }
         <<< StepperRow("minBGScale") { row in
             row.title = "Min BG Scale"
-            row.cell.stepper.stepValue = 10
+            row.cell.stepper.stepValue = 1
             row.cell.stepper.minimumValue = Double(UserDefaultsRepository.highLine.value)
             row.cell.stepper.maximumValue = 400
             row.value = Double(UserDefaultsRepository.minBGScale.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return "\(Int(value))"
+                return bgUnits.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.minBGScale.value = Int(value)
+                UserDefaultsRepository.minBGScale.value = Float(value)
         }
         <<< StepperRow("minBasalScale") { row in
             row.title = "Min Basal Scale"
@@ -251,11 +260,11 @@ class SettingsViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.lowLine.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return "\(Int(value))"
+                return bgUnits.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.lowLine.value = Int(value)
+                UserDefaultsRepository.lowLine.value = Float(value)
             // Force main screen update
             guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
             mainScreen.updateBGGraphSettings()
@@ -268,11 +277,11 @@ class SettingsViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.highLine.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return "\(Int(value))"
+                return bgUnits.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.highLine.value = Int(value)
+                UserDefaultsRepository.highLine.value = Float(value)
             // Force main screen update
             guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
             mainScreen.updateBGGraphSettings()

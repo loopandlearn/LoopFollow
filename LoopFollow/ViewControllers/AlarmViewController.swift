@@ -249,11 +249,11 @@ class AlarmViewController: FormViewController {
                        row.hidden = "$alertTemporaryActive == false"
                        row.displayValueFor = { value in
                            guard let value = value else { return nil }
-                           return "\(Int(value))"
+                           return bgUnits.toDisplayUnits(String(value))
                        }
                    }.onChange { [weak self] row in
                            guard let value = row.value else { return }
-                           UserDefaultsRepository.alertTemporaryBG.value = Int(value)
+                           UserDefaultsRepository.alertTemporaryBG.value = Float(value)
                    }
                     <<< PickerInputRow<String>("alertTemporarySound") { row in
                         row.title = "Sound"
@@ -292,11 +292,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertUrgentLowActive == false"
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return "\(Int(value))"
+                return bgUnits.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertUrgentLowBG.value = Int(value)
+                UserDefaultsRepository.alertUrgentLowBG.value = Float(value)
         }
         <<< StepperRow("alertUrgentLowSnooze") { row in
             row.title = "Default Snooze"
@@ -393,11 +393,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertLowActive == false"
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return "\(Int(value))"
+                return bgUnits.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertLowBG.value = Int(value)
+                UserDefaultsRepository.alertLowBG.value = Float(value)
         }
         <<< StepperRow("alertLowSnooze") { row in
             row.title = "Snooze"
@@ -493,11 +493,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertHighActive == false"
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return "\(Int(value))"
+                return bgUnits.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertHighBG.value = Int(value)
+                UserDefaultsRepository.alertHighBG.value = Float(value)
         }
         <<< StepperRow("alertHighPersistent") { row in
             row.title = "Persistent For"
@@ -607,11 +607,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertUrgentHighActive == false"
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return "\(Int(value))"
+                return bgUnits.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertUrgentHighBG.value = Int(value)
+                UserDefaultsRepository.alertUrgentHighBG.value = Float(value)
         }
         <<< StepperRow("alertUrgentHighSnooze") { row in
             row.title = "Snooze"
@@ -706,11 +706,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertFastDropActive == false"
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return "\(Int(value))"
+                return bgUnits.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertFastDropDelta.value = Int(value)
+                UserDefaultsRepository.alertFastDropDelta.value = Float(value)
         }
         <<< StepperRow("alertFastDropReadings") { row in
             row.title = "# Readings"
@@ -745,11 +745,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertFastDropActive == false || $alertFastDropUseLimit == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return "\(Int(value))"
+                    return bgUnits.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertFastDropBelowBG.value = Int(value)
+                UserDefaultsRepository.alertFastDropBelowBG.value = Float(value)
         }
         <<< StepperRow("alertFastDropSnooze") { row in
             row.title = "Snooze"
@@ -844,11 +844,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertFastRiseActive == false"
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return "\(Int(value))"
+                return bgUnits.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertFastRiseDelta.value = Int(value)
+                UserDefaultsRepository.alertFastRiseDelta.value = Float(value)
         }
         <<< StepperRow("alertFastRiseReadings") { row in
             row.title = "# Readings"
@@ -883,11 +883,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertFastRiseActive == false || $alertFastRiseUseLimit == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return "\(Int(value))"
+                    return bgUnits.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertFastRiseAboveBG.value = Int(value)
+                UserDefaultsRepository.alertFastRiseAboveBG.value = Float(value)
         }
         <<< StepperRow("alertFastRiseSnooze") { row in
             row.title = "Snooze"
@@ -1107,11 +1107,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertNotLoopingActive == false || $alertNotLoopingUseLimits == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return "\(Int(value))"
+                    return bgUnits.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertNotLoopingLowerLimit.value = Int(value)
+                UserDefaultsRepository.alertNotLoopingLowerLimit.value = Float(value)
         }
         <<< StepperRow("alertNotLoopingUpperLimit") { row in
             row.title = "Above BG"
@@ -1122,11 +1122,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertNotLoopingActive == false || $alertNotLoopingUseLimits == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return "\(Int(value))"
+                    return bgUnits.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertNotLoopingUpperLimit.value = Int(value)
+                UserDefaultsRepository.alertNotLoopingUpperLimit.value = Float(value)
         }
         <<< StepperRow("alertNotLoopingSnooze") { row in
             row.title = "Snooze"
@@ -1281,11 +1281,11 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertMissedBolusActive == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return "\(Int(value))"
+                    return bgUnits.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertMissedBolusLowGramsBG.value = Int(value)
+                UserDefaultsRepository.alertMissedBolusLowGramsBG.value = Float(value)
         }
         
         <<< StepperRow("alertMissedBolusSnooze") { row in

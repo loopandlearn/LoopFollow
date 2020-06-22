@@ -278,8 +278,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     func updateBadge(val: Int) {
         if UserDefaultsRepository.appBadge.value {
-            let latestBG = val
-            UIApplication.shared.applicationIconBadgeNumber = latestBG
+            let latestBG = String(val)
+            UIApplication.shared.applicationIconBadgeNumber = Int(bgUnits.removePeriodForBadge(bgUnits.toDisplayUnits(latestBG))) ?? val
         } else {
             UIApplication.shared.applicationIconBadgeNumber = 0
         }
@@ -292,9 +292,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if bgData.count > 0 {
             let latestBG = bgData[bgData.count - 1].sgv
             if UserDefaultsRepository.colorBGText.value {
-                if latestBG >= UserDefaultsRepository.highLine.value {
+                if Float(latestBG) >= UserDefaultsRepository.highLine.value {
                     BGText.textColor = NSUIColor.systemYellow
-                } else if latestBG <= UserDefaultsRepository.lowLine.value {
+                } else if Float(latestBG) <= UserDefaultsRepository.lowLine.value {
                     BGText.textColor = NSUIColor.systemRed
                 } else {
                     BGText.textColor = NSUIColor.systemGreen
@@ -302,16 +302,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             } else {
                 BGText.textColor = NSUIColor.label
             }
-        }
-    }
-    
-    func bgOutputFormat(bg: Double, mmol: Bool) -> String {
-        if !mmol {
-            return String(format:"%.0f", bg)
-        }
-        else
-        {
-            return String(format:"%.1f", bg / 18.0)
         }
     }
     
@@ -335,18 +325,18 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
             var deltaString = ""
             if deltaBG < 0 {
-                deltaString = String(deltaBG)
+                deltaString = bgUnits.toDisplayUnits(String(deltaBG))
             }
             else
             {
-                deltaString = "+" + String(deltaBG)
+                deltaString = "+" + bgUnits.toDisplayUnits(String(deltaBG))
             }
             let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
 
             var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
             var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
             var  eventTitle = UserDefaultsRepository.watchLine1.value + "\n" + UserDefaultsRepository.watchLine2.value
-            eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: String(self.bgData[self.bgData.count - 1].sgv))
+            eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: bgUnits.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
             eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
             eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
             if self.currentOverride != 1.0 {
@@ -418,9 +408,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     func persistentNotification(bgTime: TimeInterval)
     {
-        if UserDefaultsRepository.persistentNotification.value && bgTime > UserDefaultsRepository.persistentNotificationLastBGTime.value {
+        if UserDefaultsRepository.persistentNotification.value && bgTime > UserDefaultsRepository.persistentNotificationLastBGTime.value && bgData.count > 0 {
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-            snoozer.sendNotification(self, bgVal: BGText.text ?? "", directionVal: DirectionText.text ?? "", deltaVal: DeltaText.text ?? "", minAgoVal: MinAgoText.text ?? "", alertLabelVal: "Latest BG")
+            snoozer.sendNotification(self, bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString, deltaVal: latestDeltaString, minAgoVal: latestMinAgoString, alertLabelVal: "Latest BG")
         }
     }
     
