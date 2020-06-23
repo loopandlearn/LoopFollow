@@ -153,7 +153,7 @@ extension MainViewController {
            // These only get checked and fire if a BG reading doesn't fire
            if UserDefaultsRepository.alertNotLoopingActive.value
                && !UserDefaultsRepository.alertNotLoopingIsSnoozed.value
-               && (Double(now - UserDefaultsRepository.alertLastLoopTime.value) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
+            && (Double(dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertLastLoopTime.value) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
                && UserDefaultsRepository.alertLastLoopTime.value > 0 {
                
                var trigger = true
