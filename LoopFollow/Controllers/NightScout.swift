@@ -346,8 +346,8 @@ extension MainViewController {
                         }
                     }
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.1f", (iobdata["iob"] as! Double))
-                        latestIOB = String(format:"%.1f", (iobdata["iob"] as! Double))
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
+                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
                     }
                     if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
                         tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
