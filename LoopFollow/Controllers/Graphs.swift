@@ -257,7 +257,7 @@ extension MainViewController {
         lineBG.circleColors.removeAll()
         if colors.count > 0 {
             print("graph colors")
-            for i in 1..<colors.count{
+            for i in 0..<colors.count{
                 mainChart.addColor(colors[i])
                 mainChart.circleColors.append(colors[i])
                 smallChart.addColor(colors[i])
