@@ -11,13 +11,13 @@ import UIKit
 
 
 extension MainViewController {
-    
-    //NS BG Struct
-    struct sgvData: Codable {
-        var sgv: Int
-        var date: TimeInterval
-        var direction: String?
-    }
+//
+//    //NS BG Struct
+//    struct sgvData: Codable {
+//        var sgv: Int
+//        var date: TimeInterval
+//        var direction: String?
+//    }
     
     //NS Cage Struct
     struct cageData: Codable {
@@ -155,7 +155,7 @@ extension MainViewController {
             }
             
             let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([sgvData].self, from: data)
+            let entriesResponse = try? decoder.decode([DataStructs.sgvData].self, from: data)
             if let entriesResponse = entriesResponse {
                 DispatchQueue.main.async {
                     // trigger the processor for the data after downloading.
@@ -171,7 +171,7 @@ extension MainViewController {
     }
     
     // NS BG Data Response processor
-    func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
+    func ProcessNSBGData(data: [DataStructs.sgvData], onlyPullLastRecord: Bool){
         print("Enter BG Processor")
         
         var pullDate = data[data.count - 1].date / 1000
@@ -198,7 +198,7 @@ extension MainViewController {
         for i in 0..<data.count{
             var dateString = data[data.count - 1 - i].date / 1000
             dateString.round(FloatingPointRoundingRule.toNearestOrEven)
-            let reading = sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
+            let reading = DataStructs.sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
             bgData.append(reading)
         }
         
@@ -253,6 +253,7 @@ extension MainViewController {
         }
         updateBGGraph()
         updateMinAgo()
+        updateStats()
     }
     
     // NS Device Status Web Call
