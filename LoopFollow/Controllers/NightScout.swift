@@ -611,11 +611,16 @@ extension MainViewController {
         let basal = jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
         for i in 0..<basal.count {
             let dict = basal[i] as! Dictionary<String, Any>
-            let thisValue = dict[keyPath: "value"] as! Double
-            let thisTime = dict[keyPath: "time"] as! String
-            let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
-            let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
-            basalProfile.append(entry)
+            do {
+                let thisValue = try dict[keyPath: "value"] as! Double
+                let thisTime = dict[keyPath: "time"] as! String
+                let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
+                let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
+                basalProfile.append(entry)
+            } catch {
+                print("Error Catch: Profile wrapped in Quotes")
+            }
+            
         }
     }
     
