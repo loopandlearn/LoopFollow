@@ -12,7 +12,7 @@ import AVFoundation
 extension MainViewController {
     
     
-    func checkAlarms(bgs: [sgvData]) {
+    func checkAlarms(bgs: [DataStructs.sgvData]) {
            print("ALARMS --- Checking")
            // Don't check or fire alarms within 1 minute of prior alarm
            if checkAlarmTimer.isValid {  return }

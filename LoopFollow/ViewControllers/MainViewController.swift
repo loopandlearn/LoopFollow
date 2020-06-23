@@ -24,6 +24,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var DragBar: UIImageView!
     @IBOutlet weak var PredictionLabel: UILabel!
     @IBOutlet weak var LoopStatusLabel: UILabel!
+    @IBOutlet weak var statsPieChart: PieChartView!
+    @IBOutlet weak var statsLowPercent: UILabel!
+    @IBOutlet weak var statsInRangePercent: UILabel!
+    @IBOutlet weak var statsHighPercent: UILabel!
+    @IBOutlet weak var statsAvgBG: UILabel!
+    @IBOutlet weak var statsEstA1C: UILabel!
     
     
     
@@ -60,7 +66,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // View Delay Timer
     var viewTimer = Timer()
-    let viewTimeInterval: TimeInterval = 15.0
+    let viewTimeInterval: TimeInterval = 5.0
     
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
@@ -79,7 +85,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoData(name: "CAGE", value: "") //7
     ]
     
-    var bgData: [sgvData] = []
+    var bgData: [DataStructs.sgvData] = []
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
     var bolusData: [bolusCarbGraphStruct] = []
