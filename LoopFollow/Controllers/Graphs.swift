@@ -253,7 +253,8 @@ extension MainViewController {
         
         // Set Colors
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
-        lineBG.resetColors()
+        lineBG.colors.removeAll()
+        lineBG.circleColors.removeAll()
         if colors.count > 0 {
             print("graph colors")
             for i in 1..<colors.count{
