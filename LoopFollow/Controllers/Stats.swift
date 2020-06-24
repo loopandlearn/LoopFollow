@@ -62,7 +62,10 @@ class StatsData {
         if UserDefaultsRepository.units.value == "mg/dL" {
             a1C = (46.7 + Float(avgBG)) / 28.7
         } else {
-            a1C = (((46.7 + Float(avgBG)) / 28.7) - 2.152) / 0.09148
+            a1C = (46.7 + Float(avgBG)) / 28.7
+            // Keep this for later.
+            // https://github.com/nightscout/nightguard/pull/72
+            // a1C = (((46.7 + Float(avgBG)) / 28.7) - 2.152) / 0.09148
         }
     }
 
