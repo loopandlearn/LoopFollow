@@ -66,7 +66,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // View Delay Timer
     var viewTimer = Timer()
-    let viewTimeInterval: TimeInterval = 5.0
+    let viewTimeInterval: TimeInterval = 10.0
     
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
