@@ -37,9 +37,10 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         
         
         setSnoozeTime()
-        tabBarController?.selectedIndex = 0
-        
-        snoozeTabItem.isEnabled = false;
+       // tabBarController?.selectedIndex = 0
+        AlertLabel.isHidden = true
+        SnoozeButton.isHidden = true
+        //snoozeTabItem.isEnabled = false;
         
     }
     

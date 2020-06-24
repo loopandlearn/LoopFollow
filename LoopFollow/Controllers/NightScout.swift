@@ -208,6 +208,7 @@ extension MainViewController {
     // NS BG Data Front end updater
     func viewUpdateNSBG () {
         print("Enter BG View Update")
+        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         let entries = bgData
         if entries.count > 0 {
             let latestEntryi = entries.count - 1
@@ -222,25 +223,30 @@ extension MainViewController {
             }
             
             BGText.text = bgUnits.toDisplayUnits(String(latestBG))
+            snoozer.BGLabel.text = bgUnits.toDisplayUnits(String(latestBG))
             setBGTextColor()
             
             if let directionBG = entries[latestEntryi].direction {
                 DirectionText.text = bgDirectionGraphic(directionBG)
+                snoozer.DirectionLabel.text = bgDirectionGraphic(directionBG)
                 latestDirectionString = bgDirectionGraphic(directionBG)
             }
             else
             {
                 DirectionText.text = ""
+                snoozer.DirectionLabel.text = ""
                 latestDirectionString = ""
             }
             
             if deltaBG < 0 {
                 self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
+                snoozer.DeltaLabel.text = bgUnits.toDisplayUnits(String(deltaBG))
                 latestDeltaString = String(deltaBG)
             }
             else
             {
                 self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                snoozer.DeltaLabel.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 latestDeltaString = "+" + String(deltaBG)
             }
             self.updateBadge(val: latestBG)

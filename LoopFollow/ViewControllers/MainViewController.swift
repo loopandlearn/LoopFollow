@@ -117,12 +117,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.tabBarController?.overrideUserInterfaceStyle = .dark
         }
         // Disable the snoozer tab unless an alarm is active
-        let tabBarControllerItems = self.tabBarController?.tabBar.items
-        if let arrayOfTabBarItems = tabBarControllerItems as AnyObject as? NSArray{
-            snoozeTabItem = arrayOfTabBarItems[2] as! UITabBarItem
-        }
-        snoozeTabItem.isEnabled = false;
+        //let tabBarControllerItems = self.tabBarController?.tabBar.items
+        //if let arrayOfTabBarItems = tabBarControllerItems as AnyObject as? NSArray{
+        //    snoozeTabItem = arrayOfTabBarItems[2] as! UITabBarItem
+        //}
+        //snoozeTabItem.isEnabled = false;
         
+        // Load the snoozer tab
+        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+        snoozer.loadViewIfNeeded()
         
         // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
@@ -254,13 +257,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     //update Min Ago Text. We need to call this separately because it updates between readings
     func updateMinAgo(){
+        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         if bgData.count > 0 {
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
             minAgoBG = Double(TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date)
             MinAgoText.text = String(Int(deltaTime)) + " min ago"
+            snoozer.MinAgoLabel.text = String(Int(deltaTime)) + " min ago"
             latestMinAgoString = String(Int(deltaTime)) + " min ago"
         } else {
             MinAgoText.text = ""
+            snoozer.MinAgoLabel.text = ""
             latestMinAgoString = ""
         }
         
@@ -296,18 +302,21 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     func setBGTextColor() {
         if bgData.count > 0 {
+            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             let latestBG = bgData[bgData.count - 1].sgv
+            var color: NSUIColor = NSUIColor.label
             if UserDefaultsRepository.colorBGText.value {
                 if Float(latestBG) >= UserDefaultsRepository.highLine.value {
-                    BGText.textColor = NSUIColor.systemYellow
+                    color = NSUIColor.systemYellow
                 } else if Float(latestBG) <= UserDefaultsRepository.lowLine.value {
-                    BGText.textColor = NSUIColor.systemRed
+                    color = NSUIColor.systemRed
                 } else {
-                    BGText.textColor = NSUIColor.systemGreen
+                    color = NSUIColor.systemGreen
                 }
-            } else {
-                BGText.textColor = NSUIColor.label
             }
+            
+            BGText.textColor = color
+            snoozer.BGLabel.textColor = color
         }
     }
     
