@@ -873,16 +873,21 @@ extension MainViewController {
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
-            let bolus = currentEntry?["insulin"] as! Double
-            
-            let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-            lastFoundIndex = sgv.foundIndex
-            
-            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                // Make the dot
-                let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                bolusData.append(dot)
+            do {
+                let bolus = try currentEntry?["insulin"] as! Double
+                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+                lastFoundIndex = sgv.foundIndex
+                
+                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                    // Make the dot
+                    let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                    bolusData.append(dot)
+                }
+            } catch {
+                print("Null Bolus Warning")
             }
+            
+           
             
         }
         
@@ -949,16 +954,22 @@ extension MainViewController {
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
-            let carbs = currentEntry?["carbs"] as! Double
             
-            let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-            lastFoundIndex = sgv.foundIndex
-            
-            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                // Make the dot
-                let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                carbData.append(dot)
+            do {
+                let carbs = try currentEntry?["carbs"] as! Double
+                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+                lastFoundIndex = sgv.foundIndex
+                
+                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                    // Make the dot
+                    let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                    carbData.append(dot)
+                }
+            } catch {
+                print("Null Carb Warning")
             }
+            
+            
         }
         
         if UserDefaultsRepository.graphCarbs.value {
