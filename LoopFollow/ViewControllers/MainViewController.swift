@@ -66,7 +66,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // View Delay Timer
     var viewTimer = Timer()
-    let viewTimeInterval: TimeInterval = 10.0
+    let viewTimeInterval: TimeInterval = UserDefaultsRepository.viewRefreshDelay.value
     
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
@@ -335,7 +335,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         store.requestAccess(to: .event) {(granted, error) in
             if !granted { return }
             
-            if UserDefaultsRepository.calendarIdentifier.value == "" {
+            if UserDefaultsRepository.calendarIdentifier.value != "" {
                 
                 // Create Event info
                 let deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int

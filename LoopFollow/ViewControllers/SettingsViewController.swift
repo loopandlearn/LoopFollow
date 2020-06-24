@@ -408,6 +408,21 @@ class SettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.graphPrediction.value = value
             }
+        
+        <<< StepperRow("viewRefreshDelay") { row in
+            row.title = "View Refresh Delay"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 30
+            row.value = Double(UserDefaultsRepository.viewRefreshDelay.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.viewRefreshDelay.value = Double(value)
+        }
     }
 
 }
