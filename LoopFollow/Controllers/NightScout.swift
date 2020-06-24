@@ -578,8 +578,12 @@ extension MainViewController {
     // NS Profile Web Call
     func webLoadNSProfile() {
         print("enter download profile")
+        let urlUser = UserDefaultsRepository.url.value
+        var urlString = urlUser + "/api/v1/profile/current.json"
+        if token != "" {
+            urlString = urlUser + "/api/v1/profile/current.json?token=" + token
+        }
         
-        let urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
         let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
         guard let url = URL(string: escapedAddress!) else {
             return
