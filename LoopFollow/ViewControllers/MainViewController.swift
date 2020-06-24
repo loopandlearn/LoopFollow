@@ -349,6 +349,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
 
             var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
+            print(eventStartDate)
             var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
             var  eventTitle = UserDefaultsRepository.watchLine1.value + "\n" + UserDefaultsRepository.watchLine2.value
             eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: bgUnits.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
@@ -399,7 +400,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     do {
                         (try self.store.remove(i, span: EKSpan.thisEvent, commit: true))
                     } catch let error {
-                        
+                        print("ERROR -- Delete calendar entry")
+                        print(error)
                     }
                 }
             }
@@ -415,6 +417,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
             } catch {
                 // Display error to user
+                print("ERROR - add calendar entry")
                 print(error)
             }
         }
