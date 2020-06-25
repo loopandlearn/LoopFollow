@@ -11,7 +11,7 @@ import Charts
 import EventKit
 
 
-class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate {
+class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate {
     
     @IBOutlet weak var BGText: UILabel!
     @IBOutlet weak var DeltaText: UILabel!
