@@ -734,6 +734,7 @@ extension MainViewController {
                         
                         // This will iterate through from midnight on and set it for the highest matching one.
                     }
+                    latestBasal = String(format:"%.2f", scheduled)
                     // Make the starting dot at the last ending dot
                     let startDot = basalGraphStruct(basalRate: scheduled, date: Double(priorDateTimeStamp + (priorDuration * 60)))
                     basalData.append(startDot)
@@ -754,13 +755,13 @@ extension MainViewController {
             // If it's the last one and not ended yet, extend it for 1 hour to match the prediction length. Otherwise let it end
             if i == entries.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
                 lastEndDot = Date().timeIntervalSince1970 + (55 * 60)
-                tableData[2].value = String(format:"%.1f", basalRate)
-                latestBasal = String(format:"%.1f", basalRate)
+                tableData[2].value = String(format:"%.2f", basalRate)
+                latestBasal = String(format:"%.2f", basalRate)
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
             }
             
-            // Double check for overlaps of incorrect ended TBRs and sent it to end when the next one starts if it finds a discrepancy
+            // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
             if i < entries.count - 1 {
                 let nextEntry = entries[entries.count - 2 - i] as [String : AnyObject]?
                 let nextBasalDate = nextEntry?["timestamp"] as! String
@@ -781,7 +782,7 @@ extension MainViewController {
             
         }
         
-        // If last scheduled basal was prior to right now, we need to create one last scheduled entry
+        // If last  basal was prior to right now, we need to create one last scheduled entry
         if lastEndDot <= dateTimeUtils.getNowTimeIntervalUTC() {
             var scheduled = 0.0
             // cycle through basal profiles.
@@ -800,8 +801,8 @@ extension MainViewController {
                 
             }
             
-            tableData[2].value = String(format:"%.1f", scheduled)
-            latestBasal = String(format:"%.1f", scheduled)
+            tableData[2].value = String(format:"%.2f", scheduled)
+            latestBasal = String(format:"%.2f", scheduled)
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)
