@@ -408,6 +408,13 @@ class SettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.graphPrediction.value = value
             }
+            <<< SwitchRow("sendNotificationLog"){ row in
+                row.title = "iPhone Notifications for Logs"
+                row.value = UserDefaultsRepository.sendNotificationLog.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.sendNotificationLog.value = value
+                }
         
         <<< StepperRow("viewRefreshDelay") { row in
             row.title = "View Refresh Delay"

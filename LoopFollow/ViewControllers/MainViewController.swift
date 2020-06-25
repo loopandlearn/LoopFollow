@@ -73,6 +73,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var checkAlarmTimer = Timer()
     var checkAlarmInterval: TimeInterval = 60.0
     
+    var calTimer = Timer()
+    
     // Info Table Setup
     var tableData = [
         infoData(name: "IOB", value: ""), //0
@@ -93,6 +95,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var predictionData: [Double] = []
     var chartData = LineChartData()
     var newBGPulled = false
+    var lastCalDate: Double = 0
     var latestDirectionString = ""
     var latestMinAgoString = ""
     var latestDeltaString = ""
@@ -137,11 +140,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.dataSource = self
         
         // Setup the Graph
-        createGraph()
-        createSmallBGGraph()
+        if firstGraphLoad {
+            createGraph()
+            createSmallBGGraph()
+        }
         
         // Load Data
-        if UserDefaultsRepository.url.value != "" {
+        if UserDefaultsRepository.url.value != "" && firstGraphLoad {
             nightscoutLoader()
         }
         
@@ -189,12 +194,27 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // NS Loader Timer
      func startViewTimer(time: TimeInterval) {
-        timer = Timer.scheduledTimer(timeInterval: time,
+        viewTimer = Timer.scheduledTimer(timeInterval: time,
                                      target: self,
                                      selector: #selector(MainViewController.viewTimerDidEnd(_:)),
                                      userInfo: nil,
                                      repeats: false)
         
+    }
+    
+    // Timer to allow us to write min ago calendar entries but not update them every 30 seconds
+    fileprivate func startCalTimer(time: TimeInterval) {
+        calTimer = Timer.scheduledTimer(timeInterval: time,
+                                     target: self,
+                                     selector: #selector(MainViewController.calTimerDidEnd(_:)),
+                                     userInfo: nil,
+                                     repeats: false)
+    }
+    
+    // Nothing should be done when this timer ends because it just blocks the alarms from firing when it's active
+    @objc func calTimerDidEnd(_ timer:Timer) {
+        if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Calendar Timer Ended") }
+        print("cal timer ended")
     }
     
     // This delays a few things to hopefully all all data to arrive.
@@ -224,7 +244,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         tabBarController?.selectedIndex = 0
         
         // Cancel the current timer and start a fresh background timer using the settings value only if background task is enabled
-        timer.invalidate()
+        
         if UserDefaultsRepository.backgroundRefresh.value {
             timer.invalidate()
             backgroundTask.startBackgroundTask()
@@ -237,7 +257,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // reset screenlock state if needed
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
         
-        // Cancel the background tasks, start a fresh timer, and immediately check for new data
+        // Cancel the background tasks, start a fresh timer
         if UserDefaultsRepository.backgroundRefresh.value {
             backgroundTask.stopBackgroundTask()
             timer.invalidate()
@@ -335,7 +355,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         store.requestAccess(to: .event) {(granted, error) in
             if !granted { return }
             
-            if UserDefaultsRepository.calendarIdentifier.value != "" {
+            if UserDefaultsRepository.calendarIdentifier.value == "" { return }
+                
+            if self.lastCalDate == self.bgData[self.bgData.count - 1].date && self.calTimer.isValid {
+                    if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Calendar - Not saving same entry") }
+                    return }
                 
                 // Create Event info
                 let deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
@@ -400,9 +424,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 if eVDelete != nil {
                     for i in eVDelete! {
                         do {
-                            (try self.store.remove(i, span: EKSpan.thisEvent, commit: true))
+                            try self.store.remove(i, span: EKSpan.thisEvent, commit: true)
+                            if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Calendar Delete") }
                         } catch let error {
                             print("ERROR -- Delete calendar entry")
+                            if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Error - Calendar Delete") }
                             print(error)
                         }
                     }
@@ -416,13 +442,18 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
                 do {
                     try self.store.save(event, span: .thisEvent, commit: true)
+                    self.lastCalDate = self.bgData[self.bgData.count - 1].date
+                    self.calTimer.invalidate()
+                    self.startCalTimer(time: (60 * 5))
+                    if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Calendar Write: " + eventTitle) }
                     //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
                 } catch {
                     // Display error to user
+                    if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Error - Calendar Write") }
                     print("ERROR - add calendar entry")
                     print(error)
                 }
-            }
+            
         }
     }
     
@@ -433,6 +464,19 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             snoozer.sendNotification(self, bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString, deltaVal: latestDeltaString, minAgoVal: latestMinAgoString, alertLabelVal: "Latest BG")
         }
+    }
+    
+    func sendNotification(_ sender: Any, text: String) {
+        
+        UNUserNotificationCenter.current().delegate = self
+        
+        let content = UNMutableNotificationContent()
+        content.title = dateTimeUtils.printNow()
+        content.title += " - " + text
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
     
 }
