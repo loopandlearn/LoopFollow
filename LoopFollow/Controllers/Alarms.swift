@@ -202,7 +202,7 @@ extension MainViewController {
                 var i = 1
                 // check the boluses in reverse order setting it only if the time is after the carb time minus prebolus time.
                 // This will make the loop stop at the most recent bolus that is over the minimum value or continue through all boluses
-                while lastBolus < UserDefaultsRepository.alertMissedBolusIgnoreBolus.value {
+                while lastBolus < UserDefaultsRepository.alertMissedBolusIgnoreBolus.value && i <= bgData.count {
                     // Set the bolus if it's after the carb time minus prebolus time
                     if (bolusData[bolusData.count - i].date >= lastCarbTime - Double(UserDefaultsRepository.alertMissedBolusPrebolus.value * 60)) {
                         lastBolus = bolusData[bolusData.count - i].value
