@@ -13,6 +13,9 @@
 		FC16A97D24996747003D6245 /* Alarms.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97C24996747003D6245 /* Alarms.swift */; };
 		FC16A97F249969E2003D6245 /* Graphs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97E249969E2003D6245 /* Graphs.swift */; };
 		FC16A98124996C07003D6245 /* DateTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A98024996C07003D6245 /* DateTime.swift */; };
+		FC1BDD2B24A22650001B652C /* Stats.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2A24A22650001B652C /* Stats.swift */; };
+		FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2C24A23204001B652C /* StatsView.swift */; };
+		FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2E24A232A3001B652C /* DataStructs.swift */; };
 		FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC3AE7B3249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld */; };
 		FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTaskAudio.swift */; };
 		FC5A5C3D2497B229009C550E /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FC5A5C3C2497B229009C550E /* Config.xcconfig */; };
@@ -149,6 +152,7 @@
 		FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886C2489909D00A0279D /* AnyConvertible.swift */; };
 		FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886E2489A53800A0279D /* AppConstants.swift */; };
 		FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */; };
+		FCEF87AC24A141A700AE6FA0 /* bgUnits.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCEF87AA24A1417900AE6FA0 /* bgUnits.swift */; };
 		FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCFEEC9D2486E68E00402A7F /* WebKit.framework */; };
 		FCFEECA02488157B00402A7F /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEEC9F2488157B00402A7F /* Chart.swift */; };
 		FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEECA1248857A600402A7F /* SettingsViewController.swift */; };
@@ -162,6 +166,9 @@
 		FC16A97C24996747003D6245 /* Alarms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarms.swift; sourceTree = "<group>"; };
 		FC16A97E249969E2003D6245 /* Graphs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphs.swift; sourceTree = "<group>"; };
 		FC16A98024996C07003D6245 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
+		FC1BDD2A24A22650001B652C /* Stats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stats.swift; sourceTree = "<group>"; };
+		FC1BDD2C24A23204001B652C /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		FC1BDD2E24A232A3001B652C /* DataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStructs.swift; sourceTree = "<group>"; };
 		FC3AE7B4249E8E0E00AAE1E0 /* LoopFollow.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LoopFollow.xcdatamodel; sourceTree = "<group>"; };
 		FC5A5C3C2497B229009C550E /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		FC7CE4A9248ABE2B001F83B8 /* Siri_Alert_Calibration_Needed.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Siri_Alert_Calibration_Needed.caf; sourceTree = "<group>"; };
@@ -303,6 +310,7 @@
 		FCC688702489A57C00A0279D /* Loop Follow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Follow.entitlements"; sourceTree = "<group>"; };
 		FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = carbBolusArrays.swift; sourceTree = "<group>"; };
 		FCE537C2249AAB2600F80BF8 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
+		FCEF87AA24A1417900AE6FA0 /* bgUnits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bgUnits.swift; sourceTree = "<group>"; };
 		FCFEEC9D2486E68E00402A7F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		FCFEEC9F2488157B00402A7F /* Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
 		FCFEECA1248857A600402A7F /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -358,6 +366,8 @@
 				FC16A97924996673003D6245 /* NightScout.swift */,
 				FC16A97C24996747003D6245 /* Alarms.swift */,
 				FC16A97E249969E2003D6245 /* Graphs.swift */,
+				FC1BDD2A24A22650001B652C /* Stats.swift */,
+				FC1BDD2C24A23204001B652C /* StatsView.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -551,6 +561,8 @@
 				FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */,
 				FC16A98024996C07003D6245 /* DateTime.swift */,
 				FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */,
+				FCEF87AA24A1417900AE6FA0 /* bgUnits.swift */,
+				FC1BDD2E24A232A3001B652C /* DataStructs.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -818,6 +830,8 @@
 				FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
 				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
+				FCEF87AC24A141A700AE6FA0 /* bgUnits.swift in Sources */,
+				FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */,
 				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
 				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
@@ -826,6 +840,8 @@
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
+				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
+				FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
 				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
@@ -984,6 +1000,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow";
 				PRODUCT_NAME = "Loop Follow";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1004,6 +1021,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow";
 				PRODUCT_NAME = "Loop Follow";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
