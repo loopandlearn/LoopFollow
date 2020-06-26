@@ -10,7 +10,7 @@ import UIKit
 import UserNotifications
 
 
-class SnoozeViewController: UIViewController {
+class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
 
     var snoozeTabItem: UITabBarItem = UITabBarItem()
     var mainTabItem: UITabBarItem = UITabBarItem()
@@ -23,7 +23,7 @@ class SnoozeViewController: UIViewController {
     @IBOutlet weak var MinAgoLabel: UILabel!
     @IBOutlet weak var AlertLabel: UILabel!
     
-    @IBAction func SnoozeButton(_ sender: UIButton) {
+    @IBAction func SnoozeButton(_ sender: Any) {
         AlarmSound.stop()
         
         guard let mainVC = self.tabBarController!.viewControllers?[0] as? MainViewController else { return }
@@ -37,9 +37,10 @@ class SnoozeViewController: UIViewController {
         
         
         setSnoozeTime()
-        tabBarController?.selectedIndex = 0
-        
-        snoozeTabItem.isEnabled = false;
+       // tabBarController?.selectedIndex = 0
+        AlertLabel.isHidden = true
+        SnoozeButton.isHidden = true
+        //snoozeTabItem.isEnabled = false;
         
     }
     
@@ -54,22 +55,29 @@ class SnoozeViewController: UIViewController {
     }
     
     func sendNotification(_ sender: Any, bgVal: String, directionVal: String, deltaVal: String, minAgoVal: String, alertLabelVal: String) {
-        // 1
+        
+        UNUserNotificationCenter.current().delegate = self
+        
         let content = UNMutableNotificationContent()
         content.title = alertLabelVal
         content.subtitle += bgVal + " "
         content.subtitle += directionVal + " "
         content.subtitle += deltaVal
+        content.categoryIdentifier = "category"
         
-        // show this notification 0 seconds from now
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-
-        // choose a random identifier
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-
-        // add our notification request
-        UNUserNotificationCenter.current().add(request)
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
         
+        let action = UNNotificationAction(identifier: "snooze", title: "Snooze", options: [])
+        let category = UNNotificationCategory(identifier: "category", actions: [action], intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.actionIdentifier == "snooze" {
+            SnoozeButton(self)
+        }
     }
     
     func setSnoozeTime()

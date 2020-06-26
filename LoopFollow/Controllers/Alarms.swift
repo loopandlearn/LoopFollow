@@ -12,7 +12,7 @@ import AVFoundation
 extension MainViewController {
     
     
-    func checkAlarms(bgs: [sgvData]) {
+    func checkAlarms(bgs: [DataStructs.sgvData]) {
            print("ALARMS --- Checking")
            // Don't check or fire alarms within 1 minute of prior alarm
            if checkAlarmTimer.isValid {  return }
@@ -46,14 +46,14 @@ extension MainViewController {
                // trigger temporary alert first
                if UserDefaultsRepository.alertTemporaryActive.value {
                    if UserDefaultsRepository.alertTemporaryBelow.value {
-                       if currentBG < UserDefaultsRepository.alertTemporaryBG.value {
+                       if Float(currentBG) < UserDefaultsRepository.alertTemporaryBG.value {
                            UserDefaultsRepository.alertTemporaryActive.value = false
                            AlarmSound.whichAlarm = "Temporary Alert"
                            triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value, snooozedBGReadingTime: currentBGTime)
                            return
                        }
                    } else{
-                       if currentBG > UserDefaultsRepository.alertTemporaryBG.value {
+                       if Float(currentBG) > UserDefaultsRepository.alertTemporaryBG.value {
                          tabBarController?.selectedIndex = 2
                            AlarmSound.whichAlarm = "Temporary Alert"
                            triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value, snooozedBGReadingTime: currentBGTime)
@@ -64,7 +64,7 @@ extension MainViewController {
                
                // Check Urgent Low
                if UserDefaultsRepository.alertUrgentLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
-               currentBG <= UserDefaultsRepository.alertUrgentLowBG.value {
+               Float(currentBG) <= UserDefaultsRepository.alertUrgentLowBG.value {
                    // Separating this makes it so the low or drop alerts won't trigger if they already snoozed the urgent low
                    if !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
                        AlarmSound.whichAlarm = "Urgent Low Alert"
@@ -77,7 +77,7 @@ extension MainViewController {
                
                // Check Low
                if UserDefaultsRepository.alertLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
-               currentBG <= UserDefaultsRepository.alertLowBG.value && !UserDefaultsRepository.alertLowIsSnoozed.value {
+               Float(currentBG) <= UserDefaultsRepository.alertLowBG.value && !UserDefaultsRepository.alertLowIsSnoozed.value {
                    AlarmSound.whichAlarm = "Low Alert"
                    triggerAlarm(sound: UserDefaultsRepository.alertLowSound.value, snooozedBGReadingTime: currentBGTime)
                    return
@@ -85,7 +85,7 @@ extension MainViewController {
                
                // Check Urgent High
                if UserDefaultsRepository.alertUrgentHighActive.value && !UserDefaultsRepository.alertUrgentHighIsSnoozed.value &&
-               currentBG >= UserDefaultsRepository.alertUrgentHighBG.value {
+               Float(currentBG) >= UserDefaultsRepository.alertUrgentHighBG.value {
                    // Separating this makes it so the high or rise alerts won't trigger if they already snoozed the urgent high
                    if !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
                            AlarmSound.whichAlarm = "Urgent High Alert"
@@ -102,8 +102,8 @@ extension MainViewController {
                let persistentBG = bgData[bgData.count - 1 - persistentReadings].sgv
                if UserDefaultsRepository.alertHighActive.value &&
                    !UserDefaultsRepository.alertHighIsSnoozed.value &&
-                   currentBG >= UserDefaultsRepository.alertHighBG.value &&
-                   persistentBG >= UserDefaultsRepository.alertHighBG.value &&
+                   Float(currentBG) >= UserDefaultsRepository.alertHighBG.value &&
+                   Float(persistentBG) >= UserDefaultsRepository.alertHighBG.value &&
                    !UserDefaultsRepository.alertHighIsSnoozed.value {
                        AlarmSound.whichAlarm = "High Alert"
                        triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime)
@@ -115,13 +115,13 @@ extension MainViewController {
                // Check Fast Drop
                if UserDefaultsRepository.alertFastDropActive.value && !UserDefaultsRepository.alertFastDropIsSnoozed.value {
                    // make sure limit is off or BG is below value
-                   if (!UserDefaultsRepository.alertFastDropUseLimit.value) || (UserDefaultsRepository.alertFastDropUseLimit.value && currentBG < UserDefaultsRepository.alertFastDropBelowBG.value) {
+                   if (!UserDefaultsRepository.alertFastDropUseLimit.value) || (UserDefaultsRepository.alertFastDropUseLimit.value && Float(currentBG) < UserDefaultsRepository.alertFastDropBelowBG.value) {
                        let compare = 0 - UserDefaultsRepository.alertFastDropDelta.value
                        
                        //check last 2/3/4 readings
-                       if (UserDefaultsRepository.alertFastDropReadings.value == 2 && deltas[0] <= compare)
-                       || (UserDefaultsRepository.alertFastDropReadings.value == 3 && deltas[0] <= compare && deltas[1] <= compare)
-                       || (UserDefaultsRepository.alertFastDropReadings.value == 4 && deltas[0] <= compare && deltas[1] <= compare && deltas[2] <= compare) {
+                       if (UserDefaultsRepository.alertFastDropReadings.value == 2 && Float(deltas[0]) <= compare)
+                       || (UserDefaultsRepository.alertFastDropReadings.value == 3 && Float(deltas[0]) <= compare && Float(deltas[1]) <= compare)
+                       || (UserDefaultsRepository.alertFastDropReadings.value == 4 && Float(deltas[0]) <= compare && Float(deltas[1]) <= compare && Float(deltas[2]) <= compare) {
                            AlarmSound.whichAlarm = "Fast Drop Alert"
                            triggerAlarm(sound: UserDefaultsRepository.alertFastDropSound.value, snooozedBGReadingTime: currentBGTime)
                            return
@@ -132,13 +132,13 @@ extension MainViewController {
                // Check Fast Rise
                if UserDefaultsRepository.alertFastRiseActive.value && !UserDefaultsRepository.alertFastRiseIsSnoozed.value {
                    // make sure limit is off or BG is above value
-                   if (!UserDefaultsRepository.alertFastRiseUseLimit.value) || (UserDefaultsRepository.alertFastRiseUseLimit.value && currentBG > UserDefaultsRepository.alertFastRiseAboveBG.value) {
+                   if (!UserDefaultsRepository.alertFastRiseUseLimit.value) || (UserDefaultsRepository.alertFastRiseUseLimit.value && Float(currentBG) > UserDefaultsRepository.alertFastRiseAboveBG.value) {
                        let compare = UserDefaultsRepository.alertFastDropDelta.value
                        
                        //check last 2/3/4 readings
-                       if (UserDefaultsRepository.alertFastRiseReadings.value == 2 && deltas[0] >= compare)
-                       || (UserDefaultsRepository.alertFastRiseReadings.value == 3 && deltas[0] >= compare && deltas[1] >= compare)
-                       || (UserDefaultsRepository.alertFastRiseReadings.value == 4 && deltas[0] >= compare && deltas[1] >= compare && deltas[2] >= compare) {
+                       if (UserDefaultsRepository.alertFastRiseReadings.value == 2 && Float(deltas[0]) >= compare)
+                       || (UserDefaultsRepository.alertFastRiseReadings.value == 3 && Float(deltas[0]) >= compare && Float(deltas[1]) >= compare)
+                       || (UserDefaultsRepository.alertFastRiseReadings.value == 4 && Float(deltas[0]) >= compare && Float(deltas[1]) >= compare && Float(deltas[2]) >= compare) {
                            AlarmSound.whichAlarm = "Fast Rise Alert"
                            triggerAlarm(sound: UserDefaultsRepository.alertFastRiseSound.value, snooozedBGReadingTime: currentBGTime)
                            return
@@ -153,14 +153,14 @@ extension MainViewController {
            // These only get checked and fire if a BG reading doesn't fire
            if UserDefaultsRepository.alertNotLoopingActive.value
                && !UserDefaultsRepository.alertNotLoopingIsSnoozed.value
-               && (Double(now - UserDefaultsRepository.alertLastLoopTime.value) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
+            && (Double(dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertLastLoopTime.value) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
                && UserDefaultsRepository.alertLastLoopTime.value > 0 {
                
                var trigger = true
                if (UserDefaultsRepository.alertNotLoopingUseLimits.value
                    && (
-                       (currentBG <= UserDefaultsRepository.alertNotLoopingUpperLimit.value
-                       && currentBG >= UserDefaultsRepository.alertNotLoopingLowerLimit.value) ||
+                       (Float(currentBG) <= UserDefaultsRepository.alertNotLoopingUpperLimit.value
+                       && Float(currentBG) >= UserDefaultsRepository.alertNotLoopingLowerLimit.value) ||
                        // Ignore Limits if BG reading is older than non looping time
                        (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
                    ) ||
@@ -176,7 +176,7 @@ extension MainViewController {
         if UserDefaultsRepository.alertMissedBolusActive.value
         && !UserDefaultsRepository.alertMissedBolusIsSnoozed.value
         && carbData.count > 0
-        && currentBG > UserDefaultsRepository.alertMissedBolusLowGramsBG.value {
+        && Float(currentBG) > UserDefaultsRepository.alertMissedBolusLowGramsBG.value {
             
             // Grab the latest carb entry
             let lastCarb = carbData[carbData.count - 1].value
@@ -202,7 +202,7 @@ extension MainViewController {
                 var i = 1
                 // check the boluses in reverse order setting it only if the time is after the carb time minus prebolus time.
                 // This will make the loop stop at the most recent bolus that is over the minimum value or continue through all boluses
-                while lastBolus < UserDefaultsRepository.alertMissedBolusIgnoreBolus.value {
+                while lastBolus < UserDefaultsRepository.alertMissedBolusIgnoreBolus.value && i <= bgData.count {
                     // Set the bolus if it's after the carb time minus prebolus time
                     if (bolusData[bolusData.count - i].date >= lastCarbTime - Double(UserDefaultsRepository.alertMissedBolusPrebolus.value * 60)) {
                         lastBolus = bolusData[bolusData.count - i].value
@@ -264,8 +264,10 @@ extension MainViewController {
     func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?)
     {
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.updateDisplayWhenTriggered(bgVal: String(bgData[bgData.count - 1].sgv), directionVal: latestDirectionString ?? "", deltaVal: latestDeltaString ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
-        snoozeTabItem.isEnabled = true;
+        snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        //snoozeTabItem.isEnabled = true;
+        snoozer.SnoozeButton.isHidden = false
+        snoozer.AlertLabel.isHidden = false
         tabBarController?.selectedIndex = 2
         if snooozedBGReadingTime != nil {
             UserDefaultsRepository.snoozedBGReadingTime.value = snooozedBGReadingTime
@@ -371,7 +373,7 @@ extension MainViewController {
     
     func speakBG(sgv: Int) {
            var speechSynthesizer = AVSpeechSynthesizer()
-           var speechUtterance: AVSpeechUtterance = AVSpeechUtterance(string: "Current BG is " + String(sgv))
+           var speechUtterance: AVSpeechUtterance = AVSpeechUtterance(string: "Current BG is " + bgUnits.toDisplayUnits(String(sgv)))
            speechUtterance.rate = AVSpeechUtteranceMaximumSpeechRate / 2
            speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
            speechSynthesizer.speak(speechUtterance)

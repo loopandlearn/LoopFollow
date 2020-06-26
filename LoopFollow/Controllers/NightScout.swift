@@ -11,13 +11,13 @@ import UIKit
 
 
 extension MainViewController {
-    
-    //NS BG Struct
-    struct sgvData: Codable {
-        var sgv: Int
-        var date: TimeInterval
-        var direction: String?
-    }
+//
+//    //NS BG Struct
+//    struct sgvData: Codable {
+//        var sgv: Int
+//        var date: TimeInterval
+//        var direction: String?
+//    }
     
     //NS Cage Struct
     struct cageData: Codable {
@@ -155,7 +155,7 @@ extension MainViewController {
             }
             
             let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([sgvData].self, from: data)
+            let entriesResponse = try? decoder.decode([DataStructs.sgvData].self, from: data)
             if let entriesResponse = entriesResponse {
                 DispatchQueue.main.async {
                     // trigger the processor for the data after downloading.
@@ -171,7 +171,7 @@ extension MainViewController {
     }
     
     // NS BG Data Response processor
-    func ProcessNSBGData(data: [sgvData], onlyPullLastRecord: Bool){
+    func ProcessNSBGData(data: [DataStructs.sgvData], onlyPullLastRecord: Bool){
         print("Enter BG Processor")
         
         var pullDate = data[data.count - 1].date / 1000
@@ -198,7 +198,7 @@ extension MainViewController {
         for i in 0..<data.count{
             var dateString = data[data.count - 1 - i].date / 1000
             dateString.round(FloatingPointRoundingRule.toNearestOrEven)
-            let reading = sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
+            let reading = DataStructs.sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
             bgData.append(reading)
         }
         
@@ -208,6 +208,7 @@ extension MainViewController {
     // NS BG Data Front end updater
     func viewUpdateNSBG () {
         print("Enter BG View Update")
+        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         let entries = bgData
         if entries.count > 0 {
             let latestEntryi = entries.count - 1
@@ -221,26 +222,31 @@ extension MainViewController {
                 userUnit = " mmol/L"
             }
             
-            BGText.text = bgOutputFormat(bg: Double(latestBG), mmol: mmol)
+            BGText.text = bgUnits.toDisplayUnits(String(latestBG))
+            snoozer.BGLabel.text = bgUnits.toDisplayUnits(String(latestBG))
             setBGTextColor()
             
             if let directionBG = entries[latestEntryi].direction {
                 DirectionText.text = bgDirectionGraphic(directionBG)
+                snoozer.DirectionLabel.text = bgDirectionGraphic(directionBG)
                 latestDirectionString = bgDirectionGraphic(directionBG)
             }
             else
             {
                 DirectionText.text = ""
+                snoozer.DirectionLabel.text = ""
                 latestDirectionString = ""
             }
             
             if deltaBG < 0 {
-                self.DeltaText.text = String(deltaBG)
+                self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
+                snoozer.DeltaLabel.text = bgUnits.toDisplayUnits(String(deltaBG))
                 latestDeltaString = String(deltaBG)
             }
             else
             {
-                self.DeltaText.text = "+" + String(deltaBG)
+                self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                snoozer.DeltaLabel.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 latestDeltaString = "+" + String(deltaBG)
             }
             self.updateBadge(val: latestBG)
@@ -253,6 +259,7 @@ extension MainViewController {
         }
         updateBGGraph()
         updateMinAgo()
+        updateStats()
     }
     
     // NS Device Status Web Call
@@ -345,8 +352,8 @@ extension MainViewController {
                         }
                     }
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.1f", (iobdata["iob"] as! Double))
-                        latestIOB = String(format:"%.1f", (iobdata["iob"] as! Double))
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
+                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
                     }
                     if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
                         tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
@@ -354,7 +361,7 @@ extension MainViewController {
                     }
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
                         let prediction = predictdata["values"] as! [Double]
-                        PredictionLabel.text = String(Int(prediction.last!))
+                        PredictionLabel.text = bgUnits.toDisplayUnits(String(Int(prediction.last!)))
                         PredictionLabel.textColor = UIColor.systemPurple
                         predictionData.removeAll()
                         if UserDefaultsRepository.downloadPrediction.value {
@@ -412,7 +419,7 @@ extension MainViewController {
                 oText += "% ("
                 let minValue = lastCorrection["minValue"] as! Double
                 let maxValue = lastCorrection["maxValue"] as! Double
-                oText += bgOutputFormat(bg: minValue, mmol: mmol) + "-" + bgOutputFormat(bg: maxValue, mmol: mmol) + ")"
+                oText += bgUnits.toDisplayUnits(String(minValue)) + "-" + bgUnits.toDisplayUnits(String(maxValue)) + ")"
                 
                 tableData[3].value =  oText
             }
@@ -571,8 +578,12 @@ extension MainViewController {
     // NS Profile Web Call
     func webLoadNSProfile() {
         print("enter download profile")
+        let urlUser = UserDefaultsRepository.url.value
+        var urlString = urlUser + "/api/v1/profile/current.json"
+        if token != "" {
+            urlString = urlUser + "/api/v1/profile/current.json?token=" + token
+        }
         
-        let urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
         let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
         guard let url = URL(string: escapedAddress!) else {
             return
@@ -611,11 +622,16 @@ extension MainViewController {
         let basal = jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
         for i in 0..<basal.count {
             let dict = basal[i] as! Dictionary<String, Any>
-            let thisValue = dict[keyPath: "value"] as! Double
-            let thisTime = dict[keyPath: "time"] as! String
-            let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
-            let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
-            basalProfile.append(entry)
+            do {
+                let thisValue = try dict[keyPath: "value"] as! Double
+                let thisTime = dict[keyPath: "time"] as! String
+                let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
+                let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
+                basalProfile.append(entry)
+            } catch {
+                print("Error Catch: Profile wrapped in Quotes")
+            }
+            
         }
     }
     
@@ -718,6 +734,7 @@ extension MainViewController {
                         
                         // This will iterate through from midnight on and set it for the highest matching one.
                     }
+                    latestBasal = String(format:"%.2f", scheduled)
                     // Make the starting dot at the last ending dot
                     let startDot = basalGraphStruct(basalRate: scheduled, date: Double(priorDateTimeStamp + (priorDuration * 60)))
                     basalData.append(startDot)
@@ -738,13 +755,13 @@ extension MainViewController {
             // If it's the last one and not ended yet, extend it for 1 hour to match the prediction length. Otherwise let it end
             if i == entries.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
                 lastEndDot = Date().timeIntervalSince1970 + (55 * 60)
-                tableData[2].value = String(format:"%.1f", basalRate)
-                latestBasal = String(format:"%.1f", basalRate)
+                tableData[2].value = String(format:"%.2f", basalRate)
+                latestBasal = String(format:"%.2f", basalRate)
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
             }
             
-            // Double check for overlaps of incorrect ended TBRs and sent it to end when the next one starts if it finds a discrepancy
+            // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
             if i < entries.count - 1 {
                 let nextEntry = entries[entries.count - 2 - i] as [String : AnyObject]?
                 let nextBasalDate = nextEntry?["timestamp"] as! String
@@ -765,7 +782,7 @@ extension MainViewController {
             
         }
         
-        // If last scheduled basal was prior to right now, we need to create one last scheduled entry
+        // If last  basal was prior to right now, we need to create one last scheduled entry
         if lastEndDot <= dateTimeUtils.getNowTimeIntervalUTC() {
             var scheduled = 0.0
             // cycle through basal profiles.
@@ -784,8 +801,8 @@ extension MainViewController {
                 
             }
             
-            tableData[2].value = String(format:"%.1f", scheduled)
-            latestBasal = String(format:"%.1f", scheduled)
+            tableData[2].value = String(format:"%.2f", scheduled)
+            latestBasal = String(format:"%.2f", scheduled)
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)
@@ -857,16 +874,21 @@ extension MainViewController {
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
-            let bolus = currentEntry?["insulin"] as! Double
-            
-            let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-            lastFoundIndex = sgv.foundIndex
-            
-            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                // Make the dot
-                let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                bolusData.append(dot)
+            do {
+                let bolus = try currentEntry?["insulin"] as! Double
+                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+                lastFoundIndex = sgv.foundIndex
+                
+                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                    // Make the dot
+                    let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                    bolusData.append(dot)
+                }
+            } catch {
+                print("Null Bolus Warning")
             }
+            
+           
             
         }
         
@@ -933,16 +955,22 @@ extension MainViewController {
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
-            let carbs = currentEntry?["carbs"] as! Double
             
-            let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-            lastFoundIndex = sgv.foundIndex
-            
-            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                // Make the dot
-                let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                carbData.append(dot)
+            do {
+                let carbs = try currentEntry?["carbs"] as! Double
+                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+                lastFoundIndex = sgv.foundIndex
+                
+                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                    // Make the dot
+                    let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                    carbData.append(dot)
+                }
+            } catch {
+                print("Null Carb Warning")
             }
+            
+            
         }
         
         if UserDefaultsRepository.graphCarbs.value {
