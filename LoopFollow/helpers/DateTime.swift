@@ -19,6 +19,7 @@ class dateTimeUtils {
         var midnight = dayString + " 00:00:00"
         let newFormatter = DateFormatter()
         newFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        newFormatter.locale = Locale(identifier: "en_US")
         let newDate = newFormatter.date(from: midnight)
         guard let midnightTimeInterval = newDate?.timeIntervalSince1970 else { return 0 }
         return midnightTimeInterval
@@ -32,6 +33,7 @@ class dateTimeUtils {
         var midnight = dayString + " 00:00:00"
         let newFormatter = DateFormatter()
         newFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        newFormatter.locale = Locale(identifier: "en_US")
         let newDate = newFormatter.date(from: midnight)
         guard let midnightTimeInterval = newDate?.timeIntervalSince1970 else { return 0 }
         return midnightTimeInterval
@@ -41,6 +43,7 @@ class dateTimeUtils {
         let now = Date()
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        formatter.locale = Locale(identifier: "en_US")
         formatter.timeZone = TimeZone(abbreviation: "UTC")
         let utc = formatter.string(from: now)
         let day = formatter.date(from: utc)
@@ -53,6 +56,7 @@ class dateTimeUtils {
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.locale = Locale(identifier: "en_US")
         dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
         let yesterdayString = dateFormatter.string(from: yesterday)
         return yesterdayString
@@ -62,6 +66,7 @@ class dateTimeUtils {
         let date = Date()
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss"
+        formatter.locale = Locale(identifier: "en_US")
         return formatter.string(from: date)
     }
 }
