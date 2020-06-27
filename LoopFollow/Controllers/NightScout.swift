@@ -690,6 +690,7 @@ extension MainViewController {
             let strippedZone = String(basalDate.dropLast())
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            dateFormatter.locale = Locale(identifier: "en_US")
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
@@ -711,6 +712,7 @@ extension MainViewController {
                 let priorStrippedZone = String(priorBasalDate.dropLast())
                 let priorDateFormatter = DateFormatter()
                 priorDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+                priorDateFormatter.locale = Locale(identifier: "en_US")
                 priorDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
                 let priorDateString = dateFormatter.date(from: priorStrippedZone)
                 let priorDateTimeStamp = priorDateString!.timeIntervalSince1970
@@ -768,6 +770,7 @@ extension MainViewController {
                 let nextStrippedZone = String(nextBasalDate.dropLast())
                 let nextDateFormatter = DateFormatter()
                 nextDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+                nextDateFormatter.locale = Locale(identifier: "en_US")
                 nextDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
                 let nextDateString = dateFormatter.date(from: nextStrippedZone)
                 let nextDateTimeStamp = nextDateString!.timeIntervalSince1970
@@ -871,6 +874,7 @@ extension MainViewController {
             let strippedZone = String(bolusDate.dropLast())
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            dateFormatter.locale = Locale(identifier: "en_US")
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
@@ -952,6 +956,7 @@ extension MainViewController {
             let strippedZone = String(bolusDate.dropLast())
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            dateFormatter.locale = Locale(identifier: "en_US")
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
