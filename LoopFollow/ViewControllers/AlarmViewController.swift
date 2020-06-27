@@ -155,44 +155,76 @@ class AlarmViewController: FormViewController {
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
-        buildSnoozeAll()
-        buildTemporaryAlert()
         
-        form +++
-            SegmentedRow<String>("bgAlerts"){ row in
+        
+        form
+            +++ Section("Select Alert")
+          <<< SegmentedRow<String>("bgAlerts"){ row in
                 row.title = "Main BG Alerts"
                 row.options = ["Urgent Low", "Low", "High", "Urgent High"]
-                    row.value = "Urgent Low"
+                   // row.value = "Urgent Low"
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            let otherRow = self?.form.rowBy(tag: "bgExtraAlerts") as! SegmentedRow<String>
+            otherRow.value = nil
+            otherRow.reload()
+            let otherRow2 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
+            otherRow2.value = nil
+            otherRow2.reload()
+            row.value = value
         }
+            <<< SegmentedRow<String>("bgExtraAlerts"){ row in
+                row.title = "Extra BG Alerts"
+                row.options = ["No Readings", "Fast Drop", "Fast Rise", "Temporary"]
+                    //row.value = "Missed Readings"
+        }.onChange { [weak self] row in
+             guard let value = row.value else { return }
+            let otherRow = self?.form.rowBy(tag: "bgAlerts") as! SegmentedRow<String>
+               otherRow.value = nil
+               otherRow.reload()
+               let otherRow2 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
+               otherRow2.value = nil
+               otherRow2.reload()
+            row.value = value
+        }
+            <<< SegmentedRow<String>("otherAlerts"){ row in
+                row.title = "Other Alerts"
+                row.options = ["Not Looping", "Missed Bolus", "SAGE", "CAGE"]
+                //row.value = "Not Looping"
+        }.onChange { [weak self] row in
+             guard let value = row.value else { return }
+            let otherRow = self?.form.rowBy(tag: "bgExtraAlerts") as! SegmentedRow<String>
+           otherRow.value = nil
+           otherRow.reload()
+           let otherRow2 = self?.form.rowBy(tag: "bgAlerts") as! SegmentedRow<String>
+           otherRow2.value = nil
+           otherRow2.reload()
+            row.value = value
+        }
+        
+
         
         buildUrgentLow()
         buildLow()
         buildHigh()
         buildUrgentHigh()
         
-        form +++
-            SegmentedRow<String>("bgExtraAlerts"){ row in
-                row.title = "Extra BG Alerts"
-                row.options = ["Missed Readings", "Fast Drop", "Fast Rise"]
-                    row.value = "Missed Readings"
-        }
+        
         
         buildFastDropAlert()
         buildFastRiseAlert()
         buildMissedReadings()
         
-        form +++
-            SegmentedRow<String>("otherAlerts"){ row in
-                row.title = "Other Alerts"
-                row.options = ["Not Looping", "Missed Bolus", "SAGE", "CAGE"]
-                    row.value = "Not Looping"
-        }
+        
         
         buildNotLooping()
         buildMissedBolus()
         buildSage()
         buildCage()
         
+        buildTemporaryAlert()
+        
+        buildSnoozeAll()
         buildAppInactive()
         
         
@@ -249,7 +281,9 @@ class AlarmViewController: FormViewController {
         form
 
 
-        +++ Section(header: "Temporary Alert", footer: "Temporary Alert will trigger once and disable. Disabling Alert Below BG will trigger it as a high alert above the BG.")
+        +++ Section(header: "Temporary Alert", footer: "Temporary Alert will trigger once and disable. Disabling Alert Below BG will trigger it as a high alert above the BG.") { row in
+                                  row.hidden = "$bgExtraAlerts != 'Temporary'"
+                              }
                    <<< SwitchRow("alertTemporaryActive"){ row in
                        row.title = "Active"
                        row.value = UserDefaultsRepository.alertTemporaryActive.value
@@ -259,7 +293,6 @@ class AlarmViewController: FormViewController {
                        }
                         <<< SwitchRow("alertTemporaryBelow"){ row in
                         row.title = "Alert Below BG"
-                        row.hidden = "$alertTemporaryActive == false"
                         row.value = UserDefaultsRepository.alertTemporaryBelow.value
                         }.onChange { [weak self] row in
                                 guard let value = row.value else { return }
@@ -271,7 +304,6 @@ class AlarmViewController: FormViewController {
                        row.cell.stepper.minimumValue = 40
                        row.cell.stepper.maximumValue = 400
                        row.value = Double(UserDefaultsRepository.alertTemporaryBG.value)
-                       row.hidden = "$alertTemporaryActive == false"
                        row.displayValueFor = { value in
                            guard let value = value else { return nil }
                            return bgUnits.toDisplayUnits(String(value))
@@ -283,7 +315,6 @@ class AlarmViewController: FormViewController {
                     <<< PickerInputRow<String>("alertTemporarySound") { row in
                         row.title = "Sound"
                         row.options = soundFiles
-                        row.hidden = "$alertTemporaryActive == false"
                         row.value = UserDefaultsRepository.alertTemporarySound.value
                         row.displayValueFor = { value in
                         guard let value = value else { return nil }
@@ -974,8 +1005,8 @@ class AlarmViewController: FormViewController {
     
     func buildMissedReadings(){
         form
-            +++ Section(header: "Missed Readings", footer: "Alert when there have been no BG readings for X minutes") { row in
-                                             row.hidden = "$bgExtraAlerts != 'Missed Readings'"
+            +++ Section(header: "No Readings", footer: "Alert when there have been no BG readings for X minutes") { row in
+                                             row.hidden = "$bgExtraAlerts != 'No Readings'"
                                          }
         
             <<< SwitchRow("alertMissedReadingActive"){ row in
@@ -1362,9 +1393,7 @@ class AlarmViewController: FormViewController {
     
     func buildAppInactive(){
          form
-            +++ Section(header: "App Inactive", footer: "Attempt to alert if IOS kills the app in the background") { row in
-                               row.hidden = "$otherAlerts != 'Not Looping'"
-                           }
+            +++ Section(header: "App Inactive", footer: "Attempt to alert if IOS kills the app in the background")
         <<< SwitchRow("alertAppInactive"){ row in
         row.title = "Active"
         row.value = UserDefaultsRepository.alertAppInactive.value
@@ -1475,7 +1504,7 @@ class AlarmViewController: FormViewController {
     
     func buildCage(){
         form
-            +++ Section(header: "Pump Change Reminder", footer: "Alert for Canula Change. Values are in Hours.") { row in
+            +++ Section(header: "Pump/Canula Change Reminder", footer: "Alert for Canula Change. Values are in Hours.") { row in
                                row.hidden = "$otherAlerts != 'CAGE'"
                            }
         <<< SwitchRow("alertCAGEActive"){ row in
