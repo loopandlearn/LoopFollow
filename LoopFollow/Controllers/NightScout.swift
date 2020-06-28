@@ -686,7 +686,14 @@ extension MainViewController {
         var tempArray: [basalGraphStruct] = []
         for i in 0..<entries.count {
             let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
-            let basalDate = currentEntry?["timestamp"] as! String
+            var basalDate: String
+            if currentEntry?["timestamp"] != nil {
+                basalDate = currentEntry?["timestamp"] as! String
+            } else if currentEntry?["created_at"] != nil {
+                basalDate = currentEntry?["created_at"] as! String
+            } else {
+                return
+            }
             let strippedZone = String(basalDate.dropLast())
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
