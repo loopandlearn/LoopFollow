@@ -33,6 +33,8 @@ class SettingsViewController: FormViewController {
             row.title = "URL"
             row.placeholder = "https://mycgm.herokuapp.com"
             row.value = UserDefaultsRepository.url.value
+        }.cellSetup { (cell, row) in
+            cell.textField.autocorrectionType = .no
         }.onChange { row in
             guard let value = row.value else { return }
             // check the format of the URL entered by the user and trim away any spaces or "/" at the end
@@ -48,6 +50,8 @@ class SettingsViewController: FormViewController {
             row.title = "NS Token"
             row.placeholder = "Leave blank if not using tokens"
             row.value = UserDefaultsRepository.token.value
+        }.cellSetup { (cell, row) in
+            cell.textField.autocorrectionType = .no
         }.onChange { row in
             if row.value == nil {
                 UserDefaultsRepository.token.value = ""
