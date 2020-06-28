@@ -870,7 +870,15 @@ extension MainViewController {
         var lastFoundIndex = 0
         for i in 0..<entries.count {
             let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
-            let bolusDate = currentEntry?["timestamp"] as! String
+            var bolusDate: String
+            if currentEntry?["timestamp"] != nil {
+                bolusDate = currentEntry?["timestamp"] as! String
+            } else if currentEntry?["created_at"] != nil {
+                bolusDate = currentEntry?["created_at"] as! String
+            } else {
+                return
+            }
+            
             let strippedZone = String(bolusDate.dropLast())
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
@@ -952,8 +960,15 @@ extension MainViewController {
         var lastFoundIndex = 0
         for i in 0..<entries.count {
             let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
-            let bolusDate = currentEntry?["timestamp"] as! String
-            let strippedZone = String(bolusDate.dropLast())
+            var carbDate: String
+            if currentEntry?["timestamp"] != nil {
+                carbDate = currentEntry?["timestamp"] as! String
+            } else if currentEntry?["created_at"] != nil {
+                carbDate = currentEntry?["created_at"] as! String
+            } else {
+                return
+            }
+            let strippedZone = String(carbDate.dropLast())
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
