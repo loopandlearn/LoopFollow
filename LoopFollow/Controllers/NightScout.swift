@@ -764,7 +764,6 @@ extension MainViewController {
             // If it's the last one and not ended yet, extend it for 1 hour to match the prediction length. Otherwise let it end
             if i == entries.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
                 lastEndDot = Date().timeIntervalSince1970 + (55 * 60)
-                tableData[2].value = String(format:"%.2f", basalRate)
                 latestBasal = String(format:"%.2f", basalRate)
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
@@ -811,7 +810,6 @@ extension MainViewController {
                 
             }
             
-            tableData[2].value = String(format:"%.2f", scheduled)
             latestBasal = String(format:"%.2f", scheduled)
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
@@ -823,6 +821,7 @@ extension MainViewController {
             
             
         }
+        tableData[2].value = latestBasal
         if UserDefaultsRepository.graphBasal.value {
             updateBasalGraph()
         }
