@@ -32,7 +32,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsEstA1C: UILabel!
     
     
-    
     // Data Table Struct
     struct infoData {
         var name: String
@@ -111,6 +110,18 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Start Log Timer if needed
+        if UserDefaultsRepository.debugLog.value {
+            guard let debug = self.tabBarController!.viewControllers?[5] as? debugViewController else { return }
+            debug.loadViewIfNeeded()
+        } else {
+            do {
+                try self.tabBarController?.viewControllers?.remove(at: 5)
+            } catch {
+                
+            }
+        }
         
         BGChart.delegate = self
         BGChartFull.delegate = self
@@ -213,27 +224,27 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Nothing should be done when this timer ends because it just blocks the alarms from firing when it's active
     @objc func calTimerDidEnd(_ timer:Timer) {
-        if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Calendar Timer Ended") }
-        print("cal timer ended")
+       // if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Timer Ended") }
     }
     
     // This delays a few things to hopefully all all data to arrive.
-       @objc func viewTimerDidEnd(_ timer:Timer) {
-        print(dateTimeUtils.printNow() + "view timer ended")
+    @objc func viewTimerDidEnd(_ timer:Timer) {
+//        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "View timer ended") }
         if bgData.count > 0 {
-                self.checkAlarms(bgs: bgData)
-                self.updateMinAgo()
-                // self.updateBadge(val: bgData[bgData.count - 1].sgv)
-               //self.viewUpdateNSBG()
-               if UserDefaultsRepository.writeCalendarEvent.value {
-                   self.writeCalendar()
-               }
-           }
-       }
+            self.checkAlarms(bgs: bgData)
+            self.updateMinAgo()
+            // self.updateBadge(val: bgData[bgData.count - 1].sgv)
+            //self.viewUpdateNSBG()
+            if UserDefaultsRepository.writeCalendarEvent.value {
+                self.writeCalendar()
+            }
+        }
+    }
+    
     
     // Nothing should be done when this timer ends because it just blocks the alarms from firing when it's active
     @objc func checkAlarmTimerDidEnd(_ timer:Timer) {
-        print("check alarm timer ended")
+//        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Check alarm timer ended") }
     }
     
     @objc func appMovedToBackground() {
@@ -270,13 +281,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Check for new data when timer ends
     @objc func timerDidEnd(_ timer:Timer) {
-        print(dateTimeUtils.printNow() + " " + "main timer ended " + "\(Thread.current)")
+//        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Main timer ended") }
         updateMinAgo()
         nightscoutLoader()
     }
 
     //update Min Ago Text. We need to call this separately because it updates between readings
     func updateMinAgo(){
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Update min ago text") }
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         if bgData.count > 0 {
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
@@ -315,7 +327,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         } else {
             UIApplication.shared.applicationIconBadgeNumber = 0
         }
-        print("updated badge")
+//        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "updated badge") }
     }
     
     
@@ -349,14 +361,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Write calendar
     func writeCalendar() {
-        print(dateTimeUtils.printNow() + " " + "write calendar start " + "\(Thread.current)")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Write calendar start") }
         store.requestAccess(to: .event) {(granted, error) in
             if !granted { return }
             
             if UserDefaultsRepository.calendarIdentifier.value == "" { return }
                 
             if self.lastCalDate == self.bgData[self.bgData.count - 1].date && self.calTimer.isValid {
-                    if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Calendar - Not saving same entry") }
+//                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar - Not saving same entry") }
                     return }
                 
                 // Create Event info
@@ -373,7 +385,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
                 
                 var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
-                print(eventStartDate)
+//                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar start date") }
                 var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
                 var  eventTitle = UserDefaultsRepository.watchLine1.value + "\n" + UserDefaultsRepository.watchLine2.value
                 eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: bgUnits.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
@@ -423,10 +435,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     for i in eVDelete! {
                         do {
                             try self.store.remove(i, span: EKSpan.thisEvent, commit: true)
-                            if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Calendar Delete") }
+                            //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Delete") }
                         } catch let error {
-                            print("ERROR -- Delete calendar entry")
-                            if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Error - Calendar Delete") }
+                            //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Error - Calendar Delete") }
                             print(error)
                         }
                     }
@@ -443,13 +454,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     self.lastCalDate = self.bgData[self.bgData.count - 1].date
                     self.calTimer.invalidate()
                     self.startCalTimer(time: (60 * 5))
-                    if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Calendar Write: " + eventTitle) }
+                    //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Write: " + eventTitle) }
                     //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
                 } catch {
                     // Display error to user
-                    if UserDefaultsRepository.sendNotificationLog.value { self.sendNotification(self, text: "Error - Calendar Write") }
-                    print("ERROR - add calendar entry")
-                    print(error)
+                    //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Error: Calendar Write") }
                 }
             
         }
@@ -464,18 +473,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
     
-    func sendNotification(_ sender: Any, text: String) {
-        
-        UNUserNotificationCenter.current().delegate = self
-        
-        let content = UNMutableNotificationContent()
-        content.title = dateTimeUtils.printNow()
-        content.title += " - " + text
-        
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+    func writeDebugLog(value: String) {
+        guard let debug = self.tabBarController!.viewControllers?[5] as? debugViewController else { return }
+        var logText = "\n" + dateTimeUtils.printNow() + " - " + value
+        print(logText)
+        if debug.debugLogTextView.text.lengthOfBytes(using: .utf8) > 1000 {
+            debug.debugLogTextView.text = ""
+        }
+        debug.debugLogTextView.text += logText
     }
+    
     
 }
 

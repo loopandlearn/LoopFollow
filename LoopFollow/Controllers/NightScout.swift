@@ -97,7 +97,7 @@ extension MainViewController {
             
             
             // Give the alarms and calendar 15 seconds delay to allow time for data to compile
-            print("Start View Timer")
+//            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Start view timer") }
             self.startViewTimer(time: viewTimeInterval)
         } else {
             // Things to do if we already have data and don't need a network call
@@ -120,7 +120,7 @@ extension MainViewController {
     
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
-        print("Enter BG Web Call")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
         // Set the count= in the url either to pull 24 hours or only the last record
         var points = "1"
         if !onlyPullLastRecord {
@@ -144,7 +144,6 @@ extension MainViewController {
         
         // Downloader
         let getBGTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            if self.consoleLogging == true {print("start bg url")}
             guard error == nil else {
                 return
                 
@@ -172,7 +171,7 @@ extension MainViewController {
     
     // NS BG Data Response processor
     func ProcessNSBGData(data: [DataStructs.sgvData], onlyPullLastRecord: Bool){
-        print("Enter BG Processor")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG") }
         
         var pullDate = data[data.count - 1].date / 1000
         pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
@@ -207,7 +206,7 @@ extension MainViewController {
     
     // NS BG Data Front end updater
     func viewUpdateNSBG () {
-        print("Enter BG View Update")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Display: BG") }
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         let entries = bgData
         if entries.count > 0 {
@@ -264,7 +263,7 @@ extension MainViewController {
     
     // NS Device Status Web Call
     func webLoadNSDeviceStatus() {
-        print("Enter download device status")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: device status") }
         let urlUser = UserDefaultsRepository.url.value
         var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
         if token != "" {
@@ -275,7 +274,6 @@ extension MainViewController {
             
             return
         }
-        if consoleLogging == true {print("entered device status task.")}
         
         
         var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
@@ -283,7 +281,6 @@ extension MainViewController {
         
         
         let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
-            if self.consoleLogging == true {print("in device status loop.")}
             guard error == nil else {
                 return
             }
@@ -299,15 +296,13 @@ extension MainViewController {
                 }
             } else {
                 return
-            }
-            if self.consoleLogging == true {print("finish pump update")}}
+            } }
         deviceStatusTask.resume()
     }
     
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
-        print("Enter process device status")
-        if consoleLogging == true {print("in updatePump")}
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
             return
         }
@@ -343,9 +338,11 @@ extension MainViewController {
                 if let failure = lastLoopRecord["failureReason"] {
                     LoopStatusLabel.text = "X"
                     latestLoopStatusString = "X"
+                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop Failure: X") }
                 } else {
                     var wasEnacted = false
                     if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
                         wasEnacted = true
                         if let lastTempBasal = enacted["rate"] as? Double {
                             // tableData[2].value = String(format:"%.1f", lastTempBasal)
@@ -378,17 +375,23 @@ extension MainViewController {
                             if bgData.count > 0 {
                                 lastBGTime = bgData[bgData.count - 1].date
                             }
+                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "tempBasalTime: " + String(tempBasalTime)) }
+                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastBGTime: " + String(lastBGTime)) }
+                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "wasEnacted: " + String(wasEnacted)) }
                             if tempBasalTime > lastBGTime && !wasEnacted {
                                 LoopStatusLabel.text = "⏀"
                                 latestLoopStatusString = "⏀"
+                                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Open Loop: recommended temp. temp time > bg time, was not enacted") }
                             } else {
                                 LoopStatusLabel.text = "↻"
                                 latestLoopStatusString = "↻"
+                                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: recommended temp, but temp time is < bg time and/or was enacted") }
                             }
                         }
                     } else {
                         LoopStatusLabel.text = "↻"
                         latestLoopStatusString = "↻"
+                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: no recommended temp") }
                     }
                     
                 }
@@ -430,7 +433,7 @@ extension MainViewController {
     
     // NS Cage Web Call
     func webLoadNSCage() {
-        print("enter download cage")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: CAGE") }
         let urlUser = UserDefaultsRepository.url.value
         var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
         if token != "" {
@@ -444,7 +447,6 @@ extension MainViewController {
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if self.consoleLogging == true {print("start cage url")}
             guard error == nil else {
                 return
             }
@@ -467,8 +469,7 @@ extension MainViewController {
     
     // NS Cage Response Processor
     func updateCage(data: [cageData]) {
-        print("enter process cage")
-        if consoleLogging == true {print("in updateCage")}
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: CAGE") }
         if data.count == 0 {
             return
         }
@@ -499,7 +500,7 @@ extension MainViewController {
     
     // NS Sage Web Call
     func webLoadNSSage() {
-        print("enter download sage")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: SAGE") }
         var dayComponent    = DateComponents()
         dayComponent.day    = -10 // For removing 10 days
         let theCalendar     = Calendar.current
@@ -522,7 +523,6 @@ extension MainViewController {
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if self.consoleLogging == true {print("start cage url")}
             guard error == nil else {
                 return
             }
@@ -545,8 +545,7 @@ extension MainViewController {
     
     // NS Sage Response Processor
     func updateSage(data: [cageData]) {
-        print("enter update sage")
-        if consoleLogging == true {print("in updateSage")}
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process/Display: SAGE") }
         if data.count == 0 {
             return
         }
@@ -577,7 +576,7 @@ extension MainViewController {
     
     // NS Profile Web Call
     func webLoadNSProfile() {
-        print("enter download profile")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: profile") }
         let urlUser = UserDefaultsRepository.url.value
         var urlString = urlUser + "/api/v1/profile/current.json"
         if token != "" {
@@ -615,7 +614,7 @@ extension MainViewController {
     
     // NS Profile Response Processor
     func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
-        print("enter process profile")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: profile") }
         if jsonDeviceStatus.count == 0 {
             return
         }
@@ -629,7 +628,7 @@ extension MainViewController {
                 let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
                 basalProfile.append(entry)
             } catch {
-                print("Error Catch: Profile wrapped in Quotes")
+               if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: profile wrapped in quotes") }
             }
             
         }
@@ -637,7 +636,7 @@ extension MainViewController {
     
     // NS Temp Basal Web Call
     func WebLoadNSTempBasals() {
-        print("enter download basals")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Basal") }
         if !UserDefaultsRepository.downloadBasal.value { return }
         
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
@@ -677,7 +676,7 @@ extension MainViewController {
     
     // NS Temp Basal Response Processor
     func updateBasals(entries: [[String:AnyObject]]) {
-        print("enter process basal")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Basal") }
         // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
         basalData.removeAll()
         
@@ -829,7 +828,7 @@ extension MainViewController {
     
     // NS Bolus Web Call
     func webLoadNSBoluses(){
-        print("enter download bolus")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Bolus") }
         if !UserDefaultsRepository.downloadBolus.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
@@ -870,7 +869,7 @@ extension MainViewController {
     
     // NS Meal Bolus Response Processor
     func processNSBolus(entries: [[String:AnyObject]]) {
-        print("enter process bolus")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Bolus") }
         // because it's a small array, we're going to destroy and reload every time.
         bolusData.removeAll()
         var lastFoundIndex = 0
@@ -903,7 +902,7 @@ extension MainViewController {
                     bolusData.append(dot)
                 }
             } catch {
-                print("Null Bolus Warning")
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Bolus") }
             }
             
            
@@ -919,7 +918,7 @@ extension MainViewController {
     
     // NS Carb Web Call
     func webLoadNSCarbs(){
-        print("enter download carbs")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Carbs") }
         if !UserDefaultsRepository.downloadCarbs.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
@@ -960,7 +959,7 @@ extension MainViewController {
     
     // NS Carb Bolus Response Processor
     func processNSCarbs(entries: [[String:AnyObject]]) {
-        print("enter process carbs")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Carbs") }
         // because it's a small array, we're going to destroy and reload every time.
         carbData.removeAll()
         var lastFoundIndex = 0
@@ -993,7 +992,7 @@ extension MainViewController {
                     carbData.append(dot)
                 }
             } catch {
-                print("Null Carb Warning")
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Carb entry") }
             }
             
             

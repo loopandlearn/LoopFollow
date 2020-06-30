@@ -13,7 +13,7 @@ extension MainViewController {
     
     
     func checkAlarms(bgs: [DataStructs.sgvData]) {
-           print("ALARMS --- Checking")
+           if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Checking Alarms") }
            // Don't check or fire alarms within 1 minute of prior alarm
            if checkAlarmTimer.isValid {  return }
            
