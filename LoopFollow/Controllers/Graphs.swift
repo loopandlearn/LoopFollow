@@ -231,7 +231,7 @@ extension MainViewController {
         
         // Add Prediction Data
         if predictionData.count > 0 && bgData.count > 0 && UserDefaultsRepository.graphPrediction.value {
-            print("graph prediction")
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: print prediction") }
             var startingTime = entries[entries.count - 1].date + 300
             var i = 0
             // Add 1 hour of predictions
@@ -263,7 +263,7 @@ extension MainViewController {
         lineBGSmall.circleColors.removeAll()
 
         if colors.count > 0 {
-            print("graph colors")
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: colors") }
             for i in 0..<colors.count{
                 mainChart.addColor(colors[i])
                 mainChart.circleColors.append(colors[i])

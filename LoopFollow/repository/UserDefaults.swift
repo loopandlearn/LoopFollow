@@ -52,7 +52,7 @@ class UserDefaultsRepository {
         static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
         static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
         static let graphPrediction = UserDefaultsValue<Bool>(key: "graphPrediction", default: true)
-        static let sendNotificationLog = UserDefaultsValue<Bool>(key: "sendNotificationLog", default: false)
+        static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
         static let viewRefreshDelay = UserDefaultsValue<Double>(key: "viewRefreshDelay", default: 15.0)
     
     
