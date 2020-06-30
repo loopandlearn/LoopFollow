@@ -233,6 +233,9 @@ extension MainViewController {
         if predictionData.count > 0 && bgData.count > 0 && UserDefaultsRepository.graphPrediction.value {
             if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: print prediction") }
             var startingTime = entries[entries.count - 1].date + 300
+            if latestLoopTime < dateTimeUtils.getNowTimeIntervalUTC() - 300 {
+               startingTime = latestLoopTime + 300
+            }
             var i = 0
             // Add 1 hour of predictions
             while i < 12 {

@@ -335,6 +335,8 @@ extension MainViewController {
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
                 UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+                latestLoopTime = lastLoopTime
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
                 if let failure = lastLoopRecord["failureReason"] {
                     LoopStatusLabel.text = "X"
                     latestLoopStatusString = "X"

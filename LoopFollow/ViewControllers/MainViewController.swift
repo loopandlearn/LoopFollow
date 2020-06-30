@@ -99,6 +99,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var latestMinAgoString = ""
     var latestDeltaString = ""
     var latestLoopStatusString = ""
+    var latestLoopTime: Double = 0
     var latestCOB = ""
     var latestBasal = ""
     var latestIOB = ""
