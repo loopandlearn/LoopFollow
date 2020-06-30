@@ -683,9 +683,10 @@ extension MainViewController {
         
         var lastEndDot = 0.0
         
-        var tempArray: [basalGraphStruct] = []
-        for i in 0..<entries.count {
-            let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
+        var tempArray = entries
+        tempArray.reverse()
+        for i in 0..<tempArray.count {
+            let currentEntry = tempArray[i] as [String : AnyObject]?
             var basalDate: String
             if currentEntry?["timestamp"] != nil {
                 basalDate = currentEntry?["timestamp"] as! String
@@ -705,16 +706,15 @@ extension MainViewController {
             let midnightTime = dateTimeUtils.getTimeIntervalMidnightToday()
             // Setting end dots
             var duration = 0.0
-            // For all except the last we're going to use stored duration for end dot. For last we'll just put it 5 mintues after the entry
-            if i <= entries.count - 1 {
-                duration = currentEntry?["duration"] as! Double
-            } else {
-                duration = dateTimeStamp + 60
+            do {
+                duration = try currentEntry?["duration"] as! Double
+            } catch {
+                print("No Duration Found")
             }
             
             // This adds scheduled basal wherever there is a break between temps. can't check the prior ending on the first item. it is 24 hours old, so it isn't important for display anyway
             if i > 0 {
-                let priorEntry = entries[entries.count - i] as [String : AnyObject]?
+                let priorEntry = tempArray[i - 1] as [String : AnyObject]?
                 let priorBasalDate = priorEntry?["timestamp"] as! String
                 let priorStrippedZone = String(priorBasalDate.dropLast())
                 let priorDateFormatter = DateFormatter()
@@ -724,8 +724,8 @@ extension MainViewController {
                 let priorDateString = dateFormatter.date(from: priorStrippedZone)
                 let priorDateTimeStamp = priorDateString!.timeIntervalSince1970
                 let priorDuration = priorEntry?["duration"] as! Double
-                // if difference between time stamps is greater than the duration of the last entry, there is a gap
-                if Double( dateTimeStamp - priorDateTimeStamp ) > Double( priorDuration * 60 ) {
+                // if difference between time stamps is greater than the duration of the last entry, there is a gap. Give a 15 second leeway on the timestamp
+                if Double( dateTimeStamp - priorDateTimeStamp ) > Double( (priorDuration * 60) + 15 ) {
                     
                     var scheduled = 0.0
                     // cycle through basal profiles.
@@ -743,16 +743,16 @@ extension MainViewController {
                         
                         // This will iterate through from midnight on and set it for the highest matching one.
                     }
-                    latestBasal = String(format:"%.2f", scheduled)
                     // Make the starting dot at the last ending dot
                     let startDot = basalGraphStruct(basalRate: scheduled, date: Double(priorDateTimeStamp + (priorDuration * 60)))
                     basalData.append(startDot)
                     
+                    //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Basal: Scheduled " + String(scheduled) + " " + String(dateTimeStamp)) }
+                    
                     // Make the ending dot at the new starting dot
                     let endDot = basalGraphStruct(basalRate: scheduled, date: Double(dateTimeStamp))
                     basalData.append(endDot)
-                    
-                    
+
                 }
             }
             
@@ -761,17 +761,20 @@ extension MainViewController {
             basalData.append(startDot)
             
             // Make the ending dot
-            // If it's the last one and not ended yet, extend it for 1 hour to match the prediction length. Otherwise let it end
-            if i == entries.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
-                lastEndDot = Date().timeIntervalSince1970 + (55 * 60)
+            // If it's the last one and has no duration, extend it for 30 minutes past the start. Otherwise set ending at duration
+            // duration is already set to 0 if there is no duration set on it.
+            //if i == tempArray.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
+            if i == tempArray.count - 1 && duration == 0.0 {
+                lastEndDot = dateTimeStamp + (30 * 60)
                 latestBasal = String(format:"%.2f", basalRate)
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
+                latestBasal = String(format:"%.2f", basalRate)
             }
             
             // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
-            if i < entries.count - 1 {
-                let nextEntry = entries[entries.count - 2 - i] as [String : AnyObject]?
+            if i < tempArray.count - 1 {
+                let nextEntry = tempArray[i + 1] as [String : AnyObject]?
                 let nextBasalDate = nextEntry?["timestamp"] as! String
                 let nextStrippedZone = String(nextBasalDate.dropLast())
                 let nextDateFormatter = DateFormatter()
@@ -800,14 +803,11 @@ extension MainViewController {
                 let scheduleTimeYesterday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightYesterday()
                 let scheduleTimeToday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightToday()
                 // check the prior temp ending to the profile seconds from midnight
-                if lastEndDot >= scheduleTimeYesterday {
-                    scheduled = basalProfile[b].value
-                }
+                print("yesterday " + String(scheduleTimeYesterday))
+                print("today " + String(scheduleTimeToday))
                 if lastEndDot >= scheduleTimeToday {
                     scheduled = basalProfile[b].value
                 }
-                
-                
             }
             
             latestBasal = String(format:"%.2f", scheduled)
@@ -815,10 +815,9 @@ extension MainViewController {
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)
             
-            // Make the ending dot 1 hour after now
-            let endDot = basalGraphStruct(basalRate: scheduled, date: Double(Date().timeIntervalSince1970))
+            // Make the ending dot 10 minutes after now
+            let endDot = basalGraphStruct(basalRate: scheduled, date: Double(Date().timeIntervalSince1970 + (60 * 10)))
             basalData.append(endDot)
-            
             
         }
         tableData[2].value = latestBasal
