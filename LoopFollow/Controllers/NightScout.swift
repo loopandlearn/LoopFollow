@@ -289,7 +289,7 @@ extension MainViewController {
             }
             
             
-            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
                     self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
@@ -618,7 +618,8 @@ extension MainViewController {
         if jsonDeviceStatus.count == 0 {
             return
         }
-        let basal = jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
+        if jsonDeviceStatus[keyPath: "message"] != nil { return }
+        let basal = try jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
         for i in 0..<basal.count {
             let dict = basal[i] as! Dictionary<String, Any>
             do {
@@ -662,7 +663,7 @@ extension MainViewController {
                 return
             }
             
-            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
                     self.updateBasals(entries: json)
@@ -855,7 +856,7 @@ extension MainViewController {
                 return
             }
             
-            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
                     self.processNSBolus(entries: json)
@@ -945,7 +946,7 @@ extension MainViewController {
                 return
             }
             
-            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
                     self.processNSCarbs(entries: json)
