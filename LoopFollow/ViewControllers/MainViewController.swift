@@ -89,6 +89,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var bgData: [DataStructs.sgvData] = []
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
+    var basalScheduleData: [basalGraphStruct] = []
     var bolusData: [bolusCarbGraphStruct] = []
     var carbData: [bolusCarbGraphStruct] = []
     var predictionData: [Double] = []

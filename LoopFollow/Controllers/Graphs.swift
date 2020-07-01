@@ -109,12 +109,26 @@ extension MainViewController {
         lineCarbs.drawValuesEnabled = true
         lineCarbs.valueTextColor = NSUIColor.label
         
+        // create Scheduled Basal graph data
+        var chartBasalScheduledEntry = [ChartDataEntry]()
+        let lineBasalScheduled = LineChartDataSet(entries:chartBasalScheduledEntry, label: "")
+        lineBasalScheduled.setDrawHighlightIndicators(false)
+        lineBasalScheduled.setColor(NSUIColor.systemBlue, alpha: 0.8)
+        lineBasalScheduled.lineWidth = 2
+        lineBasalScheduled.drawFilledEnabled = false
+        lineBasalScheduled.drawCirclesEnabled = false
+        lineBasalScheduled.axisDependency = YAxis.AxisDependency.left
+        lineBasalScheduled.highlightEnabled = false
+        lineBasalScheduled.drawValuesEnabled = false
+        lineBasalScheduled.lineDashLengths = [10.0, 5.0]
+        
         // Setup the chart data of all lines
         let data = LineChartData()
         data.addDataSet(lineBG) // Dataset 0
         data.addDataSet(lineBasal) // Dataset 1
         data.addDataSet(lineBolus) // Dataset 2
         data.addDataSet(lineCarbs) // Dataset 3
+        data.addDataSet(lineBasalScheduled) // Dataset 4
         data.setValueFont(UIFont.systemFont(ofSize: 12))
         
         // Clear limit lines so they don't add multiples when changing the settings
@@ -307,6 +321,19 @@ extension MainViewController {
         }
         
         BGChart.leftAxis.axisMaximum = maxBasal
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+    }
+    
+    func updateBasalScheduledGraph() {
+        var dataIndex = 4
+        BGChart.lineData?.dataSets[dataIndex].clear()
+        for i in 0..<basalScheduleData.count{
+            let value = ChartDataEntry(x: Double(basalScheduleData[i].date), y: Double(basalScheduleData[i].basalRate))
+            BGChart.data?.dataSets[dataIndex].addEntry(value)
+        }
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
