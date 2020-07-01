@@ -20,6 +20,7 @@ class UserDefaultsRepository {
     static let showDots = UserDefaultsValue<Bool>(key: "showDots", default: true)
     static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
     static let offsetCarbsBolus = UserDefaultsValue<Bool>(key: "offsetCarbsBolus", default: true)
+    static let militaryTime = UserDefaultsValue<Bool>(key: "militaryTime", default: false)
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
     static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
     static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
