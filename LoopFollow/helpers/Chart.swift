@@ -17,7 +17,12 @@ final class ChartXValueFormatter: IAxisValueFormatter {
         let dateFormatter = DateFormatter()
         //let timezoneOffset = TimeZone.current.secondsFromGMT()
         //let epochTimezoneOffset = value + Double(timezoneOffset)
-        dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
+        if UserDefaultsRepository.militaryTime.value {
+            dateFormatter.setLocalizedDateFormatFromTemplate("HH:mm")
+        } else {
+            dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
+        }
+        
         //let date = Date(timeIntervalSince1970: epochTimezoneOffset)
         let date = Date(timeIntervalSince1970: value)
         let formattedDate = dateFormatter.string(from: date)
