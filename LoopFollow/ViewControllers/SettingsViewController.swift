@@ -203,16 +203,7 @@ class SettingsViewController: FormViewController {
     func buildGraphSettings() {
         form
             +++ Section("Graph Settings")
-            <<< SwitchRow("militaryTime"){ row in
-                row.title = "24 Hour Time"
-                row.value = UserDefaultsRepository.militaryTime.value
-            }.onChange { [weak self] row in
-                        guard let value = row.value else { return }
-                        UserDefaultsRepository.militaryTime.value = value
-                    // Force main screen update
-                    guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-                    mainScreen.updateBGGraphSettings()
-                }
+            
         <<< SwitchRow("switchRowDots"){ row in
             row.title = "Display Dots"
             row.value = UserDefaultsRepository.showDots.value
