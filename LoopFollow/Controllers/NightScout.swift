@@ -633,8 +633,81 @@ extension MainViewController {
             } catch {
                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: profile wrapped in quotes") }
             }
-            
         }
+        
+        // Make temporary array with all values of yesterday and today
+        let yesterdayStart = dateTimeUtils.getTimeIntervalMidnightYesterday()
+        let todayStart = dateTimeUtils.getTimeIntervalMidnightToday()
+        basalScheduleData.removeAll()
+        
+        var basal2Day: [DataStructs.basal2DayProfile] = []
+        // Run twice to add in order yesterday then today
+        for p in 0..<basalProfile.count {
+            let start = yesterdayStart + basalProfile[p].timeAsSeconds
+            var end = yesterdayStart
+            // set the endings 1 second before the next one starts
+            if p < basalProfile.count - 1 {
+                end = yesterdayStart + basalProfile[p + 1].timeAsSeconds - 1
+            } else {
+                // set the end 1 second before midnight
+                end = yesterdayStart + 86399
+            }
+            let entry = DataStructs.basal2DayProfile(basalRate: basalProfile[p].value, startDate: start, endDate: end)
+            basal2Day.append(entry)
+        }
+        for p in 0..<basalProfile.count {
+            let start = todayStart + basalProfile[p].timeAsSeconds
+            var end = todayStart
+            // set the endings 1 second before the next one starts
+            if p < basalProfile.count - 1 {
+                end = todayStart + basalProfile[p + 1].timeAsSeconds - 1
+            } else {
+                // set the end 1 second before midnight
+                end = todayStart + 86399
+            }
+            let entry = DataStructs.basal2DayProfile(basalRate: basalProfile[p].value, startDate: start, endDate: end)
+            basal2Day.append(entry)
+        }
+        
+        let now = dateTimeUtils.nowMinus24HoursTimeInterval()
+        for i in 0..<basal2Day.count {
+            var timeYesterday = dateTimeUtils.getTimeInterval24HoursAgo()
+            
+            
+            // we need to manually set the first one
+            // Check that this is the first one and there are no existing entries
+            if basalScheduleData.count == 0 {
+                // check that the timestamp is > the current entry and < the next entry
+                if timeYesterday >= basal2Day[i].startDate && timeYesterday < basal2Day[i].endDate {
+                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: timeYesterday + ( 60 * 5 ))
+                    basalScheduleData.append(startDot)
+                    
+                    // set the enddot where the next one will start
+                    var endDate = basal2Day[i + 1].startDate
+                    let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
+                    basalScheduleData.append(endDot)
+                }
+            }
+            
+            // check if it's > 24 hours ago an <= 30 minutes from now.
+            if basal2Day[i].startDate >= timeYesterday && basal2Day[i].startDate < dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 ) {
+                let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: basal2Day[i].startDate)
+                basalScheduleData.append(startDot)
+                var endDate = basal2Day[i].endDate
+                
+                // if it's the last one or date is greater than now, set it to 30 minutes from now
+                if i == basal2Day.count - 1 || endDate > dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 ) {
+                    endDate = dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 )
+                }
+                let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
+                basalScheduleData.append(endDot)
+            }
+        }
+        
+        if UserDefaultsRepository.graphBasal.value {
+            updateBasalScheduledGraph()
+        }
+
     }
     
     // NS Temp Basal Web Call

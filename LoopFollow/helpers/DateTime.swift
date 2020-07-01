@@ -39,6 +39,12 @@ class dateTimeUtils {
         return midnightTimeInterval
     }
     
+    static func getTimeInterval24HoursAgo() -> TimeInterval {
+        let today = Date()
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
+        return yesterday.timeIntervalSince1970
+    }
+    
     static func getNowTimeIntervalUTC() -> TimeInterval {
         let now = Date()
         let formatter = DateFormatter()
