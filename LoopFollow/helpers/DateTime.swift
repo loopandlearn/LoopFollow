@@ -68,6 +68,17 @@ class dateTimeUtils {
         return yesterdayString
     }
     
+    static func nowMinus10DaysTimeInterval() -> String {
+        let today = Date()
+        let oldDate = Calendar.current.date(byAdding: .day, value: -10, to: today)!
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US")
+        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
+        let dayString = dateFormatter.string(from: oldDate)
+        return dayString
+    }
+    
     static func printNow() -> String {
         let date = Date()
         let formatter = DateFormatter()
