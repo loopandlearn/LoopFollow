@@ -631,13 +631,17 @@ extension MainViewController {
             }
         }
         
+        
+        // Don't process the basal or draw the graph unless we have BG readings to sync the start time
+        if bgData.count < 1 { return }
+        
         // Make temporary array with all values of yesterday and today
         let yesterdayStart = dateTimeUtils.getTimeIntervalMidnightYesterday()
         let todayStart = dateTimeUtils.getTimeIntervalMidnightToday()
         basalScheduleData.removeAll()
         
         var basal2Day: [DataStructs.basal2DayProfile] = []
-        // Run twice to add in order yesterday then today
+        // Run twice to add in order yesterday then today.
         for p in 0..<basalProfile.count {
             let start = yesterdayStart + basalProfile[p].timeAsSeconds
             var end = yesterdayStart
@@ -675,7 +679,8 @@ extension MainViewController {
             if basalScheduleData.count == 0 {
                 // check that the timestamp is > the current entry and < the next entry
                 if timeYesterday >= basal2Day[i].startDate && timeYesterday < basal2Day[i].endDate {
-                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: timeYesterday + ( 60 * 5 ))
+                    // Set the start time to match the BG start
+                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: bgData[0].date)
                     basalScheduleData.append(startDot)
                     
                     // set the enddot where the next one will start
@@ -685,16 +690,19 @@ extension MainViewController {
                 }
             }
             
+            // process the rest after the first one
             // check if it's > 24 hours ago an <= 30 minutes from now.
-            if basal2Day[i].startDate >= timeYesterday && basal2Day[i].startDate < dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 ) {
+            if basalScheduleData.count > 0
+                && basal2Day[i].startDate < dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 ) {
                 let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: basal2Day[i].startDate)
                 basalScheduleData.append(startDot)
                 var endDate = basal2Day[i].endDate
                 
-                // if it's the last one or date is greater than now, set it to 30 minutes from now
-                if i == basal2Day.count - 1 || endDate > dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 ) {
-                    endDate = dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 )
+                // if it's the last one in the profile or date is greater than now, set it to the last BG dot
+                if i == basal2Day.count - 1  || endDate > bgData[bgData.count - 1].date {
+                    endDate = Double(bgData[bgData.count - 1].date)
                 }
+
                 let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
                 basalScheduleData.append(endDot)
             }
