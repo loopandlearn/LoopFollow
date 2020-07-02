@@ -503,19 +503,12 @@ extension MainViewController {
     // NS Sage Web Call
     func webLoadNSSage() {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: SAGE") }
-        var dayComponent    = DateComponents()
-        dayComponent.day    = -10 // For removing 10 days
-        let theCalendar     = Calendar.current
         
-        let startDate    = theCalendar.date(byAdding: dayComponent, to: Date())!
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        var startDateString = dateFormatter.string(from: startDate)
-        
+        let lastDateString = dateTimeUtils.nowMinus10DaysTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
-        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
         if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
         }
         
         guard let urlData = URL(string: urlString) else {
