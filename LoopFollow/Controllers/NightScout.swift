@@ -670,6 +670,7 @@ extension MainViewController {
         }
         
         let now = dateTimeUtils.nowMinus24HoursTimeInterval()
+        var firstPass = true
         for i in 0..<basal2Day.count {
             var timeYesterday = dateTimeUtils.getTimeInterval24HoursAgo()
             
@@ -680,7 +681,7 @@ extension MainViewController {
                 // check that the timestamp is > the current entry and < the next entry
                 if timeYesterday >= basal2Day[i].startDate && timeYesterday < basal2Day[i].endDate {
                     // Set the start time to match the BG start
-                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: Double(dateTimeUtils.getNowTimeIntervalUTC() + (60 * 10)))
+                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: Double(dateTimeUtils.getTimeInterval24HoursAgo() + (60 * 5)))
                     basalScheduleData.append(startDot)
                     
                     // set the enddot where the next one will start
@@ -692,7 +693,7 @@ extension MainViewController {
             
             // process the rest after the first line segment of 2 dots
             // check if it's > 24 hours ago an <= 30 minutes from now.
-            if basalScheduleData.count > 1
+            if !firstPass
                 && basal2Day[i].startDate < dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 ) {
                 let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: basal2Day[i].startDate)
                 basalScheduleData.append(startDot)
@@ -706,10 +707,11 @@ extension MainViewController {
                 let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
                 basalScheduleData.append(endDot)
             }
+            firstPass = false
         }
         
         if UserDefaultsRepository.graphBasal.value {
-       //     updateBasalScheduledGraph()
+            updateBasalScheduledGraph()
         }
 
     }
