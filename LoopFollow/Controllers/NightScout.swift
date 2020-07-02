@@ -709,7 +709,7 @@ extension MainViewController {
         }
         
         if UserDefaultsRepository.graphBasal.value {
-            updateBasalScheduledGraph()
+       //     updateBasalScheduledGraph()
         }
 
     }
