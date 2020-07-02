@@ -632,8 +632,8 @@ extension MainViewController {
         }
         
         
-        // Don't process the basal or draw the graph unless we have BG readings to sync the start time
-        if bgData.count < 1 { return }
+        // Don't process the basal or draw the graph until after the BG has been fully processeed and drawn
+        if firstGraphLoad { return }
         
         // Make temporary array with all values of yesterday and today
         let yesterdayStart = dateTimeUtils.getTimeIntervalMidnightYesterday()
@@ -684,15 +684,15 @@ extension MainViewController {
                     basalScheduleData.append(startDot)
                     
                     // set the enddot where the next one will start
-                    var endDate = basal2Day[i + 1].startDate
+                    var endDate = basal2Day[i].endDate
                     let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
                     basalScheduleData.append(endDot)
                 }
             }
             
-            // process the rest after the first one
+            // process the rest after the first line segment of 2 dots
             // check if it's > 24 hours ago an <= 30 minutes from now.
-            if basalScheduleData.count > 0
+            if basalScheduleData.count > 1
                 && basal2Day[i].startDate < dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 ) {
                 let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: basal2Day[i].startDate)
                 basalScheduleData.append(startDot)
