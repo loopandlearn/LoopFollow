@@ -46,7 +46,7 @@ extension MainViewController {
         lineBG.circleColors = [NSUIColor.systemGreen]
         lineBG.drawCircleHoleEnabled = false
         lineBG.axisDependency = YAxis.AxisDependency.right
-        lineBG.highlightEnabled = false
+        lineBG.highlightEnabled = true
         lineBG.drawValuesEnabled = false
         
         if UserDefaultsRepository.showLines.value {
@@ -75,7 +75,7 @@ extension MainViewController {
         lineBasal.fillColor = NSUIColor.systemBlue.withAlphaComponent(0.8)
         lineBasal.drawCirclesEnabled = false
         lineBasal.axisDependency = YAxis.AxisDependency.left
-        lineBasal.highlightEnabled = false
+        lineBasal.highlightEnabled = true
         lineBasal.drawValuesEnabled = false
         
         // Boluses
@@ -88,6 +88,7 @@ extension MainViewController {
         lineBolus.setColor(NSUIColor.systemBlue, alpha: 1.0)
         lineBolus.drawCirclesEnabled = true
         lineBolus.lineWidth = 0
+        lineBolus.highlightEnabled = false
         lineBolus.axisDependency = YAxis.AxisDependency.right
         lineBolus.valueFormatter = ChartYDataValueFormatter()
         lineBolus.drawValuesEnabled = true
@@ -104,6 +105,7 @@ extension MainViewController {
         lineCarbs.setColor(NSUIColor.systemBlue, alpha: 1.0)
         lineCarbs.drawCirclesEnabled = true
         lineCarbs.lineWidth = 0
+        lineCarbs.highlightEnabled = false
         lineCarbs.axisDependency = YAxis.AxisDependency.right
         lineCarbs.valueFormatter = ChartYDataValueFormatter()
         lineCarbs.drawValuesEnabled = true
@@ -130,6 +132,10 @@ extension MainViewController {
         data.addDataSet(lineCarbs) // Dataset 3
         data.addDataSet(lineBasalScheduled) // Dataset 4
         data.setValueFont(UIFont.systemFont(ofSize: 12))
+        
+        // Add marker popups for bolus and carbs
+        let marker = PillMarker(color: .secondarySystemBackground, font: UIFont.boldSystemFont(ofSize: 14), textColor: .label)
+        BGChart.marker = marker
         
         // Clear limit lines so they don't add multiples when changing the settings
         BGChart.rightAxis.removeAllLimitLines()
