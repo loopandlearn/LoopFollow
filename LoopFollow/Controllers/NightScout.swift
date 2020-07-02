@@ -618,6 +618,7 @@ extension MainViewController {
         }
         if jsonDeviceStatus[keyPath: "message"] != nil { return }
         let basal = try jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
+        basalProfile.removeAll()
         for i in 0..<basal.count {
             let dict = basal[i] as! Dictionary<String, Any>
             do {
@@ -638,7 +639,6 @@ extension MainViewController {
         // Make temporary array with all values of yesterday and today
         let yesterdayStart = dateTimeUtils.getTimeIntervalMidnightYesterday()
         let todayStart = dateTimeUtils.getTimeIntervalMidnightToday()
-        basalScheduleData.removeAll()
         
         var basal2Day: [DataStructs.basal2DayProfile] = []
         // Run twice to add in order yesterday then today.
@@ -671,30 +671,14 @@ extension MainViewController {
         
         let now = dateTimeUtils.nowMinus24HoursTimeInterval()
         var firstPass = true
+        basalScheduleData.removeAll()
         for i in 0..<basal2Day.count {
             var timeYesterday = dateTimeUtils.getTimeInterval24HoursAgo()
             
             
-            // we need to manually set the first one
-            // Check that this is the first one and there are no existing entries
-            if basalScheduleData.count == 0 {
-                // check that the timestamp is > the current entry and < the next entry
-                if timeYesterday >= basal2Day[i].startDate && timeYesterday < basal2Day[i].endDate {
-                    // Set the start time to match the BG start
-                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: Double(dateTimeUtils.getTimeInterval24HoursAgo() + (60 * 5)))
-                    basalScheduleData.append(startDot)
-                    
-                    // set the enddot where the next one will start
-                    var endDate = basal2Day[i].endDate
-                    let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
-                    basalScheduleData.append(endDot)
-                }
-            }
-            
-            // process the rest after the first line segment of 2 dots
-            // check if it's > 24 hours ago an <= 30 minutes from now.
-            if !firstPass
-                && basal2Day[i].startDate < dateTimeUtils.getNowTimeIntervalUTC() + ( 60 * 30 ) {
+            // This processed everything after the first one.
+            if firstPass == false
+                && basal2Day[i].startDate <= dateTimeUtils.getNowTimeIntervalUTC() {
                 let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: basal2Day[i].startDate)
                 basalScheduleData.append(startDot)
                 var endDate = basal2Day[i].endDate
@@ -707,7 +691,26 @@ extension MainViewController {
                 let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
                 basalScheduleData.append(endDot)
             }
-            firstPass = false
+            
+            // we need to manually set the first one
+            // Check that this is the first one and there are no existing entries
+            if firstPass == true {
+                // check that the timestamp is > the current entry and < the next entry
+                if timeYesterday >= basal2Day[i].startDate && timeYesterday < basal2Day[i].endDate {
+                    // Set the start time to match the BG start
+                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: Double(dateTimeUtils.getTimeInterval24HoursAgo() + (60 * 5)))
+                    basalScheduleData.append(startDot)
+                    
+                    // set the enddot where the next one will start
+                    var endDate = basal2Day[i].endDate
+                    let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
+                    basalScheduleData.append(endDot)
+                    firstPass = false
+                }
+            }
+            
+
+            
         }
         
         if UserDefaultsRepository.graphBasal.value {
