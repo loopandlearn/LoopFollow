@@ -197,8 +197,11 @@ extension MainViewController {
         for i in 0..<data.count{
             var dateString = data[data.count - 1 - i].date / 1000
             dateString.round(FloatingPointRoundingRule.toNearestOrEven)
-            let reading = DataStructs.sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
-            bgData.append(reading)
+            if dateString >= dateTimeUtils.getTimeInterval24HoursAgo() {
+                let reading = DataStructs.sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
+                bgData.append(reading)
+            }
+            
         }
         
         viewUpdateNSBG()
