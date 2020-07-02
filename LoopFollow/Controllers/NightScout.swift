@@ -680,7 +680,7 @@ extension MainViewController {
                 // check that the timestamp is > the current entry and < the next entry
                 if timeYesterday >= basal2Day[i].startDate && timeYesterday < basal2Day[i].endDate {
                     // Set the start time to match the BG start
-                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: bgData[0].date)
+                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: Double(dateTimeUtils.getNowTimeIntervalUTC() + (60 * 10)))
                     basalScheduleData.append(startDot)
                     
                     // set the enddot where the next one will start
@@ -699,8 +699,8 @@ extension MainViewController {
                 var endDate = basal2Day[i].endDate
                 
                 // if it's the last one in the profile or date is greater than now, set it to the last BG dot
-                if i == basal2Day.count - 1  || endDate > bgData[bgData.count - 1].date {
-                    endDate = Double(bgData[bgData.count - 1].date)
+                if i == basal2Day.count - 1  || endDate > dateTimeUtils.getNowTimeIntervalUTC() {
+                    endDate = Double(dateTimeUtils.getNowTimeIntervalUTC())
                 }
 
                 let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
