@@ -453,13 +453,13 @@ extension MainViewController {
                     if let isActive = override["active"] as? Bool {
                         if isActive {
                             if let multiplier = override["multiplier"] as? Double {
-                                let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 200)
+                                let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 40)
                                 overrideData.append(override)
                             }
                             
                         } else {
                             let multiplier = 1.0 as Double
-                            let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 200)
+                            let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 40)
                             overrideData.append(override)
                         }
                     }
@@ -467,6 +467,7 @@ extension MainViewController {
             }
         }
         overrideData.reverse()
+        updateOverrideGraph()
     }
     
     // NS Cage Web Call
