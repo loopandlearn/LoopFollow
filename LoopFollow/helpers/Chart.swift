@@ -41,6 +41,16 @@ final class ChartYDataValueFormatter: IValueFormatter {
     }
 }
 
+final class ChartYOverrideValueFormatter: IValueFormatter {
+    func stringForValue(_ value: Double, entry: ChartDataEntry, dataSetIndex: Int, viewPortHandler: ViewPortHandler?) -> String {
+        if entry.data != nil {
+            return entry.data as? String ?? ""
+        } else {
+            return ""
+        }
+    }
+}
+
 final class ChartYMMOLValueFormatter: IAxisValueFormatter {
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
         return bgUnits.toDisplayUnits(String(value))
@@ -144,11 +154,13 @@ class PillMarker: MarkerImage {
     }
 
     override func refreshContent(entry: ChartDataEntry, highlight: Highlight) {
-         if entry.data != nil {
-                   labelText = entry.data as? String ?? ""
-               } else {
-                   labelText = String(entry.y)
-               }
+        if entry.data != nil {
+            var multipler = entry.data as! Double * 100.0
+            labelText = String(format: "%.0f%%", multipler)
+            //labelText = entry.data as? String ?? ""
+        } else {
+            labelText = String(entry.y)
+        }
     }
 
     private func customString(_ value: Double) -> String {

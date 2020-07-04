@@ -28,10 +28,6 @@ extension MainViewController {
         }
     }
 
-    // data.addDataSet(lineBG) // Dataset 0
-    // data.addDataSet(lineBasal) // Dataset 1
-    // data.addDataSet(lineBolus) // Dataset 2
-    // data.addDataSet(lineCarbs) // Dataset 3
     func createGraph(){
         self.BGChart.clear()
         // Create the BG Graph Data
@@ -124,6 +120,18 @@ extension MainViewController {
         lineBasalScheduled.drawValuesEnabled = false
         lineBasalScheduled.lineDashLengths = [10.0, 5.0]
         
+        // create Override graph data
+        var chartOverrideEntry = [ChartDataEntry]()
+        let lineOverride = LineChartDataSet(entries:chartOverrideEntry, label: "")
+        lineOverride.setDrawHighlightIndicators(false)
+        lineOverride.setColor(NSUIColor.systemTeal, alpha: 0.8  )
+        lineOverride.lineWidth = 10
+        lineOverride.drawFilledEnabled = false
+        lineOverride.drawCirclesEnabled = false
+        lineOverride.axisDependency = YAxis.AxisDependency.right
+        lineOverride.highlightEnabled = true
+        lineOverride.drawValuesEnabled = false
+        
         // Setup the chart data of all lines
         let data = LineChartData()
         data.addDataSet(lineBG) // Dataset 0
@@ -131,6 +139,7 @@ extension MainViewController {
         data.addDataSet(lineBolus) // Dataset 2
         data.addDataSet(lineCarbs) // Dataset 3
         data.addDataSet(lineBasalScheduled) // Dataset 4
+        data.addDataSet(lineOverride) // Dataset 5
         data.setValueFont(UIFont.systemFont(ofSize: 12))
         
         // Add marker popups for bolus and carbs
@@ -422,5 +431,39 @@ extension MainViewController {
         BGChartFull.data = data2
     }
     
+    
+    func updateOverrideGraph() {
+        var dataIndex = 5
+        var chart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        chart.clear()
+        
+        var colors = [NSUIColor]()
+        for i in 0..<overrideData.count{
+            let value = ChartDataEntry(x: Double(overrideData[i].date), y: Double(overrideData[i].sgv), data: overrideData[i].value)
+            BGChart.data?.dataSets[dataIndex].addEntry(value)
+            
+            if Double(overrideData[i].value) == 1.0 {
+                colors.append(NSUIColor.systemTeal.withAlphaComponent(0.0))
+            } else {
+                colors.append(NSUIColor.systemTeal)
+            }
+        }
+        
+        // Set Colors
+        let line = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        line.colors.removeAll()
+        line.circleColors.removeAll()
+        
+        if colors.count > 0 {
+            for i in 0..<colors.count{
+                chart.addColor(colors[i])
+                chart.circleColors.append(colors[i])
+            }
+        }
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+    }
   
 }
