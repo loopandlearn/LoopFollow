@@ -30,5 +30,12 @@ class DataStructs {
         var endDate: TimeInterval
     }
     
+    //NS Override Data  Struct
+    struct overrideGraphStruct: Codable {
+        var value: Double
+        var date: TimeInterval
+        var sgv: Int
+    }
+    
     
 }

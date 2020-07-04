@@ -268,9 +268,12 @@ extension MainViewController {
     func webLoadNSDeviceStatus() {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: device status") }
         let urlUser = UserDefaultsRepository.url.value
-        var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
+        
+        
+        // NS Api is not working to find by greater than date
+        var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=288"
         if token != "" {
-            urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?token=" + token + "&count=1"
+            urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=288&token=" + token
         }
         let escapedAddress = urlStringDeviceStatus.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
         guard let urlDeviceStatus = URL(string: escapedAddress!) else {
@@ -310,7 +313,7 @@ extension MainViewController {
             return
         }
         
-        //only grabbing one record since ns sorts by {created_at : -1}
+        //Process the current data first
         let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
         
         //pump and uploader
@@ -434,6 +437,36 @@ extension MainViewController {
         }
         
         infoTable.reloadData()
+        
+        
+        // Process Override Data
+        overrideData.removeAll()
+        for i in 0..<jsonDeviceStatus.count {
+            let deviceStatus = jsonDeviceStatus[i] as [String : AnyObject]?
+            if let override = deviceStatus?["override"] as! [String : AnyObject]? {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withFullDate,
+                                           .withTime,
+                                           .withDashSeparatorInDate,
+                                           .withColonSeparatorInTime]
+                if let timestamp = formatter.date(from: (override["timestamp"] as! String))?.timeIntervalSince1970 {
+                    if let isActive = override["active"] as? Bool {
+                        if isActive {
+                            if let multiplier = override["multiplier"] as? Double {
+                                let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 200)
+                                overrideData.append(override)
+                            }
+                            
+                        } else {
+                            let multiplier = 1.0 as Double
+                            let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 200)
+                            overrideData.append(override)
+                        }
+                    }
+                }
+            }
+        }
+        overrideData.reverse()
     }
     
     // NS Cage Web Call
