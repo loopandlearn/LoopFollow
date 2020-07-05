@@ -93,7 +93,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var bolusData: [bolusCarbGraphStruct] = []
     var carbData: [bolusCarbGraphStruct] = []
     var overrideData: [DataStructs.overrideGraphStruct] = []
-    var predictionData: [Double] = []
+    var predictionData: [DataStructs.sgvData] = []
     var chartData = LineChartData()
     var newBGPulled = false
     var lastCalDate: Double = 0

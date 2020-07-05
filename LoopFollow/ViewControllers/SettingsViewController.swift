@@ -233,6 +233,16 @@ class SettingsViewController: FormViewController {
                         UserDefaultsRepository.offsetCarbsBolus.value = value
                         
             }
+            <<< StepperRow("predictionToLoad") { row in
+                row.title = "Hours of Prediction"
+                row.cell.stepper.stepValue = 0.25
+                row.cell.stepper.minimumValue = 0.0
+                row.cell.stepper.maximumValue = 6.0
+                row.value = Double(UserDefaultsRepository.predictionToLoad.value)
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.predictionToLoad.value = value
+            }
         <<< StepperRow("minBGScale") { row in
             row.title = "Min BG Scale"
             row.cell.stepper.stepValue = 1
@@ -246,7 +256,24 @@ class SettingsViewController: FormViewController {
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.minBGScale.value = Float(value)
-        }
+            }
+            <<< StepperRow("minBGValue") { row in
+                row.title = "Min BG Display"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = -40
+                row.cell.stepper.maximumValue = 40
+                row.value = Double(UserDefaultsRepository.minBGValue.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return bgUnits.toDisplayUnits(String(value))
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.minBGValue.value = Float(value)
+                // Force main screen update
+                guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
+                mainScreen.updateBGGraphSettings()
+            }
         <<< StepperRow("minBasalScale") { row in
             row.title = "Min Basal Scale"
             row.cell.stepper.stepValue = 0.5
@@ -291,6 +318,20 @@ class SettingsViewController: FormViewController {
             guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
             mainScreen.updateBGGraphSettings()
         }
+        <<< StepperRow("overrideDisplayLocation") { row in
+            row.title = "Override BG Location"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = Double(UserDefaultsRepository.minBGValue.value)
+            row.cell.stepper.maximumValue = Double(UserDefaultsRepository.minBGScale.value)
+            row.value = Double(UserDefaultsRepository.overrideDisplayLocation.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return bgUnits.toDisplayUnits(String(value))
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.overrideDisplayLocation.value = Float(value)
+            }
     }
     
     func buildWatchSettings(){

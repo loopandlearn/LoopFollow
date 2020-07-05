@@ -341,7 +341,6 @@ extension MainViewController {
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
                 UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
-                latestLoopTime = lastLoopTime
                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
                 if let failure = lastLoopRecord["failureReason"] {
                     LoopStatusLabel.text = "X"
@@ -365,16 +364,23 @@ extension MainViewController {
                         latestCOB = String(format:"%.0f", cobdata["cob"] as! Double)
                     }
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
-                        let prediction = predictdata["values"] as! [Double]
+                        let prediction = predictdata["values"] as! [Int]
                         PredictionLabel.text = bgUnits.toDisplayUnits(String(Int(prediction.last!)))
                         PredictionLabel.textColor = UIColor.systemPurple
-                        predictionData.removeAll()
-                        if UserDefaultsRepository.downloadPrediction.value {
+                        if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
+                            predictionData.removeAll()
+                            var predictionTime = lastLoopTime + 300
+                            let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
                             var i = 1
-                            while i <= 12 {
-                                predictionData.append(prediction[i])
+                            while i <= toLoad {
+                                let prediction = DataStructs.sgvData(sgv: prediction[i], date: predictionTime, direction: "flat")
+                                predictionData.append(prediction)
+                                predictionTime += 300
                                 i += 1
                             }
+                        }
+                        if UserDefaultsRepository.graphPrediction.value {
+                            updatePredictionGraph()
                         }
                     }
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
@@ -408,6 +414,7 @@ extension MainViewController {
                     LoopStatusLabel.text = "⚠"
                     latestLoopStatusString = "⚠"
                 }
+                latestLoopTime = lastLoopTime
             } // end lastLoopTime
         } // end lastLoop Record
         
@@ -454,13 +461,13 @@ extension MainViewController {
                         if let isActive = override["active"] as? Bool {
                             if isActive {
                                 if let multiplier = override["multiplier"] as? Double {
-                                    let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 40)
+                                    let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: Int(UserDefaultsRepository.overrideDisplayLocation.value))
                                     overrideData.append(override)
                                 }
                                 
                             } else {
                                 let multiplier = 1.0 as Double
-                                let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 40)
+                                let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: Int(UserDefaultsRepository.overrideDisplayLocation.value))
                                 overrideData.append(override)
                             }
                         }
