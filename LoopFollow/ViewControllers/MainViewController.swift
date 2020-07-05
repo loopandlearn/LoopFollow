@@ -105,6 +105,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var latestCOB = ""
     var latestBasal = ""
     var latestIOB = ""
+    var lastOverrideStartTime: TimeInterval = 0
+    var lastOverrideEndTime: TimeInterval = 0
     
     // calendar setup
     let store = EKEventStore()

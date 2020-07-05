@@ -278,14 +278,16 @@ extension MainViewController {
         if latest.value == prior.value { return }
         
         if UserDefaultsRepository.alertOverrideStart.value {
-            if latest.value != 1.0 {
+            if latest.value != 1.0 && lastOverrideStartTime != latest.date {
                 AlarmSound.whichAlarm = String(format: "%.0f%%", latest.value) + " Override Started"
                 triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideStartSound.value)
+                lastOverrideStartTime = latest.date
             }
         } else if UserDefaultsRepository.alertOverrideEnd.value {
-            if latest.value == 0.0 {
+            if latest.value == 1.0 && lastOverrideEndTime != latest.date {
                 AlarmSound.whichAlarm = "Override Ended"
                 triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideEndSound.value)
+                lastOverrideEndTime = latest.date
             }
         }
     }
