@@ -491,6 +491,8 @@ extension MainViewController {
             
             if Double(overrideData[i].value) == 1.0 {
                 colors.append(NSUIColor.systemGray.withAlphaComponent(0.0))
+            } else if i >= overrideData.count - 2 {
+                colors.append(NSUIColor.systemGreen)
             } else {
                 colors.append(NSUIColor.systemGray.withAlphaComponent(0.5))
             }
