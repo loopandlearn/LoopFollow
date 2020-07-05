@@ -262,6 +262,9 @@ extension MainViewController {
        
     func checkOverrideAlarms()
     {
+        
+        if UserDefaultsRepository.alertSnoozeAllIsSnoozed.value { return }
+        
         // Make sure we have 2 values to compare
         if overrideData.count < 2 { return }
         
