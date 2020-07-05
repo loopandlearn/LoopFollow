@@ -21,8 +21,11 @@ class UserDefaultsRepository {
     static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
     static let offsetCarbsBolus = UserDefaultsValue<Bool>(key: "offsetCarbsBolus", default: true)
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
+    static let predictionToLoad = UserDefaultsValue<Double>(key: "predictionToLoad", default: 1)
     static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
     static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
+    static let minBGValue = UserDefaultsValue<Float>(key: "minBGValue", default: 40.0)
+    static let overrideDisplayLocation = UserDefaultsValue<Float>(key: "overrideDisplayLocation", default: 40.0)
     static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
     static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
     
