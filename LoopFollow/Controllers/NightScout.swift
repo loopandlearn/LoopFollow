@@ -450,19 +450,22 @@ extension MainViewController {
                                            .withDashSeparatorInDate,
                                            .withColonSeparatorInTime]
                 if let timestamp = formatter.date(from: (override["timestamp"] as! String))?.timeIntervalSince1970 {
-                    if let isActive = override["active"] as? Bool {
-                        if isActive {
-                            if let multiplier = override["multiplier"] as? Double {
+                    if timestamp > dateTimeUtils.getTimeInterval24HoursAgo() {
+                        if let isActive = override["active"] as? Bool {
+                            if isActive {
+                                if let multiplier = override["multiplier"] as? Double {
+                                    let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 40)
+                                    overrideData.append(override)
+                                }
+                                
+                            } else {
+                                let multiplier = 1.0 as Double
                                 let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 40)
                                 overrideData.append(override)
                             }
-                            
-                        } else {
-                            let multiplier = 1.0 as Double
-                            let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 40)
-                            overrideData.append(override)
                         }
                     }
+                    
                 }
             }
         }
