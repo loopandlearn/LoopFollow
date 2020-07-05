@@ -171,6 +171,9 @@ class AlarmViewController: FormViewController {
             let otherRow2 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
             otherRow2.value = nil
             otherRow2.reload()
+            let otherRow3 = self?.form.rowBy(tag: "overrideAlerts") as! SegmentedRow<String>
+            otherRow3.value = nil
+            otherRow3.reload()
             row.value = value
         }
             <<< SegmentedRow<String>("bgExtraAlerts"){ row in
@@ -185,6 +188,9 @@ class AlarmViewController: FormViewController {
                let otherRow2 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
                otherRow2.value = nil
                otherRow2.reload()
+            let otherRow3 = self?.form.rowBy(tag: "overrideAlerts") as! SegmentedRow<String>
+            otherRow3.value = nil
+            otherRow3.reload()
             row.value = value
         }
             <<< SegmentedRow<String>("otherAlerts"){ row in
@@ -199,6 +205,26 @@ class AlarmViewController: FormViewController {
            let otherRow2 = self?.form.rowBy(tag: "bgAlerts") as! SegmentedRow<String>
            otherRow2.value = nil
            otherRow2.reload()
+            let otherRow3 = self?.form.rowBy(tag: "overrideAlerts") as! SegmentedRow<String>
+            otherRow3.value = nil
+            otherRow3.reload()
+            row.value = value
+        }
+        <<< SegmentedRow<String>("overrideAlerts"){ row in
+                row.title = ""
+                row.options = ["Override Start", "Override End"]
+                //row.value = "Not Looping"
+        }.onChange { [weak self] row in
+             guard let value = row.value else { return }
+            let otherRow = self?.form.rowBy(tag: "bgExtraAlerts") as! SegmentedRow<String>
+           otherRow.value = nil
+           otherRow.reload()
+           let otherRow2 = self?.form.rowBy(tag: "bgAlerts") as! SegmentedRow<String>
+           otherRow2.value = nil
+           otherRow2.reload()
+            let otherRow3 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
+            otherRow3.value = nil
+            otherRow3.reload()
             row.value = value
         }
         
@@ -223,6 +249,9 @@ class AlarmViewController: FormViewController {
         buildCage()
         
         buildTemporaryAlert()
+        
+        buildOverrideStart()
+        buildOverrideEnd()
         
         buildSnoozeAll()
         buildAppInactive()
@@ -1598,6 +1627,68 @@ class AlarmViewController: FormViewController {
                           otherRow.reload()
                        }
                }
+    }
+    
+    func buildOverrideStart(){
+        form
+            +++ Section(header: "Override Started Alert", footer: "Alert will trigger without repeat once when override is activated. There is no need to snooze this alert") { row in
+                               row.hidden = "$overrideAlerts != 'Override Start'"
+                           }
+        <<< SwitchRow("alertOverrideStart"){ row in
+                    row.title = "Active"
+                    row.value = UserDefaultsRepository.alertOverrideStart.value
+                    }.onChange { [weak self] row in
+                            guard let value = row.value else { return }
+                            UserDefaultsRepository.alertOverrideStart.value = value
+                    }
+        
+            <<< PickerInputRow<String>("alertOverrideStartSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.value = UserDefaultsRepository.alertOverrideStartSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertOverrideStartSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
+       
+    }
+    
+    func buildOverrideEnd(){
+        form
+            +++ Section(header: "Override Ended Alert", footer: "Alert will trigger without repeat once when an override is turned off. There is no need to snooze this alert") { row in
+                               row.hidden = "$overrideAlerts != 'Override End'"
+                           }
+        <<< SwitchRow("alertOverrideEnd"){ row in
+                    row.title = "Active"
+                    row.value = UserDefaultsRepository.alertOverrideEnd.value
+                    }.onChange { [weak self] row in
+                            guard let value = row.value else { return }
+                            UserDefaultsRepository.alertOverrideEnd.value = value
+                    }
+        
+            <<< PickerInputRow<String>("alertOverrideEndSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.value = UserDefaultsRepository.alertOverrideEndSound.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertOverrideEndSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
+       
     }
 
 
