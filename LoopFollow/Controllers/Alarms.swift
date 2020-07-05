@@ -260,6 +260,43 @@ extension MainViewController {
            
        }
        
+    func checkOverrideAlarms()
+    {
+        // Make sure we have 2 values to compare
+        if overrideData.count < 2 { return }
+        
+        let latest = overrideData[overrideData.count - 1]
+        let prior = overrideData[overrideData.count - 2]
+        
+        // Make sure latest value is current within 10 minutes
+        if latest.date < dateTimeUtils.getNowTimeIntervalUTC() - 600 { return }
+        
+        // make sure values are with 10 minutes of each other
+        if ( latest.date - prior.date ) > 600 { return }
+        
+        // make sure values are not the same
+        if latest.value == prior.value { return }
+        
+        if UserDefaultsRepository.alertOverrideStart.value {
+            if latest.value != 1.0 {
+                AlarmSound.whichAlarm = String(format: "%.0f%%", latest.value) + " Override Started"
+                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideStartSound.value)
+            }
+        } else if UserDefaultsRepository.alertOverrideEnd.value {
+            if latest.value == 0.0 {
+                AlarmSound.whichAlarm = "Override Ended"
+                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideEndSound.value)
+            }
+        }
+    }
+    
+    func triggerOneTimeAlarm(sound: String)
+    {
+        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+        snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        AlarmSound.setSoundFile(str: sound)
+        AlarmSound.playOnce()
+    }
     
     func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?)
     {

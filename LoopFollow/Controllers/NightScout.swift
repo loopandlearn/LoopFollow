@@ -478,6 +478,7 @@ extension MainViewController {
         }
         overrideData.reverse()
         updateOverrideGraph()
+        checkOverrideAlarms()
     }
     
     // NS Cage Web Call

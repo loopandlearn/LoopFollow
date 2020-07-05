@@ -188,4 +188,11 @@ class UserDefaultsRepository {
     static let alertTemporaryBelow = UserDefaultsValue<Bool>(key: "alertTemporaryBelow", default: true)
     static let alertTemporaryBG = UserDefaultsValue<Float>(key: "alertTemporaryBG", default: 90.0)
     static let alertTemporarySound = UserDefaultsValue<String>(key: "alertTemporarySound", default: "Indeed")
+    
+    static let alertOverrideStart = UserDefaultsValue<Bool>(key: "alertOverrideStart", default: false)
+    static let alertOverrideStartSound = UserDefaultsValue<String>(key: "alertOverrideStartSound", default: "Alert_Tone_Busy")
+    
+    static let alertOverrideEnd = UserDefaultsValue<Bool>(key: "alertOverrideEnd", default: false)
+    static let alertOverrideEndSound = UserDefaultsValue<String>(key: "alertOverrideEndSound", default: "Ending_Reached")
+    
 }
