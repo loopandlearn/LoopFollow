@@ -114,7 +114,8 @@ class AlarmSound {
         }
     }
     
-    static func playOnce() {
+    
+    static func play(overrideVolume: Bool, numLoops: Int) {
         
         guard !self.isPlaying else {
             return
@@ -128,7 +129,7 @@ class AlarmSound {
             try AVAudioSession.sharedInstance().setActive(true)
             
             // Play endless loops
-            self.audioPlayer!.numberOfLoops = 0
+            self.audioPlayer!.numberOfLoops = numLoops
             
             // Store existing volume
             if self.systemOutputVolumeBeforeOverride == nil {
@@ -157,63 +158,7 @@ class AlarmSound {
             //    self.audioPlayer!.setVolume(1.0, fadeDuration: UserDefaultsRepository.fadeInTimeInterval.value)
             //}
             
-            if UserDefaultsRepository.overrideSystemOutputVolume.value {
-                MPVolumeView.setVolume(UserDefaultsRepository.forcedOutputVolume.value)
-            }
-            
-            
-            //self.playingTimer = Timer.schedule(repeatInterval: 1.0, handler: self.onPlayingTimer)
-            
-        } catch let error {
-            NSLog("AlarmSound - unable to play sound; error: \(error)")
-        }
-    }
-    
-    
-    static func play() {
-        
-        guard !self.isPlaying else {
-            return
-        }
-        
-        do {
-            self.audioPlayer = try AVAudioPlayer(contentsOf: self.soundURL)
-            self.audioPlayer!.delegate = self.audioPlayerDelegate
-            
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playback)))
-            try AVAudioSession.sharedInstance().setActive(true)
-            
-            // Play endless loops
-            self.audioPlayer!.numberOfLoops = -1
-            
-            // Store existing volume
-            if self.systemOutputVolumeBeforeOverride == nil {
-                self.systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
-            }
-            
-            // init volume before start playing (mute if fade-in)
-            //self.audioPlayer!.volume = (self.muted || (UserDefaultsRepository.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
-            
-            if !self.audioPlayer!.prepareToPlay() {
-                NSLog("AlarmSound - audio player failed preparing to play")
-            }
-            
-            if self.audioPlayer!.play() {
-                if !self.isPlaying {
-                    NSLog("AlarmSound - not playing after calling play")
-                    NSLog("AlarmSound - rate value: \(self.audioPlayer!.rate)")
-                }
-            } else {
-                NSLog("AlarmSound - audio player failed to play")
-            }
-            
-            
-            // do fade-in
-            //if !self.muted && (UserDefaultsRepository.fadeInTimeInterval.value > 0) {
-            //    self.audioPlayer!.setVolume(1.0, fadeDuration: UserDefaultsRepository.fadeInTimeInterval.value)
-            //}
-            
-            if UserDefaultsRepository.overrideSystemOutputVolume.value {
+            if overrideVolume {
                 MPVolumeView.setVolume(UserDefaultsRepository.forcedOutputVolume.value)
             }
             

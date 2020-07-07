@@ -28,7 +28,7 @@ extension MainViewController {
                ] else {}
            let currentBGTime = bgs[bgs.count - 1].date
            var alarmTriggered = false
-           
+           var numLoops = 0
            clearOldSnoozes()
            
            // Exit if all is snoozed
@@ -49,14 +49,16 @@ extension MainViewController {
                        if Float(currentBG) < UserDefaultsRepository.alertTemporaryBG.value {
                            UserDefaultsRepository.alertTemporaryActive.value = false
                            AlarmSound.whichAlarm = "Temporary Alert"
-                           triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value, snooozedBGReadingTime: currentBGTime)
+                        if UserDefaultsRepository.alertTemporaryBGRepeat.value { numLoops = -1 }
+                           triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.alertTemporaryBGDND.value, numLoops: numLoops)
                            return
                        }
                    } else{
                        if Float(currentBG) > UserDefaultsRepository.alertTemporaryBG.value {
                          tabBarController?.selectedIndex = 2
                            AlarmSound.whichAlarm = "Temporary Alert"
-                           triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value, snooozedBGReadingTime: currentBGTime)
+                        if UserDefaultsRepository.alertTemporaryBGRepeat.value { numLoops = -1 }
+                           triggerAlarm(sound: UserDefaultsRepository.alertTemporarySound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.alertTemporaryBGDND.value, numLoops: numLoops)
                            return
                       }
                    }
@@ -68,7 +70,8 @@ extension MainViewController {
                    // Separating this makes it so the low or drop alerts won't trigger if they already snoozed the urgent low
                    if !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
                        AlarmSound.whichAlarm = "Urgent Low Alert"
-                       triggerAlarm(sound: UserDefaultsRepository.alertUrgentLowSound.value, snooozedBGReadingTime: currentBGTime)
+                    if UserDefaultsRepository.alertUrgentLowRepeat.value { numLoops = -1 }
+                       triggerAlarm(sound: UserDefaultsRepository.alertUrgentLowSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.alertUrgentLowDND.value, numLoops: numLoops)
                        return
                    } else {
                        return
@@ -79,7 +82,8 @@ extension MainViewController {
                if UserDefaultsRepository.alertLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
                Float(currentBG) <= UserDefaultsRepository.alertLowBG.value && !UserDefaultsRepository.alertLowIsSnoozed.value {
                    AlarmSound.whichAlarm = "Low Alert"
-                   triggerAlarm(sound: UserDefaultsRepository.alertLowSound.value, snooozedBGReadingTime: currentBGTime)
+                if UserDefaultsRepository.alertLowRepeat.value { numLoops = -1 }
+                   triggerAlarm(sound: UserDefaultsRepository.alertLowSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.alertLowDND.value, numLoops: numLoops)
                    return
                }
                
@@ -89,7 +93,8 @@ extension MainViewController {
                    // Separating this makes it so the high or rise alerts won't trigger if they already snoozed the urgent high
                    if !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
                            AlarmSound.whichAlarm = "Urgent High Alert"
-                           triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime)
+                    if UserDefaultsRepository.alertUrgentHighRepeat.value { numLoops = -1 }
+                           triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.alertUrgentHighDND.value, numLoops: numLoops)
                            return
                    } else {
                        return
@@ -106,7 +111,8 @@ extension MainViewController {
                    Float(persistentBG) >= UserDefaultsRepository.alertHighBG.value &&
                    !UserDefaultsRepository.alertHighIsSnoozed.value {
                        AlarmSound.whichAlarm = "High Alert"
-                       triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime)
+                if UserDefaultsRepository.alertHighRepeat.value { numLoops = -1 }
+                       triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.alertHighDND.value, numLoops: numLoops)
                        return
                }
                
@@ -123,7 +129,8 @@ extension MainViewController {
                        || (UserDefaultsRepository.alertFastDropReadings.value == 3 && Float(deltas[0]) <= compare && Float(deltas[1]) <= compare)
                        || (UserDefaultsRepository.alertFastDropReadings.value == 4 && Float(deltas[0]) <= compare && Float(deltas[1]) <= compare && Float(deltas[2]) <= compare) {
                            AlarmSound.whichAlarm = "Fast Drop Alert"
-                           triggerAlarm(sound: UserDefaultsRepository.alertFastDropSound.value, snooozedBGReadingTime: currentBGTime)
+                        if UserDefaultsRepository.alertFastDropRepeat.value { numLoops = -1 }
+                           triggerAlarm(sound: UserDefaultsRepository.alertFastDropSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.alertFastDropDND.value, numLoops: numLoops)
                            return
                        }
                    }
@@ -140,7 +147,8 @@ extension MainViewController {
                        || (UserDefaultsRepository.alertFastRiseReadings.value == 3 && Float(deltas[0]) >= compare && Float(deltas[1]) >= compare)
                        || (UserDefaultsRepository.alertFastRiseReadings.value == 4 && Float(deltas[0]) >= compare && Float(deltas[1]) >= compare && Float(deltas[2]) >= compare) {
                            AlarmSound.whichAlarm = "Fast Rise Alert"
-                           triggerAlarm(sound: UserDefaultsRepository.alertFastRiseSound.value, snooozedBGReadingTime: currentBGTime)
+                        if UserDefaultsRepository.alertFastRiseRepeat.value { numLoops = -1 }
+                           triggerAlarm(sound: UserDefaultsRepository.alertFastRiseSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.alertFastRiseDND.value, numLoops: numLoops)
                            return
                        }
                    }
@@ -166,7 +174,8 @@ extension MainViewController {
                    ) ||
                    !UserDefaultsRepository.alertNotLoopingUseLimits.value) {
                        AlarmSound.whichAlarm = "Not Looping Alert"
-                       triggerAlarm(sound: UserDefaultsRepository.alertNotLoopingSound.value, snooozedBGReadingTime: nil)
+                if UserDefaultsRepository.alertNotLoopingRepeat.value { numLoops = -1 }
+                       triggerAlarm(sound: UserDefaultsRepository.alertNotLoopingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.alertNotLoopingDND.value, numLoops: numLoops)
                        return
                }
            }
@@ -191,7 +200,8 @@ extension MainViewController {
                 // There is a current carb but no boluses data at all
                 if bolusData.count < 1 {
                     AlarmSound.whichAlarm = "Missed Bolus Alert"
-                    triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil)
+                    if UserDefaultsRepository.alertMissedBolusRepeat.value { numLoops = -1 }
+                    triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.alertMissedBolusDND.value, numLoops: numLoops)
                     return
                 }
                 
@@ -214,7 +224,8 @@ extension MainViewController {
                 // This will trigger is no boluses were set above
                 if (lastBolus == 0.0) {
                     AlarmSound.whichAlarm = "Missed Bolus Alert"
-                    triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil)
+                    if UserDefaultsRepository.alertMissedBolusRepeat.value { numLoops = -1 }
+                    triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.alertMissedBolusDND.value, numLoops: numLoops)
                     return
                 }
                     
@@ -225,7 +236,8 @@ extension MainViewController {
            //check for missed reading alert
            if UserDefaultsRepository.alertMissedReadingActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
                AlarmSound.whichAlarm = "Missed Reading Alert"
-                   triggerAlarm(sound: UserDefaultsRepository.alertMissedReadingSound.value, snooozedBGReadingTime: nil)
+            if UserDefaultsRepository.alertMissedReadingRepeat.value { numLoops = -1 }
+                   triggerAlarm(sound: UserDefaultsRepository.alertMissedReadingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.alertMissedReadingDND.value, numLoops: numLoops)
                    return
            }
            
@@ -237,7 +249,8 @@ extension MainViewController {
                let tenDays = 10 * 24 * 60 * 60
                if Double(tenDays) - Double(delta) <= alertDistance {
                    AlarmSound.whichAlarm = "Sensor Change Alert"
-                   triggerAlarm(sound: UserDefaultsRepository.alertSAGESound.value, snooozedBGReadingTime: nil)
+                if UserDefaultsRepository.alertSAGERepeat.value { numLoops = -1 }
+                   triggerAlarm(sound: UserDefaultsRepository.alertSAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.alertSAGEDND.value, numLoops: numLoops)
                    return
                }
            }
@@ -250,7 +263,8 @@ extension MainViewController {
                let tenDays = 3 * 24 * 60 * 60
                if Double(tenDays) - Double(delta) <= alertDistance {
                    AlarmSound.whichAlarm = "Pump Change Alert"
-                   triggerAlarm(sound: UserDefaultsRepository.alertCAGESound.value, snooozedBGReadingTime: nil)
+                if UserDefaultsRepository.alertCAGERepeat.value { numLoops = -1 }
+                triggerAlarm(sound: UserDefaultsRepository.alertCAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.alertCAGEDND.value, numLoops: numLoops)
                    return
                }
            }
@@ -280,30 +294,33 @@ extension MainViewController {
         // make sure values are not the same
         if latest.value == prior.value { return }
         
+        var numLoops = 0
         if UserDefaultsRepository.alertOverrideStart.value {
             if latest.value != 1.0 && lastOverrideStartTime != latest.date {
-                AlarmSound.whichAlarm = String(format: "%.0f%%", latest.value) + " Override Started"
-                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideStartSound.value)
+                AlarmSound.whichAlarm = String(format: "%.0f%%", (latest.value * 100)) + " Override Started"
+                if UserDefaultsRepository.alertOverrideStartRepeat.value { numLoops = -1 }
+                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideEndSound.value, overrideVolume: UserDefaultsRepository.alertOverrideStartDND.value, numLoops: numLoops)
                 lastOverrideStartTime = latest.date
             }
         } else if UserDefaultsRepository.alertOverrideEnd.value {
             if latest.value == 1.0 && lastOverrideEndTime != latest.date {
                 AlarmSound.whichAlarm = "Override Ended"
-                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideEndSound.value)
+                if UserDefaultsRepository.alertOverrideEndRepeat.value { numLoops = -1 }
+                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideEndSound.value, overrideVolume: UserDefaultsRepository.alertOverrideEndDND.value, numLoops: numLoops)
                 lastOverrideEndTime = latest.date
             }
         }
     }
     
-    func triggerOneTimeAlarm(sound: String)
+    func triggerOneTimeAlarm(sound: String, overrideVolume: Bool, numLoops: Int)
     {
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         AlarmSound.setSoundFile(str: sound)
-        AlarmSound.playOnce()
+        AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
     }
     
-    func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?)
+    func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?, overrideVolume: Bool, numLoops: Int)
     {
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
@@ -315,7 +332,7 @@ extension MainViewController {
             UserDefaultsRepository.snoozedBGReadingTime.value = snooozedBGReadingTime
         }
         AlarmSound.setSoundFile(str: sound)
-        AlarmSound.play()
+        AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
     }
     
     func clearOldSnoozes(){
