@@ -63,6 +63,7 @@ extension MainViewController {
         let linePrediction = LineChartDataSet(entries:predictionChartEntry, label: "")
         linePrediction.circleRadius = 3
         linePrediction.circleColors = [NSUIColor.systemPurple]
+        linePrediction.colors = [NSUIColor.systemPurple]
         linePrediction.drawCircleHoleEnabled = false
         linePrediction.axisDependency = YAxis.AxisDependency.right
         linePrediction.highlightEnabled = true
@@ -220,17 +221,23 @@ extension MainViewController {
     
     func updateBGGraphSettings() {
         let dataIndex = 0
+        let dataIndexPrediction = 1
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        let linePrediction = BGChart.lineData!.dataSets[dataIndexPrediction] as! LineChartDataSet
         if UserDefaultsRepository.showLines.value {
-                   lineBG.lineWidth = 2
-               } else {
-                   lineBG.lineWidth = 0
-               }
-               if UserDefaultsRepository.showDots.value {
-                   lineBG.drawCirclesEnabled = true
-               } else {
-                   lineBG.drawCirclesEnabled = false
-               }
+            lineBG.lineWidth = 2
+            linePrediction.lineWidth = 2
+        } else {
+            lineBG.lineWidth = 0
+            linePrediction.lineWidth = 0
+        }
+        if UserDefaultsRepository.showDots.value {
+            lineBG.drawCirclesEnabled = true
+            linePrediction.drawCirclesEnabled = true
+        } else {
+            lineBG.drawCirclesEnabled = false
+            linePrediction.drawCirclesEnabled = false
+        }
         
         BGChart.rightAxis.axisMinimum = Double(UserDefaultsRepository.minBGValue.value)
         
@@ -333,18 +340,33 @@ extension MainViewController {
         smallChart.clear()
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: print prediction") }
 
+        var colors = [NSUIColor]()
         for i in 0..<predictionData.count {
-            let predictionVal = Double(predictionData[i].sgv)
+            var predictionVal = Double(predictionData[i].sgv)
             // Below can be turned on to prevent out of range on the graph if desired.
             // It currently just drops them out of view
             if predictionVal > 400 {
-                //     predictionVal = 400
+                predictionVal = 400
+                colors.append(NSUIColor.systemYellow)
             } else if predictionVal < 0 {
-                //    predictionVal = 0
+                predictionVal = 0
+                colors.append(NSUIColor.systemRed)
+            } else {
+                colors.append(NSUIColor.systemPurple)
             }
             let value = ChartDataEntry(x: predictionData[i].date, y: predictionVal)
             mainChart.addEntry(value)
             smallChart.addEntry(value)
+        }
+        
+        if colors.count > 0 {
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: prediction colors") }
+            for i in 0..<colors.count{
+                mainChart.addColor(colors[i])
+                mainChart.circleColors.append(colors[i])
+                smallChart.addColor(colors[i])
+                smallChart.circleColors.append(colors[i])
+            }
         }
 
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
