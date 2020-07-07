@@ -428,13 +428,13 @@ extension MainViewController {
                 let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
                 if let multiplier = lastOverride["multiplier"] as? Double {
                     currentOverride = multiplier
-                    oText += String(format:"%.1f", multiplier*100)
+                    oText += String(format: "%.0f%%", (multiplier * 100))
                 }
                 else
                 {
-                    oText += String(format:"%.1f", 100)
+                    oText += String(format:"%.0f%%", 100)
                 }
-                oText += "% ("
+                oText += " ("
                 let minValue = lastCorrection["minValue"] as! Double
                 let maxValue = lastCorrection["maxValue"] as! Double
                 oText += bgUnits.toDisplayUnits(String(minValue)) + "-" + bgUnits.toDisplayUnits(String(maxValue)) + ")"
