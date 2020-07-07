@@ -70,7 +70,7 @@ class SettingsViewController: FormViewController {
         
         
         buildGeneralSettings()
-        buildAlarmSettings()
+       // buildAlarmSettings()
         buildGraphSettings()
         buildWatchSettings()
         buildDebugSettings()
