@@ -33,6 +33,8 @@ class SettingsViewController: FormViewController {
             row.title = "URL"
             row.placeholder = "https://mycgm.herokuapp.com"
             row.value = UserDefaultsRepository.url.value
+        }.cellSetup { (cell, row) in
+            cell.textField.autocorrectionType = .no
         }.onChange { row in
             guard let value = row.value else { return }
             // check the format of the URL entered by the user and trim away any spaces or "/" at the end
@@ -48,6 +50,8 @@ class SettingsViewController: FormViewController {
             row.title = "NS Token"
             row.placeholder = "Leave blank if not using tokens"
             row.value = UserDefaultsRepository.token.value
+        }.cellSetup { (cell, row) in
+            cell.textField.autocorrectionType = .no
         }.onChange { row in
             if row.value == nil {
                 UserDefaultsRepository.token.value = ""
@@ -66,7 +70,7 @@ class SettingsViewController: FormViewController {
         
         
         buildGeneralSettings()
-        buildAlarmSettings()
+       // buildAlarmSettings()
         buildGraphSettings()
         buildWatchSettings()
         buildDebugSettings()
@@ -199,6 +203,7 @@ class SettingsViewController: FormViewController {
     func buildGraphSettings() {
         form
             +++ Section("Graph Settings")
+            
         <<< SwitchRow("switchRowDots"){ row in
             row.title = "Display Dots"
             row.value = UserDefaultsRepository.showDots.value
@@ -228,6 +233,16 @@ class SettingsViewController: FormViewController {
                         UserDefaultsRepository.offsetCarbsBolus.value = value
                         
             }
+            <<< StepperRow("predictionToLoad") { row in
+                row.title = "Hours of Prediction"
+                row.cell.stepper.stepValue = 0.25
+                row.cell.stepper.minimumValue = 0.0
+                row.cell.stepper.maximumValue = 6.0
+                row.value = Double(UserDefaultsRepository.predictionToLoad.value)
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.predictionToLoad.value = value
+            }
         <<< StepperRow("minBGScale") { row in
             row.title = "Min BG Scale"
             row.cell.stepper.stepValue = 1
@@ -241,7 +256,24 @@ class SettingsViewController: FormViewController {
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.minBGScale.value = Float(value)
-        }
+            }
+            <<< StepperRow("minBGValue") { row in
+                row.title = "Min BG Display"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = -40
+                row.cell.stepper.maximumValue = 40
+                row.value = Double(UserDefaultsRepository.minBGValue.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return bgUnits.toDisplayUnits(String(value))
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.minBGValue.value = Float(value)
+                // Force main screen update
+                guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
+                mainScreen.updateBGGraphSettings()
+            }
         <<< StepperRow("minBasalScale") { row in
             row.title = "Min Basal Scale"
             row.cell.stepper.stepValue = 0.5
@@ -286,6 +318,20 @@ class SettingsViewController: FormViewController {
             guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
             mainScreen.updateBGGraphSettings()
         }
+        <<< StepperRow("overrideDisplayLocation") { row in
+            row.title = "Override BG Location"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = Double(UserDefaultsRepository.minBGValue.value)
+            row.cell.stepper.maximumValue = Double(UserDefaultsRepository.minBGScale.value)
+            row.value = Double(UserDefaultsRepository.overrideDisplayLocation.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return bgUnits.toDisplayUnits(String(value))
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.overrideDisplayLocation.value = Float(value)
+            }
     }
     
     func buildWatchSettings(){
@@ -408,14 +454,13 @@ class SettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.graphPrediction.value = value
             }
-            <<< SwitchRow("sendNotificationLog"){ row in
-                row.title = "iPhone Notifications for Logs"
-                row.value = UserDefaultsRepository.sendNotificationLog.value
+            <<< SwitchRow("debugLog"){ row in
+                row.title = "Show Debug Log"
+                row.value = UserDefaultsRepository.debugLog.value
             }.onChange { [weak self] row in
                         guard let value = row.value else { return }
-                        UserDefaultsRepository.sendNotificationLog.value = value
+                        UserDefaultsRepository.debugLog.value = value
                 }
-        
         <<< StepperRow("viewRefreshDelay") { row in
             row.title = "View Refresh Delay"
             row.cell.stepper.stepValue = 1

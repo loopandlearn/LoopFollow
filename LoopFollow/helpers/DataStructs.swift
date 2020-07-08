@@ -23,5 +23,19 @@ class DataStructs {
         var value: Double
     }
     
+    //NS Basal Profile  Struct
+    struct basal2DayProfile: Codable {
+        var basalRate: Double
+        var startDate: TimeInterval
+        var endDate: TimeInterval
+    }
+    
+    //NS Override Data  Struct
+    struct overrideGraphStruct: Codable {
+        var value: Double
+        var date: TimeInterval
+        var sgv: Int
+    }
+    
     
 }

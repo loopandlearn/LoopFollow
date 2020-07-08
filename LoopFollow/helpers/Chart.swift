@@ -17,7 +17,12 @@ final class ChartXValueFormatter: IAxisValueFormatter {
         let dateFormatter = DateFormatter()
         //let timezoneOffset = TimeZone.current.secondsFromGMT()
         //let epochTimezoneOffset = value + Double(timezoneOffset)
-        dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
+        if dateTimeUtils.is24Hour() {
+            dateFormatter.setLocalizedDateFormatFromTemplate("HH:mm")
+        } else {
+            dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
+        }
+        
         //let date = Date(timeIntervalSince1970: epochTimezoneOffset)
         let date = Date(timeIntervalSince1970: value)
         let formattedDate = dateFormatter.string(from: date)
@@ -27,6 +32,16 @@ final class ChartXValueFormatter: IAxisValueFormatter {
 }
 
 final class ChartYDataValueFormatter: IValueFormatter {
+    func stringForValue(_ value: Double, entry: ChartDataEntry, dataSetIndex: Int, viewPortHandler: ViewPortHandler?) -> String {
+        if entry.data != nil {
+            return entry.data as? String ?? ""
+        } else {
+            return ""
+        }
+    }
+}
+
+final class ChartYOverrideValueFormatter: IValueFormatter {
     func stringForValue(_ value: Double, entry: ChartDataEntry, dataSetIndex: Int, viewPortHandler: ViewPortHandler?) -> String {
         if entry.data != nil {
             return entry.data as? String ?? ""
@@ -139,11 +154,13 @@ class PillMarker: MarkerImage {
     }
 
     override func refreshContent(entry: ChartDataEntry, highlight: Highlight) {
-         if entry.data != nil {
-                   labelText = entry.data as? String ?? ""
-               } else {
-                   labelText = String(entry.y)
-               }
+        if entry.data != nil {
+            var multiplier = entry.data as! Double * 100.0
+            labelText = String(format: "%.0f%%", multiplier)
+            //labelText = entry.data as? String ?? ""
+        } else {
+            labelText = String(entry.y)
+        }
     }
 
     private func customString(_ value: Double) -> String {

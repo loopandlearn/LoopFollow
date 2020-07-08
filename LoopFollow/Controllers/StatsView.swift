@@ -33,6 +33,7 @@ extension MainViewController {
         statsPieChart.legend.enabled = false
         statsPieChart.drawEntryLabelsEnabled = false
         statsPieChart.drawHoleEnabled = false
+        statsPieChart.rotationEnabled = false
         
         var chartEntry = [PieChartDataEntry]()
         var colors = [NSUIColor]()
