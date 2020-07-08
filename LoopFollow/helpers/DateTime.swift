@@ -39,6 +39,12 @@ class dateTimeUtils {
         return midnightTimeInterval
     }
     
+    static func getTimeInterval24HoursAgo() -> TimeInterval {
+        let today = Date()
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
+        return yesterday.timeIntervalSince1970
+    }
+    
     static func getNowTimeIntervalUTC() -> TimeInterval {
         let now = Date()
         let formatter = DateFormatter()
@@ -62,11 +68,28 @@ class dateTimeUtils {
         return yesterdayString
     }
     
+    static func nowMinus10DaysTimeInterval() -> String {
+        let today = Date()
+        let oldDate = Calendar.current.date(byAdding: .day, value: -10, to: today)!
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US")
+        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
+        let dayString = dateFormatter.string(from: oldDate)
+        return dayString
+    }
+    
     static func printNow() -> String {
         let date = Date()
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss"
         formatter.locale = Locale(identifier: "en_US")
         return formatter.string(from: date)
+    }
+    
+    static func is24Hour() -> Bool {
+        let dateFormat = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: Locale.current)!
+
+        return dateFormat.firstIndex(of: "a") == nil
     }
 }

@@ -28,10 +28,6 @@ extension MainViewController {
         }
     }
 
-    // data.addDataSet(lineBG) // Dataset 0
-    // data.addDataSet(lineBasal) // Dataset 1
-    // data.addDataSet(lineBolus) // Dataset 2
-    // data.addDataSet(lineCarbs) // Dataset 3
     func createGraph(){
         self.BGChart.clear()
         // Create the BG Graph Data
@@ -46,7 +42,7 @@ extension MainViewController {
         lineBG.circleColors = [NSUIColor.systemGreen]
         lineBG.drawCircleHoleEnabled = false
         lineBG.axisDependency = YAxis.AxisDependency.right
-        lineBG.highlightEnabled = false
+        lineBG.highlightEnabled = true
         lineBG.drawValuesEnabled = false
         
         if UserDefaultsRepository.showLines.value {
@@ -62,6 +58,30 @@ extension MainViewController {
         lineBG.setDrawHighlightIndicators(false)
         lineBG.valueFont.withSize(50)
         
+        // Setup Prediction line details
+        var predictionChartEntry = [ChartDataEntry]()
+        let linePrediction = LineChartDataSet(entries:predictionChartEntry, label: "")
+        linePrediction.circleRadius = 3
+        linePrediction.circleColors = [NSUIColor.systemPurple]
+        linePrediction.colors = [NSUIColor.systemPurple]
+        linePrediction.drawCircleHoleEnabled = false
+        linePrediction.axisDependency = YAxis.AxisDependency.right
+        linePrediction.highlightEnabled = true
+        linePrediction.drawValuesEnabled = false
+        
+        if UserDefaultsRepository.showLines.value {
+            linePrediction.lineWidth = 2
+        } else {
+            linePrediction.lineWidth = 0
+        }
+        if UserDefaultsRepository.showDots.value {
+            linePrediction.drawCirclesEnabled = true
+        } else {
+            linePrediction.drawCirclesEnabled = false
+        }
+        linePrediction.setDrawHighlightIndicators(false)
+        linePrediction.valueFont.withSize(50)
+        
         
 
         // create Basal graph data
@@ -75,7 +95,7 @@ extension MainViewController {
         lineBasal.fillColor = NSUIColor.systemBlue.withAlphaComponent(0.8)
         lineBasal.drawCirclesEnabled = false
         lineBasal.axisDependency = YAxis.AxisDependency.left
-        lineBasal.highlightEnabled = false
+        lineBasal.highlightEnabled = true
         lineBasal.drawValuesEnabled = false
         
         // Boluses
@@ -88,6 +108,7 @@ extension MainViewController {
         lineBolus.setColor(NSUIColor.systemBlue, alpha: 1.0)
         lineBolus.drawCirclesEnabled = true
         lineBolus.lineWidth = 0
+        lineBolus.highlightEnabled = false
         lineBolus.axisDependency = YAxis.AxisDependency.right
         lineBolus.valueFormatter = ChartYDataValueFormatter()
         lineBolus.drawValuesEnabled = true
@@ -104,18 +125,52 @@ extension MainViewController {
         lineCarbs.setColor(NSUIColor.systemBlue, alpha: 1.0)
         lineCarbs.drawCirclesEnabled = true
         lineCarbs.lineWidth = 0
+        lineCarbs.highlightEnabled = false
         lineCarbs.axisDependency = YAxis.AxisDependency.right
         lineCarbs.valueFormatter = ChartYDataValueFormatter()
         lineCarbs.drawValuesEnabled = true
         lineCarbs.valueTextColor = NSUIColor.label
         
+        // create Scheduled Basal graph data
+        var chartBasalScheduledEntry = [ChartDataEntry]()
+        let lineBasalScheduled = LineChartDataSet(entries:chartBasalScheduledEntry, label: "")
+        lineBasalScheduled.setDrawHighlightIndicators(false)
+        lineBasalScheduled.setColor(NSUIColor.systemBlue, alpha: 0.8)
+        lineBasalScheduled.lineWidth = 2
+        lineBasalScheduled.drawFilledEnabled = false
+        lineBasalScheduled.drawCirclesEnabled = false
+        lineBasalScheduled.axisDependency = YAxis.AxisDependency.left
+        lineBasalScheduled.highlightEnabled = false
+        lineBasalScheduled.drawValuesEnabled = false
+        lineBasalScheduled.lineDashLengths = [10.0, 5.0]
+        
+        // create Override graph data
+        var chartOverrideEntry = [ChartDataEntry]()
+        let lineOverride = LineChartDataSet(entries:chartOverrideEntry, label: "")
+        lineOverride.setDrawHighlightIndicators(false)
+        lineOverride.setColor(NSUIColor.systemTeal, alpha: 0.8  )
+        lineOverride.lineWidth = 10
+        lineOverride.drawFilledEnabled = false
+        lineOverride.drawCirclesEnabled = false
+        lineOverride.axisDependency = YAxis.AxisDependency.right
+        lineOverride.highlightEnabled = true
+        lineOverride.drawValuesEnabled = false
+        
         // Setup the chart data of all lines
         let data = LineChartData()
         data.addDataSet(lineBG) // Dataset 0
-        data.addDataSet(lineBasal) // Dataset 1
-        data.addDataSet(lineBolus) // Dataset 2
-        data.addDataSet(lineCarbs) // Dataset 3
+        data.addDataSet(linePrediction) // Dataset 1
+        data.addDataSet(lineBasal) // Dataset 2
+        data.addDataSet(lineBolus) // Dataset 3
+        data.addDataSet(lineCarbs) // Dataset 4
+        data.addDataSet(lineBasalScheduled) // Dataset 5
+        data.addDataSet(lineOverride) // Dataset 6
+        
         data.setValueFont(UIFont.systemFont(ofSize: 12))
+        
+        // Add marker popups for bolus and carbs
+        let marker = PillMarker(color: .secondarySystemBackground, font: UIFont.boldSystemFont(ofSize: 14), textColor: .label)
+        BGChart.marker = marker
         
         // Clear limit lines so they don't add multiples when changing the settings
         BGChart.rightAxis.removeAllLimitLines()
@@ -147,7 +202,7 @@ extension MainViewController {
         
         BGChart.rightAxis.labelTextColor = NSUIColor.label
         BGChart.rightAxis.labelPosition = YAxis.LabelPosition.insideChart
-        BGChart.rightAxis.axisMinimum = 40
+        BGChart.rightAxis.axisMinimum = Double(UserDefaultsRepository.minBGValue.value)
         BGChart.rightAxis.axisMaximum = Double(maxBG)
         BGChart.rightAxis.gridLineDashLengths = [5.0, 5.0]
         BGChart.rightAxis.valueFormatter = ChartYMMOLValueFormatter()
@@ -166,17 +221,25 @@ extension MainViewController {
     
     func updateBGGraphSettings() {
         let dataIndex = 0
+        let dataIndexPrediction = 1
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        let linePrediction = BGChart.lineData!.dataSets[dataIndexPrediction] as! LineChartDataSet
         if UserDefaultsRepository.showLines.value {
-                   lineBG.lineWidth = 2
-               } else {
-                   lineBG.lineWidth = 0
-               }
-               if UserDefaultsRepository.showDots.value {
-                   lineBG.drawCirclesEnabled = true
-               } else {
-                   lineBG.drawCirclesEnabled = false
-               }
+            lineBG.lineWidth = 2
+            linePrediction.lineWidth = 2
+        } else {
+            lineBG.lineWidth = 0
+            linePrediction.lineWidth = 0
+        }
+        if UserDefaultsRepository.showDots.value {
+            lineBG.drawCirclesEnabled = true
+            linePrediction.drawCirclesEnabled = true
+        } else {
+            lineBG.drawCirclesEnabled = false
+            linePrediction.drawCirclesEnabled = false
+        }
+        
+        BGChart.rightAxis.axisMinimum = Double(UserDefaultsRepository.minBGValue.value)
         
         // Clear limit lines so they don't add multiples when changing the settings
         BGChart.rightAxis.removeAllLimitLines()
@@ -229,29 +292,7 @@ extension MainViewController {
             }
         }
         
-        // Add Prediction Data
-        if predictionData.count > 0 && bgData.count > 0 && UserDefaultsRepository.graphPrediction.value {
-            print("graph prediction")
-            var startingTime = entries[entries.count - 1].date + 300
-            var i = 0
-            // Add 1 hour of predictions
-            while i < 12 {
-                var predictionVal = Double(predictionData[i])
-                // Below can be turned on to prevent out of range on the graph if desired.
-                // It currently just drops them out of view
-                if predictionVal > 400 {
-               //     predictionVal = 400
-                } else if predictionVal < 0 {
-                //    predictionVal = 0
-                }
-                let value = ChartDataEntry(x: startingTime + 5, y: predictionVal)
-                mainChart.addEntry(value)
-                smallChart.addEntry(value)
-                colors.append(NSUIColor.systemPurple)
-                startingTime += 300
-                i += 1
-            }
-        }
+        
         
         // Set Colors
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
@@ -263,7 +304,7 @@ extension MainViewController {
         lineBGSmall.circleColors.removeAll()
 
         if colors.count > 0 {
-            print("graph colors")
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: colors") }
             for i in 0..<colors.count{
                 mainChart.addColor(colors[i])
                 mainChart.circleColors.append(colors[i])
@@ -291,8 +332,53 @@ extension MainViewController {
         }
     }
     
+    func updatePredictionGraph() {
+        let dataIndex = 1
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: print prediction") }
+
+        var colors = [NSUIColor]()
+        for i in 0..<predictionData.count {
+            var predictionVal = Double(predictionData[i].sgv)
+            // Below can be turned on to prevent out of range on the graph if desired.
+            // It currently just drops them out of view
+            if predictionVal > 400 {
+                predictionVal = 400
+                colors.append(NSUIColor.systemYellow)
+            } else if predictionVal < 0 {
+                predictionVal = 0
+                colors.append(NSUIColor.systemRed)
+            } else {
+                colors.append(NSUIColor.systemPurple)
+            }
+            let value = ChartDataEntry(x: predictionData[i].date, y: predictionVal)
+            mainChart.addEntry(value)
+            smallChart.addEntry(value)
+        }
+        
+        if colors.count > 0 {
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: prediction colors") }
+            for i in 0..<colors.count{
+                mainChart.addColor(colors[i])
+                mainChart.circleColors.append(colors[i])
+                smallChart.addColor(colors[i])
+                smallChart.circleColors.append(colors[i])
+            }
+        }
+
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChartFull.data?.notifyDataChanged()
+        BGChartFull.notifyDataSetChanged()
+    }
+    
     func updateBasalGraph() {
-        var dataIndex = 1
+        var dataIndex = 2
         BGChart.lineData?.dataSets[dataIndex].clear()
         var maxBasal = UserDefaultsRepository.minBasalScale.value
         for i in 0..<basalData.count{
@@ -310,8 +396,21 @@ extension MainViewController {
         BGChart.notifyDataSetChanged()
     }
     
+    func updateBasalScheduledGraph() {
+        var dataIndex = 5
+        BGChart.lineData?.dataSets[dataIndex].clear()
+        for i in 0..<basalScheduleData.count{
+            let value = ChartDataEntry(x: Double(basalScheduleData[i].date), y: Double(basalScheduleData[i].basalRate))
+            BGChart.data?.dataSets[dataIndex].addEntry(value)
+        }
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+    }
+    
     func updateBolusGraph() {
-        var dataIndex = 2
+        var dataIndex = 3
         BGChart.lineData?.dataSets[dataIndex].clear()
         for i in 0..<bolusData.count{
             let formatter = NumberFormatter()
@@ -333,7 +432,7 @@ extension MainViewController {
     }
     
     func updateCarbGraph() {
-        var dataIndex = 3
+        var dataIndex = 4
         BGChart.lineData?.dataSets[dataIndex].clear()
         for i in 0..<carbData.count{
             let formatter = NumberFormatter()
@@ -372,9 +471,24 @@ extension MainViewController {
         lineBG.highlightColor = NSUIColor.label
         lineBG.drawValuesEnabled = false
         lineBG.lineWidth = 2
+        
+        // Setup Prediction line details
+        var predictionChartEntry = [ChartDataEntry]()
+        let linePrediction = LineChartDataSet(entries:predictionChartEntry, label: "")
+        linePrediction.drawCirclesEnabled = false
+        //line2.setDrawHighlightIndicators(false)
+        linePrediction.setColor(NSUIColor.systemPurple)
+        linePrediction.highlightEnabled = true
+        linePrediction.drawHorizontalHighlightIndicatorEnabled = false
+        linePrediction.drawVerticalHighlightIndicatorEnabled = false
+        linePrediction.highlightColor = NSUIColor.label
+        linePrediction.drawValuesEnabled = false
+        linePrediction.lineWidth = 2
+        
 
-        let data2 = LineChartData()
-        data2.addDataSet(lineBG)
+        let data = LineChartData()
+        data.addDataSet(lineBG)
+        data.addDataSet(linePrediction)
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false
         BGChartFull.rightAxis.enabled = false
@@ -383,8 +497,44 @@ extension MainViewController {
         BGChartFull.scaleYEnabled = false
         BGChartFull.scaleXEnabled = false
         BGChartFull.drawGridBackgroundEnabled = false
-        BGChartFull.data = data2
+        BGChartFull.data = data
     }
     
+    
+    func updateOverrideGraph() {
+        var dataIndex = 6
+        var chart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        chart.clear()
+        
+        var colors = [NSUIColor]()
+        for i in 0..<overrideData.count{
+            let value = ChartDataEntry(x: Double(overrideData[i].date), y: Double(overrideData[i].sgv), data: overrideData[i].value)
+            BGChart.data?.dataSets[dataIndex].addEntry(value)
+            
+            if Double(overrideData[i].value) == 1.0 {
+                colors.append(NSUIColor.systemGray.withAlphaComponent(0.0))
+            } else if i >= overrideData.count - 2 {
+                colors.append(NSUIColor.systemGreen)
+            } else {
+                colors.append(NSUIColor.systemGray.withAlphaComponent(CGFloat(overrideData[i].value / 2)))
+            }
+        }
+        
+        // Set Colors
+        let line = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        line.colors.removeAll()
+        line.circleColors.removeAll()
+        
+        if colors.count > 0 {
+            for i in 0..<colors.count{
+                chart.addColor(colors[i])
+                chart.circleColors.append(colors[i])
+            }
+        }
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+    }
   
 }

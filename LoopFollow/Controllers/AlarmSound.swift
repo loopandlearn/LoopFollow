@@ -89,8 +89,6 @@ class AlarmSound {
             try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playback)))
             try AVAudioSession.sharedInstance().setActive(true)
             
-            // Play endless loops
-            //self.audioPlayer!.numberOfLoops = 1
             self.audioPlayer?.numberOfLoops = 0
             
             // init volume before start playing (mute if fade-in)
@@ -117,7 +115,7 @@ class AlarmSound {
     }
     
     
-    static func play() {
+    static func play(overrideVolume: Bool, numLoops: Int) {
         
         guard !self.isPlaying else {
             return
@@ -131,7 +129,7 @@ class AlarmSound {
             try AVAudioSession.sharedInstance().setActive(true)
             
             // Play endless loops
-            self.audioPlayer!.numberOfLoops = -1
+            self.audioPlayer!.numberOfLoops = numLoops
             
             // Store existing volume
             if self.systemOutputVolumeBeforeOverride == nil {
@@ -160,7 +158,7 @@ class AlarmSound {
             //    self.audioPlayer!.setVolume(1.0, fadeDuration: UserDefaultsRepository.fadeInTimeInterval.value)
             //}
             
-            if UserDefaultsRepository.overrideSystemOutputVolume.value {
+            if overrideVolume {
                 MPVolumeView.setVolume(UserDefaultsRepository.forcedOutputVolume.value)
             }
             

@@ -97,7 +97,7 @@ extension MainViewController {
             
             
             // Give the alarms and calendar 15 seconds delay to allow time for data to compile
-            print("Start View Timer")
+//            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Start view timer") }
             self.startViewTimer(time: viewTimeInterval)
         } else {
             // Things to do if we already have data and don't need a network call
@@ -120,7 +120,7 @@ extension MainViewController {
     
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
-        print("Enter BG Web Call")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
         // Set the count= in the url either to pull 24 hours or only the last record
         var points = "1"
         if !onlyPullLastRecord {
@@ -144,7 +144,6 @@ extension MainViewController {
         
         // Downloader
         let getBGTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            if self.consoleLogging == true {print("start bg url")}
             guard error == nil else {
                 return
                 
@@ -172,7 +171,7 @@ extension MainViewController {
     
     // NS BG Data Response processor
     func ProcessNSBGData(data: [DataStructs.sgvData], onlyPullLastRecord: Bool){
-        print("Enter BG Processor")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG") }
         
         var pullDate = data[data.count - 1].date / 1000
         pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
@@ -198,8 +197,11 @@ extension MainViewController {
         for i in 0..<data.count{
             var dateString = data[data.count - 1 - i].date / 1000
             dateString.round(FloatingPointRoundingRule.toNearestOrEven)
-            let reading = DataStructs.sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
-            bgData.append(reading)
+            if dateString >= dateTimeUtils.getTimeInterval24HoursAgo() {
+                let reading = DataStructs.sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
+                bgData.append(reading)
+            }
+            
         }
         
         viewUpdateNSBG()
@@ -207,7 +209,7 @@ extension MainViewController {
     
     // NS BG Data Front end updater
     func viewUpdateNSBG () {
-        print("Enter BG View Update")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Display: BG") }
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         let entries = bgData
         if entries.count > 0 {
@@ -264,18 +266,20 @@ extension MainViewController {
     
     // NS Device Status Web Call
     func webLoadNSDeviceStatus() {
-        print("Enter download device status")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: device status") }
         let urlUser = UserDefaultsRepository.url.value
-        var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
+        
+        
+        // NS Api is not working to find by greater than date
+        var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=288"
         if token != "" {
-            urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?token=" + token + "&count=1"
+            urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=288&token=" + token
         }
         let escapedAddress = urlStringDeviceStatus.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
         guard let urlDeviceStatus = URL(string: escapedAddress!) else {
             
             return
         }
-        if consoleLogging == true {print("entered device status task.")}
         
         
         var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
@@ -283,7 +287,6 @@ extension MainViewController {
         
         
         let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
-            if self.consoleLogging == true {print("in device status loop.")}
             guard error == nil else {
                 return
             }
@@ -292,27 +295,25 @@ extension MainViewController {
             }
             
             
-            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
                     self.updateDeviceStatusDisplay(jsonDeviceStatus: json)
                 }
             } else {
                 return
-            }
-            if self.consoleLogging == true {print("finish pump update")}}
+            } }
         deviceStatusTask.resume()
     }
     
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
-        print("Enter process device status")
-        if consoleLogging == true {print("in updatePump")}
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
             return
         }
         
-        //only grabbing one record since ns sorts by {created_at : -1}
+        //Process the current data first
         let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
         
         //pump and uploader
@@ -340,12 +341,15 @@ extension MainViewController {
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
                 UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
                 if let failure = lastLoopRecord["failureReason"] {
                     LoopStatusLabel.text = "X"
                     latestLoopStatusString = "X"
+                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop Failure: X") }
                 } else {
                     var wasEnacted = false
                     if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
                         wasEnacted = true
                         if let lastTempBasal = enacted["rate"] as? Double {
                             // tableData[2].value = String(format:"%.1f", lastTempBasal)
@@ -360,16 +364,23 @@ extension MainViewController {
                         latestCOB = String(format:"%.0f", cobdata["cob"] as! Double)
                     }
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
-                        let prediction = predictdata["values"] as! [Double]
+                        let prediction = predictdata["values"] as! [Int]
                         PredictionLabel.text = bgUnits.toDisplayUnits(String(Int(prediction.last!)))
                         PredictionLabel.textColor = UIColor.systemPurple
-                        predictionData.removeAll()
-                        if UserDefaultsRepository.downloadPrediction.value {
+                        if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
+                            predictionData.removeAll()
+                            var predictionTime = lastLoopTime + 300
+                            let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
                             var i = 1
-                            while i <= 12 {
-                                predictionData.append(prediction[i])
+                            while i <= toLoad {
+                                let prediction = DataStructs.sgvData(sgv: prediction[i], date: predictionTime, direction: "flat")
+                                predictionData.append(prediction)
+                                predictionTime += 300
                                 i += 1
                             }
+                        }
+                        if UserDefaultsRepository.graphPrediction.value {
+                            updatePredictionGraph()
                         }
                     }
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
@@ -378,17 +389,23 @@ extension MainViewController {
                             if bgData.count > 0 {
                                 lastBGTime = bgData[bgData.count - 1].date
                             }
+                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "tempBasalTime: " + String(tempBasalTime)) }
+                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastBGTime: " + String(lastBGTime)) }
+                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "wasEnacted: " + String(wasEnacted)) }
                             if tempBasalTime > lastBGTime && !wasEnacted {
                                 LoopStatusLabel.text = "⏀"
                                 latestLoopStatusString = "⏀"
+                                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Open Loop: recommended temp. temp time > bg time, was not enacted") }
                             } else {
                                 LoopStatusLabel.text = "↻"
                                 latestLoopStatusString = "↻"
+                                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: recommended temp, but temp time is < bg time and/or was enacted") }
                             }
                         }
                     } else {
                         LoopStatusLabel.text = "↻"
                         latestLoopStatusString = "↻"
+                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: no recommended temp") }
                     }
                     
                 }
@@ -397,6 +414,7 @@ extension MainViewController {
                     LoopStatusLabel.text = "⚠"
                     latestLoopStatusString = "⚠"
                 }
+                latestLoopTime = lastLoopTime
             } // end lastLoopTime
         } // end lastLoop Record
         
@@ -410,13 +428,13 @@ extension MainViewController {
                 let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
                 if let multiplier = lastOverride["multiplier"] as? Double {
                     currentOverride = multiplier
-                    oText += String(format:"%.1f", multiplier*100)
+                    oText += String(format: "%.0f%%", (multiplier * 100))
                 }
                 else
                 {
-                    oText += String(format:"%.1f", 100)
+                    oText += String(format:"%.0f%%", 100)
                 }
-                oText += "% ("
+                oText += " ("
                 let minValue = lastCorrection["minValue"] as! Double
                 let maxValue = lastCorrection["maxValue"] as! Double
                 oText += bgUnits.toDisplayUnits(String(minValue)) + "-" + bgUnits.toDisplayUnits(String(maxValue)) + ")"
@@ -426,11 +444,46 @@ extension MainViewController {
         }
         
         infoTable.reloadData()
+        
+        
+        // Process Override Data
+        overrideData.removeAll()
+        for i in 0..<jsonDeviceStatus.count {
+            let deviceStatus = jsonDeviceStatus[i] as [String : AnyObject]?
+            if let override = deviceStatus?["override"] as! [String : AnyObject]? {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withFullDate,
+                                           .withTime,
+                                           .withDashSeparatorInDate,
+                                           .withColonSeparatorInTime]
+                if let timestamp = formatter.date(from: (override["timestamp"] as! String))?.timeIntervalSince1970 {
+                    if timestamp > dateTimeUtils.getTimeInterval24HoursAgo() {
+                        if let isActive = override["active"] as? Bool {
+                            if isActive {
+                                if let multiplier = override["multiplier"] as? Double {
+                                    let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: Int(UserDefaultsRepository.overrideDisplayLocation.value))
+                                    overrideData.append(override)
+                                }
+                                
+                            } else {
+                                let multiplier = 1.0 as Double
+                                let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: Int(UserDefaultsRepository.overrideDisplayLocation.value))
+                                overrideData.append(override)
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
+        overrideData.reverse()
+        updateOverrideGraph()
+        checkOverrideAlarms()
     }
     
     // NS Cage Web Call
     func webLoadNSCage() {
-        print("enter download cage")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: CAGE") }
         let urlUser = UserDefaultsRepository.url.value
         var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
         if token != "" {
@@ -444,7 +497,6 @@ extension MainViewController {
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if self.consoleLogging == true {print("start cage url")}
             guard error == nil else {
                 return
             }
@@ -467,8 +519,7 @@ extension MainViewController {
     
     // NS Cage Response Processor
     func updateCage(data: [cageData]) {
-        print("enter process cage")
-        if consoleLogging == true {print("in updateCage")}
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: CAGE") }
         if data.count == 0 {
             return
         }
@@ -499,20 +550,13 @@ extension MainViewController {
     
     // NS Sage Web Call
     func webLoadNSSage() {
-        print("enter download sage")
-        var dayComponent    = DateComponents()
-        dayComponent.day    = -10 // For removing 10 days
-        let theCalendar     = Calendar.current
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: SAGE") }
         
-        let startDate    = theCalendar.date(byAdding: dayComponent, to: Date())!
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        var startDateString = dateFormatter.string(from: startDate)
-        
+        let lastDateString = dateTimeUtils.nowMinus10DaysTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
-        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
         if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=2020-05-31&count=1"
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
         }
         
         guard let urlData = URL(string: urlString) else {
@@ -522,7 +566,6 @@ extension MainViewController {
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if self.consoleLogging == true {print("start cage url")}
             guard error == nil else {
                 return
             }
@@ -545,8 +588,7 @@ extension MainViewController {
     
     // NS Sage Response Processor
     func updateSage(data: [cageData]) {
-        print("enter update sage")
-        if consoleLogging == true {print("in updateSage")}
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process/Display: SAGE") }
         if data.count == 0 {
             return
         }
@@ -577,7 +619,7 @@ extension MainViewController {
     
     // NS Profile Web Call
     func webLoadNSProfile() {
-        print("enter download profile")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: profile") }
         let urlUser = UserDefaultsRepository.url.value
         var urlString = urlUser + "/api/v1/profile/current.json"
         if token != "" {
@@ -615,11 +657,13 @@ extension MainViewController {
     
     // NS Profile Response Processor
     func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
-        print("enter process profile")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: profile") }
         if jsonDeviceStatus.count == 0 {
             return
         }
-        let basal = jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
+        if jsonDeviceStatus[keyPath: "message"] != nil { return }
+        let basal = try jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
+        basalProfile.removeAll()
         for i in 0..<basal.count {
             let dict = basal[i] as! Dictionary<String, Any>
             do {
@@ -629,15 +673,100 @@ extension MainViewController {
                 let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
                 basalProfile.append(entry)
             } catch {
-                print("Error Catch: Profile wrapped in Quotes")
+               if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: profile wrapped in quotes") }
+            }
+        }
+        
+        
+        // Don't process the basal or draw the graph until after the BG has been fully processeed and drawn
+        if firstGraphLoad { return }
+        
+        // Make temporary array with all values of yesterday and today
+        let yesterdayStart = dateTimeUtils.getTimeIntervalMidnightYesterday()
+        let todayStart = dateTimeUtils.getTimeIntervalMidnightToday()
+        
+        var basal2Day: [DataStructs.basal2DayProfile] = []
+        // Run twice to add in order yesterday then today.
+        for p in 0..<basalProfile.count {
+            let start = yesterdayStart + basalProfile[p].timeAsSeconds
+            var end = yesterdayStart
+            // set the endings 1 second before the next one starts
+            if p < basalProfile.count - 1 {
+                end = yesterdayStart + basalProfile[p + 1].timeAsSeconds - 1
+            } else {
+                // set the end 1 second before midnight
+                end = yesterdayStart + 86399
+            }
+            let entry = DataStructs.basal2DayProfile(basalRate: basalProfile[p].value, startDate: start, endDate: end)
+            basal2Day.append(entry)
+        }
+        for p in 0..<basalProfile.count {
+            let start = todayStart + basalProfile[p].timeAsSeconds
+            var end = todayStart
+            // set the endings 1 second before the next one starts
+            if p < basalProfile.count - 1 {
+                end = todayStart + basalProfile[p + 1].timeAsSeconds - 1
+            } else {
+                // set the end 1 second before midnight
+                end = todayStart + 86399
+            }
+            let entry = DataStructs.basal2DayProfile(basalRate: basalProfile[p].value, startDate: start, endDate: end)
+            basal2Day.append(entry)
+        }
+        
+        let now = dateTimeUtils.nowMinus24HoursTimeInterval()
+        var firstPass = true
+        basalScheduleData.removeAll()
+        for i in 0..<basal2Day.count {
+            var timeYesterday = dateTimeUtils.getTimeInterval24HoursAgo()
+            
+            
+            // This processed everything after the first one.
+            if firstPass == false
+                && basal2Day[i].startDate <= dateTimeUtils.getNowTimeIntervalUTC() {
+                let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: basal2Day[i].startDate)
+                basalScheduleData.append(startDot)
+                var endDate = basal2Day[i].endDate
+                
+                // if it's the last one in the profile or date is greater than now, set it to the last BG dot
+                if i == basal2Day.count - 1  || endDate > dateTimeUtils.getNowTimeIntervalUTC() {
+                    endDate = Double(dateTimeUtils.getNowTimeIntervalUTC())
+                }
+
+                let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
+                basalScheduleData.append(endDot)
             }
             
+            // we need to manually set the first one
+            // Check that this is the first one and there are no existing entries
+            if firstPass == true {
+                // check that the timestamp is > the current entry and < the next entry
+                if timeYesterday >= basal2Day[i].startDate && timeYesterday < basal2Day[i].endDate {
+                    // Set the start time to match the BG start
+                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: Double(dateTimeUtils.getTimeInterval24HoursAgo() + (60 * 5)))
+                    basalScheduleData.append(startDot)
+                    
+                    // set the enddot where the next one will start
+                    var endDate = basal2Day[i].endDate
+                    let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
+                    basalScheduleData.append(endDot)
+                    firstPass = false
+                }
+            }
+            
+
+            
         }
+        
+        if UserDefaultsRepository.graphBasal.value {
+            updateBasalScheduledGraph()
+        }
+
     }
     
     // NS Temp Basal Web Call
     func WebLoadNSTempBasals() {
-        print("enter download basals")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Basal") }
         if !UserDefaultsRepository.downloadBasal.value { return }
         
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
@@ -663,7 +792,7 @@ extension MainViewController {
                 return
             }
             
-            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
                     self.updateBasals(entries: json)
@@ -677,16 +806,24 @@ extension MainViewController {
     
     // NS Temp Basal Response Processor
     func updateBasals(entries: [[String:AnyObject]]) {
-        print("enter process basal")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Basal") }
         // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
         basalData.removeAll()
         
         var lastEndDot = 0.0
         
-        var tempArray: [basalGraphStruct] = []
-        for i in 0..<entries.count {
-            let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
-            let basalDate = currentEntry?["timestamp"] as! String
+        var tempArray = entries
+        tempArray.reverse()
+        for i in 0..<tempArray.count {
+            let currentEntry = tempArray[i] as [String : AnyObject]?
+            var basalDate: String
+            if currentEntry?["timestamp"] != nil {
+                basalDate = currentEntry?["timestamp"] as! String
+            } else if currentEntry?["created_at"] != nil {
+                basalDate = currentEntry?["created_at"] as! String
+            } else {
+                return
+            }
             let strippedZone = String(basalDate.dropLast())
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
@@ -698,16 +835,15 @@ extension MainViewController {
             let midnightTime = dateTimeUtils.getTimeIntervalMidnightToday()
             // Setting end dots
             var duration = 0.0
-            // For all except the last we're going to use stored duration for end dot. For last we'll just put it 5 mintues after the entry
-            if i <= entries.count - 1 {
-                duration = currentEntry?["duration"] as! Double
-            } else {
-                duration = dateTimeStamp + 60
+            do {
+                duration = try currentEntry?["duration"] as! Double
+            } catch {
+                print("No Duration Found")
             }
             
             // This adds scheduled basal wherever there is a break between temps. can't check the prior ending on the first item. it is 24 hours old, so it isn't important for display anyway
             if i > 0 {
-                let priorEntry = entries[entries.count - i] as [String : AnyObject]?
+                let priorEntry = tempArray[i - 1] as [String : AnyObject]?
                 let priorBasalDate = priorEntry?["timestamp"] as! String
                 let priorStrippedZone = String(priorBasalDate.dropLast())
                 let priorDateFormatter = DateFormatter()
@@ -717,8 +853,8 @@ extension MainViewController {
                 let priorDateString = dateFormatter.date(from: priorStrippedZone)
                 let priorDateTimeStamp = priorDateString!.timeIntervalSince1970
                 let priorDuration = priorEntry?["duration"] as! Double
-                // if difference between time stamps is greater than the duration of the last entry, there is a gap
-                if Double( dateTimeStamp - priorDateTimeStamp ) > Double( priorDuration * 60 ) {
+                // if difference between time stamps is greater than the duration of the last entry, there is a gap. Give a 15 second leeway on the timestamp
+                if Double( dateTimeStamp - priorDateTimeStamp ) > Double( (priorDuration * 60) + 15 ) {
                     
                     var scheduled = 0.0
                     // cycle through basal profiles.
@@ -736,16 +872,16 @@ extension MainViewController {
                         
                         // This will iterate through from midnight on and set it for the highest matching one.
                     }
-                    latestBasal = String(format:"%.2f", scheduled)
                     // Make the starting dot at the last ending dot
                     let startDot = basalGraphStruct(basalRate: scheduled, date: Double(priorDateTimeStamp + (priorDuration * 60)))
                     basalData.append(startDot)
                     
+                    //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Basal: Scheduled " + String(scheduled) + " " + String(dateTimeStamp)) }
+                    
                     // Make the ending dot at the new starting dot
                     let endDot = basalGraphStruct(basalRate: scheduled, date: Double(dateTimeStamp))
                     basalData.append(endDot)
-                    
-                    
+
                 }
             }
             
@@ -754,18 +890,20 @@ extension MainViewController {
             basalData.append(startDot)
             
             // Make the ending dot
-            // If it's the last one and not ended yet, extend it for 1 hour to match the prediction length. Otherwise let it end
-            if i == entries.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
-                lastEndDot = Date().timeIntervalSince1970 + (55 * 60)
-                tableData[2].value = String(format:"%.2f", basalRate)
+            // If it's the last one and has no duration, extend it for 30 minutes past the start. Otherwise set ending at duration
+            // duration is already set to 0 if there is no duration set on it.
+            //if i == tempArray.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
+            if i == tempArray.count - 1 && duration == 0.0 {
+                lastEndDot = dateTimeStamp + (30 * 60)
                 latestBasal = String(format:"%.2f", basalRate)
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
+                latestBasal = String(format:"%.2f", basalRate)
             }
             
             // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
-            if i < entries.count - 1 {
-                let nextEntry = entries[entries.count - 2 - i] as [String : AnyObject]?
+            if i < tempArray.count - 1 {
+                let nextEntry = tempArray[i + 1] as [String : AnyObject]?
                 let nextBasalDate = nextEntry?["timestamp"] as! String
                 let nextStrippedZone = String(nextBasalDate.dropLast())
                 let nextDateFormatter = DateFormatter()
@@ -794,28 +932,24 @@ extension MainViewController {
                 let scheduleTimeYesterday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightYesterday()
                 let scheduleTimeToday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightToday()
                 // check the prior temp ending to the profile seconds from midnight
-                if lastEndDot >= scheduleTimeYesterday {
-                    scheduled = basalProfile[b].value
-                }
+                print("yesterday " + String(scheduleTimeYesterday))
+                print("today " + String(scheduleTimeToday))
                 if lastEndDot >= scheduleTimeToday {
                     scheduled = basalProfile[b].value
                 }
-                
-                
             }
             
-            tableData[2].value = String(format:"%.2f", scheduled)
             latestBasal = String(format:"%.2f", scheduled)
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)
             
-            // Make the ending dot 1 hour after now
-            let endDot = basalGraphStruct(basalRate: scheduled, date: Double(Date().timeIntervalSince1970))
+            // Make the ending dot 10 minutes after now
+            let endDot = basalGraphStruct(basalRate: scheduled, date: Double(Date().timeIntervalSince1970 + (60 * 10)))
             basalData.append(endDot)
             
-            
         }
+        tableData[2].value = latestBasal
         if UserDefaultsRepository.graphBasal.value {
             updateBasalGraph()
         }
@@ -823,7 +957,7 @@ extension MainViewController {
     
     // NS Bolus Web Call
     func webLoadNSBoluses(){
-        print("enter download bolus")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Bolus") }
         if !UserDefaultsRepository.downloadBolus.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
@@ -850,7 +984,7 @@ extension MainViewController {
                 return
             }
             
-            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
                     self.processNSBolus(entries: json)
@@ -864,13 +998,21 @@ extension MainViewController {
     
     // NS Meal Bolus Response Processor
     func processNSBolus(entries: [[String:AnyObject]]) {
-        print("enter process bolus")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Bolus") }
         // because it's a small array, we're going to destroy and reload every time.
         bolusData.removeAll()
         var lastFoundIndex = 0
         for i in 0..<entries.count {
             let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
-            let bolusDate = currentEntry?["timestamp"] as! String
+            var bolusDate: String
+            if currentEntry?["timestamp"] != nil {
+                bolusDate = currentEntry?["timestamp"] as! String
+            } else if currentEntry?["created_at"] != nil {
+                bolusDate = currentEntry?["created_at"] as! String
+            } else {
+                return
+            }
+            
             let strippedZone = String(bolusDate.dropLast())
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
@@ -889,7 +1031,7 @@ extension MainViewController {
                     bolusData.append(dot)
                 }
             } catch {
-                print("Null Bolus Warning")
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Bolus") }
             }
             
            
@@ -905,7 +1047,7 @@ extension MainViewController {
     
     // NS Carb Web Call
     func webLoadNSCarbs(){
-        print("enter download carbs")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Carbs") }
         if !UserDefaultsRepository.downloadCarbs.value { return }
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
@@ -932,7 +1074,7 @@ extension MainViewController {
                 return
             }
             
-            let json = try? (JSONSerialization.jsonObject(with: data) as! [[String:AnyObject]])
+            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
                     self.processNSCarbs(entries: json)
@@ -946,14 +1088,21 @@ extension MainViewController {
     
     // NS Carb Bolus Response Processor
     func processNSCarbs(entries: [[String:AnyObject]]) {
-        print("enter process carbs")
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Carbs") }
         // because it's a small array, we're going to destroy and reload every time.
         carbData.removeAll()
         var lastFoundIndex = 0
         for i in 0..<entries.count {
             let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
-            let bolusDate = currentEntry?["timestamp"] as! String
-            let strippedZone = String(bolusDate.dropLast())
+            var carbDate: String
+            if currentEntry?["timestamp"] != nil {
+                carbDate = currentEntry?["timestamp"] as! String
+            } else if currentEntry?["created_at"] != nil {
+                carbDate = currentEntry?["created_at"] as! String
+            } else {
+                return
+            }
+            let strippedZone = String(carbDate.dropLast())
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
@@ -972,7 +1121,7 @@ extension MainViewController {
                     carbData.append(dot)
                 }
             } catch {
-                print("Null Carb Warning")
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Carb entry") }
             }
             
             
