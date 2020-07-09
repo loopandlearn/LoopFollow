@@ -156,6 +156,47 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         }
     }
     
+    func setQuietHours(snoozeTime: Date)
+    {
+        
+        if UserDefaultsRepository.alertMissedBolusQuiet.value {
+            UserDefaultsRepository.alertMissedBolusIsSnoozed.value = true
+            UserDefaultsRepository.alertMissedBolusSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertMissedBolusIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertMissedBolusSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertOverrideStartQuiet.value {
+            UserDefaultsRepository.alertOverrideStartIsSnoozed.value = true
+            UserDefaultsRepository.alertOverrideStartSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertOverrideStartIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertOverrideStartSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertOverrideEndQuiet.value {
+            UserDefaultsRepository.alertOverrideEndIsSnoozed.value = true
+            UserDefaultsRepository.alertOverrideEndSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertOverrideEndIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertOverrideEndSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertCAGEQuiet.value {
+            UserDefaultsRepository.alertCAGEIsSnoozed.value = true
+            UserDefaultsRepository.alertCAGESnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertCAGEIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertCAGESnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertSAGEQuiet.value {
+            UserDefaultsRepository.alertSAGEIsSnoozed.value = true
+            UserDefaultsRepository.alertSAGESnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertSAGEIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertSAGESnoozedTime", setNil: false, value: snoozeTime)
+        }
+        
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         if UserDefaultsRepository.forceDarkMode.value {

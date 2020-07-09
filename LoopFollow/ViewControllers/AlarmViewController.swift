@@ -356,13 +356,6 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
         }
-        <<< SwitchRow("alertTempoaryDND"){ row in
-        row.title = "Override System Volume"
-        row.value = UserDefaultsRepository.alertTemporaryBGDND.value
-        }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.alertTemporaryBGDND.value = value
-        }
         <<< SwitchRow("alertTemporaryRepeat"){ row in
         row.title = "Repeat Sound"
         row.value = UserDefaultsRepository.alertTemporaryBGRepeat.value
@@ -426,13 +419,6 @@ class AlarmViewController: FormViewController {
                 AlarmSound.setSoundFile(str: value)
                 AlarmSound.stop()
                 AlarmSound.playTest()
-            }
-            <<< SwitchRow("alertUrgentLowDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertUrgentLowDND.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertUrgentLowDND.value = value
             }
             <<< SwitchRow("alertUrgentLowRepeat"){ row in
             row.title = "Repeat Sound"
@@ -539,13 +525,6 @@ class AlarmViewController: FormViewController {
                 AlarmSound.setSoundFile(str: value)
                 AlarmSound.stop()
                 AlarmSound.playTest()
-            }
-            <<< SwitchRow("alertLowDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertLowDND.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertLowDND.value = value
             }
             <<< SwitchRow("alertLowRepeat"){ row in
             row.title = "Repeat Sound"
@@ -667,13 +646,6 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< SwitchRow("alertHighDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertHighDND.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertHighDND.value = value
-            }
             <<< SwitchRow("alertHighRepeat"){ row in
             row.title = "Repeat Sound"
             row.value = UserDefaultsRepository.alertHighRepeat.value
@@ -777,13 +749,6 @@ class AlarmViewController: FormViewController {
                 AlarmSound.setSoundFile(str: value)
                 AlarmSound.stop()
                 AlarmSound.playTest()
-            }
-            <<< SwitchRow("alertUrgentHighDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertUrgentHighDND.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertUrgentHighDND.value = value
             }
             <<< SwitchRow("alertUrgentHighRepeat"){ row in
             row.title = "Repeat Sound"
@@ -926,13 +891,6 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< SwitchRow("alertFastDropDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertFastDropDND.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertFastDropDND.value = value
-            }
             <<< SwitchRow("alertFastDropRepeat"){ row in
             row.title = "Repeat Sound"
             row.value = UserDefaultsRepository.alertFastDropRepeat.value
@@ -1074,13 +1032,6 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< SwitchRow("alertFastRiseDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertFastRiseDND.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertFastRiseDND.value = value
-            }
             <<< SwitchRow("alertFastRiseRepeat"){ row in
             row.title = "Repeat Sound"
             row.value = UserDefaultsRepository.alertFastRiseRepeat.value
@@ -1186,13 +1137,6 @@ class AlarmViewController: FormViewController {
                 AlarmSound.setSoundFile(str: value)
                 AlarmSound.stop()
                 AlarmSound.playTest()
-            }
-            <<< SwitchRow("alertMissedReadingDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertMissedReadingDND.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedReadingDND.value = value
             }
             <<< SwitchRow("alertMissedReadingRepeat"){ row in
             row.title = "Repeat Sound"
@@ -1335,13 +1279,6 @@ class AlarmViewController: FormViewController {
                 AlarmSound.setSoundFile(str: value)
                 AlarmSound.stop()
                 AlarmSound.playTest()
-            }
-            <<< SwitchRow("alertNotLoopingDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertNotLoopingDND.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertNotLoopingDND.value = value
             }
             <<< SwitchRow("alertNotLoopingRepeat"){ row in
             row.title = "Repeat Sound"
@@ -1504,12 +1441,12 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< SwitchRow("alertMissedBolusDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertMissedBolusDND.value
+            <<< SwitchRow("alertMissedBolusQuiet"){ row in
+            row.title = "Use Quiet Hours"
+            row.value = UserDefaultsRepository.alertMissedBolusQuiet.value
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedBolusDND.value = value
+                    UserDefaultsRepository.alertMissedBolusQuiet.value = value
             }
             <<< SwitchRow("alertMissedBolusRepeat"){ row in
             row.title = "Repeat Sound"
@@ -1630,12 +1567,12 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< SwitchRow("alertSAGEDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertSAGEDND.value
+            <<< SwitchRow("alertSAGEQuiet"){ row in
+            row.title = "Use Quiet Hours"
+            row.value = UserDefaultsRepository.alertSAGEQuiet.value
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertSAGEDND.value = value
+                    UserDefaultsRepository.alertSAGEQuiet.value = value
             }
             <<< SwitchRow("alertSAGERepeat"){ row in
             row.title = "Repeat Sound"
@@ -1742,12 +1679,12 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< SwitchRow("alertCAGEDND"){ row in
-            row.title = "Override System Volume"
-            row.value = UserDefaultsRepository.alertCAGEDND.value
+            <<< SwitchRow("alertCAGEQuiet"){ row in
+            row.title = "Use Quiet Hours"
+            row.value = UserDefaultsRepository.alertCAGEQuiet.value
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertCAGEDND.value = value
+                    UserDefaultsRepository.alertCAGEQuiet.value = value
             }
             <<< SwitchRow("alertCAGERepeat"){ row in
             row.title = "Repeat Sound"
@@ -1826,12 +1763,12 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
         }
-        <<< SwitchRow("alertOverrideStartDND"){ row in
-        row.title = "Override System Volume"
-        row.value = UserDefaultsRepository.alertOverrideStartDND.value
+        <<< SwitchRow("alertOverrideStartQuiet"){ row in
+        row.title = "Use Quiet Hours"
+        row.value = UserDefaultsRepository.alertOverrideStartQuiet.value
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertOverrideStartDND.value = value
+                UserDefaultsRepository.alertOverrideStartQuiet.value = value
         }
         <<< SwitchRow("alertOverrideStartRepeat"){ row in
         row.title = "Repeat Sound"
@@ -1839,6 +1776,46 @@ class AlarmViewController: FormViewController {
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertOverrideStartRepeat.value = value
+        }
+        <<< DateTimeInlineRow("alertOverrideStartSnoozedTime") { row in
+                row.title = "Snoozed Until"
+                if (UserDefaultsRepository.alertOverrideStartSnoozedTime.value != nil) {
+                    row.value = UserDefaultsRepository.alertOverrideStartSnoozedTime.value
+                }
+                row.minuteInterval = 5
+                row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertOverrideStartSnoozedTime.value = value
+                UserDefaultsRepository.alertOverrideStartIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertOverrideStartIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+            }
+            <<< SwitchRow("alertOverrideStartIsSnoozed"){ row in
+                row.title = "Is Snoozed"
+                row.value = UserDefaultsRepository.alertOverrideStartIsSnoozed.value
+                row.hidden = "$alertOverrideStartSnoozedTime == nil"
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertOverrideStartIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertOverrideStartSnoozedTime.setNil(key: "alertOverrideStartSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertOverrideStartSnoozedTime") as! DateTimeInlineRow
+                    otherRow.value = nil
+                    otherRow.reload()
+                }
         }
         
     }
@@ -1871,12 +1848,12 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
         }
-        <<< SwitchRow("alertOverrideEndDND"){ row in
-        row.title = "Override System Volume"
-        row.value = UserDefaultsRepository.alertOverrideEndDND.value
+        <<< SwitchRow("alertOverrideEndQuiet"){ row in
+        row.title = "Use Quiet Hours"
+        row.value = UserDefaultsRepository.alertOverrideEndQuiet.value
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertOverrideEndDND.value = value
+                UserDefaultsRepository.alertOverrideEndQuiet.value = value
         }
         <<< SwitchRow("alertOverrideEndRepeat"){ row in
         row.title = "Repeat Sound"
@@ -1885,19 +1862,67 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertOverrideEndRepeat.value = value
         }
+        <<< DateTimeInlineRow("alertOverrideEndSnoozedTime") { row in
+                row.title = "Snoozed Until"
+                if (UserDefaultsRepository.alertOverrideEndSnoozedTime.value != nil) {
+                    row.value = UserDefaultsRepository.alertOverrideEndSnoozedTime.value
+                }
+                row.minuteInterval = 5
+                row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertOverrideEndSnoozedTime.value = value
+                UserDefaultsRepository.alertOverrideEndIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertOverrideEndIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+            }
+            <<< SwitchRow("alertOverrideEndIsSnoozed"){ row in
+                row.title = "Is Snoozed"
+                row.value = UserDefaultsRepository.alertOverrideEndIsSnoozed.value
+                row.hidden = "$alertOverrideEndSnoozedTime == nil"
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertOverrideEndIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertOverrideEndSnoozedTime.setNil(key: "alertOverrideEndSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertOverrideEndSnoozedTime") as! DateTimeInlineRow
+                    otherRow.value = nil
+                    otherRow.reload()
+                }
+        }
         
     }
 
     func buildAlarmSettings() {
            form
-            +++ Section(header: "Alarm Sound Settings", footer: "Use this volume level for alarms that override system volume")
+            +++ Section(header: "Alarm Sound Settings", footer: "Quiet hours can be used to automatically snooze non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert that may happen during the night.")
            
+            <<< SwitchRow("overrideSystemOutputVolume"){ row in
+                row.title = "Override System Volume"
+                row.value = UserDefaultsRepository.overrideSystemOutputVolume.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.overrideSystemOutputVolume.value = value
+                }
             <<< StepperRow("forcedOutputVolume") { row in
                   row.title = "Volume Level"
                 row.cell.stepper.stepValue = 0.05
                   row.cell.stepper.minimumValue = 0
                   row.cell.stepper.maximumValue = 1
                   row.value = Double(UserDefaultsRepository.forcedOutputVolume.value)
+                  row.hidden = "$overrideSystemOutputVolume == false"
                     row.displayValueFor = { value in
                     guard let value = value else { return nil }
                     return "\(Int(value*100))%"
@@ -1906,20 +1931,20 @@ class AlarmViewController: FormViewController {
                       guard let value = row.value else { return }
                       UserDefaultsRepository.forcedOutputVolume.value = Float(value)
               }
-           /* <<< StepperRow("fadeInTimeInterval") { row in
-                row.title = "Fade-in Seconds"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 0
-                row.cell.stepper.maximumValue = 60
-                row.value = Double(UserDefaultsRepository.fadeInTimeInterval.value)
-                row.displayValueFor = { value in
-                guard let value = value else { return nil }
-                return "\(Int(value))"
-                }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.fadeInTimeInterval.value = TimeInterval(value)
-            }*/
+            <<< TimeInlineRow("quietHourStart") { row in
+                row.title = "Quiet Hours Start Today"
+                row.value = UserDefaultsRepository.quietHourStart.value
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.quietHourStart.value = value
+        }
+        <<< TimeInlineRow("quietHourEnd") { row in
+                row.title = "Quiet Hours End Tomorrow"
+                row.value = UserDefaultsRepository.quietHourEnd.value
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.quietHourEnd.value = value
+        }
        }
 
 }
