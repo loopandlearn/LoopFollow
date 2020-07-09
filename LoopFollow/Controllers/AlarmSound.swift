@@ -116,7 +116,6 @@ class AlarmSound {
     
     
     static func play(overrideVolume: Bool, numLoops: Int) {
-        
         guard !self.isPlaying else {
             return
         }
