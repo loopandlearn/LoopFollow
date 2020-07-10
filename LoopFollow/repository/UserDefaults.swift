@@ -11,10 +11,16 @@ import UIKit
 
 class UserDefaultsRepository {
     
+    
     //Nightscout Settings
     static let url = UserDefaultsValue<String>(key: "url", default: "")
     static let token = UserDefaultsValue<String>(key: "token", default: "")
     static let units = UserDefaultsValue<String>(key: "units", default: "mg/dL")
+    
+    //Dexcom Share Settings
+    static let shareUserName = UserDefaultsValue<String>(key: "shareUserName", default: "")
+    static let sharePassword = UserDefaultsValue<String>(key: "sharePassword", default: "")
+    static let shareServer = UserDefaultsValue<String>(key: "shareServer", default: "US")
     
     // Graph Settings
     static let showDots = UserDefaultsValue<Bool>(key: "showDots", default: true)
