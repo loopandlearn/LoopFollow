@@ -373,9 +373,11 @@ extension MainViewController {
                             let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
                             var i = 1
                             while i <= toLoad {
-                                let prediction = DataStructs.sgvData(sgv: prediction[i], date: predictionTime, direction: "flat")
-                                predictionData.append(prediction)
-                                predictionTime += 300
+                                if i < prediction.count {
+                                    let prediction = DataStructs.sgvData(sgv: prediction[i], date: predictionTime, direction: "flat")
+                                    predictionData.append(prediction)
+                                    predictionTime += 300
+                                }
                                 i += 1
                             }
                         }
