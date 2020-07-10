@@ -9,6 +9,7 @@
 import UIKit
 import Charts
 import EventKit
+import ShareClient
 
 
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate {
@@ -30,6 +31,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsHighPercent: UILabel!
     @IBOutlet weak var statsAvgBG: UILabel!
     @IBOutlet weak var statsEstA1C: UILabel!
+    @IBOutlet weak var statsStdDev: UILabel!
     
     
     // Data Table Struct
@@ -75,6 +77,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var calTimer = Timer()
     
     // Info Table Setup
+    // TODO: make this selectable
     var tableData = [
         infoData(name: "IOB", value: ""), //0
         infoData(name: "COB", value: ""), //1
@@ -113,19 +116,26 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     var snoozeTabItem: UITabBarItem = UITabBarItem()
     
+    var dexShare: ShareClient?;
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // TODO: look for username and password in the UserDefaultsRepo ?
+        // TODO: need non-us server ?
+        let shareUserName = UserDefaultsRepository.shareUserName.value
+        let sharePassword = UserDefaultsRepository.sharePassword.value
+        let shareServer = UserDefaultsRepository.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
+        dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer )
+        
+        //print("Share: \(dexShare)")
         
         // Start Log Timer if needed
         if UserDefaultsRepository.debugLog.value {
             guard let debug = self.tabBarController!.viewControllers?[5] as? debugViewController else { return }
             debug.loadViewIfNeeded()
         } else {
-            do {
-                try self.tabBarController?.viewControllers?.remove(at: 5)
-            } catch {
-                
-            }
+            self.tabBarController?.viewControllers?.remove(at: 5)
         }
         
         BGChart.delegate = self
@@ -164,6 +174,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Load Data
         if UserDefaultsRepository.url.value != "" && firstGraphLoad {
             nightscoutLoader()
+            dexShare?.fetchLast(150) { (err, result) -> () in
+               print("Share: \(result)")
+            }
         }
         
     }
