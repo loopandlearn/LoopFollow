@@ -67,6 +67,40 @@ class SettingsViewController: FormViewController {
             guard let value = row.value else { return }
             UserDefaultsRepository.units.value = value
         }
+        +++ Section("Dexcom Settings")
+        <<< TextRow(){ row in
+            row.title = "User Name"
+            row.value = UserDefaultsRepository.shareUserName.value
+        }.cellSetup { (cell, row) in
+            cell.textField.autocorrectionType = .no
+        }.onChange { row in
+            if row.value == nil {
+                UserDefaultsRepository.shareUserName.value = ""
+            }
+            guard let value = row.value else { return }
+            UserDefaultsRepository.shareUserName.value = value
+        }
+        <<< TextRow(){ row in
+            row.title = "Password"
+            row.value = UserDefaultsRepository.sharePassword.value
+        }.cellSetup { (cell, row) in
+            cell.textField.autocorrectionType = .no
+            cell.textField.isSecureTextEntry = true
+        }.onChange { row in
+            if row.value == nil {
+                UserDefaultsRepository.sharePassword.value = ""
+            }
+            guard let value = row.value else { return }
+            UserDefaultsRepository.sharePassword.value = value
+        }
+        <<< SegmentedRow<String>("shareServer") { row in
+            row.title = "Server"
+            row.options = ["US", "NON-US"]
+            row.value = UserDefaultsRepository.shareServer.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.shareServer.value = value
+        }
         
         
         buildGeneralSettings()
