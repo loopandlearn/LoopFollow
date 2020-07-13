@@ -1015,7 +1015,9 @@ extension MainViewController {
                 return
             }
             
-            let strippedZone = String(bolusDate.dropLast())
+            // fix to remove millisecond (after period in timestamp) for FreeAPS users
+            var strippedZone = String(bolusDate.dropLast())
+            strippedZone = strippedZone.components(separatedBy: ".")[0]
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
