@@ -1117,19 +1117,19 @@ extension MainViewController {
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
             
-            do {
-                let carbs = try currentEntry?["carbs"] as! Double
-                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-                lastFoundIndex = sgv.foundIndex
-                
-                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                    // Make the dot
-                    let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                    carbData.append(dot)
-                }
-            } catch {
-                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Carb entry") }
+            guard let carbs = currentEntry?["carbs"] as? Double else {
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Carb entry")}
+                break
             }
+            let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+            lastFoundIndex = sgv.foundIndex
+            
+            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                // Make the dot
+                let dot = bolusCarbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                carbData.append(dot)
+            }
+            
             
             
         }
