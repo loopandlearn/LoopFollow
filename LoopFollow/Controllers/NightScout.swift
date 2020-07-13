@@ -1106,7 +1106,10 @@ extension MainViewController {
             } else {
                 return
             }
-            let strippedZone = String(carbDate.dropLast())
+            // Fix for FreeAPS milliseconds in timestamp
+            var strippedZone = String(carbDate.dropLast())
+            strippedZone = strippedZone.components(separatedBy: ".")[0]
+            
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
