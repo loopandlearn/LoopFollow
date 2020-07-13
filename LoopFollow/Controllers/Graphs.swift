@@ -359,6 +359,10 @@ extension MainViewController {
             smallChart.addEntry(value)
         }
         
+        smallChart.circleColors.removeAll()
+        smallChart.colors.removeAll()
+        mainChart.colors.removeAll()
+        mainChart.circleColors.removeAll()
         if colors.count > 0 {
             if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: prediction colors") }
             for i in 0..<colors.count{
