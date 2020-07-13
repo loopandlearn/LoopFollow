@@ -111,12 +111,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
     
+    // share
+    var bgDataShare: [ShareGlucoseData] = []
+    var dexShare: ShareClient?;
+    
     // calendar setup
     let store = EKEventStore()
     
     var snoozeTabItem: UITabBarItem = UITabBarItem()
-    
-    var dexShare: ShareClient?;
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -174,11 +176,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Load Data
         if UserDefaultsRepository.url.value != "" && firstGraphLoad {
             nightscoutLoader()
-            dexShare?.fetchLast(150) { (err, result) -> () in
-               print("Share: \(result)")
+          
+            // TODO: move this to MainViewController extension ?
+            dexShare?.fetchData(262) { (err, result) -> () in
+                
+                // TODO: add error checking
+                self.bgDataShare = result!
+                // print("\(self.bgDataShare)")
             }
         }
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -186,7 +192,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
         
     }
-    
     
     // Info Table Functions
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -302,6 +307,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 //        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Main timer ended") }
         updateMinAgo()
         nightscoutLoader()
+        
+        // TODO: move this to MainViewController extension ?
+        dexShare?.fetchData(262) { (err, result) -> () in
+            
+            // TODO: add error checking
+            self.bgDataShare = result!
+            // print("\(self.bgDataShare)")
+        }
     }
 
     //update Min Ago Text. We need to call this separately because it updates between readings
