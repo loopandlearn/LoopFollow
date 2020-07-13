@@ -160,7 +160,7 @@ class AlarmViewController: FormViewController {
         form
             +++ Section("Select Alert")
           <<< SegmentedRow<String>("bgAlerts"){ row in
-                row.title = "Main BG Alerts"
+                row.title = ""
                 row.options = ["Urgent Low", "Low", "High", "Urgent High"]
                    // row.value = "Urgent Low"
         }.onChange { [weak self] row in
@@ -177,7 +177,7 @@ class AlarmViewController: FormViewController {
             row.value = value
         }
             <<< SegmentedRow<String>("bgExtraAlerts"){ row in
-                row.title = "Extra BG Alerts"
+                row.title = ""
                 row.options = ["No Readings", "Fast Drop", "Fast Rise", "Temporary"]
                     //row.value = "Missed Readings"
         }.onChange { [weak self] row in
@@ -194,7 +194,7 @@ class AlarmViewController: FormViewController {
             row.value = value
         }
             <<< SegmentedRow<String>("otherAlerts"){ row in
-                row.title = "Other Alerts"
+                row.title = ""
                 row.options = ["Not Looping", "Missed Bolus", "SAGE", "CAGE"]
                 //row.value = "Not Looping"
         }.onChange { [weak self] row in
