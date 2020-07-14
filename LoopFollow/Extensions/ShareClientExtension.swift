@@ -16,14 +16,16 @@ public struct ShareGlucoseData: Codable {
 }
 
 private var TrendTable: [String] = [
-   "NONE",            // 0
-   "DoubleUp",        // 1
-   "SingleUp",        // 2
-   "FourtyFiveUp",    // 3
-   "Flat",            // 4
-   "FourtyFiveDown",  // 5
-   "SingleDown",      // 6
-   "DoubleDown"       // 7
+   "NONE",             // 0
+   "DoubleUp",         // 1
+   "SingleUp",         // 2
+   "FortyFiveUp",      // 3
+   "Flat",             // 4
+   "FortyFiveDown",    // 5
+   "SingleDown",       // 6
+   "DoubleDown",       // 7
+   "NOT COMPUTABLE",   // 8
+   "RATE OUT OF RANGE" // 9
 ]
 
 // TODO: probably better to make this an inherited class rather than an extension

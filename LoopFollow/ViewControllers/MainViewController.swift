@@ -181,7 +181,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             dexShare?.fetchData(262) { (err, result) -> () in
                 
                 // TODO: add error checking
-                self.bgDataShare = result!
+                if(err == nil) {
+                   self.bgDataShare = result!
+                }
                 // print("\(self.bgDataShare)")
             }
         }
@@ -312,7 +314,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         dexShare?.fetchData(262) { (err, result) -> () in
             
             // TODO: add error checking
-            self.bgDataShare = result!
+            if(err == nil) {
+              self.bgDataShare = result!
+            }
             // print("\(self.bgDataShare)")
         }
     }
