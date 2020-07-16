@@ -998,6 +998,7 @@ extension MainViewController {
             
         }
         tableData[2].value = latestBasal
+        infoTable.reloadData()
         if UserDefaultsRepository.graphBasal.value {
             updateBasalGraph()
         }
