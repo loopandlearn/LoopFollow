@@ -70,7 +70,6 @@ extension MainViewController {
         if forceLoad { needsLoaded = true}
         // Only update if we don't have a current reading or forced to load
         if needsLoaded {
-            self.clearLastInfoData()
             webLoadNSDeviceStatus()
             webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
             //webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
@@ -348,6 +347,11 @@ extension MainViewController {
     
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
+        self.clearLastInfoData(index: 0)
+        self.clearLastInfoData(index: 1)
+        self.clearLastInfoData(index: 3)
+        self.clearLastInfoData(index: 4)
+        self.clearLastInfoData(index: 5)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
             return
@@ -392,7 +396,6 @@ extension MainViewController {
                         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
                         wasEnacted = true
                         if let lastTempBasal = enacted["rate"] as? Double {
-                            // tableData[2].value = String(format:"%.1f", lastTempBasal)
                         }
                     }
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
@@ -561,6 +564,7 @@ extension MainViewController {
     
     // NS Cage Response Processor
     func updateCage(data: [cageData]) {
+        self.clearLastInfoData(index: 7)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: CAGE") }
         if data.count == 0 {
             return
@@ -630,6 +634,7 @@ extension MainViewController {
     
     // NS Sage Response Processor
     func updateSage(data: [cageData]) {
+        self.clearLastInfoData(index: 6)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process/Display: SAGE") }
         if data.count == 0 {
             return
@@ -848,6 +853,7 @@ extension MainViewController {
     
     // NS Temp Basal Response Processor
     func updateBasals(entries: [[String:AnyObject]]) {
+        self.clearLastInfoData(index: 2)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Basal") }
         // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
         basalData.removeAll()
