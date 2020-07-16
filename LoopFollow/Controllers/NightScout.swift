@@ -257,9 +257,9 @@ extension MainViewController {
                 
                 // TODO: remove testing feature to color code arrow based on NS vs Dex
                 if isNS {
-                    self.DirectionText.textColor = UIColor.systemTeal
+                    self.serverText.text = "Nightscout"
                 } else {
-                    self.DirectionText.textColor = UIColor.systemOrange
+                    self.serverText.text = "Dexcom"
                 }
                 
                 self.BGText.text = bgUnits.toDisplayUnits(String(latestBG))
