@@ -224,7 +224,7 @@ extension MainViewController {
         for i in 0..<data.count{
             var dateString = data[data.count - 1 - i].date
             if isNS {
-                var dateString = data[data.count - 1 - i].date / 1000
+                dateString = data[data.count - 1 - i].date / 1000
                 dateString.round(FloatingPointRoundingRule.toNearestOrEven)
             }
             if dateString >= dateTimeUtils.getTimeInterval24HoursAgo() {
