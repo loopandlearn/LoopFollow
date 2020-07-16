@@ -175,7 +175,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         
         // Load Data
-        if UserDefaultsRepository.url.value != "" && firstGraphLoad {
+        if (UserDefaultsRepository.url.value != "" || (UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "")) && firstGraphLoad {
             nightscoutLoader()
         }
     }
