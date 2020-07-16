@@ -321,10 +321,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     //Clear the info data before next pull. This ensures we aren't displaying old data if something fails.
-    func clearLastInfoData(){
-        for i in 0..<tableData.count{
-            tableData[i].value = ""
-        }
+    func clearLastInfoData(index: Int){
+        tableData[index].value = ""
     }
 
     func stringFromTimeInterval(interval: TimeInterval) -> String {
