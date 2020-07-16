@@ -1,0 +1,21 @@
+{
+  "name": "ShareClient",
+  "version": "1.2",
+  "summary": "Dexcom Client Pod",
+  "swift_versions": "5.0",
+  "homepage": "https://github.com/josep1972/dexcom-share-client-swift",
+  "license": "MIT",
+  "authors": "josep1972",
+  "platforms": {
+    "ios": "13"
+  },
+  "source": {
+    "git": "https://github.com/josep1972/dexcom-share-client-swift.git",
+    "tag": "v1.2"
+  },
+  "source_files": [
+    "ShareClient/ShareClient.h",
+    "ShareClient/ShareClient.swift"
+  ],
+  "swift_version": "5.0"
+}

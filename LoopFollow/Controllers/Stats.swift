@@ -23,7 +23,7 @@ class StatsData {
     var stdDev: Float
     var pie: [DataStructs.pieData]
     
-    init(bgData: [DataStructs.sgvData]) {
+    init(bgData: [ShareGlucoseData]) {
         
         self.countLow = 0
         self.countRange = 0

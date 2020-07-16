@@ -11,13 +11,7 @@ import UIKit
 
 
 extension MainViewController {
-//
-//    //NS BG Struct
-//    struct sgvData: Codable {
-//        var sgv: Int
-//        var date: TimeInterval
-//        var direction: String?
-//    }
+
     
     //NS Cage Struct
     struct cageData: Codable {
@@ -78,7 +72,8 @@ extension MainViewController {
         if needsLoaded {
             self.clearLastInfoData()
             webLoadNSDeviceStatus()
-            webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+            webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
+            //webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
             
             if !staleData {
                 webLoadNSProfile()
@@ -118,6 +113,23 @@ extension MainViewController {
         }
     }
     
+    // Dex Share Web Call
+    func webLoadDexShare(onlyPullLastRecord: Bool = false) {
+        var count = 288
+        if onlyPullLastRecord { count = 1 }
+        dexShare?.fetchData(count) { (err, result) -> () in
+            
+            // TODO: add error checking
+            if(err == nil) {
+                var data = result!
+                self.ProcessNSBGData(data: data, onlyPullLastRecord: onlyPullLastRecord)
+            } else {
+                // If we get an error, immediately try to pull NS BG Data
+                self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+            }
+        }
+    }
+    
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
@@ -154,11 +166,11 @@ extension MainViewController {
             }
             
             let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([DataStructs.sgvData].self, from: data)
+            let entriesResponse = try? decoder.decode([ShareGlucoseData].self, from: data)
             if let entriesResponse = entriesResponse {
                 DispatchQueue.main.async {
                     // trigger the processor for the data after downloading.
-                    self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
+                    self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord, isNS: true)
                     
                 }
             } else {
@@ -170,11 +182,26 @@ extension MainViewController {
     }
     
     // NS BG Data Response processor
-    func ProcessNSBGData(data: [DataStructs.sgvData], onlyPullLastRecord: Bool){
+    func ProcessNSBGData(data: [ShareGlucoseData], onlyPullLastRecord: Bool, isNS: Bool = false){
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG") }
         
-        var pullDate = data[data.count - 1].date / 1000
-        pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
+        var pullDate = data[data.count - 1].date
+        if isNS {
+            pullDate = data[data.count - 1].date / 1000
+            pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
+        }
+        
+        var latestDate = data[0].date
+        if isNS {
+            latestDate = data[0].date / 1000
+            latestDate.round(FloatingPointRoundingRule.toNearestOrEven)
+        }
+        
+        let now = dateTimeUtils.getNowTimeIntervalUTC()
+        if !isNS && (latestDate + 330) < now {
+            webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+            return
+        }
         
         // If we already have data, we're going to pop it to the end and remove the first. If we have old or no data, we'll destroy the whole array and start over. This is simpler than determining how far back we need to get new data from in case Dex back-filled readings
         if !onlyPullLastRecord {
@@ -195,73 +222,86 @@ extension MainViewController {
         
         // loop through the data so we can reverse the order to oldest first for the graph and convert the NS timestamp to seconds instead of milliseconds. Makes date comparisons easier for everything else.
         for i in 0..<data.count{
-            var dateString = data[data.count - 1 - i].date / 1000
-            dateString.round(FloatingPointRoundingRule.toNearestOrEven)
+            var dateString = data[data.count - 1 - i].date
+            if isNS {
+                var dateString = data[data.count - 1 - i].date / 1000
+                dateString.round(FloatingPointRoundingRule.toNearestOrEven)
+            }
             if dateString >= dateTimeUtils.getTimeInterval24HoursAgo() {
-                let reading = DataStructs.sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
+                let reading = ShareGlucoseData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
                 bgData.append(reading)
             }
             
         }
         
-        viewUpdateNSBG()
+        viewUpdateNSBG(isNS: isNS)
     }
     
     // NS BG Data Front end updater
-    func viewUpdateNSBG () {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Display: BG") }
-        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        let entries = bgData
-        if entries.count > 0 {
-            let latestEntryi = entries.count - 1
-            let latestBG = entries[latestEntryi].sgv
-            let priorBG = entries[latestEntryi - 1].sgv
-            let deltaBG = latestBG - priorBG as Int
-            let lastBGTime = entries[latestEntryi].date
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
-            var userUnit = " mg/dL"
-            if mmol {
-                userUnit = " mmol/L"
-            }
-            
-            BGText.text = bgUnits.toDisplayUnits(String(latestBG))
-            snoozer.BGLabel.text = bgUnits.toDisplayUnits(String(latestBG))
-            setBGTextColor()
-            
-            if let directionBG = entries[latestEntryi].direction {
-                DirectionText.text = bgDirectionGraphic(directionBG)
-                snoozer.DirectionLabel.text = bgDirectionGraphic(directionBG)
-                latestDirectionString = bgDirectionGraphic(directionBG)
+    func viewUpdateNSBG (isNS: Bool) {
+        DispatchQueue.main.async {
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Display: BG") }
+            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+            let entries = self.bgData
+            if entries.count > 0 {
+                let latestEntryi = entries.count - 1
+                let latestBG = entries[latestEntryi].sgv
+                let priorBG = entries[latestEntryi - 1].sgv
+                let deltaBG = latestBG - priorBG as Int
+                let lastBGTime = entries[latestEntryi].date
+                let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
+                var userUnit = " mg/dL"
+                if self.mmol {
+                    userUnit = " mmol/L"
+                }
+                
+                // TODO: remove testing feature to color code arrow based on NS vs Dex
+                if isNS {
+                    self.DirectionText.textColor = UIColor.systemTeal
+                } else {
+                    self.DirectionText.textColor = UIColor.systemOrange
+                }
+                
+                self.BGText.text = bgUnits.toDisplayUnits(String(latestBG))
+                snoozer.BGLabel.text = bgUnits.toDisplayUnits(String(latestBG))
+                self.setBGTextColor()
+                
+                if let directionBG = entries[latestEntryi].direction {
+                    self.DirectionText.text = self.bgDirectionGraphic(directionBG)
+                    snoozer.DirectionLabel.text = self.bgDirectionGraphic(directionBG)
+                    self.latestDirectionString = self.bgDirectionGraphic(directionBG)
+                }
+                else
+                {
+                    self.DirectionText.text = ""
+                    snoozer.DirectionLabel.text = ""
+                    self.latestDirectionString = ""
+                }
+                
+                if deltaBG < 0 {
+                    self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
+                    snoozer.DeltaLabel.text = bgUnits.toDisplayUnits(String(deltaBG))
+                    self.latestDeltaString = String(deltaBG)
+                }
+                else
+                {
+                    self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                    snoozer.DeltaLabel.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                    self.latestDeltaString = "+" + String(deltaBG)
+                }
+                self.updateBadge(val: latestBG)
+                
             }
             else
             {
-                DirectionText.text = ""
-                snoozer.DirectionLabel.text = ""
-                latestDirectionString = ""
+                
+                return
             }
-            
-            if deltaBG < 0 {
-                self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
-                snoozer.DeltaLabel.text = bgUnits.toDisplayUnits(String(deltaBG))
-                latestDeltaString = String(deltaBG)
-            }
-            else
-            {
-                self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
-                snoozer.DeltaLabel.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
-                latestDeltaString = "+" + String(deltaBG)
-            }
-            self.updateBadge(val: latestBG)
-            
+            self.updateBGGraph()
+            self.updateMinAgo()
+            self.updateStats()
         }
-        else
-        {
-            
-            return
-        }
-        updateBGGraph()
-        updateMinAgo()
-        updateStats()
+        
     }
     
     // NS Device Status Web Call
@@ -374,7 +414,7 @@ extension MainViewController {
                             var i = 1
                             while i <= toLoad {
                                 if i < prediction.count {
-                                    let prediction = DataStructs.sgvData(sgv: prediction[i], date: predictionTime, direction: "flat")
+                                    let prediction = ShareGlucoseData(sgv: prediction[i], date: predictionTime, direction: "flat")
                                     predictionData.append(prediction)
                                     predictionTime += 300
                                 }
