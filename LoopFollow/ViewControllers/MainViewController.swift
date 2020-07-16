@@ -89,14 +89,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoData(name: "CAGE", value: "") //7
     ]
     
-    var bgData: [DataStructs.sgvData] = []
+    var bgData: [ShareGlucoseData] = []
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
     var basalScheduleData: [basalGraphStruct] = []
     var bolusData: [bolusCarbGraphStruct] = []
     var carbData: [bolusCarbGraphStruct] = []
     var overrideData: [DataStructs.overrideGraphStruct] = []
-    var predictionData: [DataStructs.sgvData] = []
+    var predictionData: [ShareGlucoseData] = []
     var chartData = LineChartData()
     var newBGPulled = false
     var lastCalDate: Double = 0
@@ -176,16 +176,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Load Data
         if UserDefaultsRepository.url.value != "" && firstGraphLoad {
             nightscoutLoader()
-          
-            // TODO: move this to MainViewController extension ?
-            dexShare?.fetchData(262) { (err, result) -> () in
-                
-                // TODO: add error checking
-                if(err == nil) {
-                   self.bgDataShare = result!
-                }
-                // print("\(self.bgDataShare)")
-            }
         }
     }
     
@@ -309,16 +299,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 //        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Main timer ended") }
         updateMinAgo()
         nightscoutLoader()
-        
-        // TODO: move this to MainViewController extension ?
-        dexShare?.fetchData(262) { (err, result) -> () in
-            
-            // TODO: add error checking
-            if(err == nil) {
-              self.bgDataShare = result!
-            }
-            // print("\(self.bgDataShare)")
-        }
     }
 
     //update Min Ago Text. We need to call this separately because it updates between readings
