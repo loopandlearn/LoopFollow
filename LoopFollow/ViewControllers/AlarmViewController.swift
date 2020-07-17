@@ -144,6 +144,8 @@ class AlarmViewController: FormViewController {
             }
     }
     
+    
+    
    // static let shared = AlarmViewController()
 
     @IBAction func unwindToAlarms(sender: UIStoryboardSegue)
@@ -196,6 +198,10 @@ class AlarmViewController: FormViewController {
             <<< SegmentedRow<String>("otherAlerts"){ row in
                 row.title = ""
                 row.options = ["Not Looping", "Missed Bolus", "SAGE", "CAGE"]
+                if UserDefaultsRepository.url.value == "" {
+                    row.hidden = true
+                }
+                
                 //row.value = "Not Looping"
         }.onChange { [weak self] row in
              guard let value = row.value else { return }
@@ -213,6 +219,9 @@ class AlarmViewController: FormViewController {
         <<< SegmentedRow<String>("overrideAlerts"){ row in
                 row.title = ""
                 row.options = ["Override Start", "Override End"]
+                if UserDefaultsRepository.url.value == "" {
+                    row.hidden = true
+                }
                 //row.value = "Not Looping"
         }.onChange { [weak self] row in
              guard let value = row.value else { return }
@@ -256,6 +265,42 @@ class AlarmViewController: FormViewController {
         buildSnoozeAll()
         buildAppInactive()
         buildAlarmSettings()
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        showHideNSDetails()
+    }
+    
+    func showHideNSDetails() {
+        var isHidden = false
+        var isEnabled = true
+        if UserDefaultsRepository.url.value == "" {
+            isHidden = true
+            isEnabled = false
+        }
+        
+        if let row1 = form.rowBy(tag: "otherAlerts") as? SegmentedRow<String> {
+            row1.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row1.evaluateHidden()
+        }
+        if let row2 = form.rowBy(tag: "overrideAlerts") as? SegmentedRow<String> {
+            row2.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row2.evaluateHidden()
+        }
+        if let row3 = form.sectionBy(tag: "quietHourSection") as? Section {
+            row3.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row3.evaluateHidden()
+        }
+        
+        guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
+        nightscoutTab.isEnabled = isEnabled
         
     }
 
@@ -1907,7 +1952,7 @@ class AlarmViewController: FormViewController {
 
     func buildAlarmSettings() {
            form
-            +++ Section(header: "Alarm Sound Settings", footer: "Quiet hours can be used to automatically snooze non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert that may happen during the night.")
+            +++ Section(header: "Alarm Sound Settings", footer: "")
            
             <<< SwitchRow("overrideSystemOutputVolume"){ row in
                 row.title = "Override System Volume"
@@ -1931,9 +1976,14 @@ class AlarmViewController: FormViewController {
                       guard let value = row.value else { return }
                       UserDefaultsRepository.forcedOutputVolume.value = Float(value)
               }
+            
+             +++ Section(header: "Quiet Hour Settings", footer: "Quiet hours can be used to automatically snooze non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert that may happen during the night.")  { row in
+                row.tag = "quietHourSection"
+                        }
             <<< TimeInlineRow("quietHourStart") { row in
                 row.title = "Quiet Hours Start Today"
                 row.value = UserDefaultsRepository.quietHourStart.value
+                
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.quietHourStart.value = value
@@ -1941,6 +1991,7 @@ class AlarmViewController: FormViewController {
         <<< TimeInlineRow("quietHourEnd") { row in
                 row.title = "Quiet Hours End Tomorrow"
                 row.value = UserDefaultsRepository.quietHourEnd.value
+                
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.quietHourEnd.value = value

@@ -174,6 +174,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             createSmallBGGraph()
         }
         
+        // setup display for NS vs Dex
+        showHideNSDetails()
+        
         // Load Data
         if (UserDefaultsRepository.url.value != "" || (UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "")) && firstGraphLoad {
             nightscoutLoader()
@@ -295,6 +298,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
     }
     
+    @objc override func viewDidAppear(_ animated: Bool) {
+        showHideNSDetails()
+    }
+    
     // Check for new data when timer ends
     @objc func timerDidEnd(_ timer:Timer) {
 //        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Main timer ended") }
@@ -332,7 +339,21 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return String(format: "%02d:%02d", hours, minutes)
     }
 
-    
+    func showHideNSDetails() {
+        var isHidden = false
+        var isEnabled = true
+        if UserDefaultsRepository.url.value == "" {
+            isHidden = true
+            isEnabled = false
+        }
+        
+        LoopStatusLabel.isHidden = isHidden
+        PredictionLabel.isHidden = isHidden
+        infoTable.isHidden = isHidden
+        guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
+        nightscoutTab.isEnabled = isEnabled
+        
+    }
     
     func updateBadge(val: Int) {
         if UserDefaultsRepository.appBadge.value {
