@@ -1,0 +1,6 @@
+framework module ShareClient {
+  umbrella header "ShareClient-umbrella.h"
+
+  export *
+  module * { export * }
+}
