@@ -214,7 +214,7 @@ extension MainViewController {
         
         BGChart.data = data
         BGChart.setExtraOffsets(left: 10, top: 10, right: 10, bottom: 10)
-        BGChart.setVisibleXRangeMinimum(10)
+        
        
         
     }
@@ -314,7 +314,7 @@ extension MainViewController {
         }
         
         BGChart.rightAxis.axisMaximum = Double(maxBG)
-       
+        BGChart.setVisibleXRangeMinimum(600)
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
