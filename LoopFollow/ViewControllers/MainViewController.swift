@@ -46,6 +46,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsAvgBG: UILabel!
     @IBOutlet weak var statsEstA1C: UILabel!
     @IBOutlet weak var statsStdDev: UILabel!
+
         
     // Data Table class
     class infoData {
@@ -55,6 +56,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.name = name
             self.value = value
         }
+
+    @IBOutlet weak var serverText: UILabel!
+
     }
 
     // Variables for BG Charts
@@ -100,14 +104,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var tableData : [infoData] = []
     var derivedTableData: [infoData] = []
     
-    var bgData: [DataStructs.sgvData] = []
+    var bgData: [ShareGlucoseData] = []
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
     var basalScheduleData: [basalGraphStruct] = []
     var bolusData: [bolusCarbGraphStruct] = []
     var carbData: [bolusCarbGraphStruct] = []
     var overrideData: [DataStructs.overrideGraphStruct] = []
-    var predictionData: [DataStructs.sgvData] = []
+    var predictionData: [ShareGlucoseData] = []
     var chartData = LineChartData()
     var newBGPulled = false
     var lastCalDate: Double = 0
@@ -208,19 +212,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             createSmallBGGraph()
         }
         
+        // setup display for NS vs Dex
+        showHideNSDetails()
+        
         // Load Data
-        if UserDefaultsRepository.url.value != "" && firstGraphLoad {
+        if (UserDefaultsRepository.url.value != "" || (UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "")) && firstGraphLoad {
             nightscoutLoader()
-          
-            // TODO: move this to MainViewController extension ?
-            dexShare?.fetchData(262) { (err, result) -> () in
-                
-                // TODO: add error checking
-                if(err == nil) {
-                   self.bgDataShare = result!
-                }
-                // print("\(self.bgDataShare)")
-            }
         }
     }
     
@@ -370,21 +367,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
     }
     
+    @objc override func viewDidAppear(_ animated: Bool) {
+        showHideNSDetails()
+    }
+    
     // Check for new data when timer ends
     @objc func timerDidEnd(_ timer:Timer) {
 //        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Main timer ended") }
         updateMinAgo()
         nightscoutLoader()
-        
-        // TODO: move this to MainViewController extension ?
-        dexShare?.fetchData(262) { (err, result) -> () in
-            
-            // TODO: add error checking
-            if(err == nil) {
-              self.bgDataShare = result!
-            }
-            // print("\(self.bgDataShare)")
-        }
     }
 
     //update Min Ago Text. We need to call this separately because it updates between readings
@@ -406,12 +397,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     //Clear the info data before next pull. This ensures we aren't displaying old data if something fails.
-    func clearLastInfoData(){
-        // var tmpData = tableData[2]
-        for i in 0..<tableData.count{
-            tableData[i].value = ""
-        }
-        // tableData[2] = tmpData
+    func clearLastInfoData(index: Int){
+        tableData[index].value = ""
     }
 
     func stringFromTimeInterval(interval: TimeInterval) -> String {
@@ -421,7 +408,21 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return String(format: "%02d:%02d", hours, minutes)
     }
 
-    
+    func showHideNSDetails() {
+        var isHidden = false
+        var isEnabled = true
+        if UserDefaultsRepository.url.value == "" {
+            isHidden = true
+            isEnabled = false
+        }
+        
+        LoopStatusLabel.isHidden = isHidden
+        PredictionLabel.isHidden = isHidden
+        infoTable.isHidden = isHidden
+        guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
+        nightscoutTab.isEnabled = isEnabled
+        
+    }
     
     func updateBadge(val: Int) {
         if UserDefaultsRepository.appBadge.value {

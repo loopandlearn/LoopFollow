@@ -227,8 +227,6 @@ extension MainViewController {
         
         BGChart.data = data
         BGChart.setExtraOffsets(left: 10, top: 10, right: 10, bottom: 10)
-        BGChart.setVisibleXRangeMinimum(10)
-        //BGChart.setVisibleXRangeMaximum(18)
         
     }
     
@@ -326,9 +324,7 @@ extension MainViewController {
         }
         
         BGChart.rightAxis.axisMaximum = Double(maxBG)
-       
         BGChart.setVisibleXRangeMinimum(600)
-       
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
@@ -378,6 +374,10 @@ extension MainViewController {
             smallChart.addEntry(value)
         }
         
+        smallChart.circleColors.removeAll()
+        smallChart.colors.removeAll()
+        mainChart.colors.removeAll()
+        mainChart.circleColors.removeAll()
         if colors.count > 0 {
             if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: prediction colors") }
             for i in 0..<colors.count{

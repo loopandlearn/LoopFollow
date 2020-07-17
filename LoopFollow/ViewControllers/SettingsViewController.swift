@@ -28,7 +28,9 @@ class SettingsViewController: FormViewController {
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
         }.onChange { row in
-            guard let value = row.value else { return }
+            guard let value = row.value else {
+                UserDefaultsRepository.url.value = ""
+                return }
             // check the format of the URL entered by the user and trim away any spaces or "/" at the end
             var urlNSInput = value.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
             if urlNSInput.last == "/" {
@@ -105,8 +107,10 @@ class SettingsViewController: FormViewController {
                   return controller
                }
            ), onDismiss: nil)
+
             
         }
+
         // +++ Section("Graph Settings")
         <<< ButtonRow() {
            $0.title = "Graph Settings"

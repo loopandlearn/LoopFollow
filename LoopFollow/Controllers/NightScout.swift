@@ -11,13 +11,7 @@ import UIKit
 
 
 extension MainViewController {
-//
-//    //NS BG Struct
-//    struct sgvData: Codable {
-//        var sgv: Int
-//        var date: TimeInterval
-//        var direction: String?
-//    }
+
     
     //NS Cage Struct
     struct cageData: Codable {
@@ -76,11 +70,19 @@ extension MainViewController {
         if forceLoad { needsLoaded = true}
         // Only update if we don't have a current reading or forced to load
         if needsLoaded {
-            self.clearLastInfoData()
-            webLoadNSDeviceStatus()
-            webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
             
-            if !staleData {
+            if UserDefaultsRepository.url.value != "" {
+                webLoadNSDeviceStatus()
+            }
+            
+            if UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "" {
+                webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
+            } else {
+                webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+            }
+
+            
+            if !staleData && UserDefaultsRepository.url.value != "" {
                 webLoadNSProfile()
                 if UserDefaultsRepository.downloadBasal.value {
                     WebLoadNSTempBasals()
@@ -94,27 +96,53 @@ extension MainViewController {
                 webLoadNSCage()
                 webLoadNSSage()
             }
-            
-            
+
             // Give the alarms and calendar 15 seconds delay to allow time for data to compile
-//            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Start view timer") }
             self.startViewTimer(time: viewTimeInterval)
         } else {
-            // Things to do if we already have data and don't need a network call
-            // Leaving all downloads off for right now.
-            /*
-             webLoadNSDeviceStatus()
-             
-             if UserDefaultsRepository.downloadBolus.value {
-                webLoadNSBoluses()
-             }
-             if UserDefaultsRepository.downloadCarbs.value {
-                webLoadNSCarbs()
-             }*/
+
             if bgData.count > 0 {
                 self.checkAlarms(bgs: bgData)
             }
             
+            if UserDefaultsRepository.url.value != ""  {
+                if latestLoopTime == 0 {
+                    webLoadNSDeviceStatus()
+               
+                    webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+           
+                    webLoadNSProfile()
+                    if UserDefaultsRepository.downloadBasal.value {
+                        WebLoadNSTempBasals()
+                    }
+                    if UserDefaultsRepository.downloadBolus.value {
+                        webLoadNSBoluses()
+                    }
+                    if UserDefaultsRepository.downloadCarbs.value {
+                        webLoadNSCarbs()
+                    }
+                    webLoadNSCage()
+                    webLoadNSSage()
+                }
+            }
+            
+        }
+    }
+    
+    // Dex Share Web Call
+    func webLoadDexShare(onlyPullLastRecord: Bool = false) {
+        var count = 288
+        if onlyPullLastRecord { count = 1 }
+        dexShare?.fetchData(count) { (err, result) -> () in
+            
+            // TODO: add error checking
+            if(err == nil) {
+                var data = result!
+                self.ProcessNSBGData(data: data, onlyPullLastRecord: onlyPullLastRecord)
+            } else {
+                // If we get an error, immediately try to pull NS BG Data
+                self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+            }
         }
     }
     
@@ -154,11 +182,11 @@ extension MainViewController {
             }
             
             let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([DataStructs.sgvData].self, from: data)
+            let entriesResponse = try? decoder.decode([ShareGlucoseData].self, from: data)
             if let entriesResponse = entriesResponse {
                 DispatchQueue.main.async {
                     // trigger the processor for the data after downloading.
-                    self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord)
+                    self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord, isNS: true)
                     
                 }
             } else {
@@ -170,11 +198,26 @@ extension MainViewController {
     }
     
     // NS BG Data Response processor
-    func ProcessNSBGData(data: [DataStructs.sgvData], onlyPullLastRecord: Bool){
+    func ProcessNSBGData(data: [ShareGlucoseData], onlyPullLastRecord: Bool, isNS: Bool = false){
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG") }
         
-        var pullDate = data[data.count - 1].date / 1000
-        pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
+        var pullDate = data[data.count - 1].date
+        if isNS {
+            pullDate = data[data.count - 1].date / 1000
+            pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
+        }
+        
+        var latestDate = data[0].date
+        if isNS {
+            latestDate = data[0].date / 1000
+            latestDate.round(FloatingPointRoundingRule.toNearestOrEven)
+        }
+        
+        let now = dateTimeUtils.getNowTimeIntervalUTC()
+        if !isNS && (latestDate + 330) < now {
+            webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+            return
+        }
         
         // If we already have data, we're going to pop it to the end and remove the first. If we have old or no data, we'll destroy the whole array and start over. This is simpler than determining how far back we need to get new data from in case Dex back-filled readings
         if !onlyPullLastRecord {
@@ -195,73 +238,86 @@ extension MainViewController {
         
         // loop through the data so we can reverse the order to oldest first for the graph and convert the NS timestamp to seconds instead of milliseconds. Makes date comparisons easier for everything else.
         for i in 0..<data.count{
-            var dateString = data[data.count - 1 - i].date / 1000
-            dateString.round(FloatingPointRoundingRule.toNearestOrEven)
+            var dateString = data[data.count - 1 - i].date
+            if isNS {
+                dateString = data[data.count - 1 - i].date / 1000
+                dateString.round(FloatingPointRoundingRule.toNearestOrEven)
+            }
             if dateString >= dateTimeUtils.getTimeInterval24HoursAgo() {
-                let reading = DataStructs.sgvData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
+                let reading = ShareGlucoseData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
                 bgData.append(reading)
             }
             
         }
         
-        viewUpdateNSBG()
+        viewUpdateNSBG(isNS: isNS)
     }
     
     // NS BG Data Front end updater
-    func viewUpdateNSBG () {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Display: BG") }
-        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        let entries = bgData
-        if entries.count > 0 {
-            let latestEntryi = entries.count - 1
-            let latestBG = entries[latestEntryi].sgv
-            let priorBG = entries[latestEntryi - 1].sgv
-            let deltaBG = latestBG - priorBG as Int
-            let lastBGTime = entries[latestEntryi].date
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
-            var userUnit = " mg/dL"
-            if mmol {
-                userUnit = " mmol/L"
-            }
-            
-            BGText.text = bgUnits.toDisplayUnits(String(latestBG))
-            snoozer.BGLabel.text = bgUnits.toDisplayUnits(String(latestBG))
-            setBGTextColor()
-            
-            if let directionBG = entries[latestEntryi].direction {
-                DirectionText.text = bgDirectionGraphic(directionBG)
-                snoozer.DirectionLabel.text = bgDirectionGraphic(directionBG)
-                latestDirectionString = bgDirectionGraphic(directionBG)
+    func viewUpdateNSBG (isNS: Bool) {
+        DispatchQueue.main.async {
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Display: BG") }
+            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+            let entries = self.bgData
+            if entries.count > 0 {
+                let latestEntryi = entries.count - 1
+                let latestBG = entries[latestEntryi].sgv
+                let priorBG = entries[latestEntryi - 1].sgv
+                let deltaBG = latestBG - priorBG as Int
+                let lastBGTime = entries[latestEntryi].date
+                let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
+                var userUnit = " mg/dL"
+                if self.mmol {
+                    userUnit = " mmol/L"
+                }
+                
+                // TODO: remove testing feature to color code arrow based on NS vs Dex
+                if isNS {
+                    self.serverText.text = "Nightscout"
+                } else {
+                    self.serverText.text = "Dexcom"
+                }
+                
+                self.BGText.text = bgUnits.toDisplayUnits(String(latestBG))
+                snoozer.BGLabel.text = bgUnits.toDisplayUnits(String(latestBG))
+                self.setBGTextColor()
+                
+                if let directionBG = entries[latestEntryi].direction {
+                    self.DirectionText.text = self.bgDirectionGraphic(directionBG)
+                    snoozer.DirectionLabel.text = self.bgDirectionGraphic(directionBG)
+                    self.latestDirectionString = self.bgDirectionGraphic(directionBG)
+                }
+                else
+                {
+                    self.DirectionText.text = ""
+                    snoozer.DirectionLabel.text = ""
+                    self.latestDirectionString = ""
+                }
+                
+                if deltaBG < 0 {
+                    self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
+                    snoozer.DeltaLabel.text = bgUnits.toDisplayUnits(String(deltaBG))
+                    self.latestDeltaString = String(deltaBG)
+                }
+                else
+                {
+                    self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                    snoozer.DeltaLabel.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                    self.latestDeltaString = "+" + String(deltaBG)
+                }
+                self.updateBadge(val: latestBG)
+                
             }
             else
             {
-                DirectionText.text = ""
-                snoozer.DirectionLabel.text = ""
-                latestDirectionString = ""
+                
+                return
             }
-            
-            if deltaBG < 0 {
-                self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
-                snoozer.DeltaLabel.text = bgUnits.toDisplayUnits(String(deltaBG))
-                latestDeltaString = String(deltaBG)
-            }
-            else
-            {
-                self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
-                snoozer.DeltaLabel.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
-                latestDeltaString = "+" + String(deltaBG)
-            }
-            self.updateBadge(val: latestBG)
-            
+            self.updateBGGraph()
+            self.updateMinAgo()
+            self.updateStats()
         }
-        else
-        {
-            
-            return
-        }
-        updateBGGraph()
-        updateMinAgo()
-        updateStats()
+        
     }
     
     // NS Device Status Web Call
@@ -308,6 +364,11 @@ extension MainViewController {
     
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
+        self.clearLastInfoData(index: 0)
+        self.clearLastInfoData(index: 1)
+        self.clearLastInfoData(index: 3)
+        self.clearLastInfoData(index: 4)
+        self.clearLastInfoData(index: 5)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
             return
@@ -353,7 +414,7 @@ extension MainViewController {
                         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
                         wasEnacted = true
                         if let lastTempBasal = enacted["rate"] as? Double {
-                            //tableData[2].value = String(format:"%.1f", lastTempBasal)
+
                         }
                     }
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
@@ -374,9 +435,11 @@ extension MainViewController {
                             let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
                             var i = 1
                             while i <= toLoad {
-                                let prediction = DataStructs.sgvData(sgv: prediction[i], date: predictionTime, direction: "flat")
-                                predictionData.append(prediction)
-                                predictionTime += 300
+                                if i < prediction.count {
+                                    let prediction = ShareGlucoseData(sgv: prediction[i], date: predictionTime, direction: "flat")
+                                    predictionData.append(prediction)
+                                    predictionTime += 300
+                                }
                                 i += 1
                             }
                         }
@@ -523,6 +586,7 @@ extension MainViewController {
     
     // NS Cage Response Processor
     func updateCage(data: [cageData]) {
+        self.clearLastInfoData(index: 7)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: CAGE") }
         if data.count == 0 {
             return
@@ -592,6 +656,7 @@ extension MainViewController {
     
     // NS Sage Response Processor
     func updateSage(data: [cageData]) {
+        self.clearLastInfoData(index: 6)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process/Display: SAGE") }
         if data.count == 0 {
             return
@@ -810,6 +875,7 @@ extension MainViewController {
     
     // NS Temp Basal Response Processor
     func updateBasals(entries: [[String:AnyObject]]) {
+        self.clearLastInfoData(index: 2)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Basal") }
         // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
         basalData.removeAll()
@@ -954,6 +1020,7 @@ extension MainViewController {
             
         }
         tableData[2].value = latestBasal
+        infoTable.reloadData()
         if UserDefaultsRepository.graphBasal.value {
             updateBasalGraph()
         }
@@ -1018,7 +1085,9 @@ extension MainViewController {
                 return
             }
             
-            let strippedZone = String(bolusDate.dropLast())
+            // fix to remove millisecond (after period in timestamp) for FreeAPS users
+            var strippedZone = String(bolusDate.dropLast())
+            strippedZone = strippedZone.components(separatedBy: ".")[0]
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
@@ -1107,7 +1176,10 @@ extension MainViewController {
             } else {
                 return
             }
-            let strippedZone = String(carbDate.dropLast())
+            // Fix for FreeAPS milliseconds in timestamp
+            var strippedZone = String(carbDate.dropLast())
+            strippedZone = strippedZone.components(separatedBy: ".")[0]
+            
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
@@ -1115,19 +1187,19 @@ extension MainViewController {
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
             
-            do {
-                let carbs = try currentEntry?["carbs"] as! Double
-                let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
-                lastFoundIndex = sgv.foundIndex
-                
-                if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                    // Make the dot
-                    let dot = bolusCarbGraphStruct(value: carbs, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                    carbData.append(dot)
-                }
-            } catch {
-                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Carb entry") }
+            guard let carbs = currentEntry?["carbs"] as? Double else {
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Carb entry")}
+                break
             }
+            let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
+            lastFoundIndex = sgv.foundIndex
+            
+            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                // Make the dot
+                let dot = bolusCarbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                carbData.append(dot)
+            }
+            
             
             
         }
