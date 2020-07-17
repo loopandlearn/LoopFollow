@@ -400,6 +400,7 @@ extension MainViewController {
         
         // Loop
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
+            print("Loop: \(lastLoopRecord)")
             if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
                 UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
@@ -413,6 +414,7 @@ extension MainViewController {
                         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
                         wasEnacted = true
                         if let lastTempBasal = enacted["rate"] as? Double {
+
                         }
                     }
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
@@ -444,6 +446,9 @@ extension MainViewController {
                         if UserDefaultsRepository.graphPrediction.value {
                             updatePredictionGraph()
                         }
+                    }
+                    if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
+                        tableData[8].value = String(format:"%.2fU", recBolus)
                     }
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
                         if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
@@ -1019,6 +1024,7 @@ extension MainViewController {
         if UserDefaultsRepository.graphBasal.value {
             updateBasalGraph()
         }
+        infoTable.reloadData()
     }
     
     // NS Bolus Web Call
