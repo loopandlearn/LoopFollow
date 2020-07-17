@@ -160,79 +160,6 @@ extension MainViewController {
         }
         
         // These only get checked and fire if a BG reading doesn't fire
-        if UserDefaultsRepository.alertNotLoopingActive.value
-            && !UserDefaultsRepository.alertNotLoopingIsSnoozed.value
-            && (Double(dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertLastLoopTime.value) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
-            && UserDefaultsRepository.alertLastLoopTime.value > 0 {
-            
-            var trigger = true
-            if (UserDefaultsRepository.alertNotLoopingUseLimits.value
-                && (
-                    (Float(currentBG) >= UserDefaultsRepository.alertNotLoopingUpperLimit.value
-                        && Float(currentBG) <= UserDefaultsRepository.alertNotLoopingLowerLimit.value) ||
-                        // Ignore Limits if BG reading is older than non looping time
-                        (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
-                ) ||
-                !UserDefaultsRepository.alertNotLoopingUseLimits.value) {
-                AlarmSound.whichAlarm = "Not Looping Alert"
-                if UserDefaultsRepository.alertNotLoopingRepeat.value { numLoops = -1 }
-                triggerAlarm(sound: UserDefaultsRepository.alertNotLoopingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
-                return
-            }
-        }
-        
-        // check for missed bolus - Only checks within 1 hour of carb entry
-        // Only continue if alert is active, not snooozed, we have carb data, and bg is over the ignore limit
-        if UserDefaultsRepository.alertMissedBolusActive.value
-            && !UserDefaultsRepository.alertMissedBolusIsSnoozed.value
-            && carbData.count > 0
-            && Float(currentBG) > UserDefaultsRepository.alertMissedBolusLowGramsBG.value {
-            
-            // Grab the latest carb entry
-            let lastCarb = carbData[carbData.count - 1].value
-            let lastCarbTime = carbData[carbData.count - 1].date
-            let now = dateTimeUtils.getNowTimeIntervalUTC()
-            
-            //Make sure carb entry is newer than 1 hour, has reached the time length, and is over the ignore limit
-            if lastCarbTime > (now - (60 * 60))
-                && lastCarbTime < (now - Double((UserDefaultsRepository.alertMissedBolus.value * 60)))
-                && lastCarb > Double(UserDefaultsRepository.alertMissedBolusLowGrams.value) {
-                
-                // There is a current carb but no boluses data at all
-                if bolusData.count < 1 {
-                    AlarmSound.whichAlarm = "Missed Bolus Alert"
-                    if UserDefaultsRepository.alertMissedBolusRepeat.value { numLoops = -1 }
-                    triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
-                    return
-                }
-                
-                // Get the latest bolus over the small bolus exclusion
-                // Start with 0.0 bolus assuming there isn't one to cause a trigger and only add one if found
-                var lastBolus = 0.0
-                var lastBolusTime = 0.0
-                var i = 1
-                // check the boluses in reverse order setting it only if the time is after the carb time minus prebolus time.
-                // This will make the loop stop at the most recent bolus that is over the minimum value or continue through all boluses
-                while lastBolus < UserDefaultsRepository.alertMissedBolusIgnoreBolus.value && i <= bolusData.count {
-                    // Set the bolus if it's after the carb time minus prebolus time
-                    if (bolusData[bolusData.count - i].date >= lastCarbTime - Double(UserDefaultsRepository.alertMissedBolusPrebolus.value * 60)) {
-                        lastBolus = bolusData[bolusData.count - i].value
-                        lastBolusTime = bolusData[bolusData.count - i].date
-                    }
-                    i += 1
-                }
-                
-                // This will trigger is no boluses were set above
-                if (lastBolus == 0.0) {
-                    AlarmSound.whichAlarm = "Missed Bolus Alert"
-                    if UserDefaultsRepository.alertMissedBolusRepeat.value { numLoops = -1 }
-                    triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
-                    return
-                }
-                
-            }
-            
-        }
         
         //check for missed reading alert
         if UserDefaultsRepository.alertMissedReadingActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
@@ -242,33 +169,114 @@ extension MainViewController {
             return
         }
         
-        // Check Sage
-        if UserDefaultsRepository.alertSAGEActive.value && !UserDefaultsRepository.alertSAGEIsSnoozed.value {
-            let insertTime = Double(UserDefaultsRepository.alertSageInsertTime.value)
-            let alertDistance = Double(UserDefaultsRepository.alertSAGE.value * 60 * 60)
-            let delta = now - insertTime
-            let tenDays = 10 * 24 * 60 * 60
-            if Double(tenDays) - Double(delta) <= alertDistance {
-                AlarmSound.whichAlarm = "Sensor Change Alert"
-                if UserDefaultsRepository.alertSAGERepeat.value { numLoops = -1 }
-                triggerAlarm(sound: UserDefaultsRepository.alertSAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
-                return
+        
+        if UserDefaultsRepository.url.value != "" {
+            
+            if UserDefaultsRepository.alertNotLoopingActive.value
+                && !UserDefaultsRepository.alertNotLoopingIsSnoozed.value
+                && (Double(dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertLastLoopTime.value) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
+                && UserDefaultsRepository.alertLastLoopTime.value > 0 {
+                
+                var trigger = true
+                if (UserDefaultsRepository.alertNotLoopingUseLimits.value
+                    && (
+                        (Float(currentBG) >= UserDefaultsRepository.alertNotLoopingUpperLimit.value
+                            && Float(currentBG) <= UserDefaultsRepository.alertNotLoopingLowerLimit.value) ||
+                            // Ignore Limits if BG reading is older than non looping time
+                            (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
+                    ) ||
+                    !UserDefaultsRepository.alertNotLoopingUseLimits.value) {
+                    AlarmSound.whichAlarm = "Not Looping Alert"
+                    if UserDefaultsRepository.alertNotLoopingRepeat.value { numLoops = -1 }
+                    triggerAlarm(sound: UserDefaultsRepository.alertNotLoopingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
+                    return
+                }
+            }
+            
+            // check for missed bolus - Only checks within 1 hour of carb entry
+            // Only continue if alert is active, not snooozed, we have carb data, and bg is over the ignore limit
+            if UserDefaultsRepository.alertMissedBolusActive.value
+                && !UserDefaultsRepository.alertMissedBolusIsSnoozed.value
+                && carbData.count > 0
+                && Float(currentBG) > UserDefaultsRepository.alertMissedBolusLowGramsBG.value {
+                
+                // Grab the latest carb entry
+                let lastCarb = carbData[carbData.count - 1].value
+                let lastCarbTime = carbData[carbData.count - 1].date
+                let now = dateTimeUtils.getNowTimeIntervalUTC()
+                
+                //Make sure carb entry is newer than 1 hour, has reached the time length, and is over the ignore limit
+                if lastCarbTime > (now - (60 * 60))
+                    && lastCarbTime < (now - Double((UserDefaultsRepository.alertMissedBolus.value * 60)))
+                    && lastCarb > Double(UserDefaultsRepository.alertMissedBolusLowGrams.value) {
+                    
+                    // There is a current carb but no boluses data at all
+                    if bolusData.count < 1 {
+                        AlarmSound.whichAlarm = "Missed Bolus Alert"
+                        if UserDefaultsRepository.alertMissedBolusRepeat.value { numLoops = -1 }
+                        triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
+                        return
+                    }
+                    
+                    // Get the latest bolus over the small bolus exclusion
+                    // Start with 0.0 bolus assuming there isn't one to cause a trigger and only add one if found
+                    var lastBolus = 0.0
+                    var lastBolusTime = 0.0
+                    var i = 1
+                    // check the boluses in reverse order setting it only if the time is after the carb time minus prebolus time.
+                    // This will make the loop stop at the most recent bolus that is over the minimum value or continue through all boluses
+                    while lastBolus < UserDefaultsRepository.alertMissedBolusIgnoreBolus.value && i <= bolusData.count {
+                        // Set the bolus if it's after the carb time minus prebolus time
+                        if (bolusData[bolusData.count - i].date >= lastCarbTime - Double(UserDefaultsRepository.alertMissedBolusPrebolus.value * 60)) {
+                            lastBolus = bolusData[bolusData.count - i].value
+                            lastBolusTime = bolusData[bolusData.count - i].date
+                        }
+                        i += 1
+                    }
+                    
+                    // This will trigger is no boluses were set above
+                    if (lastBolus == 0.0) {
+                        AlarmSound.whichAlarm = "Missed Bolus Alert"
+                        if UserDefaultsRepository.alertMissedBolusRepeat.value { numLoops = -1 }
+                        triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
+                        return
+                    }
+                    
+                }
+                
+            }
+            
+            // Check Sage
+            if UserDefaultsRepository.alertSAGEActive.value && !UserDefaultsRepository.alertSAGEIsSnoozed.value {
+                let insertTime = Double(UserDefaultsRepository.alertSageInsertTime.value)
+                let alertDistance = Double(UserDefaultsRepository.alertSAGE.value * 60 * 60)
+                let delta = now - insertTime
+                let tenDays = 10 * 24 * 60 * 60
+                if Double(tenDays) - Double(delta) <= alertDistance {
+                    AlarmSound.whichAlarm = "Sensor Change Alert"
+                    if UserDefaultsRepository.alertSAGERepeat.value { numLoops = -1 }
+                    triggerAlarm(sound: UserDefaultsRepository.alertSAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
+                    return
+                }
+            }
+            
+            // Check Cage
+            if UserDefaultsRepository.alertCAGEActive.value && !UserDefaultsRepository.alertCAGEIsSnoozed.value {
+                let insertTime = Double(UserDefaultsRepository.alertCageInsertTime.value)
+                let alertDistance = Double(UserDefaultsRepository.alertCAGE.value * 60 * 60)
+                let delta = now - insertTime
+                let tenDays = 3 * 24 * 60 * 60
+                if Double(tenDays) - Double(delta) <= alertDistance {
+                    AlarmSound.whichAlarm = "Pump Change Alert"
+                    if UserDefaultsRepository.alertCAGERepeat.value { numLoops = -1 }
+                    triggerAlarm(sound: UserDefaultsRepository.alertCAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
+                    return
+                }
             }
         }
         
-        // Check Cage
-        if UserDefaultsRepository.alertCAGEActive.value && !UserDefaultsRepository.alertCAGEIsSnoozed.value {
-            let insertTime = Double(UserDefaultsRepository.alertCageInsertTime.value)
-            let alertDistance = Double(UserDefaultsRepository.alertCAGE.value * 60 * 60)
-            let delta = now - insertTime
-            let tenDays = 3 * 24 * 60 * 60
-            if Double(tenDays) - Double(delta) <= alertDistance {
-                AlarmSound.whichAlarm = "Pump Change Alert"
-                if UserDefaultsRepository.alertCAGERepeat.value { numLoops = -1 }
-                triggerAlarm(sound: UserDefaultsRepository.alertCAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
-                return
-            }
-        }
+        
+        
         
         // still send persistent notification if no alarms trigger and persistent notification is on
         persistentNotification(bgTime: currentBGTime)

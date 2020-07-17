@@ -70,11 +70,19 @@ extension MainViewController {
         if forceLoad { needsLoaded = true}
         // Only update if we don't have a current reading or forced to load
         if needsLoaded {
-            webLoadNSDeviceStatus()
-            webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
-            //webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
             
-            if !staleData {
+            if UserDefaultsRepository.url.value != "" {
+                webLoadNSDeviceStatus()
+            }
+            
+            if UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "" {
+                webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
+            } else {
+                webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+            }
+
+            
+            if !staleData && UserDefaultsRepository.url.value != "" {
                 webLoadNSProfile()
                 if UserDefaultsRepository.downloadBasal.value {
                     WebLoadNSTempBasals()
@@ -88,25 +96,34 @@ extension MainViewController {
                 webLoadNSCage()
                 webLoadNSSage()
             }
-            
-            
+
             // Give the alarms and calendar 15 seconds delay to allow time for data to compile
-//            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Start view timer") }
             self.startViewTimer(time: viewTimeInterval)
         } else {
-            // Things to do if we already have data and don't need a network call
-            // Leaving all downloads off for right now.
-            /*
-             webLoadNSDeviceStatus()
-             
-             if UserDefaultsRepository.downloadBolus.value {
-                webLoadNSBoluses()
-             }
-             if UserDefaultsRepository.downloadCarbs.value {
-                webLoadNSCarbs()
-             }*/
+
             if bgData.count > 0 {
                 self.checkAlarms(bgs: bgData)
+            }
+            
+            if UserDefaultsRepository.url.value != ""  {
+                if latestLoopTime == 0 {
+                    webLoadNSDeviceStatus()
+               
+                    webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+           
+                    webLoadNSProfile()
+                    if UserDefaultsRepository.downloadBasal.value {
+                        WebLoadNSTempBasals()
+                    }
+                    if UserDefaultsRepository.downloadBolus.value {
+                        webLoadNSBoluses()
+                    }
+                    if UserDefaultsRepository.downloadCarbs.value {
+                        webLoadNSCarbs()
+                    }
+                    webLoadNSCage()
+                    webLoadNSSage()
+                }
             }
             
         }
