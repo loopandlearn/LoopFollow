@@ -11,7 +11,7 @@ import Foundation
 
 extension MainViewController {
     
-    func findNearestBGbyTime(needle: TimeInterval, haystack: [DataStructs.sgvData], startingIndex: Int) -> (sgv: Double, foundIndex: Int) {
+    func findNearestBGbyTime(needle: TimeInterval, haystack: [ShareGlucoseData], startingIndex: Int) -> (sgv: Double, foundIndex: Int) {
         
         // If we can't find a match or things fail, put it at 100 BG
         for i in startingIndex..<haystack.count {

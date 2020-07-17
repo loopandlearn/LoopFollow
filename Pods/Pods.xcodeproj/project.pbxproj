@@ -15,7 +15,6 @@
 		03D8F8D16FAF2B28113DB82186DBC66F /* BarLineChartViewBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E9C61C3E7EBE33601F29273FD0610F /* BarLineChartViewBase.swift */; };
 		052CDA13B29437A2FDCD9D19230AD39F /* FieldsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E304C127B722E54D8A82C9CAD421A740 /* FieldsRow.swift */; };
 		05C88AAB95E98E3296996797706F19AF /* RuleRequired.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D210738B60758170EEAB4EBFD35F7 /* RuleRequired.swift */; };
-		0651EDC4A371F639FD2EEAD9B5C2B26D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 436BAA54A31999B53B3CC7115C55FE50 /* Foundation.framework */; };
 		07572F1826C958646848D4EF5DBF377E /* RuleRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6A8E2C6ECCAF59C045894E1F3DF8C5 /* RuleRange.swift */; };
 		0769C281810E13C0985B2A414F20ADDE /* XAxisRendererHorizontalBarChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94F34C60E8ABE81F99BFB0915A1517A0 /* XAxisRendererHorizontalBarChart.swift */; };
 		09D2EA12CED518BAA4BCB6A707FA3125 /* TriangleShapeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733827F65F5022C471A1447F04440570 /* TriangleShapeRenderer.swift */; };
@@ -52,6 +51,7 @@
 		35C57ED01BE2D7FD6F4DACD96F5EDFE1 /* IFillFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 805B8ACDB7AF64D4B1EFF9695D06D6E7 /* IFillFormatter.swift */; };
 		39E13C8ED0C32E9EC0B353CA45C70CF2 /* AnimatedMoveViewJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F3AC74EA385AD1FB48BB312B9A8D01 /* AnimatedMoveViewJob.swift */; };
 		3A5078F021BB004E2F4463F360D41391 /* HorizontalBarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB8BBD29DF85A11464A5ADA946CB94D /* HorizontalBarChartView.swift */; };
+		3A81072EB144BB6F03C7F5360EEEE03D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 436BAA54A31999B53B3CC7115C55FE50 /* Foundation.framework */; };
 		3B86A25C5362FD2905831A10C4806500 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 436BAA54A31999B53B3CC7115C55FE50 /* Foundation.framework */; };
 		3BF29BEA4C1FF7360E93882C9D6C2A7C /* AlertRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F50F1D5643D6EBCA09E428806984608 /* AlertRow.swift */; };
 		3D57709B53538839313AA6A6DC6E322C /* ILineRadarChartDataSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF8B918AB264444686976350703223A /* ILineRadarChartDataSet.swift */; };
@@ -161,13 +161,12 @@
 		B466D5B2650B7521FBE653FC9B7A793D /* DateInlineRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 082D9D903940DEE55728285DC66D61EB /* DateInlineRow.swift */; };
 		B490953386257F2C8E03C1D632AC361E /* OptionsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E8F18420183616B27CA1A9863B96A94 /* OptionsRow.swift */; };
 		B65DAD4280582DBED3A5A2C62185B389 /* YAxisRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A1B6FFE86F41186B23437AC8B0AD94 /* YAxisRenderer.swift */; };
+		B66CAEA692B43131362E25A49DDF71EF /* Pods-LoopFollow-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 7E41188828C3ADE7A96C4DA6ED1CCDA2 /* Pods-LoopFollow-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B6DF9275361EA04A959E38F4133C33B7 /* SwipeActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F8A26F11880F80D57A284B6094FF410 /* SwipeActions.swift */; };
 		B87DABFAA95CDA5DFDDD2F409FDD5DF3 /* YAxisRendererHorizontalBarChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52B736816C4134465DD07E7A3C6EE82 /* YAxisRendererHorizontalBarChart.swift */; };
 		BB75859BDCF578D67C08E6E6741701EB /* PieChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E89110FD8C719CD0408D733C769EECC7 /* PieChartRenderer.swift */; };
 		BCD42880A54D247B7A68AC06335D0AF5 /* YAxis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D9C9FC3F24D3132834031FBA0497B6 /* YAxis.swift */; };
-		BDD0A32FDF662207FD5E5391C04E31FC /* Pods-LoopFollow-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 7E41188828C3ADE7A96C4DA6ED1CCDA2 /* Pods-LoopFollow-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BDD367ED4BB5510C86658115EE6BE71E /* CombinedHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE34CABB424024A41851C39678BA5EF3 /* CombinedHighlighter.swift */; };
-		BE11B033F02B91FA038526546C8E57B6 /* Pods-LoopFollow-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 28609CC9D3828C150821F3AA18752A77 /* Pods-LoopFollow-dummy.m */; };
 		BE93E023215A8B4A05A2AEC8B7FAE170 /* InlineRowType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7967D1617EF3687E7EA393DDFEBC8B31 /* InlineRowType.swift */; };
 		C031EFD3013B5803C3B7A6D07E4721C0 /* CombinedChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 919647803888A5B15DB3222FCDA56E0A /* CombinedChartData.swift */; };
 		C08713DF3DF904E55D8A3E3775A6F3EB /* TriplePickerRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D8EB04398FDB94F46498AD99A989CA8 /* TriplePickerRow.swift */; };
@@ -222,6 +221,7 @@
 		ECC149B136D4D63AF251912E051A142F /* IShapeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DB219299A8A67D5EC1C43C6BF5A8EE4 /* IShapeRenderer.swift */; };
 		ED58A23EB5289726B5D74EFEEA590BDD /* LineChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D365274AEF519C7E50E8567DEBC9CEF3 /* LineChartData.swift */; };
 		F1B3693550BD159B7E910C182326A44B /* ChartAnimationEasing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 254111998274AAAA1452EBD98043BD22 /* ChartAnimationEasing.swift */; };
+		F1B37767979921C4758B54144610815D /* Pods-LoopFollow-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 28609CC9D3828C150821F3AA18752A77 /* Pods-LoopFollow-dummy.m */; };
 		F2279E1339CC1B6326AD6FF389D24F96 /* DateInlineFieldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDFAF86922EDD701C440B78809BA7858 /* DateInlineFieldRow.swift */; };
 		F2C1EF0010084FA2B769B019EBD6D909 /* CombinedChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B27115EBCC224F7D67778C26B1275B8 /* CombinedChartView.swift */; };
 		F47D1993C006C374C634B04421484A4D /* AlertOptionsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6153DD0B9FA40F02377E5F8A060E378 /* AlertOptionsRow.swift */; };
@@ -231,26 +231,26 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		70AC7791B3B1114DB847777CFED5BBDA /* PBXContainerItemProxy */ = {
+		7272ABD8A5C4DE0FAA10777D4FE249DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BF03B0B2B8B052092CB5F90CC5FB3757;
+			remoteInfo = Charts;
+		};
+		768CF338A2BC484E9597CD398DFA4136 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 32507FDB9BAD6EF17DCB14A888ECA5D9;
 			remoteInfo = ShareClient;
 		};
-		80929478E859790595DCC4B6934EEA68 /* PBXContainerItemProxy */ = {
+		87D6DD57B95016F1515B8CA873C52B51 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 88BE8BE7A2FE6CED4193CCD8FF3CBEF7;
 			remoteInfo = Eureka;
-		};
-		B4EAD249F74DCCC9C759EEEBC10E9BE0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = BF03B0B2B8B052092CB5F90CC5FB3757;
-			remoteInfo = Charts;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -503,6 +503,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1DC97817961139E7E35F2AE2C60B6E3C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3A81072EB144BB6F03C7F5360EEEE03D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7C739679CAE74D90F140F5EDC0EE4EC0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -517,14 +525,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B86A25C5362FD2905831A10C4806500 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A09217DFEBD5550C0EFA50C1D3F01DE9 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				0651EDC4A371F639FD2EEAD9B5C2B26D /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -912,19 +912,19 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		5774E71EFFCC7CB457E7335C552D05B1 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				BDD0A32FDF662207FD5E5391C04E31FC /* Pods-LoopFollow-umbrella.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		7DD3157FBDD386B4916158C875050C47 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				C4EB1DE2CCEE60A99EB5AA718DD67105 /* Eureka-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B9F97AA1CF9FB0787D2291A888A6C93 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B66CAEA692B43131362E25A49DDF71EF /* Pods-LoopFollow-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -996,19 +996,19 @@
 		};
 		E187D4B9C2B76F773546AF1E39D2ECCD /* Pods-LoopFollow */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 33267BE99E13D5D253525BA1D49CA2DA /* Build configuration list for PBXNativeTarget "Pods-LoopFollow" */;
+			buildConfigurationList = C296AD097A8FA560D79E90D3C22C96E9 /* Build configuration list for PBXNativeTarget "Pods-LoopFollow" */;
 			buildPhases = (
-				5774E71EFFCC7CB457E7335C552D05B1 /* Headers */,
-				3EC2C540F4F22A21FD47A7EF7C6E6262 /* Sources */,
-				A09217DFEBD5550C0EFA50C1D3F01DE9 /* Frameworks */,
-				C8C3B267820FCCB290B983FC6A267748 /* Resources */,
+				9B9F97AA1CF9FB0787D2291A888A6C93 /* Headers */,
+				5BEF58C702FDC74DAA08B265E0143D5B /* Sources */,
+				1DC97817961139E7E35F2AE2C60B6E3C /* Frameworks */,
+				A35DC61B22F4A23E51FB4B97627ABCE9 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				E1503B327771444C7450809115CCB16D /* PBXTargetDependency */,
-				2804205A31A90804A05C34053D7862EA /* PBXTargetDependency */,
-				543EEF6428571D0759E399E754D798AF /* PBXTargetDependency */,
+				AA3C18940D595C8ABAA899EE95469C91 /* PBXTargetDependency */,
+				8B0A5134AC4ECFA08B720B20790FFA19 /* PBXTargetDependency */,
+				94AF0CD3D1D2B1992DFCD0273D0F2387 /* PBXTargetDependency */,
 			);
 			name = "Pods-LoopFollow";
 			productName = "Pods-LoopFollow";
@@ -1053,6 +1053,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A35DC61B22F4A23E51FB4B97627ABCE9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C0AFB00D995D51D37A221C832E39671F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1061,13 +1068,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C6AFE590176E3A846DAE473492B8ADE1 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C8C3B267820FCCB290B983FC6A267748 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1151,11 +1151,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3EC2C540F4F22A21FD47A7EF7C6E6262 /* Sources */ = {
+		5BEF58C702FDC74DAA08B265E0143D5B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE11B033F02B91FA038526546C8E57B6 /* Pods-LoopFollow-dummy.m in Sources */,
+				F1B37767979921C4758B54144610815D /* Pods-LoopFollow-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1319,23 +1319,23 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		2804205A31A90804A05C34053D7862EA /* PBXTargetDependency */ = {
+		8B0A5134AC4ECFA08B720B20790FFA19 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Eureka;
 			target = 88BE8BE7A2FE6CED4193CCD8FF3CBEF7 /* Eureka */;
-			targetProxy = 80929478E859790595DCC4B6934EEA68 /* PBXContainerItemProxy */;
+			targetProxy = 87D6DD57B95016F1515B8CA873C52B51 /* PBXContainerItemProxy */;
 		};
-		543EEF6428571D0759E399E754D798AF /* PBXTargetDependency */ = {
+		94AF0CD3D1D2B1992DFCD0273D0F2387 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = ShareClient;
 			target = 32507FDB9BAD6EF17DCB14A888ECA5D9 /* ShareClient */;
-			targetProxy = 70AC7791B3B1114DB847777CFED5BBDA /* PBXContainerItemProxy */;
+			targetProxy = 768CF338A2BC484E9597CD398DFA4136 /* PBXContainerItemProxy */;
 		};
-		E1503B327771444C7450809115CCB16D /* PBXTargetDependency */ = {
+		AA3C18940D595C8ABAA899EE95469C91 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Charts;
 			target = BF03B0B2B8B052092CB5F90CC5FB3757 /* Charts */;
-			targetProxy = B4EAD249F74DCCC9C759EEEBC10E9BE0 /* PBXContainerItemProxy */;
+			targetProxy = 7272ABD8A5C4DE0FAA10777D4FE249DD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1375,44 +1375,6 @@
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
-		};
-		08DC96BE55468FDC92D2E0A16F0D4FD1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = B1DF43F4B1524F385F6090756FA3016A /* Pods-LoopFollow.debug.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
 		};
 		13DF91FECD4EB2AAAF95405099441E29 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1682,42 +1644,7 @@
 			};
 			name = Release;
 		};
-		D27C976E5A2F75B799103220B6FECE18 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = B28A2F7F1E6F57132EDC348E349719CA /* Eureka.debug.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/Eureka/Eureka-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/Eureka/Eureka-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/Eureka/Eureka.modulemap";
-				PRODUCT_MODULE_NAME = Eureka;
-				PRODUCT_NAME = Eureka;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		D3990B88691574EDD3463D46E2AC8C83 /* Release */ = {
+		A57D7F46620CEA8E6010E60F37AA1C40 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = EBE2A8C176CC9C76279BE195BDA90B7F /* Pods-LoopFollow.release.xcconfig */;
 			buildSettings = {
@@ -1756,18 +1683,82 @@
 			};
 			name = Release;
 		};
+		D27C976E5A2F75B799103220B6FECE18 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B28A2F7F1E6F57132EDC348E349719CA /* Eureka.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/Eureka/Eureka-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/Eureka/Eureka-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/Eureka/Eureka.modulemap";
+				PRODUCT_MODULE_NAME = Eureka;
+				PRODUCT_NAME = Eureka;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		E56FA54D604FEC313768CAB1F44761B8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B1DF43F4B1524F385F6090756FA3016A /* Pods-LoopFollow.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		33267BE99E13D5D253525BA1D49CA2DA /* Build configuration list for PBXNativeTarget "Pods-LoopFollow" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				08DC96BE55468FDC92D2E0A16F0D4FD1 /* Debug */,
-				D3990B88691574EDD3463D46E2AC8C83 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		36778B42AB96755AAFA8AF892C40E50E /* Build configuration list for PBXNativeTarget "Eureka" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1791,6 +1782,15 @@
 			buildConfigurations = (
 				872B91677D6C5E98109D15A182CD805F /* Debug */,
 				7445CE2DA3D731E7CC7B9F0E82576D87 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C296AD097A8FA560D79E90D3C22C96E9 /* Build configuration list for PBXNativeTarget "Pods-LoopFollow" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E56FA54D604FEC313768CAB1F44761B8 /* Debug */,
+				A57D7F46620CEA8E6010E60F37AA1C40 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

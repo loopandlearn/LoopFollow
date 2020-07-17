@@ -10,13 +10,6 @@ import Foundation
 
 class DataStructs {
     
-    //NS BG Struct
-    struct sgvData: Codable {
-        var sgv: Int
-        var date: TimeInterval
-        var direction: String?
-    }
-    
     // Pie Chart Data
     struct pieData: Codable {
         var name: String
