@@ -10,10 +10,9 @@ import Foundation
 import Charts
 import UIKit
 
-
+let ScaleXMax:Float = 150.0
 extension MainViewController {
     
-
     func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
         if chartView == BGChartFull {
             BGChart.moveViewToX(entry.x)
@@ -33,8 +32,8 @@ extension MainViewController {
       
         // dont store huge values
         var scale: Float = Float(BGChart.scaleX)
-        if(scale > 18.0 ) {
-            scale = 18.0
+        if(scale > ScaleXMax ) {
+            scale = ScaleXMax
         }
         UserDefaultsRepository.chartScaleX.value = Float(scale)
     }
@@ -269,7 +268,7 @@ extension MainViewController {
         ul.limit = Double(UserDefaultsRepository.highLine.value)
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
-        
+    
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
@@ -327,6 +326,8 @@ extension MainViewController {
         }
         
         BGChart.rightAxis.axisMaximum = Double(maxBG)
+       
+        BGChart.setVisibleXRangeMinimum(600)
        
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()

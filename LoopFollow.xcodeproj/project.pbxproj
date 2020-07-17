@@ -11,6 +11,10 @@
 		DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */; };
 		DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */; };
 		DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979324C0D380002C9752 /* UIViewExtension.swift */; };
+		DDCF979624C1443C002C9752 /* GeneralSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */; };
+		DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */; };
+		DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */; };
+		DDCF979C24C14EFB002C9752 /* DebugSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979B24C14EFB002C9752 /* DebugSettingsViewController.swift */; };
 		FC16A97A24996673003D6245 /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97924996673003D6245 /* NightScout.swift */; };
 		FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
 		FC16A97D24996747003D6245 /* Alarms.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97C24996747003D6245 /* Alarms.swift */; };
@@ -168,6 +172,10 @@
 		DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsViewController.swift; sourceTree = "<group>"; };
 		DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareClientExtension.swift; sourceTree = "<group>"; };
 		DDCF979324C0D380002C9752 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
+		DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsViewController.swift; sourceTree = "<group>"; };
+		DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsViewController.swift; sourceTree = "<group>"; };
+		DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettingsViewController.swift; sourceTree = "<group>"; };
+		DDCF979B24C14EFB002C9752 /* DebugSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsViewController.swift; sourceTree = "<group>"; };
 		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
 		FC16A97924996673003D6245 /* NightScout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScout.swift; sourceTree = "<group>"; };
 		FC16A97C24996747003D6245 /* Alarms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarms.swift; sourceTree = "<group>"; };
@@ -595,6 +603,10 @@
 				FCC6884F248935D800A0279D /* AlarmViewController.swift */,
 				FC7CE59E248D8D23001F83B8 /* SnoozeViewController.swift */,
 				DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */,
+				DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */,
+				DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */,
+				DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */,
+				DDCF979B24C14EFB002C9752 /* DebugSettingsViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -842,6 +854,7 @@
 				FC7CE59F248D8D23001F83B8 /* SnoozeViewController.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */,
+				DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */,
 				FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */,
 				FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */,
 				FC16A97A24996673003D6245 /* NightScout.swift in Sources */,
@@ -856,7 +869,9 @@
 				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
 				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
 				DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */,
+				DDCF979C24C14EFB002C9752 /* DebugSettingsViewController.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
+				DDCF979624C1443C002C9752 /* GeneralSettingsViewController.swift in Sources */,
 				FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
@@ -867,6 +882,7 @@
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
 				FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
+				DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */,
 				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 			);
