@@ -46,8 +46,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsAvgBG: UILabel!
     @IBOutlet weak var statsEstA1C: UILabel!
     @IBOutlet weak var statsStdDev: UILabel!
+    @IBOutlet weak var serverText: UILabel!
 
-        
+      
     // Data Table class
     class infoData {
         public var name: String
@@ -56,9 +57,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.name = name
             self.value = value
         }
-
-    @IBOutlet weak var serverText: UILabel!
-
     }
 
     // Variables for BG Charts
