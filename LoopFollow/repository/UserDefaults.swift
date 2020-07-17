@@ -10,7 +10,9 @@ import Foundation
 import UIKit
 
 class UserDefaultsRepository {
-    
+
+    // DisplayValues total
+    static let infoDataTotal = UserDefaultsValue<Int>(key: "infoDataTotal", default: 0)
     
     //Nightscout Settings
     static let url = UserDefaultsValue<String>(key: "url", default: "")
@@ -23,6 +25,7 @@ class UserDefaultsRepository {
     static let shareServer = UserDefaultsValue<String>(key: "shareServer", default: "US")
     
     // Graph Settings
+    static let chartScaleX = UserDefaultsValue<Float>(key: "chartScaleX", default: 18.0)
     static let showDots = UserDefaultsValue<Bool>(key: "showDots", default: true)
     static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
     static let offsetCarbsBolus = UserDefaultsValue<Bool>(key: "offsetCarbsBolus", default: true)
@@ -88,7 +91,6 @@ class UserDefaultsRepository {
     
     static let alertCageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertCageInsertTime", default: 0)
     static let alertSageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0)
-    
     
     static let alertSnoozeAllTime = UserDefaultsValue<Date?>(key: "alertSnoozeAllTime", default: nil)
     static let alertSnoozeAllIsSnoozed = UserDefaultsValue<Bool>(key: "alertSnoozeAllIsSnoozed", default: false)

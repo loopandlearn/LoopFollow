@@ -17,16 +17,13 @@ class SettingsViewController: FormViewController {
         var title: String
         var identifier: String
     }
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
-        
-        
-        
+                        
         form
         +++ Section(header: "Nightscout Settings", footer: "Changing Nightscout settings requires an app restart.")
         <<< TextRow(){ row in
@@ -102,15 +99,23 @@ class SettingsViewController: FormViewController {
             UserDefaultsRepository.shareServer.value = value
         }
         
+        +++ Section("Information Display Settings")
+        <<< ButtonRow() {
+           $0.title = "Configure Information Display"
+           $0.presentationMode = .show(
+               controllerProvider: .callback(builder: {
+                  let controller = InfoDisplaySettingsViewController()
+                  return controller
+               }
+           ), onDismiss: nil)
+            
+        }
         
         buildGeneralSettings()
        // buildAlarmSettings()
         buildGraphSettings()
         buildWatchSettings()
         buildDebugSettings()
-        
-        
-        
         
     }
     
