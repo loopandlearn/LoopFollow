@@ -55,9 +55,9 @@ class InfoDisplaySettingsViewController: FormViewController {
         createForm()
     }
     
-    func createForm() {
+    private func createForm() {
         form
-        +++ MultivaluedSection(multivaluedOptions: .Reorder, header: "Display Configuration", footer: "Arrage/Enable Information Desired") {
+        +++ MultivaluedSection(multivaluedOptions: .Reorder, header: "Information Display Settings", footer: "Arrage/Enable Information Desired") {
         
            // TODO: add the other display values
            $0.tag = "InfoDisplay"
