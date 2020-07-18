@@ -11,7 +11,7 @@ import UserNotifications
 
 
 class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
-
+    var appStateController: AppStateController?
     var snoozeTabItem: UITabBarItem = UITabBarItem()
     var mainTabItem: UITabBarItem = UITabBarItem()
     

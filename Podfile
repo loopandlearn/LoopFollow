@@ -3,5 +3,6 @@ target 'LoopFollow' do
 
   pod 'Charts'
   pod 'Eureka'
-
-  end
+  pod 'ShareClient', :git => 'https://github.com/josep1972/dexcom-share-client-swift.git', :branch => 'dev' 
+  
+end
