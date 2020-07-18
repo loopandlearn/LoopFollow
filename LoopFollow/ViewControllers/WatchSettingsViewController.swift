@@ -12,6 +12,9 @@ import EventKit
 import EventKitUI
 
 class WatchSettingsViewController: FormViewController {
+
+   var appStateController: AppStateController?
+   
    override func viewDidLoad()  {
       super.viewDidLoad()
       if UserDefaultsRepository.forceDarkMode.value {
