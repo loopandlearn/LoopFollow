@@ -335,8 +335,8 @@ extension MainViewController {
         if firstGraphLoad {
             var scaleX = CGFloat(UserDefaultsRepository.chartScaleX.value)
             print("Scale: \(scaleX)")
-            if( scaleX > ScaleXMax ) {
-                scaleX = ScaleXMax
+            if( scaleX > CGFloat(ScaleXMax) ) {
+                scaleX = CGFloat(ScaleXMax)
                 UserDefaultsRepository.chartScaleX.value = ScaleXMax
             }
             BGChart.zoom(scaleX: scaleX, scaleY: 1, x: 1, y: 1)
