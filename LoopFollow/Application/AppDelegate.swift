@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     let notificationCenter = UNUserNotificationCenter.current()
-
+   
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
@@ -30,12 +30,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         let store = EKEventStore()
         store.requestAccess(to: .event) {(granted, error) in
-        if !granted { return }
-            }
-         
-        return true
-    }
-    
+           if !granted { return }
+        }
+        
+         return true
+      }
+        
+   
     func applicationWillTerminate(_ application: UIApplication) {
         if UserDefaultsRepository.alertAppInactive.value {
             AlarmSound.setSoundFile(str: "Alarm_Buzzer")

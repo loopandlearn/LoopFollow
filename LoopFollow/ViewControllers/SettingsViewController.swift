@@ -13,7 +13,9 @@ import EventKitUI
 
 class SettingsViewController: FormViewController {
 
-    override func viewDidLoad() {
+   var appStateController: AppStateController?
+   
+   override func viewDidLoad() {
         super.viewDidLoad()
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
@@ -97,36 +99,32 @@ class SettingsViewController: FormViewController {
         }
         
         +++ Section("App Settings")
-      
-        // +++ Section("General Settings")
         <<< ButtonRow() {
            $0.title = "General Settings"
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = GeneralSettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)
-
-            
         }
-
-        // +++ Section("Graph Settings")
         <<< ButtonRow() {
            $0.title = "Graph Settings"
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = GraphSettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)
         }
-          // +++ Section("Information Display Settings")
         <<< ButtonRow() {
            $0.title = "Information Display Settings"
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = InfoDisplaySettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)
@@ -139,6 +137,7 @@ class SettingsViewController: FormViewController {
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = WatchSettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)
@@ -151,6 +150,7 @@ class SettingsViewController: FormViewController {
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = DebugSettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)

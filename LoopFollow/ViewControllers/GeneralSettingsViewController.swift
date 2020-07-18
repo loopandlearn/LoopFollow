@@ -13,6 +13,8 @@ import EventKitUI
 
 class GeneralSettingsViewController: FormViewController {
    
+   var appStateController: AppStateController?
+   
    override func viewDidLoad()  {
       super.viewDidLoad()
       
@@ -30,17 +32,24 @@ class GeneralSettingsViewController: FormViewController {
         row.value = UserDefaultsRepository.colorBGText.value
         }.onChange { [weak self] row in
             guard let value = row.value else { return }
-                UserDefaultsRepository.colorBGText.value = value
+            UserDefaultsRepository.colorBGText.value = value
             // Force main screen update
-            guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-            mainScreen.setBGTextColor()
+            //guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
+            //mainScreen.setBGTextColor()
+            
+            // set the appstate to indicate settings change and flags
+            if let appState = self!.appStateController {
+              appState.generalSettingsChanged = true
+              appState.generalSettingsChanges |= GeneralSettingsChangeEnum.colorBGTextChange.rawValue
+           }
         }
         <<< SwitchRow("forceDarkMode") { row in
         row.title = "Force Dark Mode (Restart App)"
         row.value = UserDefaultsRepository.forceDarkMode.value
         }.onChange { [weak self] row in
             guard let value = row.value else { return }
-                UserDefaultsRepository.forceDarkMode.value = value
+            UserDefaultsRepository.forceDarkMode.value = value
+             
         }
         <<< SwitchRow("persistentNotification") { row in
         row.title = "Persistent Notification"
@@ -89,8 +98,15 @@ class GeneralSettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.appBadge.value = value
                     // Force main screen update
-                    guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-                    mainScreen.nightscoutLoader(forceLoad: true)
+                    //guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
+                    //mainScreen.nightscoutLoader(forceLoad: true)
+                    
+           // set the appstate to indicate settings change and flags
+           if let appState = self!.appStateController {
+              appState.generalSettingsChanged = true
+              appState.generalSettingsChanges |= GeneralSettingsChangeEnum.appBadgeChange.rawValue
+           }
+           
         }
         <<< SwitchRow("speakBG"){ row in
             row.title = "Speak BG"

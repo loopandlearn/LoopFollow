@@ -12,7 +12,8 @@ import EventKit
 import EventKitUI
 
 class InfoDisplaySettingsViewController: FormViewController {
-
+    var appStateController: AppStateController?
+    
     var infoNames:   [String] = []
     var infoSort:    [Int]    = []
     var infoVisible: [Bool]   = []
@@ -88,6 +89,7 @@ class InfoDisplaySettingsViewController: FormViewController {
                  } else {
                     row.title = "\u{2001}\t\(self.infoNames[self.infoSort[i]])"
                  }
+                 self.appStateController!.infoDataSettingsChanged = true
               }
            }
        }
@@ -105,14 +107,18 @@ class InfoDisplaySettingsViewController: FormViewController {
         let destIndex = destinationIndexPath.row
         
         // new sort
-        let tmpVal = self.infoSort[sourceIndex]
-        self.infoSort.remove(at:sourceIndex)
-        self.infoSort.insert(tmpVal, at:destIndex)
+        if(destIndex != sourceIndex ) {
+           self.appStateController!.infoDataSettingsChanged = true
+           
+           let tmpVal = self.infoSort[sourceIndex]
+           self.infoSort.remove(at:sourceIndex)
+           self.infoSort.insert(tmpVal, at:destIndex)
        
-        // save to defaults
-        UserDefaults.standard.set(self.infoSort, forKey:InfoSort)
+           // save to defaults
+           UserDefaults.standard.set(self.infoSort, forKey:InfoSort)
+        }
         
-        print("Source Row: \(sourceIndexPath.row); Source Section: \(sourceIndexPath.section)")
-        print("Destination Row: \(destinationIndexPath.row); Destination Section: \(destinationIndexPath.section)")
+        //print("Source Row: \(sourceIndexPath.row); Source Section: \(sourceIndexPath.section)")
+        //print("Destination Row: \(destinationIndexPath.row); Destination Section: \(destinationIndexPath.section)")
     }
  }

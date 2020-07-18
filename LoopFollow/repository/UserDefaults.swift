@@ -14,12 +14,12 @@ class UserDefaultsRepository {
     // DisplayValues total
     static let infoDataTotal = UserDefaultsValue<Int>(key: "infoDataTotal", default: 0)
     
-    //Nightscout Settings
+    // Nightscout Settings
     static let url = UserDefaultsValue<String>(key: "url", default: "")
     static let token = UserDefaultsValue<String>(key: "token", default: "")
     static let units = UserDefaultsValue<String>(key: "units", default: "mg/dL")
     
-    //Dexcom Share Settings
+    // Dexcom Share Settings
     static let shareUserName = UserDefaultsValue<String>(key: "shareUserName", default: "")
     static let sharePassword = UserDefaultsValue<String>(key: "sharePassword", default: "")
     static let shareServer = UserDefaultsValue<String>(key: "shareServer", default: "US")

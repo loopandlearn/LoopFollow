@@ -58,6 +58,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.value = value
         }
     }
+    
+    var appStateController: AppStateController?
 
     // Variables for BG Charts
     public var numPoints: Int = 13
@@ -147,7 +149,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.bounces = false
         infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
       
-        // get the info table
+        // get the info table setup
         let userDefaults = UserDefaults.standard
 
         // names
@@ -162,8 +164,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         for i in 0..<self.infoNames.count {
             self.tableData.append(infoData(name:self.infoNames[i], value:""))
         }
+        createDerivedData()
       
-        // TODO: look for username and password in the UserDefaultsRepo ?
         // TODO: need non-us server ?
         let shareUserName = UserDefaultsRepository.shareUserName.value
         let sharePassword = UserDefaultsRepository.sharePassword.value
@@ -202,8 +204,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-    
-        
+         
         // Setup the Graph
         if firstGraphLoad {
             createGraph()
@@ -223,9 +224,51 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // set screen lock
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
         
-        // get the info table
+        // check the app state
+        // TODO: move to a function ?
+        if let appState = self.appStateController {
+        
+           if appState.chartSettingsChanged {
+              
+              // can look at settings flags to be more fine tuned
+              self.updateBGGraphSettings()
+              
+              // reset the app state
+              appState.chartSettingsChanged = false
+              appState.chartSettingsChanges = 0
+           }
+           if appState.generalSettingsChanged {
+           
+              // settings for appBadge changed
+              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.appBadgeChange.rawValue != 0 {
+                 self.nightscoutLoader(forceLoad: true)
+              }
+              
+              // settings for textcolor changed
+              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.colorBGTextChange.rawValue != 0 {
+                 self.setBGTextColor()
+              }
+              
+              // reset the app state
+              appState.generalSettingsChanged = false
+              appState.generalSettingsChanges = 0
+           }
+           if appState.infoDataSettingsChanged {
+              createDerivedData()
+              self.infoTable.reloadData()
+              
+              // reset
+              appState.infoDataSettingsChanged = false
+           }
+           
+           // add more processing of the app state
+        }
+    }
+    
+    private func createDerivedData() {
+      // get the info table
         let userDefaults = UserDefaults.standard
-
+         
         // sort
         self.infoSort = userDefaults.array(forKey:InfoSort) as? [Int] ?? [Int]()
         if(self.infoSort.count != self.infoNames.count) {
@@ -251,9 +294,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 self.derivedTableData.append(self.tableData[self.infoSort[i]])
             }
         }
-        infoTable.reloadData()
-    }
-    
+   }
+   
     // Info Table Functions
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         //return tableData.count
