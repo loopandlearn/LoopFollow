@@ -10,10 +10,9 @@ import Foundation
 import Charts
 import UIKit
 
-
+let ScaleXMax:Float = 150.0
 extension MainViewController {
     
-
     func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
         if chartView == BGChartFull {
             BGChart.moveViewToX(entry.x)
@@ -27,9 +26,22 @@ extension MainViewController {
             //BGChartFull.highlightValue(x: Double(currentMatrix.tx), y: Double(currentMatrix.ty), dataSetIndex: 0)
         }
     }
+    
+    func chartScaled(_ chartView: ChartViewBase, scaleX: CGFloat, scaleY: CGFloat) {
+        print("Chart Scaled: \(BGChart.scaleX), \(BGChart.scaleY)")
+      
+        // dont store huge values
+        var scale: Float = Float(BGChart.scaleX)
+        if(scale > ScaleXMax ) {
+            scale = ScaleXMax
+        }
+        UserDefaultsRepository.chartScaleX.value = Float(scale)
+    }
+    
 
     func createGraph(){
         self.BGChart.clear()
+        
         // Create the BG Graph Data
         let entries = bgData
         var bgChartEntry = [ChartDataEntry]()
@@ -211,11 +223,10 @@ extension MainViewController {
         BGChart.scaleYEnabled = false
         BGChart.drawGridBackgroundEnabled = false
         //BGChart.gridBackgroundColor = NSUIColor.secondarySystemBackground
+      
         
         BGChart.data = data
         BGChart.setExtraOffsets(left: 10, top: 10, right: 10, bottom: 10)
-        BGChart.setVisibleXRangeMinimum(10)
-       
         
     }
     
@@ -255,7 +266,7 @@ extension MainViewController {
         ul.limit = Double(UserDefaultsRepository.highLine.value)
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
-        
+    
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
@@ -293,7 +304,6 @@ extension MainViewController {
         }
         
         
-        
         // Set Colors
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
 
@@ -314,8 +324,7 @@ extension MainViewController {
         }
         
         BGChart.rightAxis.axisMaximum = Double(maxBG)
-       
-        
+        BGChart.setVisibleXRangeMinimum(600)
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
@@ -324,7 +333,13 @@ extension MainViewController {
         BGChartFull.notifyDataSetChanged()
         
         if firstGraphLoad {
-            BGChart.zoom(scaleX: 18, scaleY: 1, x: 1, y: 1)
+            var scaleX = CGFloat(UserDefaultsRepository.chartScaleX.value)
+            print("Scale: \(scaleX)")
+            if( scaleX > CGFloat(ScaleXMax) ) {
+                scaleX = CGFloat(ScaleXMax)
+                UserDefaultsRepository.chartScaleX.value = ScaleXMax
+            }
+            BGChart.zoom(scaleX: scaleX, scaleY: 1, x: 1, y: 1)
             firstGraphLoad = false
         }
         if BGChart.chartXMax > dateTimeUtils.getNowTimeIntervalUTC() {

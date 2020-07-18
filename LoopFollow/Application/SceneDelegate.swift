@@ -12,12 +12,43 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
+    let appStateController = AppStateController()
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
+         
+        // get the tabBar
+        guard let tabBarController = window?.rootViewController as? UITabBarController,
+           let viewControllers = tabBarController.viewControllers
+        else {
+           return
+         }
+                  
+         // set the main controllers' connection to the app sate
+         // other controllers that need to know app state are setup programatically
+         for i in 0..<viewControllers.count {
+            if let vc = viewControllers[i] as? MainViewController {
+               vc.appStateController = appStateController
+            }
+            if let vc = viewControllers[i] as? NightscoutViewController {
+               vc.appStateController = appStateController
+            }
+            if let vc = viewControllers[i] as? SettingsViewController {
+               vc.appStateController = appStateController
+            }
+            if let vc = viewControllers[i] as? AlarmViewController {
+               vc.appStateController = appStateController
+            }
+            if let vc = viewControllers[i] as? SnoozeViewController {
+               vc.appStateController = appStateController
+            }
+            if let vc = viewControllers[i] as? debugViewController {
+               vc.appStateController = appStateController
+            }
+         }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
