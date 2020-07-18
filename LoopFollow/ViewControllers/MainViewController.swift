@@ -11,21 +11,6 @@ import Charts
 import EventKit
 import ShareClient
 
-let DefaultInfoNames = [
-   "IOB",
-   "COB",
-   "Basal",
-   "Override",
-   "Battery",
-   "Pump",
-   "SAGE",
-   "CAGE",
-   "Rec. Bolus"
-]
-let InfoNames = "infoNames"
-let InfoSort = "infoSort"
-let InfoVisible = "infoVisible"
-
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate {
     
     @IBOutlet weak var BGText: UILabel!
@@ -98,9 +83,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var calTimer = Timer()
     
     // Info Table Setup
-    var infoNames : [String] = []
-    var infoSort : [Int] = []
-    var infoVisible: [Bool] = []
     var tableData : [infoData] = []
     var derivedTableData: [infoData] = []
     
@@ -139,6 +121,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         super.viewDidLoad()
 
         
+
+ 
         // table view
         //infoTable.layer.borderColor = UIColor.darkGray.cgColor
         //infoTable.layer.borderWidth = 1.0
@@ -149,20 +133,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.bounces = false
         infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
       
-        // get the info table setup
-        let userDefaults = UserDefaults.standard
-
-        // names
-        self.infoNames = userDefaults.stringArray(forKey:InfoNames) ?? [String]()
-        if(self.infoNames.count == 0) {
-            self.infoNames = DefaultInfoNames
-            userDefaults.set(self.infoNames, forKey:InfoNames)
-        }
         
         // initialize the tableData
         self.tableData = []
-        for i in 0..<self.infoNames.count {
-            self.tableData.append(infoData(name:self.infoNames[i], value:""))
+        for i in 0..<UserDefaultsRepository.infoNames.value.count {
+            self.tableData.append(infoData(name:UserDefaultsRepository.infoNames.value[i], value:""))
         }
         createDerivedData()
       
@@ -266,32 +241,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     private func createDerivedData() {
-      // get the info table
-        let userDefaults = UserDefaults.standard
-         
-        // sort
-        self.infoSort = userDefaults.array(forKey:InfoSort) as? [Int] ?? [Int]()
-        if(self.infoSort.count != self.infoNames.count) {
-            self.infoSort = []
-            for i in 0..<self.infoNames.count {
-                self.infoSort.append(i)
-            }
-            userDefaults.set(self.infoSort, forKey:InfoSort)
-        }
-        // visible
-        infoVisible = userDefaults.array(forKey:InfoVisible) as? [Bool] ?? [Bool]()
-        if(self.infoVisible.count != self.infoNames.count) {
-            self.infoVisible = []
-            for _ in 0..<self.infoNames.count {
-                self.infoVisible.append(true)
-            }
-            userDefaults.set(self.infoVisible, forKey:InfoVisible)
-        }
         
         self.derivedTableData = []
         for i in 0..<self.tableData.count {
-            if(self.infoVisible[self.infoSort[i]]) {
-                self.derivedTableData.append(self.tableData[self.infoSort[i]])
+            if(UserDefaultsRepository.infoVisible.value[UserDefaultsRepository.infoSort.value[i]]) {
+                self.derivedTableData.append(self.tableData[UserDefaultsRepository.infoSort.value[i]])
             }
         }
    }

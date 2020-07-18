@@ -443,6 +443,10 @@ extension MainViewController {
                                 i += 1
                             }
                         }
+                        let predMin = prediction.min()
+                        let predMax = prediction.max()
+                        tableData[9].value = String(predMin!) + "-" + String(predMax!)
+                        
                         if UserDefaultsRepository.graphPrediction.value {
                             updatePredictionGraph()
                         }
