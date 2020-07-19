@@ -105,6 +105,9 @@ extension MainViewController {
                 self.checkAlarms(bgs: bgData)
             }
             
+            // Used for Min Ago watch readings
+            writeCalendar()
+            
             if UserDefaultsRepository.url.value != ""  {
                 if latestLoopTime == 0 {
                     webLoadNSDeviceStatus()

@@ -465,10 +465,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             
             if UserDefaultsRepository.calendarIdentifier.value == "" { return }
                 
-            if self.lastCalDate == self.bgData[self.bgData.count - 1].date && self.calTimer.isValid {
-//                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar - Not saving same entry") }
-                    return }
-                
+            // This lets us fire the method to write Min Ago entries only once a minute starting after 6 minutes but allows new readings through
+            if self.lastCalDate == self.bgData[self.bgData.count - 1].date
+                && (self.calTimer.isValid || (dateTimeUtils.getNowTimeIntervalUTC() - self.lastCalDate) < 360) {
+                return
+            }
+
                 // Create Event info
                 let deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
                 let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
@@ -549,9 +551,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
                 do {
                     try self.store.save(event, span: .thisEvent, commit: true)
-                    self.lastCalDate = self.bgData[self.bgData.count - 1].date
                     self.calTimer.invalidate()
-                    self.startCalTimer(time: (60 * 5))
+                    self.startCalTimer(time: (60 * 1))
+                    
+                    self.lastCalDate = self.bgData[self.bgData.count - 1].date
                     //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Write: " + eventTitle) }
                     //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
                 } catch {
