@@ -149,13 +149,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         //print("Share: \(dexShare)")
         
-        // Start Log Timer if needed
-        if UserDefaultsRepository.debugLog.value {
-            guard let debug = self.tabBarController!.viewControllers?[5] as? debugViewController else { return }
-            debug.loadViewIfNeeded()
-        } else {
-            self.tabBarController?.viewControllers?.remove(at: 5)
-        }
         
         BGChart.delegate = self
         BGChartFull.delegate = self
@@ -575,13 +568,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     func writeDebugLog(value: String) {
-        guard let debug = self.tabBarController!.viewControllers?[5] as? debugViewController else { return }
         var logText = "\n" + dateTimeUtils.printNow() + " - " + value
         print(logText)
-        if debug.debugLogTextView.text.lengthOfBytes(using: .utf8) > 1000 {
-            debug.debugLogTextView.text = ""
-        }
-        debug.debugLogTextView.text += logText
+        
     }
     
     
