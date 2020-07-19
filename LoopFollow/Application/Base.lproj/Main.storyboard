@@ -115,7 +115,7 @@
                                 <rect key="frame" x="8" y="319.33333333333326" width="398" height="309.66666666666674"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ikj-at-auF">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ikj-at-auF" userLabel="statsView">
                                 <rect key="frame" x="8" y="705" width="398" height="100"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" ambiguous="YES" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="XsT-6R-Vym">
@@ -301,6 +301,7 @@
                         <outlet property="statsLowPercent" destination="TzL-hn-9qu" id="0QR-Mz-KJe"/>
                         <outlet property="statsPieChart" destination="Hhh-F1-s1p" id="Rhh-Up-Kr0"/>
                         <outlet property="statsStdDev" destination="wAI-Tp-784" id="BUZ-lS-JfA"/>
+                        <outlet property="statsView" destination="ikj-at-auF" id="7AQ-VA-Pw2"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W5J-7L-Pyd" sceneMemberID="firstResponder"/>
