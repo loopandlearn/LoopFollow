@@ -22,8 +22,41 @@ class GraphSettingsViewController: FormViewController {
       }
  
       buildGraphSettings()
+    
+        showHideNSDetails()
    }
    
+    func showHideNSDetails() {
+        var isHidden = false
+        var isEnabled = true
+        if UserDefaultsRepository.url.value == "" {
+            isHidden = true
+            isEnabled = false
+        }
+        
+        if let row1 = form.rowBy(tag: "predictionToLoad") as? StepperRow {
+            row1.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row1.evaluateHidden()
+        }
+        
+        if let row2 = form.rowBy(tag: "offsetCarbsBolus") as? SwitchRow {
+            row2.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row2.evaluateHidden()
+        }
+        
+        if let row3 = form.rowBy(tag: "overrideDisplayLocation") as? StepperRow {
+            row3.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row3.evaluateHidden()
+        }
+        
+    }
+    
     private func buildGraphSettings() {
         form
             +++ Section("Graph Settings")
