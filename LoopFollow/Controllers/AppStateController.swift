@@ -42,6 +42,8 @@ enum GeneralSettingsChangeEnum: Int {
    case persistentNotificationChange = 128
    case persistentNotificationLastBGTimeChange = 256
    case screenlockSwitchStateChange = 512
+    case showStatsChange = 1024
+    case showSmallGraphChange = 2048
 }
 
 class AppStateController {
