@@ -10,22 +10,16 @@ import Foundation
 import UIKit
 
 class debugViewController: UIViewController {
-    
-    @IBOutlet weak var debugLogTextView: UITextView!
-    @IBOutlet weak var clearButton: UIButton!
+  
     
     var appStateController: AppStateController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        debugLogTextView.isEditable = false
 
     }
     
-    @IBAction func clearButton(_ sender: Any) {
-        
-        self.debugLogTextView.text = ""
-    }
+    
     
     
 }
