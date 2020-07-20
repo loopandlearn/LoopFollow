@@ -49,6 +49,11 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         form
         +++ Section(header:"",footer: "Changing Nightscout settings requires an app restart.") {
            $0.tag = "nightscoutHeader"
+           if( UserDefaultsRepository.nightscoutAuthStatus.value ) {
+             $0.header!.title = "Nightscout Settings (verified)"
+           } else {
+              $0.header!.title = "Nightscout Settings (unverified)"
+           }
         }
         <<< TextRow(){ row in
             
@@ -108,10 +113,16 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         }
         +++ Section("") {
            $0.tag = "dexcomHeader"
+           if( UserDefaultsRepository.shareAuthStatus.value ) {
+             $0.header!.title = "Dexcom Settings (verified)"
+           } else {
+              $0.header!.title = "Dexcom Settings (unverified)"
+           }
         }
         <<< TextRow(){ row in
             row.title = "User Name"
             row.value = UserDefaultsRepository.shareUserName.value
+            row.tag = "dexcomUserNameRow"
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
         }.onCellHighlightChanged{(cell,row) in
@@ -122,11 +133,21 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
               } else {
                  UserDefaultsRepository.shareUserName.value = ""
               }
+              
+              // try to authenticate if there is a password
+              if let passwordRow = self.form.rowBy(tag: "dexcomPasswordRow")  {
+                 if let value = passwordRow.baseValue as? String {
+                    if value != "" {
+                       self.authenticateDexcom()
+                    }
+                 }
+              }
            }
         }
         <<< TextRow(){ row in
             row.title = "Password"
             row.value = UserDefaultsRepository.sharePassword.value
+            row.tag = "dexcomPasswordRow"
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
             cell.textField.isSecureTextEntry = true
@@ -210,9 +231,9 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
             
         }
     
-        // showHideNSDetails()
-        authenticateDexcom()
-        authenticateNightscout()
+        showHideNSDetails()
+        //authenticateDexcom()
+        //authenticateNightscout()
         
     }
     
