@@ -31,11 +31,13 @@ class UserDefaultsRepository {
     static let url = UserDefaultsValue<String>(key: "url", default: "")
     static let token = UserDefaultsValue<String>(key: "token", default: "")
     static let units = UserDefaultsValue<String>(key: "units", default: "mg/dL")
+    static let nightscoutAuthStatus = UserDefaultsValue<Bool>(key: "nighscoutAuthStatus", default: false)
     
     // Dexcom Share Settings
     static let shareUserName = UserDefaultsValue<String>(key: "shareUserName", default: "")
     static let sharePassword = UserDefaultsValue<String>(key: "sharePassword", default: "")
     static let shareServer = UserDefaultsValue<String>(key: "shareServer", default: "US")
+    static let shareAuthStatus = UserDefaultsValue<Bool>(key: "shareAuthStatus", default: false)
     
     // Graph Settings
     static let chartScaleX = UserDefaultsValue<Float>(key: "chartScaleX", default: 18.0)

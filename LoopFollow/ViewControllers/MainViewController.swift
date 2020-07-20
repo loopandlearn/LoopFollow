@@ -11,7 +11,7 @@ import Charts
 import EventKit
 import ShareClient
 
-class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate {
+class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, AuthenticationDelegate {
     
     @IBOutlet weak var BGText: UILabel!
     @IBOutlet weak var DeltaText: UILabel!
@@ -120,9 +120,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        
-
- 
+        // become the authentication delegates
+        self.appStateController?.authDelegate = self
+    
         // table view
         //infoTable.layer.borderColor = UIColor.darkGray.cgColor
         //infoTable.layer.borderWidth = 1.0

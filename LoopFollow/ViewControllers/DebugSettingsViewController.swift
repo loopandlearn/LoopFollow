@@ -104,6 +104,19 @@ class DebugSettingsViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.viewRefreshDelay.value = Double(value)
         }
+        /*
+         +++ ButtonRow() {
+          $0.title = "Debug Log"
+          $0.presentationMode = .show(
+               controllerProvider: .callback(builder: {
+                  let controller = debugViewController()
+                  controller.appStateController = self.appStateController
+                  return controller
+               }
+           ), onDismiss: nil)
+        }
+        */
+        
         +++ ButtonRow() {
           $0.title = "DONE"
         }.onCellSelection { (row, arg)  in
