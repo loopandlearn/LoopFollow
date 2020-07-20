@@ -37,7 +37,6 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         
         guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
         nightscoutTab.isEnabled = isEnabled
-        
     }
    
    override func viewDidLoad() {
@@ -118,11 +117,11 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         }.onCellHighlightChanged{(cell,row) in
            // done editing
            if row.isHighlighted == false {
-              if row.value == nil {
+              if let value = row.value  {
+                 UserDefaultsRepository.shareUserName.value = value
+              } else {
                  UserDefaultsRepository.shareUserName.value = ""
               }
-              guard let value = row.value else { return }
-              UserDefaultsRepository.shareUserName.value = value
            }
         }
         <<< TextRow(){ row in
@@ -135,12 +134,12 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         }.onCellHighlightChanged{(cell,row) in
            // done editing
            if row.isHighlighted == false {
-              if row.value == nil {
+              if let value = row.value {
+                 UserDefaultsRepository.sharePassword.value = value
+              } else {
                  UserDefaultsRepository.sharePassword.value = ""
-               }
-               guard let value = row.value else { return }
-               UserDefaultsRepository.sharePassword.value = value
-               self.authenticateDexcom()
+              }
+              self.authenticateDexcom()
            }
         }
         <<< SegmentedRow<String>("shareServer") { row in
@@ -211,7 +210,7 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
             
         }
     
-        showHideNSDetails()
+        // showHideNSDetails()
         authenticateDexcom()
         authenticateNightscout()
         
