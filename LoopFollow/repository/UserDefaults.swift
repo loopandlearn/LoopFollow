@@ -13,13 +13,26 @@ class UserDefaultsRepository {
 
     // DisplayValues total
     static let infoDataTotal = UserDefaultsValue<Int>(key: "infoDataTotal", default: 0)
+    static let infoNames = UserDefaultsValue<[String]>(key: "infoNames", default: [
+        "IOB",
+        "COB",
+        "Basal",
+        "Override",
+        "Battery",
+        "Pump",
+        "SAGE",
+        "CAGE",
+        "Rec. Bolus",
+        "Pred. Min-Max"])
+    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [0,1,2,3,4,5,6,7,8,9])
+    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true])
     
-    //Nightscout Settings
+    // Nightscout Settings
     static let url = UserDefaultsValue<String>(key: "url", default: "")
     static let token = UserDefaultsValue<String>(key: "token", default: "")
     static let units = UserDefaultsValue<String>(key: "units", default: "mg/dL")
     
-    //Dexcom Share Settings
+    // Dexcom Share Settings
     static let shareUserName = UserDefaultsValue<String>(key: "shareUserName", default: "")
     static let sharePassword = UserDefaultsValue<String>(key: "sharePassword", default: "")
     static let shareServer = UserDefaultsValue<String>(key: "shareServer", default: "US")
@@ -60,7 +73,7 @@ class UserDefaultsRepository {
         static let downloadBolus = UserDefaultsValue<Bool>(key: "downloadBolus", default: true)
         static let downloadCarbs = UserDefaultsValue<Bool>(key: "downloadCarbs", default: true)
         static let downloadPrediction = UserDefaultsValue<Bool>(key: "downloadPrediction", default: true)
-       static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
+        static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
         static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
         static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
         static let graphPrediction = UserDefaultsValue<Bool>(key: "graphPrediction", default: true)

@@ -11,21 +11,6 @@ import Charts
 import EventKit
 import ShareClient
 
-let DefaultInfoNames = [
-   "IOB",
-   "COB",
-   "Basal",
-   "Override",
-   "Battery",
-   "Pump",
-   "SAGE",
-   "CAGE",
-   "Rec. Bolus"
-]
-let InfoNames = "infoNames"
-let InfoSort = "infoSort"
-let InfoVisible = "infoVisible"
-
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate {
     
     @IBOutlet weak var BGText: UILabel!
@@ -46,8 +31,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsAvgBG: UILabel!
     @IBOutlet weak var statsEstA1C: UILabel!
     @IBOutlet weak var statsStdDev: UILabel!
+    @IBOutlet weak var serverText: UILabel!
 
-        
+      
     // Data Table class
     class infoData {
         public var name: String
@@ -56,10 +42,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.name = name
             self.value = value
         }
-
-    @IBOutlet weak var serverText: UILabel!
-
     }
+    
+    var appStateController: AppStateController?
 
     // Variables for BG Charts
     public var numPoints: Int = 13
@@ -98,9 +83,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var calTimer = Timer()
     
     // Info Table Setup
-    var infoNames : [String] = []
-    var infoSort : [Int] = []
-    var infoVisible: [Bool] = []
     var tableData : [infoData] = []
     var derivedTableData: [infoData] = []
     
@@ -139,6 +121,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         super.viewDidLoad()
 
         
+
+ 
         // table view
         //infoTable.layer.borderColor = UIColor.darkGray.cgColor
         //infoTable.layer.borderWidth = 1.0
@@ -149,23 +133,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.bounces = false
         infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
       
-        // get the info table
-        let userDefaults = UserDefaults.standard
-
-        // names
-        self.infoNames = userDefaults.stringArray(forKey:InfoNames) ?? [String]()
-        if(self.infoNames.count == 0) {
-            self.infoNames = DefaultInfoNames
-            userDefaults.set(self.infoNames, forKey:InfoNames)
-        }
         
         // initialize the tableData
         self.tableData = []
-        for i in 0..<self.infoNames.count {
-            self.tableData.append(infoData(name:self.infoNames[i], value:""))
+        for i in 0..<UserDefaultsRepository.infoNames.value.count {
+            self.tableData.append(infoData(name:UserDefaultsRepository.infoNames.value[i], value:""))
         }
+        createDerivedData()
       
-        // TODO: look for username and password in the UserDefaultsRepo ?
         // TODO: need non-us server ?
         let shareUserName = UserDefaultsRepository.shareUserName.value
         let sharePassword = UserDefaultsRepository.sharePassword.value
@@ -174,13 +149,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         //print("Share: \(dexShare)")
         
-        // Start Log Timer if needed
-        if UserDefaultsRepository.debugLog.value {
-            guard let debug = self.tabBarController!.viewControllers?[5] as? debugViewController else { return }
-            debug.loadViewIfNeeded()
-        } else {
-            self.tabBarController?.viewControllers?.remove(at: 5)
-        }
         
         BGChart.delegate = self
         BGChartFull.delegate = self
@@ -204,8 +172,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-    
-        
+         
         // Setup the Graph
         if firstGraphLoad {
             createGraph()
@@ -225,37 +192,57 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // set screen lock
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
         
-        // get the info table
-        let userDefaults = UserDefaults.standard
-
-        // sort
-        self.infoSort = userDefaults.array(forKey:InfoSort) as? [Int] ?? [Int]()
-        if(self.infoSort.count != self.infoNames.count) {
-            self.infoSort = []
-            for i in 0..<self.infoNames.count {
-                self.infoSort.append(i)
-            }
-            userDefaults.set(self.infoSort, forKey:InfoSort)
+        // check the app state
+        // TODO: move to a function ?
+        if let appState = self.appStateController {
+        
+           if appState.chartSettingsChanged {
+              
+              // can look at settings flags to be more fine tuned
+              self.updateBGGraphSettings()
+              
+              // reset the app state
+              appState.chartSettingsChanged = false
+              appState.chartSettingsChanges = 0
+           }
+           if appState.generalSettingsChanged {
+           
+              // settings for appBadge changed
+              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.appBadgeChange.rawValue != 0 {
+                 self.nightscoutLoader(forceLoad: true)
+              }
+              
+              // settings for textcolor changed
+              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.colorBGTextChange.rawValue != 0 {
+                 self.setBGTextColor()
+              }
+              
+              // reset the app state
+              appState.generalSettingsChanged = false
+              appState.generalSettingsChanges = 0
+           }
+           if appState.infoDataSettingsChanged {
+              createDerivedData()
+              self.infoTable.reloadData()
+              
+              // reset
+              appState.infoDataSettingsChanged = false
+           }
+           
+           // add more processing of the app state
         }
-        // visible
-        infoVisible = userDefaults.array(forKey:InfoVisible) as? [Bool] ?? [Bool]()
-        if(self.infoVisible.count != self.infoNames.count) {
-            self.infoVisible = []
-            for _ in 0..<self.infoNames.count {
-                self.infoVisible.append(true)
-            }
-            userDefaults.set(self.infoVisible, forKey:InfoVisible)
-        }
+    }
+    
+    private func createDerivedData() {
         
         self.derivedTableData = []
         for i in 0..<self.tableData.count {
-            if(self.infoVisible[self.infoSort[i]]) {
-                self.derivedTableData.append(self.tableData[self.infoSort[i]])
+            if(UserDefaultsRepository.infoVisible.value[UserDefaultsRepository.infoSort.value[i]]) {
+                self.derivedTableData.append(self.tableData[UserDefaultsRepository.infoSort.value[i]])
             }
         }
-        infoTable.reloadData()
-    }
-    
+   }
+   
     // Info Table Functions
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         //return tableData.count
@@ -459,7 +446,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     func bgDirectionGraphic(_ value:String)->String
     {
         let //graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
-        graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
+        graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NONE":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
         return graphics[value]!
     }
     
@@ -471,10 +458,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             
             if UserDefaultsRepository.calendarIdentifier.value == "" { return }
                 
-            if self.lastCalDate == self.bgData[self.bgData.count - 1].date && self.calTimer.isValid {
-//                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar - Not saving same entry") }
-                    return }
-                
+            // This lets us fire the method to write Min Ago entries only once a minute starting after 6 minutes but allows new readings through
+            if self.lastCalDate == self.bgData[self.bgData.count - 1].date
+                && (self.calTimer.isValid || (dateTimeUtils.getNowTimeIntervalUTC() - self.lastCalDate) < 360) {
+                return
+            }
+
                 // Create Event info
                 let deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
                 let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
@@ -555,9 +544,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
                 do {
                     try self.store.save(event, span: .thisEvent, commit: true)
-                    self.lastCalDate = self.bgData[self.bgData.count - 1].date
                     self.calTimer.invalidate()
-                    self.startCalTimer(time: (60 * 5))
+                    self.startCalTimer(time: (60 * 1))
+                    
+                    self.lastCalDate = self.bgData[self.bgData.count - 1].date
                     //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Write: " + eventTitle) }
                     //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
                 } catch {
@@ -578,13 +568,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     func writeDebugLog(value: String) {
-        guard let debug = self.tabBarController!.viewControllers?[5] as? debugViewController else { return }
         var logText = "\n" + dateTimeUtils.printNow() + " - " + value
         print(logText)
-        if debug.debugLogTextView.text.lengthOfBytes(using: .utf8) > 1000 {
-            debug.debugLogTextView.text = ""
-        }
-        debug.debugLogTextView.text += logText
+        
     }
     
     

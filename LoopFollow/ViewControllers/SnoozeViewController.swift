@@ -11,7 +11,7 @@ import UserNotifications
 
 
 class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
-
+    var appStateController: AppStateController?
     var snoozeTabItem: UITabBarItem = UITabBarItem()
     var mainTabItem: UITabBarItem = UITabBarItem()
     
@@ -64,6 +64,11 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         content.subtitle += directionVal + " "
         content.subtitle += deltaVal
         content.categoryIdentifier = "category"
+        // This is needed to trigger vibrate on watch and phone
+        // TODO:
+        // See if we can use .Critcal
+        // See if we should use this method instead of direct sound player
+        content.sound = .default
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)

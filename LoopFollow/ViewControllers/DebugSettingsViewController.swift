@@ -12,6 +12,9 @@ import EventKit
 import EventKitUI
 
 class DebugSettingsViewController: FormViewController {
+
+   var appStateController: AppStateController?
+   
    override func viewDidLoad()  {
       super.viewDidLoad()
       if UserDefaultsRepository.forceDarkMode.value {
