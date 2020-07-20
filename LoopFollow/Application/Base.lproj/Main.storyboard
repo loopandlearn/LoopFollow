@@ -471,50 +471,6 @@
             </objects>
             <point key="canvasLocation" x="130" y="700"/>
         </scene>
-        <!--Debug-->
-        <scene sceneID="cZ6-3g-mng">
-            <objects>
-                <viewController id="9r8-3s-tWh" customClass="debugViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="7hU-AX-9jB">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" keyboardDismissMode="onDrag" translatesAutoresizingMaskIntoConstraints="NO" id="Ieq-pV-T9Q">
-                                <rect key="frame" x="8" y="52" width="398" height="703"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                                <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
-                            </textView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6PS-rq-xdP">
-                                <rect key="frame" x="147" y="763" width="120" height="30"/>
-                                <state key="normal" title="Clear Log Display"/>
-                                <connections>
-                                    <action selector="clearButton:" destination="9r8-3s-tWh" eventType="touchUpInside" id="Owz-mE-5pP"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                        <constraints>
-                            <constraint firstItem="6PS-rq-xdP" firstAttribute="top" secondItem="Ieq-pV-T9Q" secondAttribute="bottom" constant="8" id="BWN-dg-cZc"/>
-                            <constraint firstItem="Ieq-pV-T9Q" firstAttribute="leading" secondItem="aMT-dx-6x9" secondAttribute="leading" constant="8" id="Osu-OU-EnY"/>
-                            <constraint firstItem="aMT-dx-6x9" firstAttribute="bottom" secondItem="6PS-rq-xdP" secondAttribute="bottom" constant="20" id="djl-I0-32Y"/>
-                            <constraint firstItem="aMT-dx-6x9" firstAttribute="trailing" secondItem="Ieq-pV-T9Q" secondAttribute="trailing" constant="8" id="fTv-Gn-qks"/>
-                            <constraint firstItem="Ieq-pV-T9Q" firstAttribute="top" secondItem="aMT-dx-6x9" secondAttribute="top" constant="8" id="ieU-fq-W8U"/>
-                            <constraint firstItem="6PS-rq-xdP" firstAttribute="centerX" secondItem="aMT-dx-6x9" secondAttribute="centerX" id="tMD-fi-wJu"/>
-                        </constraints>
-                        <viewLayoutGuide key="safeArea" id="aMT-dx-6x9"/>
-                    </view>
-                    <tabBarItem key="tabBarItem" title="Debug" image="keyboard" catalog="system" id="wbk-Vr-CKq"/>
-                    <connections>
-                        <outlet property="clearButton" destination="6PS-rq-xdP" id="IFy-5R-qT5"/>
-                        <outlet property="debugLogTextView" destination="Ieq-pV-T9Q" id="HvY-Z3-T2E"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="ccN-WA-Klh" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="973.91304347826099" y="-13.392857142857142"/>
-        </scene>
         <!--Settings-->
         <scene sceneID="ORV-wr-Fd3">
             <objects>
@@ -554,7 +510,6 @@
                         <segue destination="e0E-cx-0Wr" kind="relationship" relationship="viewControllers" id="NKn-DR-nLR"/>
                         <segue destination="8rJ-Kc-sve" kind="relationship" relationship="viewControllers" id="lzU-1b-eKA"/>
                         <segue destination="hDv-qK-Udb" kind="relationship" relationship="viewControllers" id="maf-Gu-a58"/>
-                        <segue destination="9r8-3s-tWh" kind="relationship" relationship="viewControllers" id="Sjn-Lm-tBH"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HuB-VB-40B" sceneMemberID="firstResponder"/>
@@ -566,7 +521,6 @@
         <image name="alarm" catalog="system" width="124" height="128"/>
         <image name="gear" catalog="system" width="128" height="119"/>
         <image name="house" catalog="system" width="128" height="110"/>
-        <image name="keyboard" catalog="system" width="128" height="70"/>
         <image name="safari" catalog="system" width="128" height="121"/>
         <image name="zzz" catalog="system" width="121" height="128"/>
     </resources>

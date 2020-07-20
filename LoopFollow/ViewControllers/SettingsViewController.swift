@@ -13,11 +13,35 @@ import EventKitUI
 
 class SettingsViewController: FormViewController {
 
-    override func viewDidLoad() {
+   var appStateController: AppStateController?
+    
+    func showHideNSDetails() {
+        var isHidden = false
+        var isEnabled = true
+        if UserDefaultsRepository.url.value == "" {
+            isHidden = true
+            isEnabled = false
+        }
+        
+        if let row1 = form.rowBy(tag: "informationDisplaySettings") as? ButtonRow {
+            row1.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row1.evaluateHidden()
+        }
+        
+        guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
+        nightscoutTab.isEnabled = isEnabled
+        
+    }
+   
+   override func viewDidLoad() {
         super.viewDidLoad()
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
+    
+        
                         
         form
         +++ Section(header: "Nightscout Settings", footer: "Changing Nightscout settings requires an app restart.")
@@ -30,6 +54,7 @@ class SettingsViewController: FormViewController {
         }.onChange { row in
             guard let value = row.value else {
                 UserDefaultsRepository.url.value = ""
+                self.showHideNSDetails()
                 return }
             // check the format of the URL entered by the user and trim away any spaces or "/" at the end
             var urlNSInput = value.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
@@ -39,7 +64,8 @@ class SettingsViewController: FormViewController {
             UserDefaultsRepository.url.value = urlNSInput.lowercased()
             // set the row value back to the correctly formatted URL so that the user immediately sees how it should have been written
             row.value = UserDefaultsRepository.url.value
-        }
+            self.showHideNSDetails()
+            }
         <<< TextRow(){ row in
             row.title = "NS Token"
             row.placeholder = "Leave blank if not using tokens"
@@ -97,48 +123,45 @@ class SettingsViewController: FormViewController {
         }
         
         +++ Section("App Settings")
-      
-        // +++ Section("General Settings")
         <<< ButtonRow() {
            $0.title = "General Settings"
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = GeneralSettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)
-
-            
         }
-
-        // +++ Section("Graph Settings")
-        <<< ButtonRow() {
+        <<< ButtonRow("graphSettings") {
            $0.title = "Graph Settings"
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = GraphSettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)
         }
-          // +++ Section("Information Display Settings")
-        <<< ButtonRow() {
+        <<< ButtonRow("informationDisplaySettings") {
            $0.title = "Information Display Settings"
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = InfoDisplaySettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)
             
         }
         
-        +++ Section("Watch App Settings")
+        +++ Section("Integrations")
         <<< ButtonRow() {
-           $0.title = "Configure Watch App"
+           $0.title = "Apple Watch and Carplay"
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = WatchSettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)
@@ -151,11 +174,16 @@ class SettingsViewController: FormViewController {
            $0.presentationMode = .show(
                controllerProvider: .callback(builder: {
                   let controller = DebugSettingsViewController()
+                  controller.appStateController = self.appStateController
                   return controller
                }
            ), onDismiss: nil)
             
         }
+    
+        showHideNSDetails()
       
     }
+    
+    
 }

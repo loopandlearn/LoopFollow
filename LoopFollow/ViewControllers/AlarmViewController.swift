@@ -11,6 +11,7 @@ import UIKit
 import Eureka
 
 class AlarmViewController: FormViewController {
+    var appStateController: AppStateController?
     
     var soundFiles: [String] = [
         "Alarm_Buzzer",

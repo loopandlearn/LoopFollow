@@ -12,10 +12,8 @@ import EventKit
 import EventKitUI
 
 class InfoDisplaySettingsViewController: FormViewController {
+    var appStateController: AppStateController?
 
-    var infoNames:   [String] = []
-    var infoSort:    [Int]    = []
-    var infoVisible: [Bool]   = []
     
     override func viewDidLoad() {
         print("Display Load")
@@ -24,34 +22,6 @@ class InfoDisplaySettingsViewController: FormViewController {
             overrideUserInterfaceStyle = .dark
         }
          
-        // get the info table
-        let userDefaults = UserDefaults.standard
-
-        // names
-        self.infoNames = userDefaults.stringArray(forKey:InfoNames) ?? [String]()
-        if(self.infoNames.count == 0) {
-            self.infoNames = DefaultInfoNames
-            userDefaults.set(self.infoNames, forKey:InfoNames)
-        }
-        
-        // sort
-        self.infoSort = userDefaults.array(forKey:InfoSort) as? [Int] ?? [Int]()
-        if(self.infoSort.count != self.infoNames.count) {
-            self.infoSort = []
-            for i in 0..<self.infoNames.count {
-                self.infoSort.append(i)
-            }
-            userDefaults.set(self.infoSort, forKey:InfoSort)
-        }
-        // visible
-        self.infoVisible = userDefaults.array(forKey:InfoVisible) as? [Bool] ?? [Bool]()
-        if(self.infoVisible.count != self.infoNames.count) {
-            self.infoVisible = []
-            for _ in 0..<self.infoNames.count {
-                self.infoVisible.append(true)
-            }
-            userDefaults.set(self.infoVisible, forKey:InfoVisible)
-        }
         createForm()
     }
     
@@ -62,19 +32,16 @@ class InfoDisplaySettingsViewController: FormViewController {
            // TODO: add the other display values
            $0.tag = "InfoDisplay"
            
-            for i in 0..<self.infoNames.count {
+            for i in 0..<UserDefaultsRepository.infoNames.value.count {
               $0 <<< TextRow() { row in
-                if(self.infoVisible[self.infoSort[i]]) {
-                    row.title = "\u{2713}\t\(self.infoNames[self.infoSort[i]])"
+                if(UserDefaultsRepository.infoVisible.value[UserDefaultsRepository.infoSort.value[i]]) {
+                    row.title = "\u{2713}\t\(UserDefaultsRepository.infoNames.value[UserDefaultsRepository.infoSort.value[i]])"
                  } else {
-                    row.title = "\u{2001}\t\(self.infoNames[self.infoSort[i]])"
+                    row.title = "\u{2001}\t\(UserDefaultsRepository.infoNames.value[UserDefaultsRepository.infoSort.value[i]])"
                  }
               }.onCellSelection{(cell, row) in
                 let i = row.indexPath!.row
-                self.infoVisible[self.infoSort[i]] = !self.infoVisible[self.infoSort[i]]
-                
-                // save info visible
-                UserDefaults.standard.set(self.infoVisible, forKey:InfoVisible)
+                UserDefaultsRepository.infoVisible.value[UserDefaultsRepository.infoSort.value[i]] = !UserDefaultsRepository.infoVisible.value[UserDefaultsRepository.infoSort.value[i]]
                 
                 self.tableView.reloadData()
                 
@@ -83,11 +50,12 @@ class InfoDisplaySettingsViewController: FormViewController {
               }.cellSetup { (cell, row) in
                  cell.textField.isUserInteractionEnabled = false
               }.cellUpdate{ (cell, row) in
-                 if(self.infoVisible[self.infoSort[i]]) {
-                    row.title = "\u{2713}\t\(self.infoNames[self.infoSort[i]])"
+                if(UserDefaultsRepository.infoVisible.value[UserDefaultsRepository.infoSort.value[i]]) {
+                    row.title = "\u{2713}\t\(UserDefaultsRepository.infoNames.value[UserDefaultsRepository.infoSort.value[i]])"
                  } else {
-                    row.title = "\u{2001}\t\(self.infoNames[self.infoSort[i]])"
+                    row.title = "\u{2001}\t\(UserDefaultsRepository.infoNames.value[UserDefaultsRepository.infoSort.value[i]])"
                  }
+                 self.appStateController!.infoDataSettingsChanged = true
               }
            }
        }
@@ -105,14 +73,14 @@ class InfoDisplaySettingsViewController: FormViewController {
         let destIndex = destinationIndexPath.row
         
         // new sort
-        let tmpVal = self.infoSort[sourceIndex]
-        self.infoSort.remove(at:sourceIndex)
-        self.infoSort.insert(tmpVal, at:destIndex)
+        if(destIndex != sourceIndex ) {
+           self.appStateController!.infoDataSettingsChanged = true
+           
+            let tmpVal = UserDefaultsRepository.infoSort.value[sourceIndex]
+            UserDefaultsRepository.infoSort.value.remove(at:sourceIndex)
+            UserDefaultsRepository.infoSort.value.insert(tmpVal, at:destIndex)
        
-        // save to defaults
-        UserDefaults.standard.set(self.infoSort, forKey:InfoSort)
+        }
         
-        print("Source Row: \(sourceIndexPath.row); Source Section: \(sourceIndexPath.section)")
-        print("Destination Row: \(destinationIndexPath.row); Destination Section: \(destinationIndexPath.section)")
     }
  }
