@@ -23,7 +23,7 @@ class UserDefaultsRepository {
         "SAGE",
         "CAGE",
         "Rec. Bolus",
-        "Pred. Min-Max"])
+        "Pred. Min/Max"])
     static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [0,1,2,3,4,5,6,7,8,9])
     static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true])
     
@@ -55,6 +55,8 @@ class UserDefaultsRepository {
     
     // General Settings
     static let colorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
+    static let showStats = UserDefaultsValue<Bool>(key: "showStats", default: true)
+    static let showSmallGraph = UserDefaultsValue<Bool>(key: "showSmallGraph", default: true)
     static let speakBG = UserDefaultsValue<Bool>(key: "speakBG", default: false)
     static let backgroundRefreshFrequency = UserDefaultsValue<Double>(key: "backgroundRefreshFrequency", default: 1)
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)

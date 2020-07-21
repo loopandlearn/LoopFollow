@@ -32,7 +32,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsEstA1C: UILabel!
     @IBOutlet weak var statsStdDev: UILabel!
     @IBOutlet weak var serverText: UILabel!
-
+    @IBOutlet weak var statsView: UIView!
+    
       
     // Data Table class
     class infoData {
@@ -120,9 +121,24 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     override func viewDidLoad() {
         super.viewDidLoad()
 
+
         // become the authentication delegates
         self.appStateController?.authDelegate = self
     
+        // reset the infoTable names in case we add or delete items
+        UserDefaultsRepository.infoNames.value.removeAll()
+        UserDefaultsRepository.infoNames.value.append("IOB")
+        UserDefaultsRepository.infoNames.value.append("COB")
+        UserDefaultsRepository.infoNames.value.append("Basal")
+        UserDefaultsRepository.infoNames.value.append("Override")
+        UserDefaultsRepository.infoNames.value.append("Battery")
+        UserDefaultsRepository.infoNames.value.append("Pump")
+        UserDefaultsRepository.infoNames.value.append("SAGE")
+        UserDefaultsRepository.infoNames.value.append("CAGE")
+        UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
+        UserDefaultsRepository.infoNames.value.append("Pred. Min/Max")
+ 
+
         // table view
         //infoTable.layer.borderColor = UIColor.darkGray.cgColor
         //infoTable.layer.borderWidth = 1.0
@@ -132,7 +148,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         infoTable.tableFooterView = UIView(frame: .zero) // get rid of extra rows
         infoTable.bounces = false
         infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
-      
         
         // initialize the tableData
         self.tableData = []
@@ -149,6 +164,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         //print("Share: \(dexShare)")
         
+        // setup show/hide small graph and stats
+        BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
+        statsView.isHidden = !UserDefaultsRepository.showStats.value
         
         BGChart.delegate = self
         BGChartFull.delegate = self
@@ -216,6 +234,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
               if appState.generalSettingsChanges & GeneralSettingsChangeEnum.colorBGTextChange.rawValue != 0 {
                  self.setBGTextColor()
               }
+            
+            // settings for showStats changed
+            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showStatsChange.rawValue != 0 {
+               statsView.isHidden = !UserDefaultsRepository.showStats.value
+            }
+            
+            // settings for showSmallGraph changed
+            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showSmallGraphChange.rawValue != 0 {
+                BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
+            }
               
               // reset the app state
               appState.generalSettingsChanged = false
