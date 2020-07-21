@@ -20,9 +20,10 @@ class StatsData {
     var totalGlucose: Int
     var avgBG: Float
     var a1C: Float
+    var stdDev: Float
     var pie: [DataStructs.pieData]
     
-    init(bgData: [DataStructs.sgvData]) {
+    init(bgData: [ShareGlucoseData]) {
         
         self.countLow = 0
         self.countRange = 0
@@ -54,8 +55,6 @@ class StatsData {
             DataStructs.pieData(name: "range", value: Double(percentRange)),
             DataStructs.pieData(name: "high", value: Double(percentHigh))]
         
-        
-        
         // Set Average
         avgBG = Float(totalGlucose / bgData.count)
         
@@ -67,6 +66,13 @@ class StatsData {
             // https://github.com/nightscout/nightguard/pull/72
             // a1C = (((46.7 + Float(avgBG)) / 28.7) - 2.152) / 0.09148
         }
+         
+        // compute std dev (sigma)
+        var partialSum: Float = 0;
+        for i in 0..<bgData.count {
+            partialSum += (Float(bgData[i].sgv) - avgBG) * ( Float(bgData[i].sgv) - avgBG)
+        }
+        stdDev = sqrt(partialSum / Float(bgData.count))
     }
 
 }

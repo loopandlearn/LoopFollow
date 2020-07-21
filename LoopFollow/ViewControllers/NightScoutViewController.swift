@@ -15,6 +15,7 @@ class NightscoutViewController: UIViewController {
 
     @IBOutlet weak var webView: WKWebView!
     
+    var appStateController: AppStateController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
