@@ -11,7 +11,7 @@ import UserNotifications
 
 
 class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
-
+    var appStateController: AppStateController?
     var snoozeTabItem: UITabBarItem = UITabBarItem()
     var mainTabItem: UITabBarItem = UITabBarItem()
     
@@ -64,6 +64,11 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         content.subtitle += directionVal + " "
         content.subtitle += deltaVal
         content.categoryIdentifier = "category"
+        // This is needed to trigger vibrate on watch and phone
+        // TODO:
+        // See if we can use .Critcal
+        // See if we should use this method instead of direct sound player
+        content.sound = .default
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
@@ -154,6 +159,47 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
                         alarms.reloadIsSnoozed(key: "alertMissedBolusIsSnoozed", value: true)
                         alarms.reloadSnoozeTime(key: "alertMissedBolusSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(UserDefaultsRepository.alertMissedBolusSnooze.value * 60)))
         }
+    }
+    
+    func setQuietHours(snoozeTime: Date)
+    {
+        
+        if UserDefaultsRepository.alertMissedBolusQuiet.value {
+            UserDefaultsRepository.alertMissedBolusIsSnoozed.value = true
+            UserDefaultsRepository.alertMissedBolusSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertMissedBolusIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertMissedBolusSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertOverrideStartQuiet.value {
+            UserDefaultsRepository.alertOverrideStartIsSnoozed.value = true
+            UserDefaultsRepository.alertOverrideStartSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertOverrideStartIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertOverrideStartSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertOverrideEndQuiet.value {
+            UserDefaultsRepository.alertOverrideEndIsSnoozed.value = true
+            UserDefaultsRepository.alertOverrideEndSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertOverrideEndIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertOverrideEndSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertCAGEQuiet.value {
+            UserDefaultsRepository.alertCAGEIsSnoozed.value = true
+            UserDefaultsRepository.alertCAGESnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertCAGEIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertCAGESnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertSAGEQuiet.value {
+            UserDefaultsRepository.alertSAGEIsSnoozed.value = true
+            UserDefaultsRepository.alertSAGESnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertSAGEIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertSAGESnoozedTime", setNil: false, value: snoozeTime)
+        }
+        
     }
     
     override func viewDidLoad() {

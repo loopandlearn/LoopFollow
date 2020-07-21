@@ -16,13 +16,14 @@ extension MainViewController {
     func updateStats()
     {
         if bgData.count > 0 {
-           var stats = StatsData(bgData: bgData)
+           let stats = StatsData(bgData: bgData)
             
             statsLowPercent.text = String(format:"%.1f%", stats.percentLow) + "%"
             statsInRangePercent.text = String(format:"%.1f%", stats.percentRange) + "%"
             statsHighPercent.text = String(format:"%.1f%", stats.percentHigh) + "%"
             statsAvgBG.text = bgUnits.toDisplayUnits(String(format:"%.0f%", stats.avgBG))
             statsEstA1C.text = String(format:"%.1f%", stats.a1C)
+            statsStdDev.text = String(format:"%.2f%", stats.stdDev)
             
             createStatsPie(pieData: stats.pie)
         }

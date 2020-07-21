@@ -9,7 +9,7 @@
 import UIKit
 import Charts
 import EventKit
-
+import ShareClient
 
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate {
     
@@ -30,13 +30,22 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsHighPercent: UILabel!
     @IBOutlet weak var statsAvgBG: UILabel!
     @IBOutlet weak var statsEstA1C: UILabel!
+    @IBOutlet weak var statsStdDev: UILabel!
+    @IBOutlet weak var serverText: UILabel!
+    @IBOutlet weak var statsView: UIView!
     
-    
-    // Data Table Struct
-    struct infoData {
-        var name: String
-        var value: String
+      
+    // Data Table class
+    class infoData {
+        public var name: String
+        public var value: String
+        init(name: String, value: String) {
+            self.name = name
+            self.value = value
+        }
     }
+    
+    var appStateController: AppStateController?
 
     // Variables for BG Charts
     public var numPoints: Int = 13
@@ -75,25 +84,17 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var calTimer = Timer()
     
     // Info Table Setup
-    var tableData = [
-        infoData(name: "IOB", value: ""), //0
-        infoData(name: "COB", value: ""), //1
-        infoData(name: "Basal", value: ""), //2
-        infoData(name: "Override", value: ""), //3
-        infoData(name: "Battery", value: ""), //4
-        infoData(name: "Pump", value: ""), //5
-        infoData(name: "SAGE", value: ""), //6
-        infoData(name: "CAGE", value: "") //7
-    ]
+    var tableData : [infoData] = []
+    var derivedTableData: [infoData] = []
     
-    var bgData: [DataStructs.sgvData] = []
+    var bgData: [ShareGlucoseData] = []
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
     var basalScheduleData: [basalGraphStruct] = []
     var bolusData: [bolusCarbGraphStruct] = []
     var carbData: [bolusCarbGraphStruct] = []
     var overrideData: [DataStructs.overrideGraphStruct] = []
-    var predictionData: [DataStructs.sgvData] = []
+    var predictionData: [ShareGlucoseData] = []
     var chartData = LineChartData()
     var newBGPulled = false
     var lastCalDate: Double = 0
@@ -108,6 +109,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
     
+    // share
+    var bgDataShare: [ShareGlucoseData] = []
+    var dexShare: ShareClient?;
+    
     // calendar setup
     let store = EKEventStore()
     
@@ -115,18 +120,48 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        // reset the infoTable names in case we add or delete items
+        UserDefaultsRepository.infoNames.value.removeAll()
+        UserDefaultsRepository.infoNames.value.append("IOB")
+        UserDefaultsRepository.infoNames.value.append("COB")
+        UserDefaultsRepository.infoNames.value.append("Basal")
+        UserDefaultsRepository.infoNames.value.append("Override")
+        UserDefaultsRepository.infoNames.value.append("Battery")
+        UserDefaultsRepository.infoNames.value.append("Pump")
+        UserDefaultsRepository.infoNames.value.append("SAGE")
+        UserDefaultsRepository.infoNames.value.append("CAGE")
+        UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
+        UserDefaultsRepository.infoNames.value.append("Pred.")
+ 
+        // table view
+        //infoTable.layer.borderColor = UIColor.darkGray.cgColor
+        //infoTable.layer.borderWidth = 1.0
+        //infoTable.layer.cornerRadius = 6
+        infoTable.rowHeight = 24
+        infoTable.dataSource = self
+        infoTable.tableFooterView = UIView(frame: .zero) // get rid of extra rows
+        infoTable.bounces = false
+        infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
         
-        // Start Log Timer if needed
-        if UserDefaultsRepository.debugLog.value {
-            guard let debug = self.tabBarController!.viewControllers?[5] as? debugViewController else { return }
-            debug.loadViewIfNeeded()
-        } else {
-            do {
-                try self.tabBarController?.viewControllers?.remove(at: 5)
-            } catch {
-                
-            }
+        // initialize the tableData
+        self.tableData = []
+        for i in 0..<UserDefaultsRepository.infoNames.value.count {
+            self.tableData.append(infoData(name:UserDefaultsRepository.infoNames.value[i], value:""))
         }
+        createDerivedData()
+      
+        // TODO: need non-us server ?
+        let shareUserName = UserDefaultsRepository.shareUserName.value
+        let sharePassword = UserDefaultsRepository.sharePassword.value
+        let shareServer = UserDefaultsRepository.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
+        dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer )
+        
+        //print("Share: \(dexShare)")
+        
+        // setup show/hide small graph and stats
+        BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
+        statsView.isHidden = !UserDefaultsRepository.showStats.value
         
         BGChart.delegate = self
         BGChartFull.delegate = self
@@ -150,39 +185,97 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-        
-        //Bind info data
-        infoTable.rowHeight = 25
-        infoTable.dataSource = self
-        
+         
         // Setup the Graph
         if firstGraphLoad {
             createGraph()
             createSmallBGGraph()
         }
         
+        // setup display for NS vs Dex
+        showHideNSDetails()
+        
         // Load Data
-        if UserDefaultsRepository.url.value != "" && firstGraphLoad {
+        if (UserDefaultsRepository.url.value != "" || (UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "")) && firstGraphLoad {
             nightscoutLoader()
         }
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         // set screen lock
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
         
+        // check the app state
+        // TODO: move to a function ?
+        if let appState = self.appStateController {
+        
+           if appState.chartSettingsChanged {
+              
+              // can look at settings flags to be more fine tuned
+              self.updateBGGraphSettings()
+              
+              // reset the app state
+              appState.chartSettingsChanged = false
+              appState.chartSettingsChanges = 0
+           }
+           if appState.generalSettingsChanged {
+           
+              // settings for appBadge changed
+              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.appBadgeChange.rawValue != 0 {
+                 self.nightscoutLoader(forceLoad: true)
+              }
+              
+              // settings for textcolor changed
+              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.colorBGTextChange.rawValue != 0 {
+                 self.setBGTextColor()
+              }
+            
+            // settings for showStats changed
+            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showStatsChange.rawValue != 0 {
+               statsView.isHidden = !UserDefaultsRepository.showStats.value
+            }
+            
+            // settings for showSmallGraph changed
+            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showSmallGraphChange.rawValue != 0 {
+                BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
+            }
+              
+              // reset the app state
+              appState.generalSettingsChanged = false
+              appState.generalSettingsChanges = 0
+           }
+           if appState.infoDataSettingsChanged {
+              createDerivedData()
+              self.infoTable.reloadData()
+              
+              // reset
+              appState.infoDataSettingsChanged = false
+           }
+           
+           // add more processing of the app state
+        }
     }
     
-    
+    private func createDerivedData() {
+        
+        self.derivedTableData = []
+        for i in 0..<self.tableData.count {
+            if(UserDefaultsRepository.infoVisible.value[UserDefaultsRepository.infoSort.value[i]]) {
+                self.derivedTableData.append(self.tableData[UserDefaultsRepository.infoSort.value[i]])
+            }
+        }
+   }
+   
     // Info Table Functions
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableData.count
+        //return tableData.count
+        return derivedTableData.count
+        
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "LabelCell", for: indexPath)
-        let values = tableData[indexPath.row]
+        let values = derivedTableData[indexPath.row]
         cell.textLabel?.text = values.name
         cell.detailTextLabel?.text = values.value
         return cell
@@ -284,6 +377,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
     }
     
+    @objc override func viewDidAppear(_ animated: Bool) {
+        showHideNSDetails()
+    }
+    
     // Check for new data when timer ends
     @objc func timerDidEnd(_ timer:Timer) {
 //        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Main timer ended") }
@@ -310,10 +407,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     //Clear the info data before next pull. This ensures we aren't displaying old data if something fails.
-    func clearLastInfoData(){
-        for i in 0..<tableData.count{
-            tableData[i].value = ""
-        }
+    func clearLastInfoData(index: Int){
+        tableData[index].value = ""
     }
 
     func stringFromTimeInterval(interval: TimeInterval) -> String {
@@ -323,7 +418,21 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return String(format: "%02d:%02d", hours, minutes)
     }
 
-    
+    func showHideNSDetails() {
+        var isHidden = false
+        var isEnabled = true
+        if UserDefaultsRepository.url.value == "" {
+            isHidden = true
+            isEnabled = false
+        }
+        
+        LoopStatusLabel.isHidden = isHidden
+        PredictionLabel.isHidden = isHidden
+        infoTable.isHidden = isHidden
+        guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
+        nightscoutTab.isEnabled = isEnabled
+        
+    }
     
     func updateBadge(val: Int) {
         if UserDefaultsRepository.appBadge.value {
@@ -360,7 +469,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     func bgDirectionGraphic(_ value:String)->String
     {
         let //graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
-        graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
+        graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NONE":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
         return graphics[value]!
     }
     
@@ -372,10 +481,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             
             if UserDefaultsRepository.calendarIdentifier.value == "" { return }
                 
-            if self.lastCalDate == self.bgData[self.bgData.count - 1].date && self.calTimer.isValid {
-//                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar - Not saving same entry") }
-                    return }
-                
+            // This lets us fire the method to write Min Ago entries only once a minute starting after 6 minutes but allows new readings through
+            if self.lastCalDate == self.bgData[self.bgData.count - 1].date
+                && (self.calTimer.isValid || (dateTimeUtils.getNowTimeIntervalUTC() - self.lastCalDate) < 360) {
+                return
+            }
+
                 // Create Event info
                 let deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
                 let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
@@ -456,9 +567,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
                 do {
                     try self.store.save(event, span: .thisEvent, commit: true)
-                    self.lastCalDate = self.bgData[self.bgData.count - 1].date
                     self.calTimer.invalidate()
-                    self.startCalTimer(time: (60 * 5))
+                    self.startCalTimer(time: (60 * 1))
+                    
+                    self.lastCalDate = self.bgData[self.bgData.count - 1].date
                     //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Write: " + eventTitle) }
                     //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
                 } catch {
@@ -479,13 +591,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     func writeDebugLog(value: String) {
-        guard let debug = self.tabBarController!.viewControllers?[5] as? debugViewController else { return }
         var logText = "\n" + dateTimeUtils.printNow() + " - " + value
         print(logText)
-        if debug.debugLogTextView.text.lengthOfBytes(using: .utf8) > 1000 {
-            debug.debugLogTextView.text = ""
-        }
-        debug.debugLogTextView.text += logText
+        
     }
     
     
