@@ -139,7 +139,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UserDefaultsRepository.infoNames.value.append("SAGE")
         UserDefaultsRepository.infoNames.value.append("CAGE")
         UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
-        UserDefaultsRepository.infoNames.value.append("Pred. Min/Max")
+        UserDefaultsRepository.infoNames.value.append("Pred.")
  
         // table view
         //infoTable.layer.borderColor = UIColor.darkGray.cgColor
