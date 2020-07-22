@@ -448,7 +448,7 @@ extension MainViewController {
                         }
                         let predMin = prediction.min()
                         let predMax = prediction.max()
-                        tableData[9].value = String(predMin!) + "-" + String(predMax!)
+                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
                         
                         if UserDefaultsRepository.graphPrediction.value {
                             updatePredictionGraph()
