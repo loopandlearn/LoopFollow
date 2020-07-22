@@ -21,9 +21,7 @@ protocol AuthenticationDelegate {
 class SettingsViewController: FormViewController, UITextFieldDelegate {
 
     var appStateController: AppStateController?
-    var dexcomSection: Section!
-    var nightscoutSection: Section!
-   
+    
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
