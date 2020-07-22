@@ -56,8 +56,6 @@ extension MainViewController {
         
         let set = PieChartDataSet(entries: chartEntry, label: "")
         
-        
-        
         set.drawIconsEnabled = false
         set.sliceSpace = 2
         set.drawValuesEnabled = false

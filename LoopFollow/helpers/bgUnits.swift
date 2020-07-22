@@ -21,6 +21,26 @@ class bgUnits {
         }
     }
     
+    static func toFloat(_ value: Float) -> Float {
+       if UserDefaultsRepository.units.value == "mg/dL" {
+            return value
+        } else {
+            // convert mg/dL to mmol/l
+            let mmolValue : Float = Float(value) * 0.0555
+            return mmolValue
+        }
+    }
+    
+    static func toFloat(_ value: Int) -> Float {
+       if UserDefaultsRepository.units.value == "mg/dL" {
+            return Float(value)
+        } else {
+            // convert mg/dL to mmol/l
+            let mmolValue : Float = Float(value) * 0.0555
+            return mmolValue
+        }
+    }
+    
     // if a "." is contained, simply takes the left part of the string only
     static func removeDecimals(_ value : String) -> String {
         if !value.contains(".") {

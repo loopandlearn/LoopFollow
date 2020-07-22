@@ -68,9 +68,10 @@ class StatsData {
         }
          
         // compute std dev (sigma)
-        var partialSum: Float = 0;
+        var partialSum: Float = 0
         for i in 0..<bgData.count {
-            partialSum += (Float(bgData[i].sgv) - avgBG) * ( Float(bgData[i].sgv) - avgBG)
+            let distance = bgUnits.toFloat(bgData[i].sgv) - bgUnits.toFloat(avgBG)
+            partialSum += distance * distance
         }
         stdDev = sqrt(partialSum / Float(bgData.count))
     }
