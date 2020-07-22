@@ -11,14 +11,18 @@ import Eureka
 import EventKit
 import EventKitUI
 
+
 protocol AuthenticationDelegate {
    func nightscoutDidConnect() -> Bool
    func dexcomDidConnect() -> Bool
 }
 
+
 class SettingsViewController: FormViewController, UITextFieldDelegate {
 
     var appStateController: AppStateController?
+    var dexcomSection: Section!
+    var nightscoutSection: Section!
    
     func showHideNSDetails() {
         var isHidden = false
@@ -39,21 +43,21 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         nightscoutTab.isEnabled = isEnabled
     }
    
+   override func viewDidAppear(_ animated: Bool) {
+       super.viewDidAppear(animated)
+       authenticateDexcom()
+       authenticateNightscout()
+   }
+   
    override func viewDidLoad() {
         super.viewDidLoad()
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
     
-      
         form
         +++ Section(header:"",footer: "Changing Nightscout settings requires an app restart.") {
            $0.tag = "nightscoutHeader"
-           if( UserDefaultsRepository.nightscoutAuthStatus.value ) {
-             $0.header!.title = "Nightscout Settings (verified)"
-           } else {
-              $0.header!.title = "Nightscout Settings (unverified)"
-           }
         }
         <<< TextRow(){ row in
             
@@ -113,11 +117,6 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         }
         +++ Section("") {
            $0.tag = "dexcomHeader"
-           if( UserDefaultsRepository.shareAuthStatus.value ) {
-             $0.header!.title = "Dexcom Settings (verified)"
-           } else {
-              $0.header!.title = "Dexcom Settings (unverified)"
-           }
         }
         <<< TextRow(){ row in
             row.title = "User Name"
@@ -231,13 +230,60 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
             
         }
     
+        setupNotifications()
         showHideNSDetails()
-        //authenticateDexcom()
-        //authenticateNightscout()
-        
+            
+    }
+    
+    // Notifications
+    private func setupNotifications() {
+       NotificationCenter.default.addObserver(self, selector: #selector(didCompleteDexcomAuthentication(_:)), name: .didCompleteDexcomAuthentication, object: nil)
+       NotificationCenter.default.addObserver(self, selector: #selector(didCompleteNightscoutAuthentication(_:)), name: .didCompleteNightscoutAuthentication, object: nil)
+    }
+    @objc func didCompleteDexcomAuthentication(_ notification: Notification) {
+       let valid = notification.object as? Bool
+       let section = self.form.sectionBy(tag: "dexcomHeader")
+       if  valid != nil && valid! {
+          UserDefaultsRepository.shareAuthStatus.value = true
+          section!.header!.title = "Dexcom Settings (verified)"
+       } else {
+          UserDefaultsRepository.shareAuthStatus.value = false
+          section!.header!.title = "Dexcom Settings (unverified)"
+       }
+       // need to send this to the main thread
+       DispatchQueue.main.async {
+          // section!.reload()
+          self.tableView.reloadData()
+       }
+    }
+    @objc func didCompleteNightscoutAuthentication(_ notification: Notification) {
+       let valid = notification.object as? Bool
+       let section = self.form.sectionBy(tag: "nightscoutHeader")
+       if  valid != nil && valid! {
+          UserDefaultsRepository.nightscoutAuthStatus.value = true
+          section!.header!.title = "Nightscout Settings (verified)"
+       } else {
+          UserDefaultsRepository.nightscoutAuthStatus.value = false
+          section!.header!.title = "Nightscout Settings (unverified)"
+       }
+       // need to send this to the main thread
+       DispatchQueue.main.async {
+          // section!.reload()
+          self.tableView.reloadData()
+       }
     }
     
     private func authenticateNightscout() {
+       
+       // not verified yet
+       let section = self.form.sectionBy(tag: "nightscoutHeader")
+       UserDefaultsRepository.nightscoutAuthStatus.value = false
+       section!.header!.title = "Nightscout Settings (unverified)"
+       //section!.reload()
+       self.tableView.reloadData()
+       
+       NotificationCenter.default.post(name: .needNightscoutAuthentication, object: nil)
+       /*
        let section = self.form.sectionBy(tag: "nightscoutHeader")
        let didConnect = self.appStateController?.authDelegate?.nightscoutDidConnect()
        if ((didConnect != nil) && didConnect!) {
@@ -248,9 +294,20 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
           section!.header!.title = "Nightscout Settings (unverified)"
        }
        section?.reload()
+       */
     }
     
     private func authenticateDexcom() {
+    
+       // not verified yet
+       let section = self.form.sectionBy(tag: "dexcomHeader")
+       UserDefaultsRepository.nightscoutAuthStatus.value = false
+       section!.header!.title = "Dexcom Settings (unverified)"
+       //section!.reload()
+       self.tableView.reloadData()
+       
+       NotificationCenter.default.post(name: .needDexcomAuthentication, object: nil)
+       /*
        let section = self.form.sectionBy(tag: "dexcomHeader")
        let didConnect = self.appStateController?.authDelegate?.dexcomDidConnect()
        if( didConnect != nil && didConnect! ) {
@@ -261,5 +318,6 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
           section!.header!.title = "Dexcom Settings (unverified)"
        }
        section?.reload()
+       */
    }
 }
