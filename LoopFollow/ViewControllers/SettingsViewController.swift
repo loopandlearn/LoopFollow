@@ -79,12 +79,13 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
             // set the row value back to the correctly formatted URL so that the user immediately sees how it should have been written
             row.value = UserDefaultsRepository.url.value
             self.showHideNSDetails()
-            
+            globalVariables.nsVerifiedAlert = 0            
         }.onCellHighlightChanged{(cell,row) in
            // done editing
            if row.isHighlighted == false {
               // self.authenticateNightscout()
               self.appStateController!.nightscoutCredentialsChanged = true
+              globalVariables.nsVerifiedAlert = 0
            }
         }
         <<< TextRow(){ row in
@@ -99,14 +100,14 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
             }
             guard let value = row.value else { return }
             UserDefaultsRepository.token.value = value
-            
-         
+            globalVariables.nsVerifiedAlert = 0
         }.onCellHighlightChanged{(cell,row) in
            // done editing
            if row.isHighlighted == false {
            
               // self.authenticateNightscout()
               self.appStateController!.nightscoutCredentialsChanged = true
+              globalVariables.nsVerifiedAlert = 0
            }
         }
         <<< SegmentedRow<String>("units") { row in
@@ -127,6 +128,7 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
             row.tag = "dexcomUserNameRow"
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
+
         }.onCellHighlightChanged{(cell,row) in
            // done editing
            if row.isHighlighted == false {
@@ -146,6 +148,7 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
               }
               */
               self.appStateController!.dexcomCredentialsChanged = true
+              globalVariables.dexVerifiedAlert = 0
            }
         }
         <<< TextRow(){ row in
@@ -155,7 +158,6 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
             cell.textField.isSecureTextEntry = true
-        
         }.onCellHighlightChanged{(cell,row) in
            // done editing
            if row.isHighlighted == false {
@@ -167,6 +169,7 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
               
               // self.authenticateDexcom()
               self.appStateController!.dexcomCredentialsChanged = true
+              globalVariables.dexVerifiedAlert = 0
            }
         }
         <<< SegmentedRow<String>("shareServer") { row in

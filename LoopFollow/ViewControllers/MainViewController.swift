@@ -10,6 +10,7 @@ import UIKit
 import Charts
 import EventKit
 import ShareClient
+import UserNotifications
 
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate {
     
@@ -64,6 +65,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var defaults : UserDefaults?
     let consoleLogging = true
     var timeofLastBGUpdate = 0 as TimeInterval
+    var nsVerifiedAlerted = false
     
     var backgroundTask = BackgroundTask()
     
@@ -112,6 +114,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // share
     var bgDataShare: [ShareGlucoseData] = []
     var dexShare: ShareClient?;
+    var dexVerifiedAlerted = false
     
     // calendar setup
     let store = EKEventStore()
@@ -637,5 +640,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
        return
     }
+
 }
 
