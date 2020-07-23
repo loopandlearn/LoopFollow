@@ -43,8 +43,8 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
    
    override func viewDidAppear(_ animated: Bool) {
        super.viewDidAppear(animated)
-       authenticateDexcom()
-       authenticateNightscout()
+       // authenticateDexcom()
+       // authenticateNightscout()
    }
    
    override func viewDidLoad() {
@@ -56,6 +56,7 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         form
         +++ Section(header:"",footer: "Changing Nightscout settings requires an app restart.") {
            $0.tag = "nightscoutHeader"
+           $0.header!.title = "Nightscout Settings"
         }
         <<< TextRow(){ row in
             
@@ -82,7 +83,8 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         }.onCellHighlightChanged{(cell,row) in
            // done editing
            if row.isHighlighted == false {
-              self.authenticateNightscout()
+              // self.authenticateNightscout()
+              self.appStateController!.nightscoutCredentialsChanged = true
            }
         }
         <<< TextRow(){ row in
@@ -102,7 +104,9 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         }.onCellHighlightChanged{(cell,row) in
            // done editing
            if row.isHighlighted == false {
-              self.authenticateNightscout()
+           
+              // self.authenticateNightscout()
+              self.appStateController!.nightscoutCredentialsChanged = true
            }
         }
         <<< SegmentedRow<String>("units") { row in
@@ -115,6 +119,7 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         }
         +++ Section("") {
            $0.tag = "dexcomHeader"
+           $0.header!.title = "Dexcom Settings"
         }
         <<< TextRow(){ row in
             row.title = "User Name"
@@ -130,7 +135,7 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
               } else {
                  UserDefaultsRepository.shareUserName.value = ""
               }
-              
+              /*
               // try to authenticate if there is a password
               if let passwordRow = self.form.rowBy(tag: "dexcomPasswordRow")  {
                  if let value = passwordRow.baseValue as? String {
@@ -139,6 +144,8 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
                     }
                  }
               }
+              */
+              self.appStateController!.dexcomCredentialsChanged = true
            }
         }
         <<< TextRow(){ row in
@@ -157,7 +164,9 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
               } else {
                  UserDefaultsRepository.sharePassword.value = ""
               }
-              self.authenticateDexcom()
+              
+              // self.authenticateDexcom()
+              self.appStateController!.dexcomCredentialsChanged = true
            }
         }
         <<< SegmentedRow<String>("shareServer") { row in
@@ -167,6 +176,7 @@ class SettingsViewController: FormViewController, UITextFieldDelegate {
         }.onChange { row in
             guard let value = row.value else { return }
             UserDefaultsRepository.shareServer.value = value
+            self.appStateController!.dexcomCredentialsChanged = true
         }
         
         +++ Section("App Settings")

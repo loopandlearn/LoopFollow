@@ -12,7 +12,7 @@ import UserNotifications
 import EventKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
     let notificationCenter = UNUserNotificationCenter.current()
@@ -28,6 +28,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("User has declined notifications")
             }
         }
+        UNUserNotificationCenter.current().delegate = self
+        
         let store = EKEventStore()
         store.requestAccess(to: .event) {(granted, error) in
            if !granted { return }
@@ -122,5 +124,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
-
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+       completionHandler(.alert)
+    }
 }

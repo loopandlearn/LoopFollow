@@ -68,8 +68,7 @@ extension MainViewController {
       
    }
    @objc func needDexcomAuthentication(_ notification: Notification) {
-   
-   
+      
       let shareUserName = UserDefaultsRepository.shareUserName.value
       let sharePassword = UserDefaultsRepository.sharePassword.value
       let shareServer = UserDefaultsRepository.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
@@ -86,10 +85,13 @@ extension MainViewController {
             // error to the main thread
             DispatchQueue.main.async {
 
+               self.sendNotification(title: "Dexcom Share Error", body: "Please double check user name and password, internet connection, and sharing status.")
+               /*
                // depending on how share implements timeout, internet conenction could still be at fault
                let alert = UIAlertController(title:"Dexcom Login Fail", message: "Please double check user name and password, internet connection, and sharing status.", preferredStyle: .alert)
                alert.addAction(UIAlertAction(title:"Close", style: .default, handler: nil))
                self.present(alert, animated: true)
+               */
             }
          }
          NotificationCenter.default.post(name:.didCompleteDexcomAuthentication, object:valid)

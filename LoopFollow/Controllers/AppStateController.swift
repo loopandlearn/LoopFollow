@@ -55,6 +55,12 @@ class AppStateController {
    var generalSettingsChanged : Bool = false
    var generalSettingsChanges : Int = 0
 
+   // Nightscout Credentials Changed
+   var nightscoutCredentialsChanged : Bool = false
+   
+   // Dexcom Credentials Changed
+   var dexcomCredentialsChanged : Bool = false
+   
    // Chart Settings State
    var chartSettingsChanged : Bool = false // settings change has ocurred
    var chartSettingsChanges: Int = 0       // what settings have changed
