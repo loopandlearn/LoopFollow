@@ -236,7 +236,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
              
               dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer )
               
-              // reset timer here ?
+              // retry
+              self.webLoadDexShare()
            
            }
            if appState.chartSettingsChanged {
