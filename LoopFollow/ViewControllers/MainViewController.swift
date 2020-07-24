@@ -238,6 +238,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
               
               // retry
               self.webLoadDexShare()
+              
+              // reset
+              appState.dexcomCredentialsChanged = false
            
            }
            if appState.chartSettingsChanged {
@@ -261,15 +264,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                  self.setBGTextColor()
               }
             
-            // settings for showStats changed
-            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showStatsChange.rawValue != 0 {
-               statsView.isHidden = !UserDefaultsRepository.showStats.value
-            }
+              // settings for showStats changed
+              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showStatsChange.rawValue != 0 {
+                 statsView.isHidden = !UserDefaultsRepository.showStats.value
+              }
             
-            // settings for showSmallGraph changed
-            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showSmallGraphChange.rawValue != 0 {
-                BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
-            }
+              // settings for showSmallGraph changed
+              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showSmallGraphChange.rawValue != 0 {
+                  BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
+              }
               
               // reset the app state
               appState.generalSettingsChanged = false
