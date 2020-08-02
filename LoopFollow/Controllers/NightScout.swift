@@ -106,7 +106,9 @@ extension MainViewController {
             }
             
             // Used for Min Ago watch readings
-            writeCalendar()
+            if UserDefaultsRepository.writeCalendarEvent.value {
+                writeCalendar()
+            }
             
             if UserDefaultsRepository.url.value != ""  {
                 if latestLoopTime == 0 {
