@@ -544,7 +544,6 @@
 				DD98F54224BCEF190007425A /* Extensions */,
 				FC16A9782499657E003D6245 /* Controllers */,
 				FCC688542489367300A0279D /* helpers */,
-				FCC68872248A748A00A0279D /* Models */,
 				FCC688512489363F00A0279D /* repository */,
 				FC16A97624995FEE003D6245 /* Application */,
 			);
@@ -615,13 +614,6 @@
 				DDCF979B24C14EFB002C9752 /* DebugSettingsViewController.swift */,
 			);
 			path = ViewControllers;
-			sourceTree = "<group>";
-		};
-		FCC68872248A748A00A0279D /* Models */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
