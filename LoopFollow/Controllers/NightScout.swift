@@ -155,7 +155,7 @@ extension MainViewController {
                 if globalVariables.dexVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                     globalVariables.dexVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     DispatchQueue.main.async {
-                        self.sendNotification(title: "Dexcom Share Error", body: "Please double check user name and password, internet connection, and sharing status.")
+                        //self.sendNotification(title: "Dexcom Share Error", body: "Please double check user name and password, internet connection, and sharing status.")
                     }
                 }
             }
@@ -181,7 +181,7 @@ extension MainViewController {
         guard let urlBGData = URL(string: urlBGDataPath) else {
             if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
+                //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
             }
             return
         }
@@ -193,7 +193,7 @@ extension MainViewController {
             guard error == nil else {
                 if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
+                    //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
                 return
                 
@@ -201,7 +201,7 @@ extension MainViewController {
             guard let data = data else {
                 if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
+                    //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
                 return
                 
@@ -218,7 +218,7 @@ extension MainViewController {
             } else {
                 if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    self.sendNotification(title: "Nightscout Failure", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
+                    //self.sendNotification(title: "Nightscout Failure", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
                 return
                 
@@ -365,7 +365,7 @@ extension MainViewController {
         guard let urlDeviceStatus = URL(string: escapedAddress!) else {
             if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                self.sendNotification(title: "Nightscout Failure", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
+                //self.sendNotification(title: "Nightscout Failure", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
             }
             return
         }
@@ -380,7 +380,7 @@ extension MainViewController {
             guard error == nil else {
                 if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
+                    //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
                 return
             }
@@ -388,7 +388,7 @@ extension MainViewController {
             guard let data = data else {
                 if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
+                    //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
                 return
             }
@@ -402,7 +402,7 @@ extension MainViewController {
             } else {
                 if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
+                    //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
                 return
             }
