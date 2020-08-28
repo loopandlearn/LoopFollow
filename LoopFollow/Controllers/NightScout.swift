@@ -947,14 +947,19 @@ extension MainViewController {
             } else {
                 return
             }
-            let strippedZone = String(basalDate.dropLast())
+            var strippedZone = String(basalDate.dropLast())
+            strippedZone = strippedZone.replacingOccurrences(of: "\\.\\d+", with: "", options: .regularExpression)
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
-            let basalRate = currentEntry?["absolute"] as! Double
+            guard let basalRate = currentEntry?["absolute"] as? Double else {
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Basal entry")}
+                continue
+            }
+            
             let midnightTime = dateTimeUtils.getTimeIntervalMidnightToday()
             // Setting end dots
             var duration = 0.0
@@ -967,8 +972,16 @@ extension MainViewController {
             // This adds scheduled basal wherever there is a break between temps. can't check the prior ending on the first item. it is 24 hours old, so it isn't important for display anyway
             if i > 0 {
                 let priorEntry = tempArray[i - 1] as [String : AnyObject]?
-                let priorBasalDate = priorEntry?["timestamp"] as! String
-                let priorStrippedZone = String(priorBasalDate.dropLast())
+                var priorBasalDate: String
+                if priorEntry?["timestamp"] != nil {
+                    priorBasalDate = priorEntry?["timestamp"] as! String
+                } else if currentEntry?["created_at"] != nil {
+                    priorBasalDate = priorEntry?["created_at"] as! String
+                } else {
+                    continue
+                }
+                var priorStrippedZone = String(priorBasalDate.dropLast())
+                priorStrippedZone = priorStrippedZone.replacingOccurrences(of: "\\.\\d+", with: "", options: .regularExpression)
                 let priorDateFormatter = DateFormatter()
                 priorDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
                 priorDateFormatter.locale = Locale(identifier: "en_US")
@@ -1027,8 +1040,16 @@ extension MainViewController {
             // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
             if i < tempArray.count - 1 {
                 let nextEntry = tempArray[i + 1] as [String : AnyObject]?
-                let nextBasalDate = nextEntry?["timestamp"] as! String
-                let nextStrippedZone = String(nextBasalDate.dropLast())
+                var nextBasalDate: String
+                if nextEntry?["timestamp"] != nil {
+                    nextBasalDate = nextEntry?["timestamp"] as! String
+                } else if currentEntry?["created_at"] != nil {
+                    nextBasalDate = nextEntry?["created_at"] as! String
+                } else {
+                    continue
+                }
+                var nextStrippedZone = String(nextBasalDate.dropLast())
+                nextStrippedZone = nextStrippedZone.replacingOccurrences(of: "\\.\\d+", with: "", options: .regularExpression)
                 let nextDateFormatter = DateFormatter()
                 nextDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
                 nextDateFormatter.locale = Locale(identifier: "en_US")
