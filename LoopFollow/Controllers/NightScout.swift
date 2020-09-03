@@ -40,7 +40,7 @@ extension MainViewController {
     
     func isStaleData() -> Bool {
         if bgData.count > 0 {
-            let now = NSDate().timeIntervalSince1970
+            let now = dateTimeUtils.getNowTimeIntervalUTC()
             let lastReadingTime = bgData.last!.date
             let secondsAgo = now - lastReadingTime
             if secondsAgo >= 20*60 {
@@ -231,7 +231,7 @@ extension MainViewController {
                 let lastBGTime = entries[latestEntryi].date
                 
                 // Start the BG timer based on the reading
-                let now = NSDate().timeIntervalSince1970
+                let now = dateTimeUtils.getNowTimeIntervalUTC()
                 let secondsAgo = now - lastBGTime
                 
                 // if reading is overdue over: 20:00, re-attempt every 5 minutes
@@ -583,7 +583,7 @@ extension MainViewController {
         checkOverrideAlarms()
         
         // Start the timer based on the timestamp
-        let now = NSDate().timeIntervalSince1970
+        let now = dateTimeUtils.getNowTimeIntervalUTC()
         let secondsAgo = now - latestLoopTime
         
         // if Loop is overdue over: 20:00, re-attempt every 5 minutes
@@ -667,7 +667,7 @@ extension MainViewController {
                                    .withColonSeparatorInTime]
         UserDefaultsRepository.alertCageInsertTime.value = formatter.date(from: (lastCageString))?.timeIntervalSince1970 as! TimeInterval
         if let cageTime = formatter.date(from: (lastCageString))?.timeIntervalSince1970 {
-            let now = NSDate().timeIntervalSince1970
+            let now = dateTimeUtils.getNowTimeIntervalUTC()
             let secondsAgo = now - cageTime
             //let days = 24 * 60 * 60
             
@@ -737,7 +737,7 @@ extension MainViewController {
                                    .withColonSeparatorInTime]
         UserDefaultsRepository.alertSageInsertTime.value = formatter.date(from: (lastSageString))?.timeIntervalSince1970 as! TimeInterval
         if let sageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
-            let now = NSDate().timeIntervalSince1970
+            let now = dateTimeUtils.getNowTimeIntervalUTC()
             let secondsAgo = now - sageTime
             let days = 24 * 60 * 60
             
