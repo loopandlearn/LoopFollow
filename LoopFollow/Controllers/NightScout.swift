@@ -38,105 +38,21 @@ extension MainViewController {
         var sgv: Int
     }
     
-    
-    // Main loader for all data
-    func nightscoutLoader(forceLoad: Bool = false) {
-        
-        var needsLoaded: Bool = false
-        var staleData: Bool = false
-        var onlyPullLastRecord = false
-        
-        // If we have existing data and it's within 5 minutes, we aren't going to do a BG network call
-        // if we have stale BG data 10 min or older, we're only going to attempt to pull BG and Loop status
-        // to not have a full refresh every 15 seconds. The remaining data will start pulling again on the
-        // next BG reading that comes in.
+    func isStaleData() -> Bool {
         if bgData.count > 0 {
             let now = NSDate().timeIntervalSince1970
-            let lastReadingTime = bgData[bgData.count - 1].date
+            let lastReadingTime = bgData.last!.date
             let secondsAgo = now - lastReadingTime
-            if secondsAgo >= 5*60 {
-                needsLoaded = true
-                if secondsAgo < 10*60 {
-                    onlyPullLastRecord = true
-                } else {
-                    staleData = true
-                }
-            }
-        } else {
-            needsLoaded = true
-        }
-        
-        
-        if forceLoad { needsLoaded = true}
-        // Only update if we don't have a current reading or forced to load
-        if needsLoaded {
-            
-            if UserDefaultsRepository.url.value != "" {
-                webLoadNSDeviceStatus()
-            }
-            
-            if UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "" {
-                webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
+            if secondsAgo >= 20*60 {
+                return true
             } else {
-                webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+                return false
             }
-
-            
-            if !staleData && UserDefaultsRepository.url.value != "" {
-                webLoadNSProfile()
-                if UserDefaultsRepository.downloadBasal.value {
-                    WebLoadNSTempBasals()
-                }
-                if UserDefaultsRepository.downloadBolus.value {
-                    webLoadNSBoluses()
-                }
-                if UserDefaultsRepository.downloadCarbs.value {
-                    webLoadNSCarbs()
-                }
-                webLoadNSCage()
-                webLoadNSSage()
-            }
-
-            // Give the alarms and calendar 15 seconds delay to allow time for data to compile
-            self.startViewTimer(time: viewTimeInterval)
         } else {
-
-            if bgData.count > 0 {
-                self.checkAlarms(bgs: bgData)
-            }
-            
-            // Used for Min Ago watch readings
-            if UserDefaultsRepository.writeCalendarEvent.value {
-                writeCalendar()
-            }
-            
-            if UserDefaultsRepository.url.value != ""  {
-                if latestLoopTime == 0 {
-                    webLoadNSDeviceStatus()
-               
-                    if UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "" {
-                        webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
-                    } else {
-                        webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
-                    }
-           
-                    webLoadNSProfile()
-                    if UserDefaultsRepository.downloadBasal.value {
-                        WebLoadNSTempBasals()
-                    }
-                    if UserDefaultsRepository.downloadBolus.value {
-                        webLoadNSBoluses()
-                    }
-                    if UserDefaultsRepository.downloadCarbs.value {
-                        webLoadNSCarbs()
-                    }
-                    webLoadNSCage()
-                    webLoadNSSage()
-                }
-            }
-            
+            return false
         }
     }
+    
     
     // Dex Share Web Call
     func webLoadDexShare(onlyPullLastRecord: Bool = false) {
@@ -183,6 +99,10 @@ extension MainViewController {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                 //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
             }
+            if bgTimer.isValid {
+                bgTimer.invalidate()
+            }
+            startBGTimer(time: 10)
             return
         }
         var request = URLRequest(url: urlBGData)
@@ -195,6 +115,10 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
+                if self.bgTimer.isValid {
+                    self.bgTimer.invalidate()
+                }
+                self.startBGTimer(time: 10)
                 return
                 
             }
@@ -203,6 +127,10 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
+                if self.bgTimer.isValid {
+                    self.bgTimer.invalidate()
+                }
+                self.startBGTimer(time: 10)
                 return
                 
             }
@@ -220,6 +148,10 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Failure", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
+                if self.bgTimer.isValid {
+                    self.bgTimer.invalidate()
+                }
+                self.startBGTimer(time: 10)
                 return
                 
             }
@@ -261,8 +193,6 @@ extension MainViewController {
             if data.count > 0 {
                 self.updateBadge(val: data[data.count - 1].sgv)
             }
-            
-            // self.viewUpdateNSBG()
             return
         }
         
@@ -295,6 +225,39 @@ extension MainViewController {
                 let priorBG = entries[latestEntryi - 1].sgv
                 let deltaBG = latestBG - priorBG as Int
                 let lastBGTime = entries[latestEntryi].date
+                
+                // Start the BG timer based on the reading
+                let now = NSDate().timeIntervalSince1970
+                let secondsAgo = now - lastBGTime
+                
+                // if reading is overdue over: 20:00, re-attempt every 5 minutes
+                if secondsAgo >= (20 * 60) {
+                    self.startBGTimer(time: (5 * 60))
+                    print("started 5 minute bg timer")
+                    
+                // if the reading is overdue: 10:00-19:59, re-attempt every minute
+                } else if secondsAgo >= (10 * 60) {
+                    self.startBGTimer(time: 60)
+                    print("started 1 minute bg timer")
+                    
+                // if the reading is overdue: 7:00-9:59, re-attempt every 30 seconds
+                } else if secondsAgo >= (7 * 60) {
+                    self.startBGTimer(time: 30)
+                    print("started 30 second bg timer")
+                    
+                // if the reading is overdue: 5:00-6:59 re-attempt every 10 seconds
+                } else if secondsAgo >= (5 * 60) {
+                    self.startBGTimer(time: 10)
+                    print("started 10 second bg timer")
+                
+                // We have a current reading. Set timer to 5:10 from last reading
+                } else {
+                    self.startBGTimer(time: 310 - secondsAgo)
+                    let timerVal = 310 - secondsAgo
+                    print("started 5:10 bg timer: \(timerVal)")
+                }
+                
+                
                 let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
                 var userUnit = " mg/dL"
                 if self.mmol {
@@ -366,6 +329,10 @@ extension MainViewController {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                 //self.sendNotification(title: "Nightscout Failure", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
             }
+            if self.deviceStatusTimer.isValid {
+                self.deviceStatusTimer.invalidate()
+            }
+            self.startDeviceStatusTimer(time: 10)
             return
         }
         
@@ -381,6 +348,10 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
+                if self.deviceStatusTimer.isValid {
+                    self.deviceStatusTimer.invalidate()
+                }
+                self.startDeviceStatusTimer(time: 10)
                 return
             }
             
@@ -389,6 +360,10 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
+                if self.deviceStatusTimer.isValid {
+                    self.deviceStatusTimer.invalidate()
+                }
+                self.startDeviceStatusTimer(time: 10)
                 return
             }
             
@@ -403,6 +378,10 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
+                if self.deviceStatusTimer.isValid {
+                    self.deviceStatusTimer.invalidate()
+                }
+                self.startDeviceStatusTimer(time: 10)
                 return
             }
         }
@@ -448,7 +427,7 @@ extension MainViewController {
         
         // Loop
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
-            print("Loop: \(lastLoopRecord)")
+            //print("Loop: \(lastLoopRecord)")
             if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
                 UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
@@ -598,6 +577,37 @@ extension MainViewController {
         overrideData.reverse()
         updateOverrideGraph()
         checkOverrideAlarms()
+        
+        // Start the timer based on the timestamp
+        let now = NSDate().timeIntervalSince1970
+        let secondsAgo = now - latestLoopTime
+        
+        // if Loop is overdue over: 20:00, re-attempt every 5 minutes
+        if secondsAgo >= (20 * 60) {
+            self.startDeviceStatusTimer(time: (5 * 60))
+            print("started 5 minute device status timer")
+            
+        // if the Loop is overdue: 10:00-19:59, re-attempt every minute
+        } else if secondsAgo >= (10 * 60) {
+            self.startDeviceStatusTimer(time: 60)
+            print("started 1 minute device status timer")
+            
+        // if the Loop is overdue: 7:00-9:59, re-attempt every 30 seconds
+        } else if secondsAgo >= (7 * 60) {
+            self.startDeviceStatusTimer(time: 30)
+            print("started 30 second device status timer")
+            
+        // if the Loop is overdue: 5:00-6:59 re-attempt every 10 seconds
+        } else if secondsAgo >= (5 * 60) {
+            self.startDeviceStatusTimer(time: 10)
+            print("started 10 second bg timer")
+        
+        // We have a current Loop. Set timer to 5:10 from last reading
+        } else {
+            self.startDeviceStatusTimer(time: 310 - secondsAgo)
+            let timerVal = 310 - secondsAgo
+            print("started 5:10 device status timer: \(timerVal)")
+        }
     }
     
     // NS Cage Web Call
@@ -882,7 +892,7 @@ extension MainViewController {
         if UserDefaultsRepository.graphBasal.value {
             updateBasalScheduledGraph()
         }
-
+        
     }
     
     // NS Temp Basal Web Call
