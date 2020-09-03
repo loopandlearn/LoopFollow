@@ -16,10 +16,10 @@ extension MainViewController {
         if !deviceStatusTimer.isValid { startDeviceStatusTimer(time: 1) }
         if !profileTimer.isValid { startProfileTimer(time: 1) }
         if !bgTimer.isValid { startBGTimer(time: 1) }
-        if !treatmentsTimer.isValid { startTreatmentsTimer(time: 10) }
-        if !cageSageTimer.isValid { startCageSageTimer(time: 10) }
+        if !treatmentsTimer.isValid { startTreatmentsTimer(time: 1) }
+        if !cageSageTimer.isValid { startCageSageTimer(time: 1) }
         if !minAgoTimer.isValid { startMinAgoTimer(time: minAgoTimeInterval) }
-        if !calendarTimer.isValid { startCalendarTimer(time: 30) }
+        if !calendarTimer.isValid { startCalendarTimer(time: 15) }
         if !alarmTimer.isValid { startAlarmTimer(time: 30) }
     }
     

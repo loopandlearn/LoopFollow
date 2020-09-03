@@ -193,6 +193,10 @@ extension MainViewController {
             if data.count > 0 {
                 self.updateBadge(val: data[data.count - 1].sgv)
             }
+            if self.bgTimer.isValid {
+                self.bgTimer.invalidate()
+            }
+            self.startBGTimer(time: 10)
             return
         }
         
@@ -600,7 +604,7 @@ extension MainViewController {
         // if the Loop is overdue: 5:00-6:59 re-attempt every 10 seconds
         } else if secondsAgo >= (5 * 60) {
             self.startDeviceStatusTimer(time: 10)
-            print("started 10 second bg timer")
+            print("started 10 second device status timer")
         
         // We have a current Loop. Set timer to 5:10 from last reading
         } else {
