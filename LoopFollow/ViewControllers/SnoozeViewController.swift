@@ -51,6 +51,7 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         DeltaLabel.text = deltaVal
         MinAgoLabel.text = minAgoVal
         AlertLabel.text = alertLabelVal
+        if alertLabelVal == "none" { return }
         sendNotification(self, bgVal: bgVal, directionVal: directionVal, deltaVal: deltaVal, minAgoVal: minAgoVal, alertLabelVal: alertLabelVal)
     }
     
