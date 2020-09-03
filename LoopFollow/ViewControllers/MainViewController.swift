@@ -74,6 +74,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // check every 30 Seconds whether new bgvalues should be retrieved
     let timeInterval: TimeInterval = 30.0
     
+    // Min Ago Timer
+    var minAgoTimer = Timer()
+    var minAgoTimeInterval: TimeInterval = 1.0
+    
     // View Delay Timer
     var viewTimer = Timer()
     let viewTimeInterval: TimeInterval = UserDefaultsRepository.viewRefreshDelay.value
@@ -202,6 +206,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if (UserDefaultsRepository.url.value != "" || (UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "")) && firstGraphLoad {
             nightscoutLoader()
         }
+        
+        startMinAgoTimer(time: minAgoTimeInterval)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -284,70 +291,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return cell
     }
     
-    
-    // NS Loader Timer
-    fileprivate func startTimer(time: TimeInterval) {
-        timer = Timer.scheduledTimer(timeInterval: time,
-                                     target: self,
-                                     selector: #selector(MainViewController.timerDidEnd(_:)),
-                                     userInfo: nil,
-                                     repeats: true)
-    }
-    
-    // Check Alarm Timer
-    func startCheckAlarmTimer(time: TimeInterval) {
-        
-        checkAlarmTimer = Timer.scheduledTimer(timeInterval: time,
-                                     target: self,
-                                     selector: #selector(MainViewController.checkAlarmTimerDidEnd(_:)),
-                                     userInfo: nil,
-                                     repeats: false)
-    }
-    
-    // NS Loader Timer
-     func startViewTimer(time: TimeInterval) {
-        viewTimer = Timer.scheduledTimer(timeInterval: time,
-                                     target: self,
-                                     selector: #selector(MainViewController.viewTimerDidEnd(_:)),
-                                     userInfo: nil,
-                                     repeats: false)
-        
-    }
-    
-    // Timer to allow us to write min ago calendar entries but not update them every 30 seconds
-    fileprivate func startCalTimer(time: TimeInterval) {
-        calTimer = Timer.scheduledTimer(timeInterval: time,
-                                     target: self,
-                                     selector: #selector(MainViewController.calTimerDidEnd(_:)),
-                                     userInfo: nil,
-                                     repeats: false)
-    }
-    
-    // Nothing should be done when this timer ends because it just blocks the alarms from firing when it's active
-    @objc func calTimerDidEnd(_ timer:Timer) {
-       // if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Timer Ended") }
-    }
-    
-    // This delays a few things to hopefully all all data to arrive.
-    @objc func viewTimerDidEnd(_ timer:Timer) {
-//        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "View timer ended") }
-        if bgData.count > 0 {
-            self.checkAlarms(bgs: bgData)
-            self.updateMinAgo()
-            // self.updateBadge(val: bgData[bgData.count - 1].sgv)
-            //self.viewUpdateNSBG()
-            if UserDefaultsRepository.writeCalendarEvent.value {
-                self.writeCalendar()
-            }
-        }
-    }
-    
-    
-    // Nothing should be done when this timer ends because it just blocks the alarms from firing when it's active
-    @objc func checkAlarmTimerDidEnd(_ timer:Timer) {
-//        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Check alarm timer ended") }
-    }
-    
     @objc func appMovedToBackground() {
         // Allow screen to turn off
         UIApplication.shared.isIdleTimerDisabled = false;
@@ -363,6 +306,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             let refresh = UserDefaultsRepository.backgroundRefreshFrequency.value * 60
             startTimer(time: TimeInterval(refresh))
         }
+        
     }
 
     @objc func appCameToForeground() {
@@ -384,12 +328,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         showHideNSDetails()
     }
     
-    // Check for new data when timer ends
-    @objc func timerDidEnd(_ timer:Timer) {
-//        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Main timer ended") }
-        updateMinAgo()
-        nightscoutLoader()
-    }
+    
 
     //update Min Ago Text. We need to call this separately because it updates between readings
     func updateMinAgo(){

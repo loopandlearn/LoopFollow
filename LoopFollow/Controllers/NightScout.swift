@@ -344,7 +344,6 @@ extension MainViewController {
                 return
             }
             self.updateBGGraph()
-            self.updateMinAgo()
             self.updateStats()
         }
         
