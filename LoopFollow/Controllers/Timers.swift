@@ -117,7 +117,7 @@ extension MainViewController {
         // Check if the last reading is less than 10 minutes ago
         // to only pull 1 reading if that's all we need
         if bgData.count > 0 {
-            let now = NSDate().timeIntervalSince1970
+            let now = dateTimeUtils.getNowTimeIntervalUTC()
             let lastReadingTime = bgData.last!.date
             let secondsAgo = now - lastReadingTime
             if secondsAgo < 10*60 {
@@ -275,6 +275,9 @@ extension MainViewController {
     @objc func alarmTimerDidEnd(_ timer:Timer) {
         if bgData.count > 0 {
             self.checkAlarms(bgs: bgData)
+        }
+        if !self.bgTimer.isValid {
+            startBGTimer(time: 10)
         }
     }
     
