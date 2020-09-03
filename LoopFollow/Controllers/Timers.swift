@@ -12,6 +12,16 @@ import UIKit
 
 extension MainViewController {
     
+    func restartAllTimers() {
+        if !deviceStatusTimer.isValid { startDeviceStatusTimer(time: 1) }
+        if !profileTimer.isValid { startProfileTimer(time: 1) }
+        if !bgTimer.isValid { startBGTimer(time: 1) }
+        if !treatmentsTimer.isValid { startTreatmentsTimer(time: 10) }
+        if !cageSageTimer.isValid { startCageSageTimer(time: 10) }
+        if !minAgoTimer.isValid { startMinAgoTimer(time: minAgoTimeInterval) }
+        if !calendarTimer.isValid { startCalendarTimer(time: 30) }
+        if !alarmTimer.isValid { startAlarmTimer(time: 30) }
+    }
     
     
     // min Ago Timer
@@ -64,19 +74,6 @@ extension MainViewController {
         
     }
     
-    // Main Download Timer
-    func startTimer(time: TimeInterval) {
-        timer = Timer.scheduledTimer(timeInterval: time,
-                                     target: self,
-                                     selector: #selector(MainViewController.timerDidEnd(_:)),
-                                     userInfo: nil,
-                                     repeats: true)
-    }
-    
-    // Check for new data when timer ends
-    @objc func timerDidEnd(_ timer:Timer) {
-        nightscoutLoader()
-    }
     
     // Runs a 60 second timer when an alarm is snoozed
     // Prevents the alarm from triggering again while saving the snooze time to settings
@@ -91,6 +88,160 @@ extension MainViewController {
     }
     
     @objc func checkAlarmTimerDidEnd(_ timer:Timer) {
+    }
+    
+    // BG Timer
+    // Runs to 5:10 after last reading timestamp
+    // Failed or no reading re-attempts after 10 second delay
+    // Changes to 30 second increments after 7:00
+    // Changes to 1 minute increments after 10:00
+    // Changes to 5 minute increments after 20:00 stale data
+    func startBGTimer(time: TimeInterval =  60 * 5) {
+        bgTimer = Timer.scheduledTimer(timeInterval: time,
+                                               target: self,
+                                               selector: #selector(MainViewController.bgTimerDidEnd(_:)),
+                                               userInfo: nil,
+                                               repeats: false)
+    }
+    
+    @objc func bgTimerDidEnd(_ timer:Timer) {
+        
+        // reset timer to 1 minute if settings aren't entered
+        if UserDefaultsRepository.shareUserName.value == "" && UserDefaultsRepository.sharePassword.value == "" && UserDefaultsRepository.url.value == "" {
+            startBGTimer(time: 60)
+            return
+        }
+        
+        var onlyPullLastRecord = false
+        
+        // Check if the last reading is less than 10 minutes ago
+        // to only pull 1 reading if that's all we need
+        if bgData.count > 0 {
+            let now = NSDate().timeIntervalSince1970
+            let lastReadingTime = bgData.last!.date
+            let secondsAgo = now - lastReadingTime
+            if secondsAgo < 10*60 {
+                onlyPullLastRecord = true
+            }
+        }
+        
+        if UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "" {
+            webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
+        } else {
+            webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+        }
+        
+    }
+    
+    // Device Status Timer
+    // Runs to 5:10 after last reading timestamp
+    // Failed or no update re-attempts after 10 second delay
+    // Changes to 30 second increments after 7:00
+    // Changes to 1 minute increments after 10:00
+    // Changes to 5 minute increments after 20:00 stale data
+    func startDeviceStatusTimer(time: TimeInterval =  60 * 5) {
+        deviceStatusTimer = Timer.scheduledTimer(timeInterval: time,
+                                               target: self,
+                                               selector: #selector(MainViewController.deviceStatusTimerDidEnd(_:)),
+                                               userInfo: nil,
+                                               repeats: false)
+    }
+    
+    @objc func deviceStatusTimerDidEnd(_ timer:Timer) {
+        
+        // reset timer to 1 minute if settings aren't entered
+        if UserDefaultsRepository.url.value == "" {
+            startDeviceStatusTimer(time: 60)
+            return
+        }
+        
+        if UserDefaultsRepository.url.value != "" {
+            webLoadNSDeviceStatus()
+        }
+    }
+    
+    // Treatments Timer
+    // Runs on 2 minute intervals
+    // Pauses with stale BG data
+    func startTreatmentsTimer(time: TimeInterval =  60 * 2) {
+        treatmentsTimer = Timer.scheduledTimer(timeInterval: time,
+                                               target: self,
+                                               selector: #selector(MainViewController.treatmentsTimerDidEnd(_:)),
+                                               userInfo: nil,
+                                               repeats: false)
+    }
+    
+    @objc func treatmentsTimerDidEnd(_ timer:Timer) {
+        
+        // reset timer to 1 minute if settings aren't entered
+        if UserDefaultsRepository.url.value == "" {
+            startTreatmentsTimer(time: 60)
+            return
+        }
+        
+        if !isStaleData() && UserDefaultsRepository.url.value != "" {
+            if UserDefaultsRepository.downloadBasal.value {
+                WebLoadNSTempBasals()
+            }
+            if UserDefaultsRepository.downloadBolus.value {
+                webLoadNSBoluses()
+            }
+            if UserDefaultsRepository.downloadCarbs.value {
+                webLoadNSCarbs()
+            }
+            startTreatmentsTimer()
+        }
+    }
+    
+    // Profile Timer
+    // Runs on 10 minute intervals
+    // Pauses with stale BG data
+    func startProfileTimer(time: TimeInterval =  60 * 10) {
+        profileTimer = Timer.scheduledTimer(timeInterval: time,
+                                               target: self,
+                                               selector: #selector(MainViewController.profileTimerDidEnd(_:)),
+                                               userInfo: nil,
+                                               repeats: false)
+    }
+    
+    @objc func profileTimerDidEnd(_ timer:Timer) {
+        
+        // reset timer to 1 minute if settings aren't entered
+        if UserDefaultsRepository.url.value == "" {
+            startProfileTimer(time: 60)
+            return
+        }
+        
+        if !isStaleData() && UserDefaultsRepository.url.value != "" {
+            webLoadNSProfile()
+            startProfileTimer()
+        }
+    }
+    
+    // Cage and Sage Timer
+    // Runs on 10 minute intervals
+    // Pauses with stale BG data
+    func startCageSageTimer(time: TimeInterval =  60 * 10) {
+        cageSageTimer = Timer.scheduledTimer(timeInterval: time,
+                                               target: self,
+                                               selector: #selector(MainViewController.cageSageTimerDidEnd(_:)),
+                                               userInfo: nil,
+                                               repeats: false)
+    }
+    
+    @objc func cageSageTimerDidEnd(_ timer:Timer) {
+        
+        // reset timer to 1 minute if settings aren't entered
+        if UserDefaultsRepository.url.value == "" {
+            startCageSageTimer(time: 60)
+            return
+        }
+        
+        if !isStaleData() && UserDefaultsRepository.url.value != "" {
+            webLoadNSCage()
+            webLoadNSSage()
+            startCageSageTimer()
+        }
     }
     
     // Cancel and reset the playing alarm if it has not been snoozed after 4 min 50 seconds.
@@ -109,28 +260,42 @@ extension MainViewController {
         }
     }
     
-    // NS Loader Timer
-    func startViewTimer(time: TimeInterval) {
-        viewTimer = Timer.scheduledTimer(timeInterval: time,
+    
+    // Alarm Timer
+    // Run the alarm checker every 15 seconds
+    func startAlarmTimer(time: TimeInterval) {
+        alarmTimer = Timer.scheduledTimer(timeInterval: time,
                                          target: self,
-                                         selector: #selector(MainViewController.viewTimerDidEnd(_:)),
+                                         selector: #selector(MainViewController.alarmTimerDidEnd(_:)),
                                          userInfo: nil,
-                                         repeats: false)
+                                         repeats: true)
         
     }
     
-    // This delays a few things to hopefully all all data to arrive.
-    @objc func viewTimerDidEnd(_ timer:Timer) {
+    @objc func alarmTimerDidEnd(_ timer:Timer) {
         if bgData.count > 0 {
             self.checkAlarms(bgs: bgData)
-            //self.updateMinAgo()
-            // self.updateBadge(val: bgData[bgData.count - 1].sgv)
-            //self.viewUpdateNSBG()
-            if UserDefaultsRepository.writeCalendarEvent.value {
-                self.writeCalendar()
-            }
         }
     }
+    
+    // Calendar Timer
+    // Run the calendar writer every 30 seconds
+    func startCalendarTimer(time: TimeInterval) {
+        calendarTimer = Timer.scheduledTimer(timeInterval: time,
+                                         target: self,
+                                         selector: #selector(MainViewController.calendarTimerDidEnd(_:)),
+                                         userInfo: nil,
+                                         repeats: true)
+        
+    }
+    
+    @objc func calendarTimerDidEnd(_ timer:Timer) {
+        if UserDefaultsRepository.writeCalendarEvent.value && UserDefaultsRepository.calendarIdentifier.value != "" {
+            self.writeCalendar()
+        }
+    }
+    
+    
     
     // Timer to allow us to write min ago calendar entries but not update them every 30 seconds
     func startCalTimer(time: TimeInterval) {

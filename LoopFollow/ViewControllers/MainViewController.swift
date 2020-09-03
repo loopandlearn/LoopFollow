@@ -78,9 +78,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var minAgoTimer = Timer()
     var minAgoTimeInterval: TimeInterval = 1.0
     
-    // View Delay Timer
-    var viewTimer = Timer()
-    let viewTimeInterval: TimeInterval = UserDefaultsRepository.viewRefreshDelay.value
     
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
@@ -88,6 +85,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var checkAlarmInterval: TimeInterval = 60.0
     
     var calTimer = Timer()
+    
+    var bgTimer = Timer()
+    var cageSageTimer = Timer()
+    var profileTimer = Timer()
+    var deviceStatusTimer = Timer()
+    var treatmentsTimer = Timer()
+    var alarmTimer = Timer()
+    var calendarTimer = Timer()
     
     // Info Table Setup
     var tableData : [infoData] = []
@@ -202,14 +207,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // setup display for NS vs Dex
         showHideNSDetails()
         
-        // Load Data
-        if (UserDefaultsRepository.url.value != "" || (UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "")) && firstGraphLoad {
-            nightscoutLoader()
-        }
-        
-        startMinAgoTimer(time: minAgoTimeInterval)
+        // Load Startup Data
+        restartAllTimers()
         
     }
+    
+
+    
     
     override func viewWillAppear(_ animated: Bool) {
         // set screen lock
@@ -232,7 +236,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
            
               // settings for appBadge changed
               if appState.generalSettingsChanges & GeneralSettingsChangeEnum.appBadgeChange.rawValue != 0 {
-                 self.nightscoutLoader(forceLoad: true)
+                 
               }
               
               // settings for textcolor changed
@@ -301,10 +305,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Cancel the current timer and start a fresh background timer using the settings value only if background task is enabled
         
         if UserDefaultsRepository.backgroundRefresh.value {
-            timer.invalidate()
             backgroundTask.startBackgroundTask()
-            let refresh = UserDefaultsRepository.backgroundRefreshFrequency.value * 60
-            startTimer(time: TimeInterval(refresh))
         }
         
     }
@@ -316,12 +317,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Cancel the background tasks, start a fresh timer
         if UserDefaultsRepository.backgroundRefresh.value {
             backgroundTask.stopBackgroundTask()
-            timer.invalidate()
-        }
-        if !timer.isValid {
-            startTimer(time: timeInterval)
         }
         
+        restartAllTimers()
+
     }
     
     @objc override func viewDidAppear(_ animated: Bool) {
@@ -377,6 +376,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     func updateBadge(val: Int) {
+        DispatchQueue.main.async {
         if UserDefaultsRepository.appBadge.value {
             let latestBG = String(val)
             UIApplication.shared.applicationIconBadgeNumber = Int(bgUnits.removePeriodForBadge(bgUnits.toDisplayUnits(latestBG))) ?? val
@@ -384,6 +384,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             UIApplication.shared.applicationIconBadgeNumber = 0
         }
 //        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "updated badge") }
+        }
     }
     
     
