@@ -423,6 +423,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if !granted { return }
             
             if UserDefaultsRepository.calendarIdentifier.value == "" { return }
+            
+            if self.bgData.count < 1 { return }
                 
             // This lets us fire the method to write Min Ago entries only once a minute starting after 6 minutes but allows new readings through
             if self.lastCalDate == self.bgData[self.bgData.count - 1].date
