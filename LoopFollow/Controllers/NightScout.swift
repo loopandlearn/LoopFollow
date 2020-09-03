@@ -178,7 +178,38 @@ extension MainViewController {
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         if !isNS && (latestDate + 330) < now {
             webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+            print("dex didn't load, triggered NS attempt")
             return
+        }
+        
+        // Start the BG timer based on the reading
+        let secondsAgo = now - latestDate
+        
+        // if reading is overdue over: 20:00, re-attempt every 5 minutes
+        if secondsAgo >= (20 * 60) {
+            self.startBGTimer(time: (5 * 60))
+            print("##### started 5 minute bg timer")
+            
+        // if the reading is overdue: 10:00-19:59, re-attempt every minute
+        } else if secondsAgo >= (10 * 60) {
+            self.startBGTimer(time: 60)
+            print("##### started 1 minute bg timer")
+            
+        // if the reading is overdue: 7:00-9:59, re-attempt every 30 seconds
+        } else if secondsAgo >= (7 * 60) {
+            self.startBGTimer(time: 30)
+            print("##### started 30 second bg timer")
+            
+        // if the reading is overdue: 5:00-6:59 re-attempt every 10 seconds
+        } else if secondsAgo >= (5 * 60) {
+            self.startBGTimer(time: 10)
+            print("##### started 10 second bg timer")
+        
+        // We have a current reading. Set timer to 5:10 from last reading
+        } else {
+            self.startBGTimer(time: 310 - secondsAgo)
+            let timerVal = 310 - secondsAgo
+            print("##### started 5:10 bg timer: \(timerVal)")
         }
         
         // If we already have data, we're going to pop it to the end and remove the first. If we have old or no data, we'll destroy the whole array and start over. This is simpler than determining how far back we need to get new data from in case Dex back-filled readings
@@ -229,38 +260,6 @@ extension MainViewController {
                 let priorBG = entries[latestEntryi - 1].sgv
                 let deltaBG = latestBG - priorBG as Int
                 let lastBGTime = entries[latestEntryi].date
-                
-                // Start the BG timer based on the reading
-                let now = dateTimeUtils.getNowTimeIntervalUTC()
-                let secondsAgo = now - lastBGTime
-                
-                // if reading is overdue over: 20:00, re-attempt every 5 minutes
-                if secondsAgo >= (20 * 60) {
-                    self.startBGTimer(time: (5 * 60))
-                    print("started 5 minute bg timer")
-                    
-                // if the reading is overdue: 10:00-19:59, re-attempt every minute
-                } else if secondsAgo >= (10 * 60) {
-                    self.startBGTimer(time: 60)
-                    print("started 1 minute bg timer")
-                    
-                // if the reading is overdue: 7:00-9:59, re-attempt every 30 seconds
-                } else if secondsAgo >= (7 * 60) {
-                    self.startBGTimer(time: 30)
-                    print("started 30 second bg timer")
-                    
-                // if the reading is overdue: 5:00-6:59 re-attempt every 10 seconds
-                } else if secondsAgo >= (5 * 60) {
-                    self.startBGTimer(time: 10)
-                    print("started 10 second bg timer")
-                
-                // We have a current reading. Set timer to 5:10 from last reading
-                } else {
-                    self.startBGTimer(time: 310 - secondsAgo)
-                    let timerVal = 310 - secondsAgo
-                    print("started 5:10 bg timer: \(timerVal)")
-                }
-                
                 
                 let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
                 var userUnit = " mg/dL"
