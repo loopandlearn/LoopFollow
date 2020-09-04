@@ -9,6 +9,18 @@
 import Foundation
 import Charts
 
+final class OverrideFillFormatter: IFillFormatter {
+    func getFillLinePosition(dataSet: ILineChartDataSet, dataProvider: LineChartDataProvider) -> CGFloat {
+        return -40
+    }
+}
+
+final class basalFillFormatter: IFillFormatter {
+    func getFillLinePosition(dataSet: ILineChartDataSet, dataProvider: LineChartDataProvider) -> CGFloat {
+        return 0
+    }
+}
+
 final class ChartXValueFormatter: IAxisValueFormatter {
     
 

@@ -597,7 +597,7 @@ extension MainViewController {
             }
         }
         overrideData.reverse()
-        updateOverrideGraph()
+        //updateOverrideGraph()
         checkOverrideAlarms()
         
         // Start the timer based on the timestamp
@@ -972,6 +972,7 @@ extension MainViewController {
         var suspendPump: [[String:AnyObject]] = []
         var resumePump: [[String:AnyObject]] = []
         var pumpSiteChange: [[String:AnyObject]] = []
+        var cgmSensorStart: [[String:AnyObject]] = []
         
         for i in 0..<entries.count {
             let entry = entries[i] as [String : AnyObject]?
@@ -995,6 +996,8 @@ extension MainViewController {
                     resumePump.append(entry!)
                 case "Pump Site Change":
                     pumpSiteChange.append(entry!)
+                case "CGM Sensor Start":
+                    cgmSensorStart.append(entry!)
                 default:
                     print("No Match: \(String(describing: entry))")
             }
@@ -1005,6 +1008,7 @@ extension MainViewController {
         if bolus.count > 0 { processNSBolus(entries: bolus)}
         if carbs.count > 0 { processNSCarbs(entries: carbs)}
         if bgCheck.count > 0 { processNSBGCheck(entries: bgCheck)}
+        if temporaryOverride.count > 0 { processNSOverrides(entries: temporaryOverride)}
     }
     
     // NS Temp Basal Response Processor
@@ -1181,7 +1185,7 @@ extension MainViewController {
         }
         infoTable.reloadData()
     }
-    
+
     // NS Meal Bolus Response Processor
     func processNSBolus(entries: [[String:AnyObject]]) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Bolus") }
@@ -1329,6 +1333,54 @@ extension MainViewController {
             updateBGCheckGraph()
         }
         
+        
+    }
+    
+    // NS Override Response Processor
+    func processNSOverrides(entries: [[String:AnyObject]]) {
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Overrides") }
+        // because it's a small array, we're going to destroy and reload every time.
+        overrideGraphData.removeAll()
+        for i in 0..<entries.count {
+            let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
+            var date: String
+            if currentEntry?["timestamp"] != nil {
+                date = currentEntry?["timestamp"] as! String
+            } else if currentEntry?["created_at"] != nil {
+                date = currentEntry?["created_at"] as! String
+            } else {
+                return
+            }
+            // Fix for FreeAPS milliseconds in timestamp
+            var strippedZone = String(date.dropLast())
+            strippedZone = strippedZone.components(separatedBy: ".")[0]
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            dateFormatter.locale = Locale(identifier: "en_US")
+            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+            let dateString = dateFormatter.date(from: strippedZone)
+            let dateTimeStamp = dateString!.timeIntervalSince1970
+            
+            guard let multipler = currentEntry?["insulinNeedsScaleFactor"] as? Double else { continue }
+            guard let duration = currentEntry?["duration"] as? Double else { continue }
+            guard let enteredBy = currentEntry?["enteredBy"] as? String else { continue }
+            guard let reason = currentEntry?["reason"] as? String else { continue }
+            guard let ranges = currentEntry?["correctionRange"] as? [Int] else { continue }
+            guard let low = ranges[0] as? Int else { continue }
+            guard let high = ranges[1] as? Int else { continue }
+            let endDate = dateTimeStamp + (duration * 60)
+            var range: [Int] = []
+            range.append(low)
+            range.append(high)
+           
+            let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: multipler, date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: range, enteredBy: enteredBy, reason: reason, sgv: -20)
+            overrideGraphData.append(dot)
+            
+            
+        }
+        
+        updateOverrideGraph()
         
     }
 }

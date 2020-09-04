@@ -109,11 +109,12 @@ extension MainViewController {
         lineBasal.axisDependency = YAxis.AxisDependency.left
         lineBasal.highlightEnabled = true
         lineBasal.drawValuesEnabled = false
+        lineBasal.fillFormatter = basalFillFormatter()
         
         // Boluses
         var chartEntryBolus = [ChartDataEntry]()
         let lineBolus = LineChartDataSet(entries:chartEntryBolus, label: "")
-        lineBolus.circleRadius = 7
+        lineBolus.circleRadius = 5
         lineBolus.circleColors = [NSUIColor.systemBlue.withAlphaComponent(0.75)]
         lineBolus.drawCircleHoleEnabled = false
         lineBolus.setDrawHighlightIndicators(false)
@@ -130,7 +131,7 @@ extension MainViewController {
         // Carbs
         var chartEntryCarbs = [ChartDataEntry]()
         let lineCarbs = LineChartDataSet(entries:chartEntryCarbs, label: "")
-        lineCarbs.circleRadius = 7
+        lineCarbs.circleRadius = 5
         lineCarbs.circleColors = [NSUIColor.systemOrange.withAlphaComponent(0.75)]
         lineCarbs.drawCircleHoleEnabled = false
         lineCarbs.setDrawHighlightIndicators(false)
@@ -160,9 +161,10 @@ extension MainViewController {
         var chartOverrideEntry = [ChartDataEntry]()
         let lineOverride = LineChartDataSet(entries:chartOverrideEntry, label: "")
         lineOverride.setDrawHighlightIndicators(false)
-        lineOverride.setColor(NSUIColor.systemTeal, alpha: 0.8  )
-        lineOverride.lineWidth = 10
-        lineOverride.drawFilledEnabled = false
+        lineOverride.lineWidth = 0
+        lineOverride.drawFilledEnabled = true
+        lineOverride.fillFormatter = OverrideFillFormatter()
+        lineOverride.fillColor = NSUIColor.systemTeal.withAlphaComponent(0.8)
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
         lineOverride.highlightEnabled = true
@@ -229,7 +231,7 @@ extension MainViewController {
         BGChart.leftAxis.enabled = true
         BGChart.leftAxis.labelPosition = YAxis.LabelPosition.insideChart
         BGChart.leftAxis.axisMaximum = maxBasal
-        BGChart.leftAxis.axisMinimum = 0.0
+        BGChart.leftAxis.axisMinimum = -1
         BGChart.leftAxis.drawGridLinesEnabled = false
         
         BGChart.rightAxis.labelTextColor = NSUIColor.label
@@ -469,7 +471,8 @@ extension MainViewController {
             if UserDefaultsRepository.offsetCarbsBolus.value {
                 offset = 10
             }
-            let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + offset), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+            //let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + offset), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+            let value = ChartDataEntry(x: Double(bolusData[i].date), y: -5, data: formatter.string(from: NSNumber(value: bolusData[i].value)))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
         }
@@ -491,7 +494,8 @@ extension MainViewController {
             if UserDefaultsRepository.offsetCarbsBolus.value {
                 offset = 30
             }
-             let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + offset), data: formatter.string(from: NSNumber(value: carbData[i].value)))
+           //  let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + offset), data: formatter.string(from: NSNumber(value: carbData[i].value)))
+            let value = ChartDataEntry(x: Double(carbData[i].date), y: -25, data: formatter.string(from: NSNumber(value: carbData[i].value)))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
         }
@@ -572,19 +576,33 @@ extension MainViewController {
         chart.clear()
         
         var colors = [NSUIColor]()
-        for i in 0..<overrideData.count{
-            let multiplier = overrideData[i].value as! Double * 100.0
-            let labelText = String(format: "%.0f%%", multiplier)
-            //let value = ChartDataEntry(x: Double(overrideData[i].date), y: Double(overrideData[i].sgv), data: overrideData[i].value)
-            let value = ChartDataEntry(x: Double(overrideData[i].date), y: Double(overrideData[i].sgv), data: labelText)
+        for i in 0..<overrideGraphData.count{
+            let multiplier = overrideGraphData[i].insulNeedsScaleFactor as! Double * 100.0
+            //let labelText = String(format: "%.0f%%", multiplier)
+            let labelText = overrideGraphData[i].reason
+            
+            // Start Dot
+            let value = ChartDataEntry(x: Double(overrideGraphData[i].date), y: Double(overrideGraphData[i].sgv), data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             
-            if Double(overrideData[i].value) == 1.0 {
+            if Double(overrideGraphData[i].insulNeedsScaleFactor) == 1.0 {
                 colors.append(NSUIColor.systemGray.withAlphaComponent(0.0))
-            } else if i >= overrideData.count - 2 {
+            } else if i >= overrideGraphData.count - 2 {
                 colors.append(NSUIColor.systemGreen)
             } else {
-                colors.append(NSUIColor.systemGray.withAlphaComponent(CGFloat(overrideData[i].value / 2)))
+                colors.append(NSUIColor.systemGray.withAlphaComponent(CGFloat(overrideGraphData[i].insulNeedsScaleFactor / 2)))
+            }
+            
+            // End Dot
+            let endDot = ChartDataEntry(x: Double(overrideGraphData[i].endDate), y: Double(overrideGraphData[i].sgv), data: labelText)
+            BGChart.data?.dataSets[dataIndex].addEntry(endDot)
+            
+            if Double(overrideGraphData[i].insulNeedsScaleFactor) == 1.0 {
+                colors.append(NSUIColor.systemGray.withAlphaComponent(0.0))
+            } else if i >= overrideGraphData.count - 2 {
+                colors.append(NSUIColor.systemGreen)
+            } else {
+                colors.append(NSUIColor.systemGray.withAlphaComponent(CGFloat(overrideGraphData[i].insulNeedsScaleFactor / 2)))
             }
         }
         
