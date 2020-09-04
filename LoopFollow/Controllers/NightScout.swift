@@ -99,10 +99,12 @@ extension MainViewController {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                 //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
             }
-            if bgTimer.isValid {
-                bgTimer.invalidate()
+            DispatchQueue.main.async {
+                if self.bgTimer.isValid {
+                    self.bgTimer.invalidate()
+                }
+                self.startBGTimer(time: 10)
             }
-            startBGTimer(time: 10)
             return
         }
         var request = URLRequest(url: urlBGData)
@@ -115,10 +117,12 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
-                if self.bgTimer.isValid {
-                    self.bgTimer.invalidate()
+                DispatchQueue.main.async {
+                    if self.bgTimer.isValid {
+                        self.bgTimer.invalidate()
+                    }
+                    self.startBGTimer(time: 10)
                 }
-                self.startBGTimer(time: 10)
                 return
                 
             }
@@ -127,10 +131,12 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
-                if self.bgTimer.isValid {
-                    self.bgTimer.invalidate()
+                DispatchQueue.main.async {
+                    if self.bgTimer.isValid {
+                        self.bgTimer.invalidate()
+                    }
+                    self.startBGTimer(time: 10)
                 }
-                self.startBGTimer(time: 10)
                 return
                 
             }
@@ -148,10 +154,12 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Failure", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
-                if self.bgTimer.isValid {
-                    self.bgTimer.invalidate()
+                DispatchQueue.main.async {
+                    if self.bgTimer.isValid {
+                        self.bgTimer.invalidate()
+                    }
+                    self.startBGTimer(time: 10)
                 }
-                self.startBGTimer(time: 10)
                 return
                 
             }
@@ -185,31 +193,37 @@ extension MainViewController {
         // Start the BG timer based on the reading
         let secondsAgo = now - latestDate
         
-        // if reading is overdue over: 20:00, re-attempt every 5 minutes
-        if secondsAgo >= (20 * 60) {
-            self.startBGTimer(time: (5 * 60))
-            print("##### started 5 minute bg timer")
+        DispatchQueue.main.async {
+            // if reading is overdue over: 20:00, re-attempt every 5 minutes
+            if secondsAgo >= (20 * 60) {
+                self.startBGTimer(time: (5 * 60))
+                print("##### started 5 minute bg timer")
+                self.sendNotification(title: "BG Timer", body: "5 Minutes")
+                
+            // if the reading is overdue: 10:00-19:59, re-attempt every minute
+            } else if secondsAgo >= (10 * 60) {
+                self.startBGTimer(time: 60)
+                print("##### started 1 minute bg timer")
+                self.sendNotification(title: "BG Timer", body: "1 Minute")
+                
+            // if the reading is overdue: 7:00-9:59, re-attempt every 30 seconds
+            } else if secondsAgo >= (7 * 60) {
+                self.startBGTimer(time: 30)
+                print("##### started 30 second bg timer")
+                self.sendNotification(title: "BG Timer", body: "30 Seconds")
+                
+            // if the reading is overdue: 5:00-6:59 re-attempt every 10 seconds
+            } else if secondsAgo >= (5 * 60) {
+                self.startBGTimer(time: 10)
+                print("##### started 10 second bg timer")
+                self.sendNotification(title: "BG Timer", body: "10 Seconds")
             
-        // if the reading is overdue: 10:00-19:59, re-attempt every minute
-        } else if secondsAgo >= (10 * 60) {
-            self.startBGTimer(time: 60)
-            print("##### started 1 minute bg timer")
-            
-        // if the reading is overdue: 7:00-9:59, re-attempt every 30 seconds
-        } else if secondsAgo >= (7 * 60) {
-            self.startBGTimer(time: 30)
-            print("##### started 30 second bg timer")
-            
-        // if the reading is overdue: 5:00-6:59 re-attempt every 10 seconds
-        } else if secondsAgo >= (5 * 60) {
-            self.startBGTimer(time: 10)
-            print("##### started 10 second bg timer")
-        
-        // We have a current reading. Set timer to 5:10 from last reading
-        } else {
-            self.startBGTimer(time: 310 - secondsAgo)
-            let timerVal = 310 - secondsAgo
-            print("##### started 5:10 bg timer: \(timerVal)")
+            // We have a current reading. Set timer to 5:10 from last reading
+            } else {
+                self.startBGTimer(time: 310 - secondsAgo)
+                let timerVal = 310 - secondsAgo
+                print("##### started 5:10 bg timer: \(timerVal)")
+            }
         }
         
         // If we already have data, we're going to pop it to the end and remove the first. If we have old or no data, we'll destroy the whole array and start over. This is simpler than determining how far back we need to get new data from in case Dex back-filled readings
@@ -224,10 +238,6 @@ extension MainViewController {
             if data.count > 0 {
                 self.updateBadge(val: data[data.count - 1].sgv)
             }
-            if self.bgTimer.isValid {
-                self.bgTimer.invalidate()
-            }
-            self.startBGTimer(time: 10)
             return
         }
         
@@ -332,10 +342,13 @@ extension MainViewController {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                 //self.sendNotification(title: "Nightscout Failure", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
             }
-            if self.deviceStatusTimer.isValid {
-                self.deviceStatusTimer.invalidate()
+            DispatchQueue.main.async {
+                if self.deviceStatusTimer.isValid {
+                    self.deviceStatusTimer.invalidate()
+                }
+                self.startDeviceStatusTimer(time: 10)
             }
-            self.startDeviceStatusTimer(time: 10)
+            
             return
         }
         
@@ -351,10 +364,12 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
-                if self.deviceStatusTimer.isValid {
-                    self.deviceStatusTimer.invalidate()
+                DispatchQueue.main.async {
+                    if self.deviceStatusTimer.isValid {
+                        self.deviceStatusTimer.invalidate()
+                    }
+                    self.startDeviceStatusTimer(time: 10)
                 }
-                self.startDeviceStatusTimer(time: 10)
                 return
             }
             
@@ -363,10 +378,12 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
-                if self.deviceStatusTimer.isValid {
-                    self.deviceStatusTimer.invalidate()
+                DispatchQueue.main.async {
+                    if self.deviceStatusTimer.isValid {
+                        self.deviceStatusTimer.invalidate()
+                    }
+                    self.startDeviceStatusTimer(time: 10)
                 }
-                self.startDeviceStatusTimer(time: 10)
                 return
             }
             
@@ -381,10 +398,12 @@ extension MainViewController {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                     //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
-                if self.deviceStatusTimer.isValid {
-                    self.deviceStatusTimer.invalidate()
+                DispatchQueue.main.async {
+                    if self.deviceStatusTimer.isValid {
+                        self.deviceStatusTimer.invalidate()
+                    }
+                    self.startDeviceStatusTimer(time: 10)
                 }
-                self.startDeviceStatusTimer(time: 10)
                 return
             }
         }
@@ -585,31 +604,33 @@ extension MainViewController {
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         let secondsAgo = now - latestLoopTime
         
-        // if Loop is overdue over: 20:00, re-attempt every 5 minutes
-        if secondsAgo >= (20 * 60) {
-            self.startDeviceStatusTimer(time: (5 * 60))
-            print("started 5 minute device status timer")
-            
-        // if the Loop is overdue: 10:00-19:59, re-attempt every minute
-        } else if secondsAgo >= (10 * 60) {
-            self.startDeviceStatusTimer(time: 60)
-            print("started 1 minute device status timer")
-            
-        // if the Loop is overdue: 7:00-9:59, re-attempt every 30 seconds
-        } else if secondsAgo >= (7 * 60) {
-            self.startDeviceStatusTimer(time: 30)
-            print("started 30 second device status timer")
-            
-        // if the Loop is overdue: 5:00-6:59 re-attempt every 10 seconds
-        } else if secondsAgo >= (5 * 60) {
-            self.startDeviceStatusTimer(time: 10)
-            print("started 10 second device status timer")
-        
-        // We have a current Loop. Set timer to 5:10 from last reading
-        } else {
-            self.startDeviceStatusTimer(time: 310 - secondsAgo)
-            let timerVal = 310 - secondsAgo
-            print("started 5:10 device status timer: \(timerVal)")
+        DispatchQueue.main.async {
+            // if Loop is overdue over: 20:00, re-attempt every 5 minutes
+            if secondsAgo >= (20 * 60) {
+                self.startDeviceStatusTimer(time: (5 * 60))
+                print("started 5 minute device status timer")
+                
+                // if the Loop is overdue: 10:00-19:59, re-attempt every minute
+            } else if secondsAgo >= (10 * 60) {
+                self.startDeviceStatusTimer(time: 60)
+                print("started 1 minute device status timer")
+                
+                // if the Loop is overdue: 7:00-9:59, re-attempt every 30 seconds
+            } else if secondsAgo >= (7 * 60) {
+                self.startDeviceStatusTimer(time: 30)
+                print("started 30 second device status timer")
+                
+                // if the Loop is overdue: 5:00-6:59 re-attempt every 10 seconds
+            } else if secondsAgo >= (5 * 60) {
+                self.startDeviceStatusTimer(time: 10)
+                print("started 10 second device status timer")
+                
+                // We have a current Loop. Set timer to 5:10 from last reading
+            } else {
+                self.startDeviceStatusTimer(time: 310 - secondsAgo)
+                let timerVal = 310 - secondsAgo
+                print("started 5:10 device status timer: \(timerVal)")
+            }
         }
     }
     

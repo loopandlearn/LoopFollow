@@ -291,9 +291,6 @@ extension MainViewController {
         if bgData.count > 0 {
             self.checkAlarms(bgs: bgData)
         }
-        if !self.bgTimer.isValid {
-            startBGTimer(time: 10)
-        }
     }
     
     // Calendar Timer
