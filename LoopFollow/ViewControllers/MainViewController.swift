@@ -93,6 +93,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var treatmentsTimer = Timer()
     var alarmTimer = Timer()
     var calendarTimer = Timer()
+    var graphNowTimer = Timer()
     
     // Info Table Setup
     var tableData : [infoData] = []
