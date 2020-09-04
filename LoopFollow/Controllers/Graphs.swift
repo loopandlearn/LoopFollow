@@ -303,7 +303,7 @@ extension MainViewController {
             if Float(entries[i].sgv) > maxBG - maxBGOffset {
                 maxBG = Float(entries[i].sgv) + maxBGOffset
             }
-            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv))
+            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: bgUnits.toDisplayUnits(String(entries[i].sgv)))
             mainChart.addEntry(value)
             smallChart.addEntry(value)
             
@@ -540,7 +540,10 @@ extension MainViewController {
         
         var colors = [NSUIColor]()
         for i in 0..<overrideData.count{
-            let value = ChartDataEntry(x: Double(overrideData[i].date), y: Double(overrideData[i].sgv), data: overrideData[i].value)
+            let multiplier = overrideData[i].value as! Double * 100.0
+            let labelText = String(format: "%.0f%%", multiplier)
+            //let value = ChartDataEntry(x: Double(overrideData[i].date), y: Double(overrideData[i].sgv), data: overrideData[i].value)
+            let value = ChartDataEntry(x: Double(overrideData[i].date), y: Double(overrideData[i].sgv), data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             
             if Double(overrideData[i].value) == 1.0 {

@@ -155,9 +155,9 @@ class PillMarker: MarkerImage {
 
     override func refreshContent(entry: ChartDataEntry, highlight: Highlight) {
         if entry.data != nil {
-            var multiplier = entry.data as! Double * 100.0
-            labelText = String(format: "%.0f%%", multiplier)
-            //labelText = entry.data as? String ?? ""
+            //var multiplier = entry.data as! Double * 100.0
+            //labelText = String(format: "%.0f%%", multiplier)
+            labelText = entry.data as? String ?? ""
         } else {
             labelText = String(entry.y)
         }
