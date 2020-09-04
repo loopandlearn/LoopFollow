@@ -919,16 +919,17 @@ extension MainViewController {
         
     }
     
-    // NS Temp Basal Web Call
-    func WebLoadNSTempBasals() {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Basal") }
-        if !UserDefaultsRepository.downloadBasal.value { return }
+    // NS Treatments Web Call
+    // Downloads Basal, Bolus, Carbs, BG Check, Notes, Overrides
+    func WebLoadNSTreatments() {
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Treatments") }
+        if !UserDefaultsRepository.downloadTreatments.value { return }
         
         let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
         
-        var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[eventType][$eq]=Temp%20Basal&find[created_at][$gte]=" + yesterdayString
+        var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[created_at][$gte]=" + yesterdayString
         if token != "" {
-            urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?token=" + token + "&find[eventType][$eq]=Temp%20Basal&find[created_at][$gte]=" + yesterdayString
+            urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?token=" + token + "&find[created_at][$gte]=" + yesterdayString
         }
         
         guard let urlData = URL(string: urlString) else {
@@ -950,7 +951,7 @@ extension MainViewController {
             let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
             if let json = json {
                 DispatchQueue.main.async {
-                    self.updateBasals(entries: json)
+                    self.updateTreatments(entries: json)
                 }
             } else {
                 return
@@ -959,8 +960,55 @@ extension MainViewController {
         task.resume()
     }
     
+    // Process and split out treatments to individual tasks
+    func updateTreatments(entries: [[String:AnyObject]]) {
+        
+        var tempBasal: [[String:AnyObject]] = []
+        var bolus: [[String:AnyObject]] = []
+        var carbs: [[String:AnyObject]] = []
+        var temporaryOverride: [[String:AnyObject]] = []
+        var note: [[String:AnyObject]] = []
+        var bgCheck: [[String:AnyObject]] = []
+        var suspendPump: [[String:AnyObject]] = []
+        var resumePump: [[String:AnyObject]] = []
+        var pumpSiteChange: [[String:AnyObject]] = []
+        
+        for i in 0..<entries.count {
+            let entry = entries[i] as [String : AnyObject]?
+            switch entry?["eventType"] as! String {
+                case "Temp Basal":
+                    tempBasal.append(entry!)
+                case "Correction Bolus":
+                    bolus.append(entry!)
+                case "Meal Bolus":
+                    carbs.append(entry!)
+                case "Temporary Override":
+                    temporaryOverride.append(entry!)
+                case "Note":
+                    note.append(entry!)
+                    print("Note: \(String(describing: entry))")
+                case "BG Check":
+                    bgCheck.append(entry!)
+                case "Suspend Pump":
+                    suspendPump.append(entry!)
+                case "Resume Pump":
+                    resumePump.append(entry!)
+                case "Pump Site Change":
+                    pumpSiteChange.append(entry!)
+                default:
+                    print("No Match: \(String(describing: entry))")
+            }
+        }
+        // end of for loop
+        
+        if tempBasal.count > 0 { processNSBasals(entries: tempBasal)}
+        if bolus.count > 0 { processNSBolus(entries: bolus)}
+        if carbs.count > 0 { processNSCarbs(entries: carbs)}
+        if bgCheck.count > 0 { processNSBGCheck(entries: bgCheck)}
+    }
+    
     // NS Temp Basal Response Processor
-    func updateBasals(entries: [[String:AnyObject]]) {
+    func processNSBasals(entries: [[String:AnyObject]]) {
         self.clearLastInfoData(index: 2)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Basal") }
         // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
@@ -1134,47 +1182,6 @@ extension MainViewController {
         infoTable.reloadData()
     }
     
-    // NS Bolus Web Call
-    func webLoadNSBoluses(){
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Bolus") }
-        if !UserDefaultsRepository.downloadBolus.value { return }
-        let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
-        let urlUser = UserDefaultsRepository.url.value
-        var searchString = "find[eventType]=Correction%20Bolus&find[created_at][$gte]=" + yesterdayString
-        var urlDataPath: String = urlUser + "/api/v1/treatments.json?"
-        if token == "" {
-            urlDataPath = urlDataPath + searchString
-        }
-        else
-        {
-            urlDataPath = urlDataPath + "token=" + token + "&" + searchString
-        }
-        guard let urlData = URL(string: urlDataPath) else {
-            return
-        }
-        var request = URLRequest(url: urlData)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            
-            guard error == nil else {
-                return
-            }
-            guard let data = data else {
-                return
-            }
-            
-            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
-            if let json = json {
-                DispatchQueue.main.async {
-                    self.processNSBolus(entries: json)
-                }
-            } else {
-                return
-            }
-        }
-        task.resume()
-    }
-    
     // NS Meal Bolus Response Processor
     func processNSBolus(entries: [[String:AnyObject]]) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Bolus") }
@@ -1224,49 +1231,7 @@ extension MainViewController {
         }
         
     }
-    
-    
-    // NS Carb Web Call
-    func webLoadNSCarbs(){
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Carbs") }
-        if !UserDefaultsRepository.downloadCarbs.value { return }
-        let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
-        let urlUser = UserDefaultsRepository.url.value
-        var searchString = "find[eventType]=Meal%20Bolus&find[created_at][$gte]=" + yesterdayString
-        var urlDataPath: String = urlUser + "/api/v1/treatments.json?"
-        if token == "" {
-            urlDataPath = urlDataPath + searchString
-        }
-        else
-        {
-            urlDataPath = urlDataPath + "token=" + token + "&" + searchString
-        }
-        guard let urlData = URL(string: urlDataPath) else {
-            return
-        }
-        var request = URLRequest(url: urlData)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            
-            guard error == nil else {
-                return
-            }
-            guard let data = data else {
-                return
-            }
-            
-            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
-            if let json = json {
-                DispatchQueue.main.async {
-                    self.processNSCarbs(entries: json)
-                }
-            } else {
-                return
-            }
-        }
-        task.resume()
-    }
-    
+   
     // NS Carb Bolus Response Processor
     func processNSCarbs(entries: [[String:AnyObject]]) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Carbs") }
@@ -1313,6 +1278,55 @@ extension MainViewController {
         
         if UserDefaultsRepository.graphCarbs.value {
             updateCarbGraph()
+        }
+        
+        
+    }
+    
+    // NS BG Check Response Processor
+    func processNSBGCheck(entries: [[String:AnyObject]]) {
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG Check") }
+        // because it's a small array, we're going to destroy and reload every time.
+        bgCheckData.removeAll()
+        for i in 0..<entries.count {
+            let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
+            var date: String
+            if currentEntry?["timestamp"] != nil {
+                date = currentEntry?["timestamp"] as! String
+            } else if currentEntry?["created_at"] != nil {
+                date = currentEntry?["created_at"] as! String
+            } else {
+                return
+            }
+            // Fix for FreeAPS milliseconds in timestamp
+            var strippedZone = String(date.dropLast())
+            strippedZone = strippedZone.components(separatedBy: ".")[0]
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            dateFormatter.locale = Locale(identifier: "en_US")
+            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+            let dateString = dateFormatter.date(from: strippedZone)
+            let dateTimeStamp = dateString!.timeIntervalSince1970
+            
+            guard let sgv = currentEntry?["glucose"] as? Int else {
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Non-Int Glucose entry")}
+                continue
+            }
+            
+            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
+                // Make the dot
+                //let dot = ShareGlucoseData(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                let dot = ShareGlucoseData(sgv: sgv, date: Double(dateTimeStamp), direction: "")
+                bgCheckData.append(dot)
+            }
+            
+            
+            
+        }
+        
+        if UserDefaultsRepository.graphCarbs.value {
+            updateBGCheckGraph()
         }
         
         

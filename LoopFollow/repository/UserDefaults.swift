@@ -71,6 +71,7 @@ class UserDefaultsRepository {
     })
     
     // Debug Settings
+        static let downloadTreatments = UserDefaultsValue<Bool>(key: "downloadTreatments", default: true)
         static let downloadBasal = UserDefaultsValue<Bool>(key: "downloadBasal", default: true)
         static let downloadBolus = UserDefaultsValue<Bool>(key: "downloadBolus", default: true)
         static let downloadCarbs = UserDefaultsValue<Bool>(key: "downloadCarbs", default: true)

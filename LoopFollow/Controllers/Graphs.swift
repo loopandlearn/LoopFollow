@@ -168,6 +168,21 @@ extension MainViewController {
         lineOverride.highlightEnabled = true
         lineOverride.drawValuesEnabled = false
         
+        // BG Check
+        var chartEntryBGCheck = [ChartDataEntry]()
+        let lineBGCheck = LineChartDataSet(entries:chartEntryBGCheck, label: "")
+        lineBGCheck.circleRadius = 5
+        lineBGCheck.circleColors = [NSUIColor.systemRed.withAlphaComponent(0.75)]
+        lineBGCheck.drawCircleHoleEnabled = false
+        lineBGCheck.setDrawHighlightIndicators(false)
+        lineBGCheck.setColor(NSUIColor.systemRed, alpha: 1.0)
+        lineBGCheck.drawCirclesEnabled = true
+        lineBGCheck.lineWidth = 0
+        lineBGCheck.highlightEnabled = false
+        lineBGCheck.axisDependency = YAxis.AxisDependency.right
+        lineBGCheck.valueFormatter = ChartYDataValueFormatter()
+        lineBGCheck.drawValuesEnabled = false
+        
         // Setup the chart data of all lines
         let data = LineChartData()
         data.addDataSet(lineBG) // Dataset 0
@@ -177,6 +192,7 @@ extension MainViewController {
         data.addDataSet(lineCarbs) // Dataset 4
         data.addDataSet(lineBasalScheduled) // Dataset 5
         data.addDataSet(lineOverride) // Dataset 6
+        data.addDataSet(lineBGCheck) // Dataset 7
         
         data.setValueFont(UIFont.systemFont(ofSize: 12))
         
@@ -485,6 +501,23 @@ extension MainViewController {
         BGChart.notifyDataSetChanged()
     }
     
+    func updateBGCheckGraph() {
+        var dataIndex = 7
+        BGChart.lineData?.dataSets[dataIndex].clear()
+        for i in 0..<bgCheckData.count{
+            let formatter = NumberFormatter()
+            formatter.minimumFractionDigits = 0
+            formatter.maximumFractionDigits = 2
+            formatter.minimumIntegerDigits = 1
+            let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatter.string(from: NSNumber(value: bgCheckData[i].sgv)))
+            BGChart.data?.dataSets[dataIndex].addEntry(value)
+
+        }
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+    }
  
     
     func createSmallBGGraph(){
