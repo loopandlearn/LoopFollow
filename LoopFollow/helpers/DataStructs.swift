@@ -30,5 +30,16 @@ class DataStructs {
         var sgv: Int
     }
     
+    //NS Override Data  Struct
+    struct overrideStruct: Codable {
+        var insulNeedsScaleFactor: Double
+        var date: TimeInterval
+        var endDate: TimeInterval
+        var duration: Double
+        var correctionRange: [Int]
+        var enteredBy: String
+        var reason: String
+        var sgv: Float
+    }
     
 }
