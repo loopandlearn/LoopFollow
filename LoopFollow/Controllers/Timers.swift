@@ -195,14 +195,8 @@ extension MainViewController {
         }
         
         if !isStaleData() && UserDefaultsRepository.url.value != "" {
-            if UserDefaultsRepository.downloadBasal.value {
-                WebLoadNSTempBasals()
-            }
-            if UserDefaultsRepository.downloadBolus.value {
-                webLoadNSBoluses()
-            }
-            if UserDefaultsRepository.downloadCarbs.value {
-                webLoadNSCarbs()
+            if UserDefaultsRepository.downloadTreatments.value {
+                WebLoadNSTreatments()
             }
             startTreatmentsTimer()
         }
