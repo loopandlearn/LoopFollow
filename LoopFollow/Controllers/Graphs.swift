@@ -199,6 +199,10 @@ extension MainViewController {
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
         
+        // Add Now Line
+        createNowLine()
+        startGraphNowTimer()
+        
         // Setup the main graph overall details
         BGChart.xAxis.valueFormatter = ChartXValueFormatter()
         BGChart.xAxis.granularity = 1800
@@ -228,6 +232,15 @@ extension MainViewController {
         BGChart.data = data
         BGChart.setExtraOffsets(left: 10, top: 10, right: 10, bottom: 10)
         
+    }
+    
+    func createNowLine() {
+        BGChart.xAxis.removeAllLimitLines()
+        let ul = ChartLimitLine()
+        ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
+        ul.lineColor = NSUIColor.systemGray.withAlphaComponent(0.5)
+        ul.lineWidth = 1
+        BGChart.xAxis.addLimitLine(ul)
     }
     
     func updateBGGraphSettings() {
