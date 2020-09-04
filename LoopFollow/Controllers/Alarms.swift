@@ -347,7 +347,8 @@ extension MainViewController {
         let bgSeconds = bgData.last!.date
         let now = Date().timeIntervalSince1970
         let secondsAgo = now - bgSeconds
-        let timerLength = 290 - secondsAgo
+        var timerLength = 290 - secondsAgo
+        if timerLength < 10 { timerLength = 290}
         startAlarmPlayingTimer(time: timerLength)
     }
     
