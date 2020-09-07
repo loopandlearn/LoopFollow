@@ -32,10 +32,18 @@ extension MainViewController {
     }
     
     //NS Bolus Data  Struct
-    struct bolusCarbGraphStruct: Codable {
+    struct bolusGraphStruct: Codable {
         var value: Double
         var date: TimeInterval
         var sgv: Int
+    }
+    
+    //NS Bolus Data  Struct
+    struct carbGraphStruct: Codable {
+        var value: Double
+        var date: TimeInterval
+        var sgv: Int
+        var absorptionTime: Int
     }
     
     func isStaleData() -> Bool {
@@ -480,9 +488,9 @@ extension MainViewController {
                         PredictionLabel.textColor = UIColor.systemPurple
                         if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
                             predictionData.removeAll()
-                            var predictionTime = lastLoopTime + 300
+                            var predictionTime = lastLoopTime
                             let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
-                            var i = 1
+                            var i = 0
                             while i <= toLoad {
                                 if i < prediction.count {
                                     let prediction = ShareGlucoseData(sgv: prediction[i], date: predictionTime, direction: "flat")
@@ -883,9 +891,9 @@ extension MainViewController {
                 basalScheduleData.append(startDot)
                 var endDate = basal2Day[i].endDate
                 
-                // if it's the last one in the profile or date is greater than now, set it to the last BG dot
+                // if it's the last one in the profile or date is greater than now, set it to 30 minutes from now
                 if i == basal2Day.count - 1  || endDate > dateTimeUtils.getNowTimeIntervalUTC() {
-                    endDate = Double(dateTimeUtils.getNowTimeIntervalUTC())
+                    endDate = Double(dateTimeUtils.getNowTimeIntervalUTC() + (30 * 60))
                 }
 
                 let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
@@ -1219,7 +1227,7 @@ extension MainViewController {
                 
                 if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                     // Make the dot
-                    let dot = bolusCarbGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                    let dot = bolusGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
                     bolusData.append(dot)
                 }
             } catch {
@@ -1252,6 +1260,9 @@ extension MainViewController {
             } else {
                 return
             }
+            
+            let absorptionTime = currentEntry?["absorptionTime"] as? Int ?? 0
+            
             // Fix for FreeAPS milliseconds in timestamp
             var strippedZone = String(carbDate.dropLast())
             strippedZone = strippedZone.components(separatedBy: ".")[0]
@@ -1272,7 +1283,7 @@ extension MainViewController {
             
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                 // Make the dot
-                let dot = bolusCarbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                let dot = carbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv), absorptionTime: absorptionTime)
                 carbData.append(dot)
             }
             
@@ -1360,20 +1371,36 @@ extension MainViewController {
             dateFormatter.locale = Locale(identifier: "en_US")
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
-            let dateTimeStamp = dateString!.timeIntervalSince1970
+            var dateTimeStamp = dateString!.timeIntervalSince1970
+            if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() {
+                dateTimeStamp = dateTimeUtils.getTimeInterval24HoursAgo()
+            }
             
             guard let multipler = currentEntry?["insulinNeedsScaleFactor"] as? Double else { continue }
-            guard let duration = currentEntry?["duration"] as? Double else { continue }
+            var duration: Double = 5.0
+            if let durationType = currentEntry?["durationType"] as? String {
+                duration = dateTimeUtils.getNowTimeIntervalUTC() - dateTimeStamp + (60 * 60)
+            } else {
+                duration = (currentEntry?["duration"] as? Double)!
+                duration = duration * 60
+            }
+            
             guard let enteredBy = currentEntry?["enteredBy"] as? String else { continue }
             guard let reason = currentEntry?["reason"] as? String else { continue }
-            guard let ranges = currentEntry?["correctionRange"] as? [Int] else { continue }
-            guard let low = ranges[0] as? Int else { continue }
-            guard let high = ranges[1] as? Int else { continue }
-            let endDate = dateTimeStamp + (duration * 60)
+            
             var range: [Int] = []
-            range.append(low)
-            range.append(high)
-           
+            if let ranges = currentEntry?["correctionRange"] as? [Int] {
+                if ranges.count == 2 {
+                    guard let low = ranges[0] as? Int else { continue }
+                    guard let high = ranges[1] as? Int else { continue }
+                    range.append(low)
+                    range.append(high)
+                }
+                
+            }
+                        
+            let endDate = dateTimeStamp + (duration)
+
             let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: multipler, date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: range, enteredBy: enteredBy, reason: reason, sgv: -20)
             overrideGraphData.append(dot)
             

@@ -17,6 +17,9 @@ extension MainViewController {
         if chartView == BGChartFull {
             BGChart.moveViewToX(entry.x)
         }
+        if entry.data as? String == "hide"{
+            BGChart.highlightValue(nil, callDelegate: false)
+        }
     }
     
     func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
@@ -104,7 +107,8 @@ extension MainViewController {
         lineBasal.setColor(NSUIColor.systemBlue, alpha: 0.5)
         lineBasal.lineWidth = 0
         lineBasal.drawFilledEnabled = true
-        lineBasal.fillColor = NSUIColor.systemBlue.withAlphaComponent(0.8)
+        lineBasal.fillColor = NSUIColor.systemBlue
+        lineBasal.fillAlpha = 0.5
         lineBasal.drawCirclesEnabled = false
         lineBasal.axisDependency = YAxis.AxisDependency.left
         lineBasal.highlightEnabled = true
@@ -119,13 +123,28 @@ extension MainViewController {
         lineBolus.drawCircleHoleEnabled = false
         lineBolus.setDrawHighlightIndicators(false)
         lineBolus.setColor(NSUIColor.systemBlue, alpha: 1.0)
-        lineBolus.drawCirclesEnabled = true
         lineBolus.lineWidth = 0
-        lineBolus.highlightEnabled = false
         lineBolus.axisDependency = YAxis.AxisDependency.right
         lineBolus.valueFormatter = ChartYDataValueFormatter()
-        lineBolus.drawValuesEnabled = true
         lineBolus.valueTextColor = NSUIColor.label
+        lineBolus.fillFormatter = BolusFillFormatter()
+        lineBolus.fillColor = NSUIColor.systemBlue
+        lineBolus.fillAlpha = 0.6
+        if UserDefaultsRepository.graphBars.value {
+            lineBolus.drawCirclesEnabled = false
+            lineBolus.drawFilledEnabled = true
+        } else {
+            lineBolus.drawCirclesEnabled = true
+            lineBolus.drawFilledEnabled = false
+        }
+        if UserDefaultsRepository.showValues.value {
+            lineBolus.drawValuesEnabled = true
+            lineBolus.highlightEnabled = false
+        } else {
+            lineBolus.drawValuesEnabled = false
+            lineBolus.highlightEnabled = true
+        }
+        
 
         
         // Carbs
@@ -136,13 +155,28 @@ extension MainViewController {
         lineCarbs.drawCircleHoleEnabled = false
         lineCarbs.setDrawHighlightIndicators(false)
         lineCarbs.setColor(NSUIColor.systemBlue, alpha: 1.0)
-        lineCarbs.drawCirclesEnabled = true
         lineCarbs.lineWidth = 0
-        lineCarbs.highlightEnabled = false
         lineCarbs.axisDependency = YAxis.AxisDependency.right
         lineCarbs.valueFormatter = ChartYDataValueFormatter()
-        lineCarbs.drawValuesEnabled = true
         lineCarbs.valueTextColor = NSUIColor.label
+        lineCarbs.fillFormatter = CarbFillFormatter()
+        lineCarbs.fillColor = NSUIColor.systemOrange
+        lineCarbs.fillAlpha = 0.6
+        if UserDefaultsRepository.graphBars.value {
+            lineCarbs.drawCirclesEnabled = false
+            lineCarbs.drawFilledEnabled = true
+        } else {
+            lineCarbs.drawCirclesEnabled = true
+            lineCarbs.drawFilledEnabled = false
+        }
+        if UserDefaultsRepository.showValues.value {
+            lineCarbs.drawValuesEnabled = true
+            lineCarbs.highlightEnabled = false
+        } else {
+            lineCarbs.drawValuesEnabled = false
+            lineCarbs.highlightEnabled = true
+        }
+        
         
         // create Scheduled Basal graph data
         var chartBasalScheduledEntry = [ChartDataEntry]()
@@ -164,7 +198,8 @@ extension MainViewController {
         lineOverride.lineWidth = 0
         lineOverride.drawFilledEnabled = true
         lineOverride.fillFormatter = OverrideFillFormatter()
-        lineOverride.fillColor = NSUIColor.systemTeal.withAlphaComponent(0.8)
+        lineOverride.fillColor = NSUIColor.systemGreen
+        lineOverride.fillAlpha = 0.6
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
         lineOverride.highlightEnabled = true
@@ -183,7 +218,7 @@ extension MainViewController {
         lineBGCheck.highlightEnabled = false
         lineBGCheck.axisDependency = YAxis.AxisDependency.right
         lineBGCheck.valueFormatter = ChartYDataValueFormatter()
-        lineBGCheck.drawValuesEnabled = false
+        lineBGCheck.drawValuesEnabled = UserDefaultsRepository.showValues.value
         
         // Setup the chart data of all lines
         let data = LineChartData()
@@ -231,21 +266,28 @@ extension MainViewController {
         BGChart.leftAxis.enabled = true
         BGChart.leftAxis.labelPosition = YAxis.LabelPosition.insideChart
         BGChart.leftAxis.axisMaximum = maxBasal
-        BGChart.leftAxis.axisMinimum = -1
+        BGChart.leftAxis.axisMinimum = 0
         BGChart.leftAxis.drawGridLinesEnabled = false
+        BGChart.leftAxis.granularityEnabled = true
+        BGChart.leftAxis.granularity = 0.5
+        //BGChart.leftAxis.inverted = true
         
         BGChart.rightAxis.labelTextColor = NSUIColor.label
         BGChart.rightAxis.labelPosition = YAxis.LabelPosition.insideChart
-        BGChart.rightAxis.axisMinimum = Double(UserDefaultsRepository.minBGValue.value)
-        BGChart.rightAxis.axisMaximum = Double(maxBG)
+        BGChart.rightAxis.axisMinimum = 0.0
+        BGChart.rightAxis.axisMaximum = 400.0
         BGChart.rightAxis.gridLineDashLengths = [5.0, 5.0]
+        BGChart.rightAxis.drawGridLinesEnabled = false
         BGChart.rightAxis.valueFormatter = ChartYMMOLValueFormatter()
+        BGChart.rightAxis.granularityEnabled = true
+        BGChart.rightAxis.granularity = 50
         
         BGChart.legend.enabled = false
         BGChart.scaleYEnabled = false
-        BGChart.drawGridBackgroundEnabled = false
-        //BGChart.gridBackgroundColor = NSUIColor.secondarySystemBackground
-      
+        BGChart.drawGridBackgroundEnabled = true
+        BGChart.gridBackgroundColor = NSUIColor.secondarySystemBackground
+        
+        BGChart.highlightValue(nil, callDelegate: false)
         
         BGChart.data = data
         BGChart.setExtraOffsets(left: 10, top: 10, right: 10, bottom: 10)
@@ -281,7 +323,7 @@ extension MainViewController {
             linePrediction.drawCirclesEnabled = false
         }
         
-        BGChart.rightAxis.axisMinimum = Double(UserDefaultsRepository.minBGValue.value)
+        BGChart.rightAxis.axisMinimum = 0
         
         // Clear limit lines so they don't add multiples when changing the settings
         BGChart.rightAxis.removeAllLimitLines()
@@ -354,7 +396,7 @@ extension MainViewController {
             }
         }
         
-        BGChart.rightAxis.axisMaximum = Double(maxBG)
+        BGChart.rightAxis.axisMaximum = 400
         BGChart.setVisibleXRangeMinimum(600)
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
@@ -461,20 +503,55 @@ extension MainViewController {
     
     func updateBolusGraph() {
         var dataIndex = 3
+        var yTop: Double = 370
+        var yBottom: Double = 345
         BGChart.lineData?.dataSets[dataIndex].clear()
+
         for i in 0..<bolusData.count{
             let formatter = NumberFormatter()
             formatter.minimumFractionDigits = 0
             formatter.maximumFractionDigits = 2
-            formatter.minimumIntegerDigits = 1
+            formatter.minimumIntegerDigits = 0
             var offset = 0
             if UserDefaultsRepository.offsetCarbsBolus.value {
                 offset = 10
             }
-            //let value = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + offset), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
-            let value = ChartDataEntry(x: Double(bolusData[i].date), y: -5, data: formatter.string(from: NSNumber(value: bolusData[i].value)))
-            BGChart.data?.dataSets[dataIndex].addEntry(value)
+            
+            
+            if UserDefaultsRepository.graphBars.value {
+                var dateSpread = bolusData[i].value * 2 * 60
+                if dateSpread < 60 { dateSpread * 2 }
+                
+                var startDotTime = bolusData[i].date
+                var startInnerDotTime = bolusData[i].date + 1
+                var endInnerDotTime = bolusData[i].date + dateSpread - 1
+                var endDotTime = bolusData[i].date + dateSpread
+                
+                if i < bolusData.count - 1 {
+                    if endDotTime >= bolusData[i + 1].date {
+                        endDotTime = bolusData[i + 1].date - 4
+                        endInnerDotTime = endDotTime - 1
+                        
+                        // Skip this loop if it's too short of a time to add the dots
+                        if endDotTime <= startDotTime { continue }
+                    }
+                }
+                
+                let preStartDot = ChartDataEntry(x: Double(startDotTime), y: yBottom, data: "hide")
+                BGChart.data?.dataSets[dataIndex].addEntry(preStartDot)
 
+                let startDot = ChartDataEntry(x: Double(startInnerDotTime), y: yTop, data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+                BGChart.data?.dataSets[dataIndex].addEntry(startDot)
+                
+                let preEndDot = ChartDataEntry(x: Double(endInnerDotTime), y: yTop, data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+                BGChart.data?.dataSets[dataIndex].addEntry(preEndDot)
+
+                let endDot = ChartDataEntry(x: Double(endDotTime), y: yBottom, data: "hide")
+                BGChart.data?.dataSets[dataIndex].addEntry(endDot)
+            } else {
+                let dot = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + offset), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+                BGChart.data?.dataSets[dataIndex].addEntry(dot)
+            }
         }
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
@@ -484,6 +561,8 @@ extension MainViewController {
     
     func updateCarbGraph() {
         var dataIndex = 4
+        var yTop: Double = 340
+        var yBottom: Double = 315
         BGChart.lineData?.dataSets[dataIndex].clear()
         for i in 0..<carbData.count{
             let formatter = NumberFormatter()
@@ -494,9 +573,47 @@ extension MainViewController {
             if UserDefaultsRepository.offsetCarbsBolus.value {
                 offset = 30
             }
-           //  let value = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + offset), data: formatter.string(from: NSNumber(value: carbData[i].value)))
-            let value = ChartDataEntry(x: Double(carbData[i].date), y: -25, data: formatter.string(from: NSNumber(value: carbData[i].value)))
-            BGChart.data?.dataSets[dataIndex].addEntry(value)
+            
+            var valueString: String = formatter.string(from: NSNumber(value: carbData[i].value))!
+            
+            if carbData[i].absorptionTime > 0 && UserDefaultsRepository.showAbsorption.value {
+                let hours = carbData[i].absorptionTime / 60
+                valueString += " " + String(hours) + "h"
+            }
+            
+            if UserDefaultsRepository.graphBars.value {
+                var dateSpread = carbData[i].value / 10 * 60 * 2
+                
+                var startDotTime = carbData[i].date
+                var startInnerDotTime = carbData[i].date + 1
+                var endInnerDotTime = carbData[i].date + dateSpread - 1
+                var endDotTime = carbData[i].date + dateSpread
+                
+                if i < carbData.count - 1 {
+                    if endDotTime >= carbData[i + 1].date {
+                        endDotTime = carbData[i + 1].date - 4
+                        endInnerDotTime = endDotTime - 1
+                        
+                        // Skip this loop if it's too short of a time to add the dots
+                        if endDotTime <= startDotTime { continue }
+                    }
+                }
+                
+                let preStartDot = ChartDataEntry(x: Double(startDotTime), y: yBottom, data: "hide")
+                BGChart.data?.dataSets[dataIndex].addEntry(preStartDot)
+                let startDot = ChartDataEntry(x: Double(startInnerDotTime), y: yTop, data: valueString)
+                BGChart.data?.dataSets[dataIndex].addEntry(startDot)
+                
+                let endDot = ChartDataEntry(x: Double(endInnerDotTime), y: yTop, data: valueString)
+                BGChart.data?.dataSets[dataIndex].addEntry(endDot)
+                let postEndDot = ChartDataEntry(x: Double(endDotTime), y: yBottom, data: "hide")
+                BGChart.data?.dataSets[dataIndex].addEntry(postEndDot)
+            } else {
+                let dot = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + offset), data: valueString)
+                BGChart.data?.dataSets[dataIndex].addEntry(dot)
+            }
+            
+            
 
         }
         
@@ -572,6 +689,8 @@ extension MainViewController {
     
     func updateOverrideGraph() {
         var dataIndex = 6
+        var yTop: Double = 399
+        var yBottom: Double = 375
         var chart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
         chart.clear()
         
@@ -582,7 +701,10 @@ extension MainViewController {
             let labelText = overrideGraphData[i].reason
             
             // Start Dot
-            let value = ChartDataEntry(x: Double(overrideGraphData[i].date), y: Double(overrideGraphData[i].sgv), data: labelText)
+            // Shift dots 30 seconds to create an empty 0 space between consecutive temps
+            let preStartDot = ChartDataEntry(x: Double(overrideGraphData[i].date), y: yBottom, data: "hide")
+            BGChart.data?.dataSets[dataIndex].addEntry(preStartDot)
+            let value = ChartDataEntry(x: Double(overrideGraphData[i].date + 1), y: yTop, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             
             if Double(overrideGraphData[i].insulNeedsScaleFactor) == 1.0 {
@@ -594,8 +716,11 @@ extension MainViewController {
             }
             
             // End Dot
-            let endDot = ChartDataEntry(x: Double(overrideGraphData[i].endDate), y: Double(overrideGraphData[i].sgv), data: labelText)
+            let endDot = ChartDataEntry(x: Double(overrideGraphData[i].endDate - 1), y: yTop, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(endDot)
+            // Post end dot
+            let postEndDot = ChartDataEntry(x: Double(overrideGraphData[i].endDate), y: yBottom, data: "hide")
+            BGChart.data?.dataSets[dataIndex].addEntry(postEndDot)
             
             if Double(overrideGraphData[i].insulNeedsScaleFactor) == 1.0 {
                 colors.append(NSUIColor.systemGray.withAlphaComponent(0.0))
