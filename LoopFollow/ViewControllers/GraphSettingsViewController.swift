@@ -55,6 +55,19 @@ class GraphSettingsViewController: FormViewController {
             row3.evaluateHidden()
         }
         
+        if let row4 = form.rowBy(tag: "showValues") as? SwitchRow {
+            row4.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row4.evaluateHidden()
+        }
+        if let row5 = form.rowBy(tag: "showAbsorption") as? SwitchRow {
+            row5.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row5.evaluateHidden()
+        }
+        
     }
     
     private func buildGraphSettings() {
@@ -99,6 +112,30 @@ class GraphSettingsViewController: FormViewController {
             }.onChange { [weak self] row in
                         guard let value = row.value else { return }
                         UserDefaultsRepository.offsetCarbsBolus.value = value
+                        
+            }
+            <<< SwitchRow("showValues"){ row in
+                row.title = "Show Carb/Bolus Values"
+                row.value = UserDefaultsRepository.showValues.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.showValues.value = value
+                        
+            }
+                <<< SwitchRow("showAbsorption"){ row in
+                    row.title = "Show Carb Absorption"
+                    row.value = UserDefaultsRepository.showAbsorption.value
+                }.onChange { [weak self] row in
+                            guard let value = row.value else { return }
+                            UserDefaultsRepository.showAbsorption.value = value
+                            
+                }
+            <<< SwitchRow("graphBars"){ row in
+                row.title = "Carb/Bolus Bar Graph"
+                row.value = UserDefaultsRepository.graphBars.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.graphBars.value = value
                         
             }
             <<< StepperRow("predictionToLoad") { row in
