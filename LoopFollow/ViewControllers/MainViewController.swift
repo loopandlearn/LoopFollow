@@ -109,6 +109,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var overrideGraphData: [DataStructs.overrideStruct] = []
     var predictionData: [ShareGlucoseData] = []
     var bgCheckData: [ShareGlucoseData] = []
+    var suspendGraphData: [DataStructs.timestampOnlyStruct] = []
+    var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
+    var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
+    var noteGraphData: [DataStructs.noteStruct] = []
     var chartData = LineChartData()
     var newBGPulled = false
     var lastCalDate: Double = 0
