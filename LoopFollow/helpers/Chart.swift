@@ -165,7 +165,7 @@ class PillMarker: MarkerImage {
         var rectangle = CGRect(x: point.x, y: point.y, width: labelWidth, height: labelHeight)
         rectangle.origin.x -= rectangle.width / 2.0
         var spacing: CGFloat = 20
-        if point.y < 200 { spacing = -20 }
+        if point.y < 300 { spacing = -40 }
         
         rectangle.origin.y -= rectangle.height + spacing
 
