@@ -26,4 +26,21 @@ extension MainViewController {
         return (100.00, 0)
     }
     
+    
+    func findNearestBolusbyTime(needle: TimeInterval, haystack: [bolusGraphStruct], startingIndex: Int) -> (offset: Bool, foundIndex: Int) {
+        
+        // If we can't find a match or things fail, put it at 100 BG
+        for i in startingIndex..<haystack.count {
+            // i has reached the end without a result. return 0
+            let timeDiff = needle - haystack[i].date
+            if timeDiff <= 300 && timeDiff >= -300 { return (true, i)}
+            
+            if i == haystack.count - 1 { return (false, 0) }
+            if timeDiff < -300 { return (false, 0)}
+            
+        }
+        
+        return (false, 0 )
+    }
+    
 }

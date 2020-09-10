@@ -571,9 +571,8 @@ extension MainViewController {
             formatter.minimumFractionDigits = 0
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 0
-            var offset = 20
   
-            let dot = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv + offset), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+            let dot = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
 
         }
@@ -584,8 +583,6 @@ extension MainViewController {
     
     func updateCarbGraph() {
         var dataIndex = 4
-        var yTop: Double = 340
-        var yBottom: Double = 315
         BGChart.lineData?.dataSets[dataIndex].clear()
 
         
@@ -594,12 +591,7 @@ extension MainViewController {
             formatter.minimumFractionDigits = 0
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 1
-            var offset = 0
-            if carbData[i].sgv > 250 {
-                offset = -50
-            } else {
-                offset = 80
-            }
+
             
             var valueString: String = formatter.string(from: NSNumber(value: carbData[i].value))!
             
@@ -609,7 +601,8 @@ extension MainViewController {
             }
             
             
-            let dot = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv + offset), data: valueString)
+            
+            let dot = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv), data: valueString)
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
             
             
