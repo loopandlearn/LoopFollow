@@ -11,7 +11,8 @@ import Charts
 
 final class OverrideFillFormatter: IFillFormatter {
     func getFillLinePosition(dataSet: ILineChartDataSet, dataProvider: LineChartDataProvider) -> CGFloat {
-        return 375
+        return CGFloat(dataSet.entryForIndex(0)!.y)
+        //return 375
     }
 }
 
