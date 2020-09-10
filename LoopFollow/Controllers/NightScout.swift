@@ -1278,7 +1278,7 @@ extension MainViewController {
             dateFormatter.locale = Locale(identifier: "en_US")
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
-            let dateTimeStamp = dateString!.timeIntervalSince1970
+            var dateTimeStamp = dateString!.timeIntervalSince1970
             
             guard let carbs = currentEntry?["carbs"] as? Double else {
                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Carb entry")}
@@ -1289,7 +1289,7 @@ extension MainViewController {
             
             var offset = -50
             if sgv.sgv < Double(250) {
-                let bolusTime = findNearestBolusbyTime(needle: dateTimeStamp, haystack: bolusData, startingIndex: lastFoundBolus)
+                let bolusTime = findNearestBolusbyTime(timeWithin: 300, needle: dateTimeStamp, haystack: bolusData, startingIndex: lastFoundBolus)
                 lastFoundBolus = bolusTime.foundIndex
                 
                 if bolusTime.offset {

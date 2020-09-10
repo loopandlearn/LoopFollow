@@ -571,8 +571,17 @@ extension MainViewController {
             formatter.minimumFractionDigits = 0
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 0
+            
+            // Check overlapping carbs to shift left if needed
+            let bolusShift = findNextBolusTime(timeWithin: 240, needle: bolusData[i].date, haystack: bolusData, startingIndex: i)
+            var dateTimeStamp = bolusData[i].date
+            if bolusShift {
+                // Move it half the distance between BG readings
+                dateTimeStamp = dateTimeStamp - 150
+            }
+            
   
-            let dot = ChartDataEntry(x: Double(bolusData[i].date), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
 
         }
@@ -600,9 +609,15 @@ extension MainViewController {
                 valueString += " " + String(hours) + "h"
             }
             
+            // Check overlapping carbs to shift left if needed
+            let carbShift = findNextCarbTime(timeWithin: 250, needle: carbData[i].date, haystack: carbData, startingIndex: i)
+            var dateTimeStamp = carbData[i].date
+            if carbShift {
+                dateTimeStamp = dateTimeStamp - 250
+            }
             
             
-            let dot = ChartDataEntry(x: Double(carbData[i].date), y: Double(carbData[i].sgv), data: valueString)
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
             
             
