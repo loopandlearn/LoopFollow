@@ -41,18 +41,16 @@ class UserDefaultsRepository {
     static let chartScaleX = UserDefaultsValue<Float>(key: "chartScaleX", default: 18.0)
     static let showDots = UserDefaultsValue<Bool>(key: "showDots", default: true)
     static let showValues = UserDefaultsValue<Bool>(key: "showValues", default: true)
-    static let graphBars = UserDefaultsValue<Bool>(key: "graphBars", default: true)
     static let showAbsorption = UserDefaultsValue<Bool>(key: "showAbsorption", default: true)
     static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
-    static let offsetCarbsBolus = UserDefaultsValue<Bool>(key: "offsetCarbsBolus", default: true)
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
     static let predictionToLoad = UserDefaultsValue<Double>(key: "predictionToLoad", default: 1)
     static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
     static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
-    static let minBGValue = UserDefaultsValue<Float>(key: "minBGValue", default: 40.0)
-    static let overrideDisplayLocation = UserDefaultsValue<Float>(key: "overrideDisplayLocation", default: 40.0)
+
     static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
     static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
+    
     
     // General Settings
     static let colorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)

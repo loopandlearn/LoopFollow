@@ -560,7 +560,7 @@ extension MainViewController {
                 }
                 else
                 {
-                    oText += String(format:"%.0f%%", 100)
+                    oText += "100%"
                 }
                 oText += " ("
                 let minValue = lastCorrection["minValue"] as! Double
@@ -589,13 +589,13 @@ extension MainViewController {
                         if let isActive = override["active"] as? Bool {
                             if isActive {
                                 if let multiplier = override["multiplier"] as? Double {
-                                    let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: Int(UserDefaultsRepository.overrideDisplayLocation.value))
+                                    let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 400)
                                     overrideData.append(override)
                                 }
                                 
                             } else {
                                 let multiplier = 1.0 as Double
-                                let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: Int(UserDefaultsRepository.overrideDisplayLocation.value))
+                                let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 400)
                                 overrideData.append(override)
                             }
                         }
@@ -1550,7 +1550,10 @@ extension MainViewController {
                 dateTimeStamp = dateTimeUtils.getTimeInterval24HoursAgo()
             }
             
-            guard let multipler = currentEntry?["insulinNeedsScaleFactor"] as? Double else { continue }
+            var multiplier: Double = 1.0
+            if currentEntry?["insulinNeedsScaleFactor"] != nil {
+                multiplier = currentEntry?["insulinNeedsScaleFactor"] as! Double
+            }
             var duration: Double = 5.0
             if let durationType = currentEntry?["durationType"] as? String {
                 duration = dateTimeUtils.getNowTimeIntervalUTC() - dateTimeStamp + (60 * 60)
@@ -1575,7 +1578,7 @@ extension MainViewController {
                         
             let endDate = dateTimeStamp + (duration)
 
-            let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: multipler, date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: range, enteredBy: enteredBy, reason: reason, sgv: -20)
+            let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: multiplier, date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: range, enteredBy: enteredBy, reason: reason, sgv: -20)
             overrideGraphData.append(dot)
             
             

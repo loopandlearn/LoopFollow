@@ -12,4 +12,11 @@ import Foundation
 struct globalVariables {
     static var dexVerifiedAlert: TimeInterval = 0
     static var nsVerifiedAlert: TimeInterval = 0
+    
+    // Graph Settings
+    static let dotBG: Float = 3
+    static let dotCarb: Float = 6
+    static let dotBolus: Float = 6
+    static let dotOther: Float = 6
+    
 }
