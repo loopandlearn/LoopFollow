@@ -1231,7 +1231,7 @@ extension MainViewController {
                 
                 if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                     // Make the dot
-                    let dot = bolusGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                    let dot = bolusGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 20))
                     bolusData.append(dot)
                 }
             } catch {
@@ -1254,6 +1254,7 @@ extension MainViewController {
         // because it's a small array, we're going to destroy and reload every time.
         carbData.removeAll()
         var lastFoundIndex = 0
+        var lastFoundBolus = 0
         for i in 0..<entries.count {
             let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
             var carbDate: String
@@ -1264,6 +1265,7 @@ extension MainViewController {
             } else {
                 return
             }
+            
             
             let absorptionTime = currentEntry?["absorptionTime"] as? Int ?? 0
             
@@ -1285,9 +1287,21 @@ extension MainViewController {
             let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
             lastFoundIndex = sgv.foundIndex
             
+            var offset = -50
+            if sgv.sgv < Double(250) {
+                let bolusTime = findNearestBolusbyTime(needle: dateTimeStamp, haystack: bolusData, startingIndex: lastFoundBolus)
+                lastFoundBolus = bolusTime.foundIndex
+                
+                if bolusTime.offset {
+                    offset = 70
+                } else {
+                    offset = 20
+                }
+            }
+            
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                 // Make the dot
-                let dot = carbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv), absorptionTime: absorptionTime)
+                let dot = carbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv + Double(offset)), absorptionTime: absorptionTime)
                 carbData.append(dot)
             }
             
