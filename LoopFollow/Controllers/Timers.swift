@@ -283,6 +283,9 @@ extension MainViewController {
         if bgData.count > 0 {
             self.checkAlarms(bgs: bgData)
         }
+        if overrideGraphData.count > 0 {
+            self.checkOverrideAlarms()
+        }
     }
     
     // Calendar Timer
