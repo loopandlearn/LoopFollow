@@ -310,7 +310,7 @@ extension MainViewController {
         BGChart.rightAxis.addLimitLine(ul)
         
         // Add Now Line
-        createNowLine()
+        createNowAndDIALines()
         startGraphNowTimer()
         
         // Setup the main graph overall details
@@ -351,14 +351,29 @@ extension MainViewController {
         
     }
     
-    func createNowLine() {
+    func createNowAndDIALines() {
         BGChart.xAxis.removeAllLimitLines()
         let ul = ChartLimitLine()
         ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
         ul.lineColor = NSUIColor.systemGray.withAlphaComponent(0.5)
         ul.lineWidth = 1
         BGChart.xAxis.addLimitLine(ul)
+        
+        
+        if UserDefaultsRepository.showDIALines.value {
+            for i in 1..<7 {
+                let ul = ChartLimitLine()
+                ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC() - Double(i * 60 * 60))
+                ul.lineColor = NSUIColor.systemGray.withAlphaComponent(0.3)
+                let dash = 10.0 - Double(i)
+                let space = 5.0 + Double(i)
+                ul.lineDashLengths = [CGFloat(dash), CGFloat(space)]
+                ul.lineWidth = 1
+                BGChart.xAxis.addLimitLine(ul)
+            }
+        }
     }
+    
     
     func updateBGGraphSettings() {
         let dataIndex = 0

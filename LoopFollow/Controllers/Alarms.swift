@@ -334,9 +334,9 @@ extension MainViewController {
     {
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
-        //snoozeTabItem.isEnabled = true;
         snoozer.SnoozeButton.isHidden = false
         snoozer.AlertLabel.isHidden = false
+        snoozer.clockLabel.isHidden = true
         tabBarController?.selectedIndex = 2
         if snooozedBGReadingTime != nil {
             UserDefaultsRepository.snoozedBGReadingTime.value = snooozedBGReadingTime
