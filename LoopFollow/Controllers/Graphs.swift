@@ -40,7 +40,6 @@ extension MainViewController {
         }
         UserDefaultsRepository.chartScaleX.value = Float(scale)
     }
-    
 
     func createGraph(){
         self.BGChart.clear()
@@ -418,7 +417,7 @@ extension MainViewController {
             if Float(entries[i].sgv) > topBG - maxBGOffset {
                 topBG = Float(entries[i].sgv) + maxBGOffset
             }
-            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: bgUnits.toDisplayUnits(String(entries[i].sgv)))
+            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
             mainChart.addEntry(value)
             smallChart.addEntry(value)
             
@@ -501,7 +500,7 @@ extension MainViewController {
             } else {
                 colors.append(NSUIColor.systemPurple)
             }
-            let value = ChartDataEntry(x: predictionData[i].date, y: predictionVal)
+            let value = ChartDataEntry(x: predictionData[i].date, y: predictionVal, data: formatPillText(line1: bgUnits.toDisplayUnits(String(predictionData[i].sgv)), time: predictionData[i].date))
             mainChart.addEntry(value)
             smallChart.addEntry(value)
         }
@@ -533,7 +532,7 @@ extension MainViewController {
         BGChart.lineData?.dataSets[dataIndex].clear()
         var maxBasal = UserDefaultsRepository.minBasalScale.value
         for i in 0..<basalData.count{
-            let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate))
+            let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate), data: formatPillText(line1: String(basalData[i].basalRate), time: basalData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if basalData[i].basalRate  > maxBasal {
                 maxBasal = basalData[i].basalRate
@@ -647,7 +646,7 @@ extension MainViewController {
             // skip if > 24 hours old
             if bgCheckData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
             
-            let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatter.string(from: NSNumber(value: bgCheckData[i].sgv)))
+            let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(bgCheckData[i].sgv)), time: bgCheckData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
         }
@@ -665,7 +664,7 @@ extension MainViewController {
             // skip if > 24 hours old
             if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: "Suspend Pump")
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Suspend Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
         }
@@ -683,7 +682,7 @@ extension MainViewController {
             // skip if > 24 hours old
             if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: "Resume Pump")
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Resume Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
         }
@@ -701,7 +700,7 @@ extension MainViewController {
             // skip if > 24 hours old
             if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: "Start Sensor")
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Start Sensor", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
         }
@@ -720,7 +719,7 @@ extension MainViewController {
             // skip if > 24 hours old
             if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: thisData[i].note)
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: thisData[i].note, time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
         }
@@ -774,7 +773,6 @@ extension MainViewController {
         BGChartFull.drawGridBackgroundEnabled = false
         BGChartFull.data = data
     }
-    
     
     func updateOverrideGraph() {
         var dataIndex = 6
@@ -842,6 +840,23 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
+    }
+    
+    func formatPillText(line1: String, time: TimeInterval) -> String {
+        let dateFormatter = DateFormatter()
+        //let timezoneOffset = TimeZone.current.secondsFromGMT()
+        //let epochTimezoneOffset = value + Double(timezoneOffset)
+        if dateTimeUtils.is24Hour() {
+            dateFormatter.setLocalizedDateFormatFromTemplate("HH:mm")
+        } else {
+            dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
+        }
+        
+        //let date = Date(timeIntervalSince1970: epochTimezoneOffset)
+        let date = Date(timeIntervalSince1970: time)
+        let formattedDate = dateFormatter.string(from: date)
+
+        return line1 + "\r\n" + formattedDate
     }
   
 }
