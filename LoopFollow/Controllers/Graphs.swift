@@ -489,9 +489,15 @@ extension MainViewController {
             if Float(predictionVal) > topBG - maxBGOffset {
                 topBG = Float(predictionVal) + maxBGOffset
             }
-            // Below can be turned on to prevent out of range on the graph if desired.
-            // It currently just drops them out of view
-            if predictionVal > 400 {
+
+            if i == 0 {
+                if UserDefaultsRepository.showDots.value {
+                    colors.append(NSUIColor.systemPurple.withAlphaComponent(0.0))
+                } else {
+                    colors.append(NSUIColor.systemPurple.withAlphaComponent(1.0))
+                }
+                
+            } else if predictionVal > 400 {
                 predictionVal = 400
                 colors.append(NSUIColor.systemYellow)
             } else if predictionVal < 0 {
