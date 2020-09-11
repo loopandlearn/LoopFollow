@@ -605,8 +605,6 @@ extension MainViewController {
             }
         }
         overrideData.reverse()
-        //updateOverrideGraph()
-        checkOverrideAlarms()
         
         // Start the timer based on the timestamp
         let now = dateTimeUtils.getNowTimeIntervalUTC()

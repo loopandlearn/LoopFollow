@@ -285,39 +285,40 @@ extension MainViewController {
        
     func checkOverrideAlarms()
     {
-        
         if UserDefaultsRepository.alertSnoozeAllIsSnoozed.value { return }
         
-        // Make sure we have 2 values to compare
-        if overrideData.count < 2 { return }
+        let recentOverride = overrideGraphData.last
+        let recentStart: TimeInterval = recentOverride?.date ?? 0
+        let recentEnd: TimeInterval = recentOverride?.endDate ?? 0
+        let now = dateTimeUtils.getNowTimeIntervalUTC()
         
-        let latest = overrideData[overrideData.count - 1]
-        let prior = overrideData[overrideData.count - 2]
+        var triggerStart = false
+        var triggerEnd = false
         
-        // Make sure latest value is current within 10 minutes
-        if latest.date < dateTimeUtils.getNowTimeIntervalUTC() - 600 { return }
+        // Trigger newly started override
+        if now - recentStart > 0 && now - recentStart <= (15 * 60) && recentStart > lastOverrideAlarm {
+            triggerStart = true
+        } else if now - recentEnd > 0 && now - recentEnd <= (15 * 60) && recentEnd > lastOverrideAlarm {
+            triggerEnd = true
+        } else {
+            return
+        }
         
-        // make sure values are with 10 minutes of each other
-        if ( latest.date - prior.date ) > 600 { return }
-        
-        // make sure values are not the same
-        if latest.value == prior.value { return }
-        
+        let overrideName = recentOverride?.reason as! String
+       
         var numLoops = 0
-        if UserDefaultsRepository.alertOverrideStart.value && !UserDefaultsRepository.alertOverrideStartIsSnoozed.value {
-            if latest.value != 1.0 && lastOverrideStartTime != latest.date {
-                AlarmSound.whichAlarm = String(format: "%.0f%%", (latest.value * 100)) + " Override Started"
+        if UserDefaultsRepository.alertOverrideStart.value && !UserDefaultsRepository.alertOverrideStartIsSnoozed.value && triggerStart {
+            AlarmSound.whichAlarm = overrideName + " Override Started"
                 if UserDefaultsRepository.alertOverrideStartRepeat.value { numLoops = -1 }
-                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideEndSound.value, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
-                lastOverrideStartTime = latest.date
-            }
-        } else if UserDefaultsRepository.alertOverrideEnd.value && !UserDefaultsRepository.alertOverrideEndIsSnoozed.value {
-            if latest.value == 1.0 && lastOverrideEndTime != latest.date {
-                AlarmSound.whichAlarm = "Override Ended"
+                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideStartSound.value, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
+                lastOverrideStartTime = recentStart
+                lastOverrideAlarm = now
+        } else if UserDefaultsRepository.alertOverrideEnd.value && !UserDefaultsRepository.alertOverrideEndIsSnoozed.value && triggerEnd {
+                AlarmSound.whichAlarm = overrideName + " Override Ended"
                 if UserDefaultsRepository.alertOverrideEndRepeat.value { numLoops = -1 }
                 triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideEndSound.value, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
-                lastOverrideEndTime = latest.date
-            }
+                lastOverrideEndTime = recentEnd
+                lastOverrideAlarm = now
         }
     }
     

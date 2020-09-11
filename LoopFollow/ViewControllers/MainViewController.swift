@@ -127,6 +127,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
     var topBG: Float = UserDefaultsRepository.minBGScale.value
+    var lastOverrideAlarm: TimeInterval = 0
     
     // share
     var bgDataShare: [ShareGlucoseData] = []

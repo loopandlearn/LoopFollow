@@ -318,7 +318,6 @@ extension MainViewController {
         BGChart.leftAxis.drawGridLinesEnabled = false
         BGChart.leftAxis.granularityEnabled = true
         BGChart.leftAxis.granularity = 0.5
-        //BGChart.leftAxis.inverted = true
         
         BGChart.rightAxis.labelTextColor = NSUIColor.label
         BGChart.rightAxis.labelPosition = YAxis.LabelPosition.insideChart
