@@ -14,6 +14,9 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
     var appStateController: AppStateController?
     var snoozeTabItem: UITabBarItem = UITabBarItem()
     var mainTabItem: UITabBarItem = UITabBarItem()
+    var clockTimer: Timer = Timer()
+    
+   
     
     @IBOutlet weak var SnoozeButton: UIButton!
 
@@ -22,6 +25,7 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
     @IBOutlet weak var DeltaLabel: UILabel!
     @IBOutlet weak var MinAgoLabel: UILabel!
     @IBOutlet weak var AlertLabel: UILabel!
+    @IBOutlet weak var clockLabel: UILabel!
     
     @IBAction func SnoozeButton(_ sender: Any) {
         AlarmSound.stop()
@@ -37,11 +41,32 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         
         
         setSnoozeTime()
-       // tabBarController?.selectedIndex = 0
         AlertLabel.isHidden = true
         SnoozeButton.isHidden = true
-        //snoozeTabItem.isEnabled = false;
+        clockLabel.isHidden = false
         
+    }
+    
+    
+    // Update Time
+    func startClockTimer(time: TimeInterval) {
+        clockTimer = Timer.scheduledTimer(timeInterval: time,
+                                           target: self,
+                                           selector: #selector(clockTimerDidEnd(_:)),
+                                           userInfo: nil,
+                                           repeats: true)
+    }
+    
+    // Update Time Ended
+    @objc func clockTimerDidEnd(_ timer:Timer) {
+        let formatter = DateFormatter()
+        if dateTimeUtils.is24Hour() {
+            formatter.setLocalizedDateFormatFromTemplate("HH:mm")
+        } else {
+            formatter.setLocalizedDateFormatFromTemplate("hh:mm a")
+        }
+        
+        clockLabel.text = formatter.string(from: Date())
     }
     
     func updateDisplayWhenTriggered(bgVal: String, directionVal: String, deltaVal: String, minAgoVal: String, alertLabelVal: String){
@@ -210,8 +235,10 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         }
         SnoozeButton.layer.cornerRadius = 5
         SnoozeButton.contentEdgeInsets = UIEdgeInsets(top: 10,left: 10,bottom: 10,right: 10)
-        
+        clockLabel.text = ""
+        startClockTimer(time: 1)
     }
 
 
+    
 }

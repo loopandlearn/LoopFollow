@@ -109,6 +109,14 @@ class GraphSettingsViewController: FormViewController {
                             UserDefaultsRepository.showAbsorption.value = value
                             
                 }
+            <<< SwitchRow("showDIAMarkers"){ row in
+                row.title = "Show DIA Lines"
+                row.value = UserDefaultsRepository.showDIALines.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.showDIALines.value = value
+                        
+            }
             <<< StepperRow("predictionToLoad") { row in
                 row.title = "Hours of Prediction"
                 row.cell.stepper.stepValue = 0.25

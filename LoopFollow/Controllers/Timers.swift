@@ -87,7 +87,7 @@ extension MainViewController {
     }
     
     @objc func graphNowTimerDidEnd(_ timer:Timer) {
-        createNowLine()
+        createNowAndDIALines()
     }
     
     // Runs a 60 second timer when an alarm is snoozed
