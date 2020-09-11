@@ -20,14 +20,7 @@ extension MainViewController {
         if entry.data as? String == "hide"{
             BGChart.highlightValue(nil, callDelegate: false)
         }
-    }
-    
-    func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
-        if chartView == BGChart {
-            let currentMatrix = chartView.viewPortHandler.touchMatrix
-            //BGChartFull.viewPortHandler.refresh(newMatrix: currentMatrix, chart: BGChartFull, invalidate: true)
-            //BGChartFull.highlightValue(x: Double(currentMatrix.tx), y: Double(currentMatrix.ty), dataSetIndex: 0)
-        }
+        
     }
     
     func chartScaled(_ chartView: ChartViewBase, scaleX: CGFloat, scaleY: CGFloat) {
@@ -126,7 +119,6 @@ extension MainViewController {
         lineBolus.axisDependency = YAxis.AxisDependency.right
         lineBolus.valueFormatter = ChartYDataValueFormatter()
         lineBolus.valueTextColor = NSUIColor.label
-        lineBolus.fillFormatter = BolusFillFormatter()
         lineBolus.fillColor = NSUIColor.systemBlue
         lineBolus.fillAlpha = 0.6
         
@@ -155,7 +147,6 @@ extension MainViewController {
         lineCarbs.axisDependency = YAxis.AxisDependency.right
         lineCarbs.valueFormatter = ChartYDataValueFormatter()
         lineCarbs.valueTextColor = NSUIColor.label
-        lineCarbs.fillFormatter = CarbFillFormatter()
         lineCarbs.fillColor = NSUIColor.systemOrange
         lineCarbs.fillAlpha = 0.6
        
@@ -339,6 +330,7 @@ extension MainViewController {
         BGChart.rightAxis.granularityEnabled = true
         BGChart.rightAxis.granularity = 50
         
+        BGChart.maxHighlightDistance = 15.0
         BGChart.legend.enabled = false
         BGChart.scaleYEnabled = false
         BGChart.drawGridBackgroundEnabled = true
