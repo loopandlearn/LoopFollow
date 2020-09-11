@@ -580,6 +580,8 @@ extension MainViewController {
                 dateTimeStamp = dateTimeStamp - 150
             }
             
+            // skip if > 24 hours old
+            if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
   
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
@@ -612,6 +614,10 @@ extension MainViewController {
             // Check overlapping carbs to shift left if needed
             let carbShift = findNextCarbTime(timeWithin: 250, needle: carbData[i].date, haystack: carbData, startingIndex: i)
             var dateTimeStamp = carbData[i].date
+            
+            // skip if > 24 hours old
+            if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            
             if carbShift {
                 dateTimeStamp = dateTimeStamp - 250
             }
@@ -637,6 +643,10 @@ extension MainViewController {
             formatter.minimumFractionDigits = 0
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 1
+            
+            // skip if > 24 hours old
+            if bgCheckData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            
             let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatter.string(from: NSNumber(value: bgCheckData[i].sgv)))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
@@ -652,6 +662,9 @@ extension MainViewController {
         BGChart.lineData?.dataSets[dataIndex].clear()
         let thisData = suspendGraphData
         for i in 0..<thisData.count{
+            // skip if > 24 hours old
+            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: "Suspend Pump")
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
@@ -667,6 +680,9 @@ extension MainViewController {
         BGChart.lineData?.dataSets[dataIndex].clear()
         let thisData = resumeGraphData
         for i in 0..<thisData.count{
+            // skip if > 24 hours old
+            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: "Resume Pump")
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
@@ -682,6 +698,9 @@ extension MainViewController {
         BGChart.lineData?.dataSets[dataIndex].clear()
         let thisData = sensorStartGraphData
         for i in 0..<thisData.count{
+            // skip if > 24 hours old
+            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: "Start Sensor")
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
@@ -697,6 +716,10 @@ extension MainViewController {
         BGChart.lineData?.dataSets[dataIndex].clear()
         let thisData = noteGraphData
         for i in 0..<thisData.count{
+            
+            // skip if > 24 hours old
+            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: thisData[i].note)
             BGChart.data?.dataSets[dataIndex].addEntry(value)
 
