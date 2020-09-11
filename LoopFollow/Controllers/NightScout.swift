@@ -490,7 +490,7 @@ extension MainViewController {
                             predictionData.removeAll()
                             var predictionTime = lastLoopTime
                             let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
-                            var i = 1
+                            var i = 0
                             while i <= toLoad {
                                 if i < prediction.count {
                                     let prediction = ShareGlucoseData(sgv: prediction[i], date: predictionTime, direction: "flat")
