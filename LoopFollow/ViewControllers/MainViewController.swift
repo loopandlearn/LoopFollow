@@ -105,7 +105,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var basalScheduleData: [basalGraphStruct] = []
     var bolusData: [bolusGraphStruct] = []
     var carbData: [carbGraphStruct] = []
-    var overrideData: [DataStructs.overrideGraphStruct] = []
     var overrideGraphData: [DataStructs.overrideStruct] = []
     var predictionData: [ShareGlucoseData] = []
     var bgCheckData: [ShareGlucoseData] = []
