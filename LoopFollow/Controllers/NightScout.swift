@@ -573,39 +573,6 @@ extension MainViewController {
         
         infoTable.reloadData()
         
-        
-        // Process Override Data
-        overrideData.removeAll()
-        for i in 0..<jsonDeviceStatus.count {
-            let deviceStatus = jsonDeviceStatus[i] as [String : AnyObject]?
-            if let override = deviceStatus?["override"] as! [String : AnyObject]? {
-                let formatter = ISO8601DateFormatter()
-                formatter.formatOptions = [.withFullDate,
-                                           .withTime,
-                                           .withDashSeparatorInDate,
-                                           .withColonSeparatorInTime]
-                if let timestamp = formatter.date(from: (override["timestamp"] as! String))?.timeIntervalSince1970 {
-                    if timestamp > dateTimeUtils.getTimeInterval24HoursAgo() {
-                        if let isActive = override["active"] as? Bool {
-                            if isActive {
-                                if let multiplier = override["multiplier"] as? Double {
-                                    let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 400)
-                                    overrideData.append(override)
-                                }
-                                
-                            } else {
-                                let multiplier = 1.0 as Double
-                                let override = DataStructs.overrideGraphStruct(value: multiplier, date: timestamp, sgv: 400)
-                                overrideData.append(override)
-                            }
-                        }
-                    }
-                    
-                }
-            }
-        }
-        overrideData.reverse()
-        
         // Start the timer based on the timestamp
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         let secondsAgo = now - latestLoopTime
@@ -875,24 +842,31 @@ extension MainViewController {
             basal2Day.append(entry)
         }
         
-        let now = dateTimeUtils.nowMinus24HoursTimeInterval()
         var firstPass = true
+        // Runs the scheduled basal to the end of the prediction line
+        let predictionEndTime = dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)
         basalScheduleData.removeAll()
         for i in 0..<basal2Day.count {
-            var timeYesterday = dateTimeUtils.getTimeInterval24HoursAgo()
+            let timeYesterday = dateTimeUtils.getTimeInterval24HoursAgo()
             
             
             // This processed everything after the first one.
             if firstPass == false
-                && basal2Day[i].startDate <= dateTimeUtils.getNowTimeIntervalUTC() {
+                && basal2Day[i].startDate <= predictionEndTime {
                 let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: basal2Day[i].startDate)
                 basalScheduleData.append(startDot)
                 var endDate = basal2Day[i].endDate
                 
-                // if it's the last one in the profile or date is greater than now, set it to 30 minutes from now
-                if i == basal2Day.count - 1  || endDate > dateTimeUtils.getNowTimeIntervalUTC() {
+                // if it's the last one in the profile set to 30 minutes from now
+                if i == basal2Day.count - 1 {
                     endDate = Double(dateTimeUtils.getNowTimeIntervalUTC() + (30 * 60))
                 }
+                
+                // if it's the last one needed, set it to end at the prediction end time
+                if endDate > predictionEndTime {
+                    endDate = Double(predictionEndTime)
+                }
+
 
                 let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
                 basalScheduleData.append(endDot)
