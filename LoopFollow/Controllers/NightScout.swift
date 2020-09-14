@@ -1010,16 +1010,160 @@ extension MainViewController {
         }
         // end of for loop
         
-        if tempBasal.count > 0 { processNSBasals(entries: tempBasal)}
-        if bolus.count > 0 { processNSBolus(entries: bolus)}
-        if carbs.count > 0 { processNSCarbs(entries: carbs)}
-        if bgCheck.count > 0 { processNSBGCheck(entries: bgCheck)}
-        if temporaryOverride.count > 0 { processNSOverrides(entries: temporaryOverride)}
-        if suspendPump.count > 0 { processSuspendPump(entries: suspendPump)}
-        if resumePump.count > 0 { processResumePump(entries: resumePump)}
-        if cgmSensorStart.count > 0 { processSensorStart(entries: cgmSensorStart)}
-        if note.count > 0 { processNotes(entries: note)}
+        if tempBasal.count > 0 {
+                   processNSBasals(entries: tempBasal)
+               } else {
+                   if basalData.count < 0 {
+                       clearOldTempBasal()
+                   }
+               }
+               if bolus.count > 0 {
+                   processNSBolus(entries: bolus)
+               } else {
+                   if bolusData.count > 0 {
+                       clearOldBolus()
+                   }
+               }
+               if carbs.count > 0 {
+                   processNSCarbs(entries: carbs)
+               } else {
+                   if carbData.count > 0 {
+                       clearOldCarb()
+                   }
+               }
+               if bgCheck.count > 0 {
+                   processNSBGCheck(entries: bgCheck)
+               } else {
+                   if bgCheckData.count > 0 {
+                       clearOldBGCheck()
+                   }
+               }
+               if temporaryOverride.count > 0 {
+                   processNSOverrides(entries: temporaryOverride)
+               } else {
+                   if overrideGraphData.count > 0 {
+                       clearOldOverride()
+                   }
+               }
+               if suspendPump.count > 0 {
+                   processSuspendPump(entries: suspendPump)
+               } else {
+                   if suspendGraphData.count > 0 {
+                       clearOldSuspend()
+                   }
+               }
+               if resumePump.count > 0 {
+                   processResumePump(entries: resumePump)
+               } else {
+                   if resumeGraphData.count > 0 {
+                       clearOldResume()
+                   }
+               }
+               if cgmSensorStart.count > 0 {
+                   processSensorStart(entries: cgmSensorStart)
+               } else {
+                   if sensorStartGraphData.count > 0 {
+                       clearOldSensor()
+                   }
+               }
+               if note.count > 0 {
+                   processNotes(entries: note)
+               } else {
+                   if noteGraphData.count > 0 {
+                       clearOldNotes()
+                   }
+               }
     }
+    
+    func clearOldTempBasal()
+        {
+            for i in 0..<basalData.count {
+                if basalData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
+                    basalData.remove(at: i)
+                }
+            }
+            updateBasalGraph()
+        }
+        
+        func clearOldBolus()
+        {
+            for i in 0..<bolusData.count {
+                if bolusData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
+                    bolusData.remove(at: i)
+                }
+            }
+            updateBolusGraph()
+        }
+        
+        func clearOldCarb()
+        {
+            for i in 0..<carbData.count {
+                if carbData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
+                    carbData.remove(at: i)
+                }
+            }
+            updateCarbGraph()
+        }
+        
+        func clearOldBGCheck()
+        {
+            for i in 0..<bgCheckData.count {
+                if bgCheckData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
+                    bgCheckData.remove(at: i)
+                }
+            }
+            updateBGCheckGraph()
+        }
+        
+        func clearOldOverride()
+        {
+            for i in 0..<overrideGraphData.count {
+                if overrideGraphData[i].endDate < dateTimeUtils.getTimeInterval24HoursAgo() {
+                    overrideGraphData.remove(at: i)
+                }
+            }
+            updateOverrideGraph()
+        }
+        
+        func clearOldSuspend()
+        {
+            for i in 0..<suspendGraphData.count {
+                if suspendGraphData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
+                    suspendGraphData.remove(at: i)
+                }
+            }
+            updateSuspendGraph()
+        }
+        
+        func clearOldResume()
+        {
+            for i in 0..<resumeGraphData.count {
+                if resumeGraphData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
+                    resumeGraphData.remove(at: i)
+                }
+            }
+            updateResumeGraph()
+        }
+        
+        func clearOldSensor()
+        {
+            for i in 0..<sensorStartGraphData.count {
+                if sensorStartGraphData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
+                    sensorStartGraphData.remove(at: i)
+                }
+            }
+            updateSensorStart()
+        }
+        
+        func clearOldNotes()
+        {
+            for i in 0..<noteGraphData.count {
+                if noteGraphData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
+                    noteGraphData.remove(at: i)
+                }
+            }
+            updateNotes()
+        }
     
     // NS Temp Basal Response Processor
     func processNSBasals(entries: [[String:AnyObject]]) {
