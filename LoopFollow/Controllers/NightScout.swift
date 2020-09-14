@@ -844,7 +844,7 @@ extension MainViewController {
         
         var firstPass = true
         // Runs the scheduled basal to the end of the prediction line
-        let predictionEndTime = dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)
+        var predictionEndTime = dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)
         basalScheduleData.removeAll()
         for i in 0..<basal2Day.count {
             let timeYesterday = dateTimeUtils.getTimeInterval24HoursAgo()
@@ -857,15 +857,16 @@ extension MainViewController {
                 basalScheduleData.append(startDot)
                 var endDate = basal2Day[i].endDate
                 
-                // if it's the last one in the profile set to 30 minutes from now
-                if i == basal2Day.count - 1 {
-                    endDate = Double(dateTimeUtils.getNowTimeIntervalUTC() + (30 * 60))
-                }
-                
                 // if it's the last one needed, set it to end at the prediction end time
                 if endDate > predictionEndTime {
                     endDate = Double(predictionEndTime)
                 }
+                // if it's the last one in the profile set to 30 minutes from now
+                else if i == basal2Day.count - 1 {
+                    endDate = Double(dateTimeUtils.getNowTimeIntervalUTC() + (30 * 60))
+                }
+                
+                
 
 
                 let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
