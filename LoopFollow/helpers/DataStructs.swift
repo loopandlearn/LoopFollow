@@ -23,13 +23,6 @@ class DataStructs {
         var endDate: TimeInterval
     }
     
-    //NS Override Data  Struct
-    struct overrideGraphStruct: Codable {
-        var value: Double
-        var date: TimeInterval
-        var sgv: Int
-    }
-    
     //NS Timestamp Only Data  Struct
     struct timestampOnlyStruct: Codable {
         var date: TimeInterval
