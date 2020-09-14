@@ -858,13 +858,10 @@ extension MainViewController {
                 var endDate = basal2Day[i].endDate
                 
                 // if it's the last one needed, set it to end at the prediction end time
-                if endDate > predictionEndTime {
+                if endDate > predictionEndTime || i == basal2Day.count - 1 {
                     endDate = Double(predictionEndTime)
                 }
-                // if it's the last one in the profile set to 30 minutes from now
-                else if i == basal2Day.count - 1 {
-                    endDate = Double(dateTimeUtils.getNowTimeIntervalUTC() + (30 * 60))
-                }
+
                 
                 
 
