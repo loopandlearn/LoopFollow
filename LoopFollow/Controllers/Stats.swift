@@ -53,10 +53,18 @@ class StatsData {
         pie = [
             DataStructs.pieData(name: "low", value: Double(percentLow)),
             DataStructs.pieData(name: "range", value: Double(percentRange)),
-            DataStructs.pieData(name: "high", value: Double(percentHigh))]
-        
+            DataStructs.pieData(name: "high", value: Double(percentHigh))
+        ]
+
         // Set Average
         avgBG = Float(totalGlucose / bgData.count)
+
+        // compute std dev (sigma)
+        var partialSum: Float = 0;
+        for i in 0..<bgData.count {
+            partialSum += (Float(bgData[i].sgv) - avgBG) * ( Float(bgData[i].sgv) - avgBG)
+        }
+        stdDev = sqrt(partialSum / Float(bgData.count))
         
         if UserDefaultsRepository.units.value == "mg/dL" {
             a1C = (46.7 + Float(avgBG)) / 28.7
@@ -65,14 +73,9 @@ class StatsData {
             // Keep this for later.
             // https://github.com/nightscout/nightguard/pull/72
             // a1C = (((46.7 + Float(avgBG)) / 28.7) - 2.152) / 0.09148
+            stdDev = Float( bgUnits.toDisplayUnits( String( stdDev ) ) ) ?? 0.0;
         }
          
-        // compute std dev (sigma)
-        var partialSum: Float = 0;
-        for i in 0..<bgData.count {
-            partialSum += (Float(bgData[i].sgv) - avgBG) * ( Float(bgData[i].sgv) - avgBG)
-        }
-        stdDev = sqrt(partialSum / Float(bgData.count))
     }
 
 }

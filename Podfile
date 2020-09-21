@@ -2,7 +2,7 @@ target 'LoopFollow' do
   use_frameworks!
 
   pod 'Charts'
-  pod 'Eureka'
-  pod 'ShareClient', :git => 'https://github.com/josep1972/dexcom-share-client-swift.git', :branch => 'dev' 
+  pod 'Eureka', :git => 'https://github.com/xmartlabs/Eureka.git'
+  pod 'ShareClient', :git => 'https://github.com/jonfawcett/dexcom-share-client-swift.git', :branch => 'master'
   
 end

@@ -41,18 +41,18 @@ class GraphSettingsViewController: FormViewController {
             row1.evaluateHidden()
         }
         
-        if let row2 = form.rowBy(tag: "offsetCarbsBolus") as? SwitchRow {
-            row2.hidden = .function(["hide"],  {form in
-                return isHidden
-            })
-            row2.evaluateHidden()
-        }
         
-        if let row3 = form.rowBy(tag: "overrideDisplayLocation") as? StepperRow {
-            row3.hidden = .function(["hide"],  {form in
+        if let row4 = form.rowBy(tag: "showValues") as? SwitchRow {
+            row4.hidden = .function(["hide"],  {form in
                 return isHidden
             })
-            row3.evaluateHidden()
+            row4.evaluateHidden()
+        }
+        if let row5 = form.rowBy(tag: "showAbsorption") as? SwitchRow {
+            row5.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row5.evaluateHidden()
         }
         
     }
@@ -93,12 +93,28 @@ class GraphSettingsViewController: FormViewController {
              }
                
         }
-            <<< SwitchRow("offsetCarbsBolus"){ row in
-                row.title = "Offset Carb/Bolus Dots"
-                row.value = UserDefaultsRepository.offsetCarbsBolus.value
+            <<< SwitchRow("showValues"){ row in
+                row.title = "Show Carb/Bolus Values"
+                row.value = UserDefaultsRepository.showValues.value
             }.onChange { [weak self] row in
                         guard let value = row.value else { return }
-                        UserDefaultsRepository.offsetCarbsBolus.value = value
+                        UserDefaultsRepository.showValues.value = value
+                        
+            }
+                <<< SwitchRow("showAbsorption"){ row in
+                    row.title = "Show Carb Absorption"
+                    row.value = UserDefaultsRepository.showAbsorption.value
+                }.onChange { [weak self] row in
+                            guard let value = row.value else { return }
+                            UserDefaultsRepository.showAbsorption.value = value
+                            
+                }
+            <<< SwitchRow("showDIAMarkers"){ row in
+                row.title = "Show DIA Lines"
+                row.value = UserDefaultsRepository.showDIALines.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.showDIALines.value = value
                         
             }
             <<< StepperRow("predictionToLoad") { row in
@@ -127,29 +143,7 @@ class GraphSettingsViewController: FormViewController {
                 UserDefaultsRepository.minBGScale.value = Float(value)
                 
             }
-            <<< StepperRow("minBGValue") { row in
-                row.title = "Min BG Display"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = -40
-                row.cell.stepper.maximumValue = 40
-                row.value = Double(UserDefaultsRepository.minBGValue.value)
-                row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return bgUnits.toDisplayUnits(String(value))
-                }
-            }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.minBGValue.value = Float(value)
-                // Force main screen update
-                //guard let mainScreen = self?.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-                //mainScreen.updateBGGraphSettings()
-              
-                if let appState = self!.appStateController {
-                  appState.chartSettingsChanged = true
-                  appState.chartSettingsChanges |= ChartSettingsChangeEnum.minBGValueChanged.rawValue
-               }
-                
-            }
+           
         <<< StepperRow("minBasalScale") { row in
             row.title = "Min Basal Scale"
             row.cell.stepper.stepValue = 0.5
@@ -206,20 +200,7 @@ class GraphSettingsViewController: FormViewController {
                appState.chartSettingsChanges |= ChartSettingsChangeEnum.highLineChanged.rawValue
              }
         }
-        <<< StepperRow("overrideDisplayLocation") { row in
-            row.title = "Override BG Location"
-            row.cell.stepper.stepValue = 1
-            row.cell.stepper.minimumValue = Double(UserDefaultsRepository.minBGValue.value)
-            row.cell.stepper.maximumValue = Double(UserDefaultsRepository.minBGScale.value)
-            row.value = Double(UserDefaultsRepository.overrideDisplayLocation.value)
-            row.displayValueFor = { value in
-                guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
-            }
-        }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.overrideDisplayLocation.value = Float(value)
-            }
+       
             
        +++ ButtonRow() {
           $0.title = "DONE"
