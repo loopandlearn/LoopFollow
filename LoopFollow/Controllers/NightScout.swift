@@ -499,12 +499,11 @@ extension MainViewController {
                                 }
                                 i += 1
                             }
-                        }
-                        let predMin = prediction.min()
-                        let predMax = prediction.max()
-                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
-                        
-                        if UserDefaultsRepository.graphPrediction.value {
+                            
+                            let predMin = prediction.min()
+                            let predMax = prediction.max()
+                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
+                            
                             updatePredictionGraph()
                         }
                     }
@@ -1466,9 +1465,9 @@ extension MainViewController {
                 suspendGraphData.append(dot)
             }
         }
-        
+        if UserDefaultsRepository.graphOtherTreatments.value {
         updateSuspendGraph()
-        
+        }
         
     }
     
@@ -1508,9 +1507,9 @@ extension MainViewController {
                 resumeGraphData.append(dot)
             }
         }
-        
+        if UserDefaultsRepository.graphOtherTreatments.value {
         updateResumeGraph()
-        
+        }
         
     }
     
@@ -1550,9 +1549,9 @@ extension MainViewController {
                 sensorStartGraphData.append(dot)
             }
         }
-        
+        if UserDefaultsRepository.graphOtherTreatments.value {
         updateSensorStart()
-        
+        }
         
     }
     
@@ -1594,9 +1593,9 @@ extension MainViewController {
                 noteGraphData.append(dot)
             }
         }
-        
+        if UserDefaultsRepository.graphOtherTreatments.value {
         updateNotes()
-        
+        }
         
     }
     
@@ -1642,7 +1641,7 @@ extension MainViewController {
             
         }
         
-        if UserDefaultsRepository.graphCarbs.value {
+        if UserDefaultsRepository.graphOtherTreatments.value {
             updateBGCheckGraph()
         }
         
@@ -1711,8 +1710,9 @@ extension MainViewController {
             
             
         }
-        
+        if UserDefaultsRepository.graphOtherTreatments.value {
         updateOverrideGraph()
+        }
         
     }
 }
