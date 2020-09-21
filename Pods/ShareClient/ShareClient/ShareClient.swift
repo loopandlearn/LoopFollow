@@ -28,9 +28,20 @@ public enum ShareError: Error {
 
 
 public enum KnownShareServers: String {
-    case US="https://share1.dexcom.com"
+    case US="https://share2.dexcom.com"
     case NON_US="https://shareous1.dexcom.com"
+    /*
+         To enable Loop to use a custom share server:
+            - remove the comment marker on line 44 and change the value of CUSTOM
+            - remove the comment markers on lines 34 and 35 in ShareClientUI/ShareService+UI.swift
 
+         Note: The URL in CUSTOM must start with 'https://' (NOT 'http://')
+
+         You can find installation instructions for one such custom share server at
+         https://github.com/dabear/NightscoutShareServer
+    */
+
+    // case CUSTOM="https://yourusernameshareserver.herokuapp.com"
 }
 
 // From the Dexcom Share iOS app, via @bewest and @shanselman:

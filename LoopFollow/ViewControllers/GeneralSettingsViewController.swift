@@ -53,18 +53,6 @@ class GeneralSettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.backgroundRefresh.value = value
             }
-        <<< StepperRow("backgroundRefreshFrequency") { row in
-            row.title = "Refresh Minutes"
-            row.tag = "backgroundRefreshFrequency"
-            row.cell.stepper.stepValue = 0.25
-            row.cell.stepper.minimumValue = 0.25
-            row.cell.stepper.maximumValue = 10
-            row.value = Double(UserDefaultsRepository.backgroundRefreshFrequency.value)
-            row.hidden = "$backgroundRefresh == false"
-        }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.backgroundRefreshFrequency.value = value
-        }
         <<< SwitchRow("persistentNotification") { row in
         row.title = "Persistent Notification"
         row.value = UserDefaultsRepository.persistentNotification.value

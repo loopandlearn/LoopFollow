@@ -41,6 +41,22 @@ class AlarmSound {
     
     fileprivate static var muted = false
     
+    fileprivate static var alarmPlayingForTimer = Timer()
+    fileprivate static let alarmPlayingForInterval = 290
+    
+    fileprivate func startAlarmPlayingForTimer(time: TimeInterval) {
+        AlarmSound.alarmPlayingForTimer = Timer.scheduledTimer(timeInterval: time,
+                                     target: self,
+                                     selector: #selector(AlarmSound.alarmPlayingForTimerDidEnd(_:)),
+                                     userInfo: nil,
+                                     repeats: true)
+    }
+    
+    @objc func alarmPlayingForTimerDidEnd(_ timer:Timer) {
+        if !AlarmSound.isPlaying { return }
+        AlarmSound.stop()
+    }
+    
     /*
      * Sets the audio volume to 0.
      */
@@ -162,8 +178,6 @@ class AlarmSound {
             }
             
             
-            //self.playingTimer = Timer.schedule(repeatInterval: 1.0, handler: self.onPlayingTimer)
-            
         } catch let error {
             NSLog("AlarmSound - unable to play sound; error: \(error)")
         }
@@ -212,43 +226,7 @@ class AlarmSound {
             NSLog("Terminate AlarmSound - unable to play sound; error: \(error)")
         }
     }
-    
-    fileprivate static func onPlayingTimer(timer: Timer?) {
-        
-        // player should be playing, not muted!
-        guard self.isPlaying && !self.isMuted else {
-            return
-        }
-        
-        // application should be in active state!
-        guard UIApplication.shared.applicationState == .active else {
-            return
-        }
-        
-        if UserDefaultsRepository.overrideSystemOutputVolume.value {
 
-            // keep the system output volume before overriding it
-            if self.systemOutputVolumeBeforeOverride == nil {
-                //self.systemOutputVolumeBeforeOverride = MPVolumeView.volume
-                self.systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
-            }
-            
-             // override the system output volume
-            MPVolumeView.setVolume(UserDefaultsRepository.systemOutputVolume.value)
-           // if MPVolumeView.volume != UserDefaultsRepository.systemOutputVolume.value {
-            //    self.volumeChangeDetector.isActive = false
-            //    MPVolumeView.volume = UserDefaultsRepository.systemOutputVolume.value
-           // } else {
-            
-                // listen to user volume changes
-           //     self.volumeChangeDetector.isActive = true
-           // }
-        }
-            
-        if self.vibrate.value {
-            AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-        }
-    }
     
     fileprivate static func restoreSystemOutputVolume() {
         

@@ -149,6 +149,7 @@
 		FC9788212485969B00A7906C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC97881F2485969B00A7906C /* Main.storyboard */; };
 		FC9788262485969C00A7906C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC9788252485969C00A7906C /* Assets.xcassets */; };
 		FC9788292485969C00A7906C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC9788272485969C00A7906C /* LaunchScreen.storyboard */; };
+		FCA2DDE62501095000254A8C /* Timers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCA2DDE52501095000254A8C /* Timers.swift */; };
 		FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */; };
 		FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6884F248935D800A0279D /* AlarmViewController.swift */; };
 		FCC6885C2489559400A0279D /* blank.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885B2489559400A0279D /* blank.wav */; };
@@ -159,6 +160,7 @@
 		FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886A24898FD800A0279D /* ObservationToken.swift */; };
 		FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886C2489909D00A0279D /* AnyConvertible.swift */; };
 		FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886E2489A53800A0279D /* AppConstants.swift */; };
+		FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD2A27C24C9D044009F7B7B /* Globals.swift */; };
 		FCD49B6C24AA536E007879DC /* DebugViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD49B6B24AA536E007879DC /* DebugViewController.swift */; };
 		FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */; };
 		FCEF87AC24A141A700AE6FA0 /* bgUnits.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCEF87AA24A1417900AE6FA0 /* bgUnits.swift */; };
@@ -313,6 +315,7 @@
 		FC9788202485969B00A7906C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FC9788252485969C00A7906C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC9788282485969C00A7906C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		FCA2DDE52501095000254A8C /* Timers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timers.swift; sourceTree = "<group>"; };
 		FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryKeyPath.swift; sourceTree = "<group>"; };
 		FCC6884F248935D800A0279D /* AlarmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmViewController.swift; sourceTree = "<group>"; };
 		FCC688592489554800A0279D /* BackgroundTaskAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskAudio.swift; sourceTree = "<group>"; };
@@ -325,6 +328,7 @@
 		FCC6886C2489909D00A0279D /* AnyConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyConvertible.swift; sourceTree = "<group>"; };
 		FCC6886E2489A53800A0279D /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		FCC688702489A57C00A0279D /* Loop Follow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Follow.entitlements"; sourceTree = "<group>"; };
+		FCD2A27C24C9D044009F7B7B /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		FCD49B6B24AA536E007879DC /* DebugViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugViewController.swift; sourceTree = "<group>"; };
 		FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = carbBolusArrays.swift; sourceTree = "<group>"; };
 		FCE537C2249AAB2600F80BF8 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
@@ -396,6 +400,7 @@
 				FC16A97E249969E2003D6245 /* Graphs.swift */,
 				FC1BDD2A24A22650001B652C /* Stats.swift */,
 				FC1BDD2C24A23204001B652C /* StatsView.swift */,
+				FCA2DDE52501095000254A8C /* Timers.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -542,7 +547,6 @@
 				DD98F54224BCEF190007425A /* Extensions */,
 				FC16A9782499657E003D6245 /* Controllers */,
 				FCC688542489367300A0279D /* helpers */,
-				FCC68872248A748A00A0279D /* Models */,
 				FCC688512489363F00A0279D /* repository */,
 				FC16A97624995FEE003D6245 /* Application */,
 			);
@@ -592,6 +596,7 @@
 				FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */,
 				FCEF87AA24A1417900AE6FA0 /* bgUnits.swift */,
 				FC1BDD2E24A232A3001B652C /* DataStructs.swift */,
+				FCD2A27C24C9D044009F7B7B /* Globals.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -612,13 +617,6 @@
 				DDCF979B24C14EFB002C9752 /* DebugSettingsViewController.swift */,
 			);
 			path = ViewControllers;
-			sourceTree = "<group>";
-		};
-		FCC68872248A748A00A0279D /* Models */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -886,7 +884,9 @@
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
 				FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
+				FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */,
 				DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */,
+				FCA2DDE62501095000254A8C /* Timers.swift in Sources */,
 				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 			);
