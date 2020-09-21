@@ -1,14 +1,14 @@
 PODS:
-  - Charts (3.5.0):
-    - Charts/Core (= 3.5.0)
-  - Charts/Core (3.5.0)
-  - Eureka (5.2.1)
+  - Charts (3.6.0):
+    - Charts/Core (= 3.6.0)
+  - Charts/Core (3.6.0)
+  - Eureka (5.3.0)
   - ShareClient (1.2)
 
 DEPENDENCIES:
   - Charts
-  - Eureka (from `https://github.com/xmartlabs/Eureka.git`, branch `xcode12`)
-  - ShareClient (from `https://github.com/josep1972/dexcom-share-client-swift.git`, branch `dev`)
+  - Eureka (from `https://github.com/xmartlabs/Eureka.git`)
+  - ShareClient (from `https://github.com/jonfawcett/dexcom-share-client-swift.git`, branch `master`)
 
 SPEC REPOS:
   trunk:
@@ -16,25 +16,24 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Eureka:
-    :branch: xcode12
     :git: https://github.com/xmartlabs/Eureka.git
   ShareClient:
-    :branch: dev
-    :git: https://github.com/josep1972/dexcom-share-client-swift.git
+    :branch: master
+    :git: https://github.com/jonfawcett/dexcom-share-client-swift.git
 
 CHECKOUT OPTIONS:
   Eureka:
-    :commit: f5651e328e099393e51b63f1abe78153cbacf90f
+    :commit: e1bb4d668cb5b2280133709f47119eb34c2b65df
     :git: https://github.com/xmartlabs/Eureka.git
   ShareClient:
-    :commit: 815a1dbddd970a563e3b7fd22d88b23c164b026e
-    :git: https://github.com/josep1972/dexcom-share-client-swift.git
+    :commit: bcc9cf9ab35b9a6d3b198507cb057f58b5df1ff0
+    :git: https://github.com/jonfawcett/dexcom-share-client-swift.git
 
 SPEC CHECKSUMS:
-  Charts: 40a08591df1f8ad5c223ddedfb1a06da92f24f7c
-  Eureka: c883105488e05bc65539f583246ecf9657cabbfe
-  ShareClient: 5937ff69b57c85c2004c915812f73cf7ae86549e
+  Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
+  Eureka: 49239596c9d2eed9ab523990c34de62b6feac9f0
+  ShareClient: 8d60bcd3fd106ca42c6e71e8bcae24deb173fb9e
 
-PODFILE CHECKSUM: 532f55936f29112bc61a5bc37e8b82ab44663a0d
+PODFILE CHECKSUM: 084f5ab2f55c59ed2c2fa3cdaaa9590c99a95408
 
 COCOAPODS: 1.9.3
