@@ -1205,18 +1205,12 @@ extension MainViewController {
                     var scheduled = 0.0
                     // cycle through basal profiles.
                     // TODO figure out how to deal with profile changes that happen mid-gap
-                    for b in 0..<self.basalProfile.count {
-                        let scheduleTimeYesterday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightYesterday()
-                        let scheduleTimeToday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightToday()
-                        // check the prior temp ending to the profile seconds from midnight
-                        if (priorDateTimeStamp + (priorDuration * 60)) >= scheduleTimeYesterday {
-                            scheduled = basalProfile[b].value
-                        }
-                        if (priorDateTimeStamp + (priorDuration * 60)) >= scheduleTimeToday {
-                            scheduled = basalProfile[b].value
+                    for b in 0..<self.basalScheduleData.count {
+                        
+                        if (priorDateTimeStamp + (priorDuration * 60)) >= basalScheduleData[b].date {
+                            scheduled = basalScheduleData[b].basalRate
                         }
                         
-                        // This will iterate through from midnight on and set it for the highest matching one.
                     }
                     // Make the starting dot at the last ending dot
                     let startDot = basalGraphStruct(basalRate: scheduled, date: Double(priorDateTimeStamp + (priorDuration * 60)))
