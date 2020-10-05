@@ -41,7 +41,10 @@ class SettingsViewController: FormViewController {
             overrideUserInterfaceStyle = .dark
         }
     
-        
+        var expiration: Date = Date()
+        if let provision = MobileProvision.read() {
+            expiration = provision.expirationDate
+        }
                         
         form
         +++ Section(header: "Nightscout Settings", footer: "Changing Nightscout settings requires an app restart.")
@@ -185,9 +188,12 @@ class SettingsViewController: FormViewController {
             
         }
     
+            +++ Section(header: "App Expiration", footer: String(expiration.description))
+    
         showHideNSDetails()
       
     }
     
     
+
 }
