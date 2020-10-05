@@ -142,6 +142,7 @@
 		FC7CE58E248ABEF2001F83B8 /* alarm-notification.m4a in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE58C248ABEF1001F83B8 /* alarm-notification.m4a */; };
 		FC7CE59C248D33A9001F83B8 /* dragbar.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE59B248D33A9001F83B8 /* dragbar.png */; };
 		FC7CE59F248D8D23001F83B8 /* SnoozeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE59E248D8D23001F83B8 /* SnoozeViewController.swift */; };
+		FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC8589BE252B54F500C8FC73 /* Mobileprovision.swift */; };
 		FC9788182485969B00A7906C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9788172485969B00A7906C /* AppDelegate.swift */; };
 		FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9788192485969B00A7906C /* SceneDelegate.swift */; };
 		FC97881C2485969B00A7906C /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC97881B2485969B00A7906C /* MainViewController.swift */; };
@@ -306,6 +307,7 @@
 		FC7CE58C248ABEF1001F83B8 /* alarm-notification.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = "alarm-notification.m4a"; sourceTree = "<group>"; };
 		FC7CE59B248D33A9001F83B8 /* dragbar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dragbar.png; sourceTree = "<group>"; };
 		FC7CE59E248D8D23001F83B8 /* SnoozeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozeViewController.swift; sourceTree = "<group>"; };
+		FC8589BE252B54F500C8FC73 /* Mobileprovision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mobileprovision.swift; sourceTree = "<group>"; };
 		FC8DEEE62485D1ED0075863F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FC9788142485969B00A7906C /* Loop Follow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Loop Follow.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC9788172485969B00A7906C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -597,6 +599,7 @@
 				FCEF87AA24A1417900AE6FA0 /* bgUnits.swift */,
 				FC1BDD2E24A232A3001B652C /* DataStructs.swift */,
 				FCD2A27C24C9D044009F7B7B /* Globals.swift */,
+				FC8589BE252B54F500C8FC73 /* Mobileprovision.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -870,6 +873,7 @@
 				FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */,
 				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
 				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
+				FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */,
 				DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */,
 				DDCF979C24C14EFB002C9752 /* DebugSettingsViewController.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
