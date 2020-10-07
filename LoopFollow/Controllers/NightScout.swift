@@ -1203,24 +1203,53 @@ extension MainViewController {
                 if Double( dateTimeStamp - priorDateTimeStamp ) > Double( (priorDuration * 60) + 15 ) {
                     
                     var scheduled = 0.0
+                    var midGap = false
+                    var midGapTime: TimeInterval = 0
+                    var midGapValue: Double = 0
                     // cycle through basal profiles.
                     // TODO figure out how to deal with profile changes that happen mid-gap
                     for b in 0..<self.basalScheduleData.count {
                         
                         if (priorDateTimeStamp + (priorDuration * 60)) >= basalScheduleData[b].date {
                             scheduled = basalScheduleData[b].basalRate
+                            
+                            // deal with mid-gap scheduled basal change
+                            // don't do it on the last scheudled basal entry
+                            if b < self.basalScheduleData.count - 1 {
+                                if dateTimeStamp > self.basalScheduleData[b + 1].date {
+                                   // midGap = true
+                                    // TODO: finish this to handle mid-gap items without crashing from overlapping entries
+                                    midGapTime = self.basalScheduleData[b + 1].date
+                                    midGapValue = self.basalScheduleData[b + 1].basalRate
+                                }
+                            }
+                            
                         }
                         
                     }
+                    
                     // Make the starting dot at the last ending dot
                     let startDot = basalGraphStruct(basalRate: scheduled, date: Double(priorDateTimeStamp + (priorDuration * 60)))
                     basalData.append(startDot)
-                    
-                    //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Basal: Scheduled " + String(scheduled) + " " + String(dateTimeStamp)) }
-                    
-                    // Make the ending dot at the new starting dot
-                    let endDot = basalGraphStruct(basalRate: scheduled, date: Double(dateTimeStamp))
-                    basalData.append(endDot)
+                        
+                       
+                    if midGap {
+                        // Make the ending dot at the new scheduled basal
+                        let endDot1 = basalGraphStruct(basalRate: scheduled, date: Double(midGapTime))
+                        basalData.append(endDot1)
+                        // Make the starting dot at the scheduled Time
+                        let startDot2 = basalGraphStruct(basalRate: midGapValue, date: Double(midGapTime))
+                        basalData.append(startDot2)
+                        // Make the ending dot at the new basal value
+                        let endDot2 = basalGraphStruct(basalRate: midGapValue, date: Double(dateTimeStamp))
+                        basalData.append(endDot2)
+                        
+                    } else {
+                        // Make the ending dot at the new starting dot
+                        let endDot = basalGraphStruct(basalRate: scheduled, date: Double(dateTimeStamp))
+                        basalData.append(endDot)
+                    }
+                        
 
                 }
             }
