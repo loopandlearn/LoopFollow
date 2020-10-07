@@ -72,6 +72,7 @@ class UserDefaultsRepository {
     })
     
     // Debug Settings
+        static let onlyDownloadBG = UserDefaultsValue<Bool>(key: "onlyDownloadBG", default: false)
         static let downloadTreatments = UserDefaultsValue<Bool>(key: "downloadTreatments", default: true)
         static let downloadPrediction = UserDefaultsValue<Bool>(key: "downloadPrediction", default: true)
         static let graphOtherTreatments = UserDefaultsValue<Bool>(key: "graphOtherTreatments", default: true)
