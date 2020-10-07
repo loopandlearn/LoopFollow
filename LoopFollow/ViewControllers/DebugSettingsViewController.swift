@@ -26,6 +26,14 @@ class DebugSettingsViewController: FormViewController {
         form
             +++ Section("Debug Settings")
             
+            <<< SwitchRow("onlyDownloadBG"){ row in
+                row.title = "Only Download BG from NS"
+                row.value = UserDefaultsRepository.onlyDownloadBG.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.onlyDownloadBG.value = value
+            }
+            
             <<< SwitchRow("downloadTreatments"){ row in
                 row.title = "Download Treatments"
                 row.value = UserDefaultsRepository.downloadTreatments.value
