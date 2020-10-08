@@ -188,6 +188,9 @@ extension MainViewController {
         lineOverride.axisDependency = YAxis.AxisDependency.right
         lineOverride.highlightEnabled = true
         lineOverride.drawValuesEnabled = false
+//        lineOverride.circleColors = [NSUIColor.systemGreen.withAlphaComponent(0.75)]
+//        lineOverride.valueFormatter = ChartYDataValueFormatter()
+//        lineOverride.drawCircleHoleEnabled = false
         
         // BG Check
         var chartEntryBGCheck = [ChartDataEntry]()
@@ -1014,7 +1017,7 @@ extension MainViewController {
     
     func updateOverrideGraph() {
         var dataIndex = 6
-        var yTop: Double = Double(topBG - 1)
+        var yTop: Double = Double(topBG - 5)
         var yBottom: Double = Double(topBG - 25)
         var chart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
         var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
@@ -1035,21 +1038,21 @@ extension MainViewController {
             
             // Start Dot
             // Shift dots 30 seconds to create an empty 0 space between consecutive temps
-            let preStartDot = ChartDataEntry(x: Double(thisItem.date), y: yBottom, data: "hide")
+            let preStartDot = ChartDataEntry(x: Double(thisItem.date), y: yBottom, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(preStartDot)
             BGChartFull.data?.dataSets[dataIndex].addEntry(preStartDot)
             
             let startDot = ChartDataEntry(x: Double(thisItem.date + 1), y: yTop, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(startDot)
             BGChartFull.data?.dataSets[dataIndex].addEntry(startDot)
-            
+
             // End Dot
-            let endDot = ChartDataEntry(x: Double(thisItem.endDate - 1), y: yTop, data: labelText)
+            let endDot = ChartDataEntry(x: Double(thisItem.endDate - 2), y: yTop, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(endDot)
             BGChartFull.data?.dataSets[dataIndex].addEntry(endDot)
             
             // Post end dot
-            let postEndDot = ChartDataEntry(x: Double(thisItem.endDate), y: yBottom, data: "hide")
+            let postEndDot = ChartDataEntry(x: Double(thisItem.endDate - 1), y: yBottom, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(postEndDot)
             BGChartFull.data?.dataSets[dataIndex].addEntry(postEndDot)
         }
