@@ -40,6 +40,7 @@ class UserDefaultsRepository {
     // Graph Settings
     static let chartScaleX = UserDefaultsValue<Float>(key: "chartScaleX", default: 18.0)
     static let showDots = UserDefaultsValue<Bool>(key: "showDots", default: true)
+    static let smallGraphTreatments = UserDefaultsValue<Bool>(key: "smallGraphTreatments", default: true)
     static let showValues = UserDefaultsValue<Bool>(key: "showValues", default: true)
     static let showAbsorption = UserDefaultsValue<Bool>(key: "showAbsorption", default: true)
     static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
@@ -50,6 +51,7 @@ class UserDefaultsRepository {
     static let showDIALines = UserDefaultsValue<Bool>(key: "showDIAMarkers", default: true)
     static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
     static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
+    static let smallGraphHeight = UserDefaultsValue<Int>(key: "smallGraphHeight", default: 40)
     
     
     // General Settings

@@ -35,6 +35,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsStdDev: UILabel!
     @IBOutlet weak var serverText: UILabel!
     @IBOutlet weak var statsView: UIView!
+    @IBOutlet weak var smallGraphHeightConstraint: NSLayoutConstraint!
     
       
     // Data Table class
@@ -171,6 +172,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.tableData.append(infoData(name:UserDefaultsRepository.infoNames.value[i], value:""))
         }
         createDerivedData()
+        
+        smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
+        self.view.layoutIfNeeded()
       
         // TODO: need non-us server ?
         let shareUserName = UserDefaultsRepository.shareUserName.value
@@ -236,6 +240,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
               
               // can look at settings flags to be more fine tuned
               self.updateBGGraphSettings()
+            
+            if ChartSettingsChangeEnum.smallGraphHeight.rawValue != 0 {
+                smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
+                self.view.layoutIfNeeded()
+            }
               
               // reset the app state
               appState.chartSettingsChanged = false
