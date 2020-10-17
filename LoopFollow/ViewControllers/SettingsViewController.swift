@@ -194,7 +194,6 @@ class SettingsViewController: FormViewController {
                     guard let mainScreen = self.tabBarController!.viewControllers?[0] as? MainViewController else { return }
                     
                     mainScreen.deleteOldImages()
-                    mainScreen.saveChartImage()
                 }
             }
     
