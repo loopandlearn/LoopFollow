@@ -206,25 +206,21 @@ extension MainViewController {
             if secondsAgo >= (20 * 60) {
                 self.startBGTimer(time: (5 * 60))
                 print("##### started 5 minute bg timer")
-                self.sendNotification(title: "BG Timer", body: "5 Minutes")
                 
             // if the reading is overdue: 10:00-19:59, re-attempt every minute
             } else if secondsAgo >= (10 * 60) {
                 self.startBGTimer(time: 60)
                 print("##### started 1 minute bg timer")
-                self.sendNotification(title: "BG Timer", body: "1 Minute")
                 
             // if the reading is overdue: 7:00-9:59, re-attempt every 30 seconds
             } else if secondsAgo >= (7 * 60) {
                 self.startBGTimer(time: 30)
                 print("##### started 30 second bg timer")
-                self.sendNotification(title: "BG Timer", body: "30 Seconds")
                 
             // if the reading is overdue: 5:00-6:59 re-attempt every 10 seconds
             } else if secondsAgo >= (5 * 60) {
                 self.startBGTimer(time: 10)
                 print("##### started 10 second bg timer")
-                self.sendNotification(title: "BG Timer", body: "10 Seconds")
             
             // We have a current reading. Set timer to 5:10 from last reading
             } else {
