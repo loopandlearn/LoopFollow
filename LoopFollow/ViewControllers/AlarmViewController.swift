@@ -174,7 +174,7 @@ class AlarmViewController: FormViewController {
             let otherRow2 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
             otherRow2.value = nil
             otherRow2.reload()
-            let otherRow3 = self?.form.rowBy(tag: "overrideAlerts") as! SegmentedRow<String>
+            let otherRow3 = self?.form.rowBy(tag: "otherAlerts2") as! SegmentedRow<String>
             otherRow3.value = nil
             otherRow3.reload()
             row.value = value
@@ -191,7 +191,7 @@ class AlarmViewController: FormViewController {
                let otherRow2 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
                otherRow2.value = nil
                otherRow2.reload()
-            let otherRow3 = self?.form.rowBy(tag: "overrideAlerts") as! SegmentedRow<String>
+            let otherRow3 = self?.form.rowBy(tag: "otherAlerts2") as! SegmentedRow<String>
             otherRow3.value = nil
             otherRow3.reload()
             row.value = value
@@ -212,14 +212,14 @@ class AlarmViewController: FormViewController {
            let otherRow2 = self?.form.rowBy(tag: "bgAlerts") as! SegmentedRow<String>
            otherRow2.value = nil
            otherRow2.reload()
-            let otherRow3 = self?.form.rowBy(tag: "overrideAlerts") as! SegmentedRow<String>
+            let otherRow3 = self?.form.rowBy(tag: "otherAlerts2") as! SegmentedRow<String>
             otherRow3.value = nil
             otherRow3.reload()
             row.value = value
         }
-        <<< SegmentedRow<String>("overrideAlerts"){ row in
+        <<< SegmentedRow<String>("otherAlerts2"){ row in
                 row.title = ""
-                row.options = ["Override Start", "Override End"]
+                row.options = ["Override Start", "Override End", "Pump"]
                 if UserDefaultsRepository.url.value == "" {
                     row.hidden = true
                 }
@@ -262,6 +262,7 @@ class AlarmViewController: FormViewController {
         
         buildOverrideStart()
         buildOverrideEnd()
+        buildPump()
         
         buildSnoozeAll()
         buildAppInactive()
@@ -1784,7 +1785,7 @@ class AlarmViewController: FormViewController {
     func buildOverrideStart(){
         form
             +++ Section(header: "Override Started Alert", footer: "Alert will trigger without repeat once when override is activated. There is no need to snooze this alert") { row in
-                row.hidden = "$overrideAlerts != 'Override Start'"
+                row.hidden = "$otherAlerts2 != 'Override Start'"
             }
             <<< SwitchRow("alertOverrideStart"){ row in
                 row.title = "Active"
@@ -1869,7 +1870,7 @@ class AlarmViewController: FormViewController {
     func buildOverrideEnd(){
         form
             +++ Section(header: "Override Ended Alert", footer: "Alert will trigger without repeat once when an override is turned off. There is no need to snooze this alert") { row in
-                row.hidden = "$overrideAlerts != 'Override End'"
+                row.hidden = "$otherAlerts2 != 'Override End'"
             }
             <<< SwitchRow("alertOverrideEnd"){ row in
                 row.title = "Active"
@@ -1949,6 +1950,120 @@ class AlarmViewController: FormViewController {
                 }
         }
         
+    }
+    
+    func buildPump() {
+        form
+            +++ Section(header: "Pump", footer: "Alert will trigger when pump reservoir is below value") { row in
+                row.hidden = "$otherAlerts2 != 'Pump'"
+            }
+            <<< SwitchRow("alertPump"){ row in
+                row.title = "Active"
+                row.value = UserDefaultsRepository.alertPump.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertPump.value = value
+            }
+            
+            <<< StepperRow("alertPumpAt") { row in
+                row.title = "Units Remaining"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 1
+                row.cell.stepper.maximumValue = 49
+                row.value = Double(UserDefaultsRepository.alertPumpAt.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertPumpAt.value = Int(value)
+            }
+            
+            <<< StepperRow("alertPumpSnoozeHours") { row in
+                row.title = "Snooze Hours"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 1
+                row.cell.stepper.maximumValue = 24
+                row.value = Double(UserDefaultsRepository.alertPumpSnoozeHours.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertPumpSnoozeHours.value = Int(value)
+            }
+            <<< PickerInputRow<String>("alertPumpSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.value = UserDefaultsRepository.alertPumpSound.value
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertPumpSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+        }
+        <<< SwitchRow("alertPumpQuiet"){ row in
+        row.title = "Use Quiet Hours"
+        row.value = UserDefaultsRepository.alertPumpQuiet.value
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertPumpQuiet.value = value
+        }
+        <<< SwitchRow("alertPumpRepeat"){ row in
+        row.title = "Repeat Sound"
+        row.value = UserDefaultsRepository.alertPumpRepeat.value
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertPumpRepeat.value = value
+        }
+
+            <<< DateTimeInlineRow("alertPumpSnoozedTime") { row in
+                row.title = "Snoozed Until"
+                if (UserDefaultsRepository.alertPumpSnoozedTime.value != nil) {
+                    row.value = UserDefaultsRepository.alertPumpSnoozedTime.value
+                }
+                row.minuteInterval = 5
+                row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertPumpSnoozedTime.value = value
+                UserDefaultsRepository.alertPumpIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertPumpIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+            }
+            <<< SwitchRow("alertPumpIsSnoozed"){ row in
+                row.title = "Is Snoozed"
+                row.value = UserDefaultsRepository.alertPumpIsSnoozed.value
+                row.hidden = "$alertPumpSnoozedTime == nil"
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertPumpIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertPumpSnoozedTime.setNil(key: "alertPumpSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertPumpSnoozedTime") as! DateTimeInlineRow
+                    otherRow.value = nil
+                    otherRow.reload()
+                }
+        }
     }
 
     func buildAlarmSettings() {
