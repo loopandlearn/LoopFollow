@@ -439,8 +439,10 @@ extension MainViewController {
         if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String : AnyObject]? {
             if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
+                    latestPumpVolume = reservoirData
                     tableData[5].value = String(format:"%.0f", reservoirData) + "U"
                 } else {
+                    latestPumpVolume = 50.0
                     tableData[5].value = "50+U"
                 }
                 

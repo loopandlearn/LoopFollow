@@ -273,6 +273,17 @@ extension MainViewController {
                     return
                 }
             }
+            
+            // Check Pump
+            if UserDefaultsRepository.alertPump.value && !UserDefaultsRepository.alertPumpIsSnoozed.value {
+                let alertAt = Double(UserDefaultsRepository.alertPumpAt.value)
+                if latestPumpVolume <= alertAt {
+                    AlarmSound.whichAlarm = "Low Insulin Alert"
+                    if UserDefaultsRepository.alertPumpRepeat.value { numLoops = -1 }
+                    triggerAlarm(sound: UserDefaultsRepository.alertPumpSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
+                    return
+                }
+            }
         }
         
         
@@ -469,6 +480,15 @@ extension MainViewController {
 
         }
         
+        if UserDefaultsRepository.alertPumpIsSnoozed.value {
+            UserDefaultsRepository.alertPumpSnoozedTime.setNil(key: "alertPumpSnoozedTime")
+            UserDefaultsRepository.alertPumpIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertPumpSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertPumpIsSnoozed", value: false)
+
+        }
+        
+        
       }
     
     func checkQuietHours() {
@@ -512,6 +532,7 @@ extension MainViewController {
         }
         
     }
+    
     
     func speakBG(sgv: Int) {
            var speechSynthesizer = AVSpeechSynthesizer()
