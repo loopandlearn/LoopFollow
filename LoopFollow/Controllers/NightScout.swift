@@ -1358,8 +1358,8 @@ extension MainViewController {
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
-            do {
-                let bolus = try currentEntry?["insulin"] as! Double
+
+                guard let bolus = currentEntry?["insulin"] as? Double else { continue }
                 let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
                 lastFoundIndex = sgv.foundIndex
                 
@@ -1368,11 +1368,6 @@ extension MainViewController {
                     let dot = bolusGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 20))
                     bolusData.append(dot)
                 }
-            } catch {
-                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Bolus") }
-            }
-            
-           
             
         }
         
