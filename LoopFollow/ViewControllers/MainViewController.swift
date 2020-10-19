@@ -520,14 +520,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     }
                     return
                 }
-                DispatchQueue.main.async {
-                    self.saveChartImage()
-                    
-                    self.sendNotification(self, title: "Watch Face Cleanup", subtitle: "", body: "Delete old watch face graph images", timer: 86400, method: "deleteOldImages", actionTitle: "Delete")
-                }
-                
             })
         }
+        
+        self.sendNotification(self, title: "Watch Face Cleanup", subtitle: "", body: "Delete old watch face graph images", timer: 86400)
         
         
     }
@@ -714,7 +710,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // General Notifications
     
-    func sendNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval, method: String, actionTitle: String) {
+    func sendNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
         
         UNUserNotificationCenter.current().delegate = self
         
@@ -729,15 +725,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
         
-        let action = UNNotificationAction(identifier: method, title: actionTitle, options: [])
-        let category = UNNotificationCategory(identifier: "category", actions: [action], intentIdentifiers: [], options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([category])
+        
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        if response.actionIdentifier == "deleteOldImages" {
-            deleteOldImages()
-        }
+        
     }
     
     
