@@ -1,6 +1,9 @@
 ## Loop Follow 
 ![screenshot](https://user-images.githubusercontent.com/38429455/93782187-436e8880-fbf8-11ea-8709-e2afba692132.png)
 
+### To begin building, copy/paste this code into terminal and hit enter.
+
+`/bin/bash -c "$curl( -fsSL https://raw.githubusercontent.com/jonfawcett/LoopFollow/Main/BuildLoopFollow.sh)"`
 
 Using so many different apps as a parent or caregiver of a T1D can be very cumbersome. Add in the extra details from Looping
 and it can be a challenge flipping back and forth between apps. Each app has different strengths and weaknesses.
