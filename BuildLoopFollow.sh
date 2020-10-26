@@ -98,7 +98,7 @@ mkdir $LOOP_DIR
 cd $LOOP_DIR
 pwd
 clear
-echo -e "\n\n Downloading Loop Follow.\n--------------------------------\n"
+echo -e "\n\n Downloading Loop Follow to your Downloads folder.\n--------------------------------\n"
 git clone --branch=$BRANCH --recurse-submodules $REPO
 
 echo -e "--------------------------------\n\nIf there are no errors listed above, code has successfully downloaded.\n"
