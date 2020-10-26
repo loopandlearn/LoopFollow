@@ -118,5 +118,5 @@ done
 
 cd LoopFollow
 Echo Open xcode
-xed .
+xed ./LoopFollow.xcworkspace
 exit
