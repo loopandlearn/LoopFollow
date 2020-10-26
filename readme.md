@@ -19,7 +19,7 @@ And there are some functions I've always wished for and not found anywhere such 
 for those nights when Loop is stuck on high and you open loop with a correction. This lets you set a higher
 low alert for the BG you want to wake up to and close Loop.
 
-Build Instruction Video: https://youtu.be/sdF5v2eGGyA
+Build Instruction Video: https://youtu.be/s07QPZ7xycY
 
 Special thanks to Spike-App, NSApple, and Nightguard for helping me figure out how to do a lot of the code for this.
 
