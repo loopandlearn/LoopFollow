@@ -27,6 +27,7 @@ enum ChartSettingsChangeEnum: Int {
   case overrideDisplayLocationChanged = 256
   case lowLineChanged = 512
   case highLineChanged = 1024
+  case smallGraphHeight = 2048
 }
 
 // General Settings Flags

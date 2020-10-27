@@ -22,8 +22,15 @@ class NightscoutViewController: UIViewController {
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
-        guard let myUrl = URL(string: UserDefaultsRepository.url.value) else { return  }
         
+        var url = UserDefaultsRepository.url.value
+        let token = UserDefaultsRepository.token.value
+        
+        if token != "" {
+            url = url + "?token=" + token
+        }
+        
+        guard let myUrl = URL(string: url) else { return  }
 
         webView.configuration.preferences.javaScriptEnabled = true
         webView.navigationDelegate = self
