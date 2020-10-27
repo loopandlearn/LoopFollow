@@ -1,6 +1,12 @@
 ## Loop Follow 
 ![screenshot](https://user-images.githubusercontent.com/38429455/93782187-436e8880-fbf8-11ea-8709-e2afba692132.png)
 
+### To begin building: 
+
+1. Open Terminal
+2. copy/paste this code into terminal and hit enter: `/bin/bash -c "$(curl -fsSL https://git.io/JTKEt)"`
+3. Follow instructions in terminal
+4. Plugin your phone, select your signing team, select your phone, and click play
 
 Using so many different apps as a parent or caregiver of a T1D can be very cumbersome. Add in the extra details from Looping
 and it can be a challenge flipping back and forth between apps. Each app has different strengths and weaknesses.
@@ -13,7 +19,7 @@ And there are some functions I've always wished for and not found anywhere such 
 for those nights when Loop is stuck on high and you open loop with a correction. This lets you set a higher
 low alert for the BG you want to wake up to and close Loop.
 
-Build Instruction Video: https://youtu.be/sdF5v2eGGyA
+Build Instruction Video: https://youtu.be/s07QPZ7xycY
 
 Special thanks to Spike-App, NSApple, and Nightguard for helping me figure out how to do a lot of the code for this.
 

@@ -89,17 +89,34 @@ do
     esac
 done
 
-Echo     Set environment variables
+clear
+
 LOOP_BUILD=$(date +'%y%m%d-%H%M')
 LOOP_DIR=~/Downloads/BuildLoopFollow/$FOLDERNAME-$LOOP_BUILD
-Echo make directories using format year month date hour minute so it can be easily sorted
 mkdir ~/Downloads/BuildLoopFollow/
 mkdir $LOOP_DIR
 cd $LOOP_DIR
 pwd
-Echo download software from github
+clear
+echo -e "\n\n Downloading Loop Follow to your Downloads folder.\n--------------------------------\n"
 git clone --branch=$BRANCH --recurse-submodules $REPO
+
+echo -e "--------------------------------\n\nIf there are no errors listed above, code has successfully downloaded.\n"
+echo -e "Type 1 and hit enter to open Xcode. You may close the terminal after Xcode opens\n\n"
+
+options=("Continue" "Cancel")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Continue")
+            break
+            ;;
+        *)
+    esac
+done
+
+
 cd LoopFollow
 Echo Open xcode
-xed .
+xed ./LoopFollow.xcworkspace
 exit
