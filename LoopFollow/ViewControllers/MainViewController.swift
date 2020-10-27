@@ -11,6 +11,7 @@ import Charts
 import EventKit
 import ShareClient
 import UserNotifications
+import Photos
 
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate {
     
@@ -34,6 +35,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsStdDev: UILabel!
     @IBOutlet weak var serverText: UILabel!
     @IBOutlet weak var statsView: UIView!
+    @IBOutlet weak var smallGraphHeightConstraint: NSLayoutConstraint!
     
       
     // Data Table class
@@ -122,6 +124,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var latestLoopTime: Double = 0
     var latestCOB = ""
     var latestBasal = ""
+    var latestPumpVolume: Double = 50.0
     var latestIOB = ""
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
@@ -170,6 +173,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.tableData.append(infoData(name:UserDefaultsRepository.infoNames.value[i], value:""))
         }
         createDerivedData()
+        
+        smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
+        self.view.layoutIfNeeded()
       
         // TODO: need non-us server ?
         let shareUserName = UserDefaultsRepository.shareUserName.value
@@ -235,6 +241,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
               
               // can look at settings flags to be more fine tuned
               self.updateBGGraphSettings()
+            
+            if ChartSettingsChangeEnum.smallGraphHeight.rawValue != 0 {
+                smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
+                self.view.layoutIfNeeded()
+            }
               
               // reset the app state
               appState.chartSettingsChanged = false
@@ -424,6 +435,145 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return graphics[value]!
     }
     
+    // Test code to save an image of graph for viewing on watch
+    func saveChartImage() {
+        var originalColor = BGChart.backgroundColor
+        BGChart.backgroundColor = NSUIColor.black
+        guard var image = BGChart.getChartImage(transparent: true) else {
+            BGChart.backgroundColor = originalColor
+            return }
+        var newImage = image.resizeImage(448.0, landscape: false, opaque: false, contentMode: .scaleAspectFit)
+        createAlbums(name1: "Loop Follow", name2: "Loop Follow Old")
+        if let collection1 = fetchAssetCollection("Loop Follow"), let collection2 = fetchAssetCollection("Loop Follow Old") {
+            deleteExistingImagesFromCollection(collection: collection1)
+            saveImageToAssetCollection(image, collection1: collection1, collection2: collection2)
+        }
+        
+        BGChart.backgroundColor = originalColor
+    }
+    
+    func createAlbums(name1: String, name2: String) {
+        if let collection1 = fetchAssetCollection(name1) {
+        } else {
+            // Album does not exist, create it and attempt to save the image
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: name1)
+            }, completionHandler: { (success: Bool, error: Error?) in
+                guard success == true && error == nil else {
+                    NSLog("Could not create the album")
+                    if let err = error {
+                        NSLog("Error: \(err)")
+                    }
+                    return
+                }
+
+                if let newCollection1 = self.fetchAssetCollection(name1) {
+                }
+            })
+        }
+        
+        if let collection2 = fetchAssetCollection(name2) {
+        } else {
+            // Album does not exist, create it and attempt to save the image
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: name2)
+            }, completionHandler: { (success: Bool, error: Error?) in
+                guard success == true && error == nil else {
+                    NSLog("Could not create the album")
+                    if let err = error {
+                        NSLog("Error: \(err)")
+                    }
+                    return
+                }
+
+                if let newCollection2 = self.fetchAssetCollection(name2) {
+                }
+            })
+        }
+    }
+    
+    func fetchAssetCollection(_ name: String) -> PHAssetCollection? {
+
+        let fetchOption = PHFetchOptions()
+        fetchOption.predicate = NSPredicate(format: "title == '" + name + "'")
+
+        let fetchResult = PHAssetCollection.fetchAssetCollections(
+            with: PHAssetCollectionType.album,
+            subtype: PHAssetCollectionSubtype.albumRegular,
+            options: fetchOption)
+
+        return fetchResult.firstObject
+    }
+    
+    func deleteOldImages() {
+        if let collection = fetchAssetCollection("Loop Follow Old") {
+            let library = PHPhotoLibrary.shared()
+            library.performChanges({
+                let fetchOptions = PHFetchOptions()
+                let allPhotos = PHAsset.fetchAssets(in: collection, options: .none)
+                PHAssetChangeRequest.deleteAssets(allPhotos)
+            }, completionHandler: { (success: Bool, error: Error?) in
+                guard success == true && error == nil else {
+                    NSLog("Could not delete the image")
+                    if let err = error {
+                        NSLog("Error: " + err.localizedDescription)
+                    }
+                    return
+                }
+            })
+        }
+        
+        self.sendNotification(self, title: "Watch Face Cleanup", subtitle: "", body: "Delete old watch face graph images", timer: 86400)
+        
+        
+    }
+    
+    func deleteExistingImagesFromCollection(collection: PHAssetCollection) {
+        
+        // This code removes existing photos from collection but does not delete them
+        if collection.estimatedAssetCount < 1 { return }
+
+        PHPhotoLibrary.shared().performChanges( {
+
+            if let request = PHAssetCollectionChangeRequest(for: collection) {
+                request.removeAssets(at: [0])
+            }
+
+        }, completionHandler: { (success: Bool, error: Error?) in
+            guard success == true && error == nil else {
+                NSLog("Could not delete the image")
+                if let err = error {
+                    NSLog("Error: " + err.localizedDescription)
+                }
+                return
+            }
+        })
+    }
+
+    func saveImageToAssetCollection(_ image: UIImage, collection1: PHAssetCollection, collection2: PHAssetCollection) {
+        
+        PHPhotoLibrary.shared().performChanges({
+            
+            let creationRequest = PHAssetCreationRequest.creationRequestForAsset(from: image)
+            if let request = PHAssetCollectionChangeRequest(for: collection1),
+               let placeHolder = creationRequest.placeholderForCreatedAsset {
+                request.addAssets([placeHolder] as NSFastEnumeration)
+            }
+            if let request2 = PHAssetCollectionChangeRequest(for: collection2),
+               let placeHolder2 = creationRequest.placeholderForCreatedAsset {
+                request2.addAssets([placeHolder2] as NSFastEnumeration)
+            }
+        }, completionHandler: { (success: Bool, error: Error?) in
+            guard success == true && error == nil else {
+                NSLog("Could not save the image")
+                if let err = error {
+                    NSLog("Error: " + err.localizedDescription)
+                }
+                return
+            }
+        })
+    }
+    
     // Write calendar
     func writeCalendar() {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Write calendar start") }
@@ -531,6 +681,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Error: Calendar Write") }
                 }
             
+            if UserDefaultsRepository.saveImage.value {
+                DispatchQueue.main.async {
+                    self.saveChartImage()
+                }
+                    
+            }
+            
+            
         }
     }
     
@@ -551,19 +709,23 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     
     // General Notifications
-    func sendNotification(title: String, body: String)
-    {
-       // UNUserNotificationCenter.current().delegate = self
+    
+    func sendNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
         
-//        let content = UNMutableNotificationContent()
-//        content.title = title
-//        content.body = body
-//        content.sound = .default
-//        
-//        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-//        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-//        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-//        
+        UNUserNotificationCenter.current().delegate = self
+        
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.subtitle = subtitle
+        content.body = body
+        content.categoryIdentifier = "category"
+        content.sound = .default
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timer, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        
+        
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {

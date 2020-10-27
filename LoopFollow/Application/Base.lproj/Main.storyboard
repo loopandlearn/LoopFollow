@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
     <device id="retina6_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17124"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -303,6 +303,7 @@
                         <outlet property="PredictionLabel" destination="oiR-SM-6sg" id="2Sw-TR-SFo"/>
                         <outlet property="infoTable" destination="kTs-7g-lp9" id="Khq-sV-EZ1"/>
                         <outlet property="serverText" destination="2mX-T9-SAm" id="Jot-3l-Wim"/>
+                        <outlet property="smallGraphHeightConstraint" destination="qmO-ga-QWl" id="VsZ-zJ-LsJ"/>
                         <outlet property="statsAvgBG" destination="jpA-Nb-pU7" id="Uo8-a4-Aus"/>
                         <outlet property="statsEstA1C" destination="7Jx-XF-1vS" id="4RD-nm-JxO"/>
                         <outlet property="statsHighPercent" destination="HON-rt-8pC" id="283-3S-PCR"/>

@@ -188,6 +188,9 @@ extension MainViewController {
         lineOverride.axisDependency = YAxis.AxisDependency.right
         lineOverride.highlightEnabled = true
         lineOverride.drawValuesEnabled = false
+//        lineOverride.circleColors = [NSUIColor.systemGreen.withAlphaComponent(0.75)]
+//        lineOverride.valueFormatter = ChartYDataValueFormatter()
+//        lineOverride.drawCircleHoleEnabled = false
         
         // BG Check
         var chartEntryBGCheck = [ChartDataEntry]()
@@ -548,7 +551,9 @@ extension MainViewController {
         for i in 0..<basalData.count{
             let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate), data: formatPillText(line1: String(basalData[i].basalRate), time: basalData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            }
             if basalData[i].basalRate  > maxBasal {
                 maxBasal = basalData[i].basalRate
             }
@@ -563,9 +568,12 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
     
     func updateBasalScheduledGraph() {
@@ -575,15 +583,19 @@ extension MainViewController {
         for i in 0..<basalScheduleData.count{
             let value = ChartDataEntry(x: Double(basalScheduleData[i].date), y: Double(basalScheduleData[i].basalRate))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            }
         }
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
     
     func updateBolusGraph() {
@@ -612,15 +624,19 @@ extension MainViewController {
   
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(dot)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(dot)
+            }
 
         }
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
     
     func updateCarbGraph() {
@@ -656,7 +672,9 @@ extension MainViewController {
             
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(dot)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(dot)
+            }
             
             
 
@@ -664,9 +682,11 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
     
     func updateBGCheckGraph() {
@@ -685,16 +705,20 @@ extension MainViewController {
             
             let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(bgCheckData[i].sgv)), time: bgCheckData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            }
 
         }
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
     
     func updateSuspendGraph() {
@@ -708,15 +732,19 @@ extension MainViewController {
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Suspend Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            }
         }
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
     
     func updateResumeGraph() {
@@ -730,15 +758,19 @@ extension MainViewController {
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Resume Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            }
         }
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
     
     func updateSensorStart() {
@@ -752,15 +784,19 @@ extension MainViewController {
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Start Sensor", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            }
         }
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
     
     func updateNotes() {
@@ -775,15 +811,19 @@ extension MainViewController {
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: thisData[i].note, time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            }
         }
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
  
     func createSmallBGGraph(){
@@ -1014,7 +1054,7 @@ extension MainViewController {
     
     func updateOverrideGraph() {
         var dataIndex = 6
-        var yTop: Double = Double(topBG - 1)
+        var yTop: Double = Double(topBG - 5)
         var yBottom: Double = Double(topBG - 25)
         var chart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
         var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
@@ -1035,31 +1075,41 @@ extension MainViewController {
             
             // Start Dot
             // Shift dots 30 seconds to create an empty 0 space between consecutive temps
-            let preStartDot = ChartDataEntry(x: Double(thisItem.date), y: yBottom, data: "hide")
+            let preStartDot = ChartDataEntry(x: Double(thisItem.date), y: yBottom, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(preStartDot)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(preStartDot)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(preStartDot)
+            }
             
             let startDot = ChartDataEntry(x: Double(thisItem.date + 1), y: yTop, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(startDot)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(startDot)
-            
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(startDot)
+            }
+
             // End Dot
-            let endDot = ChartDataEntry(x: Double(thisItem.endDate - 1), y: yTop, data: labelText)
+            let endDot = ChartDataEntry(x: Double(thisItem.endDate - 2), y: yTop, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(endDot)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(endDot)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(endDot)
+            }
             
             // Post end dot
-            let postEndDot = ChartDataEntry(x: Double(thisItem.endDate), y: yBottom, data: "hide")
+            let postEndDot = ChartDataEntry(x: Double(thisItem.endDate - 1), y: yBottom, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(postEndDot)
-            BGChartFull.data?.dataSets[dataIndex].addEntry(postEndDot)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(postEndDot)
+            }
         }
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
-        BGChartFull.data?.notifyDataChanged()
-        BGChartFull.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
     }
     
     func formatPillText(line1: String, time: TimeInterval) -> String {

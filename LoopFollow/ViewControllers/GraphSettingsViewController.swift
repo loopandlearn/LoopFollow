@@ -117,6 +117,33 @@ class GraphSettingsViewController: FormViewController {
                         UserDefaultsRepository.showDIALines.value = value
                         
             }
+            <<< SwitchRow("smallGraphTreatments"){ row in
+                row.title = "Treatments on Small Graph"
+                row.value = UserDefaultsRepository.smallGraphTreatments.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.smallGraphTreatments.value = value
+                        
+            }
+            <<< StepperRow("smallGraphHeight") { row in
+                row.title = "Small Graph Height"
+                row.cell.stepper.stepValue = 5
+                row.cell.stepper.minimumValue = 40
+                row.cell.stepper.maximumValue = 80
+                row.value = Double(UserDefaultsRepository.smallGraphHeight.value)
+                row.displayValueFor = { value in
+                        guard let value = value else { return nil }
+                        return "\(Int(value))"
+                    }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.smallGraphHeight.value = Int(value)
+                
+                if let appState = self!.appStateController {
+                   appState.chartSettingsChanged = true
+                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.smallGraphHeight.rawValue
+                 }
+            }
             <<< StepperRow("predictionToLoad") { row in
                 row.title = "Hours of Prediction"
                 row.cell.stepper.stepValue = 0.25
