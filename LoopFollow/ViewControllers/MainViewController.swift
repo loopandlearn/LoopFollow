@@ -31,6 +31,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsInRangePercent: UILabel!
     @IBOutlet weak var statsHighPercent: UILabel!
     @IBOutlet weak var statsAvgBG: UILabel!
+    @IBOutlet weak var statsEstA1CLabel: UILabel!
     @IBOutlet weak var statsEstA1C: UILabel!
     @IBOutlet weak var statsStdDev: UILabel!
     @IBOutlet weak var serverText: UILabel!
