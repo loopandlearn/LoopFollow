@@ -21,11 +21,30 @@ extension MainViewController {
         let now = date.timeIntervalSince1970
         let currentBG = bgs[bgs.count - 1].sgv
         let lastBG = bgs[bgs.count - 2].sgv
-        guard let deltas: [Int] = [
-            bgs[bgs.count - 1].sgv - bgs[bgs.count - 2].sgv,
-            bgs[bgs.count - 2].sgv - bgs[bgs.count - 3].sgv,
-            bgs[bgs.count - 3].sgv - bgs[bgs.count - 4].sgv
-            ] else {}
+        
+        var deltas: [Int] = []
+        if bgs.count > 3 {
+            deltas.append(bgs[bgs.count - 1].sgv - bgs[bgs.count - 2].sgv)
+            deltas.append(bgs[bgs.count - 2].sgv - bgs[bgs.count - 3].sgv)
+            deltas.append(bgs[bgs.count - 3].sgv - bgs[bgs.count - 4].sgv)
+        } else if bgs.count > 2 {
+            deltas.append(bgs[bgs.count - 1].sgv - bgs[bgs.count - 2].sgv)
+            deltas.append(bgs[bgs.count - 2].sgv - bgs[bgs.count - 3].sgv)
+            // Set remainder to match the last delta we have
+            deltas.append(bgs[bgs.count - 2].sgv - bgs[bgs.count - 3].sgv)
+        } else if bgs.count > 1 {
+            deltas.append(bgs[bgs.count - 1].sgv - bgs[bgs.count - 2].sgv)
+            // Set remainder to match the last delta we have
+            deltas.append(bgs[bgs.count - 1].sgv - bgs[bgs.count - 2].sgv)
+            deltas.append(bgs[bgs.count - 1].sgv - bgs[bgs.count - 2].sgv)
+        } else {
+            // We only have 1 reading, set all to 0.
+            deltas.append(0)
+            deltas.append(0)
+            deltas.append(0)
+        }
+        
+        
         let currentBGTime = bgs[bgs.count - 1].date
         var alarmTriggered = false
         var numLoops = 0
