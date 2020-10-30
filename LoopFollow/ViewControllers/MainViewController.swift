@@ -267,7 +267,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showStatsChange.rawValue != 0 {
                statsView.isHidden = !UserDefaultsRepository.showStats.value
             }
-            
+
+            // settings for useIFCC changed
+            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.useIFCCChange.rawValue != 0 {
+                updateStats()
+            }
+
             // settings for showSmallGraph changed
             if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showSmallGraphChange.rawValue != 0 {
                 BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value

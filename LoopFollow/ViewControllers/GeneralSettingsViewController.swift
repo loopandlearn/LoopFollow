@@ -83,6 +83,19 @@ class GeneralSettingsViewController: FormViewController {
                 appState.generalSettingsChanges |= GeneralSettingsChangeEnum.showStatsChange.rawValue
              }
         }
+        <<< SwitchRow("useIFCC") { row in
+        row.title = "Use IFCC A1C"
+        row.value = UserDefaultsRepository.useIFCC.value
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.useIFCC.value = value
+            
+             // set the appstate to indicate settings change and flags
+             if let appState = self!.appStateController {
+                appState.generalSettingsChanged = true
+                appState.generalSettingsChanges |= GeneralSettingsChangeEnum.useIFCCChange.rawValue
+             }
+        }
         <<< SwitchRow("showSmallGraph") { row in
         row.title = "Display Small Graph"
         row.value = UserDefaultsRepository.showSmallGraph.value

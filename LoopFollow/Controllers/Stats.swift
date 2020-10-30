@@ -64,16 +64,16 @@ class StatsData {
         for i in 0..<bgData.count {
             partialSum += (Float(bgData[i].sgv) - avgBG) * ( Float(bgData[i].sgv) - avgBG)
         }
-        stdDev = sqrt(partialSum / Float(bgData.count))
         
-        if UserDefaultsRepository.units.value == "mg/dL" {
-            a1C = (46.7 + Float(avgBG)) / 28.7
+        stdDev = sqrt(partialSum / Float(bgData.count))
+        if UserDefaultsRepository.units.value != "mg/dL" {
+            stdDev = Float( bgUnits.toDisplayUnits( String( stdDev ) ) ) ?? 0.0;
+        }
+        
+        if UserDefaultsRepository.useIFCC.value {
+            a1C = (((46.7 + Float(avgBG)) / 28.7) - 2.152) / 0.09148
         } else {
             a1C = (46.7 + Float(avgBG)) / 28.7
-            // Keep this for later.
-            // https://github.com/nightscout/nightguard/pull/72
-            // a1C = (((46.7 + Float(avgBG)) / 28.7) - 2.152) / 0.09148
-            stdDev = Float( bgUnits.toDisplayUnits( String( stdDev ) ) ) ?? 0.0;
         }
          
     }
