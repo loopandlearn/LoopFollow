@@ -499,7 +499,7 @@ extension MainViewController {
 
         }
         
-        if UserDefaultsRepository.alertPumpIsSnoozed.value {
+        if date > UserDefaultsRepository.alertPumpSnoozedTime.value ?? date {
             UserDefaultsRepository.alertPumpSnoozedTime.setNil(key: "alertPumpSnoozedTime")
             UserDefaultsRepository.alertPumpIsSnoozed.value = false
             alarms.reloadSnoozeTime(key: "alertPumpSnoozedTime", setNil: true)
