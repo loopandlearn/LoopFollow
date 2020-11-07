@@ -131,10 +131,7 @@ class GeneralSettingsViewController: FormViewController {
             row.value = UserDefaultsRepository.screenlockSwitchState.value
             }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                
-                if value {
-                    UserDefaultsRepository.screenlockSwitchState.value = value
-                }
+                UserDefaultsRepository.screenlockSwitchState.value = value
             }
         
         
