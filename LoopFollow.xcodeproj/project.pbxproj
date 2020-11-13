@@ -1054,6 +1054,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow";
 				PRODUCT_NAME = "Loop Follow";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1075,6 +1076,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow";
 				PRODUCT_NAME = "Loop Follow";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
