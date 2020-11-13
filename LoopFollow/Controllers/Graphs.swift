@@ -414,6 +414,7 @@ extension MainViewController {
     func updateBGGraph() {
         let dataIndex = 0
         let entries = bgData
+        if entries.count < 1 { return }
         var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
         var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
         mainChart.clear()
@@ -449,7 +450,6 @@ extension MainViewController {
         lineBGSmall.circleColors.removeAll()
 
         if colors.count > 0 {
-            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: colors") }
             for i in 0..<colors.count{
                 mainChart.addColor(colors[i])
                 mainChart.circleColors.append(colors[i])
