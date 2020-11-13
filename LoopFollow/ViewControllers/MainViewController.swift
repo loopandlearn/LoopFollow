@@ -528,7 +528,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             })
         }
         
-        self.sendNotification(self, title: "Watch Face Cleanup", subtitle: "", body: "Delete old watch face graph images", timer: 86400)
+        self.sendGeneralNotification(self, title: "Watch Face Cleanup", subtitle: "", body: "Delete old watch face graph images", timer: 86400)
         
         
     }
@@ -715,7 +715,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // General Notifications
     
-    func sendNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
+    func sendGeneralNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
         
         UNUserNotificationCenter.current().delegate = self
         
@@ -723,7 +723,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         content.title = title
         content.subtitle = subtitle
         content.body = body
-        content.categoryIdentifier = "category"
+        content.categoryIdentifier = "noAction"
         content.sound = .default
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timer, repeats: false)
