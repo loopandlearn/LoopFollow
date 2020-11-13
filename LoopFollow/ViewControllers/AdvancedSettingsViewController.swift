@@ -11,7 +11,7 @@ import Eureka
 import EventKit
 import EventKitUI
 
-class DebugSettingsViewController: FormViewController {
+class AdvancedSettingsViewController: FormViewController {
     
     var appStateController: AppStateController?
     
@@ -20,11 +20,11 @@ class DebugSettingsViewController: FormViewController {
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
-        buildDebugSettings()
+        buildAdvancedSettings()
     }
-    private func buildDebugSettings() {
+    private func buildAdvancedSettings() {
         form
-            +++ Section("Debug Settings")
+            +++ Section("Advanced Settings")
             
             <<< SwitchRow("onlyDownloadBG"){ row in
                 row.title = "Only Download BG from NS"
@@ -76,16 +76,23 @@ class DebugSettingsViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.graphOtherTreatments.value = value
             }
-            
-            
-            
-            <<< SwitchRow("debugLog"){ row in
-                row.title = "Show Debug Log"
-                row.value = UserDefaultsRepository.debugLog.value
+            <<< StepperRow("bgUpdateDelay") { row in
+                row.title = "BG Update Delay (Sec)"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 1
+                row.cell.stepper.maximumValue = 30
+                row.value = Double(UserDefaultsRepository.bgUpdateDelay.value)
+                row.displayValueFor = { value in
+                        guard let value = value else { return nil }
+                        return "\(Int(value))"
+                    }
             }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.debugLog.value = value
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.bgUpdateDelay.value = Int(value)
             }
+            
+            
+            
             
             +++ ButtonRow() {
                 $0.title = "DONE"
