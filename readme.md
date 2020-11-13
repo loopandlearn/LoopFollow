@@ -21,7 +21,6 @@ Some things do not work correctly yet in Big Sur
 - Disable Keep Screen Active. I haven't tested, but doubt this will do anything.
 - Watch/Carplay calendar selection does not work
 - Alarms will not override the Mac volume or mute.
-- Selecting Banners or Alerts in MacOS notification options only puts it in Notification Center, not on screen. If the alarm triggers, click the date/time and you will see the notification and be able to snooze from there.
 
 Using so many different apps as a parent or caregiver of a T1D can be very cumbersome. Add in the extra details from Looping
 and it can be a challenge flipping back and forth between apps. Each app has different strengths and weaknesses.
