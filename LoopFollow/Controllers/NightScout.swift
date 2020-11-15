@@ -224,7 +224,7 @@ extension MainViewController {
             
             // We have a current reading. Set timer to 5:10 from last reading
             } else {
-                self.startBGTimer(time: 310 - secondsAgo)
+                self.startBGTimer(time: 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
                 let timerVal = 310 - secondsAgo
                 print("##### started 5:10 bg timer: \(timerVal)")
             }

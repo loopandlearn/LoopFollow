@@ -22,7 +22,13 @@ extension MainViewController {
             statsInRangePercent.text = String(format:"%.1f%", stats.percentRange) + "%"
             statsHighPercent.text = String(format:"%.1f%", stats.percentHigh) + "%"
             statsAvgBG.text = bgUnits.toDisplayUnits(String(format:"%.0f%", stats.avgBG))
-            statsEstA1C.text = String(format:"%.1f%", stats.a1C)
+            if UserDefaultsRepository.useIFCC.value {
+                statsEstA1C.text = String(format:"%.0f%", stats.a1C)
+            }
+            else
+            {
+                statsEstA1C.text = String(format:"%.1f%", stats.a1C)
+            }
             statsStdDev.text = String(format:"%.2f%", stats.stdDev)
             
             createStatsPie(pieData: stats.pie)

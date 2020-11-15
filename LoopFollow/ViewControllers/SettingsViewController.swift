@@ -174,19 +174,6 @@ class SettingsViewController: FormViewController {
            ), onDismiss: nil)
             
         }
-        
-       +++ Section("Debug Settings")
-        <<< ButtonRow() {
-           $0.title = "Configure Debug"
-           $0.presentationMode = .show(
-               controllerProvider: .callback(builder: {
-                  let controller = DebugSettingsViewController()
-                  controller.appStateController = self.appStateController
-                  return controller
-               }
-           ), onDismiss: nil)
-            
-        }
             <<< LabelRow("Clear Images"){ row in
                 row.title = "Delete Watch Face Images"
             }.onCellSelection{ cell,row  in
@@ -197,6 +184,20 @@ class SettingsViewController: FormViewController {
                     mainScreen.saveChartImage()
                 }
             }
+        
+       +++ Section("Advanced Settings")
+        <<< ButtonRow() {
+           $0.title = "Advanced Settings"
+           $0.presentationMode = .show(
+               controllerProvider: .callback(builder: {
+                  let controller = AdvancedSettingsViewController()
+                  controller.appStateController = self.appStateController
+                  return controller
+               }
+           ), onDismiss: nil)
+            
+        }
+  
     
             +++ Section(header: "App Expiration", footer: String(expiration.description))
     
