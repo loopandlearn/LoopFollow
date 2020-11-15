@@ -57,6 +57,7 @@ class UserDefaultsRepository {
     // General Settings
     static let colorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
     static let showStats = UserDefaultsValue<Bool>(key: "showStats", default: true)
+    static let useIFCC = UserDefaultsValue<Bool>(key: "useIFCC", default: false)
     static let showSmallGraph = UserDefaultsValue<Bool>(key: "showSmallGraph", default: true)
     static let speakBG = UserDefaultsValue<Bool>(key: "speakBG", default: false)
     static let backgroundRefreshFrequency = UserDefaultsValue<Double>(key: "backgroundRefreshFrequency", default: 1)
@@ -73,16 +74,16 @@ class UserDefaultsRepository {
             UIApplication.shared.isIdleTimerDisabled = screenlock
     })
     
-    // Debug Settings
-        static let onlyDownloadBG = UserDefaultsValue<Bool>(key: "onlyDownloadBG", default: false)
-        static let downloadTreatments = UserDefaultsValue<Bool>(key: "downloadTreatments", default: true)
-        static let downloadPrediction = UserDefaultsValue<Bool>(key: "downloadPrediction", default: true)
-        static let graphOtherTreatments = UserDefaultsValue<Bool>(key: "graphOtherTreatments", default: true)
-        static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
-        static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
-        static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
-        static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
-    
+    // Advanced Settings
+    static let onlyDownloadBG = UserDefaultsValue<Bool>(key: "onlyDownloadBG", default: false)
+    static let downloadTreatments = UserDefaultsValue<Bool>(key: "downloadTreatments", default: true)
+    static let downloadPrediction = UserDefaultsValue<Bool>(key: "downloadPrediction", default: true)
+    static let graphOtherTreatments = UserDefaultsValue<Bool>(key: "graphOtherTreatments", default: true)
+    static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
+    static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
+    static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
+    static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
+    static let bgUpdateDelay = UserDefaultsValue<Int>(key: "bgUpdateDelay", default: 10)
     
     
     // Watch Calendar Settings

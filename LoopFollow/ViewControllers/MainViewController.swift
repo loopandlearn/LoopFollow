@@ -267,7 +267,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showStatsChange.rawValue != 0 {
                statsView.isHidden = !UserDefaultsRepository.showStats.value
             }
-            
+
+            // settings for useIFCC changed
+            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.useIFCCChange.rawValue != 0 {
+                updateStats()
+            }
+
             // settings for showSmallGraph changed
             if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showSmallGraphChange.rawValue != 0 {
                 BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
@@ -523,7 +528,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             })
         }
         
-        self.sendNotification(self, title: "Watch Face Cleanup", subtitle: "", body: "Delete old watch face graph images", timer: 86400)
+        self.sendGeneralNotification(self, title: "Watch Face Cleanup", subtitle: "", body: "Delete old watch face graph images", timer: 86400)
         
         
     }
@@ -710,7 +715,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // General Notifications
     
-    func sendNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
+    func sendGeneralNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
         
         UNUserNotificationCenter.current().delegate = self
         
@@ -718,7 +723,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         content.title = title
         content.subtitle = subtitle
         content.body = body
-        content.categoryIdentifier = "category"
+        content.categoryIdentifier = "noAction"
         content.sound = .default
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timer, repeats: false)
