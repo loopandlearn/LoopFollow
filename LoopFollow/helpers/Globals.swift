@@ -10,6 +10,8 @@ import Foundation
 
 
 struct globalVariables {
+    static var debugLog = ""
+    
     static var dexVerifiedAlert: TimeInterval = 0
     static var nsVerifiedAlert: TimeInterval = 0
     
@@ -18,5 +20,6 @@ struct globalVariables {
     static let dotCarb: Float = 5
     static let dotBolus: Float = 5
     static let dotOther: Float = 5
+    
     
 }

@@ -707,8 +707,17 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     func writeDebugLog(value: String) {
-        var logText = "\n" + dateTimeUtils.printNow() + " - " + value
-        print(logText)
+        DispatchQueue.main.async {
+            var logText = "\n" + dateTimeUtils.printNow() + " - " + value
+            print(logText)
+            guard let debug = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+            if debug.debugTextView.text.lengthOfBytes(using: .utf8) > 20000 {
+                debug.debugTextView.text = ""
+                    }
+            debug.debugTextView.text += logText
+        }
+        
+        
         
     }
     

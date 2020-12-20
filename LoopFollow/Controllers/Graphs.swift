@@ -412,6 +412,7 @@ extension MainViewController {
     }
     
     func updateBGGraph() {
+        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "##### Start BG Graph #####") }
         let dataIndex = 0
         let entries = bgData
         if entries.count < 1 { return }
@@ -427,6 +428,7 @@ extension MainViewController {
                 topBG = Float(entries[i].sgv) + maxBGOffset
             }
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
+            if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "BG: " + value.description) }
             mainChart.addEntry(value)
             smallChart.addEntry(value)
             
@@ -438,6 +440,8 @@ extension MainViewController {
                 colors.append(NSUIColor.systemGreen)
             }
         }
+        
+        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Graph BGs: " + mainChart.entries.count.description) }
         
         
         // Set Colors
@@ -457,6 +461,8 @@ extension MainViewController {
                 smallChart.circleColors.append(colors[i])
             }
         }
+        
+        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Colors: " + mainChart.colors.count.description) }
         
         BGChart.rightAxis.axisMaximum = Double(topBG)
         BGChart.setVisibleXRangeMinimum(600)
