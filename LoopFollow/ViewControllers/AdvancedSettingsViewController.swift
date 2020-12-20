@@ -90,6 +90,21 @@ class AdvancedSettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.bgUpdateDelay.value = Int(value)
             }
+            <<< SwitchRow("alwaysDownloadAllBG"){ row in
+                row.title = "Allways Download All BG Values"
+                row.value = UserDefaultsRepository.alwaysDownloadAllBG.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alwaysDownloadAllBG.value = value
+            }
+            <<< SwitchRow("debugLog"){ row in
+                row.title = "Show Debug Log"
+                row.value = UserDefaultsRepository.debugLog.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.debugLog.value = value
+            }
+
             
             
             
@@ -100,4 +115,6 @@ class AdvancedSettingsViewController: FormViewController {
                 self.dismiss(animated:true, completion: nil)
             }
     }
+    
+
 }

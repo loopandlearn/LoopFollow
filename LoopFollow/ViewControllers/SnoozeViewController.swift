@@ -28,6 +28,7 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
     @IBOutlet weak var clockLabel: UILabel!
     @IBOutlet weak var snoozeForMinuteLabel: UILabel!
     @IBOutlet weak var snoozeForMinuteStepper: UIStepper!
+    @IBOutlet weak var debugTextView: UITextView!
     
     @IBAction func SnoozeButton(_ sender: Any) {
         AlarmSound.stop()
@@ -48,6 +49,10 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         clockLabel.isHidden = false
         snoozeForMinuteStepper.isHidden = true
         snoozeForMinuteLabel.isHidden = true
+        
+        if UserDefaultsRepository.debugLog.value {
+            debugTextView.isHidden = false
+        }
         
     }
     
@@ -256,6 +261,11 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         SnoozeButton.contentEdgeInsets = UIEdgeInsets(top: 10,left: 10,bottom: 10,right: 10)
         clockLabel.text = ""
         startClockTimer(time: 1)
+        
+        if UserDefaultsRepository.debugLog.value {
+            debugTextView.isHidden = false
+            clockLabel.isHidden = true
+        }
     }
 
 
