@@ -652,7 +652,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 // Delete Events from last 2 hours and 2 hours in future
                 var deleteStartDate = Date().addingTimeInterval(-60*60*2)
                 var deleteEndDate = Date().addingTimeInterval(60*60*2)
-                var deleteCalendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value) as! EKCalendar
+                // guard solves for some ios upgrades removing the calendar
+                guard let deleteCalendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value) as? EKCalendar else { return }
                 var predicate2 = self.store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
                 var eVDelete = self.store.events(matching: predicate2) as [EKEvent]?
                 if eVDelete != nil {
