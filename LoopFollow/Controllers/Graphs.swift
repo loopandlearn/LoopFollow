@@ -608,9 +608,12 @@ extension MainViewController {
         var dataIndex = 3
         var yTop: Double = 370
         var yBottom: Double = 345
-        BGChart.lineData?.dataSets[dataIndex].clear()
-        BGChartFull.lineData?.dataSets[dataIndex].clear()
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
         
+        var colors = [NSUIColor]()
         for i in 0..<bolusData.count{
             let formatter = NumberFormatter()
             formatter.minimumFractionDigits = 0
@@ -620,6 +623,19 @@ extension MainViewController {
             // Check overlapping carbs to shift left if needed
             let bolusShift = findNextBolusTime(timeWithin: 240, needle: bolusData[i].date, haystack: bolusData, startingIndex: i)
             var dateTimeStamp = bolusData[i].date
+            
+            // Alpha colors for DIA
+            let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
+            let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
+            if diffTimeHours <= 1 {
+                colors.append(NSUIColor.systemBlue.withAlphaComponent(1.0))
+            } else if diffTimeHours > 6 {
+                colors.append(NSUIColor.systemBlue.withAlphaComponent(0.25))
+            } else {
+                let thisAlpha = 1.0 - (0.15 * diffTimeHours)
+                colors.append(NSUIColor.systemBlue.withAlphaComponent(CGFloat(thisAlpha)))
+            }
+            
             if bolusShift {
                 // Move it half the distance between BG readings
                 dateTimeStamp = dateTimeStamp - 150
@@ -629,12 +645,29 @@ extension MainViewController {
             if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
   
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
-            BGChart.data?.dataSets[dataIndex].addEntry(dot)
+            mainChart.addEntry(dot)
             if UserDefaultsRepository.smallGraphTreatments.value {
-                BGChartFull.data?.dataSets[dataIndex].addEntry(dot)
+                smallChart.addEntry(dot)
             }
-
         }
+        
+        // Set Colors
+        let lineBolus = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        let lineBolusSmall = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        lineBolus.colors.removeAll()
+        lineBolus.circleColors.removeAll()
+        lineBolusSmall.colors.removeAll()
+        lineBolusSmall.circleColors.removeAll()
+        
+        if colors.count > 0 {
+            for i in 0..<colors.count{
+                mainChart.addColor(colors[i])
+                mainChart.circleColors.append(colors[i])
+                smallChart.addColor(colors[i])
+                smallChart.circleColors.append(colors[i])
+            }
+        }
+        
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
