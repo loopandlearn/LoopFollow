@@ -680,9 +680,12 @@ extension MainViewController {
     
     func updateCarbGraph() {
         var dataIndex = 4
-        BGChart.lineData?.dataSets[dataIndex].clear()
-        BGChartFull.lineData?.dataSets[dataIndex].clear()
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
         
+        var colors = [NSUIColor]()
         for i in 0..<carbData.count{
             let formatter = NumberFormatter()
             formatter.minimumFractionDigits = 0
@@ -692,14 +695,27 @@ extension MainViewController {
             
             var valueString: String = formatter.string(from: NSNumber(value: carbData[i].value))!
             
+            var hours = 3
             if carbData[i].absorptionTime > 0 && UserDefaultsRepository.showAbsorption.value {
-                let hours = carbData[i].absorptionTime / 60
+                hours = carbData[i].absorptionTime / 60
                 valueString += " " + String(hours) + "h"
             }
             
             // Check overlapping carbs to shift left if needed
             let carbShift = findNextCarbTime(timeWithin: 250, needle: carbData[i].date, haystack: carbData, startingIndex: i)
             var dateTimeStamp = carbData[i].date
+            
+            // Alpha colors for DIA
+            let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
+            let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
+            if diffTimeHours <= 0.5 {
+                colors.append(NSUIColor.systemOrange.withAlphaComponent(1.0))
+            } else if diffTimeHours > Double(hours) {
+                colors.append(NSUIColor.systemOrange.withAlphaComponent(0.25))
+            } else {
+                let thisAlpha = 1.0 - ((0.75 / Double(hours)) * diffTimeHours)
+                colors.append(NSUIColor.systemOrange.withAlphaComponent(CGFloat(thisAlpha)))
+            }
             
             // skip if > 24 hours old
             if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
@@ -718,6 +734,24 @@ extension MainViewController {
             
 
         }
+        
+        // Set Colors
+        let lineCarbs = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        let lineCarbsSmall = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        lineCarbs.colors.removeAll()
+        lineCarbs.circleColors.removeAll()
+        lineCarbsSmall.colors.removeAll()
+        lineCarbsSmall.circleColors.removeAll()
+        
+        if colors.count > 0 {
+            for i in 0..<colors.count{
+                mainChart.addColor(colors[i])
+                mainChart.circleColors.append(colors[i])
+                smallChart.addColor(colors[i])
+                smallChart.circleColors.append(colors[i])
+            }
+        }
+        
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
