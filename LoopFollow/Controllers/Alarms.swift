@@ -368,6 +368,7 @@ extension MainViewController {
         snoozer.SnoozeButton.isHidden = false
         snoozer.AlertLabel.isHidden = false
         snoozer.clockLabel.isHidden = true
+        snoozer.debugTextView.isHidden = true
         snoozer.snoozeForMinuteLabel.text = String(snoozeTime)
         snoozer.snoozeForMinuteStepper.value = Double(snoozeTime)
         snoozer.snoozeForMinuteStepper.stepValue = Double(snoozeIncrement)

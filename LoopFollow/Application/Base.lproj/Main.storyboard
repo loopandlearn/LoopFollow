@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
     <device id="retina6_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -422,11 +422,21 @@
                                                     </stackView>
                                                 </subviews>
                                             </stackView>
+                                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="9ey-Az-e5u" userLabel="debugTextView">
+                                                <rect key="frame" x="8" y="8" width="382" height="336"/>
+                                                <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences" autocorrectionType="no"/>
+                                            </textView>
                                         </subviews>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
                                             <constraint firstItem="HFL-Ye-6HR" firstAttribute="centerY" secondItem="xzZ-jc-k2v" secondAttribute="centerY" id="7yv-SD-WC5"/>
+                                            <constraint firstItem="9ey-Az-e5u" firstAttribute="leading" secondItem="xzZ-jc-k2v" secondAttribute="leading" constant="8" id="8DB-3W-vzX"/>
                                             <constraint firstItem="HFL-Ye-6HR" firstAttribute="centerX" secondItem="xzZ-jc-k2v" secondAttribute="centerX" id="9b8-g8-Qgc"/>
+                                            <constraint firstAttribute="trailing" secondItem="9ey-Az-e5u" secondAttribute="trailing" constant="8" id="MdV-jD-BcV"/>
+                                            <constraint firstAttribute="bottom" secondItem="9ey-Az-e5u" secondAttribute="bottom" constant="8" id="rD1-uF-92v"/>
+                                            <constraint firstItem="9ey-Az-e5u" firstAttribute="top" secondItem="xzZ-jc-k2v" secondAttribute="top" constant="8" id="w6s-Ek-CoQ"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -451,6 +461,7 @@
                         <outlet property="MinAgoLabel" destination="HNC-P8-PbV" id="gLP-TD-hOq"/>
                         <outlet property="SnoozeButton" destination="Meu-VT-byv" id="Xnm-tj-t53"/>
                         <outlet property="clockLabel" destination="r85-eB-vVd" id="JTa-Uu-hdN"/>
+                        <outlet property="debugTextView" destination="9ey-Az-e5u" id="ycy-T9-ioF"/>
                         <outlet property="snoozeForMinuteLabel" destination="iC4-A1-q9b" id="Jvg-g0-bjs"/>
                         <outlet property="snoozeForMinuteStepper" destination="0cS-P2-Zus" id="ren-xl-jxN"/>
                     </connections>
