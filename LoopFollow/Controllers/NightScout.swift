@@ -265,66 +265,73 @@ extension MainViewController {
     // NS BG Data Front end updater
     func viewUpdateNSBG (isNS: Bool) {
         DispatchQueue.main.async {
-            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Display: BG") }
-            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+            if UserDefaultsRepository.debugLog.value {
+                self.writeDebugLog(value: "Display: BG")
+                self.writeDebugLog(value: "Num BG: " + self.bgData.count.description)
+            }
             let entries = self.bgData
-            if entries.count > 0 {
-                let latestEntryi = entries.count - 1
-                let latestBG = entries[latestEntryi].sgv
-                let priorBG = entries[latestEntryi - 1].sgv
-                let deltaBG = latestBG - priorBG as Int
-                let lastBGTime = entries[latestEntryi].date
-                
-                let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
-                var userUnit = " mg/dL"
-                if self.mmol {
-                    userUnit = " mmol/L"
-                }
-                
-                // TODO: remove testing feature to color code arrow based on NS vs Dex
-                if isNS {
-                    self.serverText.text = "Nightscout"
-                } else {
-                    self.serverText.text = "Dexcom"
-                }
-                
-                self.BGText.text = bgUnits.toDisplayUnits(String(latestBG))
-                snoozer.BGLabel.text = bgUnits.toDisplayUnits(String(latestBG))
-                self.setBGTextColor()
-                
-                if let directionBG = entries[latestEntryi].direction {
-                    self.DirectionText.text = self.bgDirectionGraphic(directionBG)
-                    snoozer.DirectionLabel.text = self.bgDirectionGraphic(directionBG)
-                    self.latestDirectionString = self.bgDirectionGraphic(directionBG)
-                }
-                else
-                {
-                    self.DirectionText.text = ""
-                    snoozer.DirectionLabel.text = ""
-                    self.latestDirectionString = ""
-                }
-                
-                if deltaBG < 0 {
-                    self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
-                    snoozer.DeltaLabel.text = bgUnits.toDisplayUnits(String(deltaBG))
-                    self.latestDeltaString = String(deltaBG)
-                }
-                else
-                {
-                    self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
-                    snoozer.DeltaLabel.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
-                    self.latestDeltaString = "+" + String(deltaBG)
-                }
-                self.updateBadge(val: latestBG)
-                
+            if entries.count < 1 { return }
+            
+            self.updateBGGraph()
+            self.updateStats()
+            
+            let latestEntryi = entries.count - 1
+            let latestBG = entries[latestEntryi].sgv
+            let priorBG = entries[latestEntryi - 1].sgv
+            let deltaBG = latestBG - priorBG as Int
+            let lastBGTime = entries[latestEntryi].date
+            
+            let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
+            var userUnit = " mg/dL"
+            if self.mmol {
+                userUnit = " mmol/L"
+            }
+            
+            if isNS {
+                self.serverText.text = "Nightscout"
+            } else {
+                self.serverText.text = "Dexcom"
+            }
+            
+            var snoozerBG = ""
+            var snoozerDirection = ""
+            var snoozerDelta = ""
+            
+            self.BGText.text = bgUnits.toDisplayUnits(String(latestBG))
+            snoozerBG = bgUnits.toDisplayUnits(String(latestBG))
+            self.setBGTextColor()
+            
+            if let directionBG = entries[latestEntryi].direction {
+                self.DirectionText.text = self.bgDirectionGraphic(directionBG)
+                snoozerDirection = self.bgDirectionGraphic(directionBG)
+                self.latestDirectionString = self.bgDirectionGraphic(directionBG)
             }
             else
             {
-                
-                return
+                self.DirectionText.text = ""
+                snoozerDirection = ""
+                self.latestDirectionString = ""
             }
-            self.updateBGGraph()
-            self.updateStats()
+            
+            if deltaBG < 0 {
+                self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
+                snoozerDelta = bgUnits.toDisplayUnits(String(deltaBG))
+                self.latestDeltaString = String(deltaBG)
+            }
+            else
+            {
+                self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                snoozerDelta = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                self.latestDeltaString = "+" + String(deltaBG)
+            }
+            self.updateBadge(val: latestBG)
+            
+            // Snoozer Display
+            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+            snoozer.BGLabel.text = snoozerBG
+            snoozer.DirectionLabel.text = snoozerDirection
+            snoozer.DeltaLabel.text = snoozerDelta
+            
         }
         
     }
@@ -1704,6 +1711,9 @@ extension MainViewController {
                 duration = (currentEntry?["duration"] as? Double)!
                 duration = duration * 60
             }
+            
+            // Skip overrides that aren't 5 minutes long. This prevents overlapping that causes bars to not display.
+            if duration < 300 { continue }
             
             guard let enteredBy = currentEntry?["enteredBy"] as? String else { continue }
             guard let reason = currentEntry?["reason"] as? String else { continue }

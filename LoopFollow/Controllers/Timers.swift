@@ -140,6 +140,8 @@ extension MainViewController {
             }
         }
         
+        if UserDefaultsRepository.alwaysDownloadAllBG.value { onlyPullLastRecord = false }
+        
         if UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "" {
             webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
         } else {

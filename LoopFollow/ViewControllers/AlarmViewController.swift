@@ -329,6 +329,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -494,6 +495,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -599,6 +601,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -719,6 +722,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -823,6 +827,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -964,6 +969,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -1105,6 +1111,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -1211,6 +1218,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -1353,6 +1361,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -1521,6 +1530,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -1647,6 +1657,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -1759,6 +1770,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -1843,6 +1855,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -1928,6 +1941,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
@@ -2043,6 +2057,7 @@ class AlarmViewController: FormViewController {
             .onExpandInlineRow { [weak self] cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
                 }
                 let color = cell.detailTextLabel?.textColor
                 row.onCollapseInlineRow { cell, _, _ in
