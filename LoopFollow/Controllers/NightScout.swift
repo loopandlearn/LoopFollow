@@ -1053,91 +1053,55 @@ extension MainViewController {
     
     func clearOldTempBasal()
         {
-            for i in 0..<basalData.count {
-                if basalData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
-                    basalData.remove(at: i)
-                }
-            }
+            basalData.removeAll()
             updateBasalGraph()
         }
         
         func clearOldBolus()
         {
-            for i in 0..<bolusData.count {
-                if bolusData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
-                    bolusData.remove(at: i)
-                }
-            }
+            bolusData.removeAll()
             updateBolusGraph()
         }
         
         func clearOldCarb()
         {
-            for i in 0..<carbData.count {
-                if carbData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
-                    carbData.remove(at: i)
-                }
-            }
+            carbData.removeAll()
             updateCarbGraph()
         }
         
         func clearOldBGCheck()
         {
-            for i in 0..<bgCheckData.count {
-                if bgCheckData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
-                    bgCheckData.remove(at: i)
-                }
-            }
+            bgCheckData.removeAll()
             updateBGCheckGraph()
         }
         
         func clearOldOverride()
         {
-            for i in 0..<overrideGraphData.count {
-                if overrideGraphData[i].endDate < dateTimeUtils.getTimeInterval24HoursAgo() {
-                    overrideGraphData.remove(at: i)
-                }
-            }
+            overrideGraphData.removeAll()
             updateOverrideGraph()
         }
         
         func clearOldSuspend()
         {
-            for i in 0..<suspendGraphData.count {
-                if suspendGraphData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
-                    suspendGraphData.remove(at: i)
-                }
-            }
+            suspendGraphData.removeAll()
             updateSuspendGraph()
         }
         
         func clearOldResume()
         {
-            for i in 0..<resumeGraphData.count {
-                if resumeGraphData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
-                    resumeGraphData.remove(at: i)
-                }
-            }
+            resumeGraphData.removeAll()
             updateResumeGraph()
         }
         
         func clearOldSensor()
         {
-            for i in 0..<sensorStartGraphData.count {
-                if sensorStartGraphData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
-                    sensorStartGraphData.remove(at: i)
-                }
-            }
+            sensorStartGraphData.removeAll()
             updateSensorStart()
         }
         
         func clearOldNotes()
         {
-            for i in 0..<noteGraphData.count {
-                if noteGraphData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() {
-                    noteGraphData.remove(at: i)
-                }
-            }
+            noteGraphData.removeAll()
             updateNotes()
         }
     
@@ -1160,7 +1124,7 @@ extension MainViewController {
             } else if currentEntry?["created_at"] != nil {
                 basalDate = currentEntry?["created_at"] as! String
             } else {
-                return
+                continue
             }
             var strippedZone = String(basalDate.dropLast())
             strippedZone = strippedZone.replacingOccurrences(of: "\\.\\d+", with: "", options: .regularExpression)
@@ -1168,8 +1132,8 @@ extension MainViewController {
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-            let dateString = dateFormatter.date(from: strippedZone)
-            let dateTimeStamp = dateString!.timeIntervalSince1970
+            guard let dateString = dateFormatter.date(from: strippedZone) else { continue }
+            let dateTimeStamp = dateString.timeIntervalSince1970
             guard let basalRate = currentEntry?["absolute"] as? Double else {
                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Basal entry")}
                 continue
@@ -1201,8 +1165,8 @@ extension MainViewController {
                 priorDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
                 priorDateFormatter.locale = Locale(identifier: "en_US")
                 priorDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-                let priorDateString = dateFormatter.date(from: priorStrippedZone)
-                let priorDateTimeStamp = priorDateString!.timeIntervalSince1970
+                guard let priorDateString = dateFormatter.date(from: priorStrippedZone) else { continue }
+                let priorDateTimeStamp = priorDateString.timeIntervalSince1970
                 let priorDuration = priorEntry?["duration"] as! Double
                 // if difference between time stamps is greater than the duration of the last entry, there is a gap. Give a 15 second leeway on the timestamp
                 if Double( dateTimeStamp - priorDateTimeStamp ) > Double( (priorDuration * 60) + 15 ) {
@@ -1292,8 +1256,8 @@ extension MainViewController {
                 nextDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
                 nextDateFormatter.locale = Locale(identifier: "en_US")
                 nextDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-                let nextDateString = dateFormatter.date(from: nextStrippedZone)
-                let nextDateTimeStamp = nextDateString!.timeIntervalSince1970
+                guard let nextDateString = dateFormatter.date(from: nextStrippedZone) else { continue }
+                let nextDateTimeStamp = nextDateString.timeIntervalSince1970
                 if nextDateTimeStamp < (dateTimeStamp + (duration * 60)) {
                     lastEndDot = nextDateTimeStamp
                 }
@@ -1353,7 +1317,7 @@ extension MainViewController {
             } else if currentEntry?["created_at"] != nil {
                 bolusDate = currentEntry?["created_at"] as! String
             } else {
-                return
+                continue
             }
             
             // fix to remove millisecond (after period in timestamp) for FreeAPS users
@@ -1363,8 +1327,8 @@ extension MainViewController {
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-            let dateString = dateFormatter.date(from: strippedZone)
-            let dateTimeStamp = dateString!.timeIntervalSince1970
+            guard let dateString = dateFormatter.date(from: strippedZone) else { continue }
+            let dateTimeStamp = dateString.timeIntervalSince1970
 
                 guard let bolus = currentEntry?["insulin"] as? Double else { continue }
                 let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
@@ -1399,7 +1363,7 @@ extension MainViewController {
             } else if currentEntry?["created_at"] != nil {
                 carbDate = currentEntry?["created_at"] as! String
             } else {
-                return
+                continue
             }
             
             
@@ -1413,12 +1377,12 @@ extension MainViewController {
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
             dateFormatter.locale = Locale(identifier: "en_US")
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-            let dateString = dateFormatter.date(from: strippedZone)
-            var dateTimeStamp = dateString!.timeIntervalSince1970
+            guard let dateString = dateFormatter.date(from: strippedZone) else { continue }
+            var dateTimeStamp = dateString.timeIntervalSince1970
             
             guard let carbs = currentEntry?["carbs"] as? Double else {
                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Carb entry")}
-                break
+                continue
             }
             let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
             lastFoundIndex = sgv.foundIndex
