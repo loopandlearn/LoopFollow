@@ -90,7 +90,9 @@ extension MainViewController {
                 // Separating this makes it so the low or drop alerts won't trigger if they already snoozed the urgent low
                 if !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
                     AlarmSound.whichAlarm = "Urgent Low Alert"
-                    if UserDefaultsRepository.alertUrgentLowRepeat.value { numLoops = -1 }
+                    if UserDefaultsRepository.alertUrgentLowRepeat.value || (UserDefaultsRepository.alertsRepeatDuringQH.value && UserDefaultsRepository.checkIfQuietHours.value) {
+                        numLoops = -1
+                        }
                     triggerAlarm(sound: UserDefaultsRepository.alertUrgentLowSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertUrgentLowSnooze.value)
                     return
                 } else {
@@ -102,7 +104,9 @@ extension MainViewController {
             if UserDefaultsRepository.alertLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
                 Float(currentBG) <= UserDefaultsRepository.alertLowBG.value && !UserDefaultsRepository.alertLowIsSnoozed.value {
                 AlarmSound.whichAlarm = "Low Alert"
-                if UserDefaultsRepository.alertLowRepeat.value { numLoops = -1 }
+                if UserDefaultsRepository.alertLowRepeat.value || (UserDefaultsRepository.alertsRepeatDuringQH.value && UserDefaultsRepository.checkIfQuietHours.value) {
+                    numLoops = -1
+                    }
                 triggerAlarm(sound: UserDefaultsRepository.alertLowSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertLowSnooze.value)
                 return
             }
@@ -113,7 +117,9 @@ extension MainViewController {
                 // Separating this makes it so the high or rise alerts won't trigger if they already snoozed the urgent high
                 if !UserDefaultsRepository.alertUrgentHighIsSnoozed.value {
                     AlarmSound.whichAlarm = "Urgent High Alert"
-                    if UserDefaultsRepository.alertUrgentHighRepeat.value { numLoops = -1 }
+                    if UserDefaultsRepository.alertUrgentHighRepeat.value || (UserDefaultsRepository.alertsRepeatDuringQH.value && UserDefaultsRepository.checkIfQuietHours.value) {
+                        numLoops = -1
+                        }
                     triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertUrgentHighSnooze.value)
                     return
                 } else {
@@ -131,7 +137,9 @@ extension MainViewController {
                 Float(persistentBG) >= UserDefaultsRepository.alertHighBG.value &&
                 !UserDefaultsRepository.alertHighIsSnoozed.value {
                 AlarmSound.whichAlarm = "High Alert"
-                if UserDefaultsRepository.alertHighRepeat.value { numLoops = -1 }
+                if UserDefaultsRepository.alertHighRepeat.value || (UserDefaultsRepository.alertsRepeatDuringQH.value && UserDefaultsRepository.checkIfQuietHours.value) {
+                    numLoops = -1
+                    }
                 triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertHighSnooze.value)
                 return
             }
@@ -149,7 +157,9 @@ extension MainViewController {
                         || (UserDefaultsRepository.alertFastDropReadings.value == 3 && Float(deltas[0]) <= compare && Float(deltas[1]) <= compare)
                         || (UserDefaultsRepository.alertFastDropReadings.value == 4 && Float(deltas[0]) <= compare && Float(deltas[1]) <= compare && Float(deltas[2]) <= compare) {
                         AlarmSound.whichAlarm = "Fast Drop Alert"
-                        if UserDefaultsRepository.alertFastDropRepeat.value { numLoops = -1 }
+                        if UserDefaultsRepository.alertFastDropRepeat.value || (UserDefaultsRepository.alertsRepeatDuringQH.value && UserDefaultsRepository.checkIfQuietHours.value) {
+                            numLoops = -1
+                            }
                         triggerAlarm(sound: UserDefaultsRepository.alertFastDropSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertFastDropSnooze.value)
                         return
                     }
@@ -167,7 +177,9 @@ extension MainViewController {
                         || (UserDefaultsRepository.alertFastRiseReadings.value == 3 && Float(deltas[0]) >= compare && Float(deltas[1]) >= compare)
                         || (UserDefaultsRepository.alertFastRiseReadings.value == 4 && Float(deltas[0]) >= compare && Float(deltas[1]) >= compare && Float(deltas[2]) >= compare) {
                         AlarmSound.whichAlarm = "Fast Rise Alert"
-                        if UserDefaultsRepository.alertFastRiseRepeat.value { numLoops = -1 }
+                        if UserDefaultsRepository.alertFastRiseRepeat.value || (UserDefaultsRepository.alertsRepeatDuringQH.value && UserDefaultsRepository.checkIfQuietHours.value) {
+                            numLoops = -1
+                            }
                         triggerAlarm(sound: UserDefaultsRepository.alertFastRiseSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertFastRiseSnooze.value)
                         return
                     }
@@ -183,7 +195,9 @@ extension MainViewController {
         //check for missed reading alert
         if UserDefaultsRepository.alertMissedReadingActive.value && !UserDefaultsRepository.alertMissedReadingIsSnoozed.value && (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertMissedReading.value * 60)) {
             AlarmSound.whichAlarm = "Missed Reading Alert"
-            if UserDefaultsRepository.alertMissedReadingRepeat.value { numLoops = -1 }
+            if UserDefaultsRepository.alertMissedReadingRepeat.value || (UserDefaultsRepository.alertsRepeatDuringQH.value && UserDefaultsRepository.checkIfQuietHours.value) {
+                numLoops = -1
+                }
             triggerAlarm(sound: UserDefaultsRepository.alertMissedReadingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertMissedReadingSnooze.value)
             return
         }
@@ -206,7 +220,9 @@ extension MainViewController {
                     ) ||
                     !UserDefaultsRepository.alertNotLoopingUseLimits.value) {
                     AlarmSound.whichAlarm = "Not Looping Alert"
-                    if UserDefaultsRepository.alertNotLoopingRepeat.value { numLoops = -1 }
+                    if UserDefaultsRepository.alertNotLoopingRepeat.value || (UserDefaultsRepository.alertsRepeatDuringQH.value && UserDefaultsRepository.checkIfQuietHours.value) {
+                        numLoops = -1
+                        }
                     triggerAlarm(sound: UserDefaultsRepository.alertNotLoopingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertNotLoopingSnooze.value)
                     return
                 }
@@ -557,8 +573,15 @@ extension MainViewController {
             
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             snoozer.setQuietHours(snoozeTime: snoozeTime!)
+            
+            if UserDefaultsRepository.alertsRepeatDuringQH.value {
+                UserDefaultsRepository.checkIfQuietHours.value = true
+            }
+        } else {
+            if UserDefaultsRepository.alertsRepeatDuringQH.value {
+                UserDefaultsRepository.checkIfQuietHours.value = false
+            }
         }
-        
     }
     
     

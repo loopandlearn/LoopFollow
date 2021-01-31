@@ -108,6 +108,8 @@ class UserDefaultsRepository {
     
     static let quietHourStart = UserDefaultsValue<Date?>(key: "quietHourStart", default: nil)
     static let quietHourEnd = UserDefaultsValue<Date?>(key: "quietHourEnd", default: nil)
+    static let alertsRepeatDuringQH = UserDefaultsValue<Bool>(key: "alertsRepeatDuringQH", default: false)
+    static let checkIfQuietHours = UserDefaultsValue<Bool>(key: "checkIfQuietHours", default: false)
     
     static let snoozedBGReadingTime = UserDefaultsValue<TimeInterval?>(key: "snoozedBGReadingTime", default: 0)
     

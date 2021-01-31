@@ -2108,7 +2108,7 @@ class AlarmViewController: FormViewController {
                       UserDefaultsRepository.forcedOutputVolume.value = Float(value)
               }
             
-             +++ Section(header: "Quiet Hour Settings", footer: "Quiet hours can be used to automatically snooze non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert that may happen during the night.")  { row in
+             +++ Section(header: "Quiet Hour Settings", footer: "Quiet hours can be used to automatically snooze non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert that may happen during the night. Repeat Alerts forces critical alerts to repeat during quiet hours regardless of individual alarm settings.")  { row in
                 row.tag = "quietHourSection"
                         }
             <<< TimeInlineRow("quietHourStart") { row in
@@ -2127,6 +2127,16 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.quietHourEnd.value = value
         }
+        
+        <<< SwitchRow("repeatAlarmsQH"){ row in
+                row.title = "Repeat Alerts"
+                row.value = UserDefaultsRepository.alertsRepeatDuringQH.value
+            
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertsRepeatDuringQH.value = value
+        }
+        
        }
 
 }
