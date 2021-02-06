@@ -1144,6 +1144,9 @@ extension MainViewController {
             if thisItem.correctionRange.count == 2 {
                 labelText += String(thisItem.correctionRange[0]) + "-" + String(thisItem.correctionRange[1])
             }
+            if thisItem.enteredBy.count > 0 {
+                labelText += "\r\nEntered By: " + thisItem.enteredBy
+            }
             
             
             // Start Dot
