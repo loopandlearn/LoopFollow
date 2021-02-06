@@ -1330,7 +1330,7 @@ extension MainViewController {
             guard let dateString = dateFormatter.date(from: strippedZone) else { continue }
             let dateTimeStamp = dateString.timeIntervalSince1970
 
-                guard let bolus = currentEntry?["insulin"] as? Double else { continue }
+            guard let bolus = currentEntry?["insulin"] as? Double else { continue }
                 let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
                 lastFoundIndex = sgv.foundIndex
                 
