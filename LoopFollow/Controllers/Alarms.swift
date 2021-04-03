@@ -54,6 +54,7 @@ extension MainViewController {
         let currentBGTime = bgs[bgs.count - 1].date
         var alarmTriggered = false
         var numLoops = 0
+        var playSound = true
         checkQuietHours()
         clearOldSnoozes()
         
@@ -98,15 +99,13 @@ extension MainViewController {
                     AlarmSound.whichAlarm = "Urgent Low Alert"
                     //determine if it is day or night and what should happen
                     if UserDefaultsRepository.nightTime.value {
-                        if UserDefaultsRepository.alertUrgentLowNightTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertUrgentLowNightTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertUrgentLowNightTimeAudible.value { playSound = false }
                     } else {
-                        if UserDefaultsRepository.alertUrgentLowDayTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertUrgentLowDayTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertUrgentLowDayTimeAudible.value { playSound = false }
                     }
-                    triggerAlarm(sound: UserDefaultsRepository.alertUrgentLowSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertUrgentLowSnooze.value)
+                    triggerAlarm(sound: UserDefaultsRepository.alertUrgentLowSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertUrgentLowSnooze.value, audio: playSound)
                     return
                 } else {
                     return
@@ -120,16 +119,16 @@ extension MainViewController {
   
                 //determine if it is day or night and what should happen
                 if UserDefaultsRepository.nightTime.value {
-                    if UserDefaultsRepository.alertLowNightTime.value {
-                        numLoops = -1
-                    }
+                    if UserDefaultsRepository.alertLowNightTime.value { numLoops = -1 }
+                    if !UserDefaultsRepository.alertLowNightTimeAudible.value { playSound = false }
+                    print ("It is NightTime and playSound = ", playSound)
                 } else {
-                    if UserDefaultsRepository.alertLowDayTime.value {
-                        numLoops = -1
-                    }
+                    if UserDefaultsRepository.alertLowDayTime.value { numLoops = -1 }
+                    if !UserDefaultsRepository.alertLowDayTimeAudible.value { playSound = false }
+                    //print ("It is DayTime and playSound = ", playSound)
                 }
                 
-                triggerAlarm(sound: UserDefaultsRepository.alertLowSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertLowSnooze.value)
+                triggerAlarm(sound: UserDefaultsRepository.alertLowSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertLowSnooze.value, audio: playSound)
                 return
             }
             
@@ -141,15 +140,13 @@ extension MainViewController {
                     AlarmSound.whichAlarm = "Urgent High Alert"
                     //determine if it is day or night and what should happen
                     if UserDefaultsRepository.nightTime.value {
-                        if UserDefaultsRepository.alertUrgentHighNightTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertUrgentHighNightTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertUrgentHighNightTimeAudible.value { playSound = false }
                     } else {
-                        if UserDefaultsRepository.alertUrgentHighDayTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertUrgentHighDayTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertUrgentHighDayTimeAudible.value { playSound = false }
                     }
-                    triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertUrgentHighSnooze.value)
+                    triggerAlarm(sound: UserDefaultsRepository.alertUrgentHighSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertUrgentHighSnooze.value, audio: playSound)
                     return
                 } else {
                     return
@@ -168,15 +165,15 @@ extension MainViewController {
                 AlarmSound.whichAlarm = "High Alert"
                 //determine if it is day or night and what should happen
                 if UserDefaultsRepository.nightTime.value {
-                    if UserDefaultsRepository.alertHighNightTime.value {
-                        numLoops = -1
-                    }
+                    if UserDefaultsRepository.alertHighNightTime.value { numLoops = -1 }
+                    if !UserDefaultsRepository.alertHighNightTimeAudible.value { playSound = false }
+                    print ("It is NightTime and playSound = ", playSound)
                 } else {
-                    if UserDefaultsRepository.alertHighDayTime.value {
-                        numLoops = -1
-                    }
+                    if UserDefaultsRepository.alertHighDayTime.value { numLoops = -1 }
+                    if !UserDefaultsRepository.alertHighDayTimeAudible.value { playSound = false }
+                    //print ("It is DayTime and playSound = ", playSound)
                 }
-                triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertHighSnooze.value)
+                triggerAlarm(sound: UserDefaultsRepository.alertHighSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertHighSnooze.value, audio: playSound)
                 return
             }
             
@@ -195,15 +192,13 @@ extension MainViewController {
                         AlarmSound.whichAlarm = "Fast Drop Alert"
                         //determine if it is day or night and what should happen
                         if UserDefaultsRepository.nightTime.value {
-                            if UserDefaultsRepository.alertFastDropNightTime.value {
-                                numLoops = -1
-                            }
+                            if UserDefaultsRepository.alertFastDropNightTime.value { numLoops = -1 }
+                            if !UserDefaultsRepository.alertFastDropNightTimeAudible.value { playSound = false }
                         } else {
-                            if UserDefaultsRepository.alertFastDropDayTime.value {
-                                numLoops = -1
-                            }
+                            if UserDefaultsRepository.alertFastDropDayTime.value { numLoops = -1 }
+                            if !UserDefaultsRepository.alertFastDropDayTimeAudible.value { playSound = false }
                         }
-                        triggerAlarm(sound: UserDefaultsRepository.alertFastDropSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertFastDropSnooze.value)
+                        triggerAlarm(sound: UserDefaultsRepository.alertFastDropSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertFastDropSnooze.value, audio: playSound)
                         return
                     }
                 }
@@ -222,15 +217,13 @@ extension MainViewController {
                         AlarmSound.whichAlarm = "Fast Rise Alert"
                         //determine if it is day or night and what should happen
                         if UserDefaultsRepository.nightTime.value {
-                            if UserDefaultsRepository.alertFastRiseNightTime.value {
-                                numLoops = -1
-                            }
+                            if UserDefaultsRepository.alertFastRiseNightTime.value { numLoops = -1 }
+                            if !UserDefaultsRepository.alertFastRiseNightTimeAudible.value { playSound = false }
                         } else {
-                            if UserDefaultsRepository.alertFastRiseDayTime.value {
-                                numLoops = -1
-                            }
+                            if UserDefaultsRepository.alertFastRiseDayTime.value { numLoops = -1 }
+                            if !UserDefaultsRepository.alertFastRiseDayTimeAudible.value { playSound = false }
                         }
-                        triggerAlarm(sound: UserDefaultsRepository.alertFastRiseSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertFastRiseSnooze.value)
+                        triggerAlarm(sound: UserDefaultsRepository.alertFastRiseSound.value, snooozedBGReadingTime: currentBGTime, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertFastRiseSnooze.value, audio: playSound)
                         return
                     }
                 }
@@ -247,15 +240,13 @@ extension MainViewController {
             AlarmSound.whichAlarm = "Missed Reading Alert"
             //determine if it is day or night and what should happen
             if UserDefaultsRepository.nightTime.value {
-                if UserDefaultsRepository.alertMissedReadingNightTime.value {
-                    numLoops = -1
-                }
+                if UserDefaultsRepository.alertMissedReadingNightTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertMissedReadingNightTimeAudible.value { playSound = false }
             } else {
-                if UserDefaultsRepository.alertMissedReadingDayTime.value {
-                    numLoops = -1
-                }
+                if UserDefaultsRepository.alertMissedReadingDayTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertMissedReadingDayTimeAudible.value { playSound = false }
             }
-            triggerAlarm(sound: UserDefaultsRepository.alertMissedReadingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertMissedReadingSnooze.value)
+            triggerAlarm(sound: UserDefaultsRepository.alertMissedReadingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertMissedReadingSnooze.value, audio: playSound)
             return
         }
         
@@ -279,15 +270,13 @@ extension MainViewController {
                     AlarmSound.whichAlarm = "Not Looping Alert"
                     //determine if it is day or night and what should happen
                     if UserDefaultsRepository.nightTime.value {
-                        if UserDefaultsRepository.alertNotLoopingNightTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertNotLoopingNightTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertNotLoopingNightTimeAudible.value { playSound = false }
                     } else {
-                        if UserDefaultsRepository.alertNotLoopingDayTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertNotLoopingDayTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertNotLoopingDayTimeAudible.value { playSound = false }
                     }
-                    triggerAlarm(sound: UserDefaultsRepository.alertNotLoopingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertNotLoopingSnooze.value)
+                    triggerAlarm(sound: UserDefaultsRepository.alertNotLoopingSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertNotLoopingSnooze.value, audio: playSound)
                     return
                 }
             }
@@ -314,15 +303,13 @@ extension MainViewController {
                         AlarmSound.whichAlarm = "Missed Bolus Alert"
                         //determine if it is day or night and what should happen
                         if UserDefaultsRepository.nightTime.value {
-                            if UserDefaultsRepository.alertMissedBolusNightTime.value {
-                                numLoops = -1
-                            }
+                            if UserDefaultsRepository.alertMissedBolusNightTime.value { numLoops = -1 }
+                            if !UserDefaultsRepository.alertMissedBolusNightTimeAudible.value { playSound = false }
                         } else {
-                            if UserDefaultsRepository.alertMissedBolusDayTime.value {
-                                numLoops = -1
-                            }
+                            if UserDefaultsRepository.alertMissedBolusDayTime.value { numLoops = -1 }
+                            if !UserDefaultsRepository.alertMissedBolusDayTimeAudible.value { playSound = false }
                         }
-                        triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertMissedBolusSnooze.value)
+                        triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertMissedBolusSnooze.value, audio: playSound)
                         return
                     }
                     
@@ -347,15 +334,13 @@ extension MainViewController {
                         AlarmSound.whichAlarm = "Missed Bolus Alert"
                         //determine if it is day or night and what should happen
                         if UserDefaultsRepository.nightTime.value {
-                            if UserDefaultsRepository.alertMissedBolusNightTime.value {
-                                numLoops = -1
-                            }
+                            if UserDefaultsRepository.alertMissedBolusNightTime.value { numLoops = -1 }
+                            if !UserDefaultsRepository.alertMissedBolusNightTimeAudible.value { playSound = false }
                         } else {
-                            if UserDefaultsRepository.alertMissedBolusDayTime.value {
-                                numLoops = -1
-                            }
+                            if UserDefaultsRepository.alertMissedBolusDayTime.value { numLoops = -1 }
+                            if !UserDefaultsRepository.alertMissedBolusDayTimeAudible.value { playSound = false }
                         }
-                        triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertMissedBolusSnooze.value)
+                        triggerAlarm(sound: UserDefaultsRepository.alertMissedBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertMissedBolusSnooze.value, audio: playSound)
                         return
                     }
                     
@@ -373,15 +358,13 @@ extension MainViewController {
                     AlarmSound.whichAlarm = "Sensor Change Alert"
                     //determine if it is day or night and what should happen
                     if UserDefaultsRepository.nightTime.value {
-                        if UserDefaultsRepository.alertSAGENightTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertSAGENightTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertSAGENightTimeAudible.value { playSound = false }
                     } else {
-                        if UserDefaultsRepository.alertSAGEDayTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertSAGEDayTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertSAGEDayTimeAudible.value { playSound = false }
                     }
-                    triggerAlarm(sound: UserDefaultsRepository.alertSAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertSAGESnooze.value, snoozeIncrement: 1)
+                    triggerAlarm(sound: UserDefaultsRepository.alertSAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertSAGESnooze.value, snoozeIncrement: 1, audio: playSound)
                     return
                 }
             }
@@ -396,15 +379,13 @@ extension MainViewController {
                     AlarmSound.whichAlarm = "Pump Change Alert"
                     //determine if it is day or night and what should happen
                     if UserDefaultsRepository.nightTime.value {
-                        if UserDefaultsRepository.alertCAGENightTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertCAGENightTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertCAGENightTimeAudible.value { playSound = false }
                     } else {
-                        if UserDefaultsRepository.alertCAGEDayTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertCAGEDayTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertCAGEDayTimeAudible.value { playSound = false }
                     }
-                    triggerAlarm(sound: UserDefaultsRepository.alertCAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertCAGESnooze.value, snoozeIncrement: 1)
+                    triggerAlarm(sound: UserDefaultsRepository.alertCAGESound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertCAGESnooze.value, snoozeIncrement: 1, audio: playSound)
                     return
                 }
             }
@@ -416,15 +397,13 @@ extension MainViewController {
                     AlarmSound.whichAlarm = "Low Insulin Alert"
                     //determine if it is day or night and what should happen
                     if UserDefaultsRepository.nightTime.value {
-                        if UserDefaultsRepository.alertPumpNightTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertPumpNightTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertPumpNightTimeAudible.value { playSound = false }
                     } else {
-                        if UserDefaultsRepository.alertPumpDayTime.value {
-                            numLoops = -1
-                        }
+                        if UserDefaultsRepository.alertPumpDayTime.value { numLoops = -1 }
+                        if !UserDefaultsRepository.alertPumpDayTimeAudible.value { playSound = false }
                     }
-                    triggerAlarm(sound: UserDefaultsRepository.alertPumpSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertPumpSnoozeHours.value, snoozeIncrement: 1)
+                    triggerAlarm(sound: UserDefaultsRepository.alertPumpSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertPumpSnoozeHours.value, snoozeIncrement: 1, audio: playSound)
                     return
                 }
             }
@@ -462,49 +441,48 @@ extension MainViewController {
         let overrideName = recentOverride?.reason as! String
        
         var numLoops = 0
+        var playSound = true
         if UserDefaultsRepository.alertOverrideStart.value && !UserDefaultsRepository.alertOverrideStartIsSnoozed.value && triggerStart {
             AlarmSound.whichAlarm = overrideName + " Override Started"
             //determine if it is day or night and what should happen
             if UserDefaultsRepository.nightTime.value {
-                if UserDefaultsRepository.alertOverrideStartNightTime.value {
-                    numLoops = -1
-                }
+                if UserDefaultsRepository.alertOverrideStartNightTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertOverrideStartNightTimeAudible.value { playSound = false }
             } else {
-                if UserDefaultsRepository.alertOverrideStartDayTime.value {
-                    numLoops = -1
-                }
+                if UserDefaultsRepository.alertOverrideStartDayTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertOverrideStartDayTimeAudible.value { playSound = false }
             }
-                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideStartSound.value, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
+            triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideStartSound.value, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, audio: playSound)
                 lastOverrideStartTime = recentStart
                 lastOverrideAlarm = now
         } else if UserDefaultsRepository.alertOverrideEnd.value && !UserDefaultsRepository.alertOverrideEndIsSnoozed.value && triggerEnd {
                 AlarmSound.whichAlarm = overrideName + " Override Ended"
             //determine if it is day or night and what should happen
             if UserDefaultsRepository.nightTime.value {
-                if UserDefaultsRepository.alertOverrideEndNightTime.value {
-                    numLoops = -1
-                }
+                if UserDefaultsRepository.alertOverrideEndNightTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertOverrideEndNightTimeAudible.value { playSound = false }
             } else {
-                if UserDefaultsRepository.alertOverrideEndDayTime.value {
-                    numLoops = -1
-                }
+                if UserDefaultsRepository.alertOverrideEndDayTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertOverrideEndDayTimeAudible.value { playSound = false }
             }
-                triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideEndSound.value, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops)
+            triggerOneTimeAlarm(sound: UserDefaultsRepository.alertOverrideEndSound.value, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, audio: playSound)
                 lastOverrideEndTime = recentEnd
                 lastOverrideAlarm = now
         }
     }
     
-    func triggerOneTimeAlarm(sound: String, overrideVolume: Bool, numLoops: Int)
+    func triggerOneTimeAlarm(sound: String, overrideVolume: Bool, numLoops: Int, audio: Bool = true)
     {
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
-        AlarmSound.setSoundFile(str: sound)
-        AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
-        startAlarmPlayingTimer()
+        if audio && !UserDefaultsRepository.alertMuteAllIsMuted.value {
+            AlarmSound.setSoundFile(str: sound)
+            AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
+            startAlarmPlayingTimer()
+        }
     }
     
-    func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?, overrideVolume: Bool, numLoops: Int, snoozeTime: Int = 0, snoozeIncrement: Int = 5)
+    func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?, overrideVolume: Bool, numLoops: Int, snoozeTime: Int = 0, snoozeIncrement: Int = 5, audio: Bool = true)
     {
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
@@ -524,9 +502,10 @@ extension MainViewController {
         if snooozedBGReadingTime != nil {
             UserDefaultsRepository.snoozedBGReadingTime.value = snooozedBGReadingTime
         }
-        AlarmSound.setSoundFile(str: sound)
-        AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
-        
+        if audio && !UserDefaultsRepository.alertMuteAllIsMuted.value {
+            AlarmSound.setSoundFile(str: sound)
+            AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
+        }
         let bgSeconds = bgData.last!.date
         let now = Date().timeIntervalSince1970
         let secondsAgo = now - bgSeconds
@@ -542,7 +521,9 @@ extension MainViewController {
         snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozer.SnoozeButton.isHidden = true
         snoozer.AlertLabel.isHidden = true
-        AlarmSound.stop()
+        if AlarmSound.isPlaying {
+            AlarmSound.stop()
+        }
     }
     
     func clearOldSnoozes(){
@@ -559,6 +540,14 @@ extension MainViewController {
             
           }
           
+        if date > UserDefaultsRepository.alertMuteAllTime.value ?? date {
+            UserDefaultsRepository.alertMuteAllTime.setNil(key: "alertMuteAllTime")
+            UserDefaultsRepository.alertMuteAllIsMuted.value = false
+            alarms.reloadMuteTime(key: "alertMuteAllTime", setNil: true)
+            alarms.reloadIsMuted(key: "alertMuteAllIsMuted", value: false)
+          
+        }
+        
           if date > UserDefaultsRepository.alertUrgentLowSnoozedTime.value ?? date {
               UserDefaultsRepository.alertUrgentLowSnoozedTime.setNil(key: "alertUrgentLowSnoozedTime")
               UserDefaultsRepository.alertUrgentLowIsSnoozed.value = false
