@@ -131,11 +131,19 @@ class AlarmViewController: FormViewController {
     ]
     
     var alertRepeatOptions: [String] = [
-        "Do not repeat",
-        "Always repeat",
-        "Repeat at night",
-        "Repeat during the day"
+        "Never",
+        "Always",
+        "At night",
+        "During the day"
     ]
+    
+    var alertPlaySoundOptions: [String] = [
+        "Always",
+        "At night",
+        "During the day",
+        "Never"
+    ]
+
     
     func timeBasedSettings (pickerValue: String) -> (dayTime:Bool, nightTime:Bool) {
         var dayTime = false
@@ -177,7 +185,27 @@ class AlarmViewController: FormViewController {
             }
     }
     
+    func reloadMuteTime(key: String, setNil: Bool, value: Date = Date()) {
+        
+            if let row = form.rowBy(tag: key) as? DateTimeInlineRow {
+                if setNil {
+                    row.value = nil
+                } else {
+                   row.value = value
+                }
+                
+                row.reload()
+            }
+               
+    }
     
+    func reloadIsMuted(key: String, value: Bool) {
+        
+            if let row = form.rowBy(tag: key) as? SwitchRow {
+            row.value = value
+            row.reload()
+            }
+    }
     
    // static let shared = AlarmViewController()
 
@@ -340,7 +368,7 @@ class AlarmViewController: FormViewController {
 
     func buildSnoozeAll(){
         form
-            +++ Section(header: "Snooze All", footer: "Snooze All Alerts")
+            +++ Section(header: "Snooze & Mute Options", footer: "Snooze and Mute All Sounds: Snooze All turns everything off, Mute All turns off phone sounds but leaves vibration and iOS notifications on")
         <<< DateTimeInlineRow("alertSnoozeAllTime") { row in
             row.title = "Snooze All Until"
             
@@ -384,8 +412,51 @@ class AlarmViewController: FormViewController {
                    otherRow.reload()
                 }
         }
+        
+            <<< DateTimeInlineRow("alertMuteAllTime") { row in
+                row.title = "Mute All Until"
+                
+                if (UserDefaultsRepository.alertMuteAllTime.value != nil) {
+                    row.value = UserDefaultsRepository.alertMuteAllTime.value
+                }
+                row.minuteInterval = 5
+                row.noValueDisplayText = "Not Muted"
+                }
+                .onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMuteAllTime.value = value
+                    UserDefaultsRepository.alertMuteAllIsMuted.value = true
+                    let otherRow = self?.form.rowBy(tag: "alertMuteAllIsMuted") as! SwitchRow
+                    otherRow.value = true
+                    otherRow.reload()
+                }
+                .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                    inlineRow.cellUpdate() { cell, row in
+                        cell.datePicker.datePickerMode = .dateAndTime
+                        cell.datePicker.preferredDatePickerStyle = .wheels
+                    }
+                    let color = cell.detailTextLabel?.textColor
+                    row.onCollapseInlineRow { cell, _, _ in
+                        cell.detailTextLabel?.textColor = color
+                    }
+                    cell.detailTextLabel?.textColor = cell.tintColor
+            }
+            <<< SwitchRow("alertMuteAllIsMuted"){ row in
+                row.title = "All Sounds Muted"
+                row.value = UserDefaultsRepository.alertMuteAllIsMuted.value
+                row.hidden = "$alertMuteAllTime == nil"
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMuteAllIsMuted.value = value
+                    if !value {
+                        UserDefaultsRepository.alertMuteAllTime.setNil(key: "alertMuteAllTime")
+                        let otherRow = self?.form.rowBy(tag: "alertMuteAllTime") as! DateTimeInlineRow
+                       otherRow.value = nil
+                       otherRow.reload()
+                    }
+            }
     }
-    
+
     func buildTemporaryAlert(){
         form
             
@@ -437,7 +508,7 @@ class AlarmViewController: FormViewController {
                 AlarmSound.playTest()
         }
         <<< SwitchRow("alertTemporaryRepeat"){ row in
-        row.title = "Repeat Alert"
+        row.title = "Repeat Sound"
         row.value = UserDefaultsRepository.alertTemporaryBGRepeat.value
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -500,8 +571,24 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
+            
+            <<< PickerInputRow<String>("alertUrgentLowPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertUrgentLowAudible.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertUrgentLowAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertUrgentLowDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertUrgentLowNightTimeAudible.value = alertVol.nightTime
+            }
             <<< PickerInputRow<String>("alertUrgentLowRepeat") { row in
-                row.title = "Repeat Alert"
+                row.title = "Repeat Sound"
                 row.options = alertRepeatOptions
                 row.value = UserDefaultsRepository.alertUrgentLowRepeat.value
                 row.displayValueFor = { value in
@@ -615,8 +702,23 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
+            <<< PickerInputRow<String>("alertPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertLowAudible.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertLowAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertLowDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertLowNightTimeAudible.value = alertVol.nightTime
+            }
             <<< PickerInputRow<String>("alertLowRepeat") { row in
-                row.title = "Repeat Alert"
+                row.title = "Repeat Sound"
                 row.options = alertRepeatOptions
                 row.value = UserDefaultsRepository.alertLowRepeat.value
                 row.displayValueFor = { value in
@@ -630,6 +732,7 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertLowDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertLowNightTime.value = alertTimes.nightTime
             }
+           
         <<< DateTimeInlineRow("alertLowSnoozedTime") { row in
             row.title = "Snoozed Until"
            if (UserDefaultsRepository.alertLowSnoozedTime.value != nil) {
@@ -744,8 +847,23 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
+            <<< PickerInputRow<String>("alertHighPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertHighAudible.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertHighAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertHighDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertHighNightTimeAudible.value = alertVol.nightTime
+            }
             <<< PickerInputRow<String>("alertHighRepeat") { row in
-                row.title = "Repeat Alert"
+                row.title = "Repeat Sound"
                 row.options = alertRepeatOptions
                 row.value = UserDefaultsRepository.alertHighRepeat.value
                 row.displayValueFor = { value in
@@ -759,6 +877,7 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertHighDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertHighNightTime.value = alertTimes.nightTime
             }
+            
         <<< DateTimeInlineRow("alertHighSnoozedTime") { row in
             row.title = "Snoozed Until"
             if (UserDefaultsRepository.alertHighSnoozedTime.value != nil) {
@@ -857,8 +976,23 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
+            <<< PickerInputRow<String>("alertUrgentHighPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertUrgentHighAudible.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertUrgentHighAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertUrgentHighDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertUrgentHighNightTimeAudible.value = alertVol.nightTime
+            }
             <<< PickerInputRow<String>("alertUrgentHighRepeat") { row in
-                row.title = "Repeat Alert"
+                row.title = "Repeat Sound"
                 row.options = alertRepeatOptions
                 row.value = UserDefaultsRepository.alertUrgentHighRepeat.value
                 row.displayValueFor = { value in
@@ -872,6 +1006,7 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertUrgentHighDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertUrgentHighNightTime.value = alertTimes.nightTime
             }
+            
         <<< DateTimeInlineRow("alertUrgentHighSnoozedTime") { row in
             row.title = "Snoozed Until"
             if (UserDefaultsRepository.alertUrgentHighSnoozedTime.value != nil) {
@@ -1007,8 +1142,23 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
+            <<< PickerInputRow<String>("alertFastDropPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertFastDropAudible.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertFastDropAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertFastDropDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertFastDropNightTimeAudible.value = alertVol.nightTime
+            }
             <<< PickerInputRow<String>("alertFastDropRepeat") { row in
-                row.title = "Repeat Alert"
+                row.title = "Repeat Sound"
                 row.options = alertRepeatOptions
                 row.value = UserDefaultsRepository.alertFastDropRepeat.value
                 row.displayValueFor = { value in
@@ -1022,6 +1172,7 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertFastDropDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertFastDropNightTime.value = alertTimes.nightTime
             }
+            
         <<< DateTimeInlineRow("alertFastDropSnoozedTime") { row in
             row.title = "Snoozed Until"
            if (UserDefaultsRepository.alertFastDropSnoozedTime.value != nil) {
@@ -1157,20 +1308,35 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< PickerInputRow<String>("alertFastRiseRepeat") { row in // <--
-                row.title = "Repeat Alert"
-                row.options = alertRepeatOptions
-                row.value = UserDefaultsRepository.alertFastRiseRepeat.value // <--
+            <<< PickerInputRow<String>("alertFastRisePlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertFastRiseAudible.value
                 row.displayValueFor = { value in
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertFastRiseRepeat.value = value // <--
+                    UserDefaultsRepository.alertFastRiseAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertFastRiseDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertFastRiseNightTimeAudible.value = alertVol.nightTime
+            }
+            <<< PickerInputRow<String>("alertFastRiseRepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertFastRiseRepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertFastRiseRepeat.value = value
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
-                    UserDefaultsRepository.alertFastRiseDayTime.value = alertTimes.dayTime // <--
-                    UserDefaultsRepository.alertFastRiseNightTime.value = alertTimes.nightTime // <--
+                    UserDefaultsRepository.alertFastRiseDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertFastRiseNightTime.value = alertTimes.nightTime
             }
         <<< DateTimeInlineRow("alertFastRiseSnoozedTime") { row in
             row.title = "Snoozed Until"
@@ -1272,20 +1438,35 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< PickerInputRow<String>("alertMissedReadingRepeat") { row in // <--
-                row.title = "Repeat Alert"
-                row.options = alertRepeatOptions
-                row.value = UserDefaultsRepository.alertMissedReadingRepeat.value // <--
+            <<< PickerInputRow<String>("alertMissedReadingPlaySound") { row in
+                row.title = "PlaySound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertMissedReadingAudible.value
                 row.displayValueFor = { value in
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedReadingRepeat.value = value // <--
+                    UserDefaultsRepository.alertMissedReadingAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertMissedReadingDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertMissedReadingNightTimeAudible.value = alertVol.nightTime
+            }
+            <<< PickerInputRow<String>("alertMissedReadingRepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertMissedReadingRepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMissedReadingRepeat.value = value
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
-                    UserDefaultsRepository.alertMissedReadingDayTime.value = alertTimes.dayTime // <--
-                    UserDefaultsRepository.alertMissedReadingNightTime.value = alertTimes.nightTime // <--
+                    UserDefaultsRepository.alertMissedReadingDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertMissedReadingNightTime.value = alertTimes.nightTime
             }
         <<< DateTimeInlineRow("alertMissedReadingSnoozedTime") { row in
             row.title = "Snoozed Until"
@@ -1423,20 +1604,35 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< PickerInputRow<String>("alertNotLoopingRepeat") { row in // <--
-                row.title = "Repeat Alert"
-                row.options = alertRepeatOptions
-                row.value = UserDefaultsRepository.alertNotLoopingRepeat.value // <--
+            <<< PickerInputRow<String>("alertNotLoopingPlaySound") { row in
+                row.title = "PlaySound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertNotLoopingAudible.value
                 row.displayValueFor = { value in
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertNotLoopingRepeat.value = value // <--
+                    UserDefaultsRepository.alertNotLoopingAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertNotLoopingDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertNotLoopingNightTimeAudible.value = alertVol.nightTime
+            }
+            <<< PickerInputRow<String>("alertNotLoopingRepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertNotLoopingRepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertNotLoopingRepeat.value = value
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
-                    UserDefaultsRepository.alertNotLoopingDayTime.value = alertTimes.dayTime // <--
-                    UserDefaultsRepository.alertNotLoopingNightTime.value = alertTimes.nightTime // <--
+                    UserDefaultsRepository.alertNotLoopingDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertNotLoopingNightTime.value = alertTimes.nightTime
             }
         <<< DateTimeInlineRow("alertNotLoopingSnoozedTime") { row in
             row.title = "Snoozed Until"
@@ -1593,27 +1789,42 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< SwitchRow("alertMissedBolusQuiet"){ row in
-            row.title = "Mute at night"
-            row.value = UserDefaultsRepository.alertMissedBolusQuiet.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedBolusQuiet.value = value
-            }
-            <<< PickerInputRow<String>("alertMissedBolusRepeat") { row in // <--
-                row.title = "Repeat Alert"
-                row.options = alertRepeatOptions
-                row.value = UserDefaultsRepository.alertMissedBolusRepeat.value // <--
+            <<< PickerInputRow<String>("alertMissedBolusPlaySound") { row in
+                row.title = "PlaySound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertMissedBolusAudible.value
                 row.displayValueFor = { value in
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertMissedBolusRepeat.value = value // <--
+                    UserDefaultsRepository.alertMissedBolusAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertMissedBolusDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertMissedBolusNightTimeAudible.value = alertVol.nightTime
+            }
+            //<<< SwitchRow("alertMissedBolusQuiet"){ row in
+            //row.title = "Mute at night"
+            //row.value = UserDefaultsRepository.alertMissedBolusQuiet.value
+            //}.onChange { [weak self] row in
+            //        guard let value = row.value else { return }
+            //        UserDefaultsRepository.alertMissedBolusQuiet.value = value
+            //}
+            <<< PickerInputRow<String>("alertMissedBolusRepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertMissedBolusRepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMissedBolusRepeat.value = value
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
-                    UserDefaultsRepository.alertMissedBolusDayTime.value = alertTimes.dayTime // <--
-                    UserDefaultsRepository.alertMissedBolusNightTime.value = alertTimes.nightTime // <--
+                    UserDefaultsRepository.alertMissedBolusDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertMissedBolusNightTime.value = alertTimes.nightTime
             }
         <<< DateTimeInlineRow("alertMissedBolusSnoozedTime") { row in
             row.title = "Snoozed Until"
@@ -1728,28 +1939,44 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< SwitchRow("alertSAGEQuiet"){ row in
-            row.title = "Mute at night"
-            row.value = UserDefaultsRepository.alertSAGEQuiet.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertSAGEQuiet.value = value
-            }
-            <<< PickerInputRow<String>("alertSAGERepeat") { row in // <--
-                row.title = "Repeat Alert"
-                row.options = alertRepeatOptions
-                row.value = UserDefaultsRepository.alertSAGERepeat.value // <--
+            //<<< SwitchRow("alertSAGEQuiet"){ row in
+            //row.title = "Mute at night"
+            //row.value = UserDefaultsRepository.alertSAGEQuiet.value
+            //}.onChange { [weak self] row in
+            //        guard let value = row.value else { return }
+            //        UserDefaultsRepository.alertSAGEQuiet.value = value
+            //}
+            <<< PickerInputRow<String>("alertSAGEPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertSAGEAudible.value
                 row.displayValueFor = { value in
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertSAGERepeat.value = value // <--
-                    let alertTimes = self!.timeBasedSettings(pickerValue: value)
-                    UserDefaultsRepository.alertSAGEDayTime.value = alertTimes.dayTime // <--
-                    UserDefaultsRepository.alertSAGENightTime.value = alertTimes.nightTime // <--
+                    UserDefaultsRepository.alertSAGEAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertSAGEDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertSAGENightTimeAudible.value = alertVol.nightTime
             }
+            <<< PickerInputRow<String>("alertSAGERepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertSAGERepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertSAGERepeat.value = value
+                    let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertSAGEDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertSAGENightTime.value = alertTimes.nightTime
+            }
+            
             <<< DateTimeInlineRow("alertSAGESnoozedTime") { row in
                 row.title = "Snoozed Until"
                 if (UserDefaultsRepository.alertSAGESnoozedTime.value != nil) {
@@ -1849,27 +2076,42 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
             }
-            <<< SwitchRow("alertCAGEQuiet"){ row in
-            row.title = "Mute at night"
-            row.value = UserDefaultsRepository.alertCAGEQuiet.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertCAGEQuiet.value = value
-            }
-            <<< PickerInputRow<String>("alertCAGERepeat") { row in // <--
-                row.title = "Repeat Alert"
-                row.options = alertRepeatOptions
-                row.value = UserDefaultsRepository.alertCAGERepeat.value // <--
+            <<< PickerInputRow<String>("alertCAGEPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertCAGEAudible.value
                 row.displayValueFor = { value in
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertCAGERepeat.value = value // <--
+                    UserDefaultsRepository.alertCAGEAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertCAGEDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertCAGENightTimeAudible.value = alertVol.nightTime
+            }
+            //<<< SwitchRow("alertCAGEQuiet"){ row in
+            //row.title = "Mute at night"
+            //row.value = UserDefaultsRepository.alertCAGEQuiet.value
+            //}.onChange { [weak self] row in
+            //        guard let value = row.value else { return }
+            //        UserDefaultsRepository.alertCAGEQuiet.value = value
+            //}
+            <<< PickerInputRow<String>("alertCAGERepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertCAGERepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertCAGERepeat.value = value
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
-                    UserDefaultsRepository.alertCAGEDayTime.value = alertTimes.dayTime // <--
-                    UserDefaultsRepository.alertCAGENightTime.value = alertTimes.nightTime // <--
+                    UserDefaultsRepository.alertCAGEDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertCAGENightTime.value = alertTimes.nightTime
             }
             <<< DateTimeInlineRow("alertCAGESnoozedTime") { row in
                 row.title = "Snoozed Until"
@@ -1942,27 +2184,42 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
         }
-            <<< SwitchRow("alertOverrideStartQuiet"){ row in
-            row.title = "Mute at night"
-            row.value = UserDefaultsRepository.alertOverrideStartQuiet.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertOverrideStartQuiet.value = value
-            }
-            <<< PickerInputRow<String>("alertOverrideStartRepeat") { row in // <--
-                row.title = "Repeat Alert"
-                row.options = alertRepeatOptions
-                row.value = UserDefaultsRepository.alertOverrideStartRepeat.value // <--
+            <<< PickerInputRow<String>("alertOverrideStartPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertOverrideStartAudible.value
                 row.displayValueFor = { value in
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertOverrideStartRepeat.value = value // <--
+                    UserDefaultsRepository.alertOverrideStartAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertOverrideStartDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertOverrideStartNightTimeAudible.value = alertVol.nightTime
+            }
+            //<<< SwitchRow("alertOverrideStartQuiet"){ row in
+            //row.title = "Mute at night"
+            //row.value = UserDefaultsRepository.alertOverrideStartQuiet.value
+            //}.onChange { [weak self] row in
+            //        guard let value = row.value else { return }
+            //        UserDefaultsRepository.alertOverrideStartQuiet.value = value
+            //}
+            <<< PickerInputRow<String>("alertOverrideStartRepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertOverrideStartRepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertOverrideStartRepeat.value = value
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
-                    UserDefaultsRepository.alertOverrideStartDayTime.value = alertTimes.dayTime // <--
-                    UserDefaultsRepository.alertOverrideStartNightTime.value = alertTimes.nightTime // <--
+                    UserDefaultsRepository.alertOverrideStartDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertOverrideStartNightTime.value = alertTimes.nightTime
 
             }
         <<< DateTimeInlineRow("alertOverrideStartSnoozedTime") { row in
@@ -2037,27 +2294,42 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
         }
-            <<< SwitchRow("alertOverrideEndQuiet"){ row in
-            row.title = "Mute at night"
-            row.value = UserDefaultsRepository.alertOverrideEndQuiet.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertOverrideEndQuiet.value = value
-            }
-            <<< PickerInputRow<String>("alertOverrideEndRepeat") { row in // <--
-                row.title = "Repeat Alert"
-                row.options = alertRepeatOptions
-                row.value = UserDefaultsRepository.alertOverrideEndRepeat.value // <--
+            <<< PickerInputRow<String>("alertOverrideEndPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertOverrideEndAudible.value
                 row.displayValueFor = { value in
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertOverrideEndRepeat.value = value // <--
+                    UserDefaultsRepository.alertOverrideEndAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertOverrideEndDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertOverrideEndNightTimeAudible.value = alertVol.nightTime
+            }
+            //<<< SwitchRow("alertOverrideEndQuiet"){ row in
+            //row.title = "Mute at night"
+            //row.value = UserDefaultsRepository.alertOverrideEndQuiet.value
+            //}.onChange { [weak self] row in
+            //        guard let value = row.value else { return }
+            //        UserDefaultsRepository.alertOverrideEndQuiet.value = value
+            //}
+            <<< PickerInputRow<String>("alertOverrideEndRepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertOverrideEndRepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertOverrideEndRepeat.value = value
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
-                    UserDefaultsRepository.alertOverrideEndDayTime.value = alertTimes.dayTime // <--
-                    UserDefaultsRepository.alertOverrideEndNightTime.value = alertTimes.nightTime // <--
+                    UserDefaultsRepository.alertOverrideEndDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertOverrideEndNightTime.value = alertTimes.nightTime
             }
         <<< DateTimeInlineRow("alertOverrideEndSnoozedTime") { row in
                 row.title = "Snoozed Until"
@@ -2160,27 +2432,42 @@ class AlarmViewController: FormViewController {
                 AlarmSound.stop()
                 AlarmSound.playTest()
         }
-            <<< SwitchRow("alertPumpQuiet"){ row in
-            row.title = "Mute at night"
-            row.value = UserDefaultsRepository.alertPumpQuiet.value
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertPumpQuiet.value = value
-            }
-            <<< PickerInputRow<String>("alertPumpRepeat") { row in // <--
-                row.title = "Repeat Alert"
-                row.options = alertRepeatOptions
-                row.value = UserDefaultsRepository.alertPumpRepeat.value // <--
+            <<< PickerInputRow<String>("alertPumpPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertPumpAudible.value
                 row.displayValueFor = { value in
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
-                    UserDefaultsRepository.alertPumpRepeat.value = value // <--
+                    UserDefaultsRepository.alertPumpAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertPumpDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertPumpNightTimeAudible.value = alertVol.nightTime
+            }
+            //<<< SwitchRow("alertPumpQuiet"){ row in
+            //row.title = "Mute at night"
+            //row.value = UserDefaultsRepository.alertPumpQuiet.value
+            //}.onChange { [weak self] row in
+            //        guard let value = row.value else { return }
+            //        UserDefaultsRepository.alertPumpQuiet.value = value
+            //}
+            <<< PickerInputRow<String>("alertPumpRepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertPumpRepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertPumpRepeat.value = value
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
-                    UserDefaultsRepository.alertPumpDayTime.value = alertTimes.dayTime // <--
-                    UserDefaultsRepository.alertPumpNightTime.value = alertTimes.nightTime // <--
+                    UserDefaultsRepository.alertPumpDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertPumpNightTime.value = alertTimes.nightTime
             }
 
             <<< DateTimeInlineRow("alertPumpSnoozedTime") { row in
@@ -2253,7 +2540,7 @@ class AlarmViewController: FormViewController {
                       UserDefaultsRepository.forcedOutputVolume.value = Float(value)
               }
             
-             +++ Section(header: "Night Time Settings", footer: "Defining night time hours can be used to differ how alerts are managed during the day and at night.  For instance, automatically snooze, at night time, non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert.")  { row in
+             +++ Section(header: "Night Time Settings", footer: "Night time hours are used to differ how alerts are managed during the day and at night.  For instance, automatically snooze, at night time, non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert.")  { row in
                 row.tag = "quietHourSection"
                         }
             <<< TimeInlineRow("quietHourStart") { row in
