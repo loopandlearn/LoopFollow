@@ -671,7 +671,13 @@ extension MainViewController {
         let startMinute = startCalendar.component(.minute, from: start!)
         let startMinutes = (60 * startHour) + startMinute
         
-        if todayMinutes >= startMinutes {
+        let end = UserDefaultsRepository.quietHourEnd.value
+        let endCalendar = Calendar.current
+        let endHour = endCalendar.component(.hour, from: end!)
+        let endMinute = endCalendar.component(.minute, from: end!)
+        let endMinutes = (60 * endHour) + endMinute
+        
+        if todayMinutes >= startMinutes || todayMinutes < endMinutes {
             let tomorrow = Date().addingTimeInterval(86400)
             let tomorrowCalendar = Calendar.current
             let end = UserDefaultsRepository.quietHourEnd.value
