@@ -693,8 +693,8 @@ extension MainViewController {
             let snoozeCalendar = Calendar.current
             let snoozeTime = snoozeCalendar.date(from: components)
             
-            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-            snoozer.setQuietHours(snoozeTime: snoozeTime!)
+            //guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+            //snoozer.setQuietHours(snoozeTime: snoozeTime!)
             UserDefaultsRepository.nightTime.value = true
         } else {
             UserDefaultsRepository.nightTime.value = false
