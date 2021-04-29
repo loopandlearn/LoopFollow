@@ -143,6 +143,12 @@ class AlarmViewController: FormViewController {
         "During the day",
         "Never"
     ]
+    
+    var alertAutosnoozeOptions: [String] = [
+        "Never",
+        "At night",
+        "During the day"
+    ]
 
     
     func timeBasedSettings (pickerValue: String) -> (dayTime:Bool, nightTime:Bool) {
@@ -150,6 +156,27 @@ class AlarmViewController: FormViewController {
         var nightTime = false
         
         if pickerValue.contains("Always") {
+            dayTime = true
+            nightTime = true
+        } else if pickerValue.contains("Never") {
+            dayTime = false
+            nightTime = false
+        }else{
+            if pickerValue.contains("night"){
+                nightTime = true
+            }
+            if pickerValue.contains("day"){
+                dayTime = true
+            }
+        }
+        return (dayTime, nightTime)
+    }
+
+    func timeBasedSettingsNever (pickerValue: String) -> (dayTime:Bool, nightTime:Bool) {
+        var dayTime = false
+        var nightTime = false
+        
+        if pickerValue.contains("Never") {
             dayTime = true
             nightTime = true
         }else{
@@ -602,6 +629,21 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertUrgentLowDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertUrgentLowNightTime.value = alertTimes.nightTime
             }
+            <<< PickerInputRow<String>("alertUrgentLowAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertUrgentLowAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertUrgentLowAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertUrgentLowAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertUrgentLowAutosnoozeNight.value = alertTimes.nightTime
+            }
         <<< DateTimeInlineRow("alertUrgentLowSnoozedTime") { row in
             row.title = "Snoozed Until"
             
@@ -731,6 +773,22 @@ class AlarmViewController: FormViewController {
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
                     UserDefaultsRepository.alertLowDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertLowNightTime.value = alertTimes.nightTime
+            }
+            
+            <<< PickerInputRow<String>("alertLowAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertLowAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertLowAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertLowAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertLowAutosnoozeNight.value = alertTimes.nightTime
             }
            
         <<< DateTimeInlineRow("alertLowSnoozedTime") { row in
@@ -878,6 +936,22 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertHighNightTime.value = alertTimes.nightTime
             }
             
+            <<< PickerInputRow<String>("alertHightAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertHighAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertHighAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertHighAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertHighAutosnoozeNight.value = alertTimes.nightTime
+            }
+            
         <<< DateTimeInlineRow("alertHighSnoozedTime") { row in
             row.title = "Snoozed Until"
             if (UserDefaultsRepository.alertHighSnoozedTime.value != nil) {
@@ -1005,6 +1079,21 @@ class AlarmViewController: FormViewController {
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
                     UserDefaultsRepository.alertUrgentHighDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertUrgentHighNightTime.value = alertTimes.nightTime
+            }
+            <<< PickerInputRow<String>("alertUrgentHighAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertUrgentHighAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertUrgentHighAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertUrgentHighAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertUrgentHighAutosnoozeNight.value = alertTimes.nightTime
             }
             
         <<< DateTimeInlineRow("alertUrgentHighSnoozedTime") { row in
@@ -1173,6 +1262,22 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertFastDropNightTime.value = alertTimes.nightTime
             }
             
+            <<< PickerInputRow<String>("alertFastDropAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertFastDropAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertFastDropAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertFastDropAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertFastDropAutosnoozeNight.value = alertTimes.nightTime
+            }
+            
         <<< DateTimeInlineRow("alertFastDropSnoozedTime") { row in
             row.title = "Snoozed Until"
            if (UserDefaultsRepository.alertFastDropSnoozedTime.value != nil) {
@@ -1338,6 +1443,22 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertFastRiseDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertFastRiseNightTime.value = alertTimes.nightTime
             }
+            
+            <<< PickerInputRow<String>("alertFastRiseAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertFastRiseAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertFastRiseAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertFastRiseAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertFastRiseAutosnoozeNight.value = alertTimes.nightTime
+            }
         <<< DateTimeInlineRow("alertFastRiseSnoozedTime") { row in
             row.title = "Snoozed Until"
            if (UserDefaultsRepository.alertFastRiseSnoozedTime.value != nil) {
@@ -1467,6 +1588,22 @@ class AlarmViewController: FormViewController {
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
                     UserDefaultsRepository.alertMissedReadingDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertMissedReadingNightTime.value = alertTimes.nightTime
+            }
+            
+            <<< PickerInputRow<String>("alertMissedReadingAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertMissedReadingAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMissedReadingAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertMissedReadingAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertMissedReadingAutosnoozeNight.value = alertTimes.nightTime
             }
         <<< DateTimeInlineRow("alertMissedReadingSnoozedTime") { row in
             row.title = "Snoozed Until"
@@ -1633,6 +1770,21 @@ class AlarmViewController: FormViewController {
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
                     UserDefaultsRepository.alertNotLoopingDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertNotLoopingNightTime.value = alertTimes.nightTime
+            }
+            <<< PickerInputRow<String>("alertNotLoopingAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertNotLoopingAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertNotLoopingAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertNotLoopingAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertNotLoopingAutosnoozeNight.value = alertTimes.nightTime
             }
         <<< DateTimeInlineRow("alertNotLoopingSnoozedTime") { row in
             row.title = "Snoozed Until"
@@ -1826,6 +1978,21 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertMissedBolusDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertMissedBolusNightTime.value = alertTimes.nightTime
             }
+            <<< PickerInputRow<String>("alertMissedBolusAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertMissedBolusAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertMissedBolusAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertMissedBolusAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertMissedBolusAutosnoozeNight.value = alertTimes.nightTime
+            }
         <<< DateTimeInlineRow("alertMissedBolusSnoozedTime") { row in
             row.title = "Snoozed Until"
            if (UserDefaultsRepository.alertMissedBolusSnoozedTime.value != nil) {
@@ -1976,7 +2143,21 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertSAGEDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertSAGENightTime.value = alertTimes.nightTime
             }
-            
+            <<< PickerInputRow<String>("alertSAGEAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertSAGEAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertSAGEAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertSAGEAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertSAGEAutosnoozeNight.value = alertTimes.nightTime
+            }
             <<< DateTimeInlineRow("alertSAGESnoozedTime") { row in
                 row.title = "Snoozed Until"
                 if (UserDefaultsRepository.alertSAGESnoozedTime.value != nil) {
@@ -2113,6 +2294,21 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertCAGEDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertCAGENightTime.value = alertTimes.nightTime
             }
+            <<< PickerInputRow<String>("alertCAGEAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertCAGEAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertCAGEAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertCAGEAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertCAGEAutosnoozeNight.value = alertTimes.nightTime
+            }
             <<< DateTimeInlineRow("alertCAGESnoozedTime") { row in
                 row.title = "Snoozed Until"
                 if (UserDefaultsRepository.alertCAGESnoozedTime.value != nil) {
@@ -2222,6 +2418,21 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertOverrideStartNightTime.value = alertTimes.nightTime
 
             }
+            <<< PickerInputRow<String>("alertOverrideStartAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertOverrideStartAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertOverrideStartAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertOverrideStartAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertOverrideStartAutosnoozeNight.value = alertTimes.nightTime
+            }
         <<< DateTimeInlineRow("alertOverrideStartSnoozedTime") { row in
                 row.title = "Snoozed Until"
                 if (UserDefaultsRepository.alertOverrideStartSnoozedTime.value != nil) {
@@ -2330,6 +2541,21 @@ class AlarmViewController: FormViewController {
                     let alertTimes = self!.timeBasedSettings(pickerValue: value)
                     UserDefaultsRepository.alertOverrideEndDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertOverrideEndNightTime.value = alertTimes.nightTime
+            }
+            <<< PickerInputRow<String>("alertOverrideEndAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertOverrideEndAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertOverrideEndAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertOverrideEndAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertOverrideEndAutosnoozeNight.value = alertTimes.nightTime
             }
         <<< DateTimeInlineRow("alertOverrideEndSnoozedTime") { row in
                 row.title = "Snoozed Until"
@@ -2469,7 +2695,21 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertPumpDayTime.value = alertTimes.dayTime
                     UserDefaultsRepository.alertPumpNightTime.value = alertTimes.nightTime
             }
-
+            <<< PickerInputRow<String>("alertPumpAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertPumpAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertPumpAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertPumpAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertPumpAutosnoozeNight.value = alertTimes.nightTime
+            }
             <<< DateTimeInlineRow("alertPumpSnoozedTime") { row in
                 row.title = "Snoozed Until"
                 if (UserDefaultsRepository.alertPumpSnoozedTime.value != nil) {
