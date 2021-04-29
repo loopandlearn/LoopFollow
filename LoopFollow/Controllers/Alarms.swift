@@ -677,7 +677,7 @@ extension MainViewController {
         let endMinute = endCalendar.component(.minute, from: end!)
         let endMinutes = (60 * endHour) + endMinute
         
-        if todayMinutes >= startMinutes || todayMinutes < endMinutes {
+        if todayMinutes >= startMinutes {
             let tomorrow = Date().addingTimeInterval(86400)
             let tomorrowCalendar = Calendar.current
             let end = UserDefaultsRepository.quietHourEnd.value
@@ -687,6 +687,25 @@ extension MainViewController {
             components.month = tomorrowCalendar.component(.month, from: tomorrow)
             components.day = tomorrowCalendar.component(.day, from: tomorrow)
             components.year = tomorrowCalendar.component(.year, from: tomorrow)
+            components.hour = endCalendar.component(.hour, from: end!)
+            components.minute = endCalendar.component(.minute, from: end!)
+            components.second = endCalendar.component(.second, from: end!)
+            let snoozeCalendar = Calendar.current
+            let snoozeTime = snoozeCalendar.date(from: components)
+            
+            UserDefaultsRepository.nightTime.value = true
+            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+            snoozer.setPresnoozeNight(snoozeTime: snoozeTime!)
+        } else if todayMinutes < endMinutes {
+            let today = Date()
+            let todayCalendar = Calendar.current
+            let end = UserDefaultsRepository.quietHourEnd.value
+            let endCalendar = Calendar.current
+            
+            var components = DateComponents()
+            components.month = todayCalendar.component(.month, from: today)
+            components.day = todayCalendar.component(.day, from: today)
+            components.year = todayCalendar.component(.year, from: today)
             components.hour = endCalendar.component(.hour, from: end!)
             components.minute = endCalendar.component(.minute, from: end!)
             components.second = endCalendar.component(.second, from: end!)
