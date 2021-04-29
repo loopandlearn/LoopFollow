@@ -139,6 +139,9 @@ class UserDefaultsRepository {
     static let alertUrgentLowAudible = UserDefaultsValue<String>(key: "alertUrgentLowAudible", default: "Always")
     static let alertUrgentLowDayTimeAudible = UserDefaultsValue<Bool>(key: "alertUrgentLowDayTimeAudible", default: true)
     static let alertUrgentLowNightTimeAudible = UserDefaultsValue<Bool>(key: "alertUrgentLowNightTimeAudible", default: true)
+    static let alertUrgentLowAutosnooze = UserDefaultsValue<String>(key: "alertUrgentLowAutosnooze", default: "Never")
+    static let alertUrgentLowAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertUrgentLowAutosnoozeDay", default: false)
+    static let alertUrgentLowAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertUrgentLowAutosnoozeNight", default: false)
     
     static let alertLowActive = UserDefaultsValue<Bool>(key: "alertLowActive", default: false)
     static let alertLowBG = UserDefaultsValue<Float>(key: "alertLowBG", default: 70.0)
@@ -152,6 +155,9 @@ class UserDefaultsRepository {
     static let alertLowAudible = UserDefaultsValue<String>(key: "alertLowAudible", default: "Always")
     static let alertLowDayTimeAudible = UserDefaultsValue<Bool>(key: "alertLowDayTimeAudible", default: true)
     static let alertLowNightTimeAudible = UserDefaultsValue<Bool>(key: "alertLowNightTimeAudible", default: true)
+    static let alertLowAutosnooze = UserDefaultsValue<String>(key: "alertLowAutosnooze", default: "Never")
+    static let alertLowAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertLowAutosnoozeDay", default: false)
+    static let alertLowAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertLowAutosnoozeNight", default: false)
     
     static let alertHighActive = UserDefaultsValue<Bool>(key: "alertHighActive", default: false)
     static let alertHighBG = UserDefaultsValue<Float>(key: "alertHighBG", default: 180.0)
@@ -166,6 +172,9 @@ class UserDefaultsRepository {
     static let alertHighAudible = UserDefaultsValue<String>(key: "alertHighAudible", default: "Always")
     static let alertHighDayTimeAudible = UserDefaultsValue<Bool>(key: "alertHighDayTimeAudible", default: true)
     static let alertHighNightTimeAudible = UserDefaultsValue<Bool>(key: "alertHighNightTimeAudible", default: true)
+    static let alertHighAutosnooze = UserDefaultsValue<String>(key: "alertHighAutosnooze", default: "Never")
+    static let alertHighAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertHighAutosnoozeDay", default: false)
+    static let alertHighAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertHighAutosnoozeNight", default: false)
     
     static let alertUrgentHighActive = UserDefaultsValue<Bool>(key: "alertUrgentHighActive", default: false)
     static let alertUrgentHighBG = UserDefaultsValue<Float>(key: "alertUrgentHighBG", default: 250.0)
@@ -179,7 +188,9 @@ class UserDefaultsRepository {
     static let alertUrgentHighAudible = UserDefaultsValue<String>(key: "alertUrgentHighAudible", default: "Always")
     static let alertUrgentHighDayTimeAudible = UserDefaultsValue<Bool>(key: "alertUrgentHighDayTimeAudible", default: true)
     static let alertUrgentHighNightTimeAudible = UserDefaultsValue<Bool>(key: "alertUrgentHighNightTimeAudible", default: true)
-
+    static let alertUrgentHighAutosnooze = UserDefaultsValue<String>(key: "alertUrgentHighAutosnooze", default: "Never")
+    static let alertUrgentHighAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertUrgentHighAutosnoozeDay", default: false)
+    static let alertUrgentHighAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertUrgentHighAutosnoozeNight", default: false)
     
     static let alertFastDropActive = UserDefaultsValue<Bool>(key: "alertFastDropDeltaActive", default: false)
     static let alertFastDropSnooze = UserDefaultsValue<Int>(key: "alertFastDropDeltaSnooze", default: 10)
@@ -196,6 +207,9 @@ class UserDefaultsRepository {
     static let alertFastDropAudible = UserDefaultsValue<String>(key: "alertFastDropAudible", default: "Always")
     static let alertFastDropDayTimeAudible = UserDefaultsValue<Bool>(key: "alertFastDropDayTimeAudible", default: true)
     static let alertFastDropNightTimeAudible = UserDefaultsValue<Bool>(key: "alertFastDropNightTimeAudible", default: true)
+    static let alertFastDropAutosnooze = UserDefaultsValue<String>(key: "alertFastDropAutosnooze", default: "Never")
+    static let alertFastDropAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertFastDropAutosnoozeDay", default: false)
+    static let alertFastDropAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertFastDropAutosnoozeNight", default: false)
     
     static let alertFastRiseActive = UserDefaultsValue<Bool>(key: "alertFastRiseDeltaActive", default: false)
     static let alertFastRiseSnooze = UserDefaultsValue<Int>(key: "alertFastRiseDeltaSnooze", default: 10)
@@ -212,6 +226,9 @@ class UserDefaultsRepository {
     static let alertFastRiseAudible = UserDefaultsValue<String>(key: "alertFastRiseAudible", default: "Always")
     static let alertFastRiseDayTimeAudible = UserDefaultsValue<Bool>(key: "alertFastRiseDayTimeAudible", default: true)
     static let alertFastRiseNightTimeAudible = UserDefaultsValue<Bool>(key: "alertFastRiseNightTimeAudible", default: true)
+    static let alertFastRiseAutosnooze = UserDefaultsValue<String>(key: "alertFastRiseAutosnooze", default: "Never")
+    static let alertFastRiseAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertFastRiseAutosnoozeDay", default: false)
+    static let alertFastRiseAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertFastRiseAutosnoozeNight", default: false)
     
     
     static let alertMissedReadingActive = UserDefaultsValue<Bool>(key: "alertMissedReadingActive", default: false)
@@ -226,6 +243,9 @@ class UserDefaultsRepository {
     static let alertMissedReadingAudible = UserDefaultsValue<String>(key: "alertMissedReadingAudible", default: "Always")
     static let alertMissedReadingDayTimeAudible = UserDefaultsValue<Bool>(key: "alertMissedReadingDayTimeAudible", default: true)
     static let alertMissedReadingNightTimeAudible = UserDefaultsValue<Bool>(key: "alertMissedReadingNightTimeAudible", default: true)
+    static let alertMissedReadingAutosnooze = UserDefaultsValue<String>(key: "alertMissedReadingAutosnooze", default: "Never")
+    static let alertMissedReadingAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertMissedReadingAutosnoozeDay", default: false)
+    static let alertMissedReadingAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertMissedReadingAutosnoozeNight", default: false)
     
     
     static let alertNotLoopingActive = UserDefaultsValue<Bool>(key: "alertNotLoopingActive", default: false)
@@ -244,6 +264,9 @@ class UserDefaultsRepository {
     static let alertNotLoopingAudible = UserDefaultsValue<String>(key: "alertNotLoopingAudible", default: "Always")
     static let alertNotLoopingDayTimeAudible = UserDefaultsValue<Bool>(key: "alertNotLoopingDayTimeAudible", default: true)
     static let alertNotLoopingNightTimeAudible = UserDefaultsValue<Bool>(key: "alertNotLoopingNightTimeAudible", default: true)
+    static let alertNotLoopingAutosnooze = UserDefaultsValue<String>(key: "alertNotLoopingAutosnooze", default: "Never")
+    static let alertNotLoopingAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertNotLoopingAutosnoozeDay", default: false)
+    static let alertNotLoopingAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertNotLoopingAutosnoozeNight", default: false)
     
     static let alertMissedBolusActive = UserDefaultsValue<Bool>(key: "alertMissedBolusActive", default: false)
     static let alertMissedBolus = UserDefaultsValue<Int>(key: "alertMissedBolus", default: 10)
@@ -262,6 +285,9 @@ class UserDefaultsRepository {
     static let alertMissedBolusAudible = UserDefaultsValue<String>(key: "alertMissedBolusAudible", default: "Always")
     static let alertMissedBolusDayTimeAudible = UserDefaultsValue<Bool>(key: "alertMissedBolusDayTimeAudible", default: true)
     static let alertMissedBolusNightTimeAudible = UserDefaultsValue<Bool>(key: "alertMissedBolusNightTimeAudible", default: true)
+    static let alertMissedBolusAutosnooze = UserDefaultsValue<String>(key: "alertMissedBolusAutosnooze", default: "Never")
+    static let alertMissedBolusAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertMissedBolusAutosnoozeDay", default: false)
+    static let alertMissedBolusAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertMissedBolusAutosnoozeNight", default: false)
     
     static let alertSAGEActive = UserDefaultsValue<Bool>(key: "alertSAGEActive", default: false)
     static let alertSAGE = UserDefaultsValue<Int>(key: "alertSAGE", default: 8) //Hours
@@ -276,6 +302,9 @@ class UserDefaultsRepository {
     static let alertSAGESnoozedTime = UserDefaultsValue<Date?>(key: "alertSAGESnoozedTime", default: nil)
     static let alertSAGEIsSnoozed = UserDefaultsValue<Bool>(key: "alertSAGEIsSnoozed", default: false)
     static let alertSAGESound = UserDefaultsValue<String>(key: "alertSAGESound", default: "Wake_Up_Will_You")
+    static let alertSAGEAutosnooze = UserDefaultsValue<String>(key: "alertSAGEAutosnooze", default: "At night")
+    static let alertSAGEAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertSAGEAutosnoozeDay", default: false)
+    static let alertSAGEAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertSAGEAutosnoozeNight", default: true)
     
     static let alertCAGEActive = UserDefaultsValue<Bool>(key: "alertCAGEActive", default: false)
     static let alertCAGE = UserDefaultsValue<Int>(key: "alertCAGE", default: 4) //Hours
@@ -290,6 +319,9 @@ class UserDefaultsRepository {
     static let alertCAGESnoozedTime = UserDefaultsValue<Date?>(key: "alertCAGESnoozedTime", default: nil)
     static let alertCAGEIsSnoozed = UserDefaultsValue<Bool>(key: "alertCAGEIsSnoozed", default: false)
     static let alertCAGESound = UserDefaultsValue<String>(key: "alertCAGESound", default: "Wake_Up_Will_You")
+    static let alertCAGEAutosnooze = UserDefaultsValue<String>(key: "alertCAGEAutosnooze", default: "At night")
+    static let alertCAGEAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertCAGEAutosnoozeDay", default: false)
+    static let alertCAGEAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertCAGEAutosnoozeNight", default: true)
     
     static let alertAppInactive = UserDefaultsValue<Bool>(key: "alertAppInactive", default: false)
     
@@ -311,6 +343,9 @@ class UserDefaultsRepository {
     static let alertOverrideStartSound = UserDefaultsValue<String>(key: "alertOverrideStartSound", default: "Ending_Reached")
     static let alertOverrideStartSnoozedTime = UserDefaultsValue<Date?>(key: "alertOverrideStartSnoozedTime", default: nil)
     static let alertOverrideStartIsSnoozed = UserDefaultsValue<Bool>(key: "alertOverrideStartIsSnoozed", default: false)
+    static let alertOverrideStartAutosnooze = UserDefaultsValue<String>(key: "alertOverrideStartAutosnooze", default: "Never")
+    static let alertOverrideStartAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertOverrideStartAutosnoozeDay", default: false)
+    static let alertOverrideStartAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertOverrideStartAutosnoozeNight", default: false)
     
     static let alertOverrideEnd = UserDefaultsValue<Bool>(key: "alertOverrideEnd", default: false)
     static let alertOverrideEndQuiet = UserDefaultsValue<Bool>(key: "alertOverrideEndQuiet", default: false)
@@ -323,6 +358,9 @@ class UserDefaultsRepository {
     static let alertOverrideEndSound = UserDefaultsValue<String>(key: "alertOverrideEndSound", default: "Alert_Tone_Busy")
     static let alertOverrideEndSnoozedTime = UserDefaultsValue<Date?>(key: "alertOverrideEndSnoozedTime", default: nil)
     static let alertOverrideEndIsSnoozed = UserDefaultsValue<Bool>(key: "alertOverrideEndIsSnoozed", default: false)
+    static let alertOverrideEndAutosnooze = UserDefaultsValue<String>(key: "alertOverrideEndAutosnooze", default: "Never")
+    static let alertOverrideEndAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertOverrideEndAutosnoozeDay", default: false)
+    static let alertOverrideEndAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertOverrideEndAutosnoozeNight", default: false)
     
     static let alertPump = UserDefaultsValue<Bool>(key: "alertPump", default: false)
     static let alertPumpAt = UserDefaultsValue<Int>(key: "alertPumpAt", default: 10) //Units
@@ -337,5 +375,8 @@ class UserDefaultsRepository {
     static let alertPumpSnoozeHours = UserDefaultsValue<Int>(key: "alertPumpSnoozeHours", default: 5) //Hours
     static let alertPumpIsSnoozed = UserDefaultsValue<Bool>(key: "alertPumpIsSnoozed", default: false)
     static let alertPumpSnoozedTime = UserDefaultsValue<Date?>(key: "alertPumpSnoozedTime", default: nil)
+    static let alertPumpAutosnooze = UserDefaultsValue<String>(key: "alertPumpAutosnooze", default: "Never")
+    static let alertPumpAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertPumpAutosnoozeDay", default: false)
+    static let alertPumpAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertPumpAutosnoozeNight", default: false)
     
 }
