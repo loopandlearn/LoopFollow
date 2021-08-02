@@ -459,7 +459,31 @@ extension MainViewController {
                 }
             }
         }
-        
+       
+        // OpenAPS ( aka FreeAPS X aka AndroidAPS )
+        if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String : AnyObject]? {
+            if let lastLoopTime = formatter.date(from: (lastDeviceStatus!["created_at"] as! String))?.timeIntervalSince1970  {
+                UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
+                var wasEnacted = false
+                if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
+                    wasEnacted = true
+                    if let lastTempBasal = enacted["rate"] as? Double {
+
+                    }
+                    if let cob = enacted["COB"] as? Double {
+                        tableData[1].value = String(format:"%.0f", cob)
+                        latestCOB = String(format:"%.0f", cob)
+                    }
+                }
+                if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
+                   tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
+                   latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
+                }
+            }
+        }
+ 
         // Loop
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             //print("Loop: \(lastLoopRecord)")

@@ -151,7 +151,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UserDefaultsRepository.infoNames.value.append("Basal")
         UserDefaultsRepository.infoNames.value.append("Override")
         UserDefaultsRepository.infoNames.value.append("Battery")
-        UserDefaultsRepository.infoNames.value.append("Pump")
+        UserDefaultsRepository.infoNames.value.append("Reservoir")
         UserDefaultsRepository.infoNames.value.append("SAGE")
         UserDefaultsRepository.infoNames.value.append("CAGE")
         UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
