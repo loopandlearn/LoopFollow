@@ -118,9 +118,13 @@ extension MainViewController {
             let persistentLowTriggerImmediatelyBG = UserDefaultsRepository.alertLowBG.value - UserDefaultsRepository.alertLowPersistenceMax.value
             let predictiveNumReadings = Int(UserDefaultsRepository.alertLowPredictiveMinutes.value / 5)
             var predictiveTrigger = false
-            for i in 0..<predictiveNumReadings {
-                if Float(predictionData[i].sgv) <= persistentLowTriggerImmediatelyBG {
-                    predictiveTrigger = true
+            if  !predictionData.isEmpty {
+                for i in 0..<predictiveNumReadings {
+                    if predictionData.count > i {
+                        if Float(predictionData[i].sgv) <= persistentLowTriggerImmediatelyBG {
+                            predictiveTrigger = true
+                        }
+                    }
                 }
             }
             if UserDefaultsRepository.alertLowActive.value &&
