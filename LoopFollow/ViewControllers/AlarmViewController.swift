@@ -691,7 +691,7 @@ class AlarmViewController: FormViewController {
     
     func buildLow(){
         form
-            +++ Section(header: "Low Alert", footer: "Alerts when BG drops below value") { row in
+            +++ Section(header: "Low Alert", footer: "Alerts when BG drops below value. Persitent for minutes will allow the alert to be ignored within the Delta value to prevent alerts that Loop self-corrected the drop. Predictive minutes looks forward to Loop's prediction and will trigger an alert if a low is predicted within that time frame. Predictive uses the minimum persistence Delta value for the trigger.") { row in
                 row.hidden = "$bgAlerts != 'Low'"
             }
         <<< SwitchRow("alertLowActive"){ row in
@@ -715,6 +715,49 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertLowBG.value = Float(value)
         }
+        <<< StepperRow("alertLowPersistent") { row in
+            row.title = "Persistent For (Minutes)"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 0
+            row.cell.stepper.maximumValue = 240
+            row.value = Double(UserDefaultsRepository.alertLowPersistent.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertLowPersistent.value = Int(value)
+        }
+            <<< StepperRow("alertLowPersistenceMax") { row in
+                row.title = "Ignore Persistence (-Delta)"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 0
+                row.cell.stepper.maximumValue = 20
+                row.value = Double(UserDefaultsRepository.alertLowPersistenceMax.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return bgUnits.toDisplayUnits(String(value))
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertLowPersistenceMax.value = Float(value)
+            }
+        
+            <<< StepperRow("alertLowPredictiveMinutes") { row in
+                row.title = "Predictive Low (Minutes)"
+                row.cell.stepper.stepValue = 5
+                row.cell.stepper.minimumValue = 0
+                row.cell.stepper.maximumValue = 60
+                row.value = Double(UserDefaultsRepository.alertLowPredictiveMinutes.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertLowPredictiveMinutes.value = Int(value)
+            }
         <<< StepperRow("alertLowSnooze") { row in
             row.title = "Snooze"
             row.cell.stepper.stepValue = 5

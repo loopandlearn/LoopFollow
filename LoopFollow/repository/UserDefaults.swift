@@ -145,6 +145,9 @@ class UserDefaultsRepository {
     
     static let alertLowActive = UserDefaultsValue<Bool>(key: "alertLowActive", default: false)
     static let alertLowBG = UserDefaultsValue<Float>(key: "alertLowBG", default: 70.0)
+    static let alertLowPersistent = UserDefaultsValue<Int>(key: "alertLowPersistent", default: 0)
+    static let alertLowPersistenceMax = UserDefaultsValue<Float>(key: "alertLowPersistenceMax", default: 5.0)
+    static let alertLowPredictiveMinutes = UserDefaultsValue<Int>(key: "alertLowPredictiveMinutes", default: 0)
     static let alertLowSnooze = UserDefaultsValue<Int>(key: "alertLowSnooze", default: 5)
     static let alertLowSnoozedTime = UserDefaultsValue<Date?>(key: "alertLowSnoozedTime", default: nil)
     static let alertLowIsSnoozed = UserDefaultsValue<Bool>(key: "alertLowIsSnoozed", default: false)

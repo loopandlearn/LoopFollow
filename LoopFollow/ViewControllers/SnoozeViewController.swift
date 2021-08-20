@@ -141,6 +141,12 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertLowIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertLowSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60)))
+        } else if AlarmSound.whichAlarm == "Predictive Low Alert" {
+            UserDefaultsRepository.alertLowIsSnoozed.value = true
+            UserDefaultsRepository.alertLowSnoozedTime.value = Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60))
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertLowIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertLowSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60)))
         } else if AlarmSound.whichAlarm == "High Alert" {
             UserDefaultsRepository.alertHighIsSnoozed.value = true
             UserDefaultsRepository.alertHighSnoozedTime.value = Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60))

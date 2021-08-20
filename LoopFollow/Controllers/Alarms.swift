@@ -113,9 +113,31 @@ extension MainViewController {
             }
             
             // Check Low
-            if UserDefaultsRepository.alertLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
-                Float(currentBG) <= UserDefaultsRepository.alertLowBG.value && !UserDefaultsRepository.alertLowIsSnoozed.value {
-                AlarmSound.whichAlarm = "Low Alert"
+            let persistentLowReadings = Int(UserDefaultsRepository.alertLowPersistent.value / 5)
+            let persistentLowBG = bgData[bgData.count - 1 - persistentLowReadings].sgv
+            let persistentLowTriggerImmediatelyBG = UserDefaultsRepository.alertLowBG.value - UserDefaultsRepository.alertLowPersistenceMax.value
+            let predictiveNumReadings = Int(UserDefaultsRepository.alertLowPredictiveMinutes.value / 5)
+            var predictiveTrigger = false
+            for i in 0..<predictiveNumReadings {
+                if Float(predictionData[i].sgv) <= persistentLowTriggerImmediatelyBG {
+                    predictiveTrigger = true
+                }
+            }
+            if UserDefaultsRepository.alertLowActive.value &&
+                !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
+                !UserDefaultsRepository.alertLowIsSnoozed.value &&
+                (Float(currentBG) <= UserDefaultsRepository.alertLowBG.value &&
+                (Float(persistentLowBG) <= UserDefaultsRepository.alertLowBG.value || Float(currentBG) <= persistentLowTriggerImmediatelyBG)
+                || predictiveTrigger == true
+                )
+                 {
+                
+                if predictiveTrigger && Float(currentBG) > UserDefaultsRepository.alertLowBG.value {
+                    AlarmSound.whichAlarm = "Predictive Low Alert"
+                } else {
+                    AlarmSound.whichAlarm = "Low Alert"
+                }
+                
   
                 //determine if it is day or night and what should happen
                 if UserDefaultsRepository.nightTime.value {
@@ -155,12 +177,12 @@ extension MainViewController {
             }
             
             // Check High
-            let persistentReadings = Int(UserDefaultsRepository.alertHighPersistent.value / 5)
-            let persistentBG = bgData[bgData.count - 1 - persistentReadings].sgv
+            let persistentHighReadings = Int(UserDefaultsRepository.alertHighPersistent.value / 5)
+            let persistentHighBG = bgData[bgData.count - 1 - persistentHighReadings].sgv
             if UserDefaultsRepository.alertHighActive.value &&
                 !UserDefaultsRepository.alertHighIsSnoozed.value &&
                 Float(currentBG) >= UserDefaultsRepository.alertHighBG.value &&
-                Float(persistentBG) >= UserDefaultsRepository.alertHighBG.value &&
+                Float(persistentHighBG) >= UserDefaultsRepository.alertHighBG.value &&
                 !UserDefaultsRepository.alertHighIsSnoozed.value {
                 AlarmSound.whichAlarm = "High Alert"
                 //determine if it is day or night and what should happen
