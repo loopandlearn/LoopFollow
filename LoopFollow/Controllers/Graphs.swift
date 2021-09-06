@@ -305,6 +305,7 @@ extension MainViewController {
         
         // Add Now Line
         createNowAndDIALines()
+        createMidnightLines()
         startGraphNowTimer()
         
         // Setup the main graph overall details
@@ -364,6 +365,24 @@ extension MainViewController {
                 ul.lineDashLengths = [CGFloat(dash), CGFloat(space)]
                 ul.lineWidth = 1
                 BGChart.xAxis.addLimitLine(ul)
+            }
+        }
+    }
+    
+    func createMidnightLines() {
+        // Draw a line at midnight: useful when showing multiple days of data
+        if UserDefaultsRepository.showMidnightLines.value {
+            var midnightTimeInterval = dateTimeUtils.getTimeIntervalMidnightToday()
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
+            while midnightTimeInterval > graphStart {
+                let ul = ChartLimitLine()
+                ul.limit = Double(midnightTimeInterval)
+                ul.lineColor = NSUIColor.systemIndigo.withAlphaComponent(0.5)
+                ul.lineDashLengths = [CGFloat(2), CGFloat(5)]
+                ul.lineWidth = 1
+                BGChart.xAxis.addLimitLine(ul)
+                midnightTimeInterval = midnightTimeInterval.advanced(by: -24*60*60)
             }
         }
     }
@@ -641,8 +660,9 @@ extension MainViewController {
                 dateTimeStamp = dateTimeStamp - 150
             }
             
-            // skip if > 24 hours old
-            if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
   
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
             mainChart.addEntry(dot)
@@ -717,8 +737,9 @@ extension MainViewController {
                 colors.append(NSUIColor.systemOrange.withAlphaComponent(CGFloat(thisAlpha)))
             }
             
-            // skip if > 24 hours old
-            if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             if carbShift {
                 dateTimeStamp = dateTimeStamp - 250
@@ -773,8 +794,9 @@ extension MainViewController {
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 1
             
-            // skip if > 24 hours old
-            if bgCheckData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if bgCheckData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(bgCheckData[i].sgv)), time: bgCheckData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
@@ -800,8 +822,9 @@ extension MainViewController {
         BGChartFull.lineData?.dataSets[dataIndex].clear()
         let thisData = suspendGraphData
         for i in 0..<thisData.count{
-            // skip if > 24 hours old
-            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Suspend Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
@@ -826,8 +849,9 @@ extension MainViewController {
         BGChartFull.lineData?.dataSets[dataIndex].clear()
         let thisData = resumeGraphData
         for i in 0..<thisData.count{
-            // skip if > 24 hours old
-            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Resume Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
@@ -852,8 +876,9 @@ extension MainViewController {
         BGChartFull.lineData?.dataSets[dataIndex].clear()
         let thisData = sensorStartGraphData
         for i in 0..<thisData.count{
-            // skip if > 24 hours old
-            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Start Sensor", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
@@ -879,8 +904,9 @@ extension MainViewController {
         let thisData = noteGraphData
         for i in 0..<thisData.count{
             
-            // skip if > 24 hours old
-            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: thisData[i].note, time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)

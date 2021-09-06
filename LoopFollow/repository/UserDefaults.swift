@@ -55,6 +55,7 @@ class UserDefaultsRepository {
     static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
     static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
     static let showDIALines = UserDefaultsValue<Bool>(key: "showDIAMarkers", default: true)
+    static let showMidnightLines = UserDefaultsValue<Bool>(key: "showMidnightMarkers", default: false)
     static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
     static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
     static let smallGraphHeight = UserDefaultsValue<Int>(key: "smallGraphHeight", default: 40)
@@ -91,7 +92,8 @@ class UserDefaultsRepository {
     static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
     static let alwaysDownloadAllBG = UserDefaultsValue<Bool>(key: "alwaysDownloadAllBG", default: true)
     static let bgUpdateDelay = UserDefaultsValue<Int>(key: "bgUpdateDelay", default: 10)
-    
+    static let downloadDays = UserDefaultsValue<Int>(key: "downloadDays", default: 1)
+
     
     // Watch Calendar Settings
     static let calendarIdentifier = UserDefaultsValue<String>(key: "calendarIdentifier", default: "")

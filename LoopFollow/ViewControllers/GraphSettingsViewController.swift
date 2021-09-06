@@ -117,6 +117,14 @@ class GraphSettingsViewController: FormViewController {
                         UserDefaultsRepository.showDIALines.value = value
                         
             }
+            <<< SwitchRow("showMidnightMarkers"){ row in
+                row.title = "Show Midnight Lines"
+                row.value = UserDefaultsRepository.showMidnightLines.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.showMidnightLines.value = value
+                        
+            }
             <<< SwitchRow("smallGraphTreatments"){ row in
                 row.title = "Treatments on Small Graph"
                 row.value = UserDefaultsRepository.smallGraphTreatments.value

@@ -60,7 +60,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var currentOverride = 1.0
     
     // Vars for NS Pull
-    var graphHours:Int=24
     var mmol = false as Bool
     var urlUser = UserDefaultsRepository.url.value as String
     var token = UserDefaultsRepository.token.value as String
