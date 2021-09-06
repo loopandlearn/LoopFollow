@@ -64,7 +64,10 @@ extension MainViewController {
     
     // Dex Share Web Call
     func webLoadDexShare(onlyPullLastRecord: Bool = false) {
-        var count = 288
+        // Dexcom Share only returns 24 hrs of data as of now
+        // Requesting more just for consistency with NS
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        var count = graphHours * 12
         if onlyPullLastRecord { count = 1 }
         dexShare?.fetchData(count) { (err, result) -> () in
             
@@ -89,10 +92,11 @@ extension MainViewController {
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
-        // Set the count= in the url either to pull 24 hours or only the last record
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        // Set the count= in the url either to pull day(s) of data or only the last record
         var points = "1"
         if !onlyPullLastRecord {
-            points = String(self.graphHours * 12 + 1)
+            points = String(graphHours * 12 + 1)
         }
         
         // URL processor
@@ -179,6 +183,8 @@ extension MainViewController {
     func ProcessNSBGData(data: [ShareGlucoseData], onlyPullLastRecord: Bool, isNS: Bool = false){
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG") }
         
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        
         var pullDate = data[data.count - 1].date
         if isNS {
             pullDate = data[data.count - 1].date / 1000
@@ -252,7 +258,7 @@ extension MainViewController {
                 dateString = data[data.count - 1 - i].date / 1000
                 dateString.round(FloatingPointRoundingRule.toNearestOrEven)
             }
-            if dateString >= dateTimeUtils.getTimeInterval24HoursAgo() {
+            if dateString >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 let reading = ShareGlucoseData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
                 bgData.append(reading)
             }
@@ -812,65 +818,60 @@ extension MainViewController {
         
         // Don't process the basal or draw the graph until after the BG has been fully processeed and drawn
         if firstGraphLoad { return }
+
+        var basalSegments: [DataStructs.basalProfileSegment] = []
         
-        // Make temporary array with all values of yesterday and today
-        let yesterdayStart = dateTimeUtils.getTimeIntervalMidnightYesterday()
-        let todayStart = dateTimeUtils.getTimeIntervalMidnightToday()
-        
-        var basal2Day: [DataStructs.basal2DayProfile] = []
-        // Run twice to add in order yesterday then today.
-        for p in 0..<basalProfile.count {
-            let start = yesterdayStart + basalProfile[p].timeAsSeconds
-            var end = yesterdayStart
-            // set the endings 1 second before the next one starts
-            if p < basalProfile.count - 1 {
-                end = yesterdayStart + basalProfile[p + 1].timeAsSeconds - 1
-            } else {
-                // set the end 1 second before midnight
-                end = yesterdayStart + 86399
-            }
-            let entry = DataStructs.basal2DayProfile(basalRate: basalProfile[p].value, startDate: start, endDate: end)
-            basal2Day.append(entry)
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        // Build scheduled basal segments from right to left by
+        // moving pointers to the current midnight and current basal
+        var midnight = dateTimeUtils.getTimeIntervalMidnightToday()
+        var basalProfileIndex = basalProfile.count - 1
+        var start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
+        var end = dateTimeUtils.getNowTimeIntervalUTC()
+        // Move back until we're in the graph range
+        while start > end {
+            basalProfileIndex -= 1
+            start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
         }
-        for p in 0..<basalProfile.count {
-            let start = todayStart + basalProfile[p].timeAsSeconds
-            var end = todayStart
-            // set the endings 1 second before the next one starts
-            if p < basalProfile.count - 1 {
-                end = todayStart + basalProfile[p + 1].timeAsSeconds - 1
-            } else {
-                // set the end 1 second before midnight
-                end = todayStart + 86399
+        // Add records while they're still within the graph
+        let graphStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
+        while end >= graphStart {
+            let entry = DataStructs.basalProfileSegment(
+                basalRate: basalProfile[basalProfileIndex].value, startDate: start, endDate: end)
+            basalSegments.append(entry)
+            
+            basalProfileIndex -= 1
+            if basalProfileIndex < 0 {
+                basalProfileIndex = basalProfile.count - 1
+                midnight = midnight.advanced(by: -24*60*60)
             }
-            let entry = DataStructs.basal2DayProfile(basalRate: basalProfile[p].value, startDate: start, endDate: end)
-            basal2Day.append(entry)
+            end = start - 1
+            start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
         }
+        // reverse the result to get chronological order
+        basalSegments.reverse()
         
         var firstPass = true
         // Runs the scheduled basal to the end of the prediction line
         var predictionEndTime = dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)
         basalScheduleData.removeAll()
-        for i in 0..<basal2Day.count {
-            let timeYesterday = dateTimeUtils.getTimeInterval24HoursAgo()
-            
+        
+        for i in 0..<basalSegments.count {
+            let timeStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             
             // This processed everything after the first one.
             if firstPass == false
-                && basal2Day[i].startDate <= predictionEndTime {
-                let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: basal2Day[i].startDate)
+                && basalSegments[i].startDate <= predictionEndTime {
+                let startDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: basalSegments[i].startDate)
                 basalScheduleData.append(startDot)
-                var endDate = basal2Day[i].endDate
+                var endDate = basalSegments[i].endDate
                 
                 // if it's the last one needed, set it to end at the prediction end time
-                if endDate > predictionEndTime || i == basal2Day.count - 1 {
+                if endDate > predictionEndTime || i == basalSegments.count - 1 {
                     endDate = Double(predictionEndTime)
                 }
 
-                
-                
-
-
-                let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
+                let endDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: endDate)
                 basalScheduleData.append(endDot)
             }
             
@@ -878,21 +879,18 @@ extension MainViewController {
             // Check that this is the first one and there are no existing entries
             if firstPass == true {
                 // check that the timestamp is > the current entry and < the next entry
-                if timeYesterday >= basal2Day[i].startDate && timeYesterday < basal2Day[i].endDate {
+                if timeStart >= basalSegments[i].startDate && timeStart < basalSegments[i].endDate {
                     // Set the start time to match the BG start
-                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: Double(dateTimeUtils.getTimeInterval24HoursAgo() + (60 * 5)))
+                    let startDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: Double(timeStart + (60 * 5)))
                     basalScheduleData.append(startDot)
                     
                     // set the enddot where the next one will start
-                    var endDate = basal2Day[i].endDate
-                    let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
+                    var endDate = basalSegments[i].endDate
+                    let endDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: endDate)
                     basalScheduleData.append(endDot)
                     firstPass = false
                 }
             }
-            
-
-            
         }
         
         if UserDefaultsRepository.graphBasal.value {
@@ -907,11 +905,12 @@ extension MainViewController {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Treatments") }
         if !UserDefaultsRepository.downloadTreatments.value { return }
         
-        let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        let startTimeString = dateTimeUtils.nowMinusNHoursTimeInterval(N: graphHours)
         
-        var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[created_at][$gte]=" + yesterdayString
+        var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[created_at][$gte]=" + startTimeString
         if token != "" {
-            urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?token=" + token + "&find[created_at][$gte]=" + yesterdayString
+            urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?token=" + token + "&find[created_at][$gte]=" + startTimeString
         }
         
         guard let urlData = URL(string: urlString) else {
@@ -1660,8 +1659,9 @@ extension MainViewController {
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             var dateTimeStamp = dateString!.timeIntervalSince1970
-            if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() {
-                dateTimeStamp = dateTimeUtils.getTimeInterval24HoursAgo()
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
+                dateTimeStamp = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             }
             
             var multiplier: Double = 1.0
