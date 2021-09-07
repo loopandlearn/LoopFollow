@@ -322,6 +322,20 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
             alarms.reloadIsSnoozed(key: "alertPumpIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertPumpSnoozedTime", setNil: false, value: snoozeTime)
         }
+        if UserDefaultsRepository.alertIOBAutosnoozeNight.value {
+            UserDefaultsRepository.alertIOBIsSnoozed.value = true
+            UserDefaultsRepository.alertIOBSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertIOBIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertIOBSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertCOBAutosnoozeNight.value {
+            UserDefaultsRepository.alertCOBIsSnoozed.value = true
+            UserDefaultsRepository.alertCOBSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertCOBIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertCOBSnoozedTime", setNil: false, value: snoozeTime)
+        }
         
     }
     
@@ -424,6 +438,20 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
             guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertPumpIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertPumpSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertIOBAutosnoozeDay.value {
+            UserDefaultsRepository.alertIOBIsSnoozed.value = true
+            UserDefaultsRepository.alertIOBSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertIOBIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertIOBSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertCOBAutosnoozeDay.value {
+            UserDefaultsRepository.alertCOBIsSnoozed.value = true
+            UserDefaultsRepository.alertCOBSnoozedTime.value = snoozeTime
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertCOBIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertCOBSnoozedTime", setNil: false, value: snoozeTime)
         }
         
     }
