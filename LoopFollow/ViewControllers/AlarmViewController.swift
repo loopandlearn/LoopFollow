@@ -264,6 +264,9 @@ class AlarmViewController: FormViewController {
             let otherRow3 = self?.form.rowBy(tag: "otherAlerts2") as! SegmentedRow<String>
             otherRow3.value = nil
             otherRow3.reload()
+            let otherRow4 = self?.form.rowBy(tag: "otherAlerts3") as! SegmentedRow<String>
+            otherRow4.value = nil
+            otherRow4.reload()
             row.value = value
         }
             <<< SegmentedRow<String>("bgExtraAlerts"){ row in
@@ -281,6 +284,9 @@ class AlarmViewController: FormViewController {
             let otherRow3 = self?.form.rowBy(tag: "otherAlerts2") as! SegmentedRow<String>
             otherRow3.value = nil
             otherRow3.reload()
+            let otherRow4 = self?.form.rowBy(tag: "otherAlerts3") as! SegmentedRow<String>
+            otherRow4.value = nil
+            otherRow4.reload()
             row.value = value
         }
             <<< SegmentedRow<String>("otherAlerts"){ row in
@@ -302,6 +308,9 @@ class AlarmViewController: FormViewController {
             let otherRow3 = self?.form.rowBy(tag: "otherAlerts2") as! SegmentedRow<String>
             otherRow3.value = nil
             otherRow3.reload()
+            let otherRow4 = self?.form.rowBy(tag: "otherAlerts3") as! SegmentedRow<String>
+            otherRow4.value = nil
+            otherRow4.reload()
             row.value = value
         }
         <<< SegmentedRow<String>("otherAlerts2"){ row in
@@ -322,6 +331,33 @@ class AlarmViewController: FormViewController {
             let otherRow3 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
             otherRow3.value = nil
             otherRow3.reload()
+            let otherRow4 = self?.form.rowBy(tag: "otherAlerts3") as! SegmentedRow<String>
+            otherRow4.value = nil
+            otherRow4.reload()
+            row.value = value
+        }
+        
+        <<< SegmentedRow<String>("otherAlerts3"){ row in
+                row.title = ""
+                row.options = ["IOB", "COB"]
+                if UserDefaultsRepository.url.value == "" {
+                    row.hidden = true
+                }
+                //row.value = "Not Looping"
+        }.onChange { [weak self] row in
+             guard let value = row.value else { return }
+            let otherRow = self?.form.rowBy(tag: "bgExtraAlerts") as! SegmentedRow<String>
+           otherRow.value = nil
+           otherRow.reload()
+           let otherRow2 = self?.form.rowBy(tag: "bgAlerts") as! SegmentedRow<String>
+           otherRow2.value = nil
+           otherRow2.reload()
+            let otherRow3 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
+            otherRow3.value = nil
+            otherRow3.reload()
+            let otherRow4 = self?.form.rowBy(tag: "otherAlerts2") as! SegmentedRow<String>
+            otherRow4.value = nil
+            otherRow4.reload()
             row.value = value
         }
         
@@ -350,6 +386,9 @@ class AlarmViewController: FormViewController {
         buildOverrideStart()
         buildOverrideEnd()
         buildPump()
+        
+        buildIOB()
+        buildCOB()
         
         buildSnoozeAll()
         buildAppInactive()
@@ -569,6 +608,20 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertUrgentLowBG.value = Float(value)
         }
+        <<< StepperRow("alertUrgentLowPredictiveMinutes") { row in
+            row.title = "Predictive (Minutes)"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 0
+            row.cell.stepper.maximumValue = 60
+            row.value = Double(UserDefaultsRepository.alertUrgentLowPredictiveMinutes.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertUrgentLowPredictiveMinutes.value = Int(value)
+        }
         <<< StepperRow("alertUrgentLowSnooze") { row in
             row.title = "Default Snooze"
             row.cell.stepper.stepValue = 5
@@ -744,20 +797,7 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertLowPersistenceMax.value = Float(value)
             }
         
-            <<< StepperRow("alertLowPredictiveMinutes") { row in
-                row.title = "Predictive Low (Minutes)"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 0
-                row.cell.stepper.maximumValue = 60
-                row.value = Double(UserDefaultsRepository.alertLowPredictiveMinutes.value)
-                row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return "\(Int(value))"
-                }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertLowPredictiveMinutes.value = Int(value)
-            }
+            
         <<< StepperRow("alertLowSnooze") { row in
             row.title = "Snooze"
             row.cell.stepper.stepValue = 5
@@ -2790,6 +2830,296 @@ class AlarmViewController: FormViewController {
                 if !value {
                     UserDefaultsRepository.alertPumpSnoozedTime.setNil(key: "alertPumpSnoozedTime")
                     let otherRow = self?.form.rowBy(tag: "alertPumpSnoozedTime") as! DateTimeInlineRow
+                    otherRow.value = nil
+                    otherRow.reload()
+                }
+        }
+    }
+    
+    func buildIOB() {
+        form
+            +++ Section(header: "IOB", footer: "Alert will trigger when IOB is above value") { row in
+                row.hidden = "$otherAlerts3 != 'IOB'"
+            }
+            <<< SwitchRow("alertIOB"){ row in
+                row.title = "Active"
+                row.value = UserDefaultsRepository.alertIOB.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertIOB.value = value
+            }
+            
+            <<< StepperRow("alertIOBAt") { row in
+                row.title = "IOB >="
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 1
+                row.cell.stepper.maximumValue = 50
+                row.value = Double(UserDefaultsRepository.alertIOBAt.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertIOBAt.value = Int(value)
+            }
+            
+            <<< StepperRow("alertIOBSnoozeHours") { row in
+                row.title = "Snooze Hours"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 1
+                row.cell.stepper.maximumValue = 6
+                row.value = Double(UserDefaultsRepository.alertIOBSnoozeHours.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertIOBSnoozeHours.value = Int(value)
+            }
+            <<< PickerInputRow<String>("alertIOBSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.value = UserDefaultsRepository.alertIOBSound.value
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertIOBSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+        }
+            <<< PickerInputRow<String>("alertIOBPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertIOBAudible.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertIOBAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertIOBDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertIOBNightTimeAudible.value = alertVol.nightTime
+            }
+            <<< PickerInputRow<String>("alertIOBRepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertIOBRepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertIOBRepeat.value = value
+                    let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertIOBDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertIOBNightTime.value = alertTimes.nightTime
+            }
+            <<< PickerInputRow<String>("alertIOBAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertIOBAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertIOBAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertIOBAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertIOBAutosnoozeNight.value = alertTimes.nightTime
+            }
+            <<< DateTimeInlineRow("alertIOBSnoozedTime") { row in
+                row.title = "Snoozed Until"
+                if (UserDefaultsRepository.alertIOBSnoozedTime.value != nil) {
+                    row.value = UserDefaultsRepository.alertIOBSnoozedTime.value
+                }
+                row.minuteInterval = 5
+                row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertIOBSnoozedTime.value = value
+                UserDefaultsRepository.alertIOBIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertIOBIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+            }
+            <<< SwitchRow("alertIOBIsSnoozed"){ row in
+                row.title = "Is Snoozed"
+                row.value = UserDefaultsRepository.alertIOBIsSnoozed.value
+                row.hidden = "$alertIOBSnoozedTime == nil"
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertIOBIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertIOBSnoozedTime.setNil(key: "alertIOBSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertIOBSnoozedTime") as! DateTimeInlineRow
+                    otherRow.value = nil
+                    otherRow.reload()
+                }
+        }
+    }
+    
+    func buildCOB() {
+        form
+            +++ Section(header: "COB", footer: "Alert will trigger when COB is above value") { row in
+                row.hidden = "$otherAlerts3 != 'COB'"
+            }
+            <<< SwitchRow("alertCOB"){ row in
+                row.title = "Active"
+                row.value = UserDefaultsRepository.alertCOB.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertCOB.value = value
+            }
+            
+            <<< StepperRow("alertCOBAt") { row in
+                row.title = "COB >="
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 1
+                row.cell.stepper.maximumValue = 200
+                row.value = Double(UserDefaultsRepository.alertCOBAt.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertCOBAt.value = Int(value)
+            }
+            
+            <<< StepperRow("alertCOBSnoozeHours") { row in
+                row.title = "Snooze Hours"
+                row.cell.stepper.stepValue = 1
+                row.cell.stepper.minimumValue = 1
+                row.cell.stepper.maximumValue = 6
+                row.value = Double(UserDefaultsRepository.alertCOBSnoozeHours.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertCOBSnoozeHours.value = Int(value)
+            }
+            <<< PickerInputRow<String>("alertCOBSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.value = UserDefaultsRepository.alertCOBSound.value
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertCOBSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+        }
+            <<< PickerInputRow<String>("alertCOBPlaySound") { row in
+                row.title = "Play Sound"
+                row.options = alertPlaySoundOptions
+                row.value = UserDefaultsRepository.alertCOBAudible.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertCOBAudible.value = value
+                    let alertVol = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertCOBDayTimeAudible.value = alertVol.dayTime
+                    UserDefaultsRepository.alertCOBNightTimeAudible.value = alertVol.nightTime
+            }
+            <<< PickerInputRow<String>("alertCOBRepeat") { row in
+                row.title = "Repeat Sound"
+                row.options = alertRepeatOptions
+                row.value = UserDefaultsRepository.alertCOBRepeat.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertCOBRepeat.value = value
+                    let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                    UserDefaultsRepository.alertCOBDayTime.value = alertTimes.dayTime
+                    UserDefaultsRepository.alertCOBNightTime.value = alertTimes.nightTime
+            }
+            <<< PickerInputRow<String>("alertCOBAutoSnooze") { row in
+                row.title = "Pre-Snooze"
+                row.options = alertAutosnoozeOptions
+                row.value = UserDefaultsRepository.alertCOBAutosnooze.value
+                row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertCOBAutosnooze.value = value
+                let alertTimes = self!.timeBasedSettings(pickerValue: value)
+                UserDefaultsRepository.alertCOBAutosnoozeDay.value = alertTimes.dayTime
+                UserDefaultsRepository.alertCOBAutosnoozeNight.value = alertTimes.nightTime
+            }
+            <<< DateTimeInlineRow("alertCOBSnoozedTime") { row in
+                row.title = "Snoozed Until"
+                if (UserDefaultsRepository.alertCOBSnoozedTime.value != nil) {
+                    row.value = UserDefaultsRepository.alertCOBSnoozedTime.value
+                }
+                row.minuteInterval = 5
+                row.noValueDisplayText = "Not Snoozed"
+            }
+            .onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertCOBSnoozedTime.value = value
+                UserDefaultsRepository.alertCOBIsSnoozed.value = true
+                let otherRow = self?.form.rowBy(tag: "alertCOBIsSnoozed") as! SwitchRow
+                otherRow.value = true
+                otherRow.reload()
+            }
+            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                inlineRow.cellUpdate() { cell, row in
+                    cell.datePicker.datePickerMode = .dateAndTime
+                    cell.datePicker.preferredDatePickerStyle = .wheels
+                }
+                let color = cell.detailTextLabel?.textColor
+                row.onCollapseInlineRow { cell, _, _ in
+                    cell.detailTextLabel?.textColor = color
+                }
+                cell.detailTextLabel?.textColor = cell.tintColor
+            }
+            <<< SwitchRow("alertCOBIsSnoozed"){ row in
+                row.title = "Is Snoozed"
+                row.value = UserDefaultsRepository.alertCOBIsSnoozed.value
+                row.hidden = "$alertCOBSnoozedTime == nil"
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertCOBIsSnoozed.value = value
+                if !value {
+                    UserDefaultsRepository.alertCOBSnoozedTime.setNil(key: "alertCOBSnoozedTime")
+                    let otherRow = self?.form.rowBy(tag: "alertCOBSnoozedTime") as! DateTimeInlineRow
                     otherRow.value = nil
                     otherRow.reload()
                 }
