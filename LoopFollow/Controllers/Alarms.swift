@@ -65,6 +65,42 @@ extension MainViewController {
             return
         }
         
+        // Check IOB
+        if UserDefaultsRepository.alertIOB.value && !UserDefaultsRepository.alertIOBIsSnoozed.value {
+            let alertAt = Double(UserDefaultsRepository.alertIOBAt.value)
+            if Double(latestIOB) ?? 0 >= alertAt {
+                AlarmSound.whichAlarm = "IOB Alert"
+                //determine if it is day or night and what should happen
+                if UserDefaultsRepository.nightTime.value {
+                    if UserDefaultsRepository.alertIOBNightTime.value { numLoops = -1 }
+                    if !UserDefaultsRepository.alertIOBNightTimeAudible.value { playSound = false }
+                } else {
+                    if UserDefaultsRepository.alertIOBDayTime.value { numLoops = -1 }
+                    if !UserDefaultsRepository.alertIOBDayTimeAudible.value { playSound = false }
+                }
+                triggerAlarm(sound: UserDefaultsRepository.alertIOBSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertIOBSnoozeHours.value, snoozeIncrement: 1, audio: playSound)
+                return
+            }
+        }
+        
+        // Check COB
+        if UserDefaultsRepository.alertCOB.value && !UserDefaultsRepository.alertCOBIsSnoozed.value {
+            let alertAt = Double(UserDefaultsRepository.alertCOBAt.value)
+            if Double(latestCOB) ?? 0 >= alertAt {
+                AlarmSound.whichAlarm = "COB Alert"
+                //determine if it is day or night and what should happen
+                if UserDefaultsRepository.nightTime.value {
+                    if UserDefaultsRepository.alertCOBNightTime.value { numLoops = -1 }
+                    if !UserDefaultsRepository.alertCOBNightTimeAudible.value { playSound = false }
+                } else {
+                    if UserDefaultsRepository.alertCOBDayTime.value { numLoops = -1 }
+                    if !UserDefaultsRepository.alertCOBDayTimeAudible.value { playSound = false }
+                }
+                triggerAlarm(sound: UserDefaultsRepository.alertCOBSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertCOBSnoozeHours.value, snoozeIncrement: 1, audio: playSound)
+                return
+            }
+        }
+        
         
         // BG Based Alarms
         // Check to make sure it is a current reading and has not already triggered alarm from this reading
@@ -92,11 +128,29 @@ extension MainViewController {
             }
             
             // Check Urgent Low
+            
+            let predictiveNumReadings = Int(UserDefaultsRepository.alertUrgentLowPredictiveMinutes.value / 5)
+            var predictiveTrigger = false
+            if  !predictionData.isEmpty {
+                for i in 0..<predictiveNumReadings {
+                    if predictionData.count > i {
+                        if Float(predictionData[i].sgv) <= UserDefaultsRepository.alertUrgentLowBG.value {
+                            predictiveTrigger = true
+                        }
+                    }
+                }
+            }
             if UserDefaultsRepository.alertUrgentLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
-                Float(currentBG) <= UserDefaultsRepository.alertUrgentLowBG.value {
+                (Float(currentBG) <= UserDefaultsRepository.alertUrgentLowBG.value || predictiveTrigger) {
                 // Separating this makes it so the low or drop alerts won't trigger if they already snoozed the urgent low
                 if !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
-                    AlarmSound.whichAlarm = "Urgent Low Alert"
+                    
+                    if predictiveTrigger {
+                        AlarmSound.whichAlarm = "Predicted Urgent Low Alert"
+                    } else {
+                        AlarmSound.whichAlarm = "Urgent Low Alert"
+                    }
+                    
                     //determine if it is day or night and what should happen
                     if UserDefaultsRepository.nightTime.value {
                         if UserDefaultsRepository.alertUrgentLowNightTime.value { numLoops = -1 }
@@ -116,31 +170,18 @@ extension MainViewController {
             let persistentLowReadings = Int(UserDefaultsRepository.alertLowPersistent.value / 5)
             let persistentLowBG = bgData[bgData.count - 1 - persistentLowReadings].sgv
             let persistentLowTriggerImmediatelyBG = UserDefaultsRepository.alertLowBG.value - UserDefaultsRepository.alertLowPersistenceMax.value
-            let predictiveNumReadings = Int(UserDefaultsRepository.alertLowPredictiveMinutes.value / 5)
-            var predictiveTrigger = false
-            if  !predictionData.isEmpty {
-                for i in 0..<predictiveNumReadings {
-                    if predictionData.count > i {
-                        if Float(predictionData[i].sgv) <= persistentLowTriggerImmediatelyBG {
-                            predictiveTrigger = true
-                        }
-                    }
-                }
-            }
+            
             if UserDefaultsRepository.alertLowActive.value &&
                 !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
                 !UserDefaultsRepository.alertLowIsSnoozed.value &&
                 (Float(currentBG) <= UserDefaultsRepository.alertLowBG.value &&
-                (Float(persistentLowBG) <= UserDefaultsRepository.alertLowBG.value || Float(currentBG) <= persistentLowTriggerImmediatelyBG)
-                || predictiveTrigger == true
+                 (Float(persistentLowBG) <= UserDefaultsRepository.alertLowBG.value || Float(currentBG) <= persistentLowTriggerImmediatelyBG)
                 )
                  {
                 
-                if predictiveTrigger && Float(currentBG) > UserDefaultsRepository.alertLowBG.value {
-                    AlarmSound.whichAlarm = "Predictive Low Alert"
-                } else {
+               
                     AlarmSound.whichAlarm = "Low Alert"
-                }
+              
                 
   
                 //determine if it is day or night and what should happen

@@ -129,6 +129,7 @@ class UserDefaultsRepository {
     
     static let alertUrgentLowActive = UserDefaultsValue<Bool>(key: "alertUrgentLowActive", default: false)
     static let alertUrgentLowBG = UserDefaultsValue<Float>(key: "alertUrgentLowBG", default: 55.0)
+    static let alertUrgentLowPredictiveMinutes = UserDefaultsValue<Int>(key: "alertUrgentLowPredictiveMinutes", default: 0)
     static let alertUrgentLowSnooze = UserDefaultsValue<Int>(key: "alertUrgentLowSnooze", default: 5)
     static let alertUrgentLowSnoozedTime = UserDefaultsValue<Date?>(key: "alertUrgentLowSnoozedTime", default: nil)
     static let alertUrgentLowIsSnoozed = UserDefaultsValue<Bool>(key: "alertUrgentLowIsSnoozed", default: false)
@@ -147,7 +148,6 @@ class UserDefaultsRepository {
     static let alertLowBG = UserDefaultsValue<Float>(key: "alertLowBG", default: 70.0)
     static let alertLowPersistent = UserDefaultsValue<Int>(key: "alertLowPersistent", default: 0)
     static let alertLowPersistenceMax = UserDefaultsValue<Float>(key: "alertLowPersistenceMax", default: 5.0)
-    static let alertLowPredictiveMinutes = UserDefaultsValue<Int>(key: "alertLowPredictiveMinutes", default: 0)
     static let alertLowSnooze = UserDefaultsValue<Int>(key: "alertLowSnooze", default: 5)
     static let alertLowSnoozedTime = UserDefaultsValue<Date?>(key: "alertLowSnoozedTime", default: nil)
     static let alertLowIsSnoozed = UserDefaultsValue<Bool>(key: "alertLowIsSnoozed", default: false)
@@ -382,4 +382,37 @@ class UserDefaultsRepository {
     static let alertPumpAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertPumpAutosnoozeDay", default: false)
     static let alertPumpAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertPumpAutosnoozeNight", default: false)
     
+    static let alertIOB = UserDefaultsValue<Bool>(key: "alertIOB", default: false)
+    static let alertIOBAt = UserDefaultsValue<Int>(key: "alertIOBAt", default: 10) //Units
+    static let alertIOBQuiet = UserDefaultsValue<Bool>(key: "alertIOBQuiet", default: false)
+    static let alertIOBRepeat = UserDefaultsValue<String>(key: "alertIOBRepeat", default: "Always")
+    static let alertIOBDayTime = UserDefaultsValue<Bool>(key: "alertIOBDayTime", default: true)
+    static let alertIOBNightTime = UserDefaultsValue<Bool>(key: "alertIOBNightTime", default: true)
+    static let alertIOBAudible = UserDefaultsValue<String>(key: "alertIOBAudible", default: "Always")
+    static let alertIOBDayTimeAudible = UserDefaultsValue<Bool>(key: "alertIOBDayTimeAudible", default: true)
+    static let alertIOBNightTimeAudible = UserDefaultsValue<Bool>(key: "alertIOBNightTimeAudible", default: true)
+    static let alertIOBSound = UserDefaultsValue<String>(key: "alertIOBSound", default: "Alert_Tone_Ringtone_1")
+    static let alertIOBSnoozeHours = UserDefaultsValue<Int>(key: "alertIOBSnoozeHours", default: 1) //Hours
+    static let alertIOBIsSnoozed = UserDefaultsValue<Bool>(key: "alertIOBIsSnoozed", default: false)
+    static let alertIOBSnoozedTime = UserDefaultsValue<Date?>(key: "alertIOBSnoozedTime", default: nil)
+    static let alertIOBAutosnooze = UserDefaultsValue<String>(key: "alertIOBAutosnooze", default: "Never")
+    static let alertIOBAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertIOBAutosnoozeDay", default: false)
+    static let alertIOBAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertIOBAutosnoozeNight", default: false)
+    
+    static let alertCOB = UserDefaultsValue<Bool>(key: "alertCOB", default: false)
+    static let alertCOBAt = UserDefaultsValue<Int>(key: "alertCOBAt", default: 50) //Units
+    static let alertCOBQuiet = UserDefaultsValue<Bool>(key: "alertCOBQuiet", default: false)
+    static let alertCOBRepeat = UserDefaultsValue<String>(key: "alertCOBRepeat", default: "Always")
+    static let alertCOBDayTime = UserDefaultsValue<Bool>(key: "alertCOBDayTime", default: true)
+    static let alertCOBNightTime = UserDefaultsValue<Bool>(key: "alertCOBNightTime", default: true)
+    static let alertCOBAudible = UserDefaultsValue<String>(key: "alertCOBAudible", default: "Always")
+    static let alertCOBDayTimeAudible = UserDefaultsValue<Bool>(key: "alertCOBDayTimeAudible", default: true)
+    static let alertCOBNightTimeAudible = UserDefaultsValue<Bool>(key: "alertCOBNightTimeAudible", default: true)
+    static let alertCOBSound = UserDefaultsValue<String>(key: "alertCOBSound", default: "Alert_Tone_Ringtone_2")
+    static let alertCOBSnoozeHours = UserDefaultsValue<Int>(key: "alertCOBSnoozeHours", default: 1) //Hours
+    static let alertCOBIsSnoozed = UserDefaultsValue<Bool>(key: "alertCOBIsSnoozed", default: false)
+    static let alertCOBSnoozedTime = UserDefaultsValue<Date?>(key: "alertCOBSnoozedTime", default: nil)
+    static let alertCOBAutosnooze = UserDefaultsValue<String>(key: "alertCOBAutosnooze", default: "Never")
+    static let alertCOBAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertCOBAutosnoozeDay", default: false)
+    static let alertCOBAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertCOBAutosnoozeNight", default: false)
 }
