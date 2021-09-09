@@ -74,7 +74,22 @@ extension MainViewController {
             // TODO: add error checking
             if(err == nil) {
                 var data = result!
-                self.ProcessNSBGData(data: data, onlyPullLastRecord: onlyPullLastRecord)
+                
+                // If Dex data is old, load from NS instead
+                let latestDate = data[0].date
+                let now = dateTimeUtils.getNowTimeIntervalUTC()
+                if (latestDate + 330) < now {
+                    self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+                    print("dex didn't load, triggered NS attempt")
+                    return
+                }
+                
+                // Dexcom only returns 24 hrs of data. If we need more, call NS.
+                if graphHours > 24 && !onlyPullLastRecord {
+                    self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord, dexData: data)
+                } else {
+                    self.ProcessDexBGData(data: data, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
+                }
             } else {
                 // If we get an error, immediately try to pull NS BG Data
                 self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
@@ -90,7 +105,7 @@ extension MainViewController {
     }
     
     // NS BG Data Web call
-    func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
+    func webLoadNSBGData(onlyPullLastRecord: Bool = false, dexData: [ShareGlucoseData] = []) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         // Set the count= in the url either to pull day(s) of data or only the last record
@@ -107,6 +122,12 @@ extension MainViewController {
             urlBGDataPath = urlBGDataPath + "token=" + token + "&count=" + points
         }
         guard let urlBGData = URL(string: urlBGDataPath) else {
+            // if we have Dex data, use it
+            if !dexData.isEmpty {
+                self.ProcessDexBGData(data: dexData, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
+                return
+            }
+            
             if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                 //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
@@ -135,6 +156,10 @@ extension MainViewController {
                     }
                     self.startBGTimer(time: 10)
                 }
+                // if we have Dex data, use it
+                if !dexData.isEmpty {
+                    self.ProcessDexBGData(data: dexData, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
+                }
                 return
                 
             }
@@ -155,10 +180,30 @@ extension MainViewController {
             
             let decoder = JSONDecoder()
             let entriesResponse = try? decoder.decode([ShareGlucoseData].self, from: data)
-            if let entriesResponse = entriesResponse {
+            if var nsData = entriesResponse {
                 DispatchQueue.main.async {
+                    // transform NS data to look like Dex data
+                    for i in 0..<nsData.count {
+                        // convert the NS timestamp to seconds instead of milliseconds
+                        nsData[i].date /= 1000
+                        nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
+                    }
+                    
+                    // merge NS and Dex data if needed; use recent Dex data and older NS data
+                    var sourceName = "Nightscout"
+                    if !dexData.isEmpty {
+                        let oldestDexDate = dexData[dexData.count - 1].date
+                        var itemsToRemove = 0
+                        while itemsToRemove < nsData.count && nsData[itemsToRemove].date >= oldestDexDate {
+                            itemsToRemove += 1
+                        }
+                        nsData.removeFirst(itemsToRemove)
+                        nsData = dexData + nsData
+                        sourceName = "Dexcom + Nightscout"
+                    }
+                    
                     // trigger the processor for the data after downloading.
-                    self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord, isNS: true)
+                    self.ProcessDexBGData(data: nsData, onlyPullLastRecord: onlyPullLastRecord, sourceName: sourceName)
                     
                 }
             } else {
@@ -179,30 +224,15 @@ extension MainViewController {
         getBGTask.resume()
     }
     
-    // NS BG Data Response processor
-    func ProcessNSBGData(data: [ShareGlucoseData], onlyPullLastRecord: Bool, isNS: Bool = false){
+    // Dexcom BG Data Response processor
+    func ProcessDexBGData(data: [ShareGlucoseData], onlyPullLastRecord: Bool, sourceName: String){
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG") }
         
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         
-        var pullDate = data[data.count - 1].date
-        if isNS {
-            pullDate = data[data.count - 1].date / 1000
-            pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
-        }
-        
-        var latestDate = data[0].date
-        if isNS {
-            latestDate = data[0].date / 1000
-            latestDate.round(FloatingPointRoundingRule.toNearestOrEven)
-        }
-        
+        let pullDate = data[data.count - 1].date
+        let latestDate = data[0].date
         let now = dateTimeUtils.getNowTimeIntervalUTC()
-        if !isNS && (latestDate + 330) < now {
-            webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
-            print("dex didn't load, triggered NS attempt")
-            return
-        }
         
         // Start the BG timer based on the reading
         let secondsAgo = now - latestDate
@@ -251,25 +281,21 @@ extension MainViewController {
             return
         }
         
-        // loop through the data so we can reverse the order to oldest first for the graph and convert the NS timestamp to seconds instead of milliseconds. Makes date comparisons easier for everything else.
+        // loop through the data so we can reverse the order to oldest first for the graph
         for i in 0..<data.count{
-            var dateString = data[data.count - 1 - i].date
-            if isNS {
-                dateString = data[data.count - 1 - i].date / 1000
-                dateString.round(FloatingPointRoundingRule.toNearestOrEven)
-            }
+            let dateString = data[data.count - 1 - i].date
             if dateString >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 let reading = ShareGlucoseData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
                 bgData.append(reading)
             }
             
         }
-        
-        viewUpdateNSBG(isNS: isNS)
+
+        viewUpdateNSBG(sourceName: sourceName)
     }
     
     // NS BG Data Front end updater
-    func viewUpdateNSBG (isNS: Bool) {
+    func viewUpdateNSBG (sourceName: String) {
         DispatchQueue.main.async {
             if UserDefaultsRepository.debugLog.value {
                 self.writeDebugLog(value: "Display: BG")
@@ -293,11 +319,7 @@ extension MainViewController {
                 userUnit = " mmol/L"
             }
             
-            if isNS {
-                self.serverText.text = "Nightscout"
-            } else {
-                self.serverText.text = "Dexcom"
-            }
+            self.serverText.text = sourceName
             
             var snoozerBG = ""
             var snoozerDirection = ""
