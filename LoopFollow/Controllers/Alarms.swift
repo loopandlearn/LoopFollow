@@ -724,6 +724,22 @@ extension MainViewController {
 
         }
         
+        if date > UserDefaultsRepository.alertIOBSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertIOBSnoozedTime.setNil(key: "alertIOBSnoozedTime")
+            UserDefaultsRepository.alertIOBIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertIOBSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertIOBIsSnoozed", value: false)
+
+        }
+        
+        if date > UserDefaultsRepository.alertCOBSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertCOBSnoozedTime.setNil(key: "alertCOBSnoozedTime")
+            UserDefaultsRepository.alertCOBIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertCOBSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertCOBIsSnoozed", value: false)
+
+        }
+        
         
       }
     
