@@ -2838,7 +2838,7 @@ class AlarmViewController: FormViewController {
     
     func buildIOB() {
         form
-            +++ Section(header: "IOB", footer: "Alert will trigger when IOB is above value") { row in
+            +++ Section(header: "IOB", footer: "Alert will trigger when IOB is above value.The Total Bolus Within option with allow the alert to use the reported IOB or sum of the Boluses") { row in
                 row.hidden = "$otherAlerts3 != 'IOB'"
             }
             <<< SwitchRow("alertIOB"){ row in
@@ -2863,6 +2863,20 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertIOBAt.value = Int(value)
             }
+        <<< StepperRow("alertIOBBolusesWithin") { row in
+            row.title = "Or Total Boluses (Min)"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 120
+            row.value = Double(UserDefaultsRepository.alertIOBBolusesWithin.value)
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertIOBBolusesWithin.value = Int(value)
+        }
             
             <<< StepperRow("alertIOBSnoozeHours") { row in
                 row.title = "Snooze Hours"
@@ -3008,6 +3022,7 @@ class AlarmViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertCOBAt.value = Int(value)
             }
+        
             
             <<< StepperRow("alertCOBSnoozeHours") { row in
                 row.title = "Snooze Hours"
