@@ -68,7 +68,16 @@ extension MainViewController {
         // Check IOB
         if UserDefaultsRepository.alertIOB.value && !UserDefaultsRepository.alertIOBIsSnoozed.value {
             let alertAt = Double(UserDefaultsRepository.alertIOBAt.value)
-            if Double(latestIOB) ?? 0 >= alertAt {
+            var totalBolus: Double = 0
+            let bolusTimeAgo = dateTimeUtils.getNowTimeIntervalUTC() - Double(UserDefaultsRepository.alertIOBBolusesWithin.value * 60)
+            if UserDefaultsRepository.alertIOBBolusesWithin.value > 0 {
+                for i in 0..<bolusData.count {
+                    if bolusData[i].date >= bolusTimeAgo {
+                        totalBolus += bolusData[i].value
+                    }
+                }
+            }
+            if Double(latestIOB) ?? 0 >= alertAt || totalBolus >= alertAt {
                 AlarmSound.whichAlarm = "IOB Alert"
                 //determine if it is day or night and what should happen
                 if UserDefaultsRepository.nightTime.value {

@@ -384,6 +384,7 @@ class UserDefaultsRepository {
     
     static let alertIOB = UserDefaultsValue<Bool>(key: "alertIOB", default: false)
     static let alertIOBAt = UserDefaultsValue<Int>(key: "alertIOBAt", default: 10) //Units
+    static let alertIOBBolusesWithin = UserDefaultsValue<Int>(key: "alertIOBBolusesWithin", default: 60) //Minutes
     static let alertIOBQuiet = UserDefaultsValue<Bool>(key: "alertIOBQuiet", default: false)
     static let alertIOBRepeat = UserDefaultsValue<String>(key: "alertIOBRepeat", default: "Always")
     static let alertIOBDayTime = UserDefaultsValue<Bool>(key: "alertIOBDayTime", default: true)
