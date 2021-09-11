@@ -1,6 +1,20 @@
 ## Loop Follow 
 ![screenshot](https://user-images.githubusercontent.com/38429455/93782187-436e8880-fbf8-11ea-8709-e2afba692132.png)
 
+### Purpose:
+
+Using so many different apps as a parent or caregiver of a T1D can be very cumbersome. Add in the extra details from Looping
+and it can be a challenge flipping back and forth between apps. Each app has different strengths and weaknesses.
+- Spike is great for alarms. 
+- Spike and Sugarmate are great for the calendar complication on Apple Watch. 
+- Nightscout X or Nightscout in Safari are needed for intricate details from NS.
+- IFTTT and Pushover are  needed for Not Looping alerts.
+
+And there are some functions I've always wished for and not found anywhere such a one-time temporary alert
+for those nights when Loop is stuck on high and you open loop with a correction. This lets you set a higher
+low alert for the BG you want to wake up to and close Loop.
+
+
 ### To begin building: 
 
 1. Open Terminal
@@ -21,17 +35,6 @@ Some things do not work correctly yet in Big Sur
 - Disable Keep Screen Active. I haven't tested, but doubt this will do anything.
 - Watch/Carplay calendar selection does not work
 - Alarms will not override the Mac volume or mute.
-
-Using so many different apps as a parent or caregiver of a T1D can be very cumbersome. Add in the extra details from Looping
-and it can be a challenge flipping back and forth between apps. Each app has different strengths and weaknesses.
-- Spike is great for alarms. 
-- Spike and Sugarmate are great for the calendar complication on Apple Watch. 
-- Nightscout X or Nightscout in Safari are needed for intricate details from NS.
-- IFTTT and Pushover are  needed for Not Looping alerts.
-
-And there are some functions I've always wished for and not found anywhere such a one-time temporary alert
-for those nights when Loop is stuck on high and you open loop with a correction. This lets you set a higher
-low alert for the BG you want to wake up to and close Loop.
 
 Build Instruction Video: https://youtu.be/s07QPZ7xycY
 
