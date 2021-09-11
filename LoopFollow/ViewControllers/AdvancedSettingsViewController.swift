@@ -92,7 +92,7 @@ class AdvancedSettingsViewController: FormViewController {
             }
             <<< StepperRow("downloadDays") { row in
                 // NS supports 4 days, Dexcom Share only 1 day
-                row.title = "Show Days Back (NS only)"
+                row.title = "Show Days Back"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 4
