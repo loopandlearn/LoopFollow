@@ -2838,7 +2838,7 @@ class AlarmViewController: FormViewController {
     
     func buildIOB() {
         form
-            +++ Section(header: "IOB", footer: "Alert will trigger when IOB is above value.The Total Bolus Within option with allow the alert to use the reported IOB or sum of the Boluses") { row in
+            +++ Section(header: "IOB", footer: "Alert will trigger when multiple boluses exceed the values.") { row in
                 row.hidden = "$otherAlerts3 != 'IOB'"
             }
             <<< SwitchRow("alertIOB"){ row in
@@ -2850,21 +2850,35 @@ class AlarmViewController: FormViewController {
             }
             
             <<< StepperRow("alertIOBAt") { row in
-                row.title = "IOB >="
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 1
+                row.title = "Boluses >="
+                row.cell.stepper.stepValue = 0.1
+                row.cell.stepper.minimumValue = 0.1
                 row.cell.stepper.maximumValue = 50
                 row.value = Double(UserDefaultsRepository.alertIOBAt.value)
                 row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return "\(Int(value))"
+                    return "\(Double(round(10*value)/10))"
                 }
             }.onChange { [weak self] row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.alertIOBAt.value = Int(value)
+                UserDefaultsRepository.alertIOBAt.value = value
             }
+        <<< StepperRow("alertIOBNumber") { row in
+            row.title = "Number of Boluses >="
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 1
+            row.cell.stepper.maximumValue = 10
+            row.value = Double(UserDefaultsRepository.alertIOBNumber.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertIOBNumber.value = Int(value)
+        }
         <<< StepperRow("alertIOBBolusesWithin") { row in
-            row.title = "Or Total Boluses (Min)"
+            row.title = "Within # Minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 5
             row.cell.stepper.maximumValue = 120
@@ -2876,6 +2890,21 @@ class AlarmViewController: FormViewController {
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertIOBBolusesWithin.value = Int(value)
+        }
+        
+        <<< StepperRow("alertIOBMaxBoluses") { row in
+            row.title = "Or Total IOB"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 1
+            row.cell.stepper.maximumValue = 20
+            row.value = Double(UserDefaultsRepository.alertIOBMaxBoluses.value)
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertIOBMaxBoluses.value = Int(value)
         }
             
             <<< StepperRow("alertIOBSnoozeHours") { row in
