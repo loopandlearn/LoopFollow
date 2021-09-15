@@ -40,7 +40,18 @@ class GraphSettingsViewController: FormViewController {
             })
             row1.evaluateHidden()
         }
-        
+        if let row2 = form.rowBy(tag: "smallGraphTreatments") as? SwitchRow {
+            row2.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row2.evaluateHidden()
+        }
+        if let row3 = form.rowBy(tag: "minBasalScale") as? StepperRow {
+            row3.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row3.evaluateHidden()
+        }
         
         if let row4 = form.rowBy(tag: "showValues") as? SwitchRow {
             row4.hidden = .function(["hide"],  {form in

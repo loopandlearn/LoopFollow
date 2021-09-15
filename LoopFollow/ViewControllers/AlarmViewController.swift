@@ -414,18 +414,32 @@ class AlarmViewController: FormViewController {
             })
             row1.evaluateHidden()
         }
-        if let row2 = form.rowBy(tag: "overrideAlerts") as? SegmentedRow<String> {
+        if let row2 = form.rowBy(tag: "otherAlerts2") as? SegmentedRow<String> {
             row2.hidden = .function(["hide"],  {form in
                 return isHidden
             })
             row2.evaluateHidden()
         }
-        if let row3 = form.sectionBy(tag: "quietHourSection") as? Section {
+        if let row3 = form.rowBy(tag: "otherAlerts3") as? SegmentedRow<String> {
             row3.hidden = .function(["hide"],  {form in
                 return isHidden
             })
             row3.evaluateHidden()
         }
+        if let row4 = form.sectionBy(tag: "quietHourSection") as? Section {
+            row4.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row4.evaluateHidden()
+        }
+        if let row5 = form.rowBy(tag: "alertUrgentLowPredictiveMinutes") as? Section {
+            row5.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row5.evaluateHidden()
+            UserDefaultsRepository.alertUrgentLowPredictiveMinutes.value = 0
+        }
+        
         
         guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
         nightscoutTab.isEnabled = isEnabled
