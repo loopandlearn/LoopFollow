@@ -3196,6 +3196,13 @@ class AlarmViewController: FormViewController {
                       guard let value = row.value else { return }
                       UserDefaultsRepository.forcedOutputVolume.value = Float(value)
               }
+            <<< SwitchRow("alertIgnoreZero"){ row in
+                row.title = "Ignore Zero BG"
+                row.value = UserDefaultsRepository.alertIgnoreZero.value
+            }.onChange { [weak self] row in
+                        guard let value = row.value else { return }
+                        UserDefaultsRepository.alertIgnoreZero.value = value
+                }
             
              +++ Section(header: "Night Time Settings", footer: "Night time hours are used to differ how alerts are managed during the day and at night.  For instance, automatically snooze, at night time, non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert.")  { row in
                 row.tag = "quietHourSection"

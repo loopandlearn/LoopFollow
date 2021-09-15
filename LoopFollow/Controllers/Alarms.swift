@@ -28,6 +28,11 @@ extension MainViewController {
         let currentBG = bgs[bgs.count - 1].sgv
         let lastBG = bgs[bgs.count - 2].sgv
         
+        var skipZero = false
+        if UserDefaultsRepository.alertIgnoreZero.value && currentBG == 0 {
+            skipZero = true
+        }
+        
         var deltas: [Int] = []
         if bgs.count > 3 {
             deltas.append(bgs[bgs.count - 1].sgv - bgs[bgs.count - 2].sgv)
@@ -153,7 +158,8 @@ extension MainViewController {
                 }
             }
             if UserDefaultsRepository.alertUrgentLowActive.value && !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
-                (Float(currentBG) <= UserDefaultsRepository.alertUrgentLowBG.value || predictiveTrigger) {
+                (Float(currentBG) <= UserDefaultsRepository.alertUrgentLowBG.value || predictiveTrigger)
+                && skipZero == false {
                 // Separating this makes it so the low or drop alerts won't trigger if they already snoozed the urgent low
                 if !UserDefaultsRepository.alertUrgentLowIsSnoozed.value {
                     
@@ -186,6 +192,7 @@ extension MainViewController {
             if UserDefaultsRepository.alertLowActive.value &&
                 !UserDefaultsRepository.alertUrgentLowIsSnoozed.value &&
                 !UserDefaultsRepository.alertLowIsSnoozed.value &&
+                skipZero == false &&
                 (Float(currentBG) <= UserDefaultsRepository.alertLowBG.value &&
                  (Float(persistentLowBG) <= UserDefaultsRepository.alertLowBG.value || Float(currentBG) <= persistentLowTriggerImmediatelyBG)
                 )
