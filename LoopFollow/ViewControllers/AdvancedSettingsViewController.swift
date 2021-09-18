@@ -90,21 +90,6 @@ class AdvancedSettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.bgUpdateDelay.value = Int(value)
             }
-            <<< StepperRow("downloadDays") { row in
-                // NS supports 4 days, Dexcom Share only 1 day
-                row.title = "Show Days Back"
-                row.cell.stepper.stepValue = 1
-                row.cell.stepper.minimumValue = 1
-                row.cell.stepper.maximumValue = 4
-                row.value = Double(UserDefaultsRepository.downloadDays.value)
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.downloadDays.value = Int(value)
-            }
             <<< SwitchRow("alwaysDownloadAllBG"){ row in
                 row.title = "Allways Download All BG Values"
                 row.value = UserDefaultsRepository.alwaysDownloadAllBG.value

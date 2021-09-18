@@ -199,7 +199,7 @@ extension MainViewController {
                         }
                         nsData.removeFirst(itemsToRemove)
                         nsData = dexData + nsData
-                        sourceName = "Dexcom + Nightscout"
+                        sourceName = "Dexcom"
                     }
                     
                     // trigger the processor for the data after downloading.
