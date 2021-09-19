@@ -423,6 +423,11 @@ extension MainViewController {
         ul.limit = Double(UserDefaultsRepository.highLine.value)
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
+        
+        // Re-create vertical markers in case their settings changed
+        BGChart.xAxis.removeAllLimitLines()
+        createNowAndDIALines()
+        createMidnightLines()
     
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()

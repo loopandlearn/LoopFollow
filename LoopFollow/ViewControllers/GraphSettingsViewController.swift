@@ -116,6 +116,11 @@ class GraphSettingsViewController: FormViewController {
                         guard let value = row.value else { return }
                         UserDefaultsRepository.showDIALines.value = value
                         
+                // tell main screen that graph needs updating
+                if let appState = self!.appStateController {
+                   appState.chartSettingsChanged = true
+                   appState.chartSettingsChanges |= ChartSettingsChangeEnum.showDIALinesChanged.rawValue
+                }
             }
             <<< SwitchRow("smallGraphTreatments"){ row in
                 row.title = "Treatments on Small Graph"
@@ -249,6 +254,11 @@ class GraphSettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.showMidnightLines.value = value
                     
+            // tell main screen that graph needs updating
+            if let appState = self!.appStateController {
+               appState.chartSettingsChanged = true
+               appState.chartSettingsChanges |= ChartSettingsChangeEnum.showMidnightLinesChanged.rawValue
+            }
         }
 
             
