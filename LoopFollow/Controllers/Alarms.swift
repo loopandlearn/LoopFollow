@@ -14,6 +14,7 @@
 
 import Foundation
 import AVFoundation
+import CallKit
 
 extension MainViewController {
     
@@ -559,9 +560,12 @@ extension MainViewController {
     
     func triggerOneTimeAlarm(sound: String, overrideVolume: Bool, numLoops: Int, audio: Bool = true)
     {
+        var audioDuringCall = true
+        if !UserDefaultsRepository.alertAudioDuringPhone.value && isOnPhoneCall() { audioDuringCall = false }
+        
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
-        if audio && !UserDefaultsRepository.alertMuteAllIsMuted.value {
+        if audio && !UserDefaultsRepository.alertMuteAllIsMuted.value && audioDuringCall{
             AlarmSound.setSoundFile(str: sound)
             AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
             startAlarmPlayingTimer()
@@ -570,6 +574,9 @@ extension MainViewController {
     
     func triggerAlarm(sound: String, snooozedBGReadingTime: TimeInterval?, overrideVolume: Bool, numLoops: Int, snoozeTime: Int = 0, snoozeIncrement: Int = 5, audio: Bool = true)
     {
+        var audioDuringCall = true
+        if !UserDefaultsRepository.alertAudioDuringPhone.value && isOnPhoneCall() { audioDuringCall = false }
+        
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozer.SnoozeButton.isHidden = false
@@ -588,7 +595,7 @@ extension MainViewController {
         if snooozedBGReadingTime != nil {
             UserDefaultsRepository.snoozedBGReadingTime.value = snooozedBGReadingTime
         }
-        if audio && !UserDefaultsRepository.alertMuteAllIsMuted.value {
+        if audio && !UserDefaultsRepository.alertMuteAllIsMuted.value && audioDuringCall {
             AlarmSound.setSoundFile(str: sound)
             AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
         }
@@ -848,5 +855,17 @@ extension MainViewController {
            speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
            speechSynthesizer.speak(speechUtterance)
        }
+    
+    func isOnPhoneCall() -> Bool {
+        /*
+         Returns true if the user is currently on a phone call
+         */
+        for call in CXCallObserver().calls {
+            if call.hasEnded == false {
+                return true
+            }
+        }
+        return false
+    }
     
 }

@@ -120,6 +120,7 @@ class UserDefaultsRepository {
     static let snoozedBGReadingTime = UserDefaultsValue<TimeInterval?>(key: "snoozedBGReadingTime", default: 0)
     
     static let alertIgnoreZero = UserDefaultsValue<Bool>(key: "alertIgnoreZero", default: true)
+    static let alertAudioDuringPhone = UserDefaultsValue<Bool>(key: "alertAudioDuringPhone", default: true)
     
     static let alertCageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertCageInsertTime", default: 0)
     static let alertSageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0)

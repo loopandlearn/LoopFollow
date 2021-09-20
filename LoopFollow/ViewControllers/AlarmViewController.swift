@@ -3210,6 +3210,13 @@ class AlarmViewController: FormViewController {
                       guard let value = row.value else { return }
                       UserDefaultsRepository.forcedOutputVolume.value = Float(value)
               }
+        <<< SwitchRow("alertAudioDuringPhone"){ row in
+            row.title = "Audio During Calls"
+            row.value = UserDefaultsRepository.alertAudioDuringPhone.value
+        }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertAudioDuringPhone.value = value
+            }
             <<< SwitchRow("alertIgnoreZero"){ row in
                 row.title = "Ignore Zero BG"
                 row.value = UserDefaultsRepository.alertIgnoreZero.value
