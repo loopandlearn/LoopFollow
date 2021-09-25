@@ -267,7 +267,7 @@ extension MainViewController {
             
             
             // Check Fast Drop
-            if UserDefaultsRepository.alertFastDropActive.value && !UserDefaultsRepository.alertFastDropIsSnoozed.value {
+            if UserDefaultsRepository.alertFastDropActive.value && !UserDefaultsRepository.alertFastDropIsSnoozed.value && skipZero == false {
                 // make sure limit is off or BG is below value
                 if (!UserDefaultsRepository.alertFastDropUseLimit.value) || (UserDefaultsRepository.alertFastDropUseLimit.value && Float(currentBG) < UserDefaultsRepository.alertFastDropBelowBG.value) {
                     let compare = 0 - UserDefaultsRepository.alertFastDropDelta.value
