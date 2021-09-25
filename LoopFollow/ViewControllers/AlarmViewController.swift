@@ -3186,7 +3186,7 @@ class AlarmViewController: FormViewController {
 
     func buildAlarmSettings() {
            form
-            +++ Section(header: "Alarm Sound Settings", footer: "")
+            +++ Section(header: "Alarm Settings", footer: "")
            
             <<< SwitchRow("overrideSystemOutputVolume"){ row in
                 row.title = "Override System Volume"
@@ -3224,6 +3224,13 @@ class AlarmViewController: FormViewController {
                         guard let value = row.value else { return }
                         UserDefaultsRepository.alertIgnoreZero.value = value
                 }
+        <<< SwitchRow("alertAutoSnoozeCGMStart"){ row in
+            row.title = "Auto-Snooze CGM Start"
+            row.value = UserDefaultsRepository.alertAutoSnoozeCGMStart.value
+        }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.alertAutoSnoozeCGMStart.value = value
+            }
             
              +++ Section(header: "Night Time Settings", footer: "Night time hours are used to differ how alerts are managed during the day and at night.  For instance, automatically snooze, at night time, non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert.")  { row in
                 row.tag = "quietHourSection"
