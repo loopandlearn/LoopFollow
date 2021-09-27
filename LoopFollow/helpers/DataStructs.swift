@@ -17,7 +17,7 @@ class DataStructs {
     }
     
     //NS Basal Profile  Struct
-    struct basal2DayProfile: Codable {
+    struct basalProfileSegment: Codable {
         var basalRate: Double
         var startDate: TimeInterval
         var endDate: TimeInterval
