@@ -303,9 +303,8 @@ extension MainViewController {
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
         
-        // Add Now Line
-        createNowAndDIALines()
-        createMidnightLines()
+        // Add vertical lines as configured
+        createVerticalLines()
         startGraphNowTimer()
         
         // Setup the main graph overall details
@@ -346,8 +345,14 @@ extension MainViewController {
         
     }
     
-    func createNowAndDIALines() {
+    func createVerticalLines() {
         BGChart.xAxis.removeAllLimitLines()
+        BGChartFull.xAxis.removeAllLimitLines()
+        createNowAndDIALines()
+        createMidnightLines()
+    }
+    
+    func createNowAndDIALines() {
         let ul = ChartLimitLine()
         ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
         ul.lineColor = NSUIColor.systemGray.withAlphaComponent(0.5)
@@ -376,12 +381,22 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             let graphStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             while midnightTimeInterval > graphStart {
+                // Large chart
                 let ul = ChartLimitLine()
                 ul.limit = Double(midnightTimeInterval)
-                ul.lineColor = NSUIColor.systemIndigo.withAlphaComponent(0.5)
+                ul.lineColor = NSUIColor.systemTeal.withAlphaComponent(0.5)
                 ul.lineDashLengths = [CGFloat(2), CGFloat(5)]
                 ul.lineWidth = 1
                 BGChart.xAxis.addLimitLine(ul)
+
+                // Small chart
+                let sl = ChartLimitLine()
+                sl.limit = Double(midnightTimeInterval)
+                sl.lineColor = NSUIColor.systemTeal
+                sl.lineDashLengths = [CGFloat(2), CGFloat(2)]
+                sl.lineWidth = 1
+                BGChartFull.xAxis.addLimitLine(sl)
+                
                 midnightTimeInterval = midnightTimeInterval.advanced(by: -24*60*60)
             }
         }
@@ -425,9 +440,7 @@ extension MainViewController {
         BGChart.rightAxis.addLimitLine(ul)
         
         // Re-create vertical markers in case their settings changed
-        BGChart.xAxis.removeAllLimitLines()
-        createNowAndDIALines()
-        createMidnightLines()
+        createVerticalLines()
     
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
@@ -1146,7 +1159,9 @@ extension MainViewController {
         BGChartFull.rightAxis.axisMinimum = 0.0
         BGChartFull.rightAxis.axisMaximum = Double(maxBG)
                                                
-        BGChartFull.xAxis.enabled = false
+        BGChartFull.xAxis.drawLabelsEnabled = false
+        BGChartFull.xAxis.drawGridLinesEnabled = false
+        BGChartFull.xAxis.drawAxisLineEnabled = false
         BGChartFull.legend.enabled = false
         BGChartFull.scaleYEnabled = false
         BGChartFull.scaleXEnabled = false
