@@ -163,9 +163,12 @@ public class ShareClient {
                 return callback(.fetchError, nil)
             }
 
+            // Dexcom Share only returns up to 24 hrs of data today
+            // Requesting more just in case this changes in the future
+            let minutes = max(1440, n * 5)
             components.queryItems = [
                 URLQueryItem(name: "sessionId", value: self.token),
-                URLQueryItem(name: "minutes", value: String(1440)),
+                URLQueryItem(name: "minutes", value: String(minutes)),
                 URLQueryItem(name: "maxCount", value: String(n))
             ]
 
