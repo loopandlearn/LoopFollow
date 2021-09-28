@@ -64,14 +64,32 @@ extension MainViewController {
     
     // Dex Share Web Call
     func webLoadDexShare(onlyPullLastRecord: Bool = false) {
-        var count = 288
+        // Dexcom Share only returns 24 hrs of data as of now
+        // Requesting more just for consistency with NS
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        var count = graphHours * 12
         if onlyPullLastRecord { count = 1 }
         dexShare?.fetchData(count) { (err, result) -> () in
             
             // TODO: add error checking
             if(err == nil) {
                 var data = result!
-                self.ProcessNSBGData(data: data, onlyPullLastRecord: onlyPullLastRecord)
+                
+                // If Dex data is old, load from NS instead
+                let latestDate = data[0].date
+                let now = dateTimeUtils.getNowTimeIntervalUTC()
+                if (latestDate + 330) < now {
+                    self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+                    print("dex didn't load, triggered NS attempt")
+                    return
+                }
+                
+                // Dexcom only returns 24 hrs of data. If we need more, call NS.
+                if graphHours > 24 && !onlyPullLastRecord {
+                    self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord, dexData: data)
+                } else {
+                    self.ProcessDexBGData(data: data, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
+                }
             } else {
                 // If we get an error, immediately try to pull NS BG Data
                 self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
@@ -87,12 +105,13 @@ extension MainViewController {
     }
     
     // NS BG Data Web call
-    func webLoadNSBGData(onlyPullLastRecord: Bool = false) {
+    func webLoadNSBGData(onlyPullLastRecord: Bool = false, dexData: [ShareGlucoseData] = []) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
-        // Set the count= in the url either to pull 24 hours or only the last record
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        // Set the count= in the url either to pull day(s) of data or only the last record
         var points = "1"
         if !onlyPullLastRecord {
-            points = String(self.graphHours * 12 + 1)
+            points = String(graphHours * 12 + 1)
         }
         
         // URL processor
@@ -103,6 +122,12 @@ extension MainViewController {
             urlBGDataPath = urlBGDataPath + "token=" + token + "&count=" + points
         }
         guard let urlBGData = URL(string: urlBGDataPath) else {
+            // if we have Dex data, use it
+            if !dexData.isEmpty {
+                self.ProcessDexBGData(data: dexData, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
+                return
+            }
+            
             if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                 //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
@@ -131,6 +156,10 @@ extension MainViewController {
                     }
                     self.startBGTimer(time: 10)
                 }
+                // if we have Dex data, use it
+                if !dexData.isEmpty {
+                    self.ProcessDexBGData(data: dexData, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
+                }
                 return
                 
             }
@@ -151,10 +180,30 @@ extension MainViewController {
             
             let decoder = JSONDecoder()
             let entriesResponse = try? decoder.decode([ShareGlucoseData].self, from: data)
-            if let entriesResponse = entriesResponse {
+            if var nsData = entriesResponse {
                 DispatchQueue.main.async {
+                    // transform NS data to look like Dex data
+                    for i in 0..<nsData.count {
+                        // convert the NS timestamp to seconds instead of milliseconds
+                        nsData[i].date /= 1000
+                        nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
+                    }
+                    
+                    // merge NS and Dex data if needed; use recent Dex data and older NS data
+                    var sourceName = "Nightscout"
+                    if !dexData.isEmpty {
+                        let oldestDexDate = dexData[dexData.count - 1].date
+                        var itemsToRemove = 0
+                        while itemsToRemove < nsData.count && nsData[itemsToRemove].date >= oldestDexDate {
+                            itemsToRemove += 1
+                        }
+                        nsData.removeFirst(itemsToRemove)
+                        nsData = dexData + nsData
+                        sourceName = "Dexcom"
+                    }
+                    
                     // trigger the processor for the data after downloading.
-                    self.ProcessNSBGData(data: entriesResponse, onlyPullLastRecord: onlyPullLastRecord, isNS: true)
+                    self.ProcessDexBGData(data: nsData, onlyPullLastRecord: onlyPullLastRecord, sourceName: sourceName)
                     
                 }
             } else {
@@ -175,28 +224,15 @@ extension MainViewController {
         getBGTask.resume()
     }
     
-    // NS BG Data Response processor
-    func ProcessNSBGData(data: [ShareGlucoseData], onlyPullLastRecord: Bool, isNS: Bool = false){
+    // Dexcom BG Data Response processor
+    func ProcessDexBGData(data: [ShareGlucoseData], onlyPullLastRecord: Bool, sourceName: String){
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG") }
         
-        var pullDate = data[data.count - 1].date
-        if isNS {
-            pullDate = data[data.count - 1].date / 1000
-            pullDate.round(FloatingPointRoundingRule.toNearestOrEven)
-        }
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         
-        var latestDate = data[0].date
-        if isNS {
-            latestDate = data[0].date / 1000
-            latestDate.round(FloatingPointRoundingRule.toNearestOrEven)
-        }
-        
+        let pullDate = data[data.count - 1].date
+        let latestDate = data[0].date
         let now = dateTimeUtils.getNowTimeIntervalUTC()
-        if !isNS && (latestDate + 330) < now {
-            webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
-            print("dex didn't load, triggered NS attempt")
-            return
-        }
         
         // Start the BG timer based on the reading
         let secondsAgo = now - latestDate
@@ -245,25 +281,21 @@ extension MainViewController {
             return
         }
         
-        // loop through the data so we can reverse the order to oldest first for the graph and convert the NS timestamp to seconds instead of milliseconds. Makes date comparisons easier for everything else.
+        // loop through the data so we can reverse the order to oldest first for the graph
         for i in 0..<data.count{
-            var dateString = data[data.count - 1 - i].date
-            if isNS {
-                dateString = data[data.count - 1 - i].date / 1000
-                dateString.round(FloatingPointRoundingRule.toNearestOrEven)
-            }
-            if dateString >= dateTimeUtils.getTimeInterval24HoursAgo() {
+            let dateString = data[data.count - 1 - i].date
+            if dateString >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 let reading = ShareGlucoseData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
                 bgData.append(reading)
             }
             
         }
-        
-        viewUpdateNSBG(isNS: isNS)
+
+        viewUpdateNSBG(sourceName: sourceName)
     }
     
     // NS BG Data Front end updater
-    func viewUpdateNSBG (isNS: Bool) {
+    func viewUpdateNSBG (sourceName: String) {
         DispatchQueue.main.async {
             if UserDefaultsRepository.debugLog.value {
                 self.writeDebugLog(value: "Display: BG")
@@ -287,11 +319,7 @@ extension MainViewController {
                 userUnit = " mmol/L"
             }
             
-            if isNS {
-                self.serverText.text = "Nightscout"
-            } else {
-                self.serverText.text = "Dexcom"
-            }
+            self.serverText.text = sourceName
             
             var snoozerBG = ""
             var snoozerDirection = ""
@@ -733,6 +761,16 @@ extension MainViewController {
                                    .withDashSeparatorInDate,
                                    .withColonSeparatorInTime]
         UserDefaultsRepository.alertSageInsertTime.value = formatter.date(from: (lastSageString))?.timeIntervalSince1970 as! TimeInterval
+
+        if UserDefaultsRepository.alertAutoSnoozeCGMStart.value && (dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertSageInsertTime.value < 7200){
+            let snoozeTime = Date(timeIntervalSince1970: UserDefaultsRepository.alertSageInsertTime.value + 7200)
+            UserDefaultsRepository.alertSnoozeAllTime.value = snoozeTime
+            UserDefaultsRepository.alertSnoozeAllIsSnoozed.value = true
+            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            alarms.reloadIsSnoozed(key: "alertSnoozeAllIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertSnoozeAllTime", setNil: false, value: snoozeTime)
+        }
+        
         if let sageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
             let now = dateTimeUtils.getNowTimeIntervalUTC()
             let secondsAgo = now - sageTime
@@ -812,65 +850,60 @@ extension MainViewController {
         
         // Don't process the basal or draw the graph until after the BG has been fully processeed and drawn
         if firstGraphLoad { return }
+
+        var basalSegments: [DataStructs.basalProfileSegment] = []
         
-        // Make temporary array with all values of yesterday and today
-        let yesterdayStart = dateTimeUtils.getTimeIntervalMidnightYesterday()
-        let todayStart = dateTimeUtils.getTimeIntervalMidnightToday()
-        
-        var basal2Day: [DataStructs.basal2DayProfile] = []
-        // Run twice to add in order yesterday then today.
-        for p in 0..<basalProfile.count {
-            let start = yesterdayStart + basalProfile[p].timeAsSeconds
-            var end = yesterdayStart
-            // set the endings 1 second before the next one starts
-            if p < basalProfile.count - 1 {
-                end = yesterdayStart + basalProfile[p + 1].timeAsSeconds - 1
-            } else {
-                // set the end 1 second before midnight
-                end = yesterdayStart + 86399
-            }
-            let entry = DataStructs.basal2DayProfile(basalRate: basalProfile[p].value, startDate: start, endDate: end)
-            basal2Day.append(entry)
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        // Build scheduled basal segments from right to left by
+        // moving pointers to the current midnight and current basal
+        var midnight = dateTimeUtils.getTimeIntervalMidnightToday()
+        var basalProfileIndex = basalProfile.count - 1
+        var start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
+        var end = dateTimeUtils.getNowTimeIntervalUTC()
+        // Move back until we're in the graph range
+        while start > end {
+            basalProfileIndex -= 1
+            start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
         }
-        for p in 0..<basalProfile.count {
-            let start = todayStart + basalProfile[p].timeAsSeconds
-            var end = todayStart
-            // set the endings 1 second before the next one starts
-            if p < basalProfile.count - 1 {
-                end = todayStart + basalProfile[p + 1].timeAsSeconds - 1
-            } else {
-                // set the end 1 second before midnight
-                end = todayStart + 86399
+        // Add records while they're still within the graph
+        let graphStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
+        while end >= graphStart {
+            let entry = DataStructs.basalProfileSegment(
+                basalRate: basalProfile[basalProfileIndex].value, startDate: start, endDate: end)
+            basalSegments.append(entry)
+            
+            basalProfileIndex -= 1
+            if basalProfileIndex < 0 {
+                basalProfileIndex = basalProfile.count - 1
+                midnight = midnight.advanced(by: -24*60*60)
             }
-            let entry = DataStructs.basal2DayProfile(basalRate: basalProfile[p].value, startDate: start, endDate: end)
-            basal2Day.append(entry)
+            end = start - 1
+            start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
         }
+        // reverse the result to get chronological order
+        basalSegments.reverse()
         
         var firstPass = true
         // Runs the scheduled basal to the end of the prediction line
         var predictionEndTime = dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)
         basalScheduleData.removeAll()
-        for i in 0..<basal2Day.count {
-            let timeYesterday = dateTimeUtils.getTimeInterval24HoursAgo()
-            
+        
+        for i in 0..<basalSegments.count {
+            let timeStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             
             // This processed everything after the first one.
             if firstPass == false
-                && basal2Day[i].startDate <= predictionEndTime {
-                let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: basal2Day[i].startDate)
+                && basalSegments[i].startDate <= predictionEndTime {
+                let startDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: basalSegments[i].startDate)
                 basalScheduleData.append(startDot)
-                var endDate = basal2Day[i].endDate
+                var endDate = basalSegments[i].endDate
                 
                 // if it's the last one needed, set it to end at the prediction end time
-                if endDate > predictionEndTime || i == basal2Day.count - 1 {
+                if endDate > predictionEndTime || i == basalSegments.count - 1 {
                     endDate = Double(predictionEndTime)
                 }
 
-                
-                
-
-
-                let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
+                let endDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: endDate)
                 basalScheduleData.append(endDot)
             }
             
@@ -878,21 +911,18 @@ extension MainViewController {
             // Check that this is the first one and there are no existing entries
             if firstPass == true {
                 // check that the timestamp is > the current entry and < the next entry
-                if timeYesterday >= basal2Day[i].startDate && timeYesterday < basal2Day[i].endDate {
+                if timeStart >= basalSegments[i].startDate && timeStart < basalSegments[i].endDate {
                     // Set the start time to match the BG start
-                    let startDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: Double(dateTimeUtils.getTimeInterval24HoursAgo() + (60 * 5)))
+                    let startDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: Double(timeStart + (60 * 5)))
                     basalScheduleData.append(startDot)
                     
                     // set the enddot where the next one will start
-                    var endDate = basal2Day[i].endDate
-                    let endDot = basalGraphStruct(basalRate: basal2Day[i].basalRate, date: endDate)
+                    var endDate = basalSegments[i].endDate
+                    let endDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: endDate)
                     basalScheduleData.append(endDot)
                     firstPass = false
                 }
             }
-            
-
-            
         }
         
         if UserDefaultsRepository.graphBasal.value {
@@ -907,11 +937,12 @@ extension MainViewController {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Treatments") }
         if !UserDefaultsRepository.downloadTreatments.value { return }
         
-        let yesterdayString = dateTimeUtils.nowMinus24HoursTimeInterval()
+        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        let startTimeString = dateTimeUtils.nowMinusNHoursTimeInterval(N: graphHours)
         
-        var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[created_at][$gte]=" + yesterdayString
+        var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[created_at][$gte]=" + startTimeString
         if token != "" {
-            urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?token=" + token + "&find[created_at][$gte]=" + yesterdayString
+            urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?token=" + token + "&find[created_at][$gte]=" + startTimeString
         }
         
         guard let urlData = URL(string: urlString) else {
@@ -1330,7 +1361,7 @@ extension MainViewController {
             guard let dateString = dateFormatter.date(from: strippedZone) else { continue }
             let dateTimeStamp = dateString.timeIntervalSince1970
 
-                guard let bolus = currentEntry?["insulin"] as? Double else { continue }
+            guard let bolus = currentEntry?["insulin"] as? Double else { continue }
                 let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
                 lastFoundIndex = sgv.foundIndex
                 
@@ -1660,8 +1691,9 @@ extension MainViewController {
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             let dateString = dateFormatter.date(from: strippedZone)
             var dateTimeStamp = dateString!.timeIntervalSince1970
-            if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() {
-                dateTimeStamp = dateTimeUtils.getTimeInterval24HoursAgo()
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
+                dateTimeStamp = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             }
             
             var multiplier: Double = 1.0
