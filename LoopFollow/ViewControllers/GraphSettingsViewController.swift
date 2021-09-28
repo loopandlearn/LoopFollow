@@ -40,7 +40,18 @@ class GraphSettingsViewController: FormViewController {
             })
             row1.evaluateHidden()
         }
-        
+        if let row2 = form.rowBy(tag: "smallGraphTreatments") as? SwitchRow {
+            row2.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row2.evaluateHidden()
+        }
+        if let row3 = form.rowBy(tag: "minBasalScale") as? StepperRow {
+            row3.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row3.evaluateHidden()
+        }
         
         if let row4 = form.rowBy(tag: "showValues") as? SwitchRow {
             row4.hidden = .function(["hide"],  {form in
@@ -116,6 +127,11 @@ class GraphSettingsViewController: FormViewController {
                         guard let value = row.value else { return }
                         UserDefaultsRepository.showDIALines.value = value
                         
+                // tell main screen that graph needs updating
+                if let appState = self!.appStateController {
+                   appState.chartSettingsChanged = true
+                   appState.chartSettingsChanges |= ChartSettingsChangeEnum.showDIALinesChanged.rawValue
+                }
             }
             <<< SwitchRow("smallGraphTreatments"){ row in
                 row.title = "Treatments on Small Graph"
@@ -227,7 +243,35 @@ class GraphSettingsViewController: FormViewController {
                appState.chartSettingsChanges |= ChartSettingsChangeEnum.highLineChanged.rawValue
              }
         }
-       
+        <<< StepperRow("downloadDays") { row in
+            // NS supports up to 4 days
+            row.title = "Show Days Back"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 1
+            row.cell.stepper.maximumValue = 4
+            row.value = Double(UserDefaultsRepository.downloadDays.value)
+            row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+        }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.downloadDays.value = Int(value)
+        }
+        <<< SwitchRow("showMidnightMarkers"){ row in
+            row.title = "Show Midnight Lines"
+            row.value = UserDefaultsRepository.showMidnightLines.value
+        }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.showMidnightLines.value = value
+                    
+            // tell main screen that graph needs updating
+            if let appState = self!.appStateController {
+               appState.chartSettingsChanged = true
+               appState.chartSettingsChanges |= ChartSettingsChangeEnum.showMidnightLinesChanged.rawValue
+            }
+        }
+
             
        +++ ButtonRow() {
           $0.title = "DONE"

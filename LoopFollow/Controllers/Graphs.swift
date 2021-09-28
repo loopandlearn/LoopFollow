@@ -303,8 +303,8 @@ extension MainViewController {
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
         
-        // Add Now Line
-        createNowAndDIALines()
+        // Add vertical lines as configured
+        createVerticalLines()
         startGraphNowTimer()
         
         // Setup the main graph overall details
@@ -345,8 +345,14 @@ extension MainViewController {
         
     }
     
-    func createNowAndDIALines() {
+    func createVerticalLines() {
         BGChart.xAxis.removeAllLimitLines()
+        BGChartFull.xAxis.removeAllLimitLines()
+        createNowAndDIALines()
+        createMidnightLines()
+    }
+    
+    func createNowAndDIALines() {
         let ul = ChartLimitLine()
         ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
         ul.lineColor = NSUIColor.systemGray.withAlphaComponent(0.5)
@@ -364,6 +370,34 @@ extension MainViewController {
                 ul.lineDashLengths = [CGFloat(dash), CGFloat(space)]
                 ul.lineWidth = 1
                 BGChart.xAxis.addLimitLine(ul)
+            }
+        }
+    }
+    
+    func createMidnightLines() {
+        // Draw a line at midnight: useful when showing multiple days of data
+        if UserDefaultsRepository.showMidnightLines.value {
+            var midnightTimeInterval = dateTimeUtils.getTimeIntervalMidnightToday()
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
+            while midnightTimeInterval > graphStart {
+                // Large chart
+                let ul = ChartLimitLine()
+                ul.limit = Double(midnightTimeInterval)
+                ul.lineColor = NSUIColor.systemTeal.withAlphaComponent(0.5)
+                ul.lineDashLengths = [CGFloat(2), CGFloat(5)]
+                ul.lineWidth = 1
+                BGChart.xAxis.addLimitLine(ul)
+
+                // Small chart
+                let sl = ChartLimitLine()
+                sl.limit = Double(midnightTimeInterval)
+                sl.lineColor = NSUIColor.systemTeal
+                sl.lineDashLengths = [CGFloat(2), CGFloat(2)]
+                sl.lineWidth = 1
+                BGChartFull.xAxis.addLimitLine(sl)
+                
+                midnightTimeInterval = midnightTimeInterval.advanced(by: -24*60*60)
             }
         }
     }
@@ -404,6 +438,9 @@ extension MainViewController {
         ul.limit = Double(UserDefaultsRepository.highLine.value)
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
+        
+        // Re-create vertical markers in case their settings changed
+        createVerticalLines()
     
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
@@ -641,8 +678,9 @@ extension MainViewController {
                 dateTimeStamp = dateTimeStamp - 150
             }
             
-            // skip if > 24 hours old
-            if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
   
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
             mainChart.addEntry(dot)
@@ -717,8 +755,9 @@ extension MainViewController {
                 colors.append(NSUIColor.systemOrange.withAlphaComponent(CGFloat(thisAlpha)))
             }
             
-            // skip if > 24 hours old
-            if dateTimeStamp < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             if carbShift {
                 dateTimeStamp = dateTimeStamp - 250
@@ -773,8 +812,9 @@ extension MainViewController {
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 1
             
-            // skip if > 24 hours old
-            if bgCheckData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if bgCheckData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(bgCheckData[i].sgv)), time: bgCheckData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
@@ -800,8 +840,9 @@ extension MainViewController {
         BGChartFull.lineData?.dataSets[dataIndex].clear()
         let thisData = suspendGraphData
         for i in 0..<thisData.count{
-            // skip if > 24 hours old
-            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Suspend Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
@@ -826,8 +867,9 @@ extension MainViewController {
         BGChartFull.lineData?.dataSets[dataIndex].clear()
         let thisData = resumeGraphData
         for i in 0..<thisData.count{
-            // skip if > 24 hours old
-            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Resume Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
@@ -852,8 +894,9 @@ extension MainViewController {
         BGChartFull.lineData?.dataSets[dataIndex].clear()
         let thisData = sensorStartGraphData
         for i in 0..<thisData.count{
-            // skip if > 24 hours old
-            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Start Sensor", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
@@ -879,8 +922,9 @@ extension MainViewController {
         let thisData = noteGraphData
         for i in 0..<thisData.count{
             
-            // skip if > 24 hours old
-            if thisData[i].date < dateTimeUtils.getTimeInterval24HoursAgo() { continue }
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: thisData[i].note, time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
@@ -1115,7 +1159,9 @@ extension MainViewController {
         BGChartFull.rightAxis.axisMinimum = 0.0
         BGChartFull.rightAxis.axisMaximum = Double(maxBG)
                                                
-        BGChartFull.xAxis.enabled = false
+        BGChartFull.xAxis.drawLabelsEnabled = false
+        BGChartFull.xAxis.drawGridLinesEnabled = false
+        BGChartFull.xAxis.drawAxisLineEnabled = false
         BGChartFull.legend.enabled = false
         BGChartFull.scaleYEnabled = false
         BGChartFull.scaleXEnabled = false
@@ -1143,6 +1189,9 @@ extension MainViewController {
             labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% "
             if thisItem.correctionRange.count == 2 {
                 labelText += String(thisItem.correctionRange[0]) + "-" + String(thisItem.correctionRange[1])
+            }
+            if thisItem.enteredBy.count > 0 {
+                labelText += "\r\nEntered By: " + thisItem.enteredBy
             }
             
             

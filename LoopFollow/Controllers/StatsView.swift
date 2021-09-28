@@ -16,7 +16,19 @@ extension MainViewController {
     func updateStats()
     {
         if bgData.count > 0 {
-           let stats = StatsData(bgData: bgData)
+            var lastDayOfData = bgData
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            // If we loaded more than 1 day of data, only use the last day for the stats
+            if graphHours > 24 {
+                let oneDayAgo = dateTimeUtils.getTimeIntervalNHoursAgo(N: 24)
+                var startIndex = 0
+                while startIndex < bgData.count && bgData[startIndex].date < oneDayAgo {
+                    startIndex += 1
+                }
+                lastDayOfData = Array(bgData.dropFirst(startIndex))
+            }
+            
+            let stats = StatsData(bgData: lastDayOfData)
             
             statsLowPercent.text = String(format:"%.1f%", stats.percentLow) + "%"
             statsInRangePercent.text = String(format:"%.1f%", stats.percentRange) + "%"
