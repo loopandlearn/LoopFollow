@@ -247,7 +247,7 @@ extension MainViewController {
             return
         }
         
-        if !isStaleData() && UserDefaultsRepository.url.value != "" {
+        if UserDefaultsRepository.url.value != "" {
             webLoadNSCage()
             webLoadNSSage()
             startCageSageTimer()
