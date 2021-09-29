@@ -1955,7 +1955,7 @@ class AlarmViewController: FormViewController {
             <<< StepperRow("alertMissedBolusPrebolus") { row in
                 row.title = "Prebolus Max Time"
                 row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 1
+                row.cell.stepper.minimumValue = 5
                 row.cell.stepper.maximumValue = 45
                 row.value = Double(UserDefaultsRepository.alertMissedBolusPrebolus.value)
                 row.displayValueFor = { value in
