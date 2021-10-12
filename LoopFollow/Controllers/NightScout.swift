@@ -837,9 +837,9 @@ extension MainViewController {
         for i in 0..<basal.count {
             let dict = basal[i] as! Dictionary<String, Any>
             do {
-                let thisValue = try dict[keyPath: "value"] as! Double
+                let thisValue = try (dict[keyPath: "value"] as! NSString).doubleValue
                 let thisTime = dict[keyPath: "time"] as! String
-                let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
+                let thisTimeAsSeconds = try (dict[keyPath: "timeAsSeconds"] as! NSString).doubleValue
                 let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
                 basalProfile.append(entry)
             } catch {
