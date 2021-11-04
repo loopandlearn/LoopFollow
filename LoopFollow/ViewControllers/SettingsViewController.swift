@@ -40,6 +40,8 @@ class SettingsViewController: FormViewController {
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
+       UserDefaultsRepository.showNS.value = false
+       UserDefaultsRepository.showDex.value = false
     
         var expiration: Date = Date()
         if let provision = MobileProvision.read() {
@@ -48,10 +50,18 @@ class SettingsViewController: FormViewController {
                         
         form
         +++ Section(header: "Nightscout Settings", footer: "Changing Nightscout settings requires an app restart.")
+       <<< SwitchRow("showNS"){ row in
+       row.title = "Show Nightscout Settings"
+       row.value = UserDefaultsRepository.showNS.value
+       }.onChange { [weak self] row in
+               guard let value = row.value else { return }
+               UserDefaultsRepository.showNS.value = value
+       }
         <<< TextRow(){ row in
             row.title = "URL"
             row.placeholder = "https://mycgm.herokuapp.com"
             row.value = UserDefaultsRepository.url.value
+            row.hidden = "$showNS == false"
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
         }.onChange { row in
@@ -74,6 +84,7 @@ class SettingsViewController: FormViewController {
             row.title = "NS Token"
             row.placeholder = "Leave blank if not using tokens"
             row.value = UserDefaultsRepository.token.value
+            row.hidden = "$showNS == false"
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
         }.onChange { row in
@@ -88,14 +99,23 @@ class SettingsViewController: FormViewController {
             row.title = "Units"
             row.options = ["mg/dL", "mmol/L"]
             row.value = UserDefaultsRepository.units.value
+            row.hidden = "$showNS == false"
         }.onChange { row in
             guard let value = row.value else { return }
             UserDefaultsRepository.units.value = value
         }
         +++ Section("Dexcom Settings")
+       <<< SwitchRow("showDex"){ row in
+       row.title = "Show Dexcom Settings"
+       row.value = UserDefaultsRepository.showDex.value
+       }.onChange { [weak self] row in
+               guard let value = row.value else { return }
+               UserDefaultsRepository.showDex.value = value
+       }
         <<< TextRow(){ row in
             row.title = "User Name"
             row.value = UserDefaultsRepository.shareUserName.value
+            row.hidden = "$showDex == false"
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
         }.onChange { row in
@@ -109,6 +129,7 @@ class SettingsViewController: FormViewController {
         <<< TextRow(){ row in
             row.title = "Password"
             row.value = UserDefaultsRepository.sharePassword.value
+            row.hidden = "$showDex == false"
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
             cell.textField.isSecureTextEntry = true
@@ -124,6 +145,7 @@ class SettingsViewController: FormViewController {
             row.title = "Server"
             row.options = ["US", "NON-US"]
             row.value = UserDefaultsRepository.shareServer.value
+            row.hidden = "$showDex == false"
         }.onChange { row in
             guard let value = row.value else { return }
             UserDefaultsRepository.shareServer.value = value
