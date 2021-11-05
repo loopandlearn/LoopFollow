@@ -14,6 +14,7 @@ And there are some functions I've always wished for and not found anywhere such 
 for those nights when Loop is stuck on high and you open loop with a correction. This lets you set a higher
 low alert for the BG you want to wake up to and close Loop.
 
+### App Store Beta Test Install
 If you would like to be part of our beta testing for the App Store and install that version without needing to build it yourself, please submit the form here: https://customtypeone.com/blogs/news/loop-follow-beta-testing
 
 
