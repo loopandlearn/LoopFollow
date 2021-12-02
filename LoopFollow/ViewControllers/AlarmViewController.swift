@@ -426,17 +426,11 @@ class AlarmViewController: FormViewController {
             })
             row3.evaluateHidden()
         }
-        if let row4 = form.sectionBy(tag: "quietHourSection") as? Section {
+        if let row4 = form.rowBy(tag: "alertUrgentLowPredictiveMinutes") as? Section {
             row4.hidden = .function(["hide"],  {form in
                 return isHidden
             })
             row4.evaluateHidden()
-        }
-        if let row5 = form.rowBy(tag: "alertUrgentLowPredictiveMinutes") as? Section {
-            row5.hidden = .function(["hide"],  {form in
-                return isHidden
-            })
-            row5.evaluateHidden()
             UserDefaultsRepository.alertUrgentLowPredictiveMinutes.value = 0
         }
         
