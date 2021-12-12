@@ -34,11 +34,13 @@ class UserDefaultsRepository {
     static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true])
     
     // Nightscout Settings
+    static let showNS = UserDefaultsValue<Bool>(key: "showNS", default: false)
     static let url = UserDefaultsValue<String>(key: "url", default: "")
     static let token = UserDefaultsValue<String>(key: "token", default: "")
     static let units = UserDefaultsValue<String>(key: "units", default: "mg/dL")
     
     // Dexcom Share Settings
+    static let showDex = UserDefaultsValue<Bool>(key: "showDex", default: false)
     static let shareUserName = UserDefaultsValue<String>(key: "shareUserName", default: "")
     static let sharePassword = UserDefaultsValue<String>(key: "sharePassword", default: "")
     static let shareServer = UserDefaultsValue<String>(key: "shareServer", default: "US")
