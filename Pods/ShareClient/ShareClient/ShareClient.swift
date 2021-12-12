@@ -30,18 +30,7 @@ public enum ShareError: Error {
 public enum KnownShareServers: String {
     case US="https://share2.dexcom.com"
     case NON_US="https://shareous1.dexcom.com"
-    /*
-         To enable Loop to use a custom share server:
-            - remove the comment marker on line 44 and change the value of CUSTOM
-            - remove the comment markers on lines 34 and 35 in ShareClientUI/ShareService+UI.swift
 
-         Note: The URL in CUSTOM must start with 'https://' (NOT 'http://')
-
-         You can find installation instructions for one such custom share server at
-         https://github.com/dabear/NightscoutShareServer
-    */
-
-    // case CUSTOM="https://yourusernameshareserver.herokuapp.com"
 }
 
 // From the Dexcom Share iOS app, via @bewest and @shanselman:
@@ -163,12 +152,9 @@ public class ShareClient {
                 return callback(.fetchError, nil)
             }
 
-            // Dexcom Share only returns up to 24 hrs of data today
-            // Requesting more just in case this changes in the future
-            let minutes = max(1440, n * 5)
             components.queryItems = [
                 URLQueryItem(name: "sessionId", value: self.token),
-                URLQueryItem(name: "minutes", value: String(minutes)),
+                URLQueryItem(name: "minutes", value: String(1440)),
                 URLQueryItem(name: "maxCount", value: String(n))
             ]
 
@@ -197,8 +183,17 @@ public class ShareClient {
                     }
 
                     var transformed: Array<ShareGlucose> = []
+                    // Dec 2021, Dexcom Share modified json encoding of Trend from int to string
+                    let trendmap = ["": 0, "DoubleUp":1, "SingleUp":2, "FortyFiveUp":3, "Flat":4, "FortyFiveDown":5, "SingleDown":6, "DoubleDown": 7, "NotComputable":8, "RateOutOfRange":9]
                     for sgv in sgvs {
-                        if let glucose = sgv["Value"] as? Int, let trend = sgv["Trend"] as? Int, let wt = sgv["WT"] as? String {
+                        if let glucose = sgv["Value"] as? Int, let strend = sgv["Trend"] as? String, let wt = sgv["WT"] as? String {
+                            let itrend = trendmap[strend, default: 0]
+                            transformed.append(ShareGlucose(
+                                glucose: UInt16(glucose),
+                                trend: UInt8(itrend),
+                                timestamp: try self.parseDate(wt)
+                            ))
+                        } else if let glucose = sgv["Value"] as? Int, let trend = sgv["Trend"] as? Int, let wt = sgv["WT"] as? String {
                             transformed.append(ShareGlucose(
                                 glucose: UInt16(glucose),
                                 trend: UInt8(trend),

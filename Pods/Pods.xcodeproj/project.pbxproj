@@ -1376,6 +1376,43 @@
 			};
 			name = Release;
 		};
+		5114137E124F7AC49DAB83B911505792 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E085DDC030F8EC270DBA2B97E1CBF58D /* ShareClient.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/ShareClient/ShareClient-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/ShareClient/ShareClient-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/ShareClient/ShareClient.modulemap";
+				PRODUCT_MODULE_NAME = ShareClient;
+				PRODUCT_NAME = ShareClient;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		5C5AE90EAE3122F9FC1AA606EA47ACFE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 017205CE9DD9404E68FC3A813A5BC6A4 /* Charts.debug.xcconfig */;
@@ -1475,43 +1512,6 @@
 			};
 			name = Debug;
 		};
-		7445CE2DA3D731E7CC7B9F0E82576D87 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = E085DDC030F8EC270DBA2B97E1CBF58D /* ShareClient.release.xcconfig */;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/ShareClient/ShareClient-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/ShareClient/ShareClient-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/ShareClient/ShareClient.modulemap";
-				PRODUCT_MODULE_NAME = ShareClient;
-				PRODUCT_NAME = ShareClient;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
 		7DC5F11AFBEAE473E8D3C24A2D11338D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1572,42 +1572,6 @@
 			};
 			name = Release;
 		};
-		872B91677D6C5E98109D15A182CD805F /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 27E029128823B9D672A01E4BB4DAD95B /* ShareClient.debug.xcconfig */;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/ShareClient/ShareClient-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/ShareClient/ShareClient-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/ShareClient/ShareClient.modulemap";
-				PRODUCT_MODULE_NAME = ShareClient;
-				PRODUCT_NAME = ShareClient;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
 		A57D7F46620CEA8E6010E60F37AA1C40 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = EBE2A8C176CC9C76279BE195BDA90B7F /* Pods-LoopFollow.release.xcconfig */;
@@ -1646,6 +1610,42 @@
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
+		};
+		C6F17C30F319BDC6C3ACEC3D71396607 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 27E029128823B9D672A01E4BB4DAD95B /* ShareClient.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/ShareClient/ShareClient-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/ShareClient/ShareClient-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/ShareClient/ShareClient.modulemap";
+				PRODUCT_MODULE_NAME = ShareClient;
+				PRODUCT_NAME = ShareClient;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
 		};
 		D27C976E5A2F75B799103220B6FECE18 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1780,8 +1780,8 @@
 		7531FF23B45C520CA26A36BB717E6A4A /* Build configuration list for PBXNativeTarget "ShareClient" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				872B91677D6C5E98109D15A182CD805F /* Debug */,
-				7445CE2DA3D731E7CC7B9F0E82576D87 /* Release */,
+				C6F17C30F319BDC6C3ACEC3D71396607 /* Debug */,
+				5114137E124F7AC49DAB83B911505792 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
