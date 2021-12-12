@@ -2,10 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Loop Follow would like to access to your photo library to save graph images</string>
 	<key>AppGroupIdentifier</key>
 	<string>group.com.$(unique_id).LoopFollow</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.$(unique_id).LoopFollow</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -22,10 +24,16 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.medical</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Loop Follow would like to access your calendar to save BG readings</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Loop Follow would like to access to your photo library to save graph images</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Loop Follow would like to access to your photo library to save graph images</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -72,8 +80,6 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Loop Follow would like to access to your photo library to save graph images</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
