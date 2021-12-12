@@ -7,15 +7,13 @@
   "license": "MIT",
   "authors": "jonfawcett",
   "platforms": {
-    "ios": "13"
+    "ios": "10.0",
+    "watchos": "6.0"
   },
   "source": {
     "git": "https://github.com/jonfawcett/dexcom-share-client-swift.git",
     "tag": "v1.2"
   },
-  "source_files": [
-    "ShareClient/ShareClient.h",
-    "ShareClient/ShareClient.swift"
-  ],
+  "source_files": "ShareClient/ShareClient.{h,swift}",
   "swift_version": "5.0"
 }

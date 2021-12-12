@@ -2,7 +2,7 @@ PODS:
   - Charts (3.6.0):
     - Charts/Core (= 3.6.0)
   - Charts/Core (3.6.0)
-  - Eureka (5.3.0)
+  - Eureka (5.3.4)
   - ShareClient (1.2)
 
 DEPENDENCIES:
@@ -23,16 +23,16 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Eureka:
-    :commit: e1bb4d668cb5b2280133709f47119eb34c2b65df
+    :commit: 94475e83a6965320283b8b39986e7481ad675ab9
     :git: https://github.com/xmartlabs/Eureka.git
   ShareClient:
-    :commit: bcc9cf9ab35b9a6d3b198507cb057f58b5df1ff0
+    :commit: 2dfaf101ed528e2a92f3791f5384ed368dc7144a
     :git: https://github.com/jonfawcett/dexcom-share-client-swift.git
 
 SPEC CHECKSUMS:
   Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
-  Eureka: 49239596c9d2eed9ab523990c34de62b6feac9f0
-  ShareClient: 8d60bcd3fd106ca42c6e71e8bcae24deb173fb9e
+  Eureka: 60cf058f86a8fb3ed26165ba5292b9850361b0a6
+  ShareClient: 08a3e6b9889b41172b98c4e386d23084bafbeec4
 
 PODFILE CHECKSUM: 084f5ab2f55c59ed2c2fa3cdaaa9590c99a95408
 
