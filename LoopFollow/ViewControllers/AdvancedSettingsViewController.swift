@@ -91,7 +91,7 @@ class AdvancedSettingsViewController: FormViewController {
                     UserDefaultsRepository.bgUpdateDelay.value = Int(value)
             }
             <<< SwitchRow("alwaysDownloadAllBG"){ row in
-                row.title = "Always Download All BG Values"
+                row.title = "Allways Download All BG Values"
                 row.value = UserDefaultsRepository.alwaysDownloadAllBG.value
             }.onChange { [weak self] row in
                 guard let value = row.value else { return }
