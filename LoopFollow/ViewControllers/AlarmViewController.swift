@@ -391,7 +391,6 @@ class AlarmViewController: FormViewController {
         buildCOB()
         
         buildSnoozeAll()
-        buildAppInactive()
         buildAlarmSettings()
         
     }
@@ -403,7 +402,7 @@ class AlarmViewController: FormViewController {
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        if UserDefaultsRepository.url.value == "" {
+        if UserDefaultsRepository.url.value == ""  || !UserDefaultsRepository.loopUser.value {
             isHidden = true
             isEnabled = false
         }
@@ -433,7 +432,18 @@ class AlarmViewController: FormViewController {
             row4.evaluateHidden()
             UserDefaultsRepository.alertUrgentLowPredictiveMinutes.value = 0
         }
+        if let row5 = form.rowBy(tag: "alertAutoSnoozeCGMStart") as? SwitchRow {
+            row5.hidden = .function(["hide"],  {form in
+                return isHidden
+            })
+            row5.evaluateHidden()
+        }
         
+        
+        
+        if UserDefaultsRepository.url.value != "" {
+            isEnabled = true
+        }
         
         guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
         nightscoutTab.isEnabled = isEnabled
@@ -2127,17 +2137,7 @@ class AlarmViewController: FormViewController {
         }
     }
     
-    func buildAppInactive(){
-         form
-            +++ Section(header: "App Inactive", footer: "Attempt to alert if IOS kills the app in the background")
-        <<< SwitchRow("alertAppInactive"){ row in
-        row.title = "Active"
-        row.value = UserDefaultsRepository.alertAppInactive.value
-        }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.alertAppInactive.value = value
-        }
-    }
+
     
     func buildSage(){
         form

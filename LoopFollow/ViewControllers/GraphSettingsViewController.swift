@@ -29,7 +29,7 @@ class GraphSettingsViewController: FormViewController {
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        if UserDefaultsRepository.url.value == "" {
+        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             isHidden = true
             isEnabled = false
         }

@@ -271,12 +271,13 @@ extension MainViewController {
             bgData.removeAll()
         } else if bgData[bgData.count - 1].date != pullDate {
             bgData.removeFirst()
-            if data.count > 0 && UserDefaultsRepository.speakBG.value {
-                speakBG(sgv: data[data.count - 1].sgv)
-            }
+            
         } else {
             if data.count > 0 {
                 self.updateBadge(val: data[data.count - 1].sgv)
+                if UserDefaultsRepository.speakBG.value {
+                    speakBG(sgv: data[data.count - 1].sgv)
+                }
             }
             return
         }
