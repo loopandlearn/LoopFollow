@@ -50,10 +50,6 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         snoozeForMinuteStepper.isHidden = true
         snoozeForMinuteLabel.isHidden = true
         
-        if UserDefaultsRepository.debugLog.value {
-            debugTextView.isHidden = false
-        }
-        
     }
     
     @IBAction func snoozeForMinuteValChanged(_ sender: UIStepper) {
@@ -465,11 +461,6 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         SnoozeButton.contentEdgeInsets = UIEdgeInsets(top: 10,left: 10,bottom: 10,right: 10)
         clockLabel.text = ""
         startClockTimer(time: 1)
-        
-        if UserDefaultsRepository.debugLog.value {
-            debugTextView.isHidden = false
-            clockLabel.isHidden = true
-        }
     }
 
 

@@ -155,7 +155,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UserDefaultsRepository.infoNames.value.append("CAGE")
         UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
         UserDefaultsRepository.infoNames.value.append("Pred.")
- 
+        
+        // Reset deprecated settings
+        UserDefaultsRepository.debugLog.value = false;
+        UserDefaultsRepository.alwaysDownloadAllBG.value = true;
+        
         // table view
         //infoTable.layer.borderColor = UIColor.darkGray.cgColor
         //infoTable.layer.borderWidth = 1.0
@@ -385,7 +389,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        if UserDefaultsRepository.url.value == "" {
+        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             isHidden = true
             isEnabled = false
         }
@@ -393,6 +397,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         LoopStatusLabel.isHidden = isHidden
         PredictionLabel.isHidden = isHidden
         infoTable.isHidden = isHidden
+        
+        if UserDefaultsRepository.url.value != "" {
+            isEnabled = true
+        }
+        
         guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
         nightscoutTab.isEnabled = isEnabled
         

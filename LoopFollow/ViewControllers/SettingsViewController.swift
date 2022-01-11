@@ -18,7 +18,8 @@ class SettingsViewController: FormViewController {
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        if UserDefaultsRepository.url.value == "" {
+        var isLoopHidden = false;
+        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             isHidden = true
             isEnabled = false
         }
@@ -28,6 +29,10 @@ class SettingsViewController: FormViewController {
                 return isHidden
             })
             row1.evaluateHidden()
+        }
+        
+        if UserDefaultsRepository.url.value != "" {
+            isEnabled = true
         }
         
         guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
@@ -49,7 +54,15 @@ class SettingsViewController: FormViewController {
         }
                         
         form
-        +++ Section(header: "Nightscout Settings", footer: "Changing Nightscout settings requires an app restart.")
+        +++ Section(header: "Data Settings", footer: "")
+       <<< SegmentedRow<String>("units") { row in
+           row.title = "Units"
+           row.options = ["mg/dL", "mmol/L"]
+           row.value = UserDefaultsRepository.units.value
+       }.onChange { row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.units.value = value
+       }
        <<< SwitchRow("showNS"){ row in
        row.title = "Show Nightscout Settings"
        row.value = UserDefaultsRepository.showNS.value
@@ -95,16 +108,17 @@ class SettingsViewController: FormViewController {
             UserDefaultsRepository.token.value = value
             globalVariables.nsVerifiedAlert = 0
         }
-        <<< SegmentedRow<String>("units") { row in
-            row.title = "Units"
-            row.options = ["mg/dL", "mmol/L"]
-            row.value = UserDefaultsRepository.units.value
-            row.hidden = "$showNS == false"
-        }.onChange { row in
-            guard let value = row.value else { return }
-            UserDefaultsRepository.units.value = value
-        }
-        +++ Section("Dexcom Settings")
+       
+       <<< SwitchRow("loopUser"){ row in
+           row.title = "Download Loop/FreeAPS Data"
+           row.tag = "loopUser"
+           row.value = UserDefaultsRepository.loopUser.value
+           row.hidden = "$showNS == false"
+       }.onChange { [weak self] row in
+                   guard let value = row.value else { return }
+                   UserDefaultsRepository.loopUser.value = value
+           }
+        
        <<< SwitchRow("showDex"){ row in
        row.title = "Show Dexcom Settings"
        row.value = UserDefaultsRepository.showDex.value
@@ -152,6 +166,7 @@ class SettingsViewController: FormViewController {
         }
         
         +++ Section("App Settings")
+       
         <<< ButtonRow() {
            $0.title = "General Settings"
            $0.presentationMode = .show(
@@ -219,16 +234,7 @@ class SettingsViewController: FormViewController {
            ), onDismiss: nil)
             
         }
-            <<< LabelRow("Refresh Graph"){ row in
-                row.title = "Refresh Graph"
-            }.onCellSelection{ cell,row  in
-                if UserDefaultsRepository.saveImage.value {
-                    guard let mainScreen = self.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-                    
-                    mainScreen.updateBGGraphSettings()
-                    self.tabBarController?.selectedIndex = 0
-                }
-            }
+
   
     
             +++ Section(header: "App Expiration", footer: String(expiration.description))

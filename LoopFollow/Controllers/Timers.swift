@@ -167,7 +167,7 @@ extension MainViewController {
     @objc func deviceStatusTimerDidEnd(_ timer:Timer) {
         
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" || UserDefaultsRepository.onlyDownloadBG.value {
+        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             startDeviceStatusTimer(time: 60)
             return
         }
@@ -192,7 +192,7 @@ extension MainViewController {
         
         
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" || UserDefaultsRepository.onlyDownloadBG.value {
+        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             startTreatmentsTimer(time: 60)
             return
         }
@@ -217,7 +217,7 @@ extension MainViewController {
     @objc func profileTimerDidEnd(_ timer:Timer) {
         
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" || UserDefaultsRepository.onlyDownloadBG.value {
+        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             startProfileTimer(time: 60)
             return
         }
@@ -242,7 +242,7 @@ extension MainViewController {
     @objc func cageSageTimerDidEnd(_ timer:Timer) {
         
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" || UserDefaultsRepository.onlyDownloadBG.value {
+        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             startCageSageTimer(time: 60)
             return
         }
