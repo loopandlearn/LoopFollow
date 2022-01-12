@@ -61,7 +61,7 @@ extension MainViewController {
             latestMinAgoString = formattedDuration ?? ""
             latestMinAgoString += " min ago"
             
-            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+            guard let snoozer = self.tabBarController!.viewControllers![2] as? SnoozeViewController else { return }
             snoozer.MinAgoLabel.text = formattedDuration ?? ""
             snoozer.MinAgoLabel.text! += " min ago"
         } else {
@@ -128,19 +128,6 @@ extension MainViewController {
         }
         
         var onlyPullLastRecord = false
-        
-        // Check if the last reading is less than 10 minutes ago
-        // to only pull 1 reading if that's all we need
-        if bgData.count > 0 {
-            let now = dateTimeUtils.getNowTimeIntervalUTC()
-            let lastReadingTime = bgData.last!.date
-            let secondsAgo = now - lastReadingTime
-            if secondsAgo < 10*60 {
-                onlyPullLastRecord = true
-            }
-        }
-        
-        if UserDefaultsRepository.alwaysDownloadAllBG.value { onlyPullLastRecord = false }
         
         if UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "" {
             webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
