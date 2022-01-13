@@ -26,14 +26,6 @@ class AdvancedSettingsViewController: FormViewController {
         form
             +++ Section("Advanced Settings")
             
-            <<< SwitchRow("onlyDownloadBG"){ row in
-                row.title = "Only Download BG from NS"
-                row.value = UserDefaultsRepository.onlyDownloadBG.value
-            }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.onlyDownloadBG.value = value
-            }
-            
             <<< SwitchRow("downloadTreatments"){ row in
                 row.title = "Download Treatments"
                 row.value = UserDefaultsRepository.downloadTreatments.value
@@ -90,20 +82,7 @@ class AdvancedSettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.bgUpdateDelay.value = Int(value)
             }
-            <<< SwitchRow("alwaysDownloadAllBG"){ row in
-                row.title = "Allways Download All BG Values"
-                row.value = UserDefaultsRepository.alwaysDownloadAllBG.value
-            }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.alwaysDownloadAllBG.value = value
-            }
-            <<< SwitchRow("debugLog"){ row in
-                row.title = "Show Debug Log"
-                row.value = UserDefaultsRepository.debugLog.value
-            }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.debugLog.value = value
-            }
+
 
             
             
