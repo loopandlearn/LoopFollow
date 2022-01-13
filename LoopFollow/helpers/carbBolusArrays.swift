@@ -14,6 +14,7 @@ extension MainViewController {
     func findNearestBGbyTime(needle: TimeInterval, haystack: [ShareGlucoseData], startingIndex: Int) -> (sgv: Double, foundIndex: Int) {
         
         // If we can't find a match or things fail, put it at 100 BG
+        if startingIndex > haystack.count { return (100.00, 0) }
         for i in startingIndex..<haystack.count {
             // i has reached the end without a result. Put the dot at 100
             if i == haystack.count - 1 { return (100.00, 0) }
