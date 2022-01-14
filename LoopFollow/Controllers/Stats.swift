@@ -60,7 +60,7 @@ class StatsData {
         // Set Average
         bgDataCount = bgData.count
         if bgDataCount < 1 { bgDataCount = 1 }
-        avgBG = Float(totalGlucose / bgData.count)
+        avgBG = Float(totalGlucose / bgDataCount)
 
         // compute std dev (sigma)
         var partialSum: Float = 0;
