@@ -997,6 +997,8 @@ extension MainViewController {
                     bolus.append(entry!)
                 case "Meal Bolus":
                     carbs.append(entry!)
+                case "Carb Correction":
+                    carbs.append(entry!)
                 case "Temporary Override":
                     temporaryOverride.append(entry!)
                 case "Note":
