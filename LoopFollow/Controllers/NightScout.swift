@@ -517,7 +517,7 @@ extension MainViewController {
                         latestCOB = String(format:"%.0f", cobdata["cob"] as! Double)
                     }
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
-                        let prediction = predictdata["values"] as! [Int]
+                        let prediction = predictdata["values"] as! [Double]
                         PredictionLabel.text = bgUnits.toDisplayUnits(String(Int(prediction.last!)))
                         PredictionLabel.textColor = UIColor.systemPurple
                         if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
@@ -527,7 +527,7 @@ extension MainViewController {
                             var i = 0
                             while i <= toLoad {
                                 if i < prediction.count {
-                                    let prediction = ShareGlucoseData(sgv: prediction[i], date: predictionTime, direction: "flat")
+                                    let prediction = ShareGlucoseData(sgv: Int(round(prediction[i])), date: predictionTime, direction: "flat")
                                     predictionData.append(prediction)
                                     predictionTime += 300
                                 }
