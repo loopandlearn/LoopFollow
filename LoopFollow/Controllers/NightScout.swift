@@ -78,21 +78,23 @@ extension MainViewController {
                 // If Dex data is old, load from NS instead
                 let latestDate = data[0].date
                 let now = dateTimeUtils.getNowTimeIntervalUTC()
-                if (latestDate + 330) < now {
+                if (latestDate + 330) < now && UserDefaultsRepository.url.value != "" {
                     self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
                     print("dex didn't load, triggered NS attempt")
                     return
                 }
                 
                 // Dexcom only returns 24 hrs of data. If we need more, call NS.
-                if graphHours > 24 && !onlyPullLastRecord {
+                if graphHours > 24 && !onlyPullLastRecord && UserDefaultsRepository.url.value != "" {
                     self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord, dexData: data)
                 } else {
                     self.ProcessDexBGData(data: data, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
                 }
             } else {
                 // If we get an error, immediately try to pull NS BG Data
-                self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+                if UserDefaultsRepository.url.value != "" {
+                    self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+                }
                 
                 if globalVariables.dexVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                     globalVariables.dexVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
@@ -107,6 +109,12 @@ extension MainViewController {
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false, dexData: [ShareGlucoseData] = []) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
+        
+        // This kicks it out in the instance where dexcom fails but they aren't using NS &&
+        if UserDefaultsRepository.url.value == "" {
+            self.startBGTimer(time: 10)
+            return
+        }
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         // Set the count= in the url either to pull day(s) of data or only the last record
         var points = "1"
