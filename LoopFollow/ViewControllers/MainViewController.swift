@@ -444,8 +444,21 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     func bgDirectionGraphic(_ value:String)->String
     {
         if value == nil { return "-" }
-        let //graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
-        graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NONE":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
+        let graphics:[String:String] = [
+            "DoubleUp":"↑↑",
+            "SingleUp":"↑",
+            "FortyFiveUp":"↗",
+            "Flat":"→",
+            "FortyFiveDown":"↘︎",
+            "SingleDown":"↓",
+            "DoubleDown":"↓↓",
+            "None":"-",
+            "NONE":"-",
+            "NOT COMPUTABLE":"-",
+            "RATE OUT OF RANGE":"-",
+            "": "-"
+        ]
+
         return graphics[value]!
     }
     
@@ -718,19 +731,25 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     func writeDebugLog(value: String) {
         DispatchQueue.main.async {
-            var logText = "\n" + dateTimeUtils.printNow() + " - " + value
+            let logText = "\n" + dateTimeUtils.printNow() + " - " + value
             print(logText)
             guard let debug = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             if debug.debugTextView.text.lengthOfBytes(using: .utf8) > 20000 {
                 debug.debugTextView.text = ""
-                    }
+            }
             debug.debugTextView.text += logText
+
+            self.scrollTextViewToBottom(textView: debug.debugTextView)
         }
-        
-        
-        
     }
     
+    func scrollTextViewToBottom(textView: UITextView) {
+        if textView.text.count > 0 {
+            let location = textView.text.count - 1
+            let bottom = NSMakeRange(location, 1)
+            textView.scrollRangeToVisible(bottom)
+        }
+    }
     
     // General Notifications
     

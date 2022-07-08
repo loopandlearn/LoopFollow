@@ -82,12 +82,14 @@ class AdvancedSettingsViewController: FormViewController {
                     guard let value = row.value else { return }
                     UserDefaultsRepository.bgUpdateDelay.value = Int(value)
             }
+            <<< SwitchRow("debugLog"){ row in
+                row.title = "Debug"
+                row.value = UserDefaultsRepository.debugLog.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.debugLog.value = value
+            }
 
-
-            
-            
-            
-            
             +++ ButtonRow() {
                 $0.title = "DONE"
             }.onCellSelection { (row, arg)  in

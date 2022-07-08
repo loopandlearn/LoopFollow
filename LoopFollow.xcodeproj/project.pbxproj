@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
+		4B9035A128789D68004122B7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC9788252485969C00A7906C /* Assets.xcassets */; };
 		DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */; };
 		DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */; };
 		DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979324C0D380002C9752 /* UIViewExtension.swift */; };
@@ -149,7 +150,6 @@
 		FC97881C2485969B00A7906C /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC97881B2485969B00A7906C /* MainViewController.swift */; };
 		FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC97881D2485969B00A7906C /* NightScoutViewController.swift */; };
 		FC9788212485969B00A7906C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC97881F2485969B00A7906C /* Main.storyboard */; };
-		FC9788262485969C00A7906C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC9788252485969C00A7906C /* Assets.xcassets */; };
 		FC9788292485969C00A7906C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC9788272485969C00A7906C /* LaunchScreen.storyboard */; };
 		FCA2DDE62501095000254A8C /* Timers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCA2DDE52501095000254A8C /* Timers.swift */; };
 		FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */; };
@@ -751,7 +751,6 @@
 				FC7CE56E248ABE37001F83B8 /* Ambulance.caf in Resources */,
 				FC7CE571248ABE37001F83B8 /* Sunny.caf in Resources */,
 				FC7CE546248ABE37001F83B8 /* Cartoon_Uh_Oh.caf in Resources */,
-				FC9788262485969C00A7906C /* Assets.xcassets in Resources */,
 				FC7CE557248ABE37001F83B8 /* Soft_Marimba_Pad_Positive.caf in Resources */,
 				FC7CE54F248ABE37001F83B8 /* Cartoon_Machine_Clumsy_Loop.caf in Resources */,
 				FC7CE562248ABE37001F83B8 /* Soft_Warm_Airy_Reassuring.caf in Resources */,
@@ -780,6 +779,7 @@
 				FC7CE538248ABE37001F83B8 /* 20ms-of-silence.caf in Resources */,
 				FC7CE56B248ABE37001F83B8 /* Cartoon_Ascend_Then_Descend.caf in Resources */,
 				FC7CE54E248ABE37001F83B8 /* Hell_Yeah_Somewhat_Calmer.caf in Resources */,
+				4B9035A128789D68004122B7 /* Assets.xcassets in Resources */,
 				FC7CE586248ABE37001F83B8 /* Martian_Gun.caf in Resources */,
 				FC7CE523248ABE37001F83B8 /* Wake_Up_Will_You.caf in Resources */,
 				FC7CE552248ABE37001F83B8 /* Siri_Alert_Urgent_Low_Glucose.caf in Resources */,
@@ -1046,7 +1046,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 94QQZX9U85;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1068,7 +1068,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 94QQZX9U85;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

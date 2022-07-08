@@ -92,4 +92,20 @@ class dateTimeUtils {
 
         return dateFormat.firstIndex(of: "a") == nil
     }
+
+    static func getNSDate(dateString : String) -> Date? {
+        // Fix for FreeAPS milliseconds in timestamp
+        let dateWithoutTimeZone = String(dateString.dropLast()).components(separatedBy: ".")[0]
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.locale = Locale(identifier: "en_US")
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+
+        return dateFormatter.date(from: dateWithoutTimeZone)
+    }
+    
+    static func getNSTimeInterval(dateString: String) -> TimeInterval {
+        return getNSDate(dateString: dateString)!.timeIntervalSince1970
+    }
 }
