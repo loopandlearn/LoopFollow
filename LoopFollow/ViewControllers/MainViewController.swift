@@ -127,7 +127,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var latestIOB = ""
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
-    var topBG: Float = UserDefaultsRepository.minBGScale.value
+    var topBG = UserDefaultsRepository.minBGScale.value
     var lastOverrideAlarm: TimeInterval = 0
     
     // share
@@ -441,35 +441,33 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
     
-    func bgDirectionGraphic(_ value:String)->String
-    {
-        if value == nil { return "-" }
-        let graphics:[String:String] = [
-            "DoubleUp":"↑↑",
-            "SingleUp":"↑",
-            "FortyFiveUp":"↗",
-            "Flat":"→",
-            "FortyFiveDown":"↘︎",
-            "SingleDown":"↓",
-            "DoubleDown":"↓↓",
-            "None":"-",
-            "NONE":"-",
-            "NOT COMPUTABLE":"-",
-            "RATE OUT OF RANGE":"-",
-            "": "-"
-        ]
+    let graphics:[String:String] = [
+        "DoubleUp":"↑↑",
+        "SingleUp":"↑",
+        "FortyFiveUp":"↗",
+        "Flat":"→",
+        "FortyFiveDown":"↘︎",
+        "SingleDown":"↓",
+        "DoubleDown":"↓↓",
+        "None":"-",
+        "NONE":"-",
+        "NOT COMPUTABLE":"-",
+        "RATE OUT OF RANGE":"-",
+        "": "-"
+    ]
+
+    func bgDirectionGraphic(_ value:String) -> String {
 
         return graphics[value]!
     }
     
     // Test code to save an image of graph for viewing on watch
     func saveChartImage() {
-        var originalColor = BGChart.backgroundColor
+        let originalColor = BGChart.backgroundColor
         BGChart.backgroundColor = NSUIColor.black
-        guard var image = BGChart.getChartImage(transparent: true) else {
+        guard let image = BGChart.getChartImage(transparent: true) else {
             BGChart.backgroundColor = originalColor
             return }
-        var newImage = image.resizeImage(448.0, landscape: false, opaque: false, contentMode: .scaleAspectFit)
         createAlbums(name1: "Loop Follow", name2: "Loop Follow Old")
         if let collection1 = fetchAssetCollection("Loop Follow"), let collection2 = fetchAssetCollection("Loop Follow Old") {
             deleteExistingImagesFromCollection(collection: collection1)
@@ -480,8 +478,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     func createAlbums(name1: String, name2: String) {
-        if let collection1 = fetchAssetCollection(name1) {
-        } else {
+        if fetchAssetCollection(name1) == nil {
             // Album does not exist, create it and attempt to save the image
             PHPhotoLibrary.shared().performChanges({
                 PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: name1)
@@ -494,13 +491,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     return
                 }
 
-                if let newCollection1 = self.fetchAssetCollection(name1) {
-                }
+                _ = self.fetchAssetCollection(name1)
             })
         }
         
-        if let collection2 = fetchAssetCollection(name2) {
-        } else {
+        if fetchAssetCollection(name2) == nil {
             // Album does not exist, create it and attempt to save the image
             PHPhotoLibrary.shared().performChanges({
                 PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: name2)
@@ -513,8 +508,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     return
                 }
 
-                if let newCollection2 = self.fetchAssetCollection(name2) {
-                }
+                _ = self.fetchAssetCollection(name2)
             })
         }
     }
@@ -536,7 +530,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if let collection = fetchAssetCollection("Loop Follow Old") {
             let library = PHPhotoLibrary.shared()
             library.performChanges({
-                let fetchOptions = PHFetchOptions()
                 let allPhotos = PHAsset.fetchAssets(in: collection, options: .none)
                 PHAssetChangeRequest.deleteAssets(allPhotos)
             }, completionHandler: { (success: Bool, error: Error?) in
@@ -630,7 +623,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 }
                 let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
                 
-                var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
+                let eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
 //                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar start date") }
                 var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
                 var  eventTitle = UserDefaultsRepository.watchLine1.value + "\n" + UserDefaultsRepository.watchLine2.value
@@ -672,12 +665,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 
                 
                 // Delete Events from last 2 hours and 2 hours in future
-                var deleteStartDate = Date().addingTimeInterval(-60*60*2)
-                var deleteEndDate = Date().addingTimeInterval(60*60*2)
+                let deleteStartDate = Date().addingTimeInterval(-60*60*2)
+                let deleteEndDate = Date().addingTimeInterval(60*60*2)
                 // guard solves for some ios upgrades removing the calendar
-                guard let deleteCalendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value) as? EKCalendar else { return }
-                var predicate2 = self.store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
-                var eVDelete = self.store.events(matching: predicate2) as [EKEvent]?
+                guard let deleteCalendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value) else { return }
+                let predicate2 = self.store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
+                let eVDelete = self.store.events(matching: predicate2) as [EKEvent]?
                 if eVDelete != nil {
                     for i in eVDelete! {
                         do {
@@ -691,7 +684,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 }
                 
                 // Write New Event
-                var event = EKEvent(eventStore: self.store)
+                let event = EKEvent(eventStore: self.store)
                 event.title = eventTitle
                 event.startDate = eventStartDate
                 event.endDate = eventEndDate
@@ -731,13 +724,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     func writeDebugLog(value: String) {
         DispatchQueue.main.async {
-            let logText = "\n" + dateTimeUtils.printNow() + " - " + value
+            let logText = dateTimeUtils.printNow() + " - " + value
             print(logText)
             guard let debug = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             if debug.debugTextView.text.lengthOfBytes(using: .utf8) > 20000 {
                 debug.debugTextView.text = ""
             }
-            debug.debugTextView.text += logText
+            debug.debugTextView.text += "\n" + logText
 
             self.scrollTextViewToBottom(textView: debug.debugTextView)
         }

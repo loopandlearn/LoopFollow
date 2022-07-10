@@ -17,7 +17,7 @@ import Foundation
 /// method and return whatever you want.
 
 @objc(IChartValueFormatter)
-public protocol IValueFormatter: class
+public protocol IValueFormatter: AnyObject
 {
     
     /// Called when a value (from labels inside the chart) is formatted before being drawn.

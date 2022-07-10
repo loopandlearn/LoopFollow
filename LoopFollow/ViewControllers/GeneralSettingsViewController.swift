@@ -49,14 +49,14 @@ class GeneralSettingsViewController: FormViewController {
             row.title = "Background Refresh"
             row.tag = "backgroundRefresh"
             row.value = UserDefaultsRepository.backgroundRefresh.value
-        }.onChange { [weak self] row in
+        }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.backgroundRefresh.value = value
             }
         <<< SwitchRow("persistentNotification") { row in
         row.title = "Persistent Notification"
         row.value = UserDefaultsRepository.persistentNotification.value
-        }.onChange { [weak self] row in
+        }.onChange { row in
             guard let value = row.value else { return }
                 UserDefaultsRepository.persistentNotification.value = value
         }
@@ -65,7 +65,7 @@ class GeneralSettingsViewController: FormViewController {
         <<< SwitchRow("forceDarkMode") { row in
         row.title = "Force Dark Mode (Restart App)"
         row.value = UserDefaultsRepository.forceDarkMode.value
-        }.onChange { [weak self] row in
+        }.onChange { row in
             guard let value = row.value else { return }
             UserDefaultsRepository.forceDarkMode.value = value
              
@@ -129,7 +129,7 @@ class GeneralSettingsViewController: FormViewController {
         <<< SwitchRow("screenlockSwitchState") { row in
             row.title = "Keep Screen Active"
             row.value = UserDefaultsRepository.screenlockSwitchState.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.screenlockSwitchState.value = value
             }
@@ -140,7 +140,7 @@ class GeneralSettingsViewController: FormViewController {
         <<< SwitchRow("speakBG"){ row in
             row.title = "Speak BG"
             row.value = UserDefaultsRepository.speakBG.value
-        }.onChange { [weak self] row in
+        }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.speakBG.value = value
         }

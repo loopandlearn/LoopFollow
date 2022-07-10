@@ -64,7 +64,7 @@ class UserDefaultsValue<T: AnyConvertible & Equatable> : UserDefaultsAnyValue {
         }
         
         set {
-            guard let newValue = T.fromAny(newValue) as T? else {
+            guard let newValue = T.fromAny(newValue!) as T? else {
                 return
             }
             

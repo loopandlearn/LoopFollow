@@ -131,7 +131,7 @@ extension MainViewController {
             return
         }
         
-        var onlyPullLastRecord = false
+        let onlyPullLastRecord = false
         
         if UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "" {
             webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
@@ -248,7 +248,7 @@ extension MainViewController {
     // Cancel and reset the playing alarm if it has not been snoozed after 4 min 50 seconds.
     // This allows the next BG reading to either start the timer going or not fire if the situation has been resolved
     func startAlarmPlayingTimer(time: TimeInterval = 290) {
-        let alarmPlayingTimer = Timer.scheduledTimer(timeInterval: time,
+        _ = Timer.scheduledTimer(timeInterval: time,
                                            target: self,
                                            selector: #selector(MainViewController.alarmPlayingTimerDidEnd(_:)),
                                            userInfo: nil,

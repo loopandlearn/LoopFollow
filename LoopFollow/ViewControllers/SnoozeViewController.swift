@@ -37,12 +37,10 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         mainVC.startCheckAlarmTimer(time: mainVC.checkAlarmInterval)
         
         let tabBarControllerItems = self.tabBarController?.tabBar.items
-        if let arrayOfTabBarItems = tabBarControllerItems as! AnyObject as? NSArray{
+        if let arrayOfTabBarItems = tabBarControllerItems as? NSArray {
             snoozeTabItem = arrayOfTabBarItems[2] as! UITabBarItem
-            
         }
-        
-        
+
         setSnoozeTime()
         AlertLabel.isHidden = true
         SnoozeButton.isHidden = true

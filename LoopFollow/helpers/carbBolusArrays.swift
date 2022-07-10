@@ -56,8 +56,6 @@ extension MainViewController {
     
     func findNextBolusTime(timeWithin: Int, needle: TimeInterval, haystack: [bolusGraphStruct], startingIndex: Int) -> Bool {
         
-        var last = false
-        var next = true
         if startingIndex > haystack.count - 2 { return false }
         if startingIndex == 0 { return false }
         

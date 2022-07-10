@@ -18,7 +18,6 @@ class SettingsViewController: FormViewController {
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        var isLoopHidden = false;
         if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             isHidden = true
             isEnabled = false
@@ -66,7 +65,7 @@ class SettingsViewController: FormViewController {
        <<< SwitchRow("showNS"){ row in
        row.title = "Show Nightscout Settings"
        row.value = UserDefaultsRepository.showNS.value
-       }.onChange { [weak self] row in
+       }.onChange { row in
                guard let value = row.value else { return }
                UserDefaultsRepository.showNS.value = value
        }
@@ -114,7 +113,7 @@ class SettingsViewController: FormViewController {
            row.tag = "loopUser"
            row.value = UserDefaultsRepository.loopUser.value
            row.hidden = "$showNS == false"
-       }.onChange { [weak self] row in
+       }.onChange { row in
                    guard let value = row.value else { return }
                    UserDefaultsRepository.loopUser.value = value
            }
@@ -122,7 +121,7 @@ class SettingsViewController: FormViewController {
        <<< SwitchRow("showDex"){ row in
        row.title = "Show Dexcom Settings"
        row.value = UserDefaultsRepository.showDex.value
-       }.onChange { [weak self] row in
+       }.onChange { row in
                guard let value = row.value else { return }
                UserDefaultsRepository.showDex.value = value
        }

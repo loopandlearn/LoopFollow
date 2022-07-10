@@ -26,10 +26,8 @@ class WatchSettingsViewController: FormViewController {
     
     func showHideNSDetails() {
         var isHidden = false
-        var isEnabled = true
         if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             isHidden = true
-            isEnabled = false
         }
         
         let tmpArr = ["IOB", "COB", "BASAL", "LOOP", "OVERRIDE"]
@@ -66,7 +64,7 @@ class WatchSettingsViewController: FormViewController {
             <<< SwitchRow("writeCalendarEvent"){ row in
                 row.title = "Save BG to Calendar"
                 row.value = UserDefaultsRepository.writeCalendarEvent.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.writeCalendarEvent.value = value
             }
@@ -77,7 +75,7 @@ class WatchSettingsViewController: FormViewController {
                 row.displayValueFor = { value in
                     guard let value = value else { return nil }
                     let matching = calendars
-                        .flatMap { $0 }
+                        .compactMap { $0 }
                         .filter { $0.identifier.range(of: value) != nil || $0.title.range(of: value) != nil }
                     if matching.count > 0 {
                         
@@ -86,7 +84,7 @@ class WatchSettingsViewController: FormViewController {
                         return " - "
                     }
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.calendarIdentifier.value = value
             }
@@ -107,7 +105,7 @@ class WatchSettingsViewController: FormViewController {
             <<< SwitchRow("saveImage"){ row in
                 row.title = "Save Graph Image for Watch Face"
                 row.value = UserDefaultsRepository.saveImage.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.saveImage.value = value
             }

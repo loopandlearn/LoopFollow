@@ -16,7 +16,7 @@ class dateTimeUtils {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         let dayString = formatter.string(from: now)
-        var midnight = dayString + " 00:00:00"
+        let midnight = dayString + " 00:00:00"
         let newFormatter = DateFormatter()
         newFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         newFormatter.locale = Locale(identifier: "en_US")
@@ -30,7 +30,7 @@ class dateTimeUtils {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         let dayString = formatter.string(from: now)
-        var midnight = dayString + " 00:00:00"
+        let midnight = dayString + " 00:00:00"
         let newFormatter = DateFormatter()
         newFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         newFormatter.locale = Locale(identifier: "en_US")
@@ -57,15 +57,12 @@ class dateTimeUtils {
         return utcTime
     }
     
+    static let isoDateFormatter = ISO8601DateFormatter()
+    
     static func nowMinusNHoursTimeInterval(N: Int) -> String {
-        let today = Date()
-        let nHoursAgo = Calendar.current.date(byAdding: .hour, value: -N, to: today)!
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        dateFormatter.locale = Locale(identifier: "en_US")
-        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
-        let nHoursAgoString = dateFormatter.string(from: nHoursAgo)
-        return nHoursAgoString
+        let nHoursAgo = Calendar.current.date(byAdding: .hour, value: -N, to: Date())!
+
+        return isoDateFormatter.string(from: nHoursAgo)
     }
     
     static func nowMinus10DaysTimeInterval() -> String {
@@ -74,7 +71,7 @@ class dateTimeUtils {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         dateFormatter.locale = Locale(identifier: "en_US")
-        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
         let dayString = dateFormatter.string(from: oldDate)
         return dayString
     }

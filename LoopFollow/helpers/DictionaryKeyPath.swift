@@ -18,7 +18,7 @@ extension Dictionary {
 
     static private func keyPathKeys(forKeyPath: String) -> [Key]? {
         let keys = forKeyPath.components(separatedBy: ".")
-            .reversed().flatMap({ $0 as? Key })
+            .reversed().compactMap({ $0 as? Key })
         return keys.isEmpty ? nil : keys
     }
 

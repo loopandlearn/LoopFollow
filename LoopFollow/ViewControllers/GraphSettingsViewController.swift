@@ -28,10 +28,8 @@ class GraphSettingsViewController: FormViewController {
    
     func showHideNSDetails() {
         var isHidden = false
-        var isEnabled = true
         if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
             isHidden = true
-            isEnabled = false
         }
         
         if let row1 = form.rowBy(tag: "predictionToLoad") as? StepperRow {
@@ -107,7 +105,7 @@ class GraphSettingsViewController: FormViewController {
             <<< SwitchRow("showValues"){ row in
                 row.title = "Show Carb/Bolus Values"
                 row.value = UserDefaultsRepository.showValues.value
-            }.onChange { [weak self] row in
+            }.onChange {  row in
                         guard let value = row.value else { return }
                         UserDefaultsRepository.showValues.value = value
                         
@@ -115,7 +113,7 @@ class GraphSettingsViewController: FormViewController {
                 <<< SwitchRow("showAbsorption"){ row in
                     row.title = "Show Carb Absorption"
                     row.value = UserDefaultsRepository.showAbsorption.value
-                }.onChange { [weak self] row in
+                }.onChange { row in
                             guard let value = row.value else { return }
                             UserDefaultsRepository.showAbsorption.value = value
                             
@@ -136,7 +134,7 @@ class GraphSettingsViewController: FormViewController {
             <<< SwitchRow("smallGraphTreatments"){ row in
                 row.title = "Treatments on Small Graph"
                 row.value = UserDefaultsRepository.smallGraphTreatments.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                         guard let value = row.value else { return }
                         UserDefaultsRepository.smallGraphTreatments.value = value
                         
@@ -166,7 +164,7 @@ class GraphSettingsViewController: FormViewController {
                 row.cell.stepper.minimumValue = 0.0
                 row.cell.stepper.maximumValue = 6.0
                 row.value = Double(UserDefaultsRepository.predictionToLoad.value)
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.predictionToLoad.value = value
             }
@@ -181,9 +179,9 @@ class GraphSettingsViewController: FormViewController {
                 return bgUnits.toDisplayUnits(String(value))
                 
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
-                UserDefaultsRepository.minBGScale.value = Float(value)
+                UserDefaultsRepository.minBGScale.value = Double(value)
                 
             }
            
@@ -193,7 +191,7 @@ class GraphSettingsViewController: FormViewController {
             row.cell.stepper.minimumValue = 0.5
             row.cell.stepper.maximumValue = 20
             row.value = Double(UserDefaultsRepository.minBasalScale.value)
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.minBasalScale.value = value
         }
@@ -254,7 +252,7 @@ class GraphSettingsViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.downloadDays.value = Int(value)
         }

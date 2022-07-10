@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import CoreMedia
 
 
 extension MainViewController {
@@ -108,22 +109,25 @@ extension MainViewController {
     
     // NS BG Data Web call
     func webLoadNSBGData(onlyPullLastRecord: Bool = false, dexData: [ShareGlucoseData] = []) {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
+        writeDebugLog(value: "Download: BG")
         
         // This kicks it out in the instance where dexcom fails but they aren't using NS &&
         if UserDefaultsRepository.url.value == "" {
             self.startBGTimer(time: 10)
             return
         }
+
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         // Set the count= in the url either to pull day(s) of data or only the last record
-        var points = "1"
+        var urlBGDataPath: String = UserDefaultsRepository.url.value + "/api/v1/entries/sgv.json?count="
         if !onlyPullLastRecord {
-            points = String(graphHours * 12 + 1)
+            let startTimeString = dateTimeUtils.nowMinusNHoursTimeInterval(N: graphHours)
+            urlBGDataPath += "1440&find[dateString][$gte]=" + startTimeString
+        } else {
+            urlBGDataPath += "1"
         }
-        
+
         // URL processor
-        var urlBGDataPath: String = UserDefaultsRepository.url.value + "/api/v1/entries/sgv.json?count=" + points
         if token != "" {
             urlBGDataPath += "&token=" + token
         }
@@ -334,9 +338,7 @@ extension MainViewController {
                 self.DirectionText.text = self.bgDirectionGraphic(directionBG)
                 snoozerDirection = self.bgDirectionGraphic(directionBG)
                 self.latestDirectionString = self.bgDirectionGraphic(directionBG)
-            }
-            else
-            {
+            } else {
                 self.DirectionText.text = ""
                 snoozerDirection = ""
                 self.latestDirectionString = ""
@@ -346,9 +348,7 @@ extension MainViewController {
                 self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
                 snoozerDelta = bgUnits.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = String(deltaBG)
-            }
-            else
-            {
+            } else {
                 self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 snoozerDelta = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = "+" + String(deltaBG)
@@ -360,9 +360,7 @@ extension MainViewController {
             snoozer.BGLabel.text = snoozerBG
             snoozer.DirectionLabel.text = snoozerDirection
             snoozer.DeltaLabel.text = snoozerDelta
-            
         }
-        
     }
     
     // NS Device Status Web Call
@@ -371,7 +369,7 @@ extension MainViewController {
         let urlUser = UserDefaultsRepository.url.value
 
         // NS Api is not working to find by greater than date
-        var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=288"
+        var urlStringDeviceStatus = urlUser + "/api/v1/devicestatus.json?count=1"
         if token != "" {
             urlStringDeviceStatus += "&token=" + token
         }
@@ -394,8 +392,7 @@ extension MainViewController {
         
         var requestDeviceStatus = URLRequest(url: urlDeviceStatus)
         requestDeviceStatus.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        
-        
+
         let deviceStatusTask = URLSession.shared.dataTask(with: requestDeviceStatus) { data, response, error in
             
             guard error == nil else {
@@ -447,32 +444,119 @@ extension MainViewController {
             }
         }
         deviceStatusTask.resume()
-        
     }
     
     // NS Device Status Response Processor
+    func predictionData(_ predictions: [Double], _ loopTimestamp: TimeInterval) {
+        PredictionLabel.text = bgUnits.toDisplayUnits(String(Int(predictions.last!)))
+        if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < loopTimestamp {
+            predictionData.removeAll()
+            var predictionTime = loopTimestamp
+            let toLoad = min(Int(UserDefaultsRepository.predictionToLoad.value * 12), predictions.count)
+            for prediction in predictions[...toLoad] {
+                predictionData.append(ShareGlucoseData(sgv: Int(round(prediction)), date: predictionTime, direction: "flat"))
+                predictionTime += 300
+            }
+
+            let predMin = predictions.min()
+            let predMax = predictions.max()
+            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
+            
+            updatePredictionGraph()
+        }
+    }
+    
+    func updateLoopData(_ deviceStatus: [String : AnyObject]) {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate,
+                                   .withTime,
+                                   .withDashSeparatorInDate,
+                                   .withColonSeparatorInTime]
+
+        guard let loopRecord = deviceStatus["loop"] as! [String : AnyObject]? else { return }
+        guard let loopTimestamp = formatter.date(from: (loopRecord["timestamp"] as! String))?.timeIntervalSince1970 else { return }
+
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(loopTimestamp)) }
+
+        UserDefaultsRepository.alertLastLoopTime.value = loopTimestamp
+        if let failureReason = loopRecord["failureReason"] as! String? {
+            latestLoopStatusString = "X"
+            LoopStatusLabel.text = latestLoopStatusString
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop Failure: " + failureReason) }
+            return
+        }
+
+        var wasEnacted = false
+        if loopRecord["enacted"] is [String:AnyObject] {
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
+            wasEnacted = true
+        }
+
+        if let iobdata = loopRecord["iob"] as? [String:AnyObject] {
+            latestIOB = String(format:"%.2f U", (iobdata["iob"] as! Double))
+            tableData[0].value = latestIOB
+        }
+        if let cobdata = loopRecord["cob"] as? [String:AnyObject] {
+            latestCOB = String(format:"%.0f g", cobdata["cob"] as! Double)
+            tableData[1].value = latestCOB
+        }
+        if let predictdata = loopRecord["predicted"] as? [String:AnyObject] {
+            let prediction = predictdata["values"] as! [Double]
+            predictionData(prediction, loopTimestamp)
+        }
+        if let recBolus = loopRecord["recommendedBolus"] as? Double {
+            tableData[8].value = String(format:"%.2f U", recBolus)
+        }
+        if let loopStatus = loopRecord["recommendedTempBasal"] as? [String:AnyObject] {
+            if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
+                var lastBGTime = loopTimestamp
+                if bgData.count > 0 {
+                    lastBGTime = bgData[bgData.count - 1].date
+                }
+                if UserDefaultsRepository.debugLog.value {
+                    self.writeDebugLog(value: "tempBasalTime: " + String(tempBasalTime))
+                    self.writeDebugLog(value: "lastBGTime: " + String(lastBGTime))
+                    self.writeDebugLog(value: "wasEnacted: " + String(wasEnacted))
+                }
+                if tempBasalTime > lastBGTime && !wasEnacted {
+                    latestLoopStatusString = "⏀"
+                    LoopStatusLabel.text = latestLoopStatusString
+                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Open Loop: recommended temp. temp time > bg time, was not enacted") }
+                } else {
+                    latestLoopStatusString = "↻"
+                    LoopStatusLabel.text = latestLoopStatusString
+                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: recommended temp, but temp time is < bg time and/or was enacted") }
+                }
+            }
+        } else {
+            latestLoopStatusString = "↻"
+            LoopStatusLabel.text = latestLoopStatusString
+            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: no recommended temp") }
+        }
+        if ((TimeInterval(Date().timeIntervalSince1970) - loopTimestamp) / 60) > 15 {
+            latestLoopStatusString = "⚠"
+            LoopStatusLabel.text = latestLoopStatusString
+        }
+        latestLoopTime = loopTimestamp
+    }
+    
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
         self.clearLastInfoData(index: 0)
         self.clearLastInfoData(index: 1)
-        self.clearLastInfoData(index: 3)
-        self.clearLastInfoData(index: 4)
-        self.clearLastInfoData(index: 5)
+        self.clearLastInfoData(index: 8)
+
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
             return
         }
         
         //Process the current data first
-        let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
+        guard let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]? else {
+            return
+        }
         
-        //pump and uploader
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate,
-                                   .withTime,
-                                   .withDashSeparatorInDate,
-                                   .withColonSeparatorInTime]
-        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String : AnyObject]? {
-            if (formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970) != nil  {
+        if let lastPumpRecord = lastDeviceStatus["pump"] as! [String : AnyObject]? {
+            if lastPumpRecord["clock"] != nil {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
                     tableData[5].value = String(format:"%.0f U", reservoirData)
@@ -480,104 +564,23 @@ extension MainViewController {
                     latestPumpVolume = 50.0
                     tableData[5].value = "50+ U"
                 }
-                
-                if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
-                    let upbat = uploader["battery"] as! Double
-                    tableData[4].value = String(format:"%.0f %%", upbat)
-                }
             }
+        } else {
+            tableData[5].value = ""
         }
+
+        if let uploader = lastDeviceStatus["uploader"] as? [String:AnyObject] {
+            let upbat = uploader["battery"] as! Double
+            tableData[4].value = String(format:"%.0f %%", upbat)
+        } else {
+            tableData[4].value = ""
+        }
+
+        updateLoopData(lastDeviceStatus)
         
-        // Loop
-        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
-            //print("Loop: \(lastLoopRecord)")
-            if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
-                UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
-                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
-                if lastLoopRecord["failureReason"] != nil {
-                    LoopStatusLabel.text = "X"
-                    latestLoopStatusString = "X"
-                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop Failure: X") }
-                } else {
-                    var wasEnacted = false
-                    if lastLoopRecord["enacted"] is [String:AnyObject] {
-                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
-                        wasEnacted = true
-                    }
-                    if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        latestIOB = String(format:"%.2f U", (iobdata["iob"] as! Double))
-                        tableData[0].value = latestIOB
-                    }
-                    if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
-                        latestCOB = String(format:"%.0f g", cobdata["cob"] as! Double)
-                        tableData[1].value = latestCOB
-                    }
-                    if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
-                        let prediction = predictdata["values"] as! [Double]
-                        PredictionLabel.text = bgUnits.toDisplayUnits(String(Int(prediction.last!)))
-                        PredictionLabel.textColor = UIColor.systemPurple
-                        if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
-                            predictionData.removeAll()
-                            var predictionTime = lastLoopTime
-                            let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
-                            var i = 0
-                            while i <= toLoad {
-                                if i < prediction.count {
-                                    let prediction = ShareGlucoseData(sgv: Int(round(prediction[i])), date: predictionTime, direction: "flat")
-                                    predictionData.append(prediction)
-                                    predictionTime += 300
-                                }
-                                i += 1
-                            }
-                            
-                            let predMin = prediction.min()
-                            let predMax = prediction.max()
-                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
-                            
-                            updatePredictionGraph()
-                        }
-                    }
-                    if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
-                        tableData[8].value = String(format:"%.2f U", recBolus)
-                    }
-                    if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
-                        if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
-                            var lastBGTime = lastLoopTime
-                            if bgData.count > 0 {
-                                lastBGTime = bgData[bgData.count - 1].date
-                            }
-                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "tempBasalTime: " + String(tempBasalTime)) }
-                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastBGTime: " + String(lastBGTime)) }
-                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "wasEnacted: " + String(wasEnacted)) }
-                            if tempBasalTime > lastBGTime && !wasEnacted {
-                                LoopStatusLabel.text = "⏀"
-                                latestLoopStatusString = "⏀"
-                                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Open Loop: recommended temp. temp time > bg time, was not enacted") }
-                            } else {
-                                LoopStatusLabel.text = "↻"
-                                latestLoopStatusString = "↻"
-                                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: recommended temp, but temp time is < bg time and/or was enacted") }
-                            }
-                        }
-                    } else {
-                        LoopStatusLabel.text = "↻"
-                        latestLoopStatusString = "↻"
-                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: no recommended temp") }
-                    }
-                    
-                }
-                
-                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
-                    LoopStatusLabel.text = "⚠"
-                    latestLoopStatusString = "⚠"
-                }
-                latestLoopTime = lastLoopTime
-            } // end lastLoopTime
-        } // end lastLoop Record
-        
-        var oText = "" as String
+        var oText = ""
         currentOverride = 1.0
-        if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
+        if let lastOverride = lastDeviceStatus["override"] as! [String : AnyObject]? {
             if lastOverride["active"] as! Bool {
                 let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
                 if let multiplier = lastOverride["multiplier"] as? Double {
@@ -591,10 +594,10 @@ extension MainViewController {
                 let maxValue = lastCorrection["maxValue"] as! Double
                 oText += bgUnits.toDisplayUnits(String(minValue)) + "-" + bgUnits.toDisplayUnits(String(maxValue)) + ")"
                 
-                tableData[3].value =  oText
             }
         }
-        
+        tableData[3].value =  oText
+
         infoTable.reloadData()
         
         // Start the timer based on the timestamp
@@ -780,14 +783,12 @@ extension MainViewController {
     // NS Profile Web Call
     func webLoadNSProfile() {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: profile") }
-        let urlUser = UserDefaultsRepository.url.value
-        var urlString = urlUser + "/api/v1/profile/current.json"
+        var urlString = UserDefaultsRepository.url.value + "/api/v1/profile/current.json"
         if token != "" {
-            urlString += "&token=" + token
+            urlString += "?token=" + token
         }
-        
-        let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
-        guard let url = URL(string: escapedAddress!) else {
+
+        guard let url = URL(string: urlString) else {
             return
         }
         
@@ -813,6 +814,39 @@ extension MainViewController {
     }
     
     // NS Profile Response Processor
+    func calcBasalProfile(_ graphStart: TimeInterval, _ graphEnd : TimeInterval) -> [DataStructs.basalProfileSegment] {
+        var basalSegments: [DataStructs.basalProfileSegment] = []
+
+        // Build scheduled basal segments from right to left by
+        // moving pointers to the current midnight and current basal
+        var midnight = dateTimeUtils.getTimeIntervalMidnightToday()
+        var basalProfileIndex = basalProfile.count - 1
+        var start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
+        // Move back until we're in the graph range
+        while start > graphEnd {
+            basalProfileIndex -= 1
+            start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
+        }
+        // Add records while they're still within the graph
+        var end = graphEnd
+        while end >= graphStart {
+            let entry = DataStructs.basalProfileSegment(basalRate: basalProfile[basalProfileIndex].value, startDate: start, endDate: end)
+            basalSegments.append(entry)
+            
+            basalProfileIndex -= 1
+            if basalProfileIndex < 0 {
+                basalProfileIndex = basalProfile.count - 1
+                midnight = midnight.advanced(by: -24*60*60)
+            }
+            end = start - 1
+            start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
+        }
+        // reverse the result to get chronological order
+        basalSegments.reverse()
+
+        return basalSegments
+    }
+    
     func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: profile") }
         if jsonDeviceStatus.count == 0 {
@@ -829,89 +863,55 @@ extension MainViewController {
             let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
             basalProfile.append(entry)
         }
-        
-        
-        // Don't process the basal or draw the graph until after the BG has been fully processeed and drawn
-        if firstGraphLoad { return }
 
-        var basalSegments: [DataStructs.basalProfileSegment] = []
-        
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
-        // Build scheduled basal segments from right to left by
-        // moving pointers to the current midnight and current basal
-        var midnight = dateTimeUtils.getTimeIntervalMidnightToday()
-        var basalProfileIndex = basalProfile.count - 1
-        var start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
-        var end = dateTimeUtils.getNowTimeIntervalUTC()
-        // Move back until we're in the graph range
-        while start > end {
-            basalProfileIndex -= 1
-            start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
-        }
-        // Add records while they're still within the graph
-        let graphStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
-        while end >= graphStart {
-            let entry = DataStructs.basalProfileSegment(
-                basalRate: basalProfile[basalProfileIndex].value, startDate: start, endDate: end)
-            basalSegments.append(entry)
-            
-            basalProfileIndex -= 1
-            if basalProfileIndex < 0 {
-                basalProfileIndex = basalProfile.count - 1
-                midnight = midnight.advanced(by: -24*60*60)
-            }
-            end = start - 1
-            start = midnight + basalProfile[basalProfileIndex].timeAsSeconds
-        }
-        // reverse the result to get chronological order
-        basalSegments.reverse()
+
+        let timeStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
+        let predictionEndTime = dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)
+        let basalSegments = calcBasalProfile(timeStart, predictionEndTime)
         
         var firstPass = true
         // Runs the scheduled basal to the end of the prediction line
-        let predictionEndTime = dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)
         basalScheduleData.removeAll()
         
-        for i in 0..<basalSegments.count {
-            let timeStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
-            
-            // This processed everything after the first one.
-            if firstPass == false
-                && basalSegments[i].startDate <= predictionEndTime {
-                let startDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: basalSegments[i].startDate)
-                basalScheduleData.append(startDot)
-                var endDate = basalSegments[i].endDate
-                
-                // if it's the last one needed, set it to end at the prediction end time
-                if endDate > predictionEndTime || i == basalSegments.count - 1 {
-                    endDate = Double(predictionEndTime)
-                }
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: profile " + basalSegments.description) }
 
-                let endDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: endDate)
-                basalScheduleData.append(endDot)
-            }
-            
+        for i in 0..<basalSegments.count {
+
+            let segment = basalSegments[i]
+
             // we need to manually set the first one
             // Check that this is the first one and there are no existing entries
             if firstPass == true {
                 // check that the timestamp is > the current entry and < the next entry
-                if timeStart >= basalSegments[i].startDate && timeStart < basalSegments[i].endDate {
+                if segment.startDate <= timeStart && timeStart < segment.endDate {
+
                     // Set the start time to match the BG start
-                    let startDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: Double(timeStart + (60 * 5)))
+                    let startDot = basalGraphStruct(basalRate: segment.basalRate, date: max(timeStart, segment.startDate))
                     basalScheduleData.append(startDot)
-                    
+
                     // set the enddot where the next one will start
-                    let endDate = basalSegments[i].endDate
-                    let endDot = basalGraphStruct(basalRate: basalSegments[i].basalRate, date: endDate)
+                    let endDot = basalGraphStruct(basalRate: segment.basalRate, date: segment.endDate)
                     basalScheduleData.append(endDot)
+
                     firstPass = false
                 }
+                continue
+            }
+
+            // This processed everything after the first one.
+            if segment.startDate <= predictionEndTime {
+                let startDot = basalGraphStruct(basalRate: segment.basalRate, date: segment.startDate)
+                basalScheduleData.append(startDot)
+
+                let endDot = basalGraphStruct(basalRate: segment.basalRate, date: min(segment.endDate, predictionEndTime))
+                basalScheduleData.append(endDot)
             }
         }
         
         if UserDefaultsRepository.graphBasal.value {
             updateBasalScheduledGraph()
         }
-        
     }
     
     // NS Treatments Web Call
@@ -1000,131 +1000,111 @@ extension MainViewController {
                     print("No Match: \(String(describing: entry))")
             }
         }
-        // end of for loop
-        
+
         if tempBasal.count > 0 {
-                   processNSBasals(entries: tempBasal)
-               } else {
-                   if basalData.count < 0 {
-                       clearOldTempBasal()
-                   }
-               }
-               if bolus.count > 0 {
-                   processNSBolus(entries: bolus)
-               } else {
-                   if bolusData.count > 0 {
-                       clearOldBolus()
-                   }
-               }
-               if carbs.count > 0 {
-                   processNSCarbs(entries: carbs)
-               } else {
-                   if carbData.count > 0 {
-                       clearOldCarb()
-                   }
-               }
-               if bgCheck.count > 0 {
-                   processNSBGCheck(entries: bgCheck)
-               } else {
-                   if bgCheckData.count > 0 {
-                       clearOldBGCheck()
-                   }
-               }
-               if temporaryOverride.count > 0 {
-                   processNSOverrides(entries: temporaryOverride)
-               } else {
-                   if overrideGraphData.count > 0 {
-                       clearOldOverride()
-                   }
-               }
-               if suspendPump.count > 0 {
-                   processSuspendPump(entries: suspendPump)
-               } else {
-                   if suspendGraphData.count > 0 {
-                       clearOldSuspend()
-                   }
-               }
-               if resumePump.count > 0 {
-                   processResumePump(entries: resumePump)
-               } else {
-                   if resumeGraphData.count > 0 {
-                       clearOldResume()
-                   }
-               }
-               if cgmSensorStart.count > 0 {
-                   processSensorStart(entries: cgmSensorStart)
-               } else {
-                   if sensorStartGraphData.count > 0 {
-                       clearOldSensor()
-                   }
-               }
-               if note.count > 0 {
-                   processNotes(entries: note)
-               } else {
-                   if noteGraphData.count > 0 {
-                       clearOldNotes()
-                   }
-               }
+            processNSBasals(entries: tempBasal)
+        } else if basalData.count < 0 {
+            clearOldTempBasal()
+        }
+        
+        if bolus.count > 0 {
+            processNSBolus(entries: bolus)
+        } else if bolusData.count > 0 {
+            clearOldBolus()
+        }
+        
+        if carbs.count > 0 {
+            processNSCarbs(entries: carbs)
+        } else if carbData.count > 0 {
+            clearOldCarb()
+        }
+        
+        if bgCheck.count > 0 {
+            processNSBGCheck(entries: bgCheck)
+        } else if bgCheckData.count > 0 {
+            clearOldBGCheck()
+        }
+
+        if temporaryOverride.count > 0 {
+            processNSOverrides(entries: temporaryOverride)
+        } else if overrideGraphData.count > 0 {
+            clearOldOverride()
+        }
+
+        if suspendPump.count > 0 {
+            processSuspendPump(entries: suspendPump)
+        } else if suspendGraphData.count > 0 {
+            clearOldSuspend()
+        }
+
+        if resumePump.count > 0 {
+            processResumePump(entries: resumePump)
+        } else if resumeGraphData.count > 0 {
+            clearOldResume()
+        }
+
+        if cgmSensorStart.count > 0 {
+            processSensorStart(entries: cgmSensorStart)
+        } else if sensorStartGraphData.count > 0 {
+            clearOldSensor()
+        }
+
+        if note.count > 0 {
+            processNotes(entries: note)
+        } else if noteGraphData.count > 0 {
+            clearOldNotes()
+        }
     }
     
-    func clearOldTempBasal()
-        {
-            basalData.removeAll()
-            updateBasalGraph()
-        }
-        
-        func clearOldBolus()
-        {
-            bolusData.removeAll()
-            updateBolusGraph()
-        }
-        
-        func clearOldCarb()
-        {
-            carbData.removeAll()
-            updateCarbGraph()
-        }
-        
-        func clearOldBGCheck()
-        {
-            bgCheckData.removeAll()
-            updateBGCheckGraph()
-        }
-        
-        func clearOldOverride()
-        {
-            overrideGraphData.removeAll()
-            updateOverrideGraph()
-        }
-        
-        func clearOldSuspend()
-        {
-            suspendGraphData.removeAll()
-            updateSuspendGraph()
-        }
-        
-        func clearOldResume()
-        {
-            resumeGraphData.removeAll()
-            updateResumeGraph()
-        }
-        
-        func clearOldSensor()
-        {
-            sensorStartGraphData.removeAll()
-            updateSensorStart()
-        }
-        
-        func clearOldNotes()
-        {
-            noteGraphData.removeAll()
-            updateNotes()
-        }
+    func clearOldTempBasal() {
+        basalData.removeAll()
+        updateBasalGraph()
+    }
+    
+    func clearOldBolus() {
+        bolusData.removeAll()
+        updateBolusGraph()
+    }
+    
+    func clearOldCarb() {
+        carbData.removeAll()
+        updateCarbGraph()
+    }
+    
+    func clearOldBGCheck() {
+        bgCheckData.removeAll()
+        updateBGCheckGraph()
+    }
+    
+    func clearOldOverride() {
+        overrideGraphData.removeAll()
+        updateOverrideGraph()
+    }
+    
+    func clearOldSuspend() {
+        suspendGraphData.removeAll()
+        updateSuspendGraph()
+    }
+    
+    func clearOldResume() {
+        resumeGraphData.removeAll()
+        updateResumeGraph()
+    }
+    
+    func clearOldSensor() {
+        sensorStartGraphData.removeAll()
+        updateSensorStart()
+    }
+    
+    func clearOldNotes() {
+        noteGraphData.removeAll()
+        updateNotes()
+    }
     
     // NS Temp Basal Response Processor
     func processNSBasals(entries: [[String:AnyObject]]) {
         self.clearLastInfoData(index: 2)
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Basal") }
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Temp Basal") }
         // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
         basalData.removeAll()
         
@@ -1164,7 +1144,6 @@ extension MainViewController {
                     // cycle through basal profiles.
                     // TODO figure out how to deal with profile changes that happen mid-gap
                     for b in 0..<self.basalScheduleData.count {
-                        
                         if (priorDateTimeStamp + (priorDuration * 60)) >= basalScheduleData[b].date {
                             scheduled = basalScheduleData[b].basalRate
                             
@@ -1180,12 +1159,11 @@ extension MainViewController {
                             }
                         }
                     }
-                    
+
                     // Make the starting dot at the last ending dot
                     let startDot = basalGraphStruct(basalRate: scheduled, date: Double(priorDateTimeStamp + (priorDuration * 60)))
                     basalData.append(startDot)
-                        
-                       
+
                     if midGap {
                         // Make the ending dot at the new scheduled basal
                         let endDot1 = basalGraphStruct(basalRate: scheduled, date: Double(midGapTime))
@@ -1206,8 +1184,7 @@ extension MainViewController {
             }
             
             // Make the starting dot
-            let startDot = basalGraphStruct(basalRate: basalRate, date: Double(dateTimeStamp))
-            basalData.append(startDot)
+            basalData.append(basalGraphStruct(basalRate: basalRate, date: Double(dateTimeStamp)))
             
             // Make the ending dot
             // If it's the last one and has no duration, extend it for 30 minutes past the start. Otherwise set ending at duration
@@ -1487,10 +1464,12 @@ extension MainViewController {
         // because it's a small array, we're going to destroy and reload every time.
         overrideGraphData.removeAll()
 
+        let startOfGraph = dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * UserDefaultsRepository.downloadDays.value)
+        let endOfGraph = dateTimeUtils.getTimeIntervalNHoursAgo(N: -Int(UserDefaultsRepository.predictionToLoad.value))
+
         for currentEntry in entries.reversed() {
             guard let dateValue = getEntryDate(currentEntry: currentEntry) else { continue }
 
-            let startOfGraph = dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * UserDefaultsRepository.downloadDays.value)
             let dateTimeStamp = max(dateTimeUtils.getNSTimeInterval(dateString: dateValue), startOfGraph)
             
             var multiplier: Double = 1.0
@@ -1520,7 +1499,6 @@ extension MainViewController {
                 }
             }
                         
-            let endOfGraph = dateTimeUtils.getTimeIntervalNHoursAgo(N: -Int(UserDefaultsRepository.predictionToLoad.value))
             let endDate = min(dateTimeStamp + duration, endOfGraph)
             let dot = DataStructs.overrideStruct(
                     insulNeedsScaleFactor: multiplier,

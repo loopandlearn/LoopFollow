@@ -27,7 +27,6 @@ extension MainViewController {
         let date = Date()
         let now = date.timeIntervalSince1970
         let currentBG = bgs[bgs.count - 1].sgv
-        let lastBG = bgs[bgs.count - 2].sgv
         
         var skipZero = false
         if UserDefaultsRepository.alertIgnoreZero.value && currentBG == 0 {
@@ -58,7 +57,6 @@ extension MainViewController {
         
         
         let currentBGTime = bgs[bgs.count - 1].date
-        var alarmTriggered = false
         var numLoops = 0
         var playSound = true
         checkQuietHours()
@@ -122,7 +120,7 @@ extension MainViewController {
         
         // BG Based Alarms
         // Check to make sure it is a current reading and has not already triggered alarm from this reading
-        if now - currentBGTime <= (5*60) && currentBGTime > UserDefaultsRepository.snoozedBGReadingTime.value as! TimeInterval {
+        if now - currentBGTime <= (5*60) && currentBGTime > UserDefaultsRepository.snoozedBGReadingTime.value! {
             
             // trigger temporary alert first
             if UserDefaultsRepository.alertTemporaryActive.value {
@@ -345,7 +343,6 @@ extension MainViewController {
                 && (Double(dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertLastLoopTime.value) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
                 && UserDefaultsRepository.alertLastLoopTime.value > 0 {
                 
-                var trigger = true
                 if (UserDefaultsRepository.alertNotLoopingUseLimits.value
                     && (
                         (Float(currentBG) >= UserDefaultsRepository.alertNotLoopingUpperLimit.value
@@ -403,7 +400,6 @@ extension MainViewController {
                     // Get the latest bolus over the small bolus exclusion
                     // Start with 0.0 bolus assuming there isn't one to cause a trigger and only add one if found
                     var lastBolus = 0.0
-                    var lastBolusTime = 0.0
                     var i = 1
                     // check the boluses in reverse order setting it only if the time is after the carb time minus prebolus time.
                     // This will make the loop stop at the most recent bolus that is over the minimum value or continue through all boluses
@@ -411,7 +407,6 @@ extension MainViewController {
                         // Set the bolus if it's after the carb time minus prebolus time
                         if (bolusData[bolusData.count - i].date >= lastCarbTime - Double(UserDefaultsRepository.alertMissedBolusPrebolus.value * 60)) {
                             lastBolus = bolusData[bolusData.count - i].value
-                            lastBolusTime = bolusData[bolusData.count - i].date
                         }
                         i += 1
                     }
@@ -525,8 +520,8 @@ extension MainViewController {
             return
         }
         
-        let overrideName = recentOverride?.reason as! String
-       
+        let overrideName = (recentOverride?.reason)!
+
         var numLoops = 0
         var playSound = true
         if UserDefaultsRepository.alertOverrideStart.value && !UserDefaultsRepository.alertOverrideStartIsSnoozed.value && triggerStart {
@@ -621,8 +616,6 @@ extension MainViewController {
     
     func clearOldSnoozes(){
           let date = Date()
-          let now = date.timeIntervalSince1970
-          var needsReload: Bool = false
           guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
           
           if date > UserDefaultsRepository.alertSnoozeAllTime.value ?? date {
@@ -762,14 +755,9 @@ extension MainViewController {
     
     func checkQuietHours() {
         if UserDefaultsRepository.quietHourStart.value == nil || UserDefaultsRepository.quietHourEnd.value == nil { return }
-        
-        var startDateComponents = DateComponents()
-        
+
         let today = Date()
         let todayCalendar = Calendar.current
-        let month = todayCalendar.component(.month, from: today)
-        let day = todayCalendar.component(.day, from: today)
-        let year = todayCalendar.component(.year, from: today)
         let hour = todayCalendar.component(.hour, from: today)
         let minute = todayCalendar.component(.minute, from: today)
         let todayMinutes = (60 * hour) + minute
@@ -849,8 +837,8 @@ extension MainViewController {
     
     
     func speakBG(sgv: Int) {
-           var speechSynthesizer = AVSpeechSynthesizer()
-           var speechUtterance: AVSpeechUtterance = AVSpeechUtterance(string: "Current BG is " + bgUnits.toDisplayUnits(String(sgv)))
+           let speechSynthesizer = AVSpeechSynthesizer()
+           let speechUtterance: AVSpeechUtterance = AVSpeechUtterance(string: "Current BG is " + bgUnits.toDisplayUnits(String(sgv)))
            speechUtterance.rate = AVSpeechUtteranceMaximumSpeechRate / 2
            speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
            speechSynthesizer.speak(speechUtterance)

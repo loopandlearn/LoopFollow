@@ -56,7 +56,7 @@ class UserDefaultsRepository {
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
     static let predictionToLoad = UserDefaultsValue<Double>(key: "predictionToLoad", default: 1)
     static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
-    static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
+    static let minBGScale = UserDefaultsValue<Double>(key: "minBGScale", default: 250.0)
     static let showDIALines = UserDefaultsValue<Bool>(key: "showDIAMarkers", default: true)
     static let showMidnightLines = UserDefaultsValue<Bool>(key: "showMidnightMarkers", default: false)
     static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)

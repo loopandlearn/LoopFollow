@@ -13,7 +13,7 @@ import Foundation
 import CoreGraphics
 
 @objc
-public protocol IShapeRenderer: class
+public protocol IShapeRenderer: AnyObject
 {
     /// Renders the provided ScatterDataSet with a shape.
     ///

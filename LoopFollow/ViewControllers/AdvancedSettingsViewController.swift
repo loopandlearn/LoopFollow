@@ -29,42 +29,42 @@ class AdvancedSettingsViewController: FormViewController {
             <<< SwitchRow("downloadTreatments"){ row in
                 row.title = "Download Treatments"
                 row.value = UserDefaultsRepository.downloadTreatments.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.downloadTreatments.value = value
             }
             <<< SwitchRow("downloadPrediction"){ row in
                 row.title = "Download Prediction"
                 row.value = UserDefaultsRepository.downloadPrediction.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.downloadPrediction.value = value
             }
             <<< SwitchRow("graphBasal"){ row in
                 row.title = "Graph Basal"
                 row.value = UserDefaultsRepository.graphBasal.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.graphBasal.value = value
             }
             <<< SwitchRow("graphBolus"){ row in
                 row.title = "Graph Bolus"
                 row.value = UserDefaultsRepository.graphBolus.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.graphBolus.value = value
             }
             <<< SwitchRow("graphCarbs"){ row in
                 row.title = "Graph Carbs"
                 row.value = UserDefaultsRepository.graphCarbs.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.graphCarbs.value = value
             }
             <<< SwitchRow("graphOtherTreatments"){ row in
                 row.title = "Graph Other Treatments"
                 row.value = UserDefaultsRepository.graphOtherTreatments.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.graphOtherTreatments.value = value
             }
@@ -78,14 +78,14 @@ class AdvancedSettingsViewController: FormViewController {
                         guard let value = value else { return nil }
                         return "\(Int(value))"
                     }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.bgUpdateDelay.value = Int(value)
             }
             <<< SwitchRow("debugLog"){ row in
                 row.title = "Debug"
                 row.value = UserDefaultsRepository.debugLog.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.debugLog.value = value
             }

@@ -470,7 +470,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -514,7 +514,7 @@ class AlarmViewController: FormViewController {
                     otherRow.value = true
                     otherRow.reload()
                 }
-                .onExpandInlineRow { [weak self] cell, row, inlineRow in
+                .onExpandInlineRow { cell, row, inlineRow in
                     inlineRow.cellUpdate() { cell, row in
                         cell.datePicker.datePickerMode = .dateAndTime
                         cell.datePicker.preferredDatePickerStyle = .wheels
@@ -551,14 +551,14 @@ class AlarmViewController: FormViewController {
             <<< SwitchRow("alertTemporaryActive"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertTemporaryActive.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertTemporaryActive.value = value
             }
             <<< SwitchRow("alertTemporaryBelow"){ row in
                 row.title = "Alert Below BG"
                 row.value = UserDefaultsRepository.alertTemporaryBelow.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertTemporaryBelow.value = value
             }
@@ -572,7 +572,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return bgUnits.toDisplayUnits(String(value))
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertTemporaryBG.value = Float(value)
             }
@@ -584,7 +584,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertTemporarySound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -594,7 +594,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertTemporaryRepeat"){ row in
         row.title = "Repeat Sound"
         row.value = UserDefaultsRepository.alertTemporaryBGRepeat.value
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertTemporaryBGRepeat.value = value
         }
@@ -608,7 +608,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertUrgentLowActive"){ row in
             row.title = "Active"
             row.value = UserDefaultsRepository.alertUrgentLowActive.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertUrgentLowActive.value = value
             }
@@ -622,7 +622,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return bgUnits.toDisplayUnits(String(value))
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertUrgentLowBG.value = Float(value)
         }
@@ -636,7 +636,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return "\(Int(value))"
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertUrgentLowPredictiveMinutes.value = Int(value)
         }
@@ -650,7 +650,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertUrgentLowSnooze.value = Int(value)
         }
@@ -662,7 +662,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertUrgentLowSound.value = value //changed
                 AlarmSound.setSoundFile(str: value)
@@ -732,7 +732,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -768,7 +768,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertLowActive"){ row in
             row.title = "Active"
             row.value = UserDefaultsRepository.alertLowActive.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertLowActive.value = value
             }
@@ -782,7 +782,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return bgUnits.toDisplayUnits(String(value))
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertLowBG.value = Float(value)
         }
@@ -796,7 +796,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return "\(Int(value))"
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertLowPersistent.value = Int(value)
         }
@@ -810,7 +810,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return bgUnits.toDisplayUnits(String(value))
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertLowPersistenceMax.value = Float(value)
             }
@@ -826,7 +826,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertLowSnooze.value = Int(value)
         }
@@ -838,7 +838,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertLowSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -908,7 +908,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -944,7 +944,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertHighActive"){ row in
             row.title = "Active"
             row.value = UserDefaultsRepository.alertHighActive.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertHighActive.value = value
             }
@@ -959,7 +959,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return bgUnits.toDisplayUnits(String(value))
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertHighBG.value = Float(value)
         }
@@ -973,7 +973,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return "\(Int(value))"
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertHighPersistent.value = Int(value)
         }
@@ -987,7 +987,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertHighSnooze.value = Int(value)
         }
@@ -999,7 +999,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertHighSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -1069,7 +1069,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -1104,7 +1104,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertUrgentHighActive"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertUrgentHighActive.value
-                }.onChange { [weak self] row in
+                }.onChange { row in
                         guard let value = row.value else { return }
                         UserDefaultsRepository.alertUrgentHighActive.value = value
                 }
@@ -1118,7 +1118,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return bgUnits.toDisplayUnits(String(value))
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertUrgentHighBG.value = Float(value)
         }
@@ -1132,7 +1132,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertUrgentHighSnooze.value = Int(value)
         }
@@ -1144,7 +1144,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertUrgentHighSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -1213,7 +1213,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -1248,7 +1248,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertFastDropActive"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertFastDropActive.value
-                }.onChange { [weak self] row in
+                }.onChange { row in
                         guard let value = row.value else { return }
                         UserDefaultsRepository.alertFastDropActive.value = value
                 }
@@ -1262,7 +1262,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return bgUnits.toDisplayUnits(String(value))
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastDropDelta.value = Float(value)
         }
@@ -1276,14 +1276,14 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return "\(Int(value))"
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastDropReadings.value = Int(value)
         }
         <<< SwitchRow("alertFastDropUseLimit"){ row in
         row.title = "Use BG Limit"
         row.value = UserDefaultsRepository.alertFastDropUseLimit.value
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastDropUseLimit.value = value
         }
@@ -1299,7 +1299,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return bgUnits.toDisplayUnits(String(value))
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastDropBelowBG.value = Float(value)
         }
@@ -1313,7 +1313,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastDropSnooze.value = Int(value)
         }
@@ -1325,7 +1325,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertFastDropSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -1395,7 +1395,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -1430,7 +1430,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertFastRiseActive"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertFastRiseActive.value
-                }.onChange { [weak self] row in
+                }.onChange { row in
                         guard let value = row.value else { return }
                         UserDefaultsRepository.alertFastRiseActive.value = value
                 }
@@ -1444,7 +1444,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return bgUnits.toDisplayUnits(String(value))
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastRiseDelta.value = Float(value)
         }
@@ -1458,14 +1458,14 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return "\(Int(value))"
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastRiseReadings.value = Int(value)
         }
         <<< SwitchRow("alertFastRiseUseLimit"){ row in
         row.title = "Use BG Limit"
         row.value = UserDefaultsRepository.alertFastRiseUseLimit.value
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastRiseUseLimit.value = value
         }
@@ -1481,7 +1481,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return bgUnits.toDisplayUnits(String(value))
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastRiseAboveBG.value = Float(value)
         }
@@ -1495,7 +1495,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertFastRiseSnooze.value = Int(value)
         }
@@ -1507,7 +1507,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertFastRiseSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -1576,7 +1576,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -1612,7 +1612,7 @@ class AlarmViewController: FormViewController {
             <<< SwitchRow("alertMissedReadingActive"){ row in
                     row.title = "Active"
                     row.value = UserDefaultsRepository.alertMissedReadingActive.value
-                    }.onChange { [weak self] row in
+                    }.onChange { row in
                             guard let value = row.value else { return }
                             UserDefaultsRepository.alertMissedReadingActive.value = value
                     }
@@ -1627,7 +1627,7 @@ class AlarmViewController: FormViewController {
                         guard let value = value else { return nil }
                         return "\(Int(value))"
                     }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedReading.value = Int(value)
             }
@@ -1641,7 +1641,7 @@ class AlarmViewController: FormViewController {
                         guard let value = value else { return nil }
                         return "\(Int(value))"
                     }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedReadingSnooze.value = Int(value)
             }
@@ -1653,7 +1653,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedReadingSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -1722,7 +1722,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -1757,7 +1757,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertNotLoopingActive"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertNotLoopingActive.value
-                }.onChange { [weak self] row in
+                }.onChange { row in
                         guard let value = row.value else { return }
                         UserDefaultsRepository.alertNotLoopingActive.value = value
                 }
@@ -1771,7 +1771,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertNotLooping.value = Int(value)
         }
@@ -1779,7 +1779,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertNotLoopingUseLimits"){ row in
         row.title = "Use BG Limits"
         row.value = UserDefaultsRepository.alertNotLoopingUseLimits.value
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertNotLoopingUseLimits.value = value
         }
@@ -1794,7 +1794,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return bgUnits.toDisplayUnits(String(value))
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertNotLoopingLowerLimit.value = Float(value)
         }
@@ -1809,7 +1809,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return bgUnits.toDisplayUnits(String(value))
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertNotLoopingUpperLimit.value = Float(value)
         }
@@ -1823,7 +1823,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertNotLoopingSnooze.value = Int(value)
         }
@@ -1835,7 +1835,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertNotLoopingSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -1903,7 +1903,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -1938,7 +1938,7 @@ class AlarmViewController: FormViewController {
         <<< SwitchRow("alertMissedBolusActive"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertMissedBolusActive.value
-                }.onChange { [weak self] row in
+                }.onChange { row in
                         guard let value = row.value else { return }
                         UserDefaultsRepository.alertMissedBolusActive.value = value
                 }
@@ -1952,7 +1952,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertMissedBolus.value = Int(value)
         }
@@ -1966,7 +1966,7 @@ class AlarmViewController: FormViewController {
                         guard let value = value else { return nil }
                         return "\(Int(value))"
                     }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedBolusPrebolus.value = Int(value)
             }
@@ -1976,7 +1976,7 @@ class AlarmViewController: FormViewController {
                 row.cell.stepper.minimumValue = 0.05
                 row.cell.stepper.maximumValue = 2
                 row.value = Double(UserDefaultsRepository.alertMissedBolusIgnoreBolus.value)
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedBolusIgnoreBolus.value = value
             }
@@ -1993,7 +1993,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertMissedBolusLowGrams.value = Int(value)
         }
@@ -2008,7 +2008,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return bgUnits.toDisplayUnits(String(value))
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertMissedBolusLowGramsBG.value = Float(value)
         }
@@ -2023,7 +2023,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertMissedBolusSnooze.value = Int(value)
         }
@@ -2035,7 +2035,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.alertMissedBolusSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -2110,7 +2110,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -2148,7 +2148,7 @@ class AlarmViewController: FormViewController {
             <<< SwitchRow("alertSAGEActive"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertSAGEActive.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertSAGEActive.value = value
             }
@@ -2163,7 +2163,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertSAGE.value = Int(value)
             }
@@ -2177,7 +2177,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertSAGESnooze.value = Int(value)
             }
@@ -2190,7 +2190,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertSAGESound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -2265,7 +2265,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -2300,7 +2300,7 @@ class AlarmViewController: FormViewController {
             <<< SwitchRow("alertCAGEActive"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertCAGEActive.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertCAGEActive.value = value
             }
@@ -2315,7 +2315,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertCAGE.value = Int(value)
             }
@@ -2329,7 +2329,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertCAGESnooze.value = Int(value)
             }
@@ -2341,7 +2341,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertCAGESound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -2416,7 +2416,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -2451,7 +2451,7 @@ class AlarmViewController: FormViewController {
             <<< SwitchRow("alertOverrideStart"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertOverrideStart.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertOverrideStart.value = value
             }
@@ -2464,7 +2464,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertOverrideStartSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -2540,7 +2540,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -2576,7 +2576,7 @@ class AlarmViewController: FormViewController {
             <<< SwitchRow("alertOverrideEnd"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertOverrideEnd.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertOverrideEnd.value = value
             }
@@ -2589,7 +2589,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertOverrideEndSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -2664,7 +2664,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -2700,7 +2700,7 @@ class AlarmViewController: FormViewController {
             <<< SwitchRow("alertPump"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertPump.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertPump.value = value
             }
@@ -2715,7 +2715,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertPumpAt.value = Int(value)
             }
@@ -2730,7 +2730,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertPumpSnoozeHours.value = Int(value)
             }
@@ -2742,7 +2742,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertPumpSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -2817,7 +2817,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -2852,7 +2852,7 @@ class AlarmViewController: FormViewController {
             <<< SwitchRow("alertIOB"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertIOB.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertIOB.value = value
             }
@@ -2867,7 +2867,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Double(round(10*value)/10))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertIOBAt.value = value
             }
@@ -2881,7 +2881,7 @@ class AlarmViewController: FormViewController {
                 guard let value = value else { return nil }
                 return "\(Int(value))"
             }
-        }.onChange { [weak self] row in
+        }.onChange { row in
             guard let value = row.value else { return }
             UserDefaultsRepository.alertIOBNumber.value = Int(value)
         }
@@ -2895,7 +2895,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertIOBBolusesWithin.value = Int(value)
         }
@@ -2910,7 +2910,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-        }.onChange { [weak self] row in
+        }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertIOBMaxBoluses.value = Int(value)
         }
@@ -2925,7 +2925,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertIOBSnoozeHours.value = Int(value)
             }
@@ -2937,7 +2937,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertIOBSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -3005,7 +3005,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -3040,7 +3040,7 @@ class AlarmViewController: FormViewController {
             <<< SwitchRow("alertCOB"){ row in
                 row.title = "Active"
                 row.value = UserDefaultsRepository.alertCOB.value
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertCOB.value = value
             }
@@ -3055,7 +3055,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertCOBAt.value = Int(value)
             }
@@ -3071,7 +3071,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(Int(value))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertCOBSnoozeHours.value = Int(value)
             }
@@ -3083,7 +3083,7 @@ class AlarmViewController: FormViewController {
                     guard let value = value else { return nil }
                     return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
                 }
-            }.onChange { [weak self] row in
+            }.onChange { row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.alertCOBSound.value = value
                 AlarmSound.setSoundFile(str: value)
@@ -3151,7 +3151,7 @@ class AlarmViewController: FormViewController {
                 otherRow.value = true
                 otherRow.reload()
             }
-            .onExpandInlineRow { [weak self] cell, row, inlineRow in
+            .onExpandInlineRow { cell, row, inlineRow in
                 inlineRow.cellUpdate() { cell, row in
                     cell.datePicker.datePickerMode = .dateAndTime
                     cell.datePicker.preferredDatePickerStyle = .wheels
@@ -3179,74 +3179,72 @@ class AlarmViewController: FormViewController {
     }
 
     func buildAlarmSettings() {
-           form
-            +++ Section(header: "Alarm Settings", footer: "")
-           
-            <<< SwitchRow("overrideSystemOutputVolume"){ row in
-                row.title = "Override System Volume"
-                row.value = UserDefaultsRepository.overrideSystemOutputVolume.value
-            }.onChange { [weak self] row in
-                        guard let value = row.value else { return }
-                        UserDefaultsRepository.overrideSystemOutputVolume.value = value
-                }
-            <<< StepperRow("forcedOutputVolume") { row in
-                  row.title = "Volume Level"
-                row.cell.stepper.stepValue = 0.05
-                  row.cell.stepper.minimumValue = 0
-                  row.cell.stepper.maximumValue = 1
-                  row.value = Double(UserDefaultsRepository.forcedOutputVolume.value)
-                  row.hidden = "$overrideSystemOutputVolume == false"
-                    row.displayValueFor = { value in
-                    guard let value = value else { return nil }
-                    return "\(Int(value*100))%"
-                    }
-              }.onChange { [weak self] row in
-                      guard let value = row.value else { return }
-                      UserDefaultsRepository.forcedOutputVolume.value = Float(value)
-              }
+        form
+        +++ Section(header: "Alarm Settings", footer: "")
+        
+        <<< SwitchRow("overrideSystemOutputVolume"){ row in
+            row.title = "Override System Volume"
+            row.value = UserDefaultsRepository.overrideSystemOutputVolume.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.overrideSystemOutputVolume.value = value
+        }
+        <<< StepperRow("forcedOutputVolume") { row in
+            row.title = "Volume Level"
+            row.cell.stepper.stepValue = 0.05
+            row.cell.stepper.minimumValue = 0
+            row.cell.stepper.maximumValue = 1
+            row.value = Double(UserDefaultsRepository.forcedOutputVolume.value)
+            row.hidden = "$overrideSystemOutputVolume == false"
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value*100))%"
+            }
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.forcedOutputVolume.value = Float(value)
+        }
         <<< SwitchRow("alertAudioDuringPhone"){ row in
             row.title = "Audio During Calls"
             row.value = UserDefaultsRepository.alertAudioDuringPhone.value
-        }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertAudioDuringPhone.value = value
-            }
-            <<< SwitchRow("alertIgnoreZero"){ row in
-                row.title = "Ignore Zero BG"
-                row.value = UserDefaultsRepository.alertIgnoreZero.value
-            }.onChange { [weak self] row in
-                        guard let value = row.value else { return }
-                        UserDefaultsRepository.alertIgnoreZero.value = value
-                }
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertAudioDuringPhone.value = value
+        }
+        <<< SwitchRow("alertIgnoreZero"){ row in
+            row.title = "Ignore Zero BG"
+            row.value = UserDefaultsRepository.alertIgnoreZero.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertIgnoreZero.value = value
+        }
         <<< SwitchRow("alertAutoSnoozeCGMStart"){ row in
             row.title = "Auto-Snooze CGM Start"
             row.value = UserDefaultsRepository.alertAutoSnoozeCGMStart.value
-        }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.alertAutoSnoozeCGMStart.value = value
-            }
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertAutoSnoozeCGMStart.value = value
+        }
+        
+        +++ Section(header: "Night Time Settings", footer: "Night time hours are used to differ how alerts are managed during the day and at night.  For instance, automatically snooze, at night time, non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert.")  { row in
+            row.tag = "quietHourSection"
+        }
+        <<< TimeInlineRow("quietHourStart") { row in
+            row.title = "Night Time Starts Today"
+            row.value = UserDefaultsRepository.quietHourStart.value
             
-             +++ Section(header: "Night Time Settings", footer: "Night time hours are used to differ how alerts are managed during the day and at night.  For instance, automatically snooze, at night time, non-critical alerts that you do not wish to be awakened for such as a sensor change pre-alert.")  { row in
-                row.tag = "quietHourSection"
-                        }
-            <<< TimeInlineRow("quietHourStart") { row in
-                row.title = "Night Time Starts Today"
-                row.value = UserDefaultsRepository.quietHourStart.value
-                
-        }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.quietHourStart.value = value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.quietHourStart.value = value
         }
         <<< TimeInlineRow("quietHourEnd") { row in
-                row.title = "Night Time Ends Tomorrow"
-                row.value = UserDefaultsRepository.quietHourEnd.value
-                
-        }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.quietHourEnd.value = value
+            row.title = "Night Time Ends Tomorrow"
+            row.value = UserDefaultsRepository.quietHourEnd.value
+            
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.quietHourEnd.value = value
         }
-       }
+    }
 
 }
-
-
