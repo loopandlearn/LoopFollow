@@ -111,6 +111,11 @@ do
         "Continue")
             break
             ;;
+        "Cancel")
+            echo -e "\n${RED}User cancelled!${NC}";
+            exit 0
+            break
+            ;;
         *)
     esac
 done
