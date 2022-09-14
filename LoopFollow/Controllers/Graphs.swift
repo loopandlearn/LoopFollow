@@ -269,18 +269,19 @@ extension MainViewController {
         
         // Setup the chart data of all lines
         let data = LineChartData()
-        data.addDataSet(lineBG) // Dataset 0
-        data.addDataSet(linePrediction) // Dataset 1
-        data.addDataSet(lineBasal) // Dataset 2
-        data.addDataSet(lineBolus) // Dataset 3
-        data.addDataSet(lineCarbs) // Dataset 4
-        data.addDataSet(lineBasalScheduled) // Dataset 5
-        data.addDataSet(lineOverride) // Dataset 6
-        data.addDataSet(lineBGCheck) // Dataset 7
-        data.addDataSet(lineSuspend) // Dataset 8
-        data.addDataSet(lineResume) // Dataset 9
-        data.addDataSet(lineSensor) // Dataset 10
-        data.addDataSet(lineNote) // Dataset 11
+        
+        data.append(lineBG) // Dataset 0
+        data.append(linePrediction) // Dataset 1
+        data.append(lineBasal) // Dataset 2
+        data.append(lineBolus) // Dataset 3
+        data.append(lineCarbs) // Dataset 4
+        data.append(lineBasalScheduled) // Dataset 5
+        data.append(lineOverride) // Dataset 6
+        data.append(lineBGCheck) // Dataset 7
+        data.append(lineSuspend) // Dataset 8
+        data.append(lineResume) // Dataset 9
+        data.append(lineSensor) // Dataset 10
+        data.append(lineNote) // Dataset 11
         
         data.setValueFont(UIFont.systemFont(ofSize: 12))
         
@@ -1137,18 +1138,18 @@ extension MainViewController {
         
         // Setup the chart data of all lines
         let data = LineChartData()
-        data.addDataSet(lineBG) // Dataset 0
-        data.addDataSet(linePrediction) // Dataset 1
-        data.addDataSet(lineBasal) // Dataset 2
-        data.addDataSet(lineBolus) // Dataset 3
-        data.addDataSet(lineCarbs) // Dataset 4
-        data.addDataSet(lineBasalScheduled) // Dataset 5
-        data.addDataSet(lineOverride) // Dataset 6
-        data.addDataSet(lineBGCheck) // Dataset 7
-        data.addDataSet(lineSuspend) // Dataset 8
-        data.addDataSet(lineResume) // Dataset 9
-        data.addDataSet(lineSensor) // Dataset 10
-        data.addDataSet(lineNote) // Dataset 11
+        data.append(lineBG) // Dataset 0
+        data.append(linePrediction) // Dataset 1
+        data.append(lineBasal) // Dataset 2
+        data.append(lineBolus) // Dataset 3
+        data.append(lineCarbs) // Dataset 4
+        data.append(lineBasalScheduled) // Dataset 5
+        data.append(lineOverride) // Dataset 6
+        data.append(lineBGCheck) // Dataset 7
+        data.append(lineSuspend) // Dataset 8
+        data.append(lineResume) // Dataset 9
+        data.append(lineSensor) // Dataset 10
+        data.append(lineNote) // Dataset 11
         
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false
