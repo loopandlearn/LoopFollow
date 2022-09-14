@@ -9,20 +9,20 @@
 import Foundation
 import Charts
 
-final class OverrideFillFormatter: IFillFormatter {
-    func getFillLinePosition(dataSet: ILineChartDataSet, dataProvider: LineChartDataProvider) -> CGFloat {
+final class OverrideFillFormatter: FillFormatter {
+    func getFillLinePosition(dataSet: Charts.LineChartDataSetProtocol, dataProvider: Charts.LineChartDataProvider) -> CGFloat {
         return CGFloat(dataSet.entryForIndex(0)!.y)
         //return 375
     }
 }
 
-final class basalFillFormatter: IFillFormatter {
-    func getFillLinePosition(dataSet: ILineChartDataSet, dataProvider: LineChartDataProvider) -> CGFloat {
+final class basalFillFormatter: FillFormatter {
+    func getFillLinePosition(dataSet: Charts.LineChartDataSetProtocol, dataProvider: Charts.LineChartDataProvider) -> CGFloat {
         return 0
     }
 }
 
-final class ChartXValueFormatter: IAxisValueFormatter {
+final class ChartXValueFormatter: AxisValueFormatter {
     
 
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
@@ -44,7 +44,7 @@ final class ChartXValueFormatter: IAxisValueFormatter {
     }
 }
 
-final class ChartYDataValueFormatter: IValueFormatter {
+final class ChartYDataValueFormatter: ValueFormatter {
     func stringForValue(_ value: Double, entry: ChartDataEntry, dataSetIndex: Int, viewPortHandler: ViewPortHandler?) -> String {
         if entry.data != nil {
             return entry.data as? String ?? ""
@@ -54,7 +54,7 @@ final class ChartYDataValueFormatter: IValueFormatter {
     }
 }
 
-final class ChartYOverrideValueFormatter: IValueFormatter {
+final class ChartYOverrideValueFormatter: ValueFormatter {
     func stringForValue(_ value: Double, entry: ChartDataEntry, dataSetIndex: Int, viewPortHandler: ViewPortHandler?) -> String {
         if entry.data != nil {
             return entry.data as? String ?? ""
@@ -64,7 +64,7 @@ final class ChartYOverrideValueFormatter: IValueFormatter {
     }
 }
 
-final class ChartYMMOLValueFormatter: IAxisValueFormatter {
+final class ChartYMMOLValueFormatter: AxisValueFormatter {
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
         return bgUnits.toDisplayUnits(String(value))
     }
