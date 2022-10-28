@@ -1,4 +1,4 @@
-Call for developers: Because we have switched to Omnipod 5, we no longer are using Loop or Nightscout and I will be able to do maintnenance on the specific features related to them. If you are interested in assisting to keep this app maintained and work on new features and improvements for Loop and Nightscout functionality, please reach out to me.
+Call for developers: Because we have switched to Omnipod 5, we no longer are using Loop or Nightscout. I will not be able to do maintenance on the features related to those. If you are interested in assisting to keep this app maintained and work on new features and improvements for Loop and Nightscout functionality, please reach out.
 
 ## Loop Follow 
 ![screenshot](https://user-images.githubusercontent.com/38429455/93782187-436e8880-fbf8-11ea-8709-e2afba692132.png)
