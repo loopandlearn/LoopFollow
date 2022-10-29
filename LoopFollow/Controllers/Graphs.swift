@@ -342,7 +342,7 @@ extension MainViewController {
         BGChart.highlightValue(nil, callDelegate: false)
         
         BGChart.data = data
-        BGChart.setExtraOffsets(left: 10, top: 10, right: 10, bottom: 10)
+        BGChart.setExtraOffsets(left: 5, top: 10, right: 5, bottom: 10)
         
     }
     
@@ -477,6 +477,12 @@ extension MainViewController {
             } else {
                 colors.append(NSUIColor.systemGreen)
             }
+        }
+        
+        if (!UserDefaultsRepository.loopUser.value) {
+            let value = ChartDataEntry(x: Double(entries[entries.count-1].date+1200), y: 0)
+            mainChart.addEntry(value)
+            colors.append(NSUIColor.systemGray.withAlphaComponent(0.0))
         }
         
         if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Graph BGs: " + mainChart.entries.count.description) }
