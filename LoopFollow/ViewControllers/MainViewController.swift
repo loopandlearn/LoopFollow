@@ -620,7 +620,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
 //                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar start date") }
                 var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
-                var  eventTitle = UserDefaultsRepository.watchLine1.value + "\n" + UserDefaultsRepository.watchLine2.value
+                var  eventTitle = UserDefaultsRepository.watchLine1.value
+                if (UserDefaultsRepository.watchLine2.value.count > 1) {
+                    eventTitle += "\n" + UserDefaultsRepository.watchLine2.value
+                }
                 eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: bgUnits.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
                 eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
                 eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
