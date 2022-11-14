@@ -479,7 +479,7 @@ extension MainViewController {
             }
         }
         
-        if (!UserDefaultsRepository.loopUser.value) {
+        if (predictionData.count < 1) {
             let value = ChartDataEntry(x: Double(entries[entries.count-1].date+1200), y: 0)
             mainChart.addEntry(value)
             colors.append(NSUIColor.systemGray.withAlphaComponent(0.0))
