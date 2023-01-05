@@ -398,6 +398,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         PredictionLabel.isHidden = isHidden
         infoTable.isHidden = isHidden
         
+        if UserDefaultsRepository.hideInfoTable.value {
+            infoTable.isHidden = true
+        }
+        
         if UserDefaultsRepository.url.value != "" {
             isEnabled = true
         }

@@ -27,6 +27,16 @@ class InfoDisplaySettingsViewController: FormViewController {
     
     private func createForm() {
         form
+        +++ Section("General")
+        <<< SwitchRow("hideInfoTable"){ row in
+            row.title = "Hide Information Table"
+            row.tag = "hideInfoTable"
+            row.value = UserDefaultsRepository.hideInfoTable.value
+        }.onChange { [weak self] row in
+                    guard let value = row.value else { return }
+                    UserDefaultsRepository.hideInfoTable.value = value           
+        }
+        
         +++ MultivaluedSection(multivaluedOptions: .Reorder, header: "Information Display Settings", footer: "Arrage/Enable Information Desired") {
         
            // TODO: add the other display values
