@@ -1,4 +1,4 @@
-name: Build FAX
+name: Build Loop Follow
 on:
   workflow_dispatch:
 
@@ -22,7 +22,7 @@ jobs:
       
       # Build signed FreeAPS X IPA file
       - name: Fastlane Build & Archive
-        run: fastlane build_fax
+        run: fastlane build_LoopFollow
         env:
           TEAMID: ${{ secrets.TEAMID }}
           GH_PAT: ${{ secrets.GH_PAT }}
