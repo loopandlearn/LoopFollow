@@ -132,8 +132,6 @@ platform :ios do
     end
 
     configure_bundle_id("LoopFollow", "com.#{TEAMID}.LoopFollow", [
-      Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS,
-      Spaceship::ConnectAPI::BundleIdCapability::Type::HEALTHKIT
     ])
     
   end
