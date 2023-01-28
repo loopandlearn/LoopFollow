@@ -271,6 +271,10 @@ extension MainViewController {
                 self.startBGTimer(time: 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
                 let timerVal = 310 - secondsAgo
                 print("##### started 5:10 bg timer: \(timerVal)")
+                self.updateBadge(val: data[0].sgv)
+                if UserDefaultsRepository.speakBG.value {
+                    self.speakBG(CurrentSgv: data[0].sgv, LastSgv: data[1].sgv)
+                }
             }
         }
         
@@ -282,10 +286,7 @@ extension MainViewController {
             
         } else {
             if data.count > 0 {
-                self.updateBadge(val: data[data.count - 1].sgv)
-                if UserDefaultsRepository.speakBG.value {
-                    speakBG(sgv: data[data.count - 1].sgv)
-                }
+                //self.updateBadge(val: data[data.count - 1].sgv)
             }
             return
         }
@@ -296,6 +297,7 @@ extension MainViewController {
             if dateString >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 let reading = ShareGlucoseData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
                 bgData.append(reading)
+                
             }
             
         }
@@ -361,7 +363,7 @@ extension MainViewController {
                 snoozerDelta = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = "+" + String(deltaBG)
             }
-            self.updateBadge(val: latestBG)
+            //self.updateBadge(val: latestBG)
             
             // Snoozer Display
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }

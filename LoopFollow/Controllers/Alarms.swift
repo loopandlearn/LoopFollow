@@ -848,12 +848,24 @@ extension MainViewController {
     }
     
     
-    func speakBG(sgv: Int) {
-           var speechSynthesizer = AVSpeechSynthesizer()
-           var speechUtterance: AVSpeechUtterance = AVSpeechUtterance(string: "Current BG is " + bgUnits.toDisplayUnits(String(sgv)))
-           speechUtterance.rate = AVSpeechUtteranceMaximumSpeechRate / 2
+    func speakBG(CurrentSgv: Int, LastSgv: Int) {
+            var speechSynthesizer = AVSpeechSynthesizer()
+            var BGDelta = CurrentSgv - LastSgv
+            var BGDeltaText: String
+            
+        
+            if BGDelta < 0 {
+                BGDeltaText = bgUnits.toDisplayUnits(String(BGDelta))
+            }
+            else {
+                BGDeltaText = "+" + bgUnits.toDisplayUnits(String(BGDelta))
+            }
+        
+            var SpeechText = "Current BG is " + bgUnits.toDisplayUnits(String(CurrentSgv)) + " " + BGDeltaText
+            var speechUtterance: AVSpeechUtterance = AVSpeechUtterance(string: SpeechText)
+           //speechUtterance.rate = AVSpeechUtteranceMaximumSpeechRate / 2
            speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-           speechSynthesizer.speak(speechUtterance)
+        speechSynthesizer.speak(speechUtterance)
        }
     
     func isOnPhoneCall() -> Bool {
