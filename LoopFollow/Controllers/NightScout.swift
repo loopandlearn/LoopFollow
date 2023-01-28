@@ -283,7 +283,8 @@ extension MainViewController {
             bgData.removeAll()
         } else if bgData[bgData.count - 1].date != pullDate {
             bgData.removeFirst()
-            
+        
+        // Commented out the code for badge update in this step.  Need to to clean this up or delete
         } else {
             if data.count > 0 {
                 //self.updateBadge(val: data[data.count - 1].sgv)
@@ -363,6 +364,7 @@ extension MainViewController {
                 snoozerDelta = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = "+" + String(deltaBG)
             }
+            //This code was moved above.  Can be deleted after testing 
             //self.updateBadge(val: latestBG)
             
             // Snoozer Display
