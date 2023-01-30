@@ -34,4 +34,4 @@ jobs:
 
           git checkout Main
           git merge --no-edit upstream/Main
-          git push origin Main
+          git push origin Main --force
