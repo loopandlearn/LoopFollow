@@ -1,6 +1,6 @@
 # Using Github Actions + FastLane to deploy to TestFlight: the "Browser Build" method
 
-These instructions allow you to build Xdrip4iOS without having access to a Mac. They also allow you to easily install Xdrip4iOS on phones that are not connected to your computer. So you can send builds and updates to those you care for easily, or have an easy to access backup if you run Xdrip4iOS for yourself. You do not need to worry about correct Xcode/Mac versions either. An app built using this method can easily be deployed to newer versions of iOS, as soon as they are available.
+These instructions allow you to build Loop Follow without having access to a Mac. They also allow you to easily install Loop Follow on phones that are not connected to your computer. So you can send builds and updates to those you care for easily, or have an easy to access backup if you run Loop Follow for yourself. You do not need to worry about correct Xcode/Mac versions either. An app built using this method can easily be deployed to newer versions of iOS, as soon as they are available.
 
 The setup steps are somewhat involved, but nearly all are one time steps. Subsequent builds are trivial. Your app must be updated once every 90 days, but it's a simple click to make a new build and can be done from anywhere.
 
@@ -85,7 +85,7 @@ You do not need to fill out the next form. That is for submitting to the app sto
 
 ## Create Building Certficates
 
-1. Go back to the "Actions" tab of your Xdrip4iOS repository in github.
+1. Go back to the "Actions" tab of your Loop Follow repository in github.
 1. Select "3. Create Certificates".
 1. Click "Run Workflow", and tap the green button.
 1. Wait, and within a minute or two you should see a green checkmark indicating the workflow succeeded.
