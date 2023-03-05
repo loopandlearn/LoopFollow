@@ -1,12 +1,12 @@
 # Using Github Actions + FastLane to deploy to TestFlight: the "Browser Build" method
 
-These instructions allow you to build Xdrip4iOS without having access to a Mac. They also allow you to easily install Xdrip4iOS on phones that are not connected to your computer. So you can send builds and updates to those you care for easily, or have an easy to access backup if you run Xdrip4iOS for yourself. You do not need to worry about correct Xcode/Mac versions either. An app built using this method can easily be deployed to newer versions of iOS, as soon as they are available.
+These instructions allow you to build Loop Follow without having access to a Mac. They also allow you to easily install Loop Follow on phones that are not connected to your computer. So you can send builds and updates to those you care for easily, or have an easy to access backup if you run Loop Follow for yourself. You do not need to worry about correct Xcode/Mac versions either. An app built using this method can easily be deployed to newer versions of iOS, as soon as they are available.
 
 The setup steps are somewhat involved, but nearly all are one time steps. Subsequent builds are trivial. Your app must be updated once every 90 days, but it's a simple click to make a new build and can be done from anywhere.
 
 Note that TestFlight requires apple id accounts 13 years or older. This can be circumvented by logging into Media & Purchase on the child's phone with an adult's account. More details on this can be found in [LoopDocs](https://loopkit.github.io/loopdocs/gh-actions/gh-deploy/#install-testflight-loop-for-child).
 
-This method for building without a Mac was ported from Loop. If you have used this method for Loop or one of the other DIY apps (Loop Caregiver, Loop Follow, Xdrip4iOS, FreeAPS X), some of the steps can be re-used and the full set of instructions does not need to be repeated. This will be mentioned in relevant sections below.
+This method for building without a Mac was ported from Loop. If you have used this method for Loop or one of the other DIY apps (Loop, Loop Caregiver, xDrip4iOS, FreeAPS X), some of the steps can be re-used and the full set of instructions does not need to be repeated. This will be mentioned in relevant sections below.
 
 There are more detailed instructions in LoopDocs for doing Browser Builds of Loop and other apps, including troubleshooting and build errors. Please refer to [LoopDocs](https://loopkit.github.io/loopdocs/gh-actions/gh-other-apps/) for more details.
 
@@ -85,7 +85,7 @@ You do not need to fill out the next form. That is for submitting to the app sto
 
 ## Create Building Certficates
 
-1. Go back to the "Actions" tab of your Xdrip4iOS repository in github.
+1. Go back to the "Actions" tab of your Loop Follow repository in github.
 1. Select "3. Create Certificates".
 1. Click "Run Workflow", and tap the green button.
 1. Wait, and within a minute or two you should see a green checkmark indicating the workflow succeeded.
