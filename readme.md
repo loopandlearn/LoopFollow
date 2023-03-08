@@ -19,8 +19,15 @@ low alert for the BG you want to wake up to and close Loop.
 ### App Store Beta Test Install
 If you would like to be part of our beta testing for the App Store and install that version without needing to build it yourself, please submit the form here: https://customtypeone.com/blogs/news/loop-follow-beta-testing
 
+### Building Options
 
-### To begin building: 
+### GitHub Browser Build
+
+Loop Follow can be built using a paid Apple Developer Account on any computer using the GitHub Browser Build method as explained (tersely) [here](fastlane/testflight.md) or with more detail in [LoopDocs: GitHub Browser Build: Other Apps](https://loopkit.github.io/loopdocs/gh-actions/gh-other-apps).
+
+### Build using Mac/Xcode
+
+Loop Follow can be using a Mac computer with Xcode as described below (tersely) or with more detail using the Build-Select script, see [Loop and Learn: Build-Select Script](https://www.loopandlearn.org/build-select) or [LoopDocs: Build Select Script](https://loopkit.github.io/loopdocs/build/step14/#build-select-script) and choose to build Loop Follow.
 
 1. Open Terminal
 2. copy/paste this code into terminal and hit enter: `/bin/bash -c "$(curl -fsSL https://git.io/JTKEt)"`
