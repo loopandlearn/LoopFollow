@@ -38,7 +38,7 @@ If you have a Loop Follow app in your Applications folder from a prior Mac/Xcode
 
 ### Build using Mac/Xcode
 
-Loop Follow can be using a Mac computer with Xcode as described below (tersely) or with more detail using the Build-Select script, see [Loop and Learn: Build-Select Script](https://www.loopandlearn.org/build-select) or [LoopDocs: Build Select Script](https://loopkit.github.io/loopdocs/build/step14/#build-select-script) and choose to build Loop Follow.
+Loop Follow can be built using a Mac computer with Xcode as described below (tersely) or with more detail using the Build-Select script, see [Loop and Learn: Build-Select Script](https://www.loopandlearn.org/build-select) or [LoopDocs: Build Select Script](https://loopkit.github.io/loopdocs/build/step14/#build-select-script) and choose to build Loop Follow.
 
 1. Open Terminal
 2. copy/paste this code into terminal and hit enter:
