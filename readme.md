@@ -30,14 +30,22 @@ Loop Follow can be built using a paid Apple Developer Account on any computer us
 Loop Follow can be using a Mac computer with Xcode as described below (tersely) or with more detail using the Build-Select script, see [Loop and Learn: Build-Select Script](https://www.loopandlearn.org/build-select) or [LoopDocs: Build Select Script](https://loopkit.github.io/loopdocs/build/step14/#build-select-script) and choose to build Loop Follow.
 
 1. Open Terminal
-2. copy/paste this code into terminal and hit enter: `/bin/bash -c "$(curl -fsSL https://git.io/JTKEt)"`
+2. copy/paste this code into terminal and hit enter:
+```
+/bin/bash -c "$(curl -fsSL https://git.io/JTKEt)"
+```
 3. Follow instructions in terminal
-4. Plugin your phone or ipad, select your signing team, select your phone or ipad or "my mac" (Big Sur only), and click play.
+4. Plugin your phone or ipad, select your signing team, select your phone or ipad or "my mac" (Big Sur or later operating systems), and click play.
 
-If you build to MacOS Big Sur, after building you need to copy the app to your applications folder:
+Note: Tested this with Ventura and Xcode 14.2
+Successfully built to My Mac (Mac Catalyst); My Mac (Mac Catalyst, Rosetta); and My Mac (Designed for iPad). I did not test the app on the iPad, but it built with no problem.
+
+For running Loop Follow on your Mac, after building to your Mac, you need to copy the app to your applications folder:
 1. Click stop to close the running app
-2. Right click on "Loop Follow.app" in the left side of xcode by clicking to the Loop Follow/Products/ folder
-3. Select Show in Finder
+1. On the left side of Xcode, click on the Folder icon
+    * Click to open the LoopFollow folder list
+    * Click to open the LoopFollow/Products folder
+    * Right click (or Cntl-click) on "Loop Follow.app" and select Show in Finder
 4. Drag the Loop Follow.app icon to your Applications folder in finder.
 5. From Mac system settings/notifications, scroll down to Loop Follow and enable notifications with the options you want. For instance, Badge app icon will allow the BG reading to display on the icon.
 
