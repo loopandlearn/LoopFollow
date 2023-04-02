@@ -271,6 +271,10 @@ extension MainViewController {
                 self.startBGTimer(time: 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
                 let timerVal = 310 - secondsAgo
                 print("##### started 5:10 bg timer: \(timerVal)")
+                self.updateBadge(val: data[0].sgv)
+                if UserDefaultsRepository.speakBG.value {
+                    self.speakBG(currentValue: data[0].sgv, previousValue: data[1].sgv)
+                }
             }
         }
         
@@ -281,12 +285,6 @@ extension MainViewController {
             bgData.removeFirst()
             
         } else {
-            if data.count > 0 {
-                self.updateBadge(val: data[data.count - 1].sgv)
-                if UserDefaultsRepository.speakBG.value {
-                    speakBG(sgv: data[data.count - 1].sgv)
-                }
-            }
             return
         }
         
@@ -361,7 +359,6 @@ extension MainViewController {
                 snoozerDelta = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = "+" + String(deltaBG)
             }
-            self.updateBadge(val: latestBG)
             
             // Snoozer Display
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
