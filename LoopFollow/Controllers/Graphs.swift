@@ -360,6 +360,12 @@ extension MainViewController {
         ul.lineWidth = 1
         BGChart.xAxis.addLimitLine(ul)
         
+        //Fiasp peak line
+        let ul2 = ChartLimitLine()
+        ul2.limit = Double(dateTimeUtils.getNowTimeIntervalUTC().advanced(by: -30 * 60))
+        ul2.lineColor = NSUIColor.systemBlue.withAlphaComponent(0.5)
+        ul2.lineWidth = 1
+        BGChart.xAxis.addLimitLine(ul2)
         
         if UserDefaultsRepository.showDIALines.value {
             for i in 1..<7 {
