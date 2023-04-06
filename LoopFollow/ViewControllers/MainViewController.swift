@@ -37,7 +37,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var statsView: UIView!
     @IBOutlet weak var smallGraphHeightConstraint: NSLayoutConstraint!
     
-      
+    let speechSynthesizer = AVSpeechSynthesizer()
+
     // Data Table class
     class infoData {
         public var name: String
