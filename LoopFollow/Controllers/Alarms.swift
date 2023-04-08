@@ -847,8 +847,23 @@ extension MainViewController {
         
     }
     
-    
+    // Speaks the current blood glucose value and the change from the previous value.
+    // Repeated calls to the function within 30 seconds are prevented.
     func speakBG(currentValue: Int, previousValue: Int) {
+        // Get the current time
+        let currentTime = Date()
+
+        // Check if speakBG was called less than 30 seconds ago. If so, prevent repeated announcements and return.
+        // If `lastSpeechTime` is `nil` (i.e., this is the first time `speakBG` is being called), use `Date.distantPast` as the default
+        // value to ensure that the `guard` statement passes and the announcement is made.
+        guard currentTime.timeIntervalSince(lastSpeechTime ?? .distantPast) >= 30 else {
+            print("Repeated calls to speakBG detected!")
+            return
+        }
+
+        // Update the last speech time
+        self.lastSpeechTime = currentTime
+
         let bloodGlucoseDifference = currentValue - previousValue
         let negligibleThreshold = 3
         let differenceText: String
