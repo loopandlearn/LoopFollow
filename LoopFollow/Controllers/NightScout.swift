@@ -115,27 +115,30 @@ extension MainViewController {
             self.startBGTimer(time: 10)
             return
         }
-        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
-        // Set the count= in the url either to pull day(s) of data or only the last record
-        var points = "1"
-        if !onlyPullLastRecord {
-            points = String(graphHours * 12 + 1)
-        }
         
         // URL processor
         var urlBGDataPath: String = UserDefaultsRepository.url.value + "/api/v1/entries/sgv.json?"
-        if token == "" {
-            urlBGDataPath = urlBGDataPath + "count=" + points
+
+        if onlyPullLastRecord {
+            urlBGDataPath = urlBGDataPath + "count=1"
         } else {
-            urlBGDataPath = urlBGDataPath + "token=" + token + "&count=" + points
+            //Fetch entries for the time period of "downloadDays"
+            let utcISODateFormatter = ISO8601DateFormatter()
+            let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
+            urlBGDataPath = urlBGDataPath + "count=1000&find[dateString][$gte]=" + utcISODateFormatter.string(from: date)
         }
+
+        if !token.isEmpty {
+            urlBGDataPath = urlBGDataPath + "&token=" + token
+        }
+
         guard let urlBGData = URL(string: urlBGDataPath) else {
             // if we have Dex data, use it
             if !dexData.isEmpty {
                 self.ProcessDexBGData(data: dexData, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
                 return
             }
-            
+
             if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                 //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
@@ -196,22 +199,39 @@ extension MainViewController {
                         nsData[i].date /= 1000
                         nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
                     }
+                    print(nsData.count)
+
+                    //Avoid duplicate entries messing up the graph, only use one reading per 5 minutes.
+                    let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+                    let points = graphHours * 12 + 1
+                    var nsData2 = [ShareGlucoseData]()
+                    let timestamp = Date().timeIntervalSince1970
+                    for i in 0..<points {
+                        //Starting with "now" and then step 5 minutes back in time
+                        let target = timestamp - Double(i) * 60 * 5
+                        //Find the reading closest to the target, but not too far away
+                        let closest = nsData.filter{ abs($0.date - target) < 3 * 60 }.min { abs($0.date - target) < abs($1.date - target) }
+                        //If a reading is found, add it to the new array
+                        if let item = closest {
+                            nsData2.append(item)
+                        }
+                    }
+                    print(nsData2.count)
                     
                     // merge NS and Dex data if needed; use recent Dex data and older NS data
                     var sourceName = "Nightscout"
                     if !dexData.isEmpty {
                         let oldestDexDate = dexData[dexData.count - 1].date
                         var itemsToRemove = 0
-                        while itemsToRemove < nsData.count && nsData[itemsToRemove].date >= oldestDexDate {
+                        while itemsToRemove < nsData2.count && nsData2[itemsToRemove].date >= oldestDexDate {
                             itemsToRemove += 1
                         }
-                        nsData.removeFirst(itemsToRemove)
-                        nsData = dexData + nsData
+                        nsData2.removeFirst(itemsToRemove)
+                        nsData2 = dexData + nsData2
                         sourceName = "Dexcom"
                     }
-                    
                     // trigger the processor for the data after downloading.
-                    self.ProcessDexBGData(data: nsData, onlyPullLastRecord: onlyPullLastRecord, sourceName: sourceName)
+                    self.ProcessDexBGData(data: nsData2, onlyPullLastRecord: onlyPullLastRecord, sourceName: sourceName)
                     
                 }
             } else {
