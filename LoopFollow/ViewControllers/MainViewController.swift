@@ -141,6 +141,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     var snoozeTabItem: UITabBarItem = UITabBarItem()
     
+    // Stores the time of the last speech announcement to prevent repeated announcements.
+    // This is a temporary safeguard until the issue with multiple calls to speakBG is fixed.
+    var lastSpeechTime: Date?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
