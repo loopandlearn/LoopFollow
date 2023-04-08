@@ -13,7 +13,7 @@ import ShareClient
 import UserNotifications
 import Photos
 
-class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate {
+class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
     
     @IBOutlet weak var BGText: UILabel!
     @IBOutlet weak var DeltaText: UILabel!
@@ -36,7 +36,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet weak var serverText: UILabel!
     @IBOutlet weak var statsView: UIView!
     @IBOutlet weak var smallGraphHeightConstraint: NSLayoutConstraint!
-    
+    var refreshScrollView: UIScrollView!
+    var refreshControl: UIRefreshControl!
+
     let speechSynthesizer = AVSpeechSynthesizer()
 
     // Data Table class
@@ -228,10 +230,49 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Load Startup Data
         restartAllTimers()
         
+        // Set up refreshScrollView for BGText
+        refreshScrollView = UIScrollView()
+        refreshScrollView.translatesAutoresizingMaskIntoConstraints = false
+        refreshScrollView.alwaysBounceVertical = true
+        view.addSubview(refreshScrollView)
+        
+        NSLayoutConstraint.activate([
+            refreshScrollView.leadingAnchor.constraint(equalTo: BGText.leadingAnchor),
+            refreshScrollView.trailingAnchor.constraint(equalTo: BGText.trailingAnchor),
+            refreshScrollView.topAnchor.constraint(equalTo: BGText.topAnchor),
+            refreshScrollView.bottomAnchor.constraint(equalTo: BGText.bottomAnchor)
+        ])
+        
+        refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
+        refreshScrollView.addSubview(refreshControl)
+        
+        // Add this line to prevent scrolling in other directions
+        refreshScrollView.alwaysBounceVertical = true
+        
+        refreshScrollView.delegate = self
     }
     
-
+    // Clean all timers and start new ones when refreshing
+    @objc func refresh() {
+        print("Refreshing")
+        MinAgoText.text = "Refreshing"
+        invalidateTimers()
+        restartAllTimers()
+        refreshControl.endRefreshing()
+    }
     
+    // Scroll down BGText when refreshing
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView == refreshScrollView {
+            let yOffset = scrollView.contentOffset.y
+            if yOffset < 0 {
+                BGText.transform = CGAffineTransform(translationX: 0, y: -yOffset)
+            } else {
+                BGText.transform = CGAffineTransform.identity
+            }
+        }
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         // set screen lock
