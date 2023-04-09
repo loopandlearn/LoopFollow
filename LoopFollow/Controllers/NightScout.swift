@@ -1766,37 +1766,4 @@ extension MainViewController {
         }
         
     }
-    
-    static func createURLRequest(url: String, token: String?, path: String) -> URLRequest? {
-        var requestURLString = "\(url)\(path)"
-        
-        if let token = token {
-            let encodedToken = token.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? token
-            requestURLString += "?token=\(encodedToken)"
-        }
-        
-        guard let requestURL = URL(string: requestURLString) else {
-            return nil
-        }
-        
-        var request = URLRequest(url: requestURL)
-        request.httpMethod = "GET"
-        return request
-    }
-    
-    static func verifyURLAndToken(urlUser: String, token: String?, completion: @escaping (Bool) -> Void) {
-        guard let request = createURLRequest(url: urlUser, token: token, path: "/api/v1/status") else {
-            completion(false)
-            return
-        }
-        
-        let task = URLSession.shared.dataTask(with: request) { (_, response, error) in
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                completion(true)
-            } else {
-                completion(false)
-            }
-        }
-        task.resume()
-    }
 }
