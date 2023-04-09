@@ -14,7 +14,8 @@ import EventKitUI
 class SettingsViewController: FormViewController {
 
    var appStateController: AppStateController?
-    
+    var statusLabelRow: LabelRow!
+
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
@@ -70,45 +71,56 @@ class SettingsViewController: FormViewController {
                guard let value = row.value else { return }
                UserDefaultsRepository.showNS.value = value
        }
-        <<< TextRow(){ row in
-            row.title = "URL"
-            row.placeholder = "https://mycgm.herokuapp.com"
-            row.value = UserDefaultsRepository.url.value
-            row.hidden = "$showNS == false"
-        }.cellSetup { (cell, row) in
-            cell.textField.autocorrectionType = .no
-        }.onChange { row in
-            guard let value = row.value else {
-                UserDefaultsRepository.url.value = ""
-                self.showHideNSDetails()
-                return }
-            // check the format of the URL entered by the user and trim away any spaces or "/" at the end
-            var urlNSInput = value.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
-            if urlNSInput.last == "/" {
-                urlNSInput = String(urlNSInput.dropLast())
-            }
-            UserDefaultsRepository.url.value = urlNSInput.lowercased()
-            // set the row value back to the correctly formatted URL so that the user immediately sees how it should have been written
-            row.value = UserDefaultsRepository.url.value
-            self.showHideNSDetails()
-            globalVariables.nsVerifiedAlert = 0
-            }
-        <<< TextRow(){ row in
-            row.title = "NS Token"
-            row.placeholder = "Leave blank if not using tokens"
-            row.value = UserDefaultsRepository.token.value
-            row.hidden = "$showNS == false"
-        }.cellSetup { (cell, row) in
-            cell.textField.autocorrectionType = .no
-        }.onChange { row in
-            if row.value == nil {
-                UserDefaultsRepository.token.value = ""
-            }
-            guard let value = row.value else { return }
-            UserDefaultsRepository.token.value = value
-            globalVariables.nsVerifiedAlert = 0
-        }
-       
+       <<< TextRow() { row in
+           row.title = "URL"
+           row.placeholder = "https://mycgm.herokuapp.com"
+           row.value = UserDefaultsRepository.url.value
+           row.hidden = "$showNS == false"
+       }.cellSetup { (cell, row) in
+           cell.textField.autocorrectionType = .no
+       }.onChange { row in
+           guard let value = row.value else {
+               UserDefaultsRepository.url.value = ""
+               self.showHideNSDetails()
+               return }
+           // check the format of the URL entered by the user and trim away any spaces or "/" at the end
+           var urlNSInput = value.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
+           if urlNSInput.last == "/" {
+               urlNSInput = String(urlNSInput.dropLast())
+           }
+           UserDefaultsRepository.url.value = urlNSInput.lowercased()
+           // set the row value back to the correctly formatted URL so that the user immediately sees how it should have been written
+           row.value = UserDefaultsRepository.url.value
+           self.showHideNSDetails()
+           globalVariables.nsVerifiedAlert = 0
+           
+           // Verify Nightscout URL and token
+           self.checkNightscoutStatus()
+       }
+       <<< TextRow() { row in
+           row.title = "NS Token"
+           row.placeholder = "Leave blank if not using tokens"
+           row.value = UserDefaultsRepository.token.value
+           row.hidden = "$showNS == false"
+       }.cellSetup { (cell, row) in
+           cell.textField.autocorrectionType = .no
+       }.onChange { row in
+           if row.value == nil {
+               UserDefaultsRepository.token.value = ""
+           }
+           guard let value = row.value else { return }
+           UserDefaultsRepository.token.value = value
+           globalVariables.nsVerifiedAlert = 0
+           
+           // Verify Nightscout URL and token
+           self.checkNightscoutStatus()
+       }
+       <<< LabelRow() { row in
+           row.title = "NS Status"
+           row.value = "Checking..."
+           statusLabelRow = row
+           row.hidden = "$showNS == false"
+       }
        <<< SwitchRow("loopUser"){ row in
            row.title = "Download Loop/FreeAPS Data"
            row.tag = "loopUser"
@@ -240,10 +252,38 @@ class SettingsViewController: FormViewController {
             +++ Section(header: "App Expiration", footer: String(expiration.description))
     
         showHideNSDetails()
-      
-    
+       checkNightscoutStatus()
     }
     
+    func updateStatusLabel(error: NightscoutUtils.NightscoutError?) {
+        if let error = error {
+            switch error {
+            case .invalidURL:
+                statusLabelRow.value = "Invalid URL"
+            case .networkError:
+                statusLabelRow.value = "Network Error"
+            case .invalidToken:
+                statusLabelRow.value = "Invalid Token"
+            case .tokenRequired:
+                statusLabelRow.value = "Token Required"
+            case .siteNotFound:
+                statusLabelRow.value = "Site Not Found"
+            case .unknown:
+                statusLabelRow.value = "Unknown Error"
+            case .emptyAddress:
+                statusLabelRow.value = "Address Empty"
+            }
+        } else {
+            statusLabelRow.value = "OK"
+        }
+        statusLabelRow.updateCell()
+    }
     
-
+    func checkNightscoutStatus() {
+        NightscoutUtils.verifyURLAndToken(urlUser: UserDefaultsRepository.url.value, token: UserDefaultsRepository.token.value) { error in
+            DispatchQueue.main.async {
+                self.updateStatusLabel(error: error)
+            }
+        }
+    }
 }
