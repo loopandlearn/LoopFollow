@@ -23,6 +23,16 @@ extension MainViewController {
         if !alarmTimer.isValid { startAlarmTimer(time: 30) }
     }
     
+    func invalidateTimers() {
+        bgTimer.invalidate()
+        profileTimer.invalidate()
+        deviceStatusTimer.invalidate()
+        treatmentsTimer.invalidate()
+        cageSageTimer.invalidate()
+        minAgoTimer.invalidate()
+        calendarTimer.invalidate()
+        alarmTimer.invalidate()
+    }
     
     // min Ago Timer
     func startMinAgoTimer(time: TimeInterval) {
@@ -239,6 +249,7 @@ extension MainViewController {
         }
         
         if UserDefaultsRepository.url.value != "" {
+            webLoadNSCarbsToday()
             webLoadNSCage()
             webLoadNSSage()
             startCageSageTimer()

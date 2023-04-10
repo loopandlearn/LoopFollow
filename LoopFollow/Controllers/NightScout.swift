@@ -9,10 +9,14 @@
 import Foundation
 import UIKit
 
-
 extension MainViewController {
 
     
+    //NS Carbs Struct
+    struct carbsData: Codable {
+        var carbs: Double?
+    }
+
     //NS Cage Struct
     struct cageData: Codable {
         var created_at: String
@@ -665,6 +669,76 @@ extension MainViewController {
         }
     }
     
+    // NS Carbs Today Web Call
+    func webLoadNSCarbsToday() {
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Carbs Today") }
+        let urlUser = UserDefaultsRepository.url.value
+
+        let now = Date()
+        let timeZone = TimeZone.current
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+
+        var dateComponents = calendar.dateComponents(in: timeZone, from: now)
+        dateComponents.hour = 0
+        dateComponents.minute = 0
+        dateComponents.second = 0
+
+        guard let date = dateComponents.date else { fatalError("Invalid date components") }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        let utcDateString = dateFormatter.string(from: date)
+
+        var urlString = urlUser + "/api/v1/treatments.json?count=1000&find[eventType]=Carb+Correction&find[timestamp][$gte]=" + utcDateString
+        if token != "" {
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&count=1000&find[eventType]=Carb+Correction&find[timestamp][$gte]=" + utcDateString
+        }
+
+        guard let urlData = URL(string: urlString) else {
+            return
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([carbsData].self, from: data)
+            if let entriesResponse = entriesResponse {
+                DispatchQueue.main.async {
+                    self.updateCarbsToday(data: entriesResponse)
+                }
+            } else {
+                return
+            }
+        }
+        task.resume()
+    }
+
+    // NS CarbsToday Response Processor
+    func updateCarbsToday(data: [carbsData]) {
+        self.clearLastInfoData(index: 10)
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: carbs") }
+        if data.count == 0 {
+            return
+        }
+
+        let totalCarbs = data.reduce(0.0) { $0 + ($1.carbs ?? 0.0) }
+        let resultString = String(format: "%.0f", totalCarbs)
+
+        tableData[10].value = resultString
+
+        infoTable.reloadData()
+    }
+
     // NS Cage Web Call
     func webLoadNSCage() {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: CAGE") }
