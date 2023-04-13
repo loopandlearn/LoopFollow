@@ -1,7 +1,7 @@
 # !/bin/bash
 
 BUILD_DIR=~/Downloads/BuildLoopFollow
-OVERRIDE_FILE=ConfigOverride.xcconfig
+OVERRIDE_FILE=LoopFollowConfigOverride.xcconfig
 OVERRIDE_FULLPATH="${BUILD_DIR}/${OVERRIDE_FILE}"
 DEV_TEAM_SETTING_NAME="LF_DEVELOPMENT_TEAM"
 
@@ -273,7 +273,7 @@ select opt in "${options[@]}"
 do
     case $opt in
         "Delete old downloads")
-            # Delete all folders below ~/Downloads/BuildLoopFollow but preserve ConfigOverride.xcconfig
+            # Delete all folders below ~/Downloads/BuildLoopFollow but preserve the permanent config file.
             find ~/Downloads/BuildLoopFollow -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
             break
             ;;

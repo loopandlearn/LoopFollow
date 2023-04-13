@@ -1,4 +1,4 @@
-#include? "../../ConfigOverride.xcconfig"
+#include? "../../LoopFollowConfigOverride.xcconfig"
 
 //
 //  Config.xcconfig
