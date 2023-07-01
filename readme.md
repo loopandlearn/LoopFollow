@@ -2,7 +2,7 @@ Because our family now uses Omnipod 5, I (Jon Fawcett) will not be updating this
 
 The Loop and Learn Team will keep the Loop Follow app going; it will stay at this repository. Additional Loop Follow documentation is at [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/).
 
-If you are having problems with the app, please post in the [Loop and Learn Facebook group](https://www.facebook.com/groups/LOOPandLEARN). Your post should indicate that your question is related to Loop Follow. If you do not use Facebook - please add an Issue at this GitHub repository with your problem.
+If you are having problems with the app, please post in the [Loop and Learn Facebook group](https://www.facebook.com/groups/LOOPandLEARN). Your post should indicate that your question is related to Loop Follow. If you do not use Facebook - please click on this [link to file an Issue](https://github.com/jonfawcett/LoopFollow/issues) with your problem.
 
 If you are interested in assisting with this app and want to work on new features and improvements for Loop, iAPS and Nightscout functionality, please reach out. Issues and Pull Requests in GitHub are monitored and will get a response.
 
