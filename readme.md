@@ -1,10 +1,10 @@
-Because we have switched to Omnipod 5, we no longer are using Loop or Nightscout. I will not be able to do maintenance on the features related to those.
+Because our family now uses Omnipod 5, I (Jon Fawcett) will not be updating this repository.
 
-The Loop and Learn Team will keep the Loop Follow app going; it will stay at this repository. Additional documentation can be found on the [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/) page.
+The Loop and Learn Team will keep the Loop Follow app going; it will stay at this repository. Additional Loop Follow documentation is at [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/).
 
 If you are having problems with the app, please post in the [Loop and Learn Facebook group](https://www.facebook.com/groups/LOOPandLEARN). Your post should indicate that your question is related to Loop Follow. If you do not use Facebook - please add an Issue at this GitHub repository with your problem.
 
-If you are interested in assisting to keep this app maintained and work on new features and improvements for Loop, iAPS and Nightscout functionality, please reach out. Issues and Pull Requests in GitHub are monitored and will get a response.
+If you are interested in assisting with this app and want to work on new features and improvements for Loop, iAPS and Nightscout functionality, please reach out. Issues and Pull Requests in GitHub are monitored and will get a response.
 
 ## Loop Follow 
 ![screenshot](https://user-images.githubusercontent.com/38429455/93782187-436e8880-fbf8-11ea-8709-e2afba692132.png)
@@ -53,7 +53,7 @@ Loop Follow can be built using a Mac computer with Xcode as described below (ter
 4. This script assists in checking the status of your Xcode version, automatically signing your app and preparing the profiles to provide a full year for this app.
 5. At the end of the script, you will be told to plugin your phone or ipad and click play.
 
-Note: This script is tested along with other Loop and Learn scripts. Check [Loop and Learn: Version Updates](https://www.loopandlearn.org/version-updates/) for the latest information about iOS and Xcode versions.
+Note: This script is tested when new iOS, Mac and Xcode versions are released. Check [Loop and Learn: Version Updates](https://www.loopandlearn.org/version-updates/) for up to date information.
 
 ### Run Loop Follow on Mac
 
