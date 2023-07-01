@@ -1,4 +1,4 @@
-Because our family now uses Omnipod 5, I (Jon Fawcett) will not be updating this repository.
+Because our family now uses Omnipod 5, I (Jon Fawcett) will not be updating this repository. I will also no longer provide an option to get a TestFlight invitation from me. You must build the app yourself.
 
 The Loop and Learn Team will keep the Loop Follow app going; it will stay at this repository. Additional Loop Follow documentation is at [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/).
 
@@ -30,14 +30,9 @@ Loop Follow can be built using a paid Apple Developer Account on any computer us
 
 If you choose GitHub Browser Build and want to run Loop Follow on your Mac, you need to install the TestFlight app on your Mac. The TestFlight app shows the same set of builds and uses the same installation procedure as shown in LoopDocs for installing apps on a phone from TestFlight; just do it on your Mac.
 
-Note:
-
-If you have a Loop Follow app in your Applications folder from a prior Mac/Xcode build and then install from TestFlight:
-
-* TestFlight does not ask if you want to replace your app - you get a second app, Loop Follow 2.app, in your Applications folder
-* You can then delete the original Loop Follow.app and rename the TestFlight version from Loop Follow 2.app to Loop Follow.app
-* Subsequent installations from TestFlight overwrite the app
-* Your settings are maintained regardless of the app name
+> **Note**
+> If you used Jon's TestFlight invitation to download your Loop Follow, that is no longer available. You need to build it yourself. Click on [TestFlight: Two Apps](#testflight-two-apps) for more information. If you never used that invitation, you don't need to read that section.
+> ...
 
 ### Build using Mac-Xcode
 
@@ -68,16 +63,9 @@ After building to your Mac (using the script above):
 4. Drag the Loop Follow.app icon to your Applications folder in finder (see Note below)
 5. From Mac system settings/notifications, scroll down to Loop Follow and enable notifications with the options you want. For instance, Badge app icon will allow the BG reading to display on the icon.
 
-Note:
-
-If you have a Loop Follow app in your Applications folder from a prior TestFlight installation, then when you drag the Loop (from Finder location) to Applications, you will be asked if you want to Replace or Keep Both. Choose Replace.
-
-** Big Sur **
-Some things do not work correctly yet in Big Sur
-- Background Refresh. Mac apps stay open when minimized, so this is unneeded. Please disable the toggle switch.
-- Disable Keep Screen Active. I haven't tested, but doubt this will do anything.
-- Watch/Carplay calendar selection does not work
-- Alarms will not override the Mac volume or mute.
+> **Note**
+> If you have a Loop Follow app in your Applications folder from a prior TestFlight installation, then when you drag the Loop (from Finder location) to Applications, you will be asked if you want to Replace or Keep Both. Choose Replace.
+> ...
 
 Build Instruction Video: https://youtu.be/s07QPZ7xycY
 
@@ -103,3 +91,12 @@ If you want to contribute, the biggest needs today are to make the code cleaner 
 
 ### Open Source DIY
 - This is a DIY open source project that may or may not function as you expect. You take full responsibility for building and running this app and do so at your own risk.
+
+### TestFlight: Two Apps
+
+If you have a Loop Follow app in your Applications folder from a prior Mac/Xcode build and then install from TestFlight:
+
+* TestFlight does not ask if you want to replace your app - you get a second app, Loop Follow 2.app, in your Applications folder
+* You can then delete the original Loop Follow.app and rename the TestFlight version from Loop Follow 2.app to Loop Follow.app
+* Subsequent installations from TestFlight overwrite the app
+* Your settings are maintained regardless of the app name
