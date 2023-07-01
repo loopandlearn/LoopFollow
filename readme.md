@@ -1,4 +1,10 @@
-Call for developers: Because we have switched to Omnipod 5, we no longer are using Loop or Nightscout. I will not be able to do maintenance on the features related to those. If you are interested in assisting to keep this app maintained and work on new features and improvements for Loop and Nightscout functionality, please reach out.
+Because we have switched to Omnipod 5, we no longer are using Loop or Nightscout. I will not be able to do maintenance on the features related to those.
+
+The Loop and Learn Team will keep the Loop Follow app going; it will stay at this repository. Additional documentation can be found on the [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/) page.
+
+If you are having problems with the app, please post in the [Loop and Learn Facebook group](https://www.facebook.com/groups/LOOPandLEARN). Your post should indicate that your question is related to Loop Follow. If you do not use Facebook - please add an Issue at this GitHub repository with your problem.
+
+If you are interested in assisting to keep this app maintained and work on new features and improvements for Loop, iAPS and Nightscout functionality, please reach out. Issues and Pull Requests in GitHub are monitored and will get a response.
 
 ## Loop Follow 
 ![screenshot](https://user-images.githubusercontent.com/38429455/93782187-436e8880-fbf8-11ea-8709-e2afba692132.png)
@@ -33,30 +39,27 @@ If you have a Loop Follow app in your Applications folder from a prior Mac/Xcode
 * Subsequent installations from TestFlight overwrite the app
 * Your settings are maintained regardless of the app name
 
-### Build using Mac/Xcode
+### Build using Mac-Xcode
 
 Loop Follow can be built using a Mac computer with Xcode as described below (tersely) or with more detail using the Build-Select script, see [Loop and Learn: Build-Select Script](https://www.loopandlearn.org/build-select) or [LoopDocs: Build Select Script](https://loopkit.github.io/loopdocs/build/step14/#build-select-script) and choose to build Loop Follow.
 
 1. Open Terminal
 2. copy/paste this code into terminal and hit enter:
 ```
-/bin/bash -c "$(curl -fsSL https://git.io/JTKEt)"
+/bin/bash -c "$(curl -fsSL \
+  https://raw.githubusercontent.com/loopandlearn/lnl-scripts/main/BuildLoopFollow.sh)"
 ```
 3. Follow instructions in terminal
-4. Plugin your phone or ipad, select your signing team, select your phone or ipad or "my mac" (Big Sur or later operating systems), and click play.
+4. This script assists in checking the status of your Xcode version, automatically signing your app and preparing the profiles to provide a full year for this app.
+5. At the end of the script, you will be told to plugin your phone or ipad and click play.
 
-Note: Tested this with Ventura and Xcode 14.2, and successfully built to
-
-* My Mac (Mac Catalyst)
-* My Mac (Mac Catalyst, Rosetta)
-* My Mac (Designed for iPad)
-    * I did not test the app on the iPad, but it built with no problem
+Note: This script is tested along with other Loop and Learn scripts. Check [Loop and Learn: Version Updates](https://www.loopandlearn.org/version-updates/) for the latest information about iOS and Xcode versions.
 
 ### Run Loop Follow on Mac
 
 To run Loop Follow on your Mac, you need to move the app to your Applications folder.
 
-After building to your Mac:
+After building to your Mac (using the script above):
 1. Click stop to close the running app
 1. On the left side of Xcode, click on the Folder icon
     * Click to open the LoopFollow folder list
