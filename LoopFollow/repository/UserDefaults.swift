@@ -16,7 +16,7 @@ import Foundation
 import UIKit
 
 class UserDefaultsRepository {
-
+    
     // DisplayValues total
     static let infoDataTotal = UserDefaultsValue<Int>(key: "infoDataTotal", default: 0)
     static let infoNames = UserDefaultsValue<[String]>(key: "infoNames", default: [
@@ -84,7 +84,7 @@ class UserDefaultsRepository {
         default: UIApplication.shared.isIdleTimerDisabled,
         onChange: { screenlock in
             UIApplication.shared.isIdleTimerDisabled = screenlock
-    })
+        })
     
     // Advanced Settings
     //static let onlyDownloadBG = UserDefaultsValue<Bool>(key: "onlyDownloadBG", default: false)
@@ -98,7 +98,7 @@ class UserDefaultsRepository {
     static let alwaysDownloadAllBG = UserDefaultsValue<Bool>(key: "alwaysDownloadAllBG", default: true)
     static let bgUpdateDelay = UserDefaultsValue<Int>(key: "bgUpdateDelay", default: 10)
     static let downloadDays = UserDefaultsValue<Int>(key: "downloadDays", default: 1)
-
+    
     
     // Watch Calendar Settings
     static let calendarIdentifier = UserDefaultsValue<String>(key: "calendarIdentifier", default: "")
@@ -429,4 +429,13 @@ class UserDefaultsRepository {
     static let alertCOBAutosnooze = UserDefaultsValue<String>(key: "alertCOBAutosnooze", default: "Never")
     static let alertCOBAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertCOBAutosnoozeDay", default: false)
     static let alertCOBAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertCOBAutosnoozeNight", default: false)
+    
+    static let alertBatteryActive = UserDefaultsValue<Bool>(key: "alertBatteryActive", default: false)
+    static let alertBatteryLevel = UserDefaultsValue<Int>(key: "alertBatteryLevel", default: 20)
+    static let alertBatterySound = UserDefaultsValue<String>(key: "alertBatterySound", default: "Machine_Charge")
+    static let alertBatteryRepeat = UserDefaultsValue<Bool>(key: "alertBatteryRepeat", default: false)    
+    static let alertBatteryIsSnoozed = UserDefaultsValue<Bool>(key: "alertBatteryIsSnoozed", default: false)
+    static let alertBatterySnoozedTime = UserDefaultsValue<Date?>(key: "alertBatterySnoozedTime", default: nil)
+    static let alertBatterySnoozeHours = UserDefaultsValue<Int>(key: "alertBatterySnoozeHours", default: 1)
+    static var deviceBatteryLevel: UserDefaultsValue<Double> = UserDefaultsValue(key: "deviceBatteryLevel", default: 100.0)
 }
