@@ -496,9 +496,19 @@ extension MainViewController {
             }
         }
         
-        
-        
-        
+        if UserDefaultsRepository.alertBatteryActive.value {
+            let currentBatteryLevel = UserDefaultsRepository.deviceBatteryLevel.value
+            let alertAtBatteryLevel = Double(UserDefaultsRepository.alertBatteryLevel.value)
+            
+            if currentBatteryLevel <= alertAtBatteryLevel {
+                AlarmSound.whichAlarm = "Low Battery"
+
+                if UserDefaultsRepository.alertBatteryRepeat.value { numLoops = -1 }
+                triggerAlarm(sound: UserDefaultsRepository.alertBatterySound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: 1, snoozeIncrement: 1, audio: true)
+                return
+            }
+        }
+
         // still send persistent notification if no alarms trigger and persistent notification is on
         persistentNotification(bgTime: currentBGTime)
         
@@ -757,7 +767,12 @@ extension MainViewController {
 
         }
         
-        
+        if date > UserDefaultsRepository.alertBatterySnoozedTime.value ?? date {
+            UserDefaultsRepository.alertBatterySnoozedTime.setNil(key: "alertBatterySnoozedTime")
+            UserDefaultsRepository.alertBatteryIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertBatterySnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertBatteryIsSnoozed", value: false)
+        }
       }
     
     func checkQuietHours() {

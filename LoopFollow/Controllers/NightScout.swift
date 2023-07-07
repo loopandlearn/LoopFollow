@@ -514,6 +514,7 @@ extension MainViewController {
                 if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
                     let upbat = uploader["battery"] as! Double
                     tableData[4].value = String(format:"%.0f", upbat) + "%"
+                    UserDefaultsRepository.deviceBatteryLevel.value = upbat
                 }
             }
         }
