@@ -431,9 +431,9 @@ class UserDefaultsRepository {
     static let alertCOBAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertCOBAutosnoozeNight", default: false)
     
     static let alertBatteryActive = UserDefaultsValue<Bool>(key: "alertBatteryActive", default: false)
-    static let alertBatteryLevel = UserDefaultsValue<Int>(key: "alertBatteryLevel", default: 20)
+    static let alertBatteryLevel = UserDefaultsValue<Int>(key: "alertBatteryLevel", default: 25)
     static let alertBatterySound = UserDefaultsValue<String>(key: "alertBatterySound", default: "Machine_Charge")
-    static let alertBatteryRepeat = UserDefaultsValue<Bool>(key: "alertBatteryRepeat", default: false)    
+    static let alertBatteryRepeat = UserDefaultsValue<Bool>(key: "alertBatteryRepeat", default: true)
     static let alertBatteryIsSnoozed = UserDefaultsValue<Bool>(key: "alertBatteryIsSnoozed", default: false)
     static let alertBatterySnoozedTime = UserDefaultsValue<Date?>(key: "alertBatterySnoozedTime", default: nil)
     static let alertBatterySnoozeHours = UserDefaultsValue<Int>(key: "alertBatterySnoozeHours", default: 1)
