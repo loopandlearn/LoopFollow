@@ -496,7 +496,7 @@ extension MainViewController {
             }
         }
         
-        if UserDefaultsRepository.alertBatteryActive.value {
+        if UserDefaultsRepository.alertBatteryActive.value && !UserDefaultsRepository.alertBatteryIsSnoozed.value {
             let currentBatteryLevel = UserDefaultsRepository.deviceBatteryLevel.value
             let alertAtBatteryLevel = Double(UserDefaultsRepository.alertBatteryLevel.value)
             
