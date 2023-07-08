@@ -504,7 +504,7 @@ extension MainViewController {
                 AlarmSound.whichAlarm = "Low Battery"
 
                 if UserDefaultsRepository.alertBatteryRepeat.value { numLoops = -1 }
-                triggerAlarm(sound: UserDefaultsRepository.alertBatterySound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: 1, snoozeIncrement: 1, audio: true)
+                triggerAlarm(sound: UserDefaultsRepository.alertBatterySound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertBatterySnoozeHours.value, snoozeIncrement: 1, audio: true)
                 return
             }
         }

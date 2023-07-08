@@ -3205,6 +3205,20 @@ class AlarmViewController: FormViewController {
             guard let value = row.value else { return }
             UserDefaultsRepository.alertBatteryLevel.value = Int(value)
         }
+        <<< StepperRow("alertBatterySnoozeHours") { row in
+            row.title = "Snooze Hours"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 1
+            row.cell.stepper.maximumValue = 24
+            row.value = Double(UserDefaultsRepository.alertBatterySnoozeHours.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertBatterySnoozeHours.value = Int(value)
+        }
         <<< PickerInputRow<String>("alertBatterySound") { row in
             row.title = "Sound"
             row.options = soundFiles
