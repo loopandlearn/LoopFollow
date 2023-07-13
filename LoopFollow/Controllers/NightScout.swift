@@ -1319,7 +1319,7 @@ extension MainViewController {
                 priorDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
                 guard let priorDateString = dateFormatter.date(from: priorStrippedZone) else { continue }
                 let priorDateTimeStamp = priorDateString.timeIntervalSince1970
-                let priorDuration = priorEntry?["duration"] as! Double
+                let priorDuration = priorEntry?["duration"] as? Double ?? 0.0
                 // if difference between time stamps is greater than the duration of the last entry, there is a gap. Give a 15 second leeway on the timestamp
                 if Double( dateTimeStamp - priorDateTimeStamp ) > Double( (priorDuration * 60) + 15 ) {
                     
