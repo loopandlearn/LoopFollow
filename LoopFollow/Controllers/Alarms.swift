@@ -496,9 +496,19 @@ extension MainViewController {
             }
         }
         
-        
-        
-        
+        if UserDefaultsRepository.alertBatteryActive.value && !UserDefaultsRepository.alertBatteryIsSnoozed.value {
+            let currentBatteryLevel = UserDefaultsRepository.deviceBatteryLevel.value
+            let alertAtBatteryLevel = Double(UserDefaultsRepository.alertBatteryLevel.value)
+            
+            if currentBatteryLevel <= alertAtBatteryLevel {
+                AlarmSound.whichAlarm = "Low Battery"
+
+                if UserDefaultsRepository.alertBatteryRepeat.value { numLoops = -1 }
+                triggerAlarm(sound: UserDefaultsRepository.alertBatterySound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertBatterySnoozeHours.value, snoozeIncrement: 1, audio: true)
+                return
+            }
+        }
+
         // still send persistent notification if no alarms trigger and persistent notification is on
         persistentNotification(bgTime: currentBGTime)
         
@@ -757,7 +767,12 @@ extension MainViewController {
 
         }
         
-        
+        if date > UserDefaultsRepository.alertBatterySnoozedTime.value ?? date {
+            UserDefaultsRepository.alertBatterySnoozedTime.setNil(key: "alertBatterySnoozedTime")
+            UserDefaultsRepository.alertBatteryIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertBatterySnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertBatteryIsSnoozed", value: false)
+        }
       }
     
     func checkQuietHours() {
@@ -847,14 +862,40 @@ extension MainViewController {
         
     }
     
-    
-    func speakBG(sgv: Int) {
-           var speechSynthesizer = AVSpeechSynthesizer()
-           var speechUtterance: AVSpeechUtterance = AVSpeechUtterance(string: "Current BG is " + bgUnits.toDisplayUnits(String(sgv)))
-           speechUtterance.rate = AVSpeechUtteranceMaximumSpeechRate / 2
-           speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-           speechSynthesizer.speak(speechUtterance)
-       }
+    // Speaks the current blood glucose value and the change from the previous value.
+    // Repeated calls to the function within 30 seconds are prevented.
+    func speakBG(currentValue: Int, previousValue: Int) {
+        // Get the current time
+        let currentTime = Date()
+
+        // Check if speakBG was called less than 30 seconds ago. If so, prevent repeated announcements and return.
+        // If `lastSpeechTime` is `nil` (i.e., this is the first time `speakBG` is being called), use `Date.distantPast` as the default
+        // value to ensure that the `guard` statement passes and the announcement is made.
+        guard currentTime.timeIntervalSince(lastSpeechTime ?? .distantPast) >= 30 else {
+            print("Repeated calls to speakBG detected!")
+            return
+        }
+
+        // Update the last speech time
+        self.lastSpeechTime = currentTime
+
+        let bloodGlucoseDifference = currentValue - previousValue
+        let negligibleThreshold = 3
+        let differenceText: String
+
+        if abs(bloodGlucoseDifference) <= negligibleThreshold {
+            differenceText = "stable"
+        } else {
+            let direction = bloodGlucoseDifference < 0 ? "down" : "up"
+            let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference)))
+            differenceText = "\(direction) \(absoluteDifference)"
+        }
+
+        let announcementText = "Current BG is \(bgUnits.toDisplayUnits(String(currentValue))), and it is \(differenceText)"
+        let speechUtterance = AVSpeechUtterance(string: announcementText)
+        speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        speechSynthesizer.speak(speechUtterance)
+    }
     
     func isOnPhoneCall() -> Bool {
         /*
