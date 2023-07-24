@@ -9,10 +9,14 @@
 import Foundation
 import UIKit
 
-
 extension MainViewController {
 
     
+    //NS Carbs Struct
+    struct carbsData: Codable {
+        var carbs: Double?
+    }
+
     //NS Cage Struct
     struct cageData: Codable {
         var created_at: String
@@ -115,27 +119,30 @@ extension MainViewController {
             self.startBGTimer(time: 10)
             return
         }
-        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
-        // Set the count= in the url either to pull day(s) of data or only the last record
-        var points = "1"
-        if !onlyPullLastRecord {
-            points = String(graphHours * 12 + 1)
-        }
         
         // URL processor
         var urlBGDataPath: String = UserDefaultsRepository.url.value + "/api/v1/entries/sgv.json?"
-        if token == "" {
-            urlBGDataPath = urlBGDataPath + "count=" + points
+
+        if onlyPullLastRecord {
+            urlBGDataPath = urlBGDataPath + "count=1"
         } else {
-            urlBGDataPath = urlBGDataPath + "token=" + token + "&count=" + points
+            //Fetch entries for the time period of "downloadDays"
+            let utcISODateFormatter = ISO8601DateFormatter()
+            let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
+            urlBGDataPath = urlBGDataPath + "count=1000&find[dateString][$gte]=" + utcISODateFormatter.string(from: date)
         }
+
+        if !token.isEmpty {
+            urlBGDataPath = urlBGDataPath + "&token=" + token
+        }
+
         guard let urlBGData = URL(string: urlBGDataPath) else {
             // if we have Dex data, use it
             if !dexData.isEmpty {
                 self.ProcessDexBGData(data: dexData, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
                 return
             }
-            
+
             if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                 globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
                 //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
@@ -186,8 +193,25 @@ extension MainViewController {
                 
             }
             
+            var entriesResponse: [ShareGlucoseData]?
             let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([ShareGlucoseData].self, from: data)
+            do {
+                entriesResponse = try decoder.decode([ShareGlucoseData].self, from: data)
+            } catch let DecodingError.dataCorrupted(context) {
+                print("Data corrupted: \(context)")
+            } catch let DecodingError.keyNotFound(key, context) {
+                print("Key '\(key)' not found: \(context.debugDescription)")
+                print("codingPath: \(context.codingPath)")
+            } catch let DecodingError.valueNotFound(value, context) {
+                print("Value '\(value)' not found: \(context.debugDescription)")
+                print("codingPath: \(context.codingPath)")
+            } catch let DecodingError.typeMismatch(type, context)  {
+                print("Type '\(type)' mismatch: \(context.debugDescription)")
+                print("codingPath: \(context.codingPath)")
+            } catch {
+                print("Error decoding JSON: \(error)")
+            }
+
             if var nsData = entriesResponse {
                 DispatchQueue.main.async {
                     // transform NS data to look like Dex data
@@ -196,22 +220,39 @@ extension MainViewController {
                         nsData[i].date /= 1000
                         nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
                     }
+                    print(nsData.count)
+
+                    //Avoid duplicate entries messing up the graph, only use one reading per 5 minutes.
+                    let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+                    let points = graphHours * 12 + 1
+                    var nsData2 = [ShareGlucoseData]()
+                    let timestamp = Date().timeIntervalSince1970
+                    for i in 0..<points {
+                        //Starting with "now" and then step 5 minutes back in time
+                        let target = timestamp - Double(i) * 60 * 5
+                        //Find the reading closest to the target, but not too far away
+                        let closest = nsData.filter{ abs($0.date - target) < 3 * 60 }.min { abs($0.date - target) < abs($1.date - target) }
+                        //If a reading is found, add it to the new array
+                        if let item = closest {
+                            nsData2.append(item)
+                        }
+                    }
+                    print(nsData2.count)
                     
                     // merge NS and Dex data if needed; use recent Dex data and older NS data
                     var sourceName = "Nightscout"
                     if !dexData.isEmpty {
                         let oldestDexDate = dexData[dexData.count - 1].date
                         var itemsToRemove = 0
-                        while itemsToRemove < nsData.count && nsData[itemsToRemove].date >= oldestDexDate {
+                        while itemsToRemove < nsData2.count && nsData2[itemsToRemove].date >= oldestDexDate {
                             itemsToRemove += 1
                         }
-                        nsData.removeFirst(itemsToRemove)
-                        nsData = dexData + nsData
+                        nsData2.removeFirst(itemsToRemove)
+                        nsData2 = dexData + nsData2
                         sourceName = "Dexcom"
                     }
-                    
                     // trigger the processor for the data after downloading.
-                    self.ProcessDexBGData(data: nsData, onlyPullLastRecord: onlyPullLastRecord, sourceName: sourceName)
+                    self.ProcessDexBGData(data: nsData2, onlyPullLastRecord: onlyPullLastRecord, sourceName: sourceName)
                     
                 }
             } else {
@@ -271,6 +312,10 @@ extension MainViewController {
                 self.startBGTimer(time: 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
                 let timerVal = 310 - secondsAgo
                 print("##### started 5:10 bg timer: \(timerVal)")
+                self.updateBadge(val: data[0].sgv)
+                if UserDefaultsRepository.speakBG.value {
+                    self.speakBG(currentValue: data[0].sgv, previousValue: data[1].sgv)
+                }
             }
         }
         
@@ -281,12 +326,6 @@ extension MainViewController {
             bgData.removeFirst()
             
         } else {
-            if data.count > 0 {
-                self.updateBadge(val: data[data.count - 1].sgv)
-                if UserDefaultsRepository.speakBG.value {
-                    speakBG(sgv: data[data.count - 1].sgv)
-                }
-            }
             return
         }
         
@@ -361,7 +400,6 @@ extension MainViewController {
                 snoozerDelta = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = "+" + String(deltaBG)
             }
-            self.updateBadge(val: latestBG)
             
             // Snoozer Display
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
@@ -493,6 +531,7 @@ extension MainViewController {
                 if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
                     let upbat = uploader["battery"] as! Double
                     tableData[4].value = String(format:"%.0f", upbat) + "%"
+                    UserDefaultsRepository.deviceBatteryLevel.value = upbat
                 }
             }
         }
@@ -648,6 +687,76 @@ extension MainViewController {
         }
     }
     
+    // NS Carbs Today Web Call
+    func webLoadNSCarbsToday() {
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Carbs Today") }
+        let urlUser = UserDefaultsRepository.url.value
+
+        let now = Date()
+        let timeZone = TimeZone.current
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+
+        var dateComponents = calendar.dateComponents(in: timeZone, from: now)
+        dateComponents.hour = 0
+        dateComponents.minute = 0
+        dateComponents.second = 0
+
+        guard let date = dateComponents.date else { fatalError("Invalid date components") }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        let utcDateString = dateFormatter.string(from: date)
+
+        var urlString = urlUser + "/api/v1/treatments.json?count=1000&find[eventType]=Carb+Correction&find[timestamp][$gte]=" + utcDateString
+        if token != "" {
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&count=1000&find[eventType]=Carb+Correction&find[timestamp][$gte]=" + utcDateString
+        }
+
+        guard let urlData = URL(string: urlString) else {
+            return
+        }
+        var request = URLRequest(url: urlData)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard error == nil else {
+                return
+            }
+            guard let data = data else {
+                return
+            }
+
+            let decoder = JSONDecoder()
+            let entriesResponse = try? decoder.decode([carbsData].self, from: data)
+            if let entriesResponse = entriesResponse {
+                DispatchQueue.main.async {
+                    self.updateCarbsToday(data: entriesResponse)
+                }
+            } else {
+                return
+            }
+        }
+        task.resume()
+    }
+
+    // NS CarbsToday Response Processor
+    func updateCarbsToday(data: [carbsData]) {
+        self.clearLastInfoData(index: 10)
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: carbs") }
+        if data.count == 0 {
+            return
+        }
+
+        let totalCarbs = data.reduce(0.0) { $0 + ($1.carbs ?? 0.0) }
+        let resultString = String(format: "%.0f", totalCarbs)
+
+        tableData[10].value = resultString
+
+        infoTable.reloadData()
+    }
+
     // NS Cage Web Call
     func webLoadNSCage() {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: CAGE") }
@@ -1210,7 +1319,7 @@ extension MainViewController {
                 priorDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
                 guard let priorDateString = dateFormatter.date(from: priorStrippedZone) else { continue }
                 let priorDateTimeStamp = priorDateString.timeIntervalSince1970
-                let priorDuration = priorEntry?["duration"] as! Double
+                let priorDuration = priorEntry?["duration"] as? Double ?? 0.0
                 // if difference between time stamps is greater than the duration of the last entry, there is a gap. Give a 15 second leeway on the timestamp
                 if Double( dateTimeStamp - priorDateTimeStamp ) > Double( (priorDuration * 60) + 15 ) {
                     

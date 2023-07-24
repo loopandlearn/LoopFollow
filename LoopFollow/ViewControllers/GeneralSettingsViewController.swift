@@ -22,6 +22,9 @@ class GeneralSettingsViewController: FormViewController {
          overrideUserInterfaceStyle = .dark
       }
       buildGeneralSettings()
+
+      // Register the GeneralSettingsViewController as an observer for the UIApplication.willEnterForegroundNotification, which will be triggered when the app enters the foreground. This helps ensure that the "Speak BG" switch in the General Settings is updated according to the current setting.
+      NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
    }
    
    private func buildGeneralSettings() {
@@ -143,6 +146,9 @@ class GeneralSettingsViewController: FormViewController {
         }.onChange { [weak self] row in
                     guard let value = row.value else { return }
                     UserDefaultsRepository.speakBG.value = value
+
+                    // Post a "toggleSpeakBG" notification whenever the "Speak BG" switch value changes in the General Settings. This allows the SceneDelegate to update the Home Screen Quick Action appearance and ensures consistency between the switch and the Quick Action.
+                    NotificationCenter.default.post(name: Notification.Name("toggleSpeakBG"), object: nil)
         }
         
         +++ ButtonRow() {
@@ -152,4 +158,15 @@ class GeneralSettingsViewController: FormViewController {
        }
     }
    
+    // Update the "Speak BG" SwitchRow value in the General Settings when the app enters the foreground. This ensures that the switch reflects the current setting in UserDefaultsRepository, even if it was changed using the Home Screen Quick Action while the app was in the background.
+    @objc func handleAppWillEnterForeground() {
+        if let row = self.form.rowBy(tag: "speakBG") as? SwitchRow {
+            row.value = UserDefaultsRepository.speakBG.value
+            row.updateCell()
+        }
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
+    }
 }

@@ -215,6 +215,13 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
         alarms.reloadIsSnoozed(key: "alertCOBIsSnoozed", value: true)
         alarms.reloadSnoozeTime(key: "alertCOBSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60 * 60)))
+       } else if AlarmSound.whichAlarm == "Low Battery" {
+           UserDefaultsRepository.alertBatteryIsSnoozed.value = true
+
+           UserDefaultsRepository.alertBatterySnoozedTime.value = Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60 * 60))
+           guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+           alarms.reloadIsSnoozed(key: "alertBatteryIsSnoozed", value: true)
+           alarms.reloadSnoozeTime(key: "alertBatterySnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60 * 60)))
        }
     }
     
