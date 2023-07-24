@@ -61,6 +61,7 @@ class UserDefaultsRepository {
     static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
     static let showDIALines = UserDefaultsValue<Bool>(key: "showDIAMarkers", default: true)
     static let show30MinLine = UserDefaultsValue<Bool>(key: "show30MinLine", default: false)
+    static let show90MinLine = UserDefaultsValue<Bool>(key: "show90MinLine", default: false)
     static let showMidnightLines = UserDefaultsValue<Bool>(key: "showMidnightMarkers", default: false)
     static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
     static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)

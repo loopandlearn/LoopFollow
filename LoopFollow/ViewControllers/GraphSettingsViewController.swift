@@ -146,6 +146,19 @@ class GraphSettingsViewController: FormViewController {
                     appState.chartSettingsChanges |= ChartSettingsChangeEnum.show30MinLineChanged.rawValue
                 }
             }
+            <<< SwitchRow("show90MinLine") { row in
+                row.title = "Show -90 min line"
+                row.value = UserDefaultsRepository.show90MinLine.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.show90MinLine.value = value
+                
+                // Tell the main screen that graph needs updating
+                if let appState = self!.appStateController {
+                    appState.chartSettingsChanged = true
+                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.show90MinLineChanged.rawValue
+                }
+            }
             <<< SwitchRow("smallGraphTreatments"){ row in
                 row.title = "Treatments on Small Graph"
                 row.value = UserDefaultsRepository.smallGraphTreatments.value
