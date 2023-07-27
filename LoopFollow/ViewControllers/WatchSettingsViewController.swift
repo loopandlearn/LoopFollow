@@ -20,8 +20,17 @@ class WatchSettingsViewController: FormViewController {
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
-        buildWatchSettings()
-        showHideNSDetails()
+        
+        let eventStore = EKEventStore()
+        eventStore.requestCalendarAccess { [weak self] (granted, error) in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                // Update the form based on the calendar access status
+                self.buildWatchSettings(hasCalendarAccess: granted)
+                self.showHideNSDetails()
+            }
+        }
     }
     
     func showHideNSDetails() {
@@ -43,8 +52,8 @@ class WatchSettingsViewController: FormViewController {
         }
         
     }
-    
-    private func buildWatchSettings(){
+
+    private func buildWatchSettings(hasCalendarAccess: Bool){
         
         struct cal {
             var title: String
@@ -63,6 +72,12 @@ class WatchSettingsViewController: FormViewController {
         
         form
             +++ Section(header: "Save BG to Calendar", footer: "Add the Apple calendar complication to your Apple Watch face or Carplay to see BG readings. Create a new calendar called 'Follow' and modify the calendar settings in the iPhone Watch/Carplay App to only display the Follow calendar on your watch or car. It is important to use a new calendar because this will delete other events on the same calendar. Edit Line 1 and Line 2 to be displayed using variables below that will be replaced by the values. Other text entered will not be replaced")
+            <<< LabelRow() {
+                $0.title = "Calendar Access Denied"
+                $0.hidden = Condition.function(["hide"], { _ in hasCalendarAccess })
+            }.cellUpdate { cell, _ in
+                cell.textLabel?.textColor = .red
+            }
             <<< SwitchRow("writeCalendarEvent"){ row in
                 row.title = "Save BG to Calendar"
                 row.value = UserDefaultsRepository.writeCalendarEvent.value
