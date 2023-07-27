@@ -330,13 +330,20 @@ extension MainViewController {
         }
         
         // loop through the data so we can reverse the order to oldest first for the graph
-        for i in 0..<data.count{
+        for i in 0..<data.count {
             let dateString = data[data.count - 1 - i].date
             if dateString >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
-                let reading = ShareGlucoseData(sgv: data[data.count - 1 - i].sgv, date: dateString, direction: data[data.count - 1 - i].direction)
+                let sgvValue = data[data.count - 1 - i].sgv
+                
+                // Skip the current iteration if the sgv value is over 3000
+                // First time a user starts a G7, they get a value of 4000
+                if sgvValue > 3000 {
+                    continue
+                }
+                
+                let reading = ShareGlucoseData(sgv: sgvValue, date: dateString, direction: data[data.count - 1 - i].direction)
                 bgData.append(reading)
             }
-            
         }
 
         viewUpdateNSBG(sourceName: sourceName)
