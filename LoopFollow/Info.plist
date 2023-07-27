@@ -87,7 +87,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Loop Follow would like to access your calendar to update BG readings</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
-<false/>
+	<false/>
 </dict>
 </plist>
