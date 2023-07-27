@@ -30,6 +30,8 @@ enum ChartSettingsChangeEnum: Int {
   case smallGraphHeight = 2048
   case showDIALinesChanged = 4096
   case showMidnightLinesChanged = 8192
+  case show30MinLineChanged = 16384
+  case show90MinLineChanged = 32768
 }
 
 // General Settings Flags

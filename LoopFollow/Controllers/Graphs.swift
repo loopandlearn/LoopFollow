@@ -360,6 +360,13 @@ extension MainViewController {
         ul.lineWidth = 1
         BGChart.xAxis.addLimitLine(ul)
         
+        if UserDefaultsRepository.show30MinLine.value {
+            let ul2 = ChartLimitLine()
+            ul2.limit = Double(dateTimeUtils.getNowTimeIntervalUTC().advanced(by: -30 * 60))
+            ul2.lineColor = NSUIColor.systemBlue.withAlphaComponent(0.5)
+            ul2.lineWidth = 1
+            BGChart.xAxis.addLimitLine(ul2)
+        }
         
         if UserDefaultsRepository.showDIALines.value {
             for i in 1..<7 {
@@ -372,6 +379,14 @@ extension MainViewController {
                 ul.lineWidth = 1
                 BGChart.xAxis.addLimitLine(ul)
             }
+        }
+
+        if UserDefaultsRepository.show90MinLine.value {
+            let ul3 = ChartLimitLine()
+            ul3.limit = Double(dateTimeUtils.getNowTimeIntervalUTC().advanced(by: -90 * 60))
+            ul3.lineColor = NSUIColor.systemOrange.withAlphaComponent(0.5)
+            ul3.lineWidth = 1
+            BGChart.xAxis.addLimitLine(ul3)
         }
     }
     
