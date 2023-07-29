@@ -335,9 +335,9 @@ extension MainViewController {
             if dateString >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 let sgvValue = data[data.count - 1 - i].sgv
                 
-                // Skip the current iteration if the sgv value is over 3000
+                // Skip the current iteration if the sgv value is over 600
                 // First time a user starts a G7, they get a value of 4000
-                if sgvValue > 3000 {
+                if sgvValue > 600 {
                     continue
                 }
                 
@@ -581,8 +581,12 @@ extension MainViewController {
                             var i = 0
                             while i <= toLoad {
                                 if i < prediction.count {
-                                    let prediction = ShareGlucoseData(sgv: Int(round(prediction[i])), date: predictionTime, direction: "flat")
-                                    predictionData.append(prediction)
+                                    let sgvValue = Int(round(prediction[i]))
+                                    // Skip values higher than 600
+                                    if sgvValue <= 600 {
+                                        let prediction = ShareGlucoseData(sgv: sgvValue, date: predictionTime, direction: "flat")
+                                        predictionData.append(prediction)
+                                    }
                                     predictionTime += 300
                                 }
                                 i += 1
