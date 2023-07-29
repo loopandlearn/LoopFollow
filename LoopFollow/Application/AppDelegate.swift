@@ -28,9 +28,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("User has declined notifications")
             }
         }
+        
         let store = EKEventStore()
-        store.requestAccess(to: .event) {(granted, error) in
-           if !granted { return }
+        store.requestCalendarAccess { (granted, error) in
+            if !granted {
+                print("Failed to get calendar access: \(String(describing: error))")
+                return
+            }
         }
         
         UNUserNotificationCenter.current().delegate = self
