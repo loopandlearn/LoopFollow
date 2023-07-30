@@ -5,17 +5,17 @@
 	<key>CFBundleDisplayName</key>
 	<string>$(display_name)</string>
 	<key>AppGroupIdentifier</key>
-	<string>group.com.$(unique_id).LoopFollow</string>
+	<string>group.com.$(unique_id).LoopFollow$(app_suffix)</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.$(unique_id).LoopFollow</string>
+		<string>com.$(unique_id).LoopFollow$(app_suffix)</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.$(unique_id).LoopFollow</string>
+	<string>com.$(unique_id).LoopFollow$(app_suffix)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
