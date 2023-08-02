@@ -38,7 +38,7 @@ The creation of the Match-Secrets repository is also a common step for all "brow
 
 1. Fork https://github.com/jonfawcett/LoopFollow into your account. If you already have a fork of LoopFollow in GitHub, you can't make another one. You can continue to work with your existing fork, or delete your existing fork from GitHub and then create a new fork from https://github.com/jonfawcett/LoopFollow.
 
-NOTE: if your default branch is not set to the Main branch for LoopFollow, you will NOT see the expected build actions. Follow these steps in [LoopDocs](https://loopkit.github.io/loopdocs/gh-actions/gh-update/#set-default-branch) to select Main as your default branch.
+NOTE: if your default branch is not set to the main branch for LoopFollow, you will NOT see the expected build actions. Follow these steps in [LoopDocs](https://loopkit.github.io/loopdocs/gh-actions/gh-update/#set-default-branch) to select main as your default branch.
 
 The first time you build with the GitHub Browser Build method for any DIY app, you will generate a personal access token and make up a password (MATCH_PASSWORD) for the Match-Secrets repository. If you lose your MATCH_PASSWORD, you will need to delete the Match-Secrets repository, create a new one and make up a new password (used for all repositories for which you use the GitHub build method).
 
