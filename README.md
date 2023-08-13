@@ -1,5 +1,5 @@
 > **Message from the Loop and Learn Team:**
-> * We will keep the Loop Follow app going:
+> * We have taken responsibility for updates to the Loop Follow app:
 >    * Please note the repository name has changed to [https://github.com/loopandlearn.LoopFollow](https://github.com/loopandlearn.LoopFollow)
 >    * GitHub should automatically redirect you
 > * Additional Loop Follow documentation is at [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/).
@@ -9,9 +9,9 @@
 
 > **Message from Jon Fawcett:**
 > * Because our family now uses Omnipod 5, I will no longer involved in updating LoopFollow
-> * I have transferred the LoopFollow repository from the JonFawcett to the loopandlearn username
+> * I have transferred the _LoopFollow_ repository from the _JonFawcett_ to the _loopandlearn_ username
 > * I will also no longer provide an option for a TestFlight invitation from me. (Jon Fawcett)
-> * You must build the app yourself.
+>   * You must build the app yourself.
 
 > **Message to Developers**
 > * If you are interested in assisting with this app and want to work on new features and improvements for Loop, iAPS and Nightscout functionality, please reach out. 
