@@ -9,7 +9,7 @@
 > * If you previously created a fork of LoopFollow from the JonFawcett username
 >    * Please note the repository name has changed to [https://github.com/loopandlearn/LoopFollow](https://github.com/loopandlearn/LoopFollow)
 >    * GitHub should automatically redirect you to this new address
->    * We have also modifed branch and filenames to match standard conventions: _main_ (from _Main) and _README.md (from _readme.md_)
+>    * We have also modifed branch and filenames to match standard conventions: _main_ (from _Main_) and _README.md_ (from _readme.md_)
 
 > **Message from Jon Fawcett:**
 > * Because our family now uses Omnipod 5, I will no longer involved in updating LoopFollow
