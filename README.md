@@ -1,6 +1,6 @@
 > **Message from the Loop and Learn Team:**
 > * We have taken responsibility for updates to the Loop Follow app:
->    * Please note the repository name has changed to [https://github.com/loopandlearn.LoopFollow](https://github.com/loopandlearn.LoopFollow)
+>    * Please note the repository name has changed to [https://github.com/loopandlearn/LoopFollow](https://github.com/loopandlearn/LoopFollow)
 >    * GitHub should automatically redirect you
 > * Additional Loop Follow documentation is at [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/).
 > * If you are having problems with the app:
