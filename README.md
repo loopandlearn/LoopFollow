@@ -1,11 +1,15 @@
 > **Message from the Loop and Learn Team:**
 > * We have taken responsibility for updates to the Loop Follow app:
->    * Please note the repository name has changed to [https://github.com/loopandlearn/LoopFollow](https://github.com/loopandlearn/LoopFollow)
->    * GitHub should automatically redirect you
 > * Additional Loop Follow documentation is at [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/).
 > * If you are having problems with the app:
 >     * Post in the [Loop and Learn Facebook group](https://www.facebook.com/groups/LOOPandLEARN); indicate that your question is related to Loop Follow. 
 >     * If you do not use Facebook - please click on this [link to file an Issue](https://github.com/jonfawcett/LoopFollow/issues) with your problem.
+
+> **New location for LoopFollow Repository:**
+> * If you previously created a fork of LoopFollow from the JonFawcett username
+>    * Please note the repository name has changed to [https://github.com/loopandlearn/LoopFollow](https://github.com/loopandlearn/LoopFollow)
+>    * GitHub should automatically redirect you to this new address
+>    * We have also modifed branch and filenames to match standard conventions: _main_ (from _Main) and _README.md (from _readme.md_)
 
 > **Message from Jon Fawcett:**
 > * Because our family now uses Omnipod 5, I will no longer involved in updating LoopFollow
