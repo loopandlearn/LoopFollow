@@ -34,6 +34,6 @@ jobs:
           #git merge --no-edit upstream/feature/x
           #git push origin feature/x
 
-          git checkout Main
-          git merge --no-edit upstream/Main
+          git checkout main
+          git merge --no-edit upstream/main
           git push origin Main --force
