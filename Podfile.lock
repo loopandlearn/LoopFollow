@@ -10,7 +10,7 @@ PODS:
 DEPENDENCIES:
   - Charts
   - Eureka (from `https://github.com/xmartlabs/Eureka.git`)
-  - ShareClient (from `https://github.com/jonfawcett/dexcom-share-client-swift.git`, branch `master`)
+  - ShareClient (from `https://github.com/loopandlearn/dexcom-share-client-swift.git`, branch `loopfollow`)
 
 SPEC REPOS:
   trunk:
@@ -21,23 +21,23 @@ EXTERNAL SOURCES:
   Eureka:
     :git: https://github.com/xmartlabs/Eureka.git
   ShareClient:
-    :branch: master
-    :git: https://github.com/jonfawcett/dexcom-share-client-swift.git
+    :branch: loopfollow
+    :git: https://github.com/loopandlearn/dexcom-share-client-swift.git
 
 CHECKOUT OPTIONS:
   Eureka:
     :commit: 044e31674d319c8edb19d993a5f8ea4e24641542
     :git: https://github.com/xmartlabs/Eureka.git
   ShareClient:
-    :commit: 2dfaf101ed528e2a92f3791f5384ed368dc7144a
-    :git: https://github.com/jonfawcett/dexcom-share-client-swift.git
+    :commit: d7a3323a014d41827ee177a92d528786f9f09e75
+    :git: https://github.com/loopandlearn/dexcom-share-client-swift.git
 
 SPEC CHECKSUMS:
-  Charts: 354f86803d11d9c35de280587fef50d1af063978
+  Charts: ce0768268078eee0336f122c3c4ca248e4e204c5
   Eureka: 28ad9dec6286cd7cd601fdf8e8df39bb7356a8f4
-  ShareClient: 08a3e6b9889b41172b98c4e386d23084bafbeec4
+  ShareClient: 60b911c95e73b0ea9c5aad6d194a9c6b5f34b741
   SwiftAlgorithms: 38dda4731d19027fdeee1125f973111bf3386b53
 
-PODFILE CHECKSUM: 084f5ab2f55c59ed2c2fa3cdaaa9590c99a95408
+PODFILE CHECKSUM: d241dda366d5454279fe3ff8869458d19e1bbebb
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1
