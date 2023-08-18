@@ -109,7 +109,12 @@ platform :ios do
       api_key: api_key,
       skip_submission: false,
       ipa: "LoopFollow.ipa",
-      skip_waiting_for_build_processing: true,
+      changelog: "Monthly Update",
+      distribute_external: true,
+      groups: [
+        "External Testers"
+      ],
+      skip_waiting_for_build_processing: false,
     )
   end
 
