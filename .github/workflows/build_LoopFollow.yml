@@ -1,15 +1,10 @@
 name: 4. Build Loop Follow
 run-name: Build Loop Follow
 on:
+  schedule:
+    # Runs "At 11:00 on every day-of-week from Monday through Friday"
+    - cron: '0 17 20 * *'
   workflow_dispatch:
-
-  ## Remove the "#" sign from the beginning of the line below to get automated builds on push (code changes in your repository)
-  #push:
-
-  ## Remove the "#" sign from the beginning of the two lines below to get automated builds every two months
-  #schedule:
-    #- cron: '0 17 1 */2 *' # Runs at 17:00 UTC on the 1st in Jan, Mar, May, Jul, Sep and Nov.
-
 
 jobs:
   secrets:
