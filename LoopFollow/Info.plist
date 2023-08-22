@@ -89,6 +89,15 @@
 	</array>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Loop Follow would like to access your calendar to update BG readings</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>loopfollow</string>
+			</array>
+		</dict>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>
