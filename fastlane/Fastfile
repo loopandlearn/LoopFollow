@@ -172,7 +172,7 @@ platform :ios do
       bundle_id = Spaceship::ConnectAPI::BundleId.find(identifier)
     end
 
-    find_bundle_id("com.#{TEAMID}.loopkit.LoopCaregiver")
+    find_bundle_id("com.#{TEAMID}.loopkit.LoopFollow")
 
     match(
       type: "appstore",
