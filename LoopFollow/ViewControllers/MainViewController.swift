@@ -346,10 +346,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     private func createDerivedData() {
+        let currentCount = UserDefaultsRepository.infoSort.value.count
+        if currentCount < self.tableData.count {
+            for i in currentCount..<self.tableData.count {
+                UserDefaultsRepository.infoSort.value.append(i)
+            }
+        }
         
         self.derivedTableData = []
         while UserDefaultsRepository.infoVisible.value.count < self.tableData.count {
-            UserDefaultsRepository.infoVisible.value.append(true)
+            UserDefaultsRepository.infoVisible.value.append(false)
         }
         for i in 0..<self.tableData.count {
             if(UserDefaultsRepository.infoVisible.value[UserDefaultsRepository.infoSort.value[i]]) {
