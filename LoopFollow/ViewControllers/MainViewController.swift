@@ -160,7 +160,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UserDefaultsRepository.infoNames.value.append("Pump")
         UserDefaultsRepository.infoNames.value.append("SAGE")
         UserDefaultsRepository.infoNames.value.append("CAGE")
-        UserDefaultsRepository.infoNames.value.append("Recc. Bolus")
+        UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
         UserDefaultsRepository.infoNames.value.append("Pred.")
         UserDefaultsRepository.infoNames.value.append("Carbs today")
         UserDefaultsRepository.infoNames.value.append("Autosens")

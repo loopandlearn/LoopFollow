@@ -28,7 +28,7 @@ class UserDefaultsRepository {
         "Pump",
         "SAGE",
         "CAGE",
-        "Recc. Bolus",
+        "Rec. Bolus",
         "Pred.",
         "Carbs today",
         "Autosens"])
