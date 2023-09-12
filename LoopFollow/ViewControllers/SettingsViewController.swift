@@ -122,7 +122,7 @@ class SettingsViewController: FormViewController {
            row.hidden = "$showNS == false"
        }
        <<< SwitchRow("loopUser"){ row in
-           row.title = "Download Loop/FreeAPS Data"
+           row.title = "Download Loop/iAPS Data"
            row.tag = "loopUser"
            row.value = UserDefaultsRepository.loopUser.value
            row.hidden = "$showNS == false"

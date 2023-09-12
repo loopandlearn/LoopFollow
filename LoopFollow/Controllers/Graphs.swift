@@ -548,14 +548,13 @@ extension MainViewController {
         BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
     }
     
-    func updatePredictionGraph() {
+    func updatePredictionGraph(color: UIColor? = nil) {
         let dataIndex = 1
         var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
         var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
         mainChart.clear()
         smallChart.clear()
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: print prediction") }
-
+        
         var colors = [NSUIColor]()
         let maxBGOffset: Float = 20
         for i in 0..<predictionData.count {
@@ -563,23 +562,21 @@ extension MainViewController {
             if Float(predictionVal) > topBG - maxBGOffset {
                 topBG = Float(predictionVal) + maxBGOffset
             }
-
+            
             if i == 0 {
                 if UserDefaultsRepository.showDots.value {
-                    colors.append(NSUIColor.systemPurple.withAlphaComponent(0.0))
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(0.0))
                 } else {
-                    colors.append(NSUIColor.systemPurple.withAlphaComponent(1.0))
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(1.0))
                 }
-                
             } else if predictionVal > 400 {
-                predictionVal = 400
-                colors.append(NSUIColor.systemYellow)
+                colors.append(color ?? NSUIColor.systemYellow)
             } else if predictionVal < 0 {
-                predictionVal = 0
-                colors.append(NSUIColor.systemRed)
+                colors.append(color ?? NSUIColor.systemRed)
             } else {
-                colors.append(NSUIColor.systemPurple)
+                colors.append(color ?? NSUIColor.systemPurple)
             }
+            
             let value = ChartDataEntry(x: predictionData[i].date, y: predictionVal, data: formatPillText(line1: bgUnits.toDisplayUnits(String(predictionData[i].sgv)), time: predictionData[i].date))
             mainChart.addEntry(value)
             smallChart.addEntry(value)
@@ -590,8 +587,7 @@ extension MainViewController {
         mainChart.colors.removeAll()
         mainChart.circleColors.removeAll()
         if colors.count > 0 {
-            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Graph: prediction colors") }
-            for i in 0..<colors.count{
+            for i in 0..<colors.count {
                 mainChart.addColor(colors[i])
                 mainChart.circleColors.append(colors[i])
                 smallChart.addColor(colors[i])
