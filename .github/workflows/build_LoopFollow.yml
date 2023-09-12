@@ -1,5 +1,5 @@
 name: 4. Build Loop Follow
-run-name: Build Loop Follow
+run-name: Build Loop Follow (${{ github.ref_name }})
 on:
   workflow_dispatch:
 
@@ -12,12 +12,14 @@ on:
 
 
 jobs:
-  secrets:
+  validate:
+    name: Validate
     uses: ./.github/workflows/validate_secrets.yml
     secrets: inherit
 
   build:
-    needs: secrets
+    name: Build
+    needs: validate
     runs-on: macos-12
     steps:
       # Uncomment to manually select latest Xcode if needed
