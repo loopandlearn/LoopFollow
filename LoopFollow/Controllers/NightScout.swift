@@ -844,9 +844,9 @@ extension MainViewController {
         dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
         let utcDateString = dateFormatter.string(from: date)
 
-        var urlString = urlUser + "/api/v1/treatments.json?count=1000&find[eventType]=Carb+Correction&find[timestamp][$gte]=" + utcDateString
+        var urlString = urlUser + "/api/v1/treatments.json?count=1000&find[eventType]=Carb+Correction&find[created_at][$gte]=" + utcDateString
         if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&count=1000&find[eventType]=Carb+Correction&find[timestamp][$gte]=" + utcDateString
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&count=1000&find[eventType]=Carb+Correction&find[created_at][$gte]=" + utcDateString
         }
 
         guard let urlData = URL(string: urlString) else {
@@ -864,6 +864,7 @@ extension MainViewController {
             }
 
             let decoder = JSONDecoder()
+            print("*** \(data)")
             let entriesResponse = try? decoder.decode([carbsData].self, from: data)
             if let entriesResponse = entriesResponse {
                 DispatchQueue.main.async {
