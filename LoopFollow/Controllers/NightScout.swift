@@ -864,7 +864,6 @@ extension MainViewController {
             }
 
             let decoder = JSONDecoder()
-            print("*** \(data)")
             let entriesResponse = try? decoder.decode([carbsData].self, from: data)
             if let entriesResponse = entriesResponse {
                 DispatchQueue.main.async {
