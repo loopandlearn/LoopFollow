@@ -1986,10 +1986,20 @@ extension MainViewController {
                 }
                 
             } else {
-                guard let low = currentEntry?["targetBottom"] as? Int else { continue }
-                guard let high = currentEntry?["targetTop"] as? Int else { continue }
-                range.append(low)
-                range.append(high)
+                let low = currentEntry?["targetBottom"] as? Int
+                let high = currentEntry?["targetTop"] as? Int
+                
+                if (low == nil && high != nil) || (low != nil && high == nil) {
+                    continue
+                }
+                
+                if let l = low {
+                    range.append(l)
+                }
+                
+                if let h = high {
+                    range.append(h)
+                }
             }
                         
             let endDate = dateTimeStamp + (duration)
