@@ -636,12 +636,139 @@ extension MainViewController {
                 latestLoopTime = lastLoopTime
             } // end lastLoopTime
         } // end lastLoop Record
+
+        if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String : AnyObject]? {
+            if let lastLoopTime = formatter.date(from: (lastDeviceStatus?["created_at"] as! String))?.timeIntervalSince1970  {
+                UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
+                if let failure = lastLoopRecord["failureReason"] {
+                    LoopStatusLabel.text = "X"
+                    latestLoopStatusString = "X"
+                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop Failure: X") }
+                } else {
+                    var wasEnacted = false
+                    if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
+                        wasEnacted = true
+                        if let lastTempBasal = enacted["rate"] as? Double {
+                            
+                        }
+                    }
+
+                    if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
+                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
+                    }
+                    if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        tableData[1].value = String(format:"%.1f", cobdata["COB"] as! Double)
+                        latestCOB = String(format:"%.1f", cobdata["COB"] as! Double)
+                    }
+                    if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        tableData[8].value = String(format:"%.2fU", recbolusdata["insulinReq"] as! Double)
+                    }
+                    if let autosensdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
+                        tableData[11].value = String(format:"%.0f", sens) + "%"
+                    }
+                    
+                    //Picks COB prediction if available, else UAM, else IOB, else ZT
+                    //Ideal is to predict all 4 in Loop Follow but this is a quick start
+                    var graphtype = ""
+                    var predictioncolor = UIColor.systemGray
+                    PredictionLabel.textColor = predictioncolor
+                    if let enactdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        if let predbgdata = enactdata["predBGs"] as? [String:AnyObject] {
+                            if predbgdata["COB"] != nil {
+                                graphtype="COB"
+                                predictioncolor = UIColor.systemYellow
+                                PredictionLabel.textColor = predictioncolor
+                            }
+                            else if predbgdata["UAM"] != nil {
+                                graphtype="UAM"
+                                predictioncolor = UIColor.systemOrange
+                                PredictionLabel.textColor = predictioncolor
+                            }
+                            else if predbgdata["IOB"] != nil {
+                                graphtype="IOB"
+                                predictioncolor = UIColor.systemBlue
+                                PredictionLabel.textColor = predictioncolor
+                            }
+                            else {
+                                graphtype="ZT"
+                                predictioncolor = UIColor.systemGreen
+                                PredictionLabel.textColor = predictioncolor
+                            }
+                            
+                            let graphdata = predbgdata[graphtype] as! [Double]
+                            
+                            if let eventualdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                                if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
+                                    let eventualBGStringValue = String(describing: eventualBGValue)
+                                    PredictionLabel.text = bgUnits.toDisplayUnits(eventualBGStringValue)
+                                }
+                            }
+                            
+                            if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
+                                predictionData.removeAll()
+                                var predictionTime = lastLoopTime
+                                let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
+                                var i = 0
+                                while i <= toLoad {
+                                    if i < graphdata.count {
+                                        let prediction = ShareGlucoseData(sgv: Int(round(graphdata[i])), date: predictionTime, direction: "flat")
+                                        predictionData.append(prediction)
+                                        predictionTime += 300
+                                    }
+                                    i += 1
+                                }
+                                
+                            }
+                            
+                            let predMin = graphdata.min()
+                            let predMax = graphdata.max()
+                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
+                            
+                            updatePredictionGraph(color: predictioncolor)
+                        }
+                    }
+                    
+                    if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
+                        if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
+                            var lastBGTime = lastLoopTime
+                            if bgData.count > 0 {
+                                lastBGTime = bgData[bgData.count - 1].date
+                            }
+                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "tempBasalTime: " + String(tempBasalTime)) }
+                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastBGTime: " + String(lastBGTime)) }
+                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "wasEnacted: " + String(wasEnacted)) }
+                            if tempBasalTime > lastBGTime && !wasEnacted {
+                                LoopStatusLabel.text = "⏀"
+                                latestLoopStatusString = "⏀"
+                                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Open Loop: recommended temp. temp time > bg time, was not enacted") }
+                            } else {
+                                LoopStatusLabel.text = "↻"
+                                latestLoopStatusString = "↻"
+                                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: recommended temp, but temp time is < bg time and/or was enacted") }
+                            }
+                        }
+                    } else {
+                        LoopStatusLabel.text = "↻"
+                        latestLoopStatusString = "↻"
+                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: no recommended temp") }
+                    }
+                    
+                }
+                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
+                    LoopStatusLabel.text = "⚠"
+                    latestLoopStatusString = "⚠"
+                }
+                latestLoopTime = lastLoopTime
+            }
+        }
         
         var oText = "" as String
         currentOverride = 1.0
         if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
-            if let lastOverrideTime = formatter.date(from: (lastOverride["timestamp"] as! String))?.timeIntervalSince1970  {
-            }
             if lastOverride["active"] as! Bool {
                 
                 let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
@@ -720,9 +847,9 @@ extension MainViewController {
         dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
         let utcDateString = dateFormatter.string(from: date)
 
-        var urlString = urlUser + "/api/v1/treatments.json?count=1000&find[eventType]=Carb+Correction&find[timestamp][$gte]=" + utcDateString
+        var urlString = urlUser + "/api/v1/treatments.json?count=1000&find[eventType]=Carb+Correction&find[created_at][$gte]=" + utcDateString
         if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&count=1000&find[eventType]=Carb+Correction&find[timestamp][$gte]=" + utcDateString
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&count=1000&find[eventType]=Carb+Correction&find[created_at][$gte]=" + utcDateString
         }
 
         guard let urlData = URL(string: urlString) else {
@@ -961,18 +1088,20 @@ extension MainViewController {
             return
         }
         if jsonDeviceStatus[keyPath: "message"] != nil { return }
-        let basal = try jsonDeviceStatus[keyPath: "store.Default.basal"] as! NSArray
-        basalProfile.removeAll()
-        for i in 0..<basal.count {
-            let dict = basal[i] as! Dictionary<String, Any>
-            do {
-                let thisValue = try dict[keyPath: "value"] as! Double
-                let thisTime = dict[keyPath: "time"] as! String
-                let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
-                let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
-                basalProfile.append(entry)
-            } catch {
-               if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: profile wrapped in quotes") }
+        
+        if let basal = jsonDeviceStatus[keyPath: "store.default.basal"] as? NSArray ?? jsonDeviceStatus[keyPath: "store.Default.basal"] as? NSArray {
+            basalProfile.removeAll()
+            for i in 0..<basal.count {
+                let dict = basal[i] as! Dictionary<String, Any>
+                do {
+                    let thisValue = try dict[keyPath: "value"] as! Double
+                    let thisTime = dict[keyPath: "time"] as! String
+                    let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
+                    let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
+                    basalProfile.append(entry)
+                } catch {
+                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: profile wrapped in quotes") }
+                }
             }
         }
         
@@ -1123,12 +1252,16 @@ extension MainViewController {
                     tempBasal.append(entry!)
                 case "Correction Bolus":
                     bolus.append(entry!)
+                case "Bolus":
+                    bolus.append(entry!)
                 case "Meal Bolus":
                     carbs.append(entry!)
                     bolus.append(entry!)
                 case "Carb Correction":
                     carbs.append(entry!)
                 case "Temporary Override":
+                    temporaryOverride.append(entry!)
+                case "Temporary Target":
                     temporaryOverride.append(entry!)
                 case "Note":
                     note.append(entry!)
@@ -1855,6 +1988,21 @@ extension MainViewController {
                     range.append(high)
                 }
                 
+            } else {
+                let low = currentEntry?["targetBottom"] as? Int
+                let high = currentEntry?["targetTop"] as? Int
+                
+                if (low == nil && high != nil) || (low != nil && high == nil) {
+                    continue
+                }
+                
+                if let l = low {
+                    range.append(l)
+                }
+                
+                if let h = high {
+                    range.append(h)
+                }
             }
                         
             let endDate = dateTimeStamp + (duration)
