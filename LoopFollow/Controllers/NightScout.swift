@@ -702,7 +702,10 @@ extension MainViewController {
                             let graphdata = predbgdata[graphtype] as! [Double]
                             
                             if let eventualdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                                PredictionLabel.text = String(format:"%.0f", eventualdata["eventualBG"] as! Double)
+                                if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
+                                    let eventualBGStringValue = String(describing: eventualBGValue)
+                                    PredictionLabel.text = bgUnits.toDisplayUnits(eventualBGStringValue)
+                                }
                             }
                             
                             if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
