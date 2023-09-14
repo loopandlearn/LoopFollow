@@ -1,5 +1,5 @@
 name: 4. Build Loop Follow
-run-name: Build Loop Follow
+run-name: Build Loop Follow (${{ github.ref_name }})
 on:
   schedule:
     # Runs "At 11:00 on every day-of-week from Monday through Friday"
@@ -7,12 +7,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  secrets:
+  validate:
+    name: Validate
     uses: ./.github/workflows/validate_secrets.yml
     secrets: inherit
 
   build:
-    needs: secrets
+    name: Build
+    needs: validate
     runs-on: macos-12
     steps:
       # Uncomment to manually select latest Xcode if needed
