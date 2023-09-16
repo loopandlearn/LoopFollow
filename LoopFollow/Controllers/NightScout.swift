@@ -1811,7 +1811,7 @@ extension MainViewController {
     }
     
     // NS Sensor Change Response Processor
-    func processSensorCHange(entries: [[String:AnyObject]]) {
+    func processSensorChange(entries: [[String:AnyObject]]) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Sensor Change") }
         // because it's a small array, we're going to destroy and reload every time.
         sensorChangeGraphData.removeAll()
