@@ -529,10 +529,10 @@ extension MainViewController {
             if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
-                    tableData[5].value = String(format:"%.0f", reservoirData) + "U"
+                    tableData[5].value = String(format:"%.0f", reservoirData) + "E"
                 } else {
                     latestPumpVolume = 50.0
-                    tableData[5].value = "50+U"
+                    tableData[5].value = "50+E"
                 }
                 
                 if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
@@ -661,7 +661,7 @@ extension MainViewController {
                     }
                     if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         tableData[1].value = String(format:"%.1f", cobdata["COB"] as! Double)
-                        latestCOB = String(format:"%.1f", cobdata["COB"] as! Double)
+                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double)
                     }
                     if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         tableData[8].value = String(format:"%.2fU", recbolusdata["insulinReq"] as! Double)
@@ -888,7 +888,7 @@ extension MainViewController {
         }
 
         let totalCarbs = data.reduce(0.0) { $0 + ($1.carbs ?? 0.0) }
-        let resultString = String(format: "%.0f", totalCarbs)
+        let resultString = String(format: "%.0f", totalCarbs) + "g"
 
         tableData[10].value = resultString
 
@@ -969,9 +969,9 @@ extension MainViewController {
         
         let lastDateString = dateTimeUtils.nowMinus10DaysTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
-        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Change&find[created_at][$gte]=" + lastDateString + "&count=1"
         if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Change&find[created_at][$gte]=" + lastDateString + "&count=1"
         }
         
         guard let urlData = URL(string: urlString) else {
