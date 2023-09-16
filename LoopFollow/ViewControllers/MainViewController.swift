@@ -726,7 +726,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
             eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
             eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: cob)
-            eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal)
+            eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal + "E/h")
             
             
             
