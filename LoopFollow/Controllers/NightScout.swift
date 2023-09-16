@@ -1897,6 +1897,7 @@ extension MainViewController {
             } else {
                 return
             }
+
             // Fix for FreeAPS milliseconds in timestamp
             var strippedZone = String(date.dropLast())
             strippedZone = strippedZone.components(separatedBy: ".")[0]
@@ -1908,17 +1909,24 @@ extension MainViewController {
             let dateString = dateFormatter.date(from: strippedZone)
             let dateTimeStamp = dateString!.timeIntervalSince1970
             
-            guard let sgv = currentEntry?["glucose"] as? Int else {
-                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Non-Int Glucose entry")}
+            // Daniel: Code to convert mmol X.X values from NS to mg/dl to render correct in graphs
+            guard let glucose = currentEntry?["glucose"] as? Double else {
+                if UserDefaultsRepository.debugLog.value {
+                    self.writeDebugLog(value: "ERROR: Non-Double Glucose entry")
+                }
                 continue
             }
-            
-            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
-                // Make the dot
-                //let dot = ShareGlucoseData(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                let dot = ShareGlucoseData(sgv: sgv, date: Double(dateTimeStamp), direction: "")
-                bgCheckData.append(dot)
-            }
+
+            let multipliedGlucose = glucose * 18 // Multiply the glucose value by 2 (change the multiplier as needed)
+
+            let sgv = Int(multipliedGlucose) // Convert the multiplied glucose value to an integer
+
+            if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (2 * 60 * 60)) {
+                            // Make the dot
+                            //let dot = ShareGlucoseData(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
+                            let dot = ShareGlucoseData(sgv: sgv, date: Double(dateTimeStamp), direction: "")
+                            bgCheckData.append(dot)
+                        }
             
             
             
