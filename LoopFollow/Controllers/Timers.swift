@@ -67,13 +67,13 @@ extension MainViewController {
             let formattedDuration = formatter.string(from: secondsAgo)
             
             MinAgoText.text = formattedDuration ?? ""
-            MinAgoText.text! += " min ago"
+            MinAgoText.text! += " m sedan"
             latestMinAgoString = formattedDuration ?? ""
-            latestMinAgoString += " min ago"
+            latestMinAgoString += " m sedan"
             
             if let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController {
                 snoozer.MinAgoLabel.text = formattedDuration ?? ""
-                snoozer.MinAgoLabel.text! += " min ago"
+                snoozer.MinAgoLabel.text! += " m sedan"
             } else { return }
             
         } else {

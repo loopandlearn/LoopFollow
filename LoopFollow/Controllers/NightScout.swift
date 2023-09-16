@@ -1288,8 +1288,6 @@ extension MainViewController {
                 case "Sensor Change":
                     cgmSensorChange.append(entry!)
                 //Daniel Pumpbyte, Sensorbyte och Sensor Change tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
-                case "Sensor Start":
-                    cgmSensorChange.append(entry!)
                 default:
                     print("No Match: \(String(describing: entry))")
             }
