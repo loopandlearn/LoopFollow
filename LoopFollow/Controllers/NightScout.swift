@@ -529,15 +529,15 @@ extension MainViewController {
             if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
-                    tableData[5].value = String(format:"%.0f", reservoirData) + "E"
+                    tableData[5].value = String(format:"%.0f", reservoirData) + " E"
                 } else {
                     latestPumpVolume = 50.0
-                    tableData[5].value = "50+E"
+                    tableData[5].value = "50+ E"
                 }
                 
                 if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
                     let upbat = uploader["battery"] as! Double
-                    tableData[4].value = String(format:"%.0f", upbat) + "%"
+                    tableData[4].value = String(format:"%.0f", upbat) + " %"
                     UserDefaultsRepository.deviceBatteryLevel.value = upbat
                 }
             }
@@ -656,19 +656,19 @@ extension MainViewController {
                     }
 
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double)) + "E"
-                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double)) + "E"
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double)) + " E"
+                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double)) + " E"
                     }
                     if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double) + "g"
-                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double) + "g"
+                        tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double) + " g"
+                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double) + " g"
                     }
                     if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[8].value = String(format:"%.2f", recbolusdata["insulinReq"] as! Double) + "E"
+                        tableData[8].value = String(format:"%.2f", recbolusdata["insulinReq"] as! Double) + " E"
                     }
                     if let autosensdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
-                        tableData[11].value = String(format:"%.0f", sens) + "%"
+                        tableData[11].value = String(format:"%.0f", sens) + " %"
                     }
                     
                     //Picks COB prediction if available, else UAM, else IOB, else ZT
@@ -888,7 +888,7 @@ extension MainViewController {
         }
 
         let totalCarbs = data.reduce(0.0) { $0 + ($1.carbs ?? 0.0) }
-        let resultString = String(format: "%.0f", totalCarbs) + "g"
+        let resultString = String(format: "%.0f", totalCarbs) + " g"
 
         tableData[10].value = resultString
 
@@ -1541,10 +1541,10 @@ extension MainViewController {
             //if i == tempArray.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
             if i == tempArray.count - 1 && duration == 0.0 {
                 lastEndDot = dateTimeStamp + (30 * 60)
-                latestBasal = String(format:"%.2f", basalRate) + "E/h"
+                latestBasal = String(format:"%.2f", basalRate) + " E/h"
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
-                latestBasal = String(format:"%.2f", basalRate) + "E/h"
+                latestBasal = String(format:"%.2f", basalRate) + " E/h"
             }
             
             // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
@@ -1593,7 +1593,7 @@ extension MainViewController {
                 }
             }
             
-            latestBasal = String(format:"%.2f", scheduled) + "E/h"
+            latestBasal = String(format:"%.2f", scheduled) + " E/h"
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)

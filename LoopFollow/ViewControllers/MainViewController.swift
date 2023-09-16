@@ -173,11 +173,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         //infoTable.layer.borderColor = UIColor.darkGray.cgColor
         //infoTable.layer.borderWidth = 1.0
         //infoTable.layer.cornerRadius = 6
-        infoTable.rowHeight = 20
+        infoTable.rowHeight = 22
         infoTable.dataSource = self
         infoTable.tableFooterView = UIView(frame: .zero) // get rid of extra rows
         infoTable.bounces = false
-        infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
         
         // initialize the tableData
         self.tableData = []
