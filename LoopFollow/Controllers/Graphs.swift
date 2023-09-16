@@ -237,7 +237,7 @@ extension MainViewController {
         lineResume.valueFormatter = ChartYDataValueFormatter()
         lineResume.drawValuesEnabled = false
         
-        // Sensor Start
+        // Sensor Change
         var chartEntrySensor = [ChartDataEntry]()
         let lineSensor = LineChartDataSet(entries:chartEntrySensor, label: "")
         lineSensor.circleRadius = CGFloat(globalVariables.dotOther)
@@ -906,11 +906,11 @@ extension MainViewController {
         }
     }
     
-    func updateSensorStart() {
+    func updateSensorChange() {
         var dataIndex = 10
         BGChart.lineData?.dataSets[dataIndex].clear()
         BGChartFull.lineData?.dataSets[dataIndex].clear()
-        let thisData = sensorStartGraphData
+        let thisData = sensorChangeGraphData
         for i in 0..<thisData.count{
             // skip if outside of visible area
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
@@ -1123,7 +1123,7 @@ extension MainViewController {
         lineResume.valueFormatter = ChartYDataValueFormatter()
         lineResume.drawValuesEnabled = false
         
-        // Sensor Start
+        // Sensor Change
         var chartEntrySensor = [ChartDataEntry]()
         let lineSensor = LineChartDataSet(entries:chartEntrySensor, label: "")
         lineSensor.circleRadius = 2

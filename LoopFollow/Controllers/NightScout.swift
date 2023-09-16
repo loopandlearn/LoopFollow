@@ -1243,7 +1243,7 @@ extension MainViewController {
         var suspendPump: [[String:AnyObject]] = []
         var resumePump: [[String:AnyObject]] = []
         var pumpSiteChange: [[String:AnyObject]] = []
-        var cgmSensorStart: [[String:AnyObject]] = []
+        var cgmSensorChange: [[String:AnyObject]] = []
         
         for i in 0..<entries.count {
             let entry = entries[i] as [String : AnyObject]?
@@ -1259,6 +1259,13 @@ extension MainViewController {
                     bolus.append(entry!)
                 case "Carb Correction":
                     carbs.append(entry!)
+                case "Kolhydrater":
+                    carbs.append(entry!)
+                case "Dextro":
+                    carbs.append(entry!)
+                case "Måltid":
+                    carbs.append(entry!)
+                //Daniel Kolhydrater, Dextro och måltid tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
                 case "Temporary Override":
                     temporaryOverride.append(entry!)
                 case "Temporary Target":
@@ -1274,8 +1281,15 @@ extension MainViewController {
                     resumePump.append(entry!)
                 case "Pump Site Change":
                     pumpSiteChange.append(entry!)
+                case "Pumpbyte":
+                    pumpSiteChange.append(entry!)
+                case "Sensorbyte":
+                    cgmSensorChange.append(entry!)
+                case "Sensor Change":
+                    cgmSensorChange.append(entry!)
+                //Daniel Pumpbyte, Sensorbyte och Sensor Change tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
                 case "Sensor Start":
-                    cgmSensorStart.append(entry!)
+                    cgmSensorChange.append(entry!)
                 default:
                     print("No Match: \(String(describing: entry))")
             }
@@ -1331,10 +1345,10 @@ extension MainViewController {
                        clearOldResume()
                    }
                }
-               if cgmSensorStart.count > 0 {
-                   processSensorStart(entries: cgmSensorStart)
+               if cgmSensorChange.count > 0 {
+                   processSensorChange(entries: cgmSensorChange)
                } else {
-                   if sensorStartGraphData.count > 0 {
+                   if sensorChangeGraphData.count > 0 {
                        clearOldSensor()
                    }
                }
@@ -1391,8 +1405,8 @@ extension MainViewController {
         
         func clearOldSensor()
         {
-            sensorStartGraphData.removeAll()
-            updateSensorStart()
+            sensorChangeGraphData.removeAll()
+            updateSensorChange()
         }
         
         func clearOldNotes()
@@ -1796,11 +1810,11 @@ extension MainViewController {
         
     }
     
-    // NS Sensor Start Response Processor
-    func processSensorStart(entries: [[String:AnyObject]]) {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Sensor Start") }
+    // NS Sensor Change Response Processor
+    func processSensorCHange(entries: [[String:AnyObject]]) {
+        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Sensor Change") }
         // because it's a small array, we're going to destroy and reload every time.
-        sensorStartGraphData.removeAll()
+        sensorChangeGraphData.removeAll()
         var lastFoundIndex = 0
         for i in 0..<entries.count {
             let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
@@ -1829,11 +1843,11 @@ extension MainViewController {
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                 // Make the dot
                 let dot = DataStructs.timestampOnlyStruct(date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                sensorStartGraphData.append(dot)
+                sensorChangeGraphData.append(dot)
             }
         }
         if UserDefaultsRepository.graphOtherTreatments.value {
-        updateSensorStart()
+        updateSensorChange()
         }
         
     }
