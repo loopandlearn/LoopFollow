@@ -656,15 +656,15 @@ extension MainViewController {
                     }
 
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
-                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double)) + "E"
+                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double)) + "E"
                     }
                     if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.1f", cobdata["COB"] as! Double)
-                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double)
+                        tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double) + "g"
+                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double) + "g"
                     }
                     if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[8].value = String(format:"%.2fU", recbolusdata["insulinReq"] as! Double)
+                        tableData[8].value = String(format:"%.2f", recbolusdata["insulinReq"] as! Double) + "E"
                     }
                     if let autosensdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
@@ -1593,7 +1593,7 @@ extension MainViewController {
                 }
             }
             
-            latestBasal = String(format:"%.2f", scheduled)
+            latestBasal = String(format:"%.2f", scheduled) + "E/h"
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)
