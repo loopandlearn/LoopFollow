@@ -657,11 +657,11 @@ extension MainViewController {
 
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
                         tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double)) + " E"
-                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double)) + " E"
+                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double)) + "E"
                     }
                     if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double) + " g"
-                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double) + " g"
+                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double) + "g"
                     }
                     if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         tableData[8].value = String(format:"%.2f", recbolusdata["insulinReq"] as! Double) + " E"
@@ -1544,7 +1544,7 @@ extension MainViewController {
                 latestBasal = String(format:"%.2f", basalRate) + " E/h"
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
-                latestBasal = String(format:"%.2f", basalRate) + " E/h"
+                latestBasal = String(format:"%.2f", basalRate) + "E/h"
             }
             
             // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
