@@ -1281,6 +1281,8 @@ extension MainViewController {
                     resumePump.append(entry!)
                 case "Pump Site Change":
                     pumpSiteChange.append(entry!)
+                case "Site Change":
+                    pumpSiteChange.append(entry!)               
                 case "Pumpbyte":
                     pumpSiteChange.append(entry!)
                 case "Sensorbyte":
