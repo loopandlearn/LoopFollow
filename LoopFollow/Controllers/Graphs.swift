@@ -71,7 +71,7 @@ extension MainViewController {
         linePrediction.circleRadius = CGFloat(globalVariables.dotBG)
         linePrediction.circleColors = [NSUIColor.systemPurple]
         linePrediction.colors = [NSUIColor.systemPurple]
-        linePrediction.drawCircleHoleEnabled = false
+        linePrediction.drawCircleHoleEnabled = true
         linePrediction.axisDependency = YAxis.AxisDependency.right
         linePrediction.highlightEnabled = true
         linePrediction.drawValuesEnabled = false
