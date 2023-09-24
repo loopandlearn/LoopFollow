@@ -17,9 +17,9 @@ struct globalVariables {
     
     // Graph Settings
     static let dotBG: Float = 5
-    static let dotCarb: Float = 5
-    static let dotBolus: Float = 5
-    static let dotOther: Float = 5
+    static let dotCarb: Float = 7
+    static let dotBolus: Float = 7
+    static let dotOther: Float = 7
     
     
 }
