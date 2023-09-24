@@ -680,7 +680,7 @@ extension MainViewController {
                         if let predbgdata = enactdata["predBGs"] as? [String:AnyObject] {
                             if predbgdata["COB"] != nil {
                                 graphtype="COB"
-                                let customYellow = UIColor(red: 245/255, green: 213/255, blue: 73/255, alpha: 1.0)
+                                let customYellow = UIColor(red: 213/255, green: 185/255, blue: 63/255, alpha: 1.0)
                                 predictioncolor = customYellow
                                 PredictionLabel.textColor = predictioncolor
 
