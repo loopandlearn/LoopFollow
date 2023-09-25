@@ -1254,6 +1254,8 @@ extension MainViewController {
                     bolus.append(entry!)
                 case "Bolus":
                     bolus.append(entry!)
+                case "SMB":
+                    bolus.append(entry!)
                 case "Meal Bolus":
                     carbs.append(entry!)
                     bolus.append(entry!)
@@ -1265,7 +1267,7 @@ extension MainViewController {
                     carbs.append(entry!)
                 case "Måltid":
                     carbs.append(entry!)
-                //Daniel Kolhydrater, Dextro och måltid tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
+                //Daniel Kolhydrater, Dextro, SMB och måltid tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
                 case "Temporary Override":
                     temporaryOverride.append(entry!)
                 case "Temporary Target":
@@ -1289,7 +1291,9 @@ extension MainViewController {
                     cgmSensorChange.append(entry!)
                 case "Sensor Change":
                     cgmSensorChange.append(entry!)
-                //Daniel Pumpbyte, Sensorbyte och Sensor Change tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
+                case "Sensor Start":
+                    cgmSensorChange.append(entry!)
+                //Daniel Pumpbyte, Sensorbyte, Sensor Start och Sensor Change tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
                 default:
                     print("No Match: \(String(describing: entry))")
             }
