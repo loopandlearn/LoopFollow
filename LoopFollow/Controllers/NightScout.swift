@@ -671,7 +671,7 @@ extension MainViewController {
                         tableData[11].value = String(format:"%.0f", sens) + " %"
                     }
                     
-                    //Picks COB prediction if available, else UAM, else IOB, else ZT
+                    /Picks COB prediction if available, else UAM, else IOB, else ZT
                     //Ideal is to predict all 4 in Loop Follow but this is a quick start
                     var graphtype = ""
 var predictioncolor = UIColor.systemGray
@@ -679,34 +679,40 @@ PredictionLabel.textColor = predictioncolor
 
 if let enactdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
     if let predbgdata = enactdata["predBGs"] as? [String:AnyObject] {
-        if let cobData = predbgdata["COB"] as? [Double] {
+        if predbgdata["COB"] != nil {
             graphtype = "COB"
             predictioncolor = UIColor.systemYellow
+            PredictionLabel.textColor = predictioncolor
         }
-        else if let uamData = predbgdata["UAM"] as? [Double] {
+        else if predbgdata["UAM"] != nil {
             graphtype = "UAM"
             predictioncolor = UIColor.systemOrange
+            PredictionLabel.textColor = predictioncolor
         }
-        else if let iobData = predbgdata["IOB"] as? [Double] {
+        else if predbgdata["IOB"] != nil {
             graphtype = "IOB"
             predictioncolor = UIColor.systemBlue
+            PredictionLabel.textColor = predictioncolor
         }
-        else if let ztData = predbgdata["ZT"] as? [Double] {
+        else {
             graphtype = "ZT"
             predictioncolor = UIColor.systemPurple
+            PredictionLabel.textColor = predictioncolor
         }
-
+        
         let graphdata = predbgdata[graphtype] as! [Double]
-
+        
         if let eventualdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
             if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
                 let eventualBGStringValue = String(describing: eventualBGValue)
+                
+                // Concatenate graphtype to eventualBGStringValue
                 let combinedText = "\(eventualBGStringValue) \(graphtype)"
                 PredictionLabel.text = bgUnits.toDisplayUnits(combinedText)
             }
         }
-
-                            
+    
+                
                             if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
                                 predictionData.removeAll()
                                 var predictionTime = lastLoopTime
