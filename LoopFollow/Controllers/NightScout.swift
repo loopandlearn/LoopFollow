@@ -674,39 +674,38 @@ extension MainViewController {
                     //Picks COB prediction if available, else UAM, else IOB, else ZT
                     //Ideal is to predict all 4 in Loop Follow but this is a quick start
                     var graphtype = ""
-                    var predictioncolor = UIColor.systemGray
-                    PredictionLabel.textColor = predictioncolor
-                    if let enactdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        if let predbgdata = enactdata["predBGs"] as? [String:AnyObject] {
-                            if predbgdata["COB"] != nil {
-                                graphtype="COB"
-                                predictioncolor = UIColor.systemYellow
-                                PredictionLabel.textColor = predictioncolor
-                            }
-                            else if predbgdata["UAM"] != nil {
-                                graphtype="UAM"
-                                predictioncolor = UIColor.systemOrange
-                                PredictionLabel.textColor = predictioncolor
-                            }
-                            else if predbgdata["IOB"] != nil {
-                                graphtype="IOB"
-                                predictioncolor = UIColor.systemBlue
-                                PredictionLabel.textColor = predictioncolor
-                            }
-                            else {
-                                graphtype="ZT"
-                                predictioncolor = UIColor.systemPurple
-                                PredictionLabel.textColor = predictioncolor
-                            }
-                            
-                            let graphdata = predbgdata[graphtype] as! [Double]
-                            
-                            if let eventualdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                                if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
-                                    let eventualBGStringValue = String(describing: eventualBGValue)
-                                    PredictionLabel.text = bgUnits.toDisplayUnits(eventualBGStringValue)
-                                }
-                            }
+var predictioncolor = UIColor.systemGray
+PredictionLabel.textColor = predictioncolor
+
+if let enactdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+    if let predbgdata = enactdata["predBGs"] as? [String:AnyObject] {
+        if let cobData = predbgdata["COB"] as? [Double] {
+            graphtype = "COB"
+            predictioncolor = UIColor.systemYellow
+        }
+        else if let uamData = predbgdata["UAM"] as? [Double] {
+            graphtype = "UAM"
+            predictioncolor = UIColor.systemOrange
+        }
+        else if let iobData = predbgdata["IOB"] as? [Double] {
+            graphtype = "IOB"
+            predictioncolor = UIColor.systemBlue
+        }
+        else if let ztData = predbgdata["ZT"] as? [Double] {
+            graphtype = "ZT"
+            predictioncolor = UIColor.systemPurple
+        }
+
+        let graphdata = predbgdata[graphtype] as! [Double]
+
+        if let eventualdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+            if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
+                let eventualBGStringValue = String(describing: eventualBGValue)
+                let combinedText = "\(eventualBGStringValue) \(graphtype)"
+                PredictionLabel.text = bgUnits.toDisplayUnits(combinedText)
+            }
+        }
+
                             
                             if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
                                 predictionData.removeAll()
