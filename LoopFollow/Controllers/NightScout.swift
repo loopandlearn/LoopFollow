@@ -671,7 +671,7 @@ extension MainViewController {
                         tableData[11].value = String(format:"%.0f", sens) + " %"
                     }
                     
-                    /Picks COB prediction if available, else UAM, else IOB, else ZT
+                    //Picks COB prediction if available, else UAM, else IOB, else ZT
                     //Ideal is to predict all 4 in Loop Follow but this is a quick start
                     var graphtype = ""
 var predictioncolor = UIColor.systemGray
