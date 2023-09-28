@@ -29,6 +29,20 @@ extension MainViewController {
         var timeAsSeconds: Double
     }
     
+    struct NSProfile: Decodable {
+        struct Store: Decodable {
+            struct BasalEntry: Decodable {
+                let value: Double
+                let time: String
+                let timeAsSeconds: Double
+            }
+            
+            let basal: [BasalEntry]
+        }
+        
+        let store: [String: Store]
+    }
+    
     //NS Basal Data  Struct
     struct basalGraphStruct: Codable {
         var basalRate: Double
@@ -897,40 +911,17 @@ extension MainViewController {
 
     // NS Cage Web Call
     func webLoadNSCage() {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: CAGE") }
-        let urlUser = UserDefaultsRepository.url.value
-        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
-        if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Site%20Change&count=1"
-        }
-        
-        guard let urlData = URL(string: urlString) else {
-            return
-        }
-        var request = URLRequest(url: urlData)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard error == nil else {
-                return
-            }
-            guard let data = data else {
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([cageData].self, from: data)
-            if let entriesResponse = entriesResponse {
-                DispatchQueue.main.async {
-                    self.updateCage(data: entriesResponse)
-                }
-            } else {
-                return
+        let parameters: [String: String] = ["find[eventType]": NightscoutUtils.EventType.cage.rawValue, "count": "1"]
+        NightscoutUtils.executeRequest(eventType: .cage, parameters: parameters) { (result: Result<[cageData], Error>) in
+            switch result {
+            case .success(let data):
+                self.updateCage(data: data)
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
             }
         }
-        task.resume()
     }
-    
+        
     // NS Cage Response Processor
     func updateCage(data: [cageData]) {
         self.clearLastInfoData(index: 7)
@@ -965,42 +956,26 @@ extension MainViewController {
     
     // NS Sage Web Call
     func webLoadNSSage() {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: SAGE") }
-        
         let lastDateString = dateTimeUtils.nowMinus10DaysTimeInterval()
-        let urlUser = UserDefaultsRepository.url.value
-        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
-        if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
-        }
         
-        guard let urlData = URL(string: urlString) else {
-            return
-        }
-        var request = URLRequest(url: urlData)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        let parameters: [String: String] = [
+            "find[eventType]": NightscoutUtils.EventType.sage.rawValue,
+            "find[created_at][$gte]": lastDateString,
+            "count": "1"
+        ]
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard error == nil else {
-                return
-            }
-            guard let data = data else {
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            let entriesResponse = try? decoder.decode([cageData].self, from: data)
-            if let entriesResponse = entriesResponse {
+        NightscoutUtils.executeRequest(eventType: .sage, parameters: parameters) { (result: Result<[cageData], Error>) in
+            switch result {
+            case .success(let data):
                 DispatchQueue.main.async {
-                    self.updateSage(data: entriesResponse)
+                    self.updateSage(data: data)
                 }
-            } else {
-                return
+            case .failure(let error):
+                print("Failed to fetch data: \(error.localizedDescription)")
             }
         }
-        task.resume()
     }
-    
+        
     // NS Sage Response Processor
     func updateSage(data: [cageData]) {
         self.clearLastInfoData(index: 6)
@@ -1045,66 +1020,31 @@ extension MainViewController {
     
     // NS Profile Web Call
     func webLoadNSProfile() {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: profile") }
-        let urlUser = UserDefaultsRepository.url.value
-        var urlString = urlUser + "/api/v1/profile/current.json"
-        if token != "" {
-            urlString = urlUser + "/api/v1/profile/current.json?token=" + token
-        }
-        
-        let escapedAddress = urlString.addingPercentEncoding(withAllowedCharacters:NSCharacterSet.urlQueryAllowed)
-        guard let url = URL(string: escapedAddress!) else {
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard error == nil else {
-                return
-            }
-            guard let data = data else {
-                return
-            }
-            
-            
-            let json = try? JSONSerialization.jsonObject(with: data) as! Dictionary<String, Any>
-            
-            if let json = json {
-                DispatchQueue.main.async {
-                    self.updateProfile(jsonDeviceStatus: json)
-                }
-            } else {
-                return
+        NightscoutUtils.executeRequest(eventType: .profile, parameters: [:]) { (result: Result<NSProfile, Error>) in
+            switch result {
+            case .success(let profileData):
+                self.updateProfile(profileData: profileData)
+            case .failure(let error):
+                // Handle error, e.g., print or log
+                print("Error fetching profile data: \(error.localizedDescription)")
             }
         }
-        task.resume()
     }
     
     // NS Profile Response Processor
-    func updateProfile(jsonDeviceStatus: Dictionary<String, Any>) {
+    func updateProfile(profileData: NSProfile) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: profile") }
-        if jsonDeviceStatus.count == 0 {
+        
+        guard let store = profileData.store["default"] ?? profileData.store["Default"] else {
+            // Handle no data for default/Default key
             return
         }
-        if jsonDeviceStatus[keyPath: "message"] != nil { return }
         
-        if let basal = jsonDeviceStatus[keyPath: "store.default.basal"] as? NSArray ?? jsonDeviceStatus[keyPath: "store.Default.basal"] as? NSArray {
-            basalProfile.removeAll()
-            for i in 0..<basal.count {
-                let dict = basal[i] as! Dictionary<String, Any>
-                do {
-                    let thisValue = try dict[keyPath: "value"] as! Double
-                    let thisTime = dict[keyPath: "time"] as! String
-                    let thisTimeAsSeconds = dict[keyPath: "timeAsSeconds"] as! Double
-                    let entry = basalProfileStruct(value: thisValue, time: thisTime, timeAsSeconds: thisTimeAsSeconds)
-                    basalProfile.append(entry)
-                } catch {
-                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: profile wrapped in quotes") }
-                }
-            }
+        basalProfile.removeAll()
+        for basalEntry in store.basal {
+            let entry = basalProfileStruct(value: basalEntry.value, time: basalEntry.time, timeAsSeconds: basalEntry.timeAsSeconds)
+            basalProfile.append(entry)
         }
-        
         
         // Don't process the basal or draw the graph until after the BG has been fully processeed and drawn
         if firstGraphLoad { return }

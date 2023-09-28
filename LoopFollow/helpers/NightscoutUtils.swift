@@ -19,6 +19,57 @@ class NightscoutUtils {
         case unknown
     }
     
+    enum EventType: String {
+        case cage = "Site Change"
+        case carbsToday = "Carb Correction"
+        case sage = "Sensor Start"
+        case sgv
+        case profile
+        
+        var endpoint: String {
+            switch self {
+            case .cage, .carbsToday, .sage:
+                return "/api/v1/treatments.json"
+            case .sgv:
+                return "/api/v1/entries/sgv.json"
+            case .profile:
+                return "/api/v1/profile/current.json"
+            }
+        }
+    }
+    
+    static func executeRequest<T: Decodable>(eventType: EventType, parameters: [String: String], completion: @escaping (Result<T, Error>) -> Void) {
+        let baseURL = UserDefaultsRepository.url.value
+        let token = UserDefaultsRepository.token.value
+        
+        guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
+            completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to construct URL"])))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                completion(.failure(error!))
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            do {
+                let decodedObject = try decoder.decode(T.self, from: data)
+                DispatchQueue.main.async {
+                    completion(.success(decodedObject))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        task.resume()
+    }
+    
+    @available(*, deprecated, message: "Use constructURL instead.")
     static func createURLRequest(url: String, token: String?, path: String) -> URLRequest? {
         var requestURLString = "\(url)\(path)"
         
@@ -34,6 +85,25 @@ class NightscoutUtils {
         var request = URLRequest(url: requestURL)
         request.httpMethod = "GET"
         return request
+    }
+    
+    static func constructURL(baseURL: String, token: String?, endpoint: String, parameters: [String: String]) -> URL? {
+        var components = URLComponents(string: baseURL)
+        components?.path = endpoint
+        
+        var queryItems = [URLQueryItem]()
+        
+        if let token = token, !token.isEmpty {
+            queryItems.append(URLQueryItem(name: "token", value: token))
+        }
+        
+        for (key, value) in parameters {
+            queryItems.append(URLQueryItem(name: key, value: value))
+        }
+        
+        components?.queryItems = queryItems
+        
+        return components?.url
     }
     
     static func verifyURLAndToken(urlUser: String, token: String?, completion: @escaping (NightscoutError?) -> Void) {
