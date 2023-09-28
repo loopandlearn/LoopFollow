@@ -1254,6 +1254,8 @@ extension MainViewController {
                     bolus.append(entry!)
                 case "Bolus":
                     bolus.append(entry!)
+                case "SMB":
+                    bolus.append(entry!)
                 case "Meal Bolus":
                     carbs.append(entry!)
                     bolus.append(entry!)
