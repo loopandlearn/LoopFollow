@@ -1255,6 +1255,8 @@ extension MainViewController {
                     bolus.append(entry!)
                 case "Bolus":
                     bolus.append(entry!)
+                case "Insulinpenna":
+                    bolus.append(entry!)
                 case "SMB":
                     bolus.append(entry!)
                 case "Meal Bolus":
@@ -1268,7 +1270,7 @@ extension MainViewController {
                     carbs.append(entry!)
                 case "Måltid":
                     carbs.append(entry!)
-                //Daniel Kolhydrater, Dextro, SMB och måltid tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
+                //Daniel Kolhydrater, Dextro, Insulinpenna, SMB och måltid tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
                 case "Temporary Override":
                     temporaryOverride.append(entry!)
                 case "Temporary Target":
