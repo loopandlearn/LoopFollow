@@ -942,7 +942,6 @@ extension MainViewController {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: profile") }
         
         guard let store = profileData.store["default"] ?? profileData.store["Default"] else {
-            // Handle no data for default/Default key
             return
         }
         
