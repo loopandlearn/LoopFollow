@@ -1194,6 +1194,8 @@ extension MainViewController {
                     bolus.append(entry!)
                 case "Bolus":
                     bolus.append(entry!)
+                case "SMB":
+                    bolus.append(entry!)
                 case "Meal Bolus":
                     carbs.append(entry!)
                     bolus.append(entry!)
@@ -1907,7 +1909,9 @@ extension MainViewController {
             }
             var duration: Double = 5.0
             if let durationType = currentEntry?["durationType"] as? String {
-                duration = dateTimeUtils.getNowTimeIntervalUTC() - dateTimeStamp + (60 * 60)
+                if i == entries.count - 1 {
+                    duration = dateTimeUtils.getNowTimeIntervalUTC() - dateTimeStamp + (60 * 60)
+                }
             } else {
                 duration = (currentEntry?["duration"] as? Double)!
                 duration = duration * 60
