@@ -932,7 +932,6 @@ extension MainViewController {
             case .success(let profileData):
                 self.updateProfile(profileData: profileData)
             case .failure(let error):
-                // Handle error, e.g., print or log
                 print("Error fetching profile data: \(error.localizedDescription)")
             }
         }
