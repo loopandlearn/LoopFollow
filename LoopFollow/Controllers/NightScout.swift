@@ -10,8 +10,6 @@ import Foundation
 import UIKit
 
 extension MainViewController {
-
-    
     //NS Carbs Struct
     struct carbsData: Codable {
         var carbs: Double?
@@ -79,14 +77,12 @@ extension MainViewController {
         }
     }
     
-    
     // Dex Share Web Call
-    func webLoadDexShare(onlyPullLastRecord: Bool = false) {
+    func webLoadDexShare() {
         // Dexcom Share only returns 24 hrs of data as of now
         // Requesting more just for consistency with NS
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         var count = graphHours * 12
-        if onlyPullLastRecord { count = 1 }
         dexShare?.fetchData(count) { (err, result) -> () in
             
             // TODO: add error checking
@@ -97,21 +93,21 @@ extension MainViewController {
                 let latestDate = data[0].date
                 let now = dateTimeUtils.getNowTimeIntervalUTC()
                 if (latestDate + 330) < now && UserDefaultsRepository.url.value != "" {
-                    self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+                    self.webLoadNSBGData()
                     print("dex didn't load, triggered NS attempt")
                     return
                 }
                 
                 // Dexcom only returns 24 hrs of data. If we need more, call NS.
-                if graphHours > 24 && !onlyPullLastRecord && UserDefaultsRepository.url.value != "" {
-                    self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord, dexData: data)
+                if graphHours > 24 && UserDefaultsRepository.url.value != "" {
+                    self.webLoadNSBGData(dexData: data)
                 } else {
-                    self.ProcessDexBGData(data: data, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
+                    self.ProcessDexBGData(data: data, sourceName: "Dexcom")
                 }
             } else {
                 // If we get an error, immediately try to pull NS BG Data
                 if UserDefaultsRepository.url.value != "" {
-                    self.webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+                    self.webLoadNSBGData()
                 }
                 
                 if globalVariables.dexVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
@@ -125,7 +121,7 @@ extension MainViewController {
     }
     
     // NS BG Data Web call
-    func webLoadNSBGData(onlyPullLastRecord: Bool = false, dexData: [ShareGlucoseData] = []) {
+    func webLoadNSBGData(dexData: [ShareGlucoseData] = []) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
         
         // This kicks it out in the instance where dexcom fails but they aren't using NS &&
@@ -134,99 +130,16 @@ extension MainViewController {
             return
         }
         
-        // URL processor
-        var urlBGDataPath: String = UserDefaultsRepository.url.value + "/api/v1/entries/sgv.json?"
-
-        if onlyPullLastRecord {
-            urlBGDataPath = urlBGDataPath + "count=1"
-        } else {
-            //Fetch entries for the time period of "downloadDays"
-            let utcISODateFormatter = ISO8601DateFormatter()
-            let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
-            urlBGDataPath = urlBGDataPath + "count=1000&find[dateString][$gte]=" + utcISODateFormatter.string(from: date)
-        }
-
-        if !token.isEmpty {
-            urlBGDataPath = urlBGDataPath + "&token=" + token
-        }
-
-        guard let urlBGData = URL(string: urlBGDataPath) else {
-            // if we have Dex data, use it
-            if !dexData.isEmpty {
-                self.ProcessDexBGData(data: dexData, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
-                return
-            }
-
-            if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
-                globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
-            }
-            DispatchQueue.main.async {
-                if self.bgTimer.isValid {
-                    self.bgTimer.invalidate()
-                }
-                self.startBGTimer(time: 10)
-            }
-            return
-        }
-        var request = URLRequest(url: urlBGData)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        var parameters: [String: String] = [:]
+        let utcISODateFormatter = ISO8601DateFormatter()
+        let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
+        parameters["count"] = "1000"
+        parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: date)
         
-        // Downloader
-        let getBGTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard error == nil else {
-                if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
-                    globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
-                }
-                DispatchQueue.main.async {
-                    if self.bgTimer.isValid {
-                        self.bgTimer.invalidate()
-                    }
-                    self.startBGTimer(time: 10)
-                }
-                // if we have Dex data, use it
-                if !dexData.isEmpty {
-                    self.ProcessDexBGData(data: dexData, onlyPullLastRecord: onlyPullLastRecord, sourceName: "Dexcom")
-                }
-                return
-                
-            }
-            guard let data = data else {
-                if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
-                    globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
-                }
-                DispatchQueue.main.async {
-                    if self.bgTimer.isValid {
-                        self.bgTimer.invalidate()
-                    }
-                    self.startBGTimer(time: 10)
-                }
-                return
-                
-            }
-            
-            var entriesResponse: [ShareGlucoseData]?
-            let decoder = JSONDecoder()
-            do {
-                entriesResponse = try decoder.decode([ShareGlucoseData].self, from: data)
-            } catch let DecodingError.dataCorrupted(context) {
-                print("Data corrupted: \(context)")
-            } catch let DecodingError.keyNotFound(key, context) {
-                print("Key '\(key)' not found: \(context.debugDescription)")
-                print("codingPath: \(context.codingPath)")
-            } catch let DecodingError.valueNotFound(value, context) {
-                print("Value '\(value)' not found: \(context.debugDescription)")
-                print("codingPath: \(context.codingPath)")
-            } catch let DecodingError.typeMismatch(type, context)  {
-                print("Type '\(type)' mismatch: \(context.debugDescription)")
-                print("codingPath: \(context.codingPath)")
-            } catch {
-                print("Error decoding JSON: \(error)")
-            }
-
-            if var nsData = entriesResponse {
+        NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
+            switch result {
+            case .success(let entriesResponse):
+                var nsData = entriesResponse
                 DispatchQueue.main.async {
                     // transform NS data to look like Dex data
                     for i in 0..<nsData.count {
@@ -235,7 +148,7 @@ extension MainViewController {
                         nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
                     }
                     print(nsData.count)
-
+                    
                     //Avoid duplicate entries messing up the graph, only use one reading per 5 minutes.
                     let graphHours = 24 * UserDefaultsRepository.downloadDays.value
                     let points = graphHours * 12 + 1
@@ -266,13 +179,13 @@ extension MainViewController {
                         sourceName = "Dexcom"
                     }
                     // trigger the processor for the data after downloading.
-                    self.ProcessDexBGData(data: nsData2, onlyPullLastRecord: onlyPullLastRecord, sourceName: sourceName)
-                    
+                    self.ProcessDexBGData(data: nsData2, sourceName: sourceName)
                 }
-            } else {
+            case .failure(let error):
+                print("Failed to fetch data: \(error)")
                 if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
                     globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    //self.sendNotification(title: "Nightscout Failure", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
+                    //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
                 }
                 DispatchQueue.main.async {
                     if self.bgTimer.isValid {
@@ -280,15 +193,17 @@ extension MainViewController {
                     }
                     self.startBGTimer(time: 10)
                 }
+                // if we have Dex data, use it
+                if !dexData.isEmpty {
+                    self.ProcessDexBGData(data: dexData, sourceName: "Dexcom")
+                }
                 return
-                
             }
         }
-        getBGTask.resume()
     }
     
     // Dexcom BG Data Response processor
-    func ProcessDexBGData(data: [ShareGlucoseData], onlyPullLastRecord: Bool, sourceName: String){
+    func ProcessDexBGData(data: [ShareGlucoseData], sourceName: String){
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG") }
         
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
@@ -333,15 +248,7 @@ extension MainViewController {
             }
         }
         
-        // If we already have data, we're going to pop it to the end and remove the first. If we have old or no data, we'll destroy the whole array and start over. This is simpler than determining how far back we need to get new data from in case Dex back-filled readings
-        if !onlyPullLastRecord {
-            bgData.removeAll()
-        } else if bgData[bgData.count - 1].date != pullDate {
-            bgData.removeFirst()
-            
-        } else {
-            return
-        }
+        bgData.removeAll()
         
         // loop through the data so we can reverse the order to oldest first for the graph
         for i in 0..<data.count {
@@ -1138,37 +1045,22 @@ extension MainViewController {
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         let startTimeString = dateTimeUtils.nowMinusNHoursTimeInterval(N: graphHours)
         
-        var urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?find[created_at][$gte]=" + startTimeString
-        if token != "" {
-            urlString = UserDefaultsRepository.url.value + "/api/v1/treatments.json?token=" + token + "&find[created_at][$gte]=" + startTimeString
-        }
+        let parameters: [String: String] = ["find[created_at][$gte]": startTimeString]
         
-        guard let urlData = URL(string: urlString) else {
-            return
-        }
-        
-        
-        var request = URLRequest(url: urlData)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            
-            guard error == nil else {
-                return
-            }
-            guard let data = data else {
-                return
-            }
-            
-            let json = try? (JSONSerialization.jsonObject(with: data) as? [[String:AnyObject]])
-            if let json = json {
-                DispatchQueue.main.async {
-                    self.updateTreatments(entries: json)
+        NightscoutUtils.executeDynamicRequest(eventType: .treatments, parameters: parameters) { (result: Result<Any, Error>) in
+            switch result {
+            case .success(let data):
+                if let entries = data as? [[String: AnyObject]] {
+                    DispatchQueue.main.async {
+                        self.updateTreatments(entries: entries)
+                    }
+                } else {
+                    print("Error: Unexpected data structure")
                 }
-            } else {
-                return
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
             }
         }
-        task.resume()
     }
     
     // Process and split out treatments to individual tasks
@@ -1290,58 +1182,58 @@ extension MainViewController {
     }
     
     func clearOldTempBasal()
-        {
-            basalData.removeAll()
-            updateBasalGraph()
-        }
-        
-        func clearOldBolus()
-        {
-            bolusData.removeAll()
-            updateBolusGraph()
-        }
-        
-        func clearOldCarb()
-        {
-            carbData.removeAll()
-            updateCarbGraph()
-        }
-        
-        func clearOldBGCheck()
-        {
-            bgCheckData.removeAll()
-            updateBGCheckGraph()
-        }
-        
-        func clearOldOverride()
-        {
-            overrideGraphData.removeAll()
-            updateOverrideGraph()
-        }
-        
-        func clearOldSuspend()
-        {
-            suspendGraphData.removeAll()
-            updateSuspendGraph()
-        }
-        
-        func clearOldResume()
-        {
-            resumeGraphData.removeAll()
-            updateResumeGraph()
-        }
-        
-        func clearOldSensor()
-        {
-            sensorStartGraphData.removeAll()
-            updateSensorStart()
-        }
-        
-        func clearOldNotes()
-        {
-            noteGraphData.removeAll()
-            updateNotes()
-        }
+    {
+        basalData.removeAll()
+        updateBasalGraph()
+    }
+    
+    func clearOldBolus()
+    {
+        bolusData.removeAll()
+        updateBolusGraph()
+    }
+    
+    func clearOldCarb()
+    {
+        carbData.removeAll()
+        updateCarbGraph()
+    }
+    
+    func clearOldBGCheck()
+    {
+        bgCheckData.removeAll()
+        updateBGCheckGraph()
+    }
+    
+    func clearOldOverride()
+    {
+        overrideGraphData.removeAll()
+        updateOverrideGraph()
+    }
+    
+    func clearOldSuspend()
+    {
+        suspendGraphData.removeAll()
+        updateSuspendGraph()
+    }
+    
+    func clearOldResume()
+    {
+        resumeGraphData.removeAll()
+        updateResumeGraph()
+    }
+    
+    func clearOldSensor()
+    {
+        sensorStartGraphData.removeAll()
+        updateSensorStart()
+    }
+    
+    func clearOldNotes()
+    {
+        noteGraphData.removeAll()
+        updateNotes()
+    }
     
     // NS Temp Basal Response Processor
     func processNSBasals(entries: [[String:AnyObject]]) {

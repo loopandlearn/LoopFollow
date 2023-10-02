@@ -25,10 +25,11 @@ class NightscoutUtils {
         case sage = "Sensor Start"
         case sgv
         case profile
+        case treatments
         
         var endpoint: String {
             switch self {
-            case .cage, .carbsToday, .sage:
+            case .cage, .carbsToday, .sage, .treatments:
                 return "/api/v1/treatments.json"
             case .sgv:
                 return "/api/v1/entries/sgv.json"
@@ -69,7 +70,45 @@ class NightscoutUtils {
         task.resume()
     }
     
-    @available(*, deprecated, message: "Use constructURL instead.")
+    
+    static func executeDynamicRequest(eventType: EventType, parameters: [String: String], completion: @escaping (Result<Any, Error>) -> Void) {
+        let baseURL = UserDefaultsRepository.url.value
+        let token = UserDefaultsRepository.token.value
+        
+        guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
+            completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to construct URL"])))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                completion(.failure(error!))
+                return
+            }
+            
+            do {
+                if let jsonObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    DispatchQueue.main.async {
+                        completion(.success(jsonObject))
+                    }
+                } else if let jsonArray = try JSONSerialization.jsonObject(with: data, options: []) as? [Any] {
+                    DispatchQueue.main.async {
+                        completion(.success(jsonArray))
+                    }
+                } else {
+                    completion(.failure(NSError(domain: "NightscoutUtils", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON Structure"])))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        task.resume()
+    }
+    
+    //@available(*, deprecated, message: "Use constructURL instead.")
     static func createURLRequest(url: String, token: String?, path: String) -> URLRequest? {
         var requestURLString = "\(url)\(path)"
         
