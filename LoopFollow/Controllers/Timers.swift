@@ -141,12 +141,10 @@ extension MainViewController {
             return
         }
         
-        var onlyPullLastRecord = false
-        
         if UserDefaultsRepository.shareUserName.value != "" && UserDefaultsRepository.sharePassword.value != "" {
-            webLoadDexShare(onlyPullLastRecord: onlyPullLastRecord)
+            webLoadDexShare()
         } else {
-            webLoadNSBGData(onlyPullLastRecord: onlyPullLastRecord)
+            webLoadNSBGData()
         }
         
     }
