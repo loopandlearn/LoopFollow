@@ -1969,7 +1969,9 @@ extension MainViewController {
             }
             var duration: Double = 5.0
             if let durationType = currentEntry?["durationType"] as? String {
-                duration = dateTimeUtils.getNowTimeIntervalUTC() - dateTimeStamp + (60 * 60)
+                if i == entries.count - 1 {
+                    duration = dateTimeUtils.getNowTimeIntervalUTC() - dateTimeStamp + (60 * 60)
+                }
             } else {
                 duration = (currentEntry?["duration"] as? Double)!
                 duration = duration * 60
