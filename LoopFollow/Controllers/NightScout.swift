@@ -240,7 +240,7 @@ extension MainViewController {
                     print(nsData2.count)
                     
                     // merge NS and Dex data if needed; use recent Dex data and older NS data
-                    var sourceName = "Nightscout"
+                    var sourceName = "Ivars Nightscout"
                     if !dexData.isEmpty {
                         let oldestDexDate = dexData[dexData.count - 1].date
                         var itemsToRemove = 0
