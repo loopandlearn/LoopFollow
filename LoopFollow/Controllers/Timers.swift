@@ -247,7 +247,6 @@ extension MainViewController {
         }
         
         if UserDefaultsRepository.url.value != "" {
-            webLoadNSCarbsToday()
             webLoadNSCage()
             webLoadNSSage()
             startCageSageTimer()

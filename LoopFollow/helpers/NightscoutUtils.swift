@@ -26,6 +26,7 @@ class NightscoutUtils {
         case sgv
         case profile
         case treatments
+        case deviceStatus
         
         var endpoint: String {
             switch self {
@@ -35,6 +36,8 @@ class NightscoutUtils {
                 return "/api/v1/entries/sgv.json"
             case .profile:
                 return "/api/v1/profile/current.json"
+            case .deviceStatus: 
+                return "/api/v1/devicestatus.json"
             }
         }
     }
