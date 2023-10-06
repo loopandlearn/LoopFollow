@@ -12,7 +12,14 @@ import Foundation
 extension MainViewController {
     // NS Cage Web Call
     func webLoadNSCage() {
-        let parameters: [String: String] = ["find[eventType]": NightscoutUtils.EventType.cage.rawValue, "count": "1"]
+        let currentTimeString = dateTimeUtils.getCurrentDateTimeString()
+        
+        let parameters: [String: String] = [
+            "find[eventType]": NightscoutUtils.EventType.cage.rawValue,
+            "find[created_at][$lte]": currentTimeString,
+            "count": "1"
+        ]
+        
         NightscoutUtils.executeRequest(eventType: .cage, parameters: parameters) { (result: Result<[cageData], Error>) in
             switch result {
             case .success(let data):
