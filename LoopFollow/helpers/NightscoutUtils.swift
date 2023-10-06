@@ -111,7 +111,7 @@ class NightscoutUtils {
         task.resume()
     }
     
-    //@available(*, deprecated, message: "Use constructURL instead.")
+    @available(*, deprecated, message: "Use constructURL instead.")
     static func createURLRequest(url: String, token: String?, path: String) -> URLRequest? {
         var requestURLString = "\(url)\(path)"
         

@@ -70,7 +70,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     let consoleLogging = true
     var timeofLastBGUpdate = 0 as TimeInterval
     var nsVerifiedAlerted = false
-    
+    var mayDoDeepSageCheck = true
+    var mayDoDeepCageCheck = true
+
     var backgroundTask = BackgroundTask()
     
     // Refresh NS Data
@@ -91,7 +93,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var calTimer = Timer()
     
     var bgTimer = Timer()
-    var cageSageTimer = Timer()
     var profileTimer = Timer()
     var deviceStatusTimer = Timer()
     var treatmentsTimer = Timer()
@@ -265,6 +266,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         MinAgoText.text = "Refreshing"
         invalidateTimers()
         restartAllTimers()
+        mayDoDeepSageCheck = true
+        mayDoDeepCageCheck = true
         refreshControl.endRefreshing()
     }
     

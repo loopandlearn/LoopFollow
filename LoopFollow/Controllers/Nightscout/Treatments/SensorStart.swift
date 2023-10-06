@@ -8,6 +8,15 @@
 
 import Foundation
 extension MainViewController {
+    func processSage(entries: [sageData]) {
+        if !entries.isEmpty {
+            updateSage(data: entries)
+        } else if mayDoDeepSageCheck {
+            webLoadNSSage()
+        }
+        mayDoDeepSageCheck = false
+    }
+    
     // NS Sensor Start Response Processor
     func processSensorStart(entries: [sageData]) {
         sensorStartGraphData.removeAll()

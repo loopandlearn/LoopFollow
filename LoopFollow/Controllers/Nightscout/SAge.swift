@@ -13,10 +13,12 @@ extension MainViewController {
     // NS Sage Web Call
     func webLoadNSSage() {
         let lastDateString = dateTimeUtils.nowMinus10DaysTimeInterval()
+        let currentTimeString = dateTimeUtils.getCurrentDateTimeString()
         
         let parameters: [String: String] = [
             "find[eventType]": NightscoutUtils.EventType.sage.rawValue,
             "find[created_at][$gte]": lastDateString,
+            "find[created_at][$lte]": currentTimeString,
             "count": "1"
         ]
         

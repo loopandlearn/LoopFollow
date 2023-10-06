@@ -16,9 +16,11 @@ extension MainViewController {
         
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         let startTimeString = dateTimeUtils.nowMinusNHoursTimeInterval(N: graphHours)
-        
-        let parameters: [String: String] = ["find[created_at][$gte]": startTimeString]
-        
+        let currentTimeString = dateTimeUtils.getCurrentDateTimeString()
+        let parameters: [String: String] = [
+            "find[created_at][$gte]": startTimeString,
+            "find[created_at][$lte]": currentTimeString
+        ]
         NightscoutUtils.executeDynamicRequest(eventType: .treatments, parameters: parameters) { (result: Result<Any, Error>) in
             switch result {
             case .success(let data):
@@ -46,7 +48,7 @@ extension MainViewController {
         var bgCheck: [[String:AnyObject]] = []
         var suspendPump: [[String:AnyObject]] = []
         var resumePump: [[String:AnyObject]] = []
-        var pumpSiteChange: [[String:AnyObject]] = []
+        var pumpSiteChange: [cageData] = []
         var cgmSensorStart: [sageData] = []
         
         for i in 0..<entries.count {
@@ -78,8 +80,11 @@ extension MainViewController {
                 suspendPump.append(entry!)
             case "Resume Pump":
                 resumePump.append(entry!)
-            case "Pump Site Change":
-                pumpSiteChange.append(entry!)
+            case "Pump Site Change", "Site Change":
+                if let createdAt = entry?["created_at"] as? String {
+                    let newEntry = cageData(created_at: createdAt)
+                    pumpSiteChange.append(newEntry)
+                }
             case "Sensor Start":
                 if let createdAt = entry?["created_at"] as? String {
                     let newEntry = sageData(created_at: createdAt)
@@ -89,7 +94,6 @@ extension MainViewController {
                 print("No Match: \(String(describing: entry))")
             }
         }
-        // end of for loop
         
         if tempBasal.count > 0 {
             processNSBasals(entries: tempBasal)
@@ -141,7 +145,7 @@ extension MainViewController {
                 clearOldResume()
             }
         }
-        
+        processSage(entries: cgmSensorStart)
         if cgmSensorStart.count > 0 {
             processSensorStart(entries: cgmSensorStart)
         } else {
@@ -156,5 +160,6 @@ extension MainViewController {
                 clearOldNotes()
             }
         }
+        processCage(entries: pumpSiteChange)
     }
 }
