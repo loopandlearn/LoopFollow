@@ -1,3 +1,4 @@
+#include? "LoopFollowConfigOverride.xcconfig"
 #include? "../../LoopFollowConfigOverride.xcconfig"
 
 //
