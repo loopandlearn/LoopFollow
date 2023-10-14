@@ -884,6 +884,9 @@ extension MainViewController {
         self.clearLastInfoData(index: 10)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: carbs") }
         if data.count == 0 {
+            //Auggie default to 0 carbs for the day when no carbs are found
+            tableData[10].value = "0"
+            infoTable.reloadData()
             return
         }
 
