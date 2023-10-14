@@ -157,6 +157,23 @@ class WatchSettingsViewController: FormViewController {
             <<< LabelRow("MINAGO"){ row in
                 row.title = "%MINAGO% : Only displays for old readings"
             }
+        
+            //Auggie adding eA1C
+            <<< LabelRow("A1C"){ row in
+                row.title = "%A1C% : Displays estimated A1C"
+            }
+            //Auggie adding average BG
+            <<< LabelRow("Avg BG"){ row in
+                row.title = "%AVG% : Displays average BG"
+            }
+            //Auggie adding time in range
+            <<< LabelRow("TIR"){ row in
+                row.title = "%TIR% : Displays time in range"
+            }
+            //Auggie adding target
+            <<< LabelRow("TAR"){ row in
+                row.title = "%TAR% : Displays target"
+            }
             
             
             +++ ButtonRow() {
