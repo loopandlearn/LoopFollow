@@ -326,7 +326,8 @@ extension MainViewController {
         BGChart.rightAxis.labelTextColor = NSUIColor.label
         BGChart.rightAxis.labelPosition = YAxis.LabelPosition.insideChart
         BGChart.rightAxis.axisMinimum = 0.0
-        BGChart.rightAxis.axisMaximum = Double(maxBG)
+        //Auggie - cap at 300
+        BGChart.rightAxis.axisMaximum = 300
         BGChart.rightAxis.gridLineDashLengths = [5.0, 5.0]
         BGChart.rightAxis.drawGridLinesEnabled = false
         BGChart.rightAxis.valueFormatter = ChartYMMOLValueFormatter()
@@ -523,12 +524,15 @@ extension MainViewController {
         
         if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Colors: " + mainChart.colors.count.description) }
         
-        BGChart.rightAxis.axisMaximum = Double(topBG)
-        BGChart.setVisibleXRangeMinimum(600)
+        //Auggie - max 300
+        BGChart.rightAxis.axisMaximum = 300
+        //Auggie - max 300
+        BGChart.setVisibleXRangeMinimum(300)
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        BGChartFull.rightAxis.axisMaximum = Double(topBG)
+        //Auggie - max 300
+        BGChartFull.rightAxis.axisMaximum = 300
         BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChartFull.data?.notifyDataChanged()
         BGChartFull.notifyDataSetChanged()
@@ -569,7 +573,9 @@ extension MainViewController {
                 } else {
                     colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(1.0))
                 }
-            } else if predictionVal > 400 {
+            //Auggie cap at 300
+            } else if predictionVal > 300 {
+                predictionVal = 300
                 colors.append(color ?? NSUIColor.systemYellow)
             } else if predictionVal < 0 {
                 colors.append(color ?? NSUIColor.systemRed)
@@ -594,7 +600,8 @@ extension MainViewController {
                 smallChart.circleColors.append(colors[i])
             }
         }
-        BGChart.rightAxis.axisMaximum = Double(topBG)
+        //Auggie cap at 300
+        BGChart.rightAxis.axisMaximum = 300
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
@@ -1175,7 +1182,8 @@ extension MainViewController {
         
         BGChartFull.rightAxis.enabled = false
         BGChartFull.rightAxis.axisMinimum = 0.0
-        BGChartFull.rightAxis.axisMaximum = Double(maxBG)
+        //Auggie 300 cap
+        BGChartFull.rightAxis.axisMaximum = 300
                                                
         BGChartFull.xAxis.drawLabelsEnabled = false
         BGChartFull.xAxis.drawGridLinesEnabled = false
