@@ -691,7 +691,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             
             var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
 //                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar start date") }
-            var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
+            //Auggie - try 5 minute calendar entries
+            var eventEndDate = eventStartDate.addingTimeInterval(60 * 5)
             var  eventTitle = UserDefaultsRepository.watchLine1.value
             if (UserDefaultsRepository.watchLine2.value.count > 1) {
                 eventTitle += "\n" + UserDefaultsRepository.watchLine2.value
@@ -712,7 +713,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if deltaTime > 9 {
                 // write old BG reading and continue pushing out end date to show last entry
                 minAgo = String(Int(deltaTime)) + " min"
-                eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
+                //Auggie - try 5 minute calendar entries
+                eventEndDate = eventStartDate.addingTimeInterval((60 * 5) + (deltaTime * 60))
             }
             var cob = "0"
             if self.latestCOB != "" {
