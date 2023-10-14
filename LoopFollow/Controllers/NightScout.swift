@@ -899,9 +899,11 @@ extension MainViewController {
     func webLoadNSCage() {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: CAGE") }
         let urlUser = UserDefaultsRepository.url.value
-        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site%20Change&count=1"
+        //Auggie - fix for iOS 17
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Site+Change&count=1"
         if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Site%20Change&count=1"
+            //Auggie - fix for iOS 17
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Site+Change&count=1"
         }
         
         guard let urlData = URL(string: urlString) else {
@@ -969,9 +971,11 @@ extension MainViewController {
         
         let lastDateString = dateTimeUtils.nowMinus10DaysTimeInterval()
         let urlUser = UserDefaultsRepository.url.value
-        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
+        //Auggie fix for iOS 17
+        var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor+Start&find[created_at][$gte]=" + lastDateString + "&count=1"
         if token != "" {
-            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor%20Start&find[created_at][$gte]=" + lastDateString + "&count=1"
+            //Auggie fix for iOS 17
+            urlString = urlUser + "/api/v1/treatments.json?token=" + token + "&find[eventType]=Sensor+Start&find[created_at][$gte]=" + lastDateString + "&count=1"
         }
         
         guard let urlData = URL(string: urlString) else {
