@@ -160,9 +160,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UserDefaultsRepository.infoNames.value.append("Pump")
         UserDefaultsRepository.infoNames.value.append("SAGE")
         UserDefaultsRepository.infoNames.value.append("CAGE")
-        UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
-        UserDefaultsRepository.infoNames.value.append("Pred.")
-        UserDefaultsRepository.infoNames.value.append("Carbs today")
+        //Auggie - phrasing change
+        UserDefaultsRepository.infoNames.value.append("Needed")
+        //Auggie - phrasing change
+        UserDefaultsRepository.infoNames.value.append("Min/Max")
+        //Auggie - capitalization change
+        UserDefaultsRepository.infoNames.value.append("Carbs Today")
         UserDefaultsRepository.infoNames.value.append("Autosens")
         
         // Reset deprecated settings
