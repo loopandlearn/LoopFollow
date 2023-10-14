@@ -969,7 +969,8 @@ extension MainViewController {
     func webLoadNSSage() {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: SAGE") }
         
-        let lastDateString = dateTimeUtils.nowMinus10DaysTimeInterval()
+        //Auggie - override method for flexibility, allow longer sensor duration (Anubis, Freestyle, etc - max at 30 days here)
+        let lastDateString = dateTimeUtils.nowMinusNDaysTimeInterval(N: 30)
         let urlUser = UserDefaultsRepository.url.value
         //Auggie fix for iOS 17
         var urlString = urlUser + "/api/v1/treatments.json?find[eventType]=Sensor+Start&find[created_at][$gte]=" + lastDateString + "&count=1"
