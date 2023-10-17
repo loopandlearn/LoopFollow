@@ -70,8 +70,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     let consoleLogging = true
     var timeofLastBGUpdate = 0 as TimeInterval
     var nsVerifiedAlerted = false
-    var mayDoDeepSageCheck = true
-    var mayDoDeepCageCheck = true
+    var currentSage : sageData?
+    var currentCage : cageData?
 
     var backgroundTask = BackgroundTask()
     
@@ -266,8 +266,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         MinAgoText.text = "Refreshing"
         invalidateTimers()
         restartAllTimers()
-        mayDoDeepSageCheck = true
-        mayDoDeepCageCheck = true
+        currentCage = nil
+        currentSage = nil
         refreshControl.endRefreshing()
     }
     
