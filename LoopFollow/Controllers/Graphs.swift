@@ -862,7 +862,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Suspend Pump", time: thisData[i].date))
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Pausa pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
@@ -889,7 +889,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Resume Pump", time: thisData[i].date))
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Återuppta pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
@@ -1204,12 +1204,14 @@ extension MainViewController {
             let thisItem = thisData[i]
             let multiplier = thisItem.insulNeedsScaleFactor as! Double * 100.0
             var labelText = thisItem.reason + "\r\n"
-            labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% "
+            labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% Mål:"
             if thisItem.correctionRange.count == 2 {
-                labelText += String(thisItem.correctionRange[0]) + "-" + String(thisItem.correctionRange[1])
+                let firstValue = Double(thisItem.correctionRange[0])
+                let result = firstValue / 18.0
+                labelText += String(result)
             }
             if thisItem.enteredBy.count > 0 {
-                labelText += "\r\nEntered By: " + thisItem.enteredBy
+                labelText += "\r\nInlagt av: " + thisItem.enteredBy
             }
             
             
