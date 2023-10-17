@@ -11,39 +11,27 @@ extension MainViewController {
     // NS Carb Bolus Response Processor
     func processNSCarbs(entries: [[String:AnyObject]]) {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Carbs") }
-        // because it's a small array, we're going to destroy and reload every time.
+        // Because it's a small array, we're going to destroy and reload every time.
         carbData.removeAll()
         var lastFoundIndex = 0
         var lastFoundBolus = 0
-        for i in 0..<entries.count {
-            let currentEntry = entries[entries.count - 1 - i] as [String : AnyObject]?
+        
+        entries.reversed().forEach { currentEntry in
             var carbDate: String
-            if currentEntry?["timestamp"] != nil {
-                carbDate = currentEntry?["timestamp"] as! String
-            } else if currentEntry?["created_at"] != nil {
-                carbDate = currentEntry?["created_at"] as! String
+            if currentEntry["timestamp"] != nil {
+                carbDate = currentEntry["timestamp"] as! String
+            } else if currentEntry["created_at"] != nil {
+                carbDate = currentEntry["created_at"] as! String
             } else {
-                continue
+                return
             }
             
+            let absorptionTime = currentEntry["absorptionTime"] as? Int ?? 0
             
-            let absorptionTime = currentEntry?["absorptionTime"] as? Int ?? 0
+            guard let parsedDate = NightscoutUtils.parseDate(carbDate),
+                  let carbs = currentEntry["carbs"] as? Double else { return }
             
-            // Fix for FreeAPS milliseconds in timestamp
-            var strippedZone = String(carbDate.dropLast())
-            strippedZone = strippedZone.components(separatedBy: ".")[0]
-            
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-            dateFormatter.locale = Locale(identifier: "en_US")
-            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-            guard let dateString = dateFormatter.date(from: strippedZone) else { continue }
-            var dateTimeStamp = dateString.timeIntervalSince1970
-            
-            guard let carbs = currentEntry?["carbs"] as? Double else {
-                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Null Carb entry")}
-                continue
-            }
+            let dateTimeStamp = parsedDate.timeIntervalSince1970
             let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
             lastFoundIndex = sgv.foundIndex
             
@@ -52,11 +40,7 @@ extension MainViewController {
                 let bolusTime = findNearestBolusbyTime(timeWithin: 300, needle: dateTimeStamp, haystack: bolusData, startingIndex: lastFoundBolus)
                 lastFoundBolus = bolusTime.foundIndex
                 
-                if bolusTime.offset {
-                    offset = 70
-                } else {
-                    offset = 20
-                }
+                offset = bolusTime.offset ? 70 : 20
             }
             
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
@@ -89,10 +73,7 @@ extension MainViewController {
                 continue
             }
             
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
-            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-            guard let date = dateFormatter.date(from: carbDate) else {
+            guard let date = NightscoutUtils.parseDate(carbDate) else {
                 print("Unable to parse date from: \(carbDate)")
                 continue
             }

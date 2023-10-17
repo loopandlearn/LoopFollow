@@ -183,4 +183,22 @@ class NightscoutUtils {
         }
         task.resume()
     }
+    
+    static func parseDate(_ dateString: String) -> Date? {
+        let dateFormatterWithMilliseconds = DateFormatter()
+        dateFormatterWithMilliseconds.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        dateFormatterWithMilliseconds.timeZone = TimeZone(abbreviation: "UTC")
+        
+        let dateFormatterWithoutMilliseconds = DateFormatter()
+        dateFormatterWithoutMilliseconds.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        dateFormatterWithoutMilliseconds.timeZone = TimeZone(abbreviation: "UTC")
+        
+        if let date = dateFormatterWithMilliseconds.date(from: dateString) {
+            return date
+        } else if let date = dateFormatterWithoutMilliseconds.date(from: dateString) {
+            return date
+        }
+        
+        return nil
+    }
 }
