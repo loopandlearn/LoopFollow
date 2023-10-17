@@ -1203,13 +1203,13 @@ extension MainViewController {
         for i in 0..<thisData.count{
             let thisItem = thisData[i]
             let multiplier = thisItem.insulNeedsScaleFactor as! Double * 100.0
-            var labelText = thisItem.reason + "\r\n"
-            labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% Mål:"
-            if thisItem.correctionRange.count == 2 {
-                let firstValue = Double(thisItem.correctionRange[0])
-                let result = firstValue / 18.0
-                labelText += String(result)
-            }
+            var labelText = thisItem.reason// + "\r\n"
+            //labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% Mål:"
+            //if thisItem.correctionRange.count == 2 {
+                //let firstValue = Double(thisItem.correctionRange[0])
+                //let result = firstValue / 18.0
+                //labelText += String(result)
+            //}
             if thisItem.enteredBy.count > 0 {
                 labelText += "\r\nInlagt av: " + thisItem.enteredBy
             }
