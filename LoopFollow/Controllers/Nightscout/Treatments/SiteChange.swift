@@ -11,9 +11,10 @@ extension MainViewController {
     func processCage(entries: [cageData]) {
         if !entries.isEmpty {
             updateCage(data: entries)
-        } else if mayDoDeepCageCheck {
+        } else if let cage = currentCage {
+            updateCage(data: [cage])
+        } else {
             webLoadNSCage()
         }
-        mayDoDeepCageCheck = false
     }
 }

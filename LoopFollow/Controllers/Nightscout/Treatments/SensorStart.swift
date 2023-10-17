@@ -11,10 +11,11 @@ extension MainViewController {
     func processSage(entries: [sageData]) {
         if !entries.isEmpty {
             updateSage(data: entries)
-        } else if mayDoDeepSageCheck {
+        } else if let sage = currentSage {
+            updateSage(data: [sage])
+        } else {
             webLoadNSSage()
         }
-        mayDoDeepSageCheck = false
     }
     
     // NS Sensor Start Response Processor

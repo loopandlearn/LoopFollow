@@ -6,8 +6,6 @@
 //  Copyright © 2023 Jon Fawcett. All rights reserved.
 //
 
-//TODO: Någon bool för DeepCageSage som bara ska köras en ggn om data inte finns i vanliga Treatments
-
 import Foundation
 extension MainViewController {
     // NS Sage Web Call
@@ -41,7 +39,7 @@ extension MainViewController {
         if data.count == 0 {
             return
         }
-        
+        currentSage = data[0]
         var lastSageString = data[0].created_at
         
         let formatter = ISO8601DateFormatter()
