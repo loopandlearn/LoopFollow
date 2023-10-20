@@ -282,6 +282,7 @@ class SettingsViewController: FormViewController {
             }
         } else {
             statusLabelRow.value = "OK"
+            NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
         }
         statusLabelRow.updateCell()
     }
