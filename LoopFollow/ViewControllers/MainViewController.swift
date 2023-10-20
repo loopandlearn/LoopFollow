@@ -717,7 +717,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let fifteenMin = (lastSGV + deltaBGValue * 3) * 0.0555
         let fifteenMinString = String(format: "%.1f", fifteenMin) // Convert to string with one decimal place
             // Use the calculated 'fifteenMinString' as needed
-        
+        let fifteenMinValue = Double(fifteenMinString) ?? 0.0
+
+        if fifteenMinValue < 3.9 {
+        eventTitle = eventTitle.replacingOccurrences(of: "%15MIN%", with: " ‼️" + fifteenMinString)
+        } else if fifteenMinValue > 7.8 {
+        eventTitle = eventTitle.replacingOccurrences(of: "%15MIN%", with: " ⚠️" + fifteenMinString)
+        } else {
+        eventTitle = eventTitle.replacingOccurrences(of: "%15MIN%", with: " ➡️" + fifteenMinString)
+        }
             
             var cob = "0"
             if self.latestCOB != "" {
@@ -732,10 +740,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 iob = self.latestIOB
             }
             eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
-            eventTitle = eventTitle.replacingOccurrences(of: "%15MIN%", with: " ➡️" + fifteenMinString)
             eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
             eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: cob)
             eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal + "E/h")
+        
+            
             
             
             
