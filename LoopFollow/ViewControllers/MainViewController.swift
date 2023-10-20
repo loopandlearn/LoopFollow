@@ -711,6 +711,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 minAgo = String(Int(deltaTime)) + " min"
                 eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
             }
+        let lastSGV = Double(self.bgData[self.bgData.count - 1].sgv) // Convert the last SGV to a Double
+        let deltaBGValue = Double(deltaBG) // Convert deltaBG to a Double
+
+        let fifteenMin = (lastSGV + deltaBGValue * 3) * 0.0555
+        let fifteenMinString = String(format: "%.1f", fifteenMin) // Convert to string with one decimal place
+            // Use the calculated 'fifteenMinString' as needed
+        
+            
             var cob = "0"
             if self.latestCOB != "" {
                 cob = self.latestCOB
@@ -724,6 +732,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 iob = self.latestIOB
             }
             eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
+            eventTitle = eventTitle.replacingOccurrences(of: "%15MIN%", with: " ➡️" + fifteenMinString)
             eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
             eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: cob)
             eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal + "E/h")
