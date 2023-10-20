@@ -111,7 +111,6 @@ class NightscoutUtils {
         task.resume()
     }
     
-    @available(*, deprecated, message: "Use constructURL instead.")
     static func createURLRequest(url: String, token: String?, path: String) -> URLRequest? {
         var requestURLString = "\(url)\(path)"
         
@@ -153,7 +152,12 @@ class NightscoutUtils {
             completion(.emptyAddress)
             return
         }
-
+        
+        guard let _ = URL(string: urlUser), urlUser.hasPrefix("http://") || urlUser.hasPrefix("https://") else {
+            completion(.invalidURL)
+            return
+        }
+        
         guard let request = createURLRequest(url: urlUser, token: token, path: "/api/v1/status") else {
             completion(.invalidURL)
             return

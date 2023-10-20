@@ -258,6 +258,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         refreshScrollView.alwaysBounceVertical = true
         
         refreshScrollView.delegate = self
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("refresh"), object: nil)
     }
     
     // Clean all timers and start new ones when refreshing
