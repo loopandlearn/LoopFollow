@@ -10,7 +10,7 @@ import Foundation
 extension MainViewController {
     // NS Sage Web Call
     func webLoadNSSage() {
-        let lastDateString = dateTimeUtils.nowMinus10DaysTimeInterval()
+        let lastDateString = dateTimeUtils.nowMinus60DaysTimeInterval()
         let currentTimeString = dateTimeUtils.getCurrentDateTimeString()
         
         let parameters: [String: String] = [
