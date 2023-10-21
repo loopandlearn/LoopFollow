@@ -82,7 +82,7 @@ class dateTimeUtils {
         return nHoursAgoString
     }
     
-    static func nowMinus10DaysTimeInterval() -> String {
+    static func nowMinus60DaysTimeInterval() -> String {
         let today = Date()
         let oldDate = Calendar.current.date(byAdding: .day, value: -10, to: today)!
         let dateFormatter = DateFormatter()
