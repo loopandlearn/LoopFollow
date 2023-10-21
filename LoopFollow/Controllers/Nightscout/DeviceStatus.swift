@@ -203,8 +203,8 @@ extension MainViewController {
                         latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
                     }
                     if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.1f", cobdata["COB"] as! Double)
-                        latestCOB = String(format:"%.1f", cobdata["COB"] as! Double)
+                        tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double)
+                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double)
                     }
                     if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         tableData[8].value = String(format:"%.2fU", recbolusdata["insulinReq"] as! Double)
