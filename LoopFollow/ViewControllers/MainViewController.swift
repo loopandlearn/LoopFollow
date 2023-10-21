@@ -721,11 +721,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let fifteenMinValue = Double(fifteenMinString) ?? 0.0
 
         if fifteenMinValue < 3.9 {
-            eventLocation = eventLocation.replacingOccurrences(of: "%15MIN%", with: "🆘" + fifteenMinString)
+            eventLocation = eventLocation.replacingOccurrences(of: "%15MIN%", with: "🆘 " + fifteenMinString)
         } else if fifteenMinValue > 7.8 {
-            eventLocation = eventLocation.replacingOccurrences(of: "%15MIN%", with: "⚠️" + fifteenMinString)
+            eventLocation = eventLocation.replacingOccurrences(of: "%15MIN%", with: "⚠️ " + fifteenMinString)
         } else {
-            eventLocation = eventLocation.replacingOccurrences(of: "%15MIN%", with: "✅" + fifteenMinString)
+            eventLocation = eventLocation.replacingOccurrences(of: "%15MIN%", with: "✅ " + fifteenMinString)
         }
             
             var cob = "0"
