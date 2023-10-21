@@ -616,13 +616,15 @@ extension MainViewController {
                                 latestLoopStatusString = "⏀"
                                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Open Loop: recommended temp. temp time > bg time, was not enacted") }
                             } else {
-                                LoopStatusLabel.text = "↻"
+                                //Auggie - adding rough time since loop for closer tracking on the main screen
+                                LoopStatusLabel.text = String(format: "%.0f%", (TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) + "m  ↻"
                                 latestLoopStatusString = "↻"
                                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: recommended temp, but temp time is < bg time and/or was enacted") }
                             }
                         }
                     } else {
-                        LoopStatusLabel.text = "↻"
+                        //Auggie adding rough time since loop for closer tracking on the main screen
+                                                LoopStatusLabel.text = String(format: "%.0f%", (TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) + "m  ↻"
                         latestLoopStatusString = "↻"
                         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: no recommended temp") }
                     }
