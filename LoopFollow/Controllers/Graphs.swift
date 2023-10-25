@@ -354,11 +354,11 @@ extension MainViewController {
     }
     
     func createNowAndDIALines() {
-        let ul = ChartLimitLine()
-        ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
-        ul.lineColor = NSUIColor.systemGray.withAlphaComponent(0.5)
-        ul.lineWidth = 1
-        BGChart.xAxis.addLimitLine(ul)
+    let ul = ChartLimitLine()
+    ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
+    ul.lineColor = NSUIColor.green
+    ul.lineWidth = 2
+    BGChart.xAxis.addLimitLine(ul)
         
         if UserDefaultsRepository.show30MinLine.value {
             let ul2 = ChartLimitLine()
