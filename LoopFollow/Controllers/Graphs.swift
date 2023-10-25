@@ -357,7 +357,7 @@ extension MainViewController {
     let ul = ChartLimitLine()
     ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
     ul.lineColor = NSUIColor.green
-    ul.lineWidth = 2
+    ul.lineWidth = 1.5
     BGChart.xAxis.addLimitLine(ul)
         
         if UserDefaultsRepository.show30MinLine.value {
