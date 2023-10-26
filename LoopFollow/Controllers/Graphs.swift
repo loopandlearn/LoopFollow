@@ -71,7 +71,7 @@ extension MainViewController {
         linePrediction.circleRadius = CGFloat(globalVariables.dotBG)
         linePrediction.circleColors = [NSUIColor.systemPurple]
         linePrediction.colors = [NSUIColor.systemPurple]
-        linePrediction.drawCircleHoleEnabled = false
+        linePrediction.drawCircleHoleEnabled = true
         linePrediction.axisDependency = YAxis.AxisDependency.right
         linePrediction.highlightEnabled = true
         linePrediction.drawValuesEnabled = false
@@ -237,7 +237,7 @@ extension MainViewController {
         lineResume.valueFormatter = ChartYDataValueFormatter()
         lineResume.drawValuesEnabled = false
         
-        // Sensor Start
+        // Sensor Change
         var chartEntrySensor = [ChartDataEntry]()
         let lineSensor = LineChartDataSet(entries:chartEntrySensor, label: "")
         lineSensor.circleRadius = CGFloat(globalVariables.dotOther)
@@ -354,11 +354,11 @@ extension MainViewController {
     }
     
     func createNowAndDIALines() {
-        let ul = ChartLimitLine()
-        ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
-        ul.lineColor = NSUIColor.systemGray.withAlphaComponent(0.5)
-        ul.lineWidth = 1
-        BGChart.xAxis.addLimitLine(ul)
+    let ul = ChartLimitLine()
+    ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
+    ul.lineColor = NSUIColor.green
+    ul.lineWidth = 1.5
+    BGChart.xAxis.addLimitLine(ul)
         
         if UserDefaultsRepository.show30MinLine.value {
             let ul2 = ChartLimitLine()
@@ -545,7 +545,7 @@ extension MainViewController {
         }
         
         // Move to current reading everytime new readings load
-        BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
+       // BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
     }
     
     func updatePredictionGraph(color: UIColor? = nil) {
@@ -862,7 +862,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Suspend Pump", time: thisData[i].date))
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Pausa pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
@@ -889,7 +889,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Resume Pump", time: thisData[i].date))
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Återuppta pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
@@ -906,17 +906,17 @@ extension MainViewController {
         }
     }
     
-    func updateSensorStart() {
+    func updateSensorChange() {
         var dataIndex = 10
         BGChart.lineData?.dataSets[dataIndex].clear()
         BGChartFull.lineData?.dataSets[dataIndex].clear()
-        let thisData = sensorStartGraphData
+        let thisData = sensorChangeGraphData
         for i in 0..<thisData.count{
             // skip if outside of visible area
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Start Sensor", time: thisData[i].date))
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Sensorbyte", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
@@ -1123,7 +1123,7 @@ extension MainViewController {
         lineResume.valueFormatter = ChartYDataValueFormatter()
         lineResume.drawValuesEnabled = false
         
-        // Sensor Start
+        // Sensor Change
         var chartEntrySensor = [ChartDataEntry]()
         let lineSensor = LineChartDataSet(entries:chartEntrySensor, label: "")
         lineSensor.circleRadius = 2
@@ -1203,13 +1203,15 @@ extension MainViewController {
         for i in 0..<thisData.count{
             let thisItem = thisData[i]
             let multiplier = thisItem.insulNeedsScaleFactor as! Double * 100.0
-            var labelText = thisItem.reason + "\r\n"
-            labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% "
-            if thisItem.correctionRange.count == 2 {
-                labelText += String(thisItem.correctionRange[0]) + "-" + String(thisItem.correctionRange[1])
-            }
+            var labelText = thisItem.reason// + "\r\n"
+            //labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% Mål:"
+            //if thisItem.correctionRange.count == 2 {
+                //let firstValue = Double(thisItem.correctionRange[0])
+                //let result = firstValue / 18.0
+                //labelText += String(result)
+            //}
             if thisItem.enteredBy.count > 0 {
-                labelText += "\r\nEntered By: " + thisItem.enteredBy
+                labelText += "\r\nInlagt av: " + thisItem.enteredBy
             }
             
             

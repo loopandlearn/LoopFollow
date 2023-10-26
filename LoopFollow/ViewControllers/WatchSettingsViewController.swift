@@ -157,6 +157,9 @@ class WatchSettingsViewController: FormViewController {
             <<< LabelRow("MINAGO"){ row in
                 row.title = "%MINAGO% : Only displays for old readings"
             }
+            <<< LabelRow("15MIN"){ row in
+                row.title = "%15MIN% : Display 15min trend"
+        }
             
             
             +++ ButtonRow() {

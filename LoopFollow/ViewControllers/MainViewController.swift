@@ -115,7 +115,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var bgCheckData: [ShareGlucoseData] = []
     var suspendGraphData: [DataStructs.timestampOnlyStruct] = []
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
-    var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
+    var sensorChangeGraphData: [DataStructs.timestampOnlyStruct] = []
     var noteGraphData: [DataStructs.noteStruct] = []
     var chartData = LineChartData()
     var newBGPulled = false
@@ -157,13 +157,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UserDefaultsRepository.infoNames.value.append("COB")
         UserDefaultsRepository.infoNames.value.append("Basal")
         UserDefaultsRepository.infoNames.value.append("Override")
-        UserDefaultsRepository.infoNames.value.append("Battery")
-        UserDefaultsRepository.infoNames.value.append("Pump")
-        UserDefaultsRepository.infoNames.value.append("SAGE")
-        UserDefaultsRepository.infoNames.value.append("CAGE")
-        UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
-        UserDefaultsRepository.infoNames.value.append("Pred.")
-        UserDefaultsRepository.infoNames.value.append("Carbs today")
+        UserDefaultsRepository.infoNames.value.append("Looptelefon")
+        UserDefaultsRepository.infoNames.value.append("Reservoar")
+        UserDefaultsRepository.infoNames.value.append("Sensorbyte")
+        UserDefaultsRepository.infoNames.value.append("Poddbyte")
+        UserDefaultsRepository.infoNames.value.append("Behov")
+        UserDefaultsRepository.infoNames.value.append("Prognos")
+        UserDefaultsRepository.infoNames.value.append("Kh idag")
         UserDefaultsRepository.infoNames.value.append("Autosens")
         
         // Reset deprecated settings
@@ -174,11 +174,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         //infoTable.layer.borderColor = UIColor.darkGray.cgColor
         //infoTable.layer.borderWidth = 1.0
         //infoTable.layer.cornerRadius = 6
-        infoTable.rowHeight = 21
+        infoTable.rowHeight = 20
         infoTable.dataSource = self
         infoTable.tableFooterView = UIView(frame: .zero) // get rid of extra rows
         infoTable.bounces = false
-        infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
         
         // initialize the tableData
         self.tableData = []
@@ -429,9 +428,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if bgData.count > 0 {
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
             minAgoBG = Double(TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date)
-            MinAgoText.text = String(Int(deltaTime)) + " min ago"
-            snoozer.MinAgoLabel.text = String(Int(deltaTime)) + " min ago"
-            latestMinAgoString = String(Int(deltaTime)) + " min ago"
+            MinAgoText.text = String(Int(deltaTime)) + " m sedan"
+            snoozer.MinAgoLabel.text = String(Int(deltaTime)) + " m sedan"
+            latestMinAgoString = String(Int(deltaTime)) + " m sedan"
         } else {
             MinAgoText.text = ""
             snoozer.MinAgoLabel.text = ""
@@ -700,9 +699,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 //                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar start date") }
             var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
             var  eventTitle = UserDefaultsRepository.watchLine1.value
-            if (UserDefaultsRepository.watchLine2.value.count > 1) {
-                eventTitle += "\n" + UserDefaultsRepository.watchLine2.value
-            }
+            var  eventLocation = UserDefaultsRepository.watchLine2.value
+            //if (UserDefaultsRepository.watchLine2.value.count > 1) {
+                //eventLocation += UserDefaultsRepository.watchLine2.value
+            //<}
             eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: bgUnits.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
             eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
             eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
@@ -710,17 +710,33 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 let val = Int( self.currentOverride*100)
                 // let overrideText = String(format:"%f1", self.currentOverride*100)
                 let text = String(val) + "%"
-                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: text)
+                eventLocation = eventLocation.replacingOccurrences(of: "%OVERRIDE%", with: text)
             } else {
-                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
+                eventLocation = eventLocation.replacingOccurrences(of: "%OVERRIDE%", with: "")
             }
-            eventTitle = eventTitle.replacingOccurrences(of: "%LOOP%", with: self.latestLoopStatusString)
+            eventLocation = eventLocation.replacingOccurrences(of: "%LOOP%", with: self.latestLoopStatusString)
             var minAgo = ""
             if deltaTime > 9 {
                 // write old BG reading and continue pushing out end date to show last entry
                 minAgo = String(Int(deltaTime)) + " min"
                 eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
             }
+        let lastSGV = Double(self.bgData[self.bgData.count - 1].sgv) // Convert the last SGV to a Double
+        let deltaBGValue = Double(deltaBG) // Convert deltaBG to a Double
+
+        let fifteenMin = (lastSGV + deltaBGValue * 3) * 0.0555
+        let fifteenMinString = String(format: "%.1f", fifteenMin) // Convert to string with one decimal place
+            // Use the calculated 'fifteenMinString' as needed
+        let fifteenMinValue = Double(fifteenMinString) ?? 0.0
+
+        if fifteenMinValue < 3.9 {
+            eventLocation = eventLocation.replacingOccurrences(of: "%15MIN%", with: "🆘 " + fifteenMinString)
+        } else if fifteenMinValue > 7.8 {
+            eventLocation = eventLocation.replacingOccurrences(of: "%15MIN%", with: "⚠️ " + fifteenMinString)
+        } else {
+            eventLocation = eventLocation.replacingOccurrences(of: "%15MIN%", with: "✅ " + fifteenMinString)
+        }
+            
             var cob = "0"
             if self.latestCOB != "" {
                 cob = self.latestCOB
@@ -734,9 +750,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 iob = self.latestIOB
             }
             eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
-            eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
-            eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: cob)
-            eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal)
+        eventLocation = eventLocation.replacingOccurrences(of: "%IOB%", with: iob)
+        eventLocation = eventLocation.replacingOccurrences(of: "%COB%", with: cob)
+        eventLocation = eventLocation.replacingOccurrences(of: "%BASAL%", with: basal + "E/h")
+        
+            
             
             
             
@@ -762,6 +780,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             // Write New Event
             var event = EKEvent(eventStore: self.store)
             event.title = eventTitle
+            event.location = eventLocation
             event.startDate = eventStartDate
             event.endDate = eventEndDate
             event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)

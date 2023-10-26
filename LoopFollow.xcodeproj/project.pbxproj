@@ -1134,7 +1134,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = RMSRR5SURS;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1156,7 +1156,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = RMSRR5SURS;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
