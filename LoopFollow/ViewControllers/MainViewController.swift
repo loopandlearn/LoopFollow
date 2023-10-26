@@ -70,7 +70,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     let consoleLogging = true
     var timeofLastBGUpdate = 0 as TimeInterval
     var nsVerifiedAlerted = false
-    
+    var currentSage : sageData?
+    var currentCage : cageData?
+
     var backgroundTask = BackgroundTask()
     
     // Refresh NS Data
@@ -91,7 +93,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var calTimer = Timer()
     
     var bgTimer = Timer()
-    var cageSageTimer = Timer()
     var profileTimer = Timer()
     var deviceStatusTimer = Timer()
     var treatmentsTimer = Timer()
@@ -256,6 +257,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         refreshScrollView.alwaysBounceVertical = true
         
         refreshScrollView.delegate = self
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("refresh"), object: nil)
     }
     
     // Clean all timers and start new ones when refreshing
@@ -264,6 +271,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         MinAgoText.text = "Refreshing"
         invalidateTimers()
         restartAllTimers()
+        currentCage = nil
+        currentSage = nil
         refreshControl.endRefreshing()
     }
     

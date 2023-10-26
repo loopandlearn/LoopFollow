@@ -247,12 +247,20 @@ class SettingsViewController: FormViewController {
             
         }
 
-  
-    
-            +++ Section(header: "App Build date", footer: String(expiration.description))
-    
+       +++ Section(header: getAppVersion(), footer: "")
+
+       +++ Section(header: "App Expiration", footer: String(expiration.description))
+
+
         showHideNSDetails()
        checkNightscoutStatus()
+    }
+    
+    func getAppVersion() -> String {
+        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+            return "App Version: \(version)"
+        }
+        return "Version Unknown"
     }
     
     func updateStatusLabel(error: NightscoutUtils.NightscoutError?) {
@@ -275,6 +283,7 @@ class SettingsViewController: FormViewController {
             }
         } else {
             statusLabelRow.value = "OK"
+            NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
         }
         statusLabelRow.updateCell()
     }
