@@ -139,6 +139,9 @@ extension MainViewController {
         
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         
+        if data.count == 0 {
+            return
+        }
         let pullDate = data[data.count - 1].date
         let latestDate = data[0].date
         let now = dateTimeUtils.getNowTimeIntervalUTC()

@@ -35,13 +35,9 @@ extension MainViewController {
     }
 
     func createGraph(){
-        self.BGChart.clear()
-        
         // Create the BG Graph Data
-        let entries = bgData
-        var bgChartEntry = [ChartDataEntry]()
-        var colors = [NSUIColor]()
-        var maxBG: Float = UserDefaultsRepository.minBGScale.value
+        let bgChartEntry = [ChartDataEntry]()
+        let maxBG: Float = UserDefaultsRepository.minBGScale.value
         
         // Setup BG line details
         let lineBG = LineChartDataSet(entries:bgChartEntry, label: "")
@@ -66,7 +62,7 @@ extension MainViewController {
         lineBG.valueFont.withSize(50)
         
         // Setup Prediction line details
-        var predictionChartEntry = [ChartDataEntry]()
+        let predictionChartEntry = [ChartDataEntry]()
         let linePrediction = LineChartDataSet(entries:predictionChartEntry, label: "")
         linePrediction.circleRadius = CGFloat(globalVariables.dotBG)
         linePrediction.circleColors = [NSUIColor.systemPurple]
@@ -89,11 +85,9 @@ extension MainViewController {
         linePrediction.setDrawHighlightIndicators(false)
         linePrediction.valueFont.withSize(50)
         
-        
-
         // create Basal graph data
-        var chartEntry = [ChartDataEntry]()
-        var maxBasal = UserDefaultsRepository.minBasalScale.value
+        let chartEntry = [ChartDataEntry]()
+        let maxBasal = UserDefaultsRepository.minBasalScale.value
         let lineBasal = LineChartDataSet(entries:chartEntry, label: "")
         lineBasal.setDrawHighlightIndicators(false)
         lineBasal.setColor(NSUIColor.systemBlue, alpha: 0.5)
@@ -108,7 +102,7 @@ extension MainViewController {
         lineBasal.fillFormatter = basalFillFormatter()
         
         // Boluses
-        var chartEntryBolus = [ChartDataEntry]()
+        let chartEntryBolus = [ChartDataEntry]()
         let lineBolus = LineChartDataSet(entries:chartEntryBolus, label: "")
         lineBolus.circleRadius = CGFloat(globalVariables.dotBolus)
         lineBolus.circleColors = [NSUIColor.systemBlue.withAlphaComponent(0.75)]
@@ -133,10 +127,8 @@ extension MainViewController {
             lineBolus.highlightEnabled = true
         }
         
-
-        
         // Carbs
-        var chartEntryCarbs = [ChartDataEntry]()
+        let chartEntryCarbs = [ChartDataEntry]()
         let lineCarbs = LineChartDataSet(entries:chartEntryCarbs, label: "")
         lineCarbs.circleRadius = CGFloat(globalVariables.dotCarb)
         lineCarbs.circleColors = [NSUIColor.systemOrange.withAlphaComponent(0.75)]
@@ -161,9 +153,8 @@ extension MainViewController {
             lineCarbs.highlightEnabled = true
         }
         
-        
         // create Scheduled Basal graph data
-        var chartBasalScheduledEntry = [ChartDataEntry]()
+        let chartBasalScheduledEntry = [ChartDataEntry]()
         let lineBasalScheduled = LineChartDataSet(entries:chartBasalScheduledEntry, label: "")
         lineBasalScheduled.setDrawHighlightIndicators(false)
         lineBasalScheduled.setColor(NSUIColor.systemBlue, alpha: 0.8)
@@ -176,7 +167,7 @@ extension MainViewController {
         lineBasalScheduled.lineDashLengths = [10.0, 5.0]
         
         // create Override graph data
-        var chartOverrideEntry = [ChartDataEntry]()
+        let chartOverrideEntry = [ChartDataEntry]()
         let lineOverride = LineChartDataSet(entries:chartOverrideEntry, label: "")
         lineOverride.setDrawHighlightIndicators(false)
         lineOverride.lineWidth = 0
@@ -188,12 +179,9 @@ extension MainViewController {
         lineOverride.axisDependency = YAxis.AxisDependency.right
         lineOverride.highlightEnabled = true
         lineOverride.drawValuesEnabled = false
-//        lineOverride.circleColors = [NSUIColor.systemGreen.withAlphaComponent(0.75)]
-//        lineOverride.valueFormatter = ChartYDataValueFormatter()
-//        lineOverride.drawCircleHoleEnabled = false
         
         // BG Check
-        var chartEntryBGCheck = [ChartDataEntry]()
+        let chartEntryBGCheck = [ChartDataEntry]()
         let lineBGCheck = LineChartDataSet(entries:chartEntryBGCheck, label: "")
         lineBGCheck.circleRadius = CGFloat(globalVariables.dotOther)
         lineBGCheck.circleColors = [NSUIColor.systemRed.withAlphaComponent(0.75)]
@@ -208,7 +196,7 @@ extension MainViewController {
         lineBGCheck.drawValuesEnabled = false
         
         // Suspend Pump
-        var chartEntrySuspend = [ChartDataEntry]()
+        let chartEntrySuspend = [ChartDataEntry]()
         let lineSuspend = LineChartDataSet(entries:chartEntrySuspend, label: "")
         lineSuspend.circleRadius = CGFloat(globalVariables.dotOther)
         lineSuspend.circleColors = [NSUIColor.systemTeal.withAlphaComponent(0.75)]
@@ -223,7 +211,7 @@ extension MainViewController {
         lineSuspend.drawValuesEnabled = false
         
         // Resume Pump
-        var chartEntryResume = [ChartDataEntry]()
+        let chartEntryResume = [ChartDataEntry]()
         let lineResume = LineChartDataSet(entries:chartEntryResume, label: "")
         lineResume.circleRadius = CGFloat(globalVariables.dotOther)
         lineResume.circleColors = [NSUIColor.systemTeal.withAlphaComponent(0.75)]
@@ -238,7 +226,7 @@ extension MainViewController {
         lineResume.drawValuesEnabled = false
         
         // Sensor Start
-        var chartEntrySensor = [ChartDataEntry]()
+        let chartEntrySensor = [ChartDataEntry]()
         let lineSensor = LineChartDataSet(entries:chartEntrySensor, label: "")
         lineSensor.circleRadius = CGFloat(globalVariables.dotOther)
         lineSensor.circleColors = [NSUIColor.systemIndigo.withAlphaComponent(0.75)]
@@ -253,7 +241,7 @@ extension MainViewController {
         lineSensor.drawValuesEnabled = false
         
         // Notes
-        var chartEntryNote = [ChartDataEntry]()
+        let chartEntryNote = [ChartDataEntry]()
         let lineNote = LineChartDataSet(entries:chartEntryNote, label: "")
         lineNote.circleRadius = CGFloat(globalVariables.dotOther)
         lineNote.circleColors = [NSUIColor.systemGray.withAlphaComponent(0.75)]
@@ -343,7 +331,6 @@ extension MainViewController {
         
         BGChart.data = data
         BGChart.setExtraOffsets(left: 5, top: 10, right: 5, bottom: 10)
-        
     }
     
     func createVerticalLines() {
@@ -468,12 +455,14 @@ extension MainViewController {
         if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "##### Start BG Graph #####") }
         let dataIndex = 0
         let entries = bgData
-        if entries.count < 1 { return }
-        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
-        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
-        mainChart.clear()
-        smallChart.clear()
-        var maxBGOffset: Float = 50
+        guard !entries.isEmpty else {
+            return
+        }
+        let mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        let smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.removeAll(keepingCapacity: false)
+        smallChart.removeAll(keepingCapacity: false)
+        let maxBGOffset: Float = 50
         
         var colors = [NSUIColor]()
         for i in 0..<entries.count{
@@ -482,8 +471,8 @@ extension MainViewController {
             }
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
             if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "BG: " + value.description) }
-            mainChart.addEntry(value)
-            smallChart.addEntry(value)
+            mainChart.append(value)
+            smallChart.append(value)
             
             if Double(entries[i].sgv) >= Double(UserDefaultsRepository.highLine.value) {
                 colors.append(NSUIColor.systemYellow)
