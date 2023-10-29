@@ -483,14 +483,7 @@ extension MainViewController {
             }
         }
         
-        if (predictionData.count < 1) {
-            let value = ChartDataEntry(x: Double(entries[entries.count-1].date+1200), y: 0)
-            mainChart.addEntry(value)
-            colors.append(NSUIColor.systemGray.withAlphaComponent(0.0))
-        }
-        
-        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Graph BGs: " + mainChart.entries.count.description) }
-        
+        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Graph BGs: " + mainChart.entries.count.description) }        
         
         // Set Colors
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
