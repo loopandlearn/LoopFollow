@@ -18,9 +18,8 @@
 >   * You must build the app yourself.
 
 > **Message to Developers**
-> * If you are interested in assisting with this app and want to work on new features and improvements for Loop, iAPS and Nightscout functionality, please reach out. 
-> * Issues and Pull Requests in GitHub are monitored and will get a response. 
-> * Please always direct your PR to the dev branch.
+
+* Please click on this link: [For Developers](#for-developers)
 
 ## Loop Follow 
 ![screenshot](https://user-images.githubusercontent.com/38429455/93782187-436e8880-fbf8-11ea-8709-e2afba692132.png)
@@ -60,3 +59,46 @@ Please review the list on [Loop and Learn: Loop Follow](https://www.loopandlearn
 ### Open Source DIY
 - This is a DIY open source project that may or may not function as you expect. You take full responsibility for building and running this app and do so at your own risk.
 
+## For Developers
+
+> * If you are interested in assisting with this app and want to work on new features and improvements for Loop, iAPS and Nightscout functionality, please reach out. 
+> * Issues and Pull Requests in GitHub are monitored and will get a response. 
+> * Please always direct your PR to the dev branch.
+
+### Versions
+
+We added version numbers that are incremented with each pull request that is merged.
+
+New PR are directed to the dev branch. If you direct one to main, we will move it to point to dev. So always start with your code aligned with dev.
+
+The versioning is:
+
+* major.minor.micro
+* For example our first version is 2.0.0
+
+After that we made a decision to make the micro numbering be 2 digits.
+
+After a PR is merged to dev, the repository maintainers will bump up the micro verion number - please do not modify the version in your branch.
+
+For the most part, the deveopers keep main and dev branches at the same level. But sometimes we want modification to remain in dev for additional testing.
+
+#### Version Example
+
+Starting with version 2.0.01
+
+* PR with Feature A gets merged to dev
+    * Maintainers, bump dev to 2.0.02
+* Maintainers merge dev into main
+    * both main and dev are at 2.0.02
+* PR with Feature B gets merged to dev
+    * Maintainers, bump dev to 2.0.03
+    * main is still at 2.0.02
+* PR with Feature C gets merged to dev
+    * Maintainers, bump dev to 2.0.04
+    * main is still at 2.0.02
+* Maintainers merge dev into main
+    * both main and dev are at 2.0.04
+
+#### Version Updates
+
+Modify the LOOP_FOLLOW_MARKETING_VERSION in Config.xcconfig file to change the version reported by Loop Follow.
