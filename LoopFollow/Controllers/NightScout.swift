@@ -121,8 +121,8 @@ extension MainViewController {
     
     func clearOldSensor()
     {
-        sensorStartGraphData.removeAll()
-        updateSensorStart()
+        sensorChangeGraphData.removeAll()
+        updateSensorChange()
     }
     
     func clearOldNotes()
