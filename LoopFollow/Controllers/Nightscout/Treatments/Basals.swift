@@ -181,8 +181,6 @@ extension MainViewController {
                 let scheduleTimeYesterday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightYesterday()
                 let scheduleTimeToday = self.basalProfile[b].timeAsSeconds + dateTimeUtils.getTimeIntervalMidnightToday()
                 // check the prior temp ending to the profile seconds from midnight
-                print("yesterday " + String(scheduleTimeYesterday))
-                print("today " + String(scheduleTimeToday))
                 if lastEndDot >= scheduleTimeToday {
                     scheduled = basalProfile[b].value
                 }
