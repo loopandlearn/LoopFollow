@@ -9,3 +9,6 @@
 //  Copyright © 2018 Perceptus.org. All rights reserved.
 //
 unique_id = ${DEVELOPMENT_TEAM}
+
+//Version (DEFAULT)
+LOOP_FOLLOW_MARKETING_VERSION = 2.0.01
