@@ -272,7 +272,7 @@ extension MainViewController {
         data.append(lineSensor) // Dataset 10
         data.append(lineNote) // Dataset 11
         
-        data.setValueFont(UIFont.systemFont(ofSize: 12))
+        data.setValueFont(UIFont.systemFont(ofSize: 10))
         
         // Add marker popups for bolus and carbs
         let marker = PillMarker(color: .secondarySystemBackground, font: UIFont.boldSystemFont(ofSize: 14), textColor: .label)
