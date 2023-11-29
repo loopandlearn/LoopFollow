@@ -1,6 +1,7 @@
 #include? "LoopFollowConfigOverride.xcconfig"
 #include? "../../LoopFollowConfigOverride.xcconfig"
-#include? "LoopFollowInstanceConfig.xcconfig"
+#include? "LoopFollowDisplayNameConfig.xcconfig"
+#include? "../..LoopFollowDisplayNameConfig.xcconfig"
 
 unique_id = ${DEVELOPMENT_TEAM}
 
