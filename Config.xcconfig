@@ -1,25 +1,9 @@
 #include? "LoopFollowConfigOverride.xcconfig"
 #include? "../../LoopFollowConfigOverride.xcconfig"
+#include? "LoopFollowDisplayNameConfig.xcconfig"
+#include? "../../LoopFollowDisplayNameConfig.xcconfig"
 
-//
-//  Config.xcconfig
-//  nsapple
-//
-//  Created by Kenneth Stack on 4/12/18.
-//  Copyright © 2018 Perceptus.org. All rights reserved.
-//
 unique_id = ${DEVELOPMENT_TEAM}
 
 //Version (DEFAULT)
-LOOP_FOLLOW_MARKETING_VERSION = 2.0.02
-
-// Custom Display Name for Your LoopFollow App
-// ---------------------------------------------
-// The 'display_name' field allows you to personalize the name of this LoopFollow app instance.
-// This name appears on your device and helps to distinguish between different LoopFollow instances.
-//
-// How to Set:
-// 1. Replace 'LoopFollow' with the desired name of your app. 
-// 2. Save the file and build the app for the changes to take effect.
-//
-display_name = LoopFollow
+LOOP_FOLLOW_MARKETING_VERSION = 2.1.0
