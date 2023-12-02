@@ -41,6 +41,34 @@ low alert for the BG you want to wake up to and close Loop.
 
 Please see [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/) for all the building options.
 
+With the release of version 2.1.0, there is now an easy option for building up to three instances of the Loop Follow app for multiple Loopers in your family. Each instance can be configured to have the display name you choose with these names being the default:
+
+* LoopFollow
+* LoopFollow_Second
+* LoopFollow_Third
+
+#### Display Name Updates
+
+The _display_name_ is found in a single file.
+
+* Suggestion if you customize the name: use LF {unique name} so you can find the apps easily in iOS Settings screen
+
+Summary instructions by build method:
+
+* Browser Build: 
+    * Commit the desired _display_name_ in the LoopFollowDisplayNameConfig.xcconfig file of your forked repository for LoopFollow, LoopFollow_Second or LoopFollow_Third
+* Mac-Xcode Build
+    * First build with script, you will be prompted to enter the desired _display_name_
+    * This _display_name_ is used each time you select a fresh download for LoopFollow 1, 2 or 3
+    * To modify the _display_name_ for subsequent script builds, edit the appropriate file in the ~/Downloads/BuildLoopFollow folder
+        *  LoopFollowDisplayNameConfig.xcconfig 
+        *  LoopFollowDisplayNameConfig_Second.xcconfig 
+        *  LoopFollowDisplayNameConfig_Third.xcconfig 
+
+#### Updates
+
+When modifications and versions are updated, there might be a slight delay for getting the second and third forks updated as well, so if you are using this feature, wait until all three repositories are updated.
+
 ### General feature list
 
 Please review the list on [Loop and Learn: Loop Follow](https://www.loopandlearn.org/loop-follow/) which may be updated more frequently than this README.md file.
@@ -67,7 +95,7 @@ Please review the list on [Loop and Learn: Loop Follow](https://www.loopandlearn
 
 ### Versions
 
-We added version numbers that are incremented with each pull request that is merged.
+We added version numbers that are incremented with each pull request (or group of pull requests) merged.
 
 New PR are directed to the dev branch. If you direct one to main, we will move it to point to dev. So always start with your code aligned with dev.
 
@@ -76,28 +104,26 @@ The versioning is:
 * major.minor.micro
 * For example our first version is 2.0.0
 
-After that we made a decision to make the micro numbering be 2 digits.
-
-After a PR is merged to dev, the repository maintainers will bump up the micro verion number - please do not modify the version in your branch.
+After a PR is merged to dev, the repository maintainers will bump up the verion number before merging to main - please do not modify the version in your branch.
 
 For the most part, the deveopers keep main and dev branches at the same level. But sometimes we want modification to remain in dev for additional testing.
 
 #### Version Example
 
-Starting with version 2.0.01
+Starting with version 2.1.0
 
 * PR with Feature A gets merged to dev
-    * Maintainers, bump dev to 2.0.02
+    * Maintainers, bump dev to 2.1.0
 * Maintainers merge dev into main
-    * both main and dev are at 2.0.02
+    * both main and dev are at 2.1.0
 * PR with Feature B gets merged to dev
-    * Maintainers, bump dev to 2.0.03
-    * main is still at 2.0.02
+    * Maintainers, bump dev to 2.1.1
+    * main is still at 2.1.0
 * PR with Feature C gets merged to dev
-    * Maintainers, bump dev to 2.0.04
-    * main is still at 2.0.02
+    * Maintainers, bump dev to 2.1.2
+    * main is still at 2.1.0
 * Maintainers merge dev into main
-    * both main and dev are at 2.0.04
+    * both main and dev are at 2.1.2
 
 #### Version Updates
 
