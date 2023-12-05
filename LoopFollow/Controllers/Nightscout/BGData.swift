@@ -204,6 +204,14 @@ extension MainViewController {
         viewUpdateNSBG(sourceName: sourceName)
     }
     
+    func updateServerText(with serverText: String? = nil) {
+        if UserDefaultsRepository.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
+            self.serverText.text = displayName
+        } else if let serverText = serverText {
+            self.serverText.text = serverText
+        }
+    }
+    
     // NS BG Data Front end updater
     func viewUpdateNSBG (sourceName: String) {
         DispatchQueue.main.async {
@@ -229,7 +237,7 @@ extension MainViewController {
                 userUnit = " mmol/L"
             }
             
-            self.serverText.text = sourceName
+            self.updateServerText(with: sourceName)
             
             var snoozerBG = ""
             var snoozerDirection = ""
