@@ -49,7 +49,7 @@ enum GeneralSettingsChangeEnum: Int {
     case showStatsChange = 1024
     case showSmallGraphChange = 2048
     case useIFCCChange = 4096
-    case showAppNameChange = 8192
+    case showDisplayNameChange = 8192
 }
 
 class AppStateController {

@@ -205,7 +205,7 @@ extension MainViewController {
     }
     
     func updateServerText(with serverText: String? = nil) {
-        if UserDefaultsRepository.showAppName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
+        if UserDefaultsRepository.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
             self.serverText.text = displayName
         } else if let serverText = serverText {
             self.serverText.text = serverText

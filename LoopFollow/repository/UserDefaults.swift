@@ -75,7 +75,7 @@ class UserDefaultsRepository {
     static let useIFCC = UserDefaultsValue<Bool>(key: "useIFCC", default: false)
     static let showSmallGraph = UserDefaultsValue<Bool>(key: "showSmallGraph", default: true)
     static let speakBG = UserDefaultsValue<Bool>(key: "speakBG", default: false)
-    static let showAppName = UserDefaultsValue<Bool>(key: "showAppName", default: false)
+    static let showDisplayName = UserDefaultsValue<Bool>(key: "showDisplayName", default: false)
     static let backgroundRefreshFrequency = UserDefaultsValue<Double>(key: "backgroundRefreshFrequency", default: 1)
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
     static let appBadge = UserDefaultsValue<Bool>(key: "appBadge", default: true)
