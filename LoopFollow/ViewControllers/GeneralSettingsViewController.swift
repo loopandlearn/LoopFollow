@@ -151,7 +151,20 @@ class GeneralSettingsViewController: FormViewController {
                     NotificationCenter.default.post(name: Notification.Name("toggleSpeakBG"), object: nil)
         }
         
-        +++ ButtonRow() {
+       <<< SwitchRow("showAppName") { row in
+           row.title = "Show App Name"
+           row.value = UserDefaultsRepository.showAppName.value
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.showAppName.value = value
+
+           if let appState = self!.appStateController {
+               appState.generalSettingsChanged = true
+               appState.generalSettingsChanges |= GeneralSettingsChangeEnum.showAppNameChange.rawValue
+           }
+       }
+
+       +++ ButtonRow() {
           $0.title = "DONE"
        }.onCellSelection { (row, arg)  in
           self.dismiss(animated:true, completion: nil)

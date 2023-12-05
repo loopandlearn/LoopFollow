@@ -36,19 +36,20 @@ enum ChartSettingsChangeEnum: Int {
 
 // General Settings Flags
 enum GeneralSettingsChangeEnum: Int { 
-   case colorBGTextChange = 1
-   case speakBGChange = 2
-   case backgroundRefreshFrequencyChange = 4
-   case backgroundRefreshChange = 8
-   case appBadgeChange = 16
-   case dimScreenWhenIdleChange = 32
-   case forceDarkModeChang = 64
-   case persistentNotificationChange = 128
-   case persistentNotificationLastBGTimeChange = 256
-   case screenlockSwitchStateChange = 512
+    case colorBGTextChange = 1
+    case speakBGChange = 2
+    case backgroundRefreshFrequencyChange = 4
+    case backgroundRefreshChange = 8
+    case appBadgeChange = 16
+    case dimScreenWhenIdleChange = 32
+    case forceDarkModeChang = 64
+    case persistentNotificationChange = 128
+    case persistentNotificationLastBGTimeChange = 256
+    case screenlockSwitchStateChange = 512
     case showStatsChange = 1024
     case showSmallGraphChange = 2048
     case useIFCCChange = 4096
+    case showAppNameChange = 8192
 }
 
 class AppStateController {
