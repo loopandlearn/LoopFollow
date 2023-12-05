@@ -151,16 +151,16 @@ class GeneralSettingsViewController: FormViewController {
                     NotificationCenter.default.post(name: Notification.Name("toggleSpeakBG"), object: nil)
         }
         
-       <<< SwitchRow("showAppName") { row in
-           row.title = "Show App Name"
-           row.value = UserDefaultsRepository.showAppName.value
+       <<< SwitchRow("showDisplayName") { row in
+           row.title = "Show Display Name"
+           row.value = UserDefaultsRepository.showDisplayName.value
        }.onChange { [weak self] row in
            guard let value = row.value else { return }
-           UserDefaultsRepository.showAppName.value = value
+           UserDefaultsRepository.showDisplayName.value = value
 
            if let appState = self!.appStateController {
                appState.generalSettingsChanged = true
-               appState.generalSettingsChanges |= GeneralSettingsChangeEnum.showAppNameChange.rawValue
+               appState.generalSettingsChanges |= GeneralSettingsChangeEnum.showDisplayNameChange.rawValue
            }
        }
 

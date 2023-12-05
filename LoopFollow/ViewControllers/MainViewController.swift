@@ -338,7 +338,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                     BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
                 }
                 
-                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showAppNameChange.rawValue != 0 {
+                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showDisplayNameChange.rawValue != 0 {
                     self.updateServerText()
                 }
                 
