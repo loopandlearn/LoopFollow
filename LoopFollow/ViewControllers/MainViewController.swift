@@ -70,7 +70,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     let consoleLogging = true
     var timeofLastBGUpdate = 0 as TimeInterval
     var nsVerifiedAlerted = false
-    
+    var currentSage : sageData?
+    var currentCage : cageData?
+
     var backgroundTask = BackgroundTask()
     
     // Refresh NS Data
@@ -91,7 +93,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var calTimer = Timer()
     
     var bgTimer = Timer()
-    var cageSageTimer = Timer()
     var profileTimer = Timer()
     var deviceStatusTimer = Timer()
     var treatmentsTimer = Timer()
@@ -257,6 +258,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         refreshScrollView.alwaysBounceVertical = true
         
         refreshScrollView.delegate = self
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("refresh"), object: nil)
     }
     
     // Clean all timers and start new ones when refreshing
@@ -265,6 +272,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         MinAgoText.text = "Refreshing"
         invalidateTimers()
         restartAllTimers()
+        currentCage = nil
+        currentSage = nil
         refreshControl.endRefreshing()
     }
     
@@ -287,61 +296,65 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // check the app state
         // TODO: move to a function ?
         if let appState = self.appStateController {
-        
-           if appState.chartSettingsChanged {
-              
-              // can look at settings flags to be more fine tuned
-              self.updateBGGraphSettings()
             
-            if ChartSettingsChangeEnum.smallGraphHeight.rawValue != 0 {
-                smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
-                self.view.layoutIfNeeded()
+            if appState.chartSettingsChanged {
+                
+                // can look at settings flags to be more fine tuned
+                self.updateBGGraphSettings()
+                
+                if ChartSettingsChangeEnum.smallGraphHeight.rawValue != 0 {
+                    smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
+                    self.view.layoutIfNeeded()
+                }
+                
+                // reset the app state
+                appState.chartSettingsChanged = false
+                appState.chartSettingsChanges = 0
             }
-              
-              // reset the app state
-              appState.chartSettingsChanged = false
-              appState.chartSettingsChanges = 0
-           }
-           if appState.generalSettingsChanged {
-           
-              // settings for appBadge changed
-              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.appBadgeChange.rawValue != 0 {
-                 
-              }
-              
-              // settings for textcolor changed
-              if appState.generalSettingsChanges & GeneralSettingsChangeEnum.colorBGTextChange.rawValue != 0 {
-                 self.setBGTextColor()
-              }
+            if appState.generalSettingsChanged {
+                
+                // settings for appBadge changed
+                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.appBadgeChange.rawValue != 0 {
+                    
+                }
+                
+                // settings for textcolor changed
+                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.colorBGTextChange.rawValue != 0 {
+                    self.setBGTextColor()
+                }
+                
+                // settings for showStats changed
+                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showStatsChange.rawValue != 0 {
+                    statsView.isHidden = !UserDefaultsRepository.showStats.value
+                }
+                
+                // settings for useIFCC changed
+                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.useIFCCChange.rawValue != 0 {
+                    updateStats()
+                }
+                
+                // settings for showSmallGraph changed
+                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showSmallGraphChange.rawValue != 0 {
+                    BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
+                }
+                
+                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showDisplayNameChange.rawValue != 0 {
+                    self.updateServerText()
+                }
+                
+                // reset the app state
+                appState.generalSettingsChanged = false
+                appState.generalSettingsChanges = 0
+            }
+            if appState.infoDataSettingsChanged {
+                createDerivedData()
+                self.infoTable.reloadData()
+                
+                // reset
+                appState.infoDataSettingsChanged = false
+            }
             
-            // settings for showStats changed
-            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showStatsChange.rawValue != 0 {
-               statsView.isHidden = !UserDefaultsRepository.showStats.value
-            }
-
-            // settings for useIFCC changed
-            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.useIFCCChange.rawValue != 0 {
-                updateStats()
-            }
-
-            // settings for showSmallGraph changed
-            if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showSmallGraphChange.rawValue != 0 {
-                BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
-            }
-              
-              // reset the app state
-              appState.generalSettingsChanged = false
-              appState.generalSettingsChanges = 0
-           }
-           if appState.infoDataSettingsChanged {
-              createDerivedData()
-              self.infoTable.reloadData()
-              
-              // reset
-              appState.infoDataSettingsChanged = false
-           }
-           
-           // add more processing of the app state
+            // add more processing of the app state
         }
     }
     

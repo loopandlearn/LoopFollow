@@ -57,6 +57,20 @@ class dateTimeUtils {
         return utcTime
     }
     
+    static func getCurrentDateTimeString() -> String {
+        let currentTimeInterval = getNowTimeIntervalUTC()
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.locale = Locale(identifier: "en_US")
+        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
+        
+        let currentDate = Date(timeIntervalSince1970: currentTimeInterval)
+        let currentTimeString = dateFormatter.string(from: currentDate)
+        
+        return currentTimeString
+    }
+    
     static func nowMinusNHoursTimeInterval(N: Int) -> String {
         let today = Date()
         let nHoursAgo = Calendar.current.date(byAdding: .hour, value: -N, to: today)!
@@ -68,7 +82,7 @@ class dateTimeUtils {
         return nHoursAgoString
     }
     
-    static func nowMinus10DaysTimeInterval() -> String {
+    static func nowMinus60DaysTimeInterval() -> String {
         let today = Date()
         let oldDate = Calendar.current.date(byAdding: .day, value: -10, to: today)!
         let dateFormatter = DateFormatter()
