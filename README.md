@@ -56,6 +56,10 @@ The _display_name_ is found in a single file.
 Summary instructions by build method:
 
 * Browser Build: 
+    * Fork and setup the repository for each Loop Follow instance you want to use: 
+        * https://github.com/loopandlearn/LoopFollow
+        * https://github.com/loopandlearn/LoopFollow_Second
+        * https://github.com/loopandlearn/LoopFollow_Third
     * Commit the desired _display_name_ in the LoopFollowDisplayNameConfig.xcconfig file of your forked repository for LoopFollow, LoopFollow_Second or LoopFollow_Third
 * Mac-Xcode Build
     * First build with script, you will be prompted to enter the desired _display_name_
