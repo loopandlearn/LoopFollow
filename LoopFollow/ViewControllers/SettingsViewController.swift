@@ -106,6 +106,7 @@ class SettingsViewController: FormViewController {
        }.cellSetup { (cell, row) in
            cell.textField.autocorrectionType = .no
            cell.textField.autocapitalizationType = .none
+           cell.textField.textContentType = .password
        }.onChange { row in
            if row.value == nil {
                UserDefaultsRepository.token.value = ""
