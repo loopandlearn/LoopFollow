@@ -220,7 +220,7 @@ extension MainViewController {
                 self.writeDebugLog(value: "Num BG: " + self.bgData.count.description)
             }
             let entries = self.bgData
-            if entries.count < 1 { return }
+            if entries.count < 2 { return } // protect index out of bounds
             
             self.updateBGGraph()
             self.updateStats()
