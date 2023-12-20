@@ -27,7 +27,7 @@ extension MainViewController {
         let date = Date()
         let now = date.timeIntervalSince1970
         let currentBG = bgs[bgs.count - 1].sgv
-        let lastBG = bgs[bgs.count - 2].sgv
+        //let lastBG = bgs[bgs.count - 2].sgv // not used, protect index out of bounds
         
         var skipZero = false
         if UserDefaultsRepository.alertIgnoreZero.value && currentBG == 0 {
@@ -185,8 +185,8 @@ extension MainViewController {
                 }
             }
             
-            // Check Low
-            let persistentLowReadings = Int(UserDefaultsRepository.alertLowPersistent.value / 5)
+            // Check Low, protect index out of bounds
+            let persistentLowReadings = min(Int(UserDefaultsRepository.alertLowPersistent.value / 5), bgData.count - 1)
             let persistentLowBG = bgData[bgData.count - 1 - persistentLowReadings].sgv
             let persistentLowTriggerImmediatelyBG = UserDefaultsRepository.alertLowBG.value - UserDefaultsRepository.alertLowPersistenceMax.value
             
@@ -241,8 +241,8 @@ extension MainViewController {
                 
             }
             
-            // Check High
-            let persistentHighReadings = Int(UserDefaultsRepository.alertHighPersistent.value / 5)
+            // Check High, protect index out of bounds
+            let persistentHighReadings = min(Int(UserDefaultsRepository.alertHighPersistent.value / 5), bgData.count-1)
             let persistentHighBG = bgData[bgData.count - 1 - persistentHighReadings].sgv
             if UserDefaultsRepository.alertHighActive.value &&
                 !UserDefaultsRepository.alertHighIsSnoozed.value &&
