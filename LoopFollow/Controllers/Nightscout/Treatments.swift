@@ -14,9 +14,8 @@ extension MainViewController {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Treatments") }
         if !UserDefaultsRepository.downloadTreatments.value { return }
         
-        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
-        let startTimeString = dateTimeUtils.nowMinusNHoursTimeInterval(N: graphHours)
-        let currentTimeString = dateTimeUtils.getCurrentDateTimeString()
+        let startTimeString = dateTimeUtils.getDateTimeString(addingDays: -1 * UserDefaultsRepository.downloadDays.value)
+        let currentTimeString = dateTimeUtils.getDateTimeString(addingHours: 6)
         let parameters: [String: String] = [
             "find[created_at][$gte]": startTimeString,
             "find[created_at][$lte]": currentTimeString
