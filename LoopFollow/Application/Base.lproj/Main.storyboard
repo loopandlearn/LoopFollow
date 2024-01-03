@@ -32,7 +32,7 @@
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" text="BG" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vXU-IW-GOL">
                                                 <rect key="frame" x="0.0" y="103.33333333333334" width="144.66666666666666" height="105.33333333333334"/>
-                                                <fontDescription key="fontDescription" type="system" weight="black" pointSize="72"/>
+                                                <fontDescription key="fontDescription" type="system" weight="black" pointSize="78"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
