@@ -235,25 +235,37 @@ extension MainViewController {
 
                         // Access the color based on graphtype
                         var colorName = ""
+                        var additionalText = ""
+
                         switch graphtype {
-                        case "COB": colorName = "LoopYellow"
-                        case "UAM": colorName = "UAM"
-                        case "IOB": colorName = "Insulin"
-                        case "ZT": colorName = "ZT"
-                        default: break
+                        case "COB":
+                            colorName = "LoopYellow"
+                            additionalText = " COB"
+                        case "UAM":
+                            colorName = "UAM"
+                            additionalText = " UAM"
+                        case "IOB":
+                            colorName = "Insulin"
+                            additionalText = " IOB"
+                        case "ZT":
+                            colorName = "ZT"
+                            additionalText = " ZT"
+                        default:
+                            break
                         }
 
                         if let selectedColor = UIColor(named: colorName) {
-                            predictioncolor = selectedColor
-                            PredictionLabel.textColor = predictioncolor
+                        predictioncolor = selectedColor
+                        PredictionLabel.textColor = predictioncolor
                         }
 
                         let graphdata = predbgdata[graphtype] as! [Double]
 
-                        if let eventualdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        if let eventualdata = lastLoopRecord["enacted"] as? [String: AnyObject] {
                             if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
                                 let eventualBGStringValue = String(describing: eventualBGValue)
-                                PredictionLabel.text = bgUnits.toDisplayUnits(eventualBGStringValue)
+                                let formattedBGString = bgUnits.toDisplayUnits(eventualBGStringValue)
+                                PredictionLabel.text = "\(formattedBGString)\(additionalText)"
                             }
                         }
 
