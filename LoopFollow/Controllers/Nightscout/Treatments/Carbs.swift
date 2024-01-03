@@ -87,7 +87,7 @@ extension MainViewController {
             }
         }
         
-        let resultString = String(format: "%.0f", totalCarbs)
+        let resultString = String(format: "%.0f", totalCarbs) + " g"
         tableData[10].value = resultString
         infoTable.reloadData()
     }

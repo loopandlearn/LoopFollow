@@ -186,7 +186,7 @@ extension MainViewController {
                 }
             }
             
-            latestBasal = String(format:"%.2f", scheduled)
+            latestBasal = String(format:"%.2f", scheduled) + " E/h"
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)

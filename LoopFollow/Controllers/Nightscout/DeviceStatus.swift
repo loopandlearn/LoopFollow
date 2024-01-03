@@ -72,15 +72,15 @@ extension MainViewController {
             if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
-                    tableData[5].value = String(format:"%.0f", reservoirData) + "U"
+                    tableData[5].value = String(format:"%.0f", reservoirData) + " E"
                 } else {
                     latestPumpVolume = 50.0
-                    tableData[5].value = "50+U"
+                    tableData[5].value = "50+E"
                 }
                 
                 if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
                     let upbat = uploader["battery"] as! Double
-                    tableData[4].value = String(format:"%.0f", upbat) + "%"
+                    tableData[4].value = String(format:"%.0f", upbat) + " %"
                     UserDefaultsRepository.deviceBatteryLevel.value = upbat
                 }
             }
@@ -106,11 +106,11 @@ extension MainViewController {
                         }
                     }
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double)) + " E"
                         latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
                     }
                     if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
+                        tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double) + " g"
                         latestCOB = String(format:"%.0f", cobdata["cob"] as! Double)
                     }
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
@@ -137,13 +137,13 @@ extension MainViewController {
                             
                             let predMin = prediction.min()
                             let predMax = prediction.max()
-                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
+                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + " / " + bgUnits.toDisplayUnits(String(predMax!))
                             
                             updatePredictionGraph()
                         }
                     }
                     if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
-                        tableData[8].value = String(format:"%.2fU", recBolus)
+                        tableData[8].value = String(format:"%.2f", recBolus) + " E"
                     }
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
                         if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
@@ -199,19 +199,19 @@ extension MainViewController {
                     }
                     
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double)) + " E"
                         latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
                     }
                     if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double)
+                        tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double) + " g"
                         latestCOB = String(format:"%.0f", cobdata["COB"] as! Double)
                     }
                     if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[8].value = String(format:"%.2fU", recbolusdata["insulinReq"] as! Double)
+                        tableData[8].value = String(format:"%.2f", recbolusdata["insulinReq"] as! Double) + " E"
                     }
                     if let autosensdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
-                        tableData[11].value = String(format:"%.0f", sens) + "%"
+                        tableData[11].value = String(format:"%.0f", sens) + " %"
                     }
                     
                     //Picks COB prediction if available, else UAM, else IOB, else ZT
@@ -274,7 +274,7 @@ extension MainViewController {
 
                         let predMin = graphdata.min()
                         let predMax = graphdata.max()
-                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
+                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + " / " + bgUnits.toDisplayUnits(String(predMax!))
 
                         updatePredictionGraph(color: predictioncolor)
                     }
