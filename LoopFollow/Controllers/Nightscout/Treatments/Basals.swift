@@ -136,10 +136,10 @@ extension MainViewController {
             //if i == tempArray.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
             if i == tempArray.count - 1 && duration == 0.0 {
                 lastEndDot = dateTimeStamp + (30 * 60)
-                latestBasal = String(format:"%.2f", basalRate)
+                latestBasal = String(format:"%.2f", basalRate) + " E/h"
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
-                latestBasal = String(format:"%.2f", basalRate)
+                latestBasal = String(format:"%.2f", basalRate) + " E/h"
             }
             
             // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
