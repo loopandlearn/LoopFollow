@@ -240,16 +240,16 @@ extension MainViewController {
                         switch graphtype {
                         case "COB":
                             colorName = "LoopYellow"
-                            additionalText = " COB"
+                            additionalText = "COB"
                         case "UAM":
                             colorName = "UAM"
-                            additionalText = " UAM"
+                            additionalText = "UAM"
                         case "IOB":
                             colorName = "Insulin"
-                            additionalText = " IOB"
+                            additionalText = "IOB"
                         case "ZT":
                             colorName = "ZT"
-                            additionalText = " ZT"
+                            additionalText = "ZT"
                         default:
                             break
                         }
@@ -265,7 +265,7 @@ extension MainViewController {
                             if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
                                 let eventualBGStringValue = String(describing: eventualBGValue)
                                 let formattedBGString = bgUnits.toDisplayUnits(eventualBGStringValue)
-                                PredictionLabel.text = "\(formattedBGString)\(additionalText)"
+                                PredictionLabel.text = "⇢ \(formattedBGString) (\(additionalText))"
                             }
                         }
 
