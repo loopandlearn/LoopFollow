@@ -65,6 +65,7 @@ extension MainViewController {
             .replacingOccurrences(of: "h", with: " h")
 
             tableData[7].value = spacedDuration
+            }
         }
         infoTable.reloadData()
     }

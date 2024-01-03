@@ -72,12 +72,13 @@ extension MainViewController {
             formatter.maximumUnitCount = 0
             
             if let formattedDuration = formatter.string(from: secondsAgo) {
-        // Manually add spaces between the number and units
+            // Manually add spaces between the number and units
             let spacedDuration = formattedDuration
             .replacingOccurrences(of: "d", with: " d")
             .replacingOccurrences(of: "h", with: " h")
 
             tableData[6].value = spacedDuration
+            }
         }
         infoTable.reloadData()
     }
