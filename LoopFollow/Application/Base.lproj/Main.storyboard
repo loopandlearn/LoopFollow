@@ -38,7 +38,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="KZc-fa-qmt">
                                                 <rect key="frame" x="0.0" y="188" width="170.66666666666666" height="57.333333333333343"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4sd-6h-LSj" userLabel="Direction">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" text="--" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4sd-6h-LSj" userLabel="Direction">
                                                         <rect key="frame" x="0.0" y="0.0" width="85.333333333333329" height="57.333333333333336"/>
                                                         <fontDescription key="fontDescription" type="system" weight="black" pointSize="48"/>
                                                         <nil key="textColor"/>
