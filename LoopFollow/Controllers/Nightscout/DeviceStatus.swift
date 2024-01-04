@@ -265,7 +265,7 @@ extension MainViewController {
                             if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
                                 let eventualBGStringValue = String(describing: eventualBGValue)
                                 let formattedBGString = bgUnits.toDisplayUnits(eventualBGStringValue)
-                                PredictionLabel.text = "⇢ \(formattedBGString) (\(additionalText))"
+                                PredictionLabel.text = "\(additionalText) ⇢ \(formattedBGString)"
                             }
                         }
 
