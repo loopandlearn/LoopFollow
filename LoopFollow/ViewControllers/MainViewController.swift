@@ -724,7 +724,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let lastSGV = Double(self.bgData[self.bgData.count - 1].sgv) // Convert the last SGV to a Double
         let deltaBGValue = Double(deltaBG) // Convert deltaBG to a Double
 
-        let fifteenMin = (lastSGV + deltaBGValue * 3) * 0.0555
+        let fifteenMin = (lastSGV + deltaBGValue * 2.5) * 0.0555
         let fifteenMinString = String(format: "%.1f", fifteenMin) // Convert to string with one decimal place
             // Use the calculated 'fifteenMinString' as needed
         let fifteenMinValue = Double(fifteenMinString) ?? 0.0
