@@ -39,6 +39,7 @@ extension MainViewController {
         }
         
         let store: [String: Store]
+        let defaultProfile: String
     }
     
     //NS Basal Data  Struct

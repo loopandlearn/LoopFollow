@@ -165,7 +165,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UserDefaultsRepository.infoNames.value.append("Pred.")
         UserDefaultsRepository.infoNames.value.append("Carbs today")
         UserDefaultsRepository.infoNames.value.append("Autosens")
-        
+        UserDefaultsRepository.infoNames.value.append("Profile")
+
         // Reset deprecated settings
         UserDefaultsRepository.debugLog.value = false;
         UserDefaultsRepository.alwaysDownloadAllBG.value = true;
