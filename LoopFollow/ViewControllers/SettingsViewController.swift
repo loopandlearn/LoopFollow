@@ -78,6 +78,7 @@ class SettingsViewController: FormViewController {
            row.hidden = "$showNS == false"
        }.cellSetup { (cell, row) in
            cell.textField.autocorrectionType = .no
+           cell.textField.autocapitalizationType = .none
        }.onChange { row in
            guard let value = row.value else {
                UserDefaultsRepository.url.value = ""
@@ -104,6 +105,8 @@ class SettingsViewController: FormViewController {
            row.hidden = "$showNS == false"
        }.cellSetup { (cell, row) in
            cell.textField.autocorrectionType = .no
+           cell.textField.autocapitalizationType = .none
+           cell.textField.textContentType = .password
        }.onChange { row in
            if row.value == nil {
                UserDefaultsRepository.token.value = ""
@@ -144,6 +147,7 @@ class SettingsViewController: FormViewController {
             row.hidden = "$showDex == false"
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
+            cell.textField.autocapitalizationType = .none
         }.onChange { row in
             if row.value == nil {
                 UserDefaultsRepository.shareUserName.value = ""
@@ -159,6 +163,7 @@ class SettingsViewController: FormViewController {
         }.cellSetup { (cell, row) in
             cell.textField.autocorrectionType = .no
             cell.textField.isSecureTextEntry = true
+            cell.textField.autocapitalizationType = .none
         }.onChange { row in
             if row.value == nil {
                 UserDefaultsRepository.sharePassword.value = ""

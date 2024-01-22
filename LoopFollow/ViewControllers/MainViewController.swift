@@ -165,7 +165,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UserDefaultsRepository.infoNames.value.append("Pred.")
         UserDefaultsRepository.infoNames.value.append("Carbs today")
         UserDefaultsRepository.infoNames.value.append("Autosens")
-        
+        UserDefaultsRepository.infoNames.value.append("Profile")
+
         // Reset deprecated settings
         UserDefaultsRepository.debugLog.value = false;
         UserDefaultsRepository.alwaysDownloadAllBG.value = true;
@@ -688,7 +689,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
             // Create Event info
-            let deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
+        var deltaBG = 0 // protect index out of bounds
+        if self.bgData.count > 1 {
+            deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
+        }
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
             var deltaString = ""
             if deltaBG < 0 {
