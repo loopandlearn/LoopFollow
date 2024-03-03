@@ -173,7 +173,7 @@ extension MainViewController {
         lineOverride.lineWidth = 0
         lineOverride.drawFilledEnabled = true
         lineOverride.fillFormatter = OverrideFillFormatter()
-        lineOverride.fillColor = NSUIColor.systemGreen
+        lineOverride.fillColor = NSUIColor.systemPurple
         lineOverride.fillAlpha = 0.6
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
@@ -1054,7 +1054,7 @@ extension MainViewController {
         lineOverride.lineWidth = 0
         lineOverride.drawFilledEnabled = true
         lineOverride.fillFormatter = OverrideFillFormatter()
-        lineOverride.fillColor = NSUIColor.systemGreen
+        lineOverride.fillColor = NSUIColor.systemPurple
         lineOverride.fillAlpha = 0.6
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
@@ -1186,7 +1186,7 @@ extension MainViewController {
         for i in 0..<thisData.count{
             let thisItem = thisData[i]
             let multiplier = thisItem.insulNeedsScaleFactor as! Double * 100.0
-            var labelText = thisItem.reason// + "\r\n"
+            var labelText = thisItem.notes// + "\r\n"
             //labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% Mål:"
             //if thisItem.correctionRange.count == 2 {
                 //let firstValue = Double(thisItem.correctionRange[0])
@@ -1194,7 +1194,7 @@ extension MainViewController {
                 //labelText += String(result)
             //}
             if thisItem.enteredBy.count > 0 {
-                labelText += "\r\nInlagt av: " + thisItem.enteredBy
+                labelText += "\nInlagt av: " + thisItem.enteredBy
             }
             
             

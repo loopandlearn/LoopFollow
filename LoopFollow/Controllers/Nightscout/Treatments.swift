@@ -55,31 +55,36 @@ extension MainViewController {
             let entry = entries[i] as [String : AnyObject]?
             switch entry?["eventType"] as! String {
             case "Temp Basal":
-                                tempBasal.append(entry!)
-                            case "Correction Bolus":
-                                bolus.append(entry!)
-                            case "Bolus":
-                                bolus.append(entry!)
-                            case "Insulinpenna":
-                                bolus.append(entry!)
-                            case "SMB":
-                                bolus.append(entry!)
-                            case "Meal Bolus":
-                                carbs.append(entry!)
-                                bolus.append(entry!)
-                            case "Carb Correction":
-                                carbs.append(entry!)
-                            case "Kolhydrater":
-                                carbs.append(entry!)
-                            case "Dextro":
-                                carbs.append(entry!)
-                            case "Måltid":
-                                carbs.append(entry!)
-                            //Daniel Kolhydrater, Dextro, Insulinpenna, SMB och måltid tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
-                            case "Temporary Override":
+                tempBasal.append(entry!)
+            case "Correction Bolus":
+                bolus.append(entry!)
+            case "Bolus":
+                bolus.append(entry!)
+            case "Insulinpenna":
+                bolus.append(entry!)
+            case "SMB":
+                bolus.append(entry!)
+            case "Meal Bolus":
+                carbs.append(entry!)
+                bolus.append(entry!)
+            case "Carb Correction":
+                carbs.append(entry!)
+            case "Kolhydrater":
+                carbs.append(entry!)
+            case "Dextro":
+                carbs.append(entry!)
+            case "Måltid":
+                carbs.append(entry!)
+                //Daniel Kolhydrater, Dextro, Insulinpenna, SMB och måltid tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
+            case "Temporary Override":
                 temporaryOverride.append(entry!)
             case "Temporary Target":
                 temporaryOverride.append(entry!)
+            case "Exercise":
+                temporaryOverride.append(entry!)
+            case "Override":
+                temporaryOverride.append(entry!)
+                //Lägger till för att visualisera iPAS overrides (exercise i NS)
             case "Note":
                 note.append(entry!)
                 print("Note: \(String(describing: entry))")

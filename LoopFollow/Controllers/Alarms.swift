@@ -535,7 +535,7 @@ extension MainViewController {
             return
         }
         
-        let overrideName = recentOverride?.reason as! String
+        let overrideName = recentOverride?.notes as! String
        
         var numLoops = 0
         var playSound = true
