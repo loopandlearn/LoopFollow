@@ -43,10 +43,20 @@ class NightscoutViewController: UIViewController {
         
         self.webView.uiDelegate = self
     }
-
+    
     @objc func reloadWebView(_ sender: UIRefreshControl) {
+        clearWebCache() // Clear web cache when reloading page by swiping down
         webView.reload()
         sender.endRefreshing()
+    }
+    
+    // New code to Clear web cache
+    func clearWebCache() {
+        let dataStore = WKWebsiteDataStore.default()
+        let date = Date(timeIntervalSince1970: 0)
+        dataStore.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: date) {
+            print("Web cache cleared.")
+        }
     }
     
     // this handles target=_blank links by opening them in the same view
