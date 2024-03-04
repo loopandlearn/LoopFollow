@@ -50,42 +50,39 @@ extension MainViewController {
         var pumpSiteChange: [cageData] = []
         var cgmSensorStart: [sageData] = []
         
-        for i in 0..<entries.count {
-            let entry = entries[i] as [String : AnyObject]?
-            switch entry?["eventType"] as! String {
+        for entry in entries {
+            guard let eventType = entry["eventType"] as? String else {
+                continue
+            }
+            
+            switch eventType {
             case "Temp Basal":
-                tempBasal.append(entry!)
-            case "Correction Bolus":
-                bolus.append(entry!)
-            case "Bolus":
-                bolus.append(entry!)
-            case "SMB":
-                bolus.append(entry!)
+                tempBasal.append(entry)
+            case "Correction Bolus", "Bolus", "SMB":
+                bolus.append(entry)
             case "Meal Bolus":
-                carbs.append(entry!)
-                bolus.append(entry!)
+                carbs.append(entry)
+                bolus.append(entry)
             case "Carb Correction":
-                carbs.append(entry!)
-            case "Temporary Override":
-                temporaryOverride.append(entry!)
-            case "Temporary Target":
-                temporaryOverride.append(entry!)
+                carbs.append(entry)
+            case "Temporary Override", "Temporary Target":
+                temporaryOverride.append(entry)
             case "Note":
-                note.append(entry!)
+                note.append(entry)
                 print("Note: \(String(describing: entry))")
             case "BG Check":
-                bgCheck.append(entry!)
+                bgCheck.append(entry)
             case "Suspend Pump":
-                suspendPump.append(entry!)
+                suspendPump.append(entry)
             case "Resume Pump":
-                resumePump.append(entry!)
+                resumePump.append(entry)
             case "Pump Site Change", "Site Change":
-                if let createdAt = entry?["created_at"] as? String {
+                if let createdAt = entry["created_at"] as? String {
                     let newEntry = cageData(created_at: createdAt)
                     pumpSiteChange.append(newEntry)
                 }
             case "Sensor Start":
-                if let createdAt = entry?["created_at"] as? String {
+                if let createdAt = entry["created_at"] as? String {
                     let newEntry = sageData(created_at: createdAt)
                     cgmSensorStart.append(newEntry)
                 }
@@ -97,7 +94,7 @@ extension MainViewController {
         if tempBasal.count > 0 {
             processNSBasals(entries: tempBasal)
         } else {
-            if basalData.count < 0 {
+            if basalData.count > 0 {
                 clearOldTempBasal()
             }
         }
