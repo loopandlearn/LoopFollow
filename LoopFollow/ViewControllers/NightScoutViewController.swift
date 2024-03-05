@@ -45,7 +45,7 @@ class NightscoutViewController: UIViewController {
     }
 
     @objc func reloadWebView(_ sender: UIRefreshControl) {
-    let alertController = UIAlertController(title: "Clear Web Cache", message: "Vill du rense webcachen?\nObs Alla nightscoutinställningar kommer att återställas till standard", preferredStyle: .alert)
+    let alertController = UIAlertController(title: "Rensa webcache?", message: "Vill du rense webcachen?\nObs Alla nightscoutinställningar kommer att återställas till standard", preferredStyle: .alert)
     
     alertController.addAction(UIAlertAction(title: "Ja", style: .destructive) { _ in
         self.clearWebCache()
