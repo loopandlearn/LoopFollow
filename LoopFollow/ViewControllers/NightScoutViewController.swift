@@ -67,7 +67,7 @@ class NightscoutViewController: UIViewController {
         let cacheTypes = Set([WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache])
         let date = Date(timeIntervalSince1970: 0)
         dataStore.removeData(ofTypes: cacheTypes, modifiedSince: date) {
-          print(“Web cache cleared.“)
+          print("Web cache cleared.")
         }
       }
     
