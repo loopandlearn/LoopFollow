@@ -45,29 +45,20 @@ class NightscoutViewController: UIViewController {
     }
 
     @objc func reloadWebView(_ sender: UIRefreshControl) {
-    let alertController = UIAlertController(title: "Rensa webcache?", message: "Vill du rense webcachen?\nObs Alla nightscoutinställningar kommer att återställas till standard", preferredStyle: .alert)
-    
-    alertController.addAction(UIAlertAction(title: "Ja", style: .destructive) { _ in
-        self.clearWebCache()
+    self.clearWebCache()
         self.webView.reload()
         sender.endRefreshing()
-    })
-    
-    alertController.addAction(UIAlertAction(title: "Nej", style: .cancel) { _ in
-        self.webView.reload()
-        sender.endRefreshing()
-    })
-    
-    present(alertController, animated: true, completion: nil)
-}
-    // New code to Clear web cache
+    }
+
+    // New code to clear web cache
     func clearWebCache() {
         let dataStore = WKWebsiteDataStore.default()
+        let cacheTypes = Set([WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache])
         let date = Date(timeIntervalSince1970: 0)
-        dataStore.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: date) {
-            print("Web cache cleared.")
+        dataStore.removeData(ofTypes: cacheTypes, modifiedSince: date) {
+          print("Web cache cleared.")
         }
-    }
+      }
     
     // this handles target=_blank links by opening them in the same view
     func webView(webView: WKWebView!, createWebViewWithConfiguration configuration: WKWebViewConfiguration!, forNavigationAction navigationAction: WKNavigationAction!, windowFeatures: WKWindowFeatures!) -> WKWebView! {
