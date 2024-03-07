@@ -51,68 +51,51 @@ extension MainViewController {
         var pumpSiteChange: [cageData] = []
         var cgmSensorChange: [sageData] = []
         
-        for i in 0..<entries.count {
-            let entry = entries[i] as [String : AnyObject]?
-            switch entry?["eventType"] as! String {
-            case "Temp Basal":
-                tempBasal.append(entry!)
-            case "Correction Bolus":
-                bolus.append(entry!)
-            case "Bolus":
-                bolus.append(entry!)
-            case "Insulinpenna":
-                bolus.append(entry!)
-            case "SMB":
-                bolus.append(entry!)
-            case "Meal Bolus":
-                carbs.append(entry!)
-                bolus.append(entry!)
-            case "Carb Correction":
-                carbs.append(entry!)
-            case "Kolhydrater":
-                carbs.append(entry!)
-            case "Dextro":
-                carbs.append(entry!)
-            case "Måltid":
-                carbs.append(entry!)
-                //Daniel Kolhydrater, Dextro, Insulinpenna, SMB och måltid tillagt för att tillåta motsvarande customizerade namn på behandlingar i NS
-            case "Temporary Override":
-                temporaryOverride.append(entry!)
-            case "Temporary Target":
-                temporaryOverride.append(entry!)
-            case "Exercise":
-                temporaryOverride.append(entry!)
-            case "Override":
-                temporaryOverride.append(entry!)
-                //Lägger till för att visualisera iPAS overrides (exercise i NS)
-            case "Note":
-                note.append(entry!)
-                print("Note: \(String(describing: entry))")
-            case "BG Check":
-                bgCheck.append(entry!)
-            case "Suspend Pump":
-                suspendPump.append(entry!)
-            case "Resume Pump":
-                resumePump.append(entry!)
-            case "Pump Site Change", "Site Change", "Pumpbyte":
-                if let createdAt = entry?["created_at"] as? String {
-                    let newEntry = cageData(created_at: createdAt)
-                    pumpSiteChange.append(newEntry)
-                }
-            case "Sensor Start", "Sensor Change", "Sensorbyte":
-                if let createdAt = entry?["created_at"] as? String {
-                    let newEntry = sageData(created_at: createdAt)
-                    cgmSensorChange.append(newEntry)
-                }
-            default:
-                print("No Match: \(String(describing: entry))")
-            }
+        for entry in entries {
+                    guard let eventType = entry["eventType"] as? String else {
+                        continue
+                    }
+            
+            switch eventType {
+                        case "Temp Basal":
+                            tempBasal.append(entry)
+                        case "Correction Bolus", "Bolus", "SMB", "Insulinpenna":
+                            bolus.append(entry)
+                        case "Meal Bolus":
+                            carbs.append(entry)
+                            bolus.append(entry)
+                        case "Carb Correction", "Kolhydrater", "Dextro", "Måltid":
+                            carbs.append(entry)
+                        case "Temporary Override", "Temporary Target", "Exercise", "Override":
+                            temporaryOverride.append(entry)
+                        case "Note", "Announcement":
+                            note.append(entry)
+                            print("Note: \(String(describing: entry))")
+                        case "BG Check":
+                            bgCheck.append(entry)
+                        case "Suspend Pump":
+                            suspendPump.append(entry)
+                        case "Resume Pump":
+                            resumePump.append(entry)
+                        case "Pump Site Change", "Site Change", "Pumpbyte":
+                            if let createdAt = entry["created_at"] as? String {
+                                let newEntry = cageData(created_at: createdAt)
+                                pumpSiteChange.append(newEntry)
+                            }
+                        case "Sensor Start", "Sensor Change", "Sensorbyte":
+                            if let createdAt = entry["created_at"] as? String {
+                                let newEntry = sageData(created_at: createdAt)
+                                cgmSensorChange.append(newEntry)
+                            }
+                        default:
+                            print("No Match: \(String(describing: entry))")
+                        }
         }
         
         if tempBasal.count > 0 {
             processNSBasals(entries: tempBasal)
         } else {
-            if basalData.count < 0 {
+            if basalData.count > 0 {
                 clearOldTempBasal()
             }
         }
