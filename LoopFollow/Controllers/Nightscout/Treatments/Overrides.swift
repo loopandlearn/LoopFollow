@@ -34,6 +34,9 @@ extension MainViewController {
                 duration = (currentEntry["duration"] as? Double ?? 5.0) * 60
             }
             
+            // Limiting the override duration to a maximum of 24 hours for very long overrides
+            //duration = min(duration, 24 * 60 * 60)
+            
             if duration < 300 { return }
             
             guard let enteredBy = currentEntry["enteredBy"] as? String, let notes = currentEntry["notes"] as? String else { return }
@@ -48,7 +51,18 @@ extension MainViewController {
                 range = [low ?? 0, high ?? 0]
             }*/
             
-            let endDate = dateTimeStamp + duration
+            //let endDate = dateTimeStamp + duration
+            //Limit charts to ony vizualize very long overrides just as long as user set prediction hours into the future
+            let currentTimestamp = Date().timeIntervalSince1970
+            let predictionHoursFromNow = currentTimestamp + UserDefaultsRepository.predictionToLoad.value * 3600
+            
+            var endDate: Double
+
+            if dateTimeStamp + duration > predictionHoursFromNow {
+                endDate = predictionHoursFromNow
+            } else {
+                endDate = dateTimeStamp + duration
+            }
             
             let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: multiplier, date: dateTimeStamp, endDate: endDate, duration: duration, /*correctionRange: range,*/ enteredBy: enteredBy, notes: notes, /*reason: reason,*/ sgv: -20)
             overrideGraphData.append(dot)
