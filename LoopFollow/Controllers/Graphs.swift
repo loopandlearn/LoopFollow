@@ -1185,16 +1185,16 @@ extension MainViewController {
         var colors = [NSUIColor]()
         for i in 0..<thisData.count{
             let thisItem = thisData[i]
-            let multiplier = thisItem.insulNeedsScaleFactor as! Double * 100.0
-            var labelText = thisItem.notes// + "\r\n"
+            //let multiplier = thisItem.insulNeedsScaleFactor as! Double * 100.0
+            var labelText = thisItem.notes // + "\r\n"
             //labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% Mål:"
-            //if thisItem.correctionRange.count == 2 {
-                //let firstValue = Double(thisItem.correctionRange[0])
-                //let result = firstValue / 18.0
-                //labelText += String(result)
-            //}
+            /*if thisItem.correctionRange.count == 2 {
+                let firstValue = Double(thisItem.correctionRange[0])
+                let result = firstValue / 18.0
+                labelText! += String(result)
+            }*/
             if thisItem.enteredBy.count > 0 {
-                labelText += "\nInlagt av: " + thisItem.enteredBy
+                labelText! += "\nInlagt av: " + thisItem.enteredBy
             }
             
             
