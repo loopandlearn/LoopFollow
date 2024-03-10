@@ -10,8 +10,8 @@ import Foundation
 extension MainViewController {
     // NS Sage Web Call
     func webLoadNSSage() {
-        let lastDateString = dateTimeUtils.nowMinus60DaysTimeInterval()
-        let currentTimeString = dateTimeUtils.getCurrentDateTimeString()
+        let lastDateString = dateTimeUtils.getDateTimeString(addingDays: -60)
+        let currentTimeString = dateTimeUtils.getDateTimeString()
         
         let parameters: [String: String] = [
             "find[eventType]": NightscoutUtils.EventType.sage.rawValue,

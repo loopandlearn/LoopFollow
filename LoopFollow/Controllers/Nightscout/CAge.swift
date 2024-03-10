@@ -10,7 +10,7 @@ import Foundation
 extension MainViewController {
     // NS Cage Web Call
     func webLoadNSCage() {
-        let currentTimeString = dateTimeUtils.getCurrentDateTimeString()
+        let currentTimeString = dateTimeUtils.getDateTimeString()
         
         let parameters: [String: String] = [
             "find[eventType]": NightscoutUtils.EventType.cage.rawValue,

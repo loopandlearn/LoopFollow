@@ -57,40 +57,24 @@ class dateTimeUtils {
         return utcTime
     }
     
-    static func getCurrentDateTimeString() -> String {
-        let currentTimeInterval = getNowTimeIntervalUTC()
+    static func getDateTimeString(addingHours hours: Int? = nil, addingDays days: Int? = nil) -> String {
+            let currentDate = Date()
+            var date = currentDate
+        
+        if let hoursToAdd = hours {
+                    date = Calendar.current.date(byAdding: .hour, value: hoursToAdd, to: currentDate)!
+                }
+        
+        if let daysToAdd = days {
+                    date = Calendar.current.date(byAdding: .day, value: daysToAdd, to: currentDate)!
+                }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         dateFormatter.locale = Locale(identifier: "en_US")
-        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
-        
-        let currentDate = Date(timeIntervalSince1970: currentTimeInterval)
-        let currentTimeString = dateFormatter.string(from: currentDate)
-        
-        return currentTimeString
-    }
-    
-    static func nowMinusNHoursTimeInterval(N: Int) -> String {
-        let today = Date()
-        let nHoursAgo = Calendar.current.date(byAdding: .hour, value: -N, to: today)!
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        dateFormatter.locale = Locale(identifier: "en_US")
-        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
-        let nHoursAgoString = dateFormatter.string(from: nHoursAgo)
-        return nHoursAgoString
-    }
-    
-    static func nowMinus60DaysTimeInterval() -> String {
-        let today = Date()
-        let oldDate = Calendar.current.date(byAdding: .day, value: -10, to: today)!
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        dateFormatter.locale = Locale(identifier: "en_US")
-        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
-        let dayString = dateFormatter.string(from: oldDate)
-        return dayString
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+
+                return dateFormatter.string(from: date)
     }
     
     static func printNow() -> String {
