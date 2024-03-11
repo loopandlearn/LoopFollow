@@ -65,7 +65,7 @@ extension MainViewController {
                 bolus.append(entry)
             case "Carb Correction":
                 carbs.append(entry)
-            case "Temporary Override", "Temporary Target":
+            case "Temporary Override", "Temporary Target", "Exercise":
                 temporaryOverride.append(entry)
             case "Note":
                 note.append(entry)

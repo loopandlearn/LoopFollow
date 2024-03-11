@@ -173,7 +173,7 @@ extension MainViewController {
         lineOverride.lineWidth = 0
         lineOverride.drawFilledEnabled = true
         lineOverride.fillFormatter = OverrideFillFormatter()
-        lineOverride.fillColor = NSUIColor.systemGreen
+        lineOverride.fillColor = NSUIColor.systemPurple
         lineOverride.fillAlpha = 0.6
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
@@ -483,7 +483,7 @@ extension MainViewController {
             }
         }
         
-        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Graph BGs: " + mainChart.entries.count.description) }        
+        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Graph BGs: " + mainChart.entries.count.description) }
         
         // Set Colors
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
@@ -1050,7 +1050,7 @@ extension MainViewController {
         lineOverride.lineWidth = 0
         lineOverride.drawFilledEnabled = true
         lineOverride.fillFormatter = OverrideFillFormatter()
-        lineOverride.fillColor = NSUIColor.systemGreen
+        lineOverride.fillColor = NSUIColor.systemPurple
         lineOverride.fillAlpha = 0.6
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
@@ -1182,13 +1182,13 @@ extension MainViewController {
         for i in 0..<thisData.count{
             let thisItem = thisData[i]
             let multiplier = thisItem.insulNeedsScaleFactor as! Double * 100.0
-            var labelText = thisItem.reason + "\r\n"
-            labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% "
+            var labelText = thisItem.notes
+            /*labelText += String(Int(thisItem.insulNeedsScaleFactor * 100)) + "% "
             if thisItem.correctionRange.count == 2 {
                 labelText += String(thisItem.correctionRange[0]) + "-" + String(thisItem.correctionRange[1])
-            }
+            }*/
             if thisItem.enteredBy.count > 0 {
-                labelText += "\r\nEntered By: " + thisItem.enteredBy
+                labelText += "\nEntered By: " + thisItem.enteredBy
             }
             
             
