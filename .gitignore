@@ -79,5 +79,3 @@ fastlane/test_output
 fastlane/FastlaneRunner
 
 LoopFollowConfigOverride.xcconfig
-Config.xcconfig
-LoopFollow.xcodeproj/project.pbxproj
