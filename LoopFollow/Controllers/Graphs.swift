@@ -525,9 +525,6 @@ extension MainViewController {
             BGChart.zoom(scaleX: scaleX, scaleY: 1, x: 1, y: 1)
             firstGraphLoad = false
         }
-        
-        // Move to current reading everytime new readings load
-        BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
     }
     
     func updatePredictionGraph(color: UIColor? = nil) {
