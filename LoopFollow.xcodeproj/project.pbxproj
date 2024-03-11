@@ -1145,6 +1145,8 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow$(app_suffix)";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = "com.dev-C6U8V99TR3.LoopFollow";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "com.dev-C6U8V99TR3.LoopFollow";
 				PRODUCT_NAME = "Loop Follow";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
@@ -1167,6 +1169,8 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow$(app_suffix)";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = "com.dev-C6U8V99TR3.LoopFollow";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "com.dev-C6U8V99TR3.LoopFollow";
 				PRODUCT_NAME = "Loop Follow";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;

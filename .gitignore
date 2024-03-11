@@ -81,3 +81,5 @@ fastlane/FastlaneRunner
 LoopFollowConfigOverride.xcconfig
 Config.xcconfig
 LoopFollow.xcodeproj/project.pbxproj
+LoopFollow.xcodeproj/project.pbxproj
+LoopFollow/Info.plist
