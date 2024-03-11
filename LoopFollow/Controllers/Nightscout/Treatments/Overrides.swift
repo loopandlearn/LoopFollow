@@ -36,17 +36,20 @@ extension MainViewController {
             
             if duration < 300 { return }
             
-            guard let enteredBy = currentEntry["enteredBy"] as? String, let notes = currentEntry["notes"] as? String else { return }
+            guard let enteredBy = currentEntry["enteredBy"] as? String,
+                  let notes = currentEntry["notes"] as? String ?? currentEntry["reason"] as? String else {
+                return
+            }
             
-            /*var range: [Int] = []
-             if let ranges = currentEntry["correctionRange"] as? [Int], ranges.count == 2 {
-             range = ranges
-             } else {
-             let low = currentEntry["targetBottom"] as? Int
-             let high = currentEntry["targetTop"] as? Int
-             if (low == nil && high != nil) || (low != nil && high == nil) { return }
+            var range: [Int] = []
+            if let ranges = currentEntry["correctionRange"] as? [Int], ranges.count == 2 {
+                range = ranges
+            } else {
+                let low = currentEntry["targetBottom"] as? Int
+                let high = currentEntry["targetTop"] as? Int
+                if (low == nil && high != nil) || (low != nil && high == nil) { return }
              range = [low ?? 0, high ?? 0]
-             }*/
+             }
             
             //let endDate = dateTimeStamp + duration
             //Limit charts to ony vizualize very long overrides just as long as user set prediction hours into the future
@@ -61,7 +64,7 @@ extension MainViewController {
                 endDate = dateTimeStamp + duration
             }
             
-            let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: multiplier, date: dateTimeStamp, endDate: endDate, duration: duration, /*correctionRange: range,*/ enteredBy: enteredBy, notes: notes, /*reason: reason,*/ sgv: -20)
+            let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: multiplier, date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: range, enteredBy: enteredBy, notes: notes ?? "", reason: currentEntry["reason"] as? String ?? "", sgv: -20)
             overrideGraphData.append(dot)
         }
         
