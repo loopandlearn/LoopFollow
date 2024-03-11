@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
     <device id="retina6_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -86,7 +86,7 @@
                                         </constraints>
                                         <prototypes>
                                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="LabelCell" textLabel="gif-qe-9mv" detailTextLabel="hfT-xF-eNt" style="IBUITableViewCellStyleValue1" id="GJo-f1-ajA">
-                                                <rect key="frame" x="0.0" y="28" width="243.33333333333337" height="43.666667938232422"/>
+                                                <rect key="frame" x="0.0" y="50" width="243.33333333333337" height="43.666667938232422"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="GJo-f1-ajA" id="2H1-eI-xS5">
                                                     <rect key="frame" x="0.0" y="0.0" width="243.33333333333337" height="43.666667938232422"/>
@@ -348,40 +348,40 @@
                                         </variation>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Delta" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YCF-22-z3g" userLabel="Delta">
-                                        <rect key="frame" x="0.0" y="263" width="398" height="48"/>
+                                        <rect key="frame" x="0.0" y="263" width="398" height="95.666666666666686"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="70"/>
                                         <nil key="textColor"/>
                                         <color key="highlightedColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <variation key="heightClass=regular-widthClass=compact">
-                                            <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="80"/>
                                         </variation>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MinAgo" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HNC-P8-PbV">
-                                        <rect key="frame" x="0.0" y="311" width="398" height="48"/>
+                                        <rect key="frame" x="0.0" y="358.66666666666669" width="398" height="95.666666666666686"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="70"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                         <variation key="heightClass=regular-widthClass=compact">
-                                            <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="80"/>
                                         </variation>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xzZ-jc-k2v">
-                                        <rect key="frame" x="0.0" y="359" width="398" height="352"/>
+                                        <rect key="frame" x="0.0" y="454.33333333333337" width="398" height="256.66666666666663"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="HFL-Ye-6HR">
-                                                <rect key="frame" x="103.66666666666667" y="142" width="190.66666666666663" height="68"/>
+                                                <rect key="frame" x="102.66666666666667" y="70.666666666666629" width="192.66666666666663" height="115.66666666666669"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Clock" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r85-eB-vVd">
-                                                        <rect key="frame" x="0.0" y="0.0" width="190.66666666666666" height="48"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="192.66666666666666" height="95.666666666666671"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="70"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
                                                         <variation key="heightClass=regular-widthClass=compact">
-                                                            <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                                            <fontDescription key="fontDescription" type="system" pointSize="80"/>
                                                         </variation>
                                                     </label>
                                                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Alert Name" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tiA-fs-ZRV">
-                                                        <rect key="frame" x="0.0" y="58" width="190.66666666666666" height="0.0"/>
+                                                        <rect key="frame" x="0.0" y="105.66666666666663" width="192.66666666666666" height="0.0"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="70"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
@@ -390,7 +390,7 @@
                                                         </variation>
                                                     </label>
                                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Meu-VT-byv">
-                                                        <rect key="frame" x="0.0" y="58" width="190.66666666666666" height="0.0"/>
+                                                        <rect key="frame" x="0.0" y="105.66666666666663" width="192.66666666666666" height="0.0"/>
                                                         <color key="backgroundColor" systemColor="labelColor"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="70"/>
                                                         <state key="normal" title="Snooze">
@@ -404,7 +404,7 @@
                                                         </connections>
                                                     </button>
                                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dav-Y8-lSK">
-                                                        <rect key="frame" x="0.0" y="68" width="190.66666666666666" height="0.0"/>
+                                                        <rect key="frame" x="0.0" y="115.66666666666663" width="192.66666666666666" height="0.0"/>
                                                         <subviews>
                                                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="snoozeMinutes" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iC4-A1-q9b">
                                                                 <rect key="frame" x="0.0" y="0.0" width="0.0" height="32"/>
@@ -423,7 +423,7 @@
                                                 </subviews>
                                             </stackView>
                                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="9ey-Az-e5u" userLabel="debugTextView">
-                                                <rect key="frame" x="8" y="8" width="382" height="336"/>
+                                                <rect key="frame" x="8" y="7.9999999999999858" width="382" height="240.66666666666663"/>
                                                 <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences" autocorrectionType="no"/>
@@ -569,11 +569,11 @@
         </scene>
     </scenes>
     <resources>
-        <image name="alarm" catalog="system" width="124" height="128"/>
-        <image name="gear" catalog="system" width="128" height="119"/>
-        <image name="house" catalog="system" width="128" height="106"/>
-        <image name="safari" catalog="system" width="128" height="121"/>
-        <image name="zzz" catalog="system" width="121" height="128"/>
+        <image name="alarm" catalog="system" width="123" height="128"/>
+        <image name="gear" catalog="system" width="128" height="122"/>
+        <image name="house" catalog="system" width="128" height="104"/>
+        <image name="safari" catalog="system" width="128" height="123"/>
+        <image name="zzz" catalog="system" width="119" height="128"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
