@@ -28,13 +28,17 @@ class UserDefaultsRepository {
         "Pump",
         "SAGE",
         "CAGE",
-        "Rec. Bolus",
-        "Pred.",
+        "Needed",
+        "Min/max",
         "Carbs today",
         "Autosens",
-        "Profile"])
-    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [0,1,2,3,4,5,6,7,8,9,10,11,12])
-    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true,true,false,false])
+        "Profile",
+        "Total daily dose",
+        "Insulin sensitivity",
+        "Carb ratio",
+        "Target"])
+    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16])
+    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false])
     static let hideInfoTable = UserDefaultsValue<Bool>(key: "hideInfoTable", default: false)
     
     // Nightscout Settings

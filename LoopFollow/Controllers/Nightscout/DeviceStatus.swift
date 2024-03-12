@@ -180,7 +180,7 @@ extension MainViewController {
             } // end lastLoopTime
         } // end lastLoop Record
         
-        if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String : AnyObject]? {
+        else if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String : AnyObject]? {
             if let lastLoopTime = formatter.date(from: (lastDeviceStatus?["created_at"] as! String))?.timeIntervalSince1970  {
                 UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
@@ -202,16 +202,23 @@ extension MainViewController {
                         tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
                         latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
                     }
-                    if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double)
-                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double)
-                    }
-                    if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[8].value = String(format:"%.2fU", recbolusdata["insulinReq"] as! Double)
-                    }
-                    if let autosensdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
+                    if let enactedData = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        tableData[1].value = String(format:"%.0f", enactedData["COB"] as! Double)
+                        latestCOB = String(format:"%.0f", enactedData["COB"] as! Double)
+                    
+                        tableData[8].value = String(format:"%.2fU", enactedData["insulinReq"] as! Double)
+                    
+                        let sens = enactedData["sensitivityRatio"] as! Double * 100.0
                         tableData[11].value = String(format:"%.0f", sens) + "%"
+                        
+                        tableData[8].value = String(format:"%.2fU", enactedData["insulinReq"] as! Double)
+                        
+                        //Auggie - get TDD, ISF, CR, target
+                        tableData[13].value = String(format:"%.1f", enactedData["TDD"] as! Double)
+                        tableData[14].value = String(format:"%.0f", enactedData["ISF"] as! Double)
+                        tableData[15].value = String(format:"%.1f", enactedData["CR"] as! Double)
+                        tableData[16].value = String(format:"%.0f", enactedData["current_target"] as! Double)
+
                     }
                     
                     //Picks COB prediction if available, else UAM, else IOB, else ZT

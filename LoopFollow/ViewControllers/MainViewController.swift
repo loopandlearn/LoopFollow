@@ -155,19 +155,24 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         // reset the infoTable names in case we add or delete items
         UserDefaultsRepository.infoNames.value.removeAll()
-        UserDefaultsRepository.infoNames.value.append("IOB")
+        UserDefaultsRepository.infoNames.value.append("IOB") //0
         UserDefaultsRepository.infoNames.value.append("COB")
-        UserDefaultsRepository.infoNames.value.append("Basal")
+        UserDefaultsRepository.infoNames.value.append("Basal") //2
         UserDefaultsRepository.infoNames.value.append("Override")
-        UserDefaultsRepository.infoNames.value.append("Battery")
+        UserDefaultsRepository.infoNames.value.append("Battery") //4
         UserDefaultsRepository.infoNames.value.append("Pump")
-        UserDefaultsRepository.infoNames.value.append("SAGE")
+        UserDefaultsRepository.infoNames.value.append("SAGE") //6
         UserDefaultsRepository.infoNames.value.append("CAGE")
-        UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
-        UserDefaultsRepository.infoNames.value.append("Pred.")
-        UserDefaultsRepository.infoNames.value.append("Carbs today")
+        UserDefaultsRepository.infoNames.value.append("Needed") //8
+        UserDefaultsRepository.infoNames.value.append("Min/max")
+        UserDefaultsRepository.infoNames.value.append("Carbs today") //10
         UserDefaultsRepository.infoNames.value.append("Autosens")
-        UserDefaultsRepository.infoNames.value.append("Profile")
+        UserDefaultsRepository.infoNames.value.append("Profile") //12
+        //Auggie
+        UserDefaultsRepository.infoNames.value.append("Total daily dose") //13
+        UserDefaultsRepository.infoNames.value.append("Insulin sensitivity") //14
+        UserDefaultsRepository.infoNames.value.append("Carb ratio") //15
+        UserDefaultsRepository.infoNames.value.append("Target") //16
 
         // Reset deprecated settings
         UserDefaultsRepository.debugLog.value = false;
