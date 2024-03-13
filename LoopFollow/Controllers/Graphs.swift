@@ -342,11 +342,21 @@ extension MainViewController {
     }
     
     func createNowAndDIALines() {
-    let ul = ChartLimitLine()
-    ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
-    ul.lineColor = NSUIColor.white
-    ul.lineWidth = 1
-    BGChart.xAxis.addLimitLine(ul)
+    // Large chart
+        let ul = ChartLimitLine()
+        ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
+        ul.lineColor = NSUIColor.white
+        ul.lineDashLengths = [CGFloat(2), CGFloat(2)]
+        ul.lineWidth = 1
+        BGChart.xAxis.addLimitLine(ul)
+        
+        // Small chart
+        let sl = ChartLimitLine()
+        sl.limit = Double(dateTimeUtils.getNowTimeIntervalUTC())
+        sl.lineColor = NSUIColor.white
+        sl.lineDashLengths = [CGFloat(2), CGFloat(2)]
+        sl.lineWidth = 1
+        BGChartFull.xAxis.addLimitLine(sl)
         
         if UserDefaultsRepository.show30MinLine.value {
             let ul2 = ChartLimitLine()
@@ -360,7 +370,7 @@ extension MainViewController {
             for i in 1..<7 {
                 let ul = ChartLimitLine()
                 ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC() - Double(i * 60 * 60))
-                ul.lineColor = NSUIColor.systemGray.withAlphaComponent(0.3)
+                ul.lineColor = NSUIColor.systemGray.withAlphaComponent(0.5)
                 let dash = 10.0 - Double(i)
                 let space = 5.0 + Double(i)
                 ul.lineDashLengths = [CGFloat(dash), CGFloat(space)]
@@ -388,8 +398,8 @@ extension MainViewController {
                 // Large chart
                 let ul = ChartLimitLine()
                 ul.limit = Double(midnightTimeInterval)
-                ul.lineColor = NSUIColor.systemTeal.withAlphaComponent(0.5)
-                ul.lineDashLengths = [CGFloat(2), CGFloat(5)]
+                ul.lineColor = NSUIColor.systemTeal //.withAlphaComponent(0.5)
+                ul.lineDashLengths = [CGFloat(2), CGFloat(2)]
                 ul.lineWidth = 1
                 BGChart.xAxis.addLimitLine(ul)
 
