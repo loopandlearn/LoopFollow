@@ -225,6 +225,12 @@ extension MainViewController {
                         let currentTargetMmol = mgdlToMmol(currentTargetMgdl)
                         tableData[16].value = String(format: "%.1f", currentTargetMmol) + " mmol/L"
                         
+                    } else {
+                        // If enactedData is nil, set all tableData values to "Waiting"
+                        for i in 1..<tableData.count {
+                            tableData[i].value = "Inväntar data"
+                        }
+                        
                     }
                     
                     //Auggie - override name
