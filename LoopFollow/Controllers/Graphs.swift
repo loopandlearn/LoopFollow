@@ -378,13 +378,23 @@ extension MainViewController {
                 BGChart.xAxis.addLimitLine(ul)
             }
         }
-
+// Daniel: Changed below show -90 min to instead show -24 h (to quickly campare now with yesterday same time)
         if UserDefaultsRepository.show90MinLine.value {
+            // Large chart
             let ul3 = ChartLimitLine()
-            ul3.limit = Double(dateTimeUtils.getNowTimeIntervalUTC().advanced(by: -90 * 60))
+            ul3.limit = Double(dateTimeUtils.getNowTimeIntervalUTC().advanced(by: -1440 * 60))
             ul3.lineColor = NSUIColor.systemOrange.withAlphaComponent(0.5)
+            ul3.lineDashLengths = [CGFloat(2), CGFloat(2)]
             ul3.lineWidth = 1
             BGChart.xAxis.addLimitLine(ul3)
+            
+            // Small chart
+            let sl3 = ChartLimitLine()
+            sl3.limit = Double(dateTimeUtils.getNowTimeIntervalUTC().advanced(by: -1440 * 60))
+            sl3.lineColor = NSUIColor.systemOrange.withAlphaComponent(0.5)
+            sl3.lineDashLengths = [CGFloat(2), CGFloat(2)]
+            sl3.lineWidth = 1
+            BGChartFull.xAxis.addLimitLine(sl3)
         }
     }
     
@@ -398,7 +408,7 @@ extension MainViewController {
                 // Large chart
                 let ul = ChartLimitLine()
                 ul.limit = Double(midnightTimeInterval)
-                ul.lineColor = NSUIColor.systemTeal //.withAlphaComponent(0.5)
+                ul.lineColor = NSUIColor.systemIndigo //.withAlphaComponent(0.7)
                 ul.lineDashLengths = [CGFloat(2), CGFloat(2)]
                 ul.lineWidth = 1
                 BGChart.xAxis.addLimitLine(ul)
@@ -406,7 +416,7 @@ extension MainViewController {
                 // Small chart
                 let sl = ChartLimitLine()
                 sl.limit = Double(midnightTimeInterval)
-                sl.lineColor = NSUIColor.systemTeal
+                sl.lineColor = NSUIColor.systemIndigo //.withAlphaComponent(0.7)
                 sl.lineDashLengths = [CGFloat(2), CGFloat(2)]
                 sl.lineWidth = 1
                 BGChartFull.xAxis.addLimitLine(sl)

@@ -64,7 +64,7 @@ extension MainViewController {
         var parameters: [String: String] = [:]
         let utcISODateFormatter = ISO8601DateFormatter()
         let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
-        parameters["count"] = "1000"
+        parameters["count"] = "1200" //increased from 1000 to 1200 to allow 48h of bg data when 2 bg uploaders are used in NS (Dexcom and iAPS for instance = 576 readings/day, 1152 during 48h)
         parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: date)
         
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
