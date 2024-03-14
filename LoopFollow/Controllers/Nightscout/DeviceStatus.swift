@@ -234,16 +234,21 @@ extension MainViewController {
                     }
                     
                     //Auggie - override name
-                                        let recentOverride = overrideGraphData.last
-                                        let overrideName = recentOverride?.notes
-                                        let recentEnd: TimeInterval = recentOverride?.endDate ?? 0
-                                        let now = dateTimeUtils.getNowTimeIntervalUTC()
-                                        if recentEnd >= now {
-                                            tableData[3].value = String(overrideName ?? "Ingen")
-                                        }
-                                        else {
-                                            tableData[3].value = "Ingen"
-                                        }
+                    let recentOverride = overrideGraphData.last
+                    let overrideName: String?
+                    if let notes = recentOverride?.notes, !notes.isEmpty {
+                        overrideName = notes
+                    } else {
+                        overrideName = recentOverride?.reason
+                    }
+                    let recentEnd: TimeInterval = recentOverride?.endDate ?? 0
+                    let now = dateTimeUtils.getNowTimeIntervalUTC()
+                    if recentEnd >= now {
+                        tableData[3].value = String(overrideName ?? "Ingen aktiv")
+                    }
+                    else {
+                        tableData[3].value = "Ingen aktiv"
+                    }
                     
                     //Picks COB prediction if available, else UAM, else IOB, else ZT
                     //Ideal is to predict all 4 in Loop Follow but this is a quick start
