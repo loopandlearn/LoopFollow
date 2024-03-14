@@ -165,6 +165,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UserDefaultsRepository.infoNames.value.append("Prognos")
         UserDefaultsRepository.infoNames.value.append("Kh idag")
         UserDefaultsRepository.infoNames.value.append("Autosens")
+        UserDefaultsRepository.infoNames.value.append("Profil")
+        //Auggie
+        UserDefaultsRepository.infoNames.value.append("Total daglig dos")
+        UserDefaultsRepository.infoNames.value.append("ISF")
+        UserDefaultsRepository.infoNames.value.append("CR")
+        UserDefaultsRepository.infoNames.value.append("Målvärde")
         
         // Reset deprecated settings
         UserDefaultsRepository.debugLog.value = false;
