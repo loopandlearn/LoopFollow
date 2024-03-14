@@ -37,7 +37,7 @@ extension MainViewController {
             // Limiting the override duration to a maximum of 24 hours for very long overrides
             //duration = min(duration, 24 * 60 * 60)
             
-            if duration < 300 { return }
+            //if duration < 300 { return } Commented out this limit to include (Cancel and duration 0) temp targets from iAPS to make override name in info table to update if tt is cancelled (chart still shows entire initial duration of temp target and doesnt update when cancelled, need to fix that later)
             
             guard let enteredBy = currentEntry["enteredBy"] as? String,
                   let notes = currentEntry["notes"] as? String ?? currentEntry["reason"] as? String else {
