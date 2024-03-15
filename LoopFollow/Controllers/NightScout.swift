@@ -55,12 +55,13 @@ extension MainViewController {
         var sgv: Int
     }
     
-    //NS Bolus Data  Struct
+    //NS Carbs Data  Struct
     struct carbGraphStruct: Codable {
         var value: Double
         var date: TimeInterval
         var sgv: Int
         var absorptionTime: Int
+        var foodType: String?
     }
     
     func isStaleData() -> Bool {
