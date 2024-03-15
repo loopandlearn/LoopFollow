@@ -244,10 +244,9 @@ extension MainViewController {
                     let recentEnd: TimeInterval = recentOverride?.endDate ?? 0
                     let now = dateTimeUtils.getNowTimeIntervalUTC()
                     if recentEnd >= now {
-                        tableData[3].value = String(overrideName ?? "---")
-                    }
-                    else {
-                        tableData[3].value = "---"
+                        tableData[3].value = String(overrideName ?? "Normal profil")
+                    } else {
+                        tableData[3].value = "Normal profil"
                     }
                     
                     //Picks COB prediction if available, else UAM, else IOB, else ZT
