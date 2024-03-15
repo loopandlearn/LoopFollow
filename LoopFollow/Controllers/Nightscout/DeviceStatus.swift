@@ -141,7 +141,7 @@ extension MainViewController {
                             
                             let predMin = prediction.min()
                             let predMax = prediction.max()
-                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + " / " + bgUnits.toDisplayUnits(String(predMax!))
+                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "-" + bgUnits.toDisplayUnits(String(predMax!)) + " mmol/L"
                             
                             updatePredictionGraph()
                         }
@@ -322,7 +322,7 @@ extension MainViewController {
                         
                         let predMin = graphdata.min()
                         let predMax = graphdata.max()
-                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + " / " + bgUnits.toDisplayUnits(String(predMax!))
+                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "-" + bgUnits.toDisplayUnits(String(predMax!)) + " mmol/L"
                         
                         updatePredictionGraph(color: predictioncolor)
                     }
