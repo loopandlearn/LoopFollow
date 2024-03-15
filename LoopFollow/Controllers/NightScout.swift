@@ -55,6 +55,13 @@ extension MainViewController {
         var sgv: Int
     }
     
+    //NS SMB Data  Struct
+    struct smbGraphStruct: Codable {
+        var value: Double
+        var date: TimeInterval
+        var sgv: Int
+    }
+    
     //NS Carbs Data  Struct
     struct carbGraphStruct: Codable {
         var value: Double
@@ -89,6 +96,12 @@ extension MainViewController {
     {
         bolusData.removeAll()
         updateBolusGraph()
+    }
+    
+    func clearOldSmb()
+    {
+        smbData.removeAll()
+        updateSmbGraph()
     }
     
     func clearOldCarb()

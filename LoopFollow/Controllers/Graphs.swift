@@ -127,6 +127,32 @@ extension MainViewController {
             lineBolus.highlightEnabled = true
         }
         
+        // SMB
+        let chartEntrySmb = [ChartDataEntry]()
+        let lineSmb = LineChartDataSet(entries:chartEntrySmb, label: "")
+        lineSmb.circleRadius = CGFloat(globalVariables.dotSmb)
+        lineSmb.circleColors = [NSUIColor.systemBlue.withAlphaComponent(0.75)]
+        lineSmb.drawCircleHoleEnabled = true
+        lineSmb.setDrawHighlightIndicators(false)
+        lineSmb.setColor(NSUIColor.systemBlue, alpha: 1.0)
+        lineSmb.lineWidth = 0
+        lineSmb.axisDependency = YAxis.AxisDependency.right
+        lineSmb.valueFormatter = ChartYDataValueFormatter()
+        lineSmb.valueTextColor = NSUIColor.label
+        lineSmb.fillColor = NSUIColor.systemBlue
+        lineSmb.fillAlpha = 0.6
+        
+        lineSmb.drawCirclesEnabled = true
+        lineSmb.drawFilledEnabled = false
+        
+        if UserDefaultsRepository.showValues.value  {
+            lineSmb.drawValuesEnabled = true
+            lineSmb.highlightEnabled = true
+        } else {
+            lineSmb.drawValuesEnabled = false
+            lineSmb.highlightEnabled = true
+        }
+        
         // Carbs
         let chartEntryCarbs = [ChartDataEntry]()
         let lineCarbs = LineChartDataSet(entries:chartEntryCarbs, label: "")
@@ -147,7 +173,7 @@ extension MainViewController {
         
         if UserDefaultsRepository.showValues.value {
             lineCarbs.drawValuesEnabled = true
-            lineCarbs.highlightEnabled = false
+            lineCarbs.highlightEnabled = true
         } else {
             lineCarbs.drawValuesEnabled = false
             lineCarbs.highlightEnabled = true
@@ -271,6 +297,7 @@ extension MainViewController {
         data.append(lineResume) // Dataset 9
         data.append(lineSensor) // Dataset 10
         data.append(lineNote) // Dataset 11
+        data.append(lineSmb) // Dataset 12
         
         data.setValueFont(UIFont.systemFont(ofSize: 10))
         
@@ -737,6 +764,81 @@ extension MainViewController {
         }
     }
     
+    func updateSmbGraph() {
+        var dataIndex = 12
+        var yTop: Double = 370
+        var yBottom: Double = 345
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
+        
+        var colors = [NSUIColor]()
+        for i in 0..<smbData.count{
+            let formatter = NumberFormatter()
+            formatter.minimumFractionDigits = 0
+            formatter.maximumFractionDigits = 2
+            formatter.minimumIntegerDigits = 0
+            
+            // Check overlapping carbs to shift left if needed
+            let smbShift = findNextSmbTime(timeWithin: 240, needle: smbData[i].date, haystack: smbData, startingIndex: i)
+            var dateTimeStamp = smbData[i].date
+            
+            // Alpha colors for DIA
+            let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
+            let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
+            if diffTimeHours <= 1 {
+                colors.append(NSUIColor.systemBlue.withAlphaComponent(1.0))
+            } else if diffTimeHours > 6 {
+                colors.append(NSUIColor.systemBlue.withAlphaComponent(0.25))
+            } else {
+                let thisAlpha = 1.0 - (0.15 * diffTimeHours)
+                colors.append(NSUIColor.systemBlue.withAlphaComponent(CGFloat(thisAlpha)))
+            }
+            
+            if smbShift {
+                // Move it half the distance between BG readings
+                dateTimeStamp = dateTimeStamp - 150
+            }
+            
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
+  
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: formatter.string(from: NSNumber(value: smbData[i].value)))
+            mainChart.addEntry(dot)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                smallChart.addEntry(dot)
+            }
+        }
+        
+        // Set Colors
+        let lineSmb = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        let lineSmbSmall = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        lineSmb.colors.removeAll()
+        lineSmb.circleColors.removeAll()
+        lineSmbSmall.colors.removeAll()
+        lineSmbSmall.circleColors.removeAll()
+        
+        if colors.count > 0 {
+            for i in 0..<colors.count{
+                mainChart.addColor(colors[i])
+                mainChart.circleColors.append(colors[i])
+                smallChart.addColor(colors[i])
+                smallChart.circleColors.append(colors[i])
+            }
+        }
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
+    }
+    
     func updateCarbGraph() {
         var dataIndex = 4
         var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
@@ -1021,22 +1123,39 @@ extension MainViewController {
         var chartEntryBolus = [ChartDataEntry]()
         let lineBolus = LineChartDataSet(entries:chartEntryBolus, label: "")
         lineBolus.circleRadius = 2
-        lineBolus.circleColors = [NSUIColor.systemBlue.withAlphaComponent(0.75)]
+        lineBolus.circleColors = [NSUIColor.systemRed.withAlphaComponent(0.75)]
         lineBolus.drawCircleHoleEnabled = false
         lineBolus.setDrawHighlightIndicators(false)
-        lineBolus.setColor(NSUIColor.systemBlue, alpha: 1.0)
+        lineBolus.setColor(NSUIColor.systemRed, alpha: 1.0)
         lineBolus.lineWidth = 0
         lineBolus.axisDependency = YAxis.AxisDependency.right
         lineBolus.valueFormatter = ChartYDataValueFormatter()
         lineBolus.valueTextColor = NSUIColor.label
-        lineBolus.fillColor = NSUIColor.systemBlue
+        lineBolus.fillColor = NSUIColor.systemRed
         lineBolus.fillAlpha = 0.6
         lineBolus.drawCirclesEnabled = true
         lineBolus.drawFilledEnabled = false
         lineBolus.drawValuesEnabled = false
         lineBolus.highlightEnabled = false
         
-
+        // SMB
+        var chartEntrySmb = [ChartDataEntry]()
+        let lineSmb = LineChartDataSet(entries:chartEntrySmb, label: "")
+        lineSmb.circleRadius = 2
+        lineSmb.circleColors = [NSUIColor.systemRed.withAlphaComponent(0.75)]
+        lineSmb.drawCircleHoleEnabled = false
+        lineSmb.setDrawHighlightIndicators(false)
+        lineSmb.setColor(NSUIColor.systemRed, alpha: 1.0)
+        lineSmb.lineWidth = 0
+        lineSmb.axisDependency = YAxis.AxisDependency.right
+        lineSmb.valueFormatter = ChartYDataValueFormatter()
+        lineSmb.valueTextColor = NSUIColor.label
+        lineSmb.fillColor = NSUIColor.systemRed
+        lineSmb.fillAlpha = 0.6
+        lineSmb.drawCirclesEnabled = true
+        lineSmb.drawFilledEnabled = false
+        lineSmb.drawValuesEnabled = false
+        lineSmb.highlightEnabled = false
         
         // Carbs
         var chartEntryCarbs = [ChartDataEntry]()
@@ -1175,6 +1294,7 @@ extension MainViewController {
         data.append(lineResume) // Dataset 9
         data.append(lineSensor) // Dataset 10
         data.append(lineNote) // Dataset 11
+        data.append(lineSmb) // Dataset 12
         
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false

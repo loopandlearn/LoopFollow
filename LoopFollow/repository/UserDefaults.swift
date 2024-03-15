@@ -101,6 +101,7 @@ class UserDefaultsRepository {
     static let graphOtherTreatments = UserDefaultsValue<Bool>(key: "graphOtherTreatments", default: true)
     static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
     static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
+    static let graphSmb = UserDefaultsValue<Bool>(key: "graphSmb", default: true)
     static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
     static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
     static let alwaysDownloadAllBG = UserDefaultsValue<Bool>(key: "alwaysDownloadAllBG", default: true)

@@ -47,16 +47,23 @@ class AdvancedSettingsViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.graphBasal.value = value
             }
-            <<< SwitchRow("graphBolus"){ row in
-                row.title = "Graph Bolus"
-                row.value = UserDefaultsRepository.graphBolus.value
-            }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.graphBolus.value = value
-            }
-            <<< SwitchRow("graphCarbs"){ row in
-                row.title = "Graph Carbs"
-                row.value = UserDefaultsRepository.graphCarbs.value
+        <<< SwitchRow("graphBolus"){ row in
+            row.title = "Graph Bolus"
+            row.value = UserDefaultsRepository.graphBolus.value
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.graphBolus.value = value
+        }
+        <<< SwitchRow("graphSmb"){ row in
+            row.title = "Graph SMB"
+            row.value = UserDefaultsRepository.graphSmb.value
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.graphSmb.value = value
+        }
+        <<< SwitchRow("graphCarbs"){ row in
+            row.title = "Graph Carbs"
+            row.value = UserDefaultsRepository.graphCarbs.value
             }.onChange { [weak self] row in
                 guard let value = row.value else { return }
                 UserDefaultsRepository.graphCarbs.value = value

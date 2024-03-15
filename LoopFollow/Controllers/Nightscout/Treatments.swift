@@ -41,6 +41,7 @@ extension MainViewController {
         
         var tempBasal: [[String:AnyObject]] = []
         var bolus: [[String:AnyObject]] = []
+        var smb: [[String:AnyObject]] = []
         var carbs: [[String:AnyObject]] = []
         var temporaryOverride: [[String:AnyObject]] = []
         var note: [[String:AnyObject]] = []
@@ -58,8 +59,10 @@ extension MainViewController {
             switch eventType {
                         case "Temp Basal":
                             tempBasal.append(entry)
-                        case "Correction Bolus", "Bolus", "SMB", "Insulinpenna":
+                        case "Correction Bolus", "Bolus", /*"SMB",*/ "Insulinpenna":
                             bolus.append(entry)
+                        case "SMB":
+                            smb.append(entry)
                         case "Meal Bolus":
                             carbs.append(entry)
                             bolus.append(entry)
@@ -105,6 +108,14 @@ extension MainViewController {
                 clearOldBolus()
             }
         }
+        if smb.count > 0 {
+            processNSSmb(entries: smb)
+        } else {
+            if smbData.count > 0 {
+                clearOldSmb()
+            }
+        }
+        
         updateTodaysCarbsFromEntries(entries: carbs)
         if carbs.count > 0 {
             processNSCarbs(entries: carbs)
