@@ -228,7 +228,7 @@ extension MainViewController {
                     } else {
                         // If enactedData is nil, set all tableData values to "Waiting"
                         for i in 1..<tableData.count {
-                            tableData[i].value = "Inväntar data"
+                            tableData[i].value = "---"
                         }
                         
                     }
