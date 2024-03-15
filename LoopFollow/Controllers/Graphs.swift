@@ -121,7 +121,7 @@ extension MainViewController {
         
         if UserDefaultsRepository.showValues.value  {
             lineBolus.drawValuesEnabled = true
-            lineBolus.highlightEnabled = false
+            lineBolus.highlightEnabled = true
         } else {
             lineBolus.drawValuesEnabled = false
             lineBolus.highlightEnabled = true
@@ -729,8 +729,9 @@ extension MainViewController {
             // skip if outside of visible area
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
-  
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+            
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatPillText(line1: formatter.string(from: NSNumber(value: bolusData[i].value))!, time: dateTimeStamp))
+            
             mainChart.addEntry(dot)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 smallChart.addEntry(dot)
@@ -804,8 +805,9 @@ extension MainViewController {
             // skip if outside of visible area
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
-  
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: formatter.string(from: NSNumber(value: smbData[i].value)))
+            
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: formatPillText(line1: formatter.string(from: NSNumber(value: smbData[i].value))!, time: dateTimeStamp))
+            
             mainChart.addEntry(dot)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 smallChart.addEntry(dot)
@@ -891,15 +893,17 @@ extension MainViewController {
                 dateTimeStamp = dateTimeStamp - 250
             }
             
+            /*let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
+            BGChart.data?.dataSets[dataIndex].addEntry(dot)*/
             
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
-            BGChart.data?.dataSets[dataIndex].addEntry(dot)
+            let line1 = formatter.string(from: NSNumber(value: carbData[i].value))! + (foodType.isEmpty ? "" : " \(foodType)")
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: formatPillText(line1: line1, time: dateTimeStamp))
+
+             BGChart.data?.dataSets[dataIndex].addEntry(dot)
+            
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(dot)
             }
-            
-            
-
         }
         
         // Set Colors
@@ -1123,15 +1127,15 @@ extension MainViewController {
         var chartEntryBolus = [ChartDataEntry]()
         let lineBolus = LineChartDataSet(entries:chartEntryBolus, label: "")
         lineBolus.circleRadius = 2
-        lineBolus.circleColors = [NSUIColor.systemRed.withAlphaComponent(0.75)]
+        lineBolus.circleColors = [NSUIColor.systemBlue.withAlphaComponent(0.75)]
         lineBolus.drawCircleHoleEnabled = false
         lineBolus.setDrawHighlightIndicators(false)
-        lineBolus.setColor(NSUIColor.systemRed, alpha: 1.0)
+        lineBolus.setColor(NSUIColor.systemBlue, alpha: 1.0)
         lineBolus.lineWidth = 0
         lineBolus.axisDependency = YAxis.AxisDependency.right
         lineBolus.valueFormatter = ChartYDataValueFormatter()
         lineBolus.valueTextColor = NSUIColor.label
-        lineBolus.fillColor = NSUIColor.systemRed
+        lineBolus.fillColor = NSUIColor.systemBlue
         lineBolus.fillAlpha = 0.6
         lineBolus.drawCirclesEnabled = true
         lineBolus.drawFilledEnabled = false
@@ -1143,7 +1147,7 @@ extension MainViewController {
         let lineSmb = LineChartDataSet(entries:chartEntrySmb, label: "")
         lineSmb.circleRadius = 2
         lineSmb.circleColors = [NSUIColor.systemRed.withAlphaComponent(0.75)]
-        lineSmb.drawCircleHoleEnabled = false
+        lineSmb.drawCircleHoleEnabled = true
         lineSmb.setDrawHighlightIndicators(false)
         lineSmb.setColor(NSUIColor.systemRed, alpha: 1.0)
         lineSmb.lineWidth = 0
