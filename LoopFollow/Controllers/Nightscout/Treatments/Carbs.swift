@@ -15,6 +15,8 @@ extension MainViewController {
         carbData.removeAll()
         var lastFoundIndex = 0
         var lastFoundBolus = 0
+        var lastFoundSmb = 0
+
         
         entries.reversed().forEach { currentEntry in
             var carbDate: String
@@ -43,6 +45,13 @@ extension MainViewController {
                 lastFoundBolus = bolusTime.foundIndex
                 
                 offset = bolusTime.offset ? 70 : 20
+            }
+            
+            if sgv.sgv < Double(topBG - 100) {
+                let smbTime = findNearestSmbbyTime(timeWithin: 300, needle: dateTimeStamp, haystack: smbData, startingIndex: lastFoundSmb)
+                lastFoundSmb = smbTime.foundIndex
+                
+                offset = smbTime.offset ? 70 : 20
             }
             
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)) {

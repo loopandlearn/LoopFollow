@@ -44,6 +44,22 @@ extension MainViewController {
         return (false, 0 )
     }
     
+    func findNearestSmbbyTime(timeWithin: Int, needle: TimeInterval, haystack: [smbGraphStruct], startingIndex: Int) -> (offset: Bool, foundIndex: Int) {
+        
+        // If we can't find a match or things fail, put it at 100 BG
+        for i in startingIndex..<haystack.count {
+            // i has reached the end without a result. return 0
+            let timeDiff = needle - haystack[i].date
+            if timeDiff <= Double(timeWithin) && timeDiff >= Double(-timeWithin) { return (true, i)}
+            
+            if i == haystack.count - 1 { return (false, 0) }
+            if timeDiff < Double(-timeWithin) { return (false, 0)}
+            
+        }
+        
+        return (false, 0 )
+    }
+    
     func findNextCarbTime(timeWithin: Int, needle: TimeInterval, haystack: [carbGraphStruct], startingIndex: Int) -> Bool {
         
         if startingIndex > haystack.count - 2 { return false }
