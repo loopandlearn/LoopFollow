@@ -705,7 +705,7 @@ extension MainViewController {
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 0
             
-            // Check overlapping carbs to shift left if needed
+            // Check overlapping bolus to shift left if needed
             let bolusShift = findNextBolusTime(timeWithin: 240, needle: bolusData[i].date, haystack: bolusData, startingIndex: i)
             var dateTimeStamp = bolusData[i].date
             
@@ -781,7 +781,7 @@ extension MainViewController {
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 0
             
-            // Check overlapping carbs to shift left if needed
+            // Check overlapping smbs to shift left if needed
             let smbShift = findNextSmbTime(timeWithin: 240, needle: smbData[i].date, haystack: smbData, startingIndex: i)
             var dateTimeStamp = smbData[i].date
             

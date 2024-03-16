@@ -47,7 +47,7 @@ extension MainViewController {
                 let smbTime = findNearestSmbbyTime(timeWithin: 300, needle: dateTimeStamp, haystack: smbData, startingIndex: lastFoundSmb)
                 lastFoundSmb = smbTime.foundIndex
                 
-                offset = (bolusTime.offset || smbTime.offset) ? 70 : 20
+                offset = (bolusTime.offset || smbTime.offset) ? 75 : 25
             }
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)) {
                 // Make the dot
