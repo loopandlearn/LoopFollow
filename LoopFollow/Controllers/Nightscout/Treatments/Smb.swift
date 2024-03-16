@@ -34,7 +34,7 @@ extension MainViewController {
             
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                 // Make the dot
-                let dot = smbGraphStruct(value: smb, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 25))
+                let dot = smbGraphStruct(value: smb, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 20))
                 smbData.append(dot)
             }
         }
