@@ -44,16 +44,11 @@ extension MainViewController {
                 let bolusTime = findNearestBolusbyTime(timeWithin: 300, needle: dateTimeStamp, haystack: bolusData, startingIndex: lastFoundBolus)
                 lastFoundBolus = bolusTime.foundIndex
                 
-                offset = bolusTime.offset ? 70 : 20
-            }
-            
-            if sgv.sgv < Double(topBG - 100) {
                 let smbTime = findNearestSmbbyTime(timeWithin: 300, needle: dateTimeStamp, haystack: smbData, startingIndex: lastFoundSmb)
                 lastFoundSmb = smbTime.foundIndex
                 
-                offset = smbTime.offset ? 70 : 20
+                offset = (bolusTime.offset || smbTime.offset) ? 70 : 20
             }
-            
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)) {
                 // Make the dot
                 let dot = carbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv + Double(offset)), absorptionTime: absorptionTime, foodType: foodType as? String)
