@@ -584,7 +584,7 @@ open class LineChartRenderer: LineRadarRenderer
                     {
                         context.drawText(replacedText,
                                          at: CGPoint(x: pt.x,
-                                                     y: pt.y - CGFloat(valOffset) - valueFont.lineHeight),
+                                                     y: pt.y - CGFloat(valOffset) - valueFont.lineHeight - 10), // Daniel: Subtraction for offset
                                          align: .center,
                                          angleRadians: angleRadians,
                                          attributes: [.font: valueFont,
@@ -602,9 +602,9 @@ open class LineChartRenderer: LineRadarRenderer
             }
         }
     }
-
+    //Daniel: Added to filter out strings from chart rendering (but still keep it visible in highlight popup)
     func replaceTimeText(_ text: String) -> String {
-        let timePattern = "\\b\\d{2}:\\d{2}\\b"
+        let timePattern = "\\b(\\d{2}:\\d{2}|Måltid|Bolus|SMB|E|g)\\b"
         
         if let regex = try? NSRegularExpression(pattern: timePattern) {
             let range = NSRange(location: 0, length: text.utf16.count)
@@ -614,8 +614,6 @@ open class LineChartRenderer: LineRadarRenderer
             return text
         }
     }
-
-
     
     open override func drawExtras(context: CGContext)
     {

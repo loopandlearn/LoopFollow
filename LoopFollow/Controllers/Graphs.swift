@@ -640,7 +640,7 @@ extension MainViewController {
         var maxBasal = UserDefaultsRepository.minBasalScale.value
         var maxBasalSmall: Double = 0.0
         for i in 0..<basalData.count{
-            let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate), data: formatPillText(line1: String(basalData[i].basalRate), time: basalData[i].date))
+            let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate), data: formatPillText(line1: "Basal\n" + String(basalData[i].basalRate) + " E/h", time: basalData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
@@ -730,7 +730,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatPillText(line1: formatter.string(from: NSNumber(value: bolusData[i].value))!, time: dateTimeStamp))
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatPillText(line1: "Bolus\n" + formatter.string(from: NSNumber(value: bolusData[i].value))! + " E", time: dateTimeStamp))
             
             mainChart.addEntry(dot)
             if UserDefaultsRepository.smallGraphTreatments.value {
@@ -806,7 +806,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: formatPillText(line1: formatter.string(from: NSNumber(value: smbData[i].value))!, time: dateTimeStamp))
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: formatPillText(line1: "SMB\n" + formatter.string(from: NSNumber(value: smbData[i].value))! + " E", time: dateTimeStamp))
             
             mainChart.addEntry(dot)
             if UserDefaultsRepository.smallGraphTreatments.value {
@@ -896,7 +896,7 @@ extension MainViewController {
             /*let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
             BGChart.data?.dataSets[dataIndex].addEntry(dot)*/
             
-            let line1 = formatter.string(from: NSNumber(value: carbData[i].value))! + (foodType.isEmpty ? "" : " \(foodType)")
+            let line1 = "Måltid\n" + formatter.string(from: NSNumber(value: carbData[i].value))! + " g" + (foodType.isEmpty ? "" : " \(foodType)")
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: formatPillText(line1: line1, time: dateTimeStamp))
 
              BGChart.data?.dataSets[dataIndex].addEntry(dot)
@@ -948,7 +948,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if bgCheckData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(bgCheckData[i].sgv)), time: bgCheckData[i].date))
+            let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatPillText(line1: "Fingerstick\n" + bgUnits.toDisplayUnits(String(bgCheckData[i].sgv)) + " mmol/L", time: bgCheckData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
