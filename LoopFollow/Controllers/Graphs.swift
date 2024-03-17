@@ -517,7 +517,7 @@ extension MainViewController {
             if Float(entries[i].sgv) > topBG - maxBGOffset {
                 topBG = Float(entries[i].sgv) + maxBGOffset
             }
-            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillText(line1: "Blodsocker\n" + bgUnits.toDisplayUnits(String(entries[i].sgv)) + " mmol/L", time: entries[i].date))
+            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillTextExtraLine(line1: "Blodsocker", line2: bgUnits.toDisplayUnits(String(entries[i].sgv)) + " mmol/L", time: entries[i].date))
             if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "BG: " + value.description) }
             mainChart.append(value)
             smallChart.append(value)
@@ -607,7 +607,7 @@ extension MainViewController {
                 colors.append(color ?? NSUIColor.systemPurple)
             }
             
-            let value = ChartDataEntry(x: predictionData[i].date, y: predictionVal, data: formatPillText(line1: "Prognos\n" + bgUnits.toDisplayUnits(String(predictionData[i].sgv)) + " mmol/L", time: predictionData[i].date))
+            let value = ChartDataEntry(x: predictionData[i].date, y: predictionVal, data: formatPillTextExtraLine(line1: "Prognos", line2: bgUnits.toDisplayUnits(String(predictionData[i].sgv)) + " mmol/L", time: predictionData[i].date))
             mainChart.addEntry(value)
             smallChart.addEntry(value)
         }
@@ -640,7 +640,7 @@ extension MainViewController {
         var maxBasal = UserDefaultsRepository.minBasalScale.value
         var maxBasalSmall: Double = 0.0
         for i in 0..<basalData.count{
-            let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate), data: formatPillText(line1: "Basal\n" + String(basalData[i].basalRate) + " E/h", time: basalData[i].date))
+            let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate), data: formatPillTextExtraLine(line1: "Basal", line2: String(basalData[i].basalRate) + " E/h", time: basalData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
@@ -730,7 +730,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatPillText(line1: "Bolus\n" + formatter.string(from: NSNumber(value: bolusData[i].value))! + " E", time: dateTimeStamp))
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatPillTextExtraLine(line1: "Bolus", line2: formatter.string(from: NSNumber(value: bolusData[i].value))! + " E", time: dateTimeStamp))
             
             mainChart.addEntry(dot)
             if UserDefaultsRepository.smallGraphTreatments.value {
@@ -896,8 +896,8 @@ extension MainViewController {
             /*let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
             BGChart.data?.dataSets[dataIndex].addEntry(dot)*/
             
-            let line1 = "Kolhydrater\n" + formatter.string(from: NSNumber(value: carbData[i].value))! + " g" + (foodType.isEmpty ? "" : " \(foodType)")
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: formatPillText(line1: line1, time: dateTimeStamp))
+            let line2 = formatter.string(from: NSNumber(value: carbData[i].value))! + " g" + (foodType.isEmpty ? "" : " \(foodType)")
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: formatPillTextExtraLine(line1: "Kolhydrater", line2: line2, time: dateTimeStamp))
 
              BGChart.data?.dataSets[dataIndex].addEntry(dot)
             
@@ -1401,6 +1401,23 @@ extension MainViewController {
         let formattedDate = dateFormatter.string(from: date)
 
         return line1 + "\r\n" + formattedDate
+    }
+    
+    func formatPillTextExtraLine(line1: String, line2: String, time: TimeInterval) -> String {
+        let dateFormatter = DateFormatter()
+        //let timezoneOffset = TimeZone.current.secondsFromGMT()
+        //let epochTimezoneOffset = value + Double(timezoneOffset)
+        if dateTimeUtils.is24Hour() {
+            dateFormatter.setLocalizedDateFormatFromTemplate("HH:mm")
+        } else {
+            dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
+        }
+        
+        //let date = Date(timeIntervalSince1970: epochTimezoneOffset)
+        let date = Date(timeIntervalSince1970: time)
+        let formattedDate = dateFormatter.string(from: date)
+
+        return line1 + "\r\n" + line2 + "\r\n" + formattedDate
     }
   
 }

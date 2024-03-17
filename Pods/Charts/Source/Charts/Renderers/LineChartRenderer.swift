@@ -584,7 +584,7 @@ open class LineChartRenderer: LineRadarRenderer
                     {
                         context.drawText(replacedText,
                                          at: CGPoint(x: pt.x,
-                                                     y: pt.y - CGFloat(valOffset) - valueFont.lineHeight - 10), // Daniel: Subtraction for offset
+                                                     y: pt.y - CGFloat(valOffset) - valueFont.lineHeight - 12), // Daniel: Offset to make room for extra line in labels
                                          align: .center,
                                          angleRadians: angleRadians,
                                          attributes: [.font: valueFont,
