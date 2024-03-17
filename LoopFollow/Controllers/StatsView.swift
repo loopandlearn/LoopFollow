@@ -43,12 +43,12 @@ extension MainViewController {
             }
             statsStdDev.text = String(format:"%.2f%", stats.stdDev)
             
-            //createStatsPie(pieData: stats.pie)
+            createStatsPie(pieData: stats.pie)
         }
         
     }
     
-    /*func createStatsPie(pieData: [DataStructs.pieData]) {
+    func createStatsPie(pieData: [DataStructs.pieData]) {
         statsPieChart.legend.enabled = false
         statsPieChart.drawEntryLabelsEnabled = false
         statsPieChart.drawHoleEnabled = false
@@ -93,6 +93,6 @@ extension MainViewController {
         let data = PieChartData(dataSet: set)
         statsPieChart.data = data
         
-    }*/
+    }
 
 }
