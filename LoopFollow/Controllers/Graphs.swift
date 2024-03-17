@@ -271,10 +271,10 @@ extension MainViewController {
         let chartEntryNote = [ChartDataEntry]()
         let lineNote = LineChartDataSet(entries:chartEntryNote, label: "")
         lineNote.circleRadius = CGFloat(globalVariables.dotOther)
-        lineNote.circleColors = [NSUIColor.systemGray.withAlphaComponent(0.75)]
+        lineNote.circleColors = [NSUIColor.white.withAlphaComponent(0.75)]
         lineNote.drawCircleHoleEnabled = false
         lineNote.setDrawHighlightIndicators(false)
-        lineNote.setColor(NSUIColor.systemGray3, alpha: 1.0)
+        lineNote.setColor(NSUIColor.white, alpha: 1.0)
         lineNote.drawCirclesEnabled = true
         lineNote.lineWidth = 0
         lineNote.highlightEnabled = true
@@ -1058,7 +1058,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Notering\n" + thisData[i].note, time: thisData[i].date))
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillTextExtraLine(line1: "Notering", line2: thisData[i].note, time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
