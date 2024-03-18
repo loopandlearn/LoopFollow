@@ -968,20 +968,20 @@
                                     <rect key="frame" x="0.0" y="0.0" width="383" height="48"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Protein" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OnL-P5-RFP" userLabel="Notes label">
-                                            <rect key="frame" x="13" y="13.999999999999998" width="54" height="20.333333333333329"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Notes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OnL-P5-RFP" userLabel="Notes label">
+                                            <rect key="frame" x="13.000000000000004" y="13.999999999999998" width="45.333333333333343" height="20.333333333333329"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="..." textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="F4n-yM-1TV" userLabel="Note">
-                                            <rect key="frame" x="72" y="13" width="293" height="22"/>
+                                            <rect key="frame" x="63.333333333333343" y="13" width="301.66666666666663" height="22"/>
                                             <accessibility key="accessibilityConfiguration">
                                                 <accessibilityTraits key="traits" none="YES"/>
                                                 <bool key="isElement" value="NO"/>
                                             </accessibility>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                                            <textInputTraits key="textInputTraits" keyboardType="alphabet"/>
                                         </textField>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="geJ-gb-XZX" userLabel="Grams">
                                             <rect key="frame" x="370" y="24" width="0.0" height="0.0"/>
@@ -1062,7 +1062,7 @@
                             <constraint firstItem="6H2-QI-0u1" firstAttribute="centerX" secondItem="rUn-AS-OW1" secondAttribute="centerX" id="b5W-xq-J3n"/>
                             <constraint firstItem="CNh-gN-fVe" firstAttribute="trailing" secondItem="6H2-QI-0u1" secondAttribute="trailing" id="bOu-he-5O1"/>
                             <constraint firstItem="6H2-QI-0u1" firstAttribute="leading" secondItem="CNh-gN-fVe" secondAttribute="leading" id="c7t-fQ-uHp"/>
-                            <constraint firstItem="CNh-gN-fVe" firstAttribute="bottom" secondItem="6H2-QI-0u1" secondAttribute="bottom" constant="257" id="fOa-DY-TRX"/>
+                            <constraint firstItem="CNh-gN-fVe" firstAttribute="bottom" secondItem="6H2-QI-0u1" secondAttribute="bottom" constant="307" id="fOa-DY-TRX"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="CVr-l3-eB1"/>
@@ -1092,16 +1092,16 @@
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="secondarySystemBackgroundColor">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemMintColor">
-            <color red="0.0" green="0.7803921568627451" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.78039215689999997" blue="0.74509803919999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemPurpleColor">
-            <color red="0.68627450980392157" green="0.32156862745098042" blue="0.87058823529411766" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.68627450980000004" green="0.32156862749999998" blue="0.87058823529999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
