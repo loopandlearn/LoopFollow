@@ -600,12 +600,13 @@
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="118" id="vAM-A0-xwO"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" cornerStyle="medium">
+                                <buttonConfiguration key="configuration" style="filled" image="drop.fill" catalog="system" cornerStyle="medium" titleAlignment="leading">
                                     <attributedString key="attributedTitle">
-                                        <fragment content="Remote Bolus">
+                                        <fragment content="  Remote Bolus">
                                             <attributes>
                                                 <color key="NSColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                                <font key="NSFont" size="18" name="Helvetica"/>
+                                                <font key="NSFont" size="18" name="Helvetica-Bold"/>
+                                                <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
                                             </attributes>
                                         </fragment>
                                     </attributedString>
@@ -626,12 +627,13 @@
                                     <constraint firstAttribute="width" constant="361" id="rRU-p9-D7X"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" subtitle="" cornerStyle="medium">
+                                <buttonConfiguration key="configuration" style="filled" image="fork.knife" catalog="system" subtitle="" cornerStyle="medium" titleAlignment="leading">
                                     <attributedString key="attributedTitle">
-                                        <fragment content="Remote Meal">
+                                        <fragment content="  Remote Meal">
                                             <attributes>
                                                 <color key="NSColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                                <font key="NSFont" size="18" name="Helvetica"/>
+                                                <font key="NSFont" size="18" name="Helvetica-Bold"/>
+                                                <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
                                             </attributes>
                                         </fragment>
                                     </attributedString>
@@ -651,12 +653,13 @@
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="118" id="gap-Oj-zTn"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" cornerStyle="medium">
+                                <buttonConfiguration key="configuration" style="filled" image="person.fill" catalog="system" cornerStyle="medium" titleAlignment="leading">
                                     <attributedString key="attributedTitle">
-                                        <fragment content="Remote Override">
+                                        <fragment content="  Remote Override">
                                             <attributes>
                                                 <color key="NSColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                                <font key="NSFont" size="18" name="Helvetica"/>
+                                                <font key="NSFont" size="18" name="Helvetica-Bold"/>
+                                                <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
                                             </attributes>
                                         </fragment>
                                     </attributedString>
@@ -676,12 +679,13 @@
                                     <constraint firstAttribute="width" constant="361" id="vCR-Mu-5db"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" cornerStyle="medium">
+                                <buttonConfiguration key="configuration" style="filled" image="target" catalog="system" cornerStyle="medium" titleAlignment="leading">
                                     <attributedString key="attributedTitle">
-                                        <fragment content="Remote Temp Target">
+                                        <fragment content="  Remote Temp Target">
                                             <attributes>
-                                                <color key="NSColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                                <font key="NSFont" size="18" name="Helvetica"/>
+                                                <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                <font key="NSFont" size="18" name="Helvetica-Bold"/>
+                                                <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
                                             </attributes>
                                         </fragment>
                                     </attributedString>
@@ -1181,9 +1185,13 @@
     <resources>
         <image name="alarm" catalog="system" width="123" height="128"/>
         <image name="appletvremote.gen2" catalog="system" width="78" height="128"/>
+        <image name="drop.fill" catalog="system" width="96" height="128"/>
+        <image name="fork.knife" catalog="system" width="94" height="128"/>
         <image name="gear" catalog="system" width="128" height="122"/>
         <image name="house" catalog="system" width="128" height="104"/>
+        <image name="person.fill" catalog="system" width="128" height="120"/>
         <image name="safari" catalog="system" width="128" height="123"/>
+        <image name="target" catalog="system" width="128" height="123"/>
         <image name="zzz" catalog="system" width="119" height="128"/>
         <namedColor name="Insulin">
             <color red="0.11800000071525574" green="0.58799999952316284" blue="0.98799997568130493" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -1198,16 +1206,16 @@
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="secondarySystemBackgroundColor">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemMintColor">
-            <color red="0.0" green="0.78039215689999997" blue="0.74509803919999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.7803921568627451" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemPurpleColor">
-            <color red="0.68627450980000004" green="0.32156862749999998" blue="0.87058823529999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.68627450980392157" green="0.32156862745098042" blue="0.87058823529411766" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
