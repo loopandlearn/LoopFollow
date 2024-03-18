@@ -256,7 +256,7 @@ extension MainViewController {
         var chartEntrySensor = [ChartDataEntry]()
         let lineSensor = LineChartDataSet(entries:chartEntrySensor, label: "")
         lineSensor.circleRadius = CGFloat(globalVariables.dotOther)
-        lineSensor.circleColors = [NSUIColor.systemIndigo.withAlphaComponent(0.75)]
+        lineSensor.circleColors = [NSUIColor.white.withAlphaComponent(0.75)]
         lineSensor.drawCircleHoleEnabled = false
         lineSensor.setDrawHighlightIndicators(false)
         lineSensor.setColor(NSUIColor.systemGray3, alpha: 1.0)
@@ -271,7 +271,7 @@ extension MainViewController {
         var chartEntryPump = [ChartDataEntry]()
         let linePump = LineChartDataSet(entries:chartEntryPump, label: "")
         linePump.circleRadius = CGFloat(globalVariables.dotOther)
-        linePump.circleColors = [NSUIColor.systemIndigo.withAlphaComponent(0.75)]
+        linePump.circleColors = [NSUIColor.white.withAlphaComponent(0.75)]
         linePump.drawCircleHoleEnabled = false
         linePump.setDrawHighlightIndicators(false)
         linePump.setColor(NSUIColor.systemGray3, alpha: 1.0)
