@@ -663,6 +663,9 @@
                                     <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <color key="baseBackgroundColor" systemColor="systemPurpleColor"/>
                                 </buttonConfiguration>
+                                <connections>
+                                    <segue destination="pSX-QU-MXP" kind="show" id="bTP-H5-yI9"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ych-eW-7Bb">
                                 <rect key="frame" x="16" y="526" width="361" height="118"/>
@@ -1070,6 +1073,109 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YQp-8x-qTC" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1057" y="1465"/>
+        </scene>
+        <!--Override-->
+        <scene sceneID="EM1-pK-TnW">
+            <objects>
+                <viewController title="Override" id="pSX-QU-MXP" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="EW6-G8-zDK">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EpM-FJ-zu7">
+                                <rect key="frame" x="5" y="149" width="383" height="48"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="7iT-u4-arH">
+                                    <rect key="frame" x="0.0" y="0.0" width="383" height="48"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Override" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gnv-j8-Kxi" userLabel="Override label">
+                                            <rect key="frame" x="22" y="13.666666666666657" width="66" height="21"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <pickerView contentMode="right" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2BK-dT-Xom">
+                                            <rect key="frame" x="153" y="-84" width="229" height="216"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                        </pickerView>
+                                    </subviews>
+                                </view>
+                                <color key="backgroundColor" name="LoopGray"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="kOh-Oc-ZDg"/>
+                                </constraints>
+                                <blurEffect style="regular"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="5"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </visualEffectView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Override" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KIW-Nu-IsH">
+                                <rect key="frame" x="129.33333333333331" y="79" width="134.33333333333331" height="20.333333333333329"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yK9-YU-1os">
+                                <rect key="frame" x="0.0" y="389" width="393" height="75"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="75" id="tvq-B4-DQL"/>
+                                </constraints>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Button">
+                                    <attributedString key="attributedTitle">
+                                        <fragment content="Send Remote Bolus">
+                                            <attributes>
+                                                <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                <font key="NSFont" size="36" name="Helvetica-Bold"/>
+                                                <font key="NSOriginalFont" size="12" name="Helvetica"/>
+                                            </attributes>
+                                        </fragment>
+                                    </attributedString>
+                                </state>
+                                <buttonConfiguration key="configuration" style="filled">
+                                    <attributedString key="attributedTitle">
+                                        <fragment content="Send ">
+                                            <attributes>
+                                                <color key="NSColor" red="0.99999600649999998" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <font key="NSFont" size="18" name="Helvetica"/>
+                                                <font key="NSOriginalFont" size="12" name="Helvetica"/>
+                                            </attributes>
+                                        </fragment>
+                                        <fragment content="Override">
+                                            <attributes>
+                                                <color key="NSColor" red="0.99999600649999998" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <font key="NSFont" size="18" name="Helvetica"/>
+                                            </attributes>
+                                        </fragment>
+                                    </attributedString>
+                                    <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <color key="baseBackgroundColor" name="Insulin"/>
+                                </buttonConfiguration>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="hp9-ts-VpS"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="hp9-ts-VpS" firstAttribute="bottom" secondItem="yK9-YU-1os" secondAttribute="bottom" constant="257" id="BtO-pW-gff"/>
+                            <constraint firstItem="KIW-Nu-IsH" firstAttribute="centerX" secondItem="EW6-G8-zDK" secondAttribute="centerX" id="FbY-QF-diT"/>
+                            <constraint firstItem="EpM-FJ-zu7" firstAttribute="centerX" secondItem="KIW-Nu-IsH" secondAttribute="centerX" id="Hgn-4u-pUp"/>
+                            <constraint firstItem="yK9-YU-1os" firstAttribute="centerX" secondItem="EW6-G8-zDK" secondAttribute="centerX" id="J6v-dU-syy"/>
+                            <constraint firstItem="EpM-FJ-zu7" firstAttribute="leading" secondItem="hp9-ts-VpS" secondAttribute="leading" constant="5" id="Xjf-Sz-DDn"/>
+                            <constraint firstItem="KIW-Nu-IsH" firstAttribute="top" secondItem="hp9-ts-VpS" secondAttribute="top" constant="20" id="bO0-k6-Os0"/>
+                            <constraint firstItem="EpM-FJ-zu7" firstAttribute="top" secondItem="KIW-Nu-IsH" secondAttribute="bottom" constant="49.666666666666671" id="gtJ-De-dTR"/>
+                            <constraint firstItem="hp9-ts-VpS" firstAttribute="trailing" secondItem="yK9-YU-1os" secondAttribute="trailing" id="lYC-iH-HsY"/>
+                            <constraint firstItem="yK9-YU-1os" firstAttribute="leading" secondItem="hp9-ts-VpS" secondAttribute="leading" id="ojA-2q-etj"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="Raf-4u-ED6"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="6TC-a9-3Ul" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-356.48854961832058" y="1464.7887323943662"/>
         </scene>
     </scenes>
     <resources>
