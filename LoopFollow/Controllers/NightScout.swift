@@ -140,6 +140,12 @@ extension MainViewController {
         updateSensorChange()
     }
     
+    func clearOldPump()
+    {
+        pumpChangeGraphData.removeAll()
+        updatePumpChange()
+    }
+    
     func clearOldNotes()
     {
         noteGraphData.removeAll()

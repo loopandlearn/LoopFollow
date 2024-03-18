@@ -267,6 +267,21 @@ extension MainViewController {
         lineSensor.valueFormatter = ChartYDataValueFormatter()
         lineSensor.drawValuesEnabled = false
         
+        // Pump Change
+        var chartEntryPump = [ChartDataEntry]()
+        let linePump = LineChartDataSet(entries:chartEntryPump, label: "")
+        linePump.circleRadius = CGFloat(globalVariables.dotOther)
+        linePump.circleColors = [NSUIColor.systemIndigo.withAlphaComponent(0.75)]
+        linePump.drawCircleHoleEnabled = false
+        linePump.setDrawHighlightIndicators(false)
+        linePump.setColor(NSUIColor.systemGray3, alpha: 1.0)
+        linePump.drawCirclesEnabled = true
+        linePump.lineWidth = 0
+        linePump.highlightEnabled = true
+        linePump.axisDependency = YAxis.AxisDependency.right
+        linePump.valueFormatter = ChartYDataValueFormatter()
+        linePump.drawValuesEnabled = false
+        
         // Notes
         let chartEntryNote = [ChartDataEntry]()
         let lineNote = LineChartDataSet(entries:chartEntryNote, label: "")
@@ -298,6 +313,7 @@ extension MainViewController {
         data.append(lineSensor) // Dataset 10
         data.append(lineNote) // Dataset 11
         data.append(lineSmb) // Dataset 12
+        data.append(linePump) // Dataset 13
         
         data.setValueFont(UIFont.systemFont(ofSize: 10))
         
@@ -1047,6 +1063,33 @@ extension MainViewController {
         }
     }
     
+    func updatePumpChange() {
+        var dataIndex = 13
+        BGChart.lineData?.dataSets[dataIndex].clear()
+        BGChartFull.lineData?.dataSets[dataIndex].clear()
+        let thisData = pumpChangeGraphData
+        for i in 0..<thisData.count{
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
+            
+            let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Pumpbyte", time: thisData[i].date))
+            BGChart.data?.dataSets[dataIndex].addEntry(value)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                BGChartFull.data?.dataSets[dataIndex].addEntry(value)
+            }
+        }
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
+    }
+    
     func updateNotes() {
         var dataIndex = 11
         BGChart.lineData?.dataSets[dataIndex].clear()
@@ -1269,6 +1312,21 @@ extension MainViewController {
         lineSensor.valueFormatter = ChartYDataValueFormatter()
         lineSensor.drawValuesEnabled = false
         
+        // Pump Change
+        var chartEntryPump = [ChartDataEntry]()
+        let linePump = LineChartDataSet(entries:chartEntryPump, label: "")
+        linePump.circleRadius = 2
+        linePump.circleColors = [NSUIColor.systemIndigo.withAlphaComponent(0.75)]
+        linePump.drawCircleHoleEnabled = false
+        linePump.setDrawHighlightIndicators(false)
+        linePump.setColor(NSUIColor.systemGray3, alpha: 1.0)
+        linePump.drawCirclesEnabled = true
+        linePump.lineWidth = 0
+        linePump.highlightEnabled = false
+        linePump.axisDependency = YAxis.AxisDependency.right
+        linePump.valueFormatter = ChartYDataValueFormatter()
+        linePump.drawValuesEnabled = false
+        
         // Notes
         var chartEntryNote = [ChartDataEntry]()
         let lineNote = LineChartDataSet(entries:chartEntryNote, label: "")
@@ -1299,6 +1357,7 @@ extension MainViewController {
         data.append(lineSensor) // Dataset 10
         data.append(lineNote) // Dataset 11
         data.append(lineSmb) // Dataset 12
+        data.append(linePump) // Dataset 13
         
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false

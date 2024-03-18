@@ -168,5 +168,12 @@ extension MainViewController {
             }
         }
         processCage(entries: pumpSiteChange)
+        if pumpSiteChange.count > 0 {
+            processPumpChange(entries: pumpSiteChange)
+        } else {
+            if pumpChangeGraphData.count > 0 {
+                clearOldPump()
+            }
+        }
     }
 }
