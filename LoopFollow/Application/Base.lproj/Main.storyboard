@@ -252,10 +252,12 @@
                                                                         <buttonConfiguration key="configuration" style="filled" imagePadding="0.0" cornerStyle="capsule" buttonSize="large">
                                                                             <imageReference key="image" image="plus.circle" catalog="system" symbolScale="large" variableValue="1"/>
                                                                             <backgroundConfiguration key="background" strokeWidth="0.0" strokeOutset="0.0">
-                                                                                <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
-                                                                                <color key="strokeColor" systemColor="systemGrayColor"/>
+                                                                                <color key="backgroundColor" red="0.71111467172145226" green="0.37548028920202325" blue="0.94087700109289152" alpha="0.40278352649006621" colorSpace="custom" customColorSpace="displayP3"/>
+                                                                                <color key="strokeColor" systemColor="systemPurpleColor"/>
                                                                             </backgroundConfiguration>
-                                                                            <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage"/>
+                                                                            <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" weight="regular">
+                                                                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="21"/>
+                                                                            </preferredSymbolConfiguration>
                                                                             <color key="baseForegroundColor" systemColor="systemGrayColor"/>
                                                                         </buttonConfiguration>
                                                                         <connections>
@@ -643,6 +645,9 @@
         </systemColor>
         <systemColor name="systemGrayColor">
             <color red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemPurpleColor">
+            <color red="0.68627450980392157" green="0.32156862745098042" blue="0.87058823529411766" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
