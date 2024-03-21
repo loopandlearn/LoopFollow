@@ -17,12 +17,13 @@ class RemoteViewController: UIViewController {
     }
     
     @IBAction func mealButtonPressed(_ sender: Any) {
-        //let mealView = UIStoryboard(name: "Main", bundle: nil)
         let mealViewController = storyboard!.instantiateViewController(withIdentifier: "remoteMeal") as! MealViewController
         self.present(mealViewController, animated: true, completion: nil)
     }
     
     @IBAction func bolusButtonPressed(_ sender: Any) {
+        let bolusViewController = storyboard!.instantiateViewController(withIdentifier: "remoteBolus") as! BolusViewController
+        self.present(bolusViewController, animated: true, completion: nil)
     }
     
     @IBAction func overrideButtonPressed(_ sender: Any) {

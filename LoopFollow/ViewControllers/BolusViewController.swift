@@ -15,8 +15,13 @@ class BolusViewController: UIViewController {
 
         // Do any additional setup after loading the view.
     }
+    @IBAction func sendRemoteBolusPressed(_ sender: Any) {
+        print("Send remote bolus button pressed: Make string from amount bolus and send sms through API")
+    }
+    @IBAction func cancelButtonPressed(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
     
-
     /*
     // MARK: - Navigation
 

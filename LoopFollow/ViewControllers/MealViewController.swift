@@ -10,14 +10,18 @@ import UIKit
 
 class MealViewController: UIViewController {
 
-    @IBOutlet private weak var LabelTest: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
     }
 
+    @IBAction func sendRemoteMealPressed(_ sender: Any) {
+        print("Send remote meal button pressed: Make string from carbs,fat,protein,notes and send sms through API")
+    }
+    
     @IBAction func doneButtonTapped(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }
+
 }
