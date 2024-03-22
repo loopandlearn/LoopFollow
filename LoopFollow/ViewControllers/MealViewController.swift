@@ -28,10 +28,10 @@ class MealViewController: UIViewController {
         let proteinValue = proteinGrams.text ?? ""
         let mealNotesValue = mealNotes.text ?? ""
         
-        let combinedString = "\(carbValue), \(fatValue), \(proteinValue), \(mealNotesValue)"
+        let combinedString = "mealtoenact_ carbs\(carbValue)fat\(fatValue), protein\(proteinValue)note\(mealNotesValue)"
         
         print("Combined string:", combinedString)
-        // Send combinedString via SMS through API
+        // Todo: Send combinedString via SMS through API
         
         // Dismiss the current view controller
             dismiss(animated: true, completion: nil)
