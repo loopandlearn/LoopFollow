@@ -13,7 +13,7 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
     @IBOutlet weak var overridePicker: UIPickerView!
     
     // Data for the UIPickerView
-    let overrideOptions = ["👻 Resistance", "🤧 Sick day", "🏃‍♂️ Exercise", "😴 Nightmode"]
+    let overrideOptions = ["Select Override:", "👻 Resistance", "🤧 Sick day", "🏃‍♂️ Exercise", "😴 Nightmode"]
     
     // Property to store the selected override option
     var selectedOverride: String?
