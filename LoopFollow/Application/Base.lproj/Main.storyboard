@@ -8,7 +8,6 @@
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
-        <capability name="UIMenu" message="Requires Xcode 11 or later." minToolsVersion="11.0" requiredIntegratedClassName="UICommandDiff"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -965,12 +964,22 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Meal" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WzJ-Kc-ZMy">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Meal" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WzJ-Kc-ZMy">
                                 <rect key="frame" x="137.66666666666666" y="70" width="99.666666666666657" height="34.333333333333343"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SYt-3I-rWk">
+                                <rect key="frame" x="286.33333333333331" y="70" width="76.666666666666686" height="34.333333333333343"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Cancel" cornerStyle="capsule">
+                                    <fontDescription key="titleFontDescription" type="system" pointSize="17"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="doneButtonTapped:" destination="vZZ-Gp-n6j" eventType="touchUpInside" id="1gG-B4-9Ah"/>
+                                </connections>
+                            </button>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="37H-jP-EQn">
                                 <rect key="frame" x="16" y="134.33333333333337" width="343" height="320"/>
                                 <subviews>
@@ -1171,16 +1180,6 @@
                                     </visualEffectView>
                                 </subviews>
                             </stackView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SYt-3I-rWk">
-                                <rect key="frame" x="286.33333333333331" y="70" width="76.666666666666686" height="34.333333333333343"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Cancel" cornerStyle="capsule">
-                                    <fontDescription key="titleFontDescription" type="system" pointSize="17"/>
-                                </buttonConfiguration>
-                                <connections>
-                                    <action selector="doneButtonTapped:" destination="vZZ-Gp-n6j" eventType="touchUpInside" id="1gG-B4-9Ah"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2mm-PR-C91">
                                 <rect key="frame" x="12" y="462.33333333333331" width="351" height="70"/>
                                 <constraints>
@@ -1199,6 +1198,7 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="37H-jP-EQn" firstAttribute="top" secondItem="WzJ-Kc-ZMy" secondAttribute="bottom" constant="30" id="1pf-Qs-7TK"/>
+                            <constraint firstItem="WzJ-Kc-ZMy" firstAttribute="centerX" secondItem="4j8-vX-JWG" secondAttribute="centerX" id="CnK-Ac-XfZ"/>
                             <constraint firstItem="x7Z-jF-kMI" firstAttribute="trailing" secondItem="2mm-PR-C91" secondAttribute="trailing" constant="12" id="F45-oU-StR"/>
                             <constraint firstItem="2mm-PR-C91" firstAttribute="top" secondItem="37H-jP-EQn" secondAttribute="bottom" constant="8" id="X3m-Zd-aPA"/>
                             <constraint firstItem="37H-jP-EQn" firstAttribute="leading" secondItem="4j8-vX-JWG" secondAttribute="leadingMargin" id="Y5d-O1-OZP"/>
@@ -1209,7 +1209,6 @@
                             <constraint firstItem="x7Z-jF-kMI" firstAttribute="trailing" secondItem="SYt-3I-rWk" secondAttribute="trailing" constant="12" id="hxf-gY-j5v"/>
                             <constraint firstItem="WzJ-Kc-ZMy" firstAttribute="centerX" secondItem="37H-jP-EQn" secondAttribute="centerX" id="otI-3G-0F7"/>
                             <constraint firstItem="WzJ-Kc-ZMy" firstAttribute="top" secondItem="x7Z-jF-kMI" secondAttribute="top" constant="20" id="uso-tG-5NC"/>
-                            <constraint firstItem="SYt-3I-rWk" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="WzJ-Kc-ZMy" secondAttribute="trailing" constant="8" symbolic="YES" id="yv9-ew-XM9"/>
                         </constraints>
                     </view>
                     <toolbarItems/>
@@ -1233,6 +1232,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Bolus" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tdy-xg-Qvc">
+                                <rect key="frame" x="135" y="70" width="105.33333333333331" height="34"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XUa-NA-kEe">
                                 <rect key="frame" x="286.33333333333331" y="70" width="76.666666666666686" height="34"/>
                                 <state key="normal" title="Button"/>
@@ -1244,33 +1249,20 @@
                                     <action selector="cancelButtonPressed:" destination="2WB-f6-k7Q" eventType="touchUpInside" id="wdF-bM-i3K"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="omd-J4-dQH">
-                                <rect key="frame" x="12" y="462" width="351" height="70"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="70" id="3N4-yk-D95"/>
-                                </constraints>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Send Remote Bolus">
-                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle3"/>
-                                </buttonConfiguration>
-                                <connections>
-                                    <action selector="sendRemoteBolusPressed:" destination="gGw-b9-Weh" eventType="touchUpInside" id="fCh-ew-Thy"/>
-                                </connections>
-                            </button>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="AXN-Zg-5F4">
-                                <rect key="frame" x="8" y="134" width="359" height="320"/>
+                                <rect key="frame" x="12" y="134" width="351" height="320"/>
                                 <subviews>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="T1N-w2-ljR" userLabel="Bolus">
-                                        <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="351" height="74"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="hbT-CS-rnz">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="351" height="74"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="As3-ZU-TLX">
-                                                    <rect key="frame" x="12" y="12" width="335" height="50"/>
+                                                    <rect key="frame" x="12" y="12" width="327" height="50"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="💧 Bolus" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GRa-sN-dca">
-                                                            <rect key="frame" x="0.0" y="0.0" width="285" height="50"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="277" height="50"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="90" id="KqT-Nu-lDH"/>
                                                             </constraints>
@@ -1279,7 +1271,7 @@
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="aA6-Bf-K9h">
-                                                            <rect key="frame" x="285" y="0.0" width="50" height="50"/>
+                                                            <rect key="frame" x="277" y="0.0" width="50" height="50"/>
                                                             <subviews>
                                                                 <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="0HU-rw-87i">
                                                                     <rect key="frame" x="0.0" y="14" width="25" height="22"/>
@@ -1316,27 +1308,27 @@
                                         <blurEffect style="regular"/>
                                     </visualEffectView>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fvF-iv-pGc" userLabel="Empty">
-                                        <rect key="frame" x="0.0" y="82" width="359" height="74"/>
+                                        <rect key="frame" x="0.0" y="82" width="351" height="74"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="CXv-8k-auV">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="351" height="74"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         </view>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <blurEffect style="regular"/>
                                     </visualEffectView>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Shx-wl-iBh" userLabel="Empty">
-                                        <rect key="frame" x="0.0" y="164" width="359" height="74"/>
+                                        <rect key="frame" x="0.0" y="164" width="351" height="74"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="QMu-Ys-3Pc">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="351" height="74"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         </view>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <blurEffect style="regular"/>
                                     </visualEffectView>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VIj-s4-cIt" userLabel="Empty">
-                                        <rect key="frame" x="0.0" y="246" width="359" height="74"/>
+                                        <rect key="frame" x="0.0" y="246" width="351" height="74"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="2ZP-L8-YwT">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="351" height="74"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         </view>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -1344,29 +1336,34 @@
                                     </visualEffectView>
                                 </subviews>
                             </stackView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Bolus" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tdy-xg-Qvc">
-                                <rect key="frame" x="107" y="70" width="160.33333333333337" height="34"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="omd-J4-dQH">
+                                <rect key="frame" x="12" y="462" width="351" height="70"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="70" id="3N4-yk-D95"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Send Remote Bolus">
+                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle3"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="sendRemoteBolusPressed:" destination="gGw-b9-Weh" eventType="touchUpInside" id="fCh-ew-Thy"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="bFx-Qe-NwQ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="AXN-Zg-5F4" firstAttribute="leading" secondItem="bFx-Qe-NwQ" secondAttribute="leading" constant="8" id="1wi-cC-LvK"/>
                             <constraint firstItem="omd-J4-dQH" firstAttribute="top" secondItem="AXN-Zg-5F4" secondAttribute="bottom" constant="8" id="26W-xA-0rW"/>
                             <constraint firstItem="Tdy-xg-Qvc" firstAttribute="top" secondItem="bFx-Qe-NwQ" secondAttribute="top" constant="20" id="35D-h9-5AQ"/>
                             <constraint firstItem="omd-J4-dQH" firstAttribute="leading" secondItem="bFx-Qe-NwQ" secondAttribute="leading" constant="12" id="5ps-r3-vSL"/>
-                            <constraint firstItem="AXN-Zg-5F4" firstAttribute="centerX" secondItem="omd-J4-dQH" secondAttribute="centerX" id="7a7-ky-A1Z"/>
+                            <constraint firstItem="bFx-Qe-NwQ" firstAttribute="trailing" secondItem="AXN-Zg-5F4" secondAttribute="trailing" constant="12" id="7ue-DA-k2n"/>
                             <constraint firstItem="AXN-Zg-5F4" firstAttribute="top" secondItem="XUa-NA-kEe" secondAttribute="bottom" constant="30" id="9Ic-PS-efD"/>
                             <constraint firstItem="XUa-NA-kEe" firstAttribute="top" secondItem="bFx-Qe-NwQ" secondAttribute="top" constant="20" id="XXF-n2-Qsi"/>
                             <constraint firstItem="bFx-Qe-NwQ" firstAttribute="trailing" secondItem="omd-J4-dQH" secondAttribute="trailing" constant="12" id="YzS-i3-T05"/>
                             <constraint firstItem="Tdy-xg-Qvc" firstAttribute="centerX" secondItem="AXN-Zg-5F4" secondAttribute="centerX" id="bHF-P8-2oy"/>
-                            <constraint firstItem="XUa-NA-kEe" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Tdy-xg-Qvc" secondAttribute="trailing" constant="8" symbolic="YES" id="dbg-Uj-md7"/>
                             <constraint firstItem="AXN-Zg-5F4" firstAttribute="top" secondItem="Tdy-xg-Qvc" secondAttribute="bottom" constant="30" id="f9i-eZ-sVt"/>
                             <constraint firstItem="bFx-Qe-NwQ" firstAttribute="trailing" secondItem="XUa-NA-kEe" secondAttribute="trailing" constant="12" id="hnB-0P-PC4"/>
-                            <constraint firstItem="Tdy-xg-Qvc" firstAttribute="leading" secondItem="bFx-Qe-NwQ" secondAttribute="leading" constant="107.33333333333331" id="syn-CG-skZ"/>
+                            <constraint firstItem="AXN-Zg-5F4" firstAttribute="leading" secondItem="bFx-Qe-NwQ" secondAttribute="leading" constant="12" id="ugw-G0-jC5"/>
                             <constraint firstAttribute="bottom" secondItem="AXN-Zg-5F4" secondAttribute="bottom" constant="358" id="wdZ-4E-47R"/>
                         </constraints>
                     </view>
@@ -1389,22 +1386,16 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Override" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vfU-vF-dYf">
-                                <rect key="frame" x="107.33333333333333" y="70" width="160.33333333333337" height="34"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C5L-Kn-zm6">
-                                <rect key="frame" x="286.33333333333331" y="70" width="76.666666666666686" height="34"/>
+                                <rect key="frame" x="286.33333333333331" y="70" width="76.666666666666686" height="34.333333333333343"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Cancel" cornerStyle="capsule">
                                     <fontDescription key="titleFontDescription" type="system" pointSize="17"/>
                                 </buttonConfiguration>
                                 <connections>
                                     <action selector="cancelButtonPressed:" destination="2WB-f6-k7Q" eventType="touchUpInside" id="4ll-h0-qPA"/>
+                                    <action selector="cancelButtonPressed:" destination="Qgl-GY-Qpe" eventType="touchUpInside" id="DZN-vp-enD"/>
                                     <action selector="cancelButtonPressed:" destination="20o-Rx-sVx" eventType="touchUpInside" id="MAF-Vt-eRM"/>
-                                    <action selector="cancelButtonPressed:" destination="Qgl-GY-Qpe" eventType="touchUpInside" id="n8Z-zw-SPS"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bbd-yY-tzY">
@@ -1421,68 +1412,36 @@
                                 </connections>
                             </button>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="MMd-7B-bCg">
-                                <rect key="frame" x="8" y="134" width="359" height="320"/>
+                                <rect key="frame" x="8" y="134.33333333333334" width="359" height="319.66666666666663"/>
                                 <subviews>
-                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="g6v-UV-x7k" userLabel="Override">
-                                        <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
-                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="GGf-9i-TyW">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BEz-I9-sPs" userLabel="Empty">
+                                        <rect key="frame" x="0.0" y="0.0" width="359" height="101.33333333333333"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="wxu-lS-OVn">
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="101.33333333333333"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="grz-xA-PzB">
-                                                    <rect key="frame" x="12" y="12" width="335" height="50"/>
-                                                    <subviews>
-                                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="vG7-1Z-12G">
-                                                            <rect key="frame" x="0.0" y="0.0" width="335" height="50"/>
-                                                            <subviews>
-                                                                <button opaque="NO" contentMode="scaleToFill" showsMenuAsPrimaryAction="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3nQ-lr-cii">
-                                                                    <rect key="frame" x="0.0" y="8.6666666666666572" width="335" height="33"/>
-                                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                                    <menu key="menu" id="0zD-UL-CvO">
-                                                                        <children>
-                                                                            <command title="Item 1" id="QxO-TK-BKf"/>
-                                                                            <command title="Item 2" id="8Ug-34-g4E"/>
-                                                                        </children>
-                                                                    </menu>
-                                                                    <state key="normal" title="Select Override"/>
-                                                                </button>
-                                                            </subviews>
-                                                        </stackView>
-                                                    </subviews>
-                                                </stackView>
+                                                <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jzQ-mu-Jca">
+                                                    <rect key="frame" x="0.0" y="-20" width="359" height="162"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                                </pickerView>
                                             </subviews>
-                                            <constraints>
-                                                <constraint firstItem="grz-xA-PzB" firstAttribute="top" secondItem="GGf-9i-TyW" secondAttribute="topMargin" constant="4" id="GNh-W3-jL2"/>
-                                                <constraint firstItem="grz-xA-PzB" firstAttribute="leading" secondItem="GGf-9i-TyW" secondAttribute="leadingMargin" constant="4" id="hR6-rF-Rgf"/>
-                                                <constraint firstAttribute="bottomMargin" secondItem="grz-xA-PzB" secondAttribute="bottom" constant="4" id="rq2-jJ-p9X"/>
-                                                <constraint firstAttribute="trailingMargin" secondItem="grz-xA-PzB" secondAttribute="trailing" constant="4" id="yg2-Uz-Kic"/>
-                                            </constraints>
-                                        </view>
-                                        <color key="backgroundColor" name="LoopGray"/>
-                                        <blurEffect style="regular"/>
-                                    </visualEffectView>
-                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BEz-I9-sPs" userLabel="Empty">
-                                        <rect key="frame" x="0.0" y="82" width="359" height="74"/>
-                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="wxu-lS-OVn">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
-                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         </view>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <blurEffect style="regular"/>
                                     </visualEffectView>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="em2-W9-TMy" userLabel="Empty">
-                                        <rect key="frame" x="0.0" y="164" width="359" height="74"/>
+                                        <rect key="frame" x="0.0" y="109.33333333333331" width="359" height="101"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="oCF-Xb-DU2">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="101"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         </view>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <blurEffect style="regular"/>
                                     </visualEffectView>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jny-wK-pb4" userLabel="Empty">
-                                        <rect key="frame" x="0.0" y="246" width="359" height="74"/>
+                                        <rect key="frame" x="0.0" y="218.33333333333334" width="359" height="101.33333333333334"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="a6s-es-oZl">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="101.33333333333334"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         </view>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -1490,6 +1449,12 @@
                                     </visualEffectView>
                                 </subviews>
                             </stackView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Override" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vfU-vF-dYf">
+                                <rect key="frame" x="107.33333333333333" y="70" width="160.33333333333337" height="34.333333333333343"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="mzj-f5-WXX"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -1499,13 +1464,13 @@
                             <constraint firstItem="bbd-yY-tzY" firstAttribute="top" secondItem="MMd-7B-bCg" secondAttribute="bottom" constant="8" id="3en-uk-iw1"/>
                             <constraint firstItem="MMd-7B-bCg" firstAttribute="leading" secondItem="mzj-f5-WXX" secondAttribute="leading" constant="8" id="3yG-pB-SIX"/>
                             <constraint firstItem="MMd-7B-bCg" firstAttribute="top" secondItem="C5L-Kn-zm6" secondAttribute="bottom" constant="30" id="EZ2-1h-TEU"/>
-                            <constraint firstItem="C5L-Kn-zm6" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="vfU-vF-dYf" secondAttribute="trailing" constant="8" symbolic="YES" id="LQf-mu-83m"/>
                             <constraint firstAttribute="bottom" secondItem="MMd-7B-bCg" secondAttribute="bottom" constant="358" id="La5-Nu-ueZ"/>
                             <constraint firstItem="MMd-7B-bCg" firstAttribute="centerX" secondItem="bbd-yY-tzY" secondAttribute="centerX" id="OY3-qa-Dnt"/>
                             <constraint firstItem="bbd-yY-tzY" firstAttribute="leading" secondItem="mzj-f5-WXX" secondAttribute="leading" constant="12" id="Pva-yu-osN"/>
                             <constraint firstItem="vfU-vF-dYf" firstAttribute="top" secondItem="mzj-f5-WXX" secondAttribute="top" constant="20" id="Trh-7r-rVB"/>
                             <constraint firstItem="vfU-vF-dYf" firstAttribute="centerX" secondItem="MMd-7B-bCg" secondAttribute="centerX" id="fYM-Xj-SEg"/>
                             <constraint firstItem="mzj-f5-WXX" firstAttribute="trailing" secondItem="bbd-yY-tzY" secondAttribute="trailing" constant="12" id="kJu-RF-OyP"/>
+                            <constraint firstItem="vfU-vF-dYf" firstAttribute="centerX" secondItem="Lsr-3n-L01" secondAttribute="centerX" id="pGv-6d-diw"/>
                             <constraint firstItem="C5L-Kn-zm6" firstAttribute="top" secondItem="mzj-f5-WXX" secondAttribute="top" constant="20" id="ppm-N3-bBT"/>
                             <constraint firstItem="MMd-7B-bCg" firstAttribute="top" secondItem="vfU-vF-dYf" secondAttribute="bottom" constant="30" id="puZ-7d-1Lu"/>
                         </constraints>
@@ -1513,7 +1478,7 @@
                     <toolbarItems/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="overrideList" destination="3nQ-lr-cii" id="hfV-Gz-WYX"/>
+                        <outlet property="overridePicker" destination="jzQ-mu-Jca" id="ndJ-R2-O4t"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5Ca-0z-gh3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
