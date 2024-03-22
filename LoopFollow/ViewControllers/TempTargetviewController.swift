@@ -12,8 +12,11 @@ class TempTargetviewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        if UserDefaultsRepository.forceDarkMode.value {
+            overrideUserInterfaceStyle = .dark
+            
+            // Do any additional setup after loading the view.
+        }
     }
     
 

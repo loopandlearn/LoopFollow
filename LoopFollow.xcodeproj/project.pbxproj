@@ -13,6 +13,7 @@
 		65047E952BAC6A6F00894A39 /* BolusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047E942BAC6A6F00894A39 /* BolusViewController.swift */; };
 		65047E972BAC6A7B00894A39 /* OverrideViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047E962BAC6A7B00894A39 /* OverrideViewController.swift */; };
 		65047E992BAC6A8B00894A39 /* TempTargetviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047E982BAC6A8B00894A39 /* TempTargetviewController.swift */; };
+		65A5A4072BADCC6D00AE4B55 /* RemoteSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A5A4062BADCC6D00AE4B55 /* RemoteSettingsViewController.swift */; };
 		DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */; };
 		DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */; };
 		DD493AD52ACF2109009A6922 /* ResumePump.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AD42ACF2109009A6922 /* ResumePump.swift */; };
@@ -202,6 +203,7 @@
 		65047E942BAC6A6F00894A39 /* BolusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusViewController.swift; sourceTree = "<group>"; };
 		65047E962BAC6A7B00894A39 /* OverrideViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideViewController.swift; sourceTree = "<group>"; };
 		65047E982BAC6A8B00894A39 /* TempTargetviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetviewController.swift; sourceTree = "<group>"; };
+		65A5A4062BADCC6D00AE4B55 /* RemoteSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsViewController.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutUtils.swift; sourceTree = "<group>"; };
 		DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsViewController.swift; sourceTree = "<group>"; };
@@ -709,6 +711,7 @@
 				65047E942BAC6A6F00894A39 /* BolusViewController.swift */,
 				65047E962BAC6A7B00894A39 /* OverrideViewController.swift */,
 				65047E982BAC6A8B00894A39 /* TempTargetviewController.swift */,
+				65A5A4062BADCC6D00AE4B55 /* RemoteSettingsViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -975,6 +978,7 @@
 				FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */,
 				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
 				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
+				65A5A4072BADCC6D00AE4B55 /* RemoteSettingsViewController.swift in Sources */,
 				FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */,
 				DD493AE12ACF22FE009A6922 /* Profile.swift in Sources */,
 				DD493ADF2ACF22BB009A6922 /* SAge.swift in Sources */,

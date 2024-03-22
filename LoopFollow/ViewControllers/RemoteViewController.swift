@@ -12,8 +12,11 @@ class RemoteViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        if UserDefaultsRepository.forceDarkMode.value {
+            overrideUserInterfaceStyle = .dark
+            
+            // Do any additional setup after loading the view.
+        }
     }
     
     @IBAction func mealButtonPressed(_ sender: Any) {
@@ -33,6 +36,12 @@ class RemoteViewController: UIViewController {
     
     @IBAction func tempTargetButtonPressed(_ sender: Any) {
     }
+    
+    @IBAction func remoteSettingsButtonTapped(_ sender: Any) {
+        let remoteSettingsViewController = storyboard!.instantiateViewController(withIdentifier: "remoteSettings") as! RemoteSettingsViewController
+        self.present(remoteSettingsViewController, animated: true, completion: nil)
+    }
+    
     /*
     // MARK: - Navigation
 

@@ -443,4 +443,12 @@ class UserDefaultsRepository {
     static let alertBatterySnoozedTime = UserDefaultsValue<Date?>(key: "alertBatterySnoozedTime", default: nil)
     static let alertBatterySnoozeHours = UserDefaultsValue<Int>(key: "alertBatterySnoozeHours", default: 1)
     static var deviceBatteryLevel: UserDefaultsValue<Double> = UserDefaultsValue(key: "deviceBatteryLevel", default: 100.0)
+    
+    // Remote settings
+    static let method = UserDefaultsValue<String>(key: "method", default: "SMS API")
+    static let maxCarbs = UserDefaultsValue<Int>(key: "maxCarbs", default: 30)
+    static let maxBolus = UserDefaultsValue<Double>(key: "maxBolus", default: 2.0)
+    static let overrideString = UserDefaultsValue<String>(key: "overrideString", default: "👻 Resistance, 🤧 Sick day, 🏃‍♂️ Exercise, 😴 Nightmode")
+
+    
 }

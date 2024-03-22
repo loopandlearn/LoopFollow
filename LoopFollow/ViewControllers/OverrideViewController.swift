@@ -12,15 +12,14 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
 
     @IBOutlet weak var overridePicker: UIPickerView!
     
-    // Data for the UIPickerView
-    let overrideOptions = ["Select Override:", "👻 Resistance", "🤧 Sick day", "🏃‍♂️ Exercise", "😴 Nightmode"]
-    
     // Property to store the selected override option
     var selectedOverride: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        if UserDefaultsRepository.forceDarkMode.value {
+            overrideUserInterfaceStyle = .dark
+        }
         // Set the delegate and data source for the UIPickerView
         overridePicker.delegate = self
         overridePicker.dataSource = self
@@ -72,6 +71,12 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
     @IBAction func cancelButtonPressed(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }
+    
+    // Data for the UIPickerView
+    lazy var overrideOptions: [String] = {
+        let overrideString = UserDefaultsRepository.overrideString.value
+        // Split the overrideString by ", " to get individual options
+        return overrideString.components(separatedBy: ", ")
+    }()
 }
-
 
