@@ -27,6 +27,8 @@ class RemoteViewController: UIViewController {
     }
     
     @IBAction func overrideButtonPressed(_ sender: Any) {
+        let overrideViewController = storyboard!.instantiateViewController(withIdentifier: "remoteOverride") as! OverrideViewController
+        self.present(overrideViewController, animated: true, completion: nil)
     }
     
     @IBAction func tempTargetButtonPressed(_ sender: Any) {

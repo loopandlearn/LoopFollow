@@ -8,6 +8,7 @@
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="UIMenu" message="Requires Xcode 11 or later." minToolsVersion="11.0" requiredIntegratedClassName="UICommandDiff"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -1232,12 +1233,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Bolus" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tdy-xg-Qvc">
-                                <rect key="frame" x="107.33333333333333" y="70" width="160.33333333333337" height="34"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XUa-NA-kEe">
                                 <rect key="frame" x="286.33333333333331" y="70" width="76.666666666666686" height="34"/>
                                 <state key="normal" title="Button"/>
@@ -1349,6 +1344,12 @@
                                     </visualEffectView>
                                 </subviews>
                             </stackView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Bolus" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tdy-xg-Qvc">
+                                <rect key="frame" x="107" y="70" width="160.33333333333337" height="34"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="bFx-Qe-NwQ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -1379,6 +1380,146 @@
                 <exit id="2WB-f6-k7Q" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="-356" y="1421.6748768472908"/>
+        </scene>
+        <!--Remote Override-->
+        <scene sceneID="LdH-iY-luh">
+            <objects>
+                <viewController storyboardIdentifier="remoteOverride" title="Remote Override" id="Qgl-GY-Qpe" customClass="OverrideViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Lsr-3n-L01">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Override" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vfU-vF-dYf">
+                                <rect key="frame" x="107.33333333333333" y="70" width="160.33333333333337" height="34"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C5L-Kn-zm6">
+                                <rect key="frame" x="286.33333333333331" y="70" width="76.666666666666686" height="34"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Cancel" cornerStyle="capsule">
+                                    <fontDescription key="titleFontDescription" type="system" pointSize="17"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="cancelButtonPressed:" destination="2WB-f6-k7Q" eventType="touchUpInside" id="4ll-h0-qPA"/>
+                                    <action selector="cancelButtonPressed:" destination="20o-Rx-sVx" eventType="touchUpInside" id="MAF-Vt-eRM"/>
+                                    <action selector="cancelButtonPressed:" destination="Qgl-GY-Qpe" eventType="touchUpInside" id="n8Z-zw-SPS"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bbd-yY-tzY">
+                                <rect key="frame" x="12" y="462" width="351" height="70"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="70" id="edq-xu-cV5"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Send Remote Override">
+                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle3"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="sendRemoteOverridePressed:" destination="Qgl-GY-Qpe" eventType="touchUpInside" id="Mm7-Rz-6MO"/>
+                                </connections>
+                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="MMd-7B-bCg">
+                                <rect key="frame" x="8" y="134" width="359" height="320"/>
+                                <subviews>
+                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="g6v-UV-x7k" userLabel="Override">
+                                        <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="GGf-9i-TyW">
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <subviews>
+                                                <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="grz-xA-PzB">
+                                                    <rect key="frame" x="12" y="12" width="335" height="50"/>
+                                                    <subviews>
+                                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="vG7-1Z-12G">
+                                                            <rect key="frame" x="0.0" y="0.0" width="335" height="50"/>
+                                                            <subviews>
+                                                                <button opaque="NO" contentMode="scaleToFill" showsMenuAsPrimaryAction="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3nQ-lr-cii">
+                                                                    <rect key="frame" x="0.0" y="8.6666666666666572" width="335" height="33"/>
+                                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                                    <menu key="menu" id="0zD-UL-CvO">
+                                                                        <children>
+                                                                            <command title="Item 1" id="QxO-TK-BKf"/>
+                                                                            <command title="Item 2" id="8Ug-34-g4E"/>
+                                                                        </children>
+                                                                    </menu>
+                                                                    <state key="normal" title="Select Override"/>
+                                                                </button>
+                                                            </subviews>
+                                                        </stackView>
+                                                    </subviews>
+                                                </stackView>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="grz-xA-PzB" firstAttribute="top" secondItem="GGf-9i-TyW" secondAttribute="topMargin" constant="4" id="GNh-W3-jL2"/>
+                                                <constraint firstItem="grz-xA-PzB" firstAttribute="leading" secondItem="GGf-9i-TyW" secondAttribute="leadingMargin" constant="4" id="hR6-rF-Rgf"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="grz-xA-PzB" secondAttribute="bottom" constant="4" id="rq2-jJ-p9X"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="grz-xA-PzB" secondAttribute="trailing" constant="4" id="yg2-Uz-Kic"/>
+                                            </constraints>
+                                        </view>
+                                        <color key="backgroundColor" name="LoopGray"/>
+                                        <blurEffect style="regular"/>
+                                    </visualEffectView>
+                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BEz-I9-sPs" userLabel="Empty">
+                                        <rect key="frame" x="0.0" y="82" width="359" height="74"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="wxu-lS-OVn">
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                        </view>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <blurEffect style="regular"/>
+                                    </visualEffectView>
+                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="em2-W9-TMy" userLabel="Empty">
+                                        <rect key="frame" x="0.0" y="164" width="359" height="74"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="oCF-Xb-DU2">
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                        </view>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <blurEffect style="regular"/>
+                                    </visualEffectView>
+                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jny-wK-pb4" userLabel="Empty">
+                                        <rect key="frame" x="0.0" y="246" width="359" height="74"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="a6s-es-oZl">
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="74"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                        </view>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <blurEffect style="regular"/>
+                                    </visualEffectView>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="mzj-f5-WXX"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="vfU-vF-dYf" firstAttribute="leading" secondItem="mzj-f5-WXX" secondAttribute="leading" constant="107.33333333333331" id="177-dE-Sq0"/>
+                            <constraint firstItem="mzj-f5-WXX" firstAttribute="trailing" secondItem="C5L-Kn-zm6" secondAttribute="trailing" constant="12" id="3DQ-t8-V9P"/>
+                            <constraint firstItem="bbd-yY-tzY" firstAttribute="top" secondItem="MMd-7B-bCg" secondAttribute="bottom" constant="8" id="3en-uk-iw1"/>
+                            <constraint firstItem="MMd-7B-bCg" firstAttribute="leading" secondItem="mzj-f5-WXX" secondAttribute="leading" constant="8" id="3yG-pB-SIX"/>
+                            <constraint firstItem="MMd-7B-bCg" firstAttribute="top" secondItem="C5L-Kn-zm6" secondAttribute="bottom" constant="30" id="EZ2-1h-TEU"/>
+                            <constraint firstItem="C5L-Kn-zm6" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="vfU-vF-dYf" secondAttribute="trailing" constant="8" symbolic="YES" id="LQf-mu-83m"/>
+                            <constraint firstAttribute="bottom" secondItem="MMd-7B-bCg" secondAttribute="bottom" constant="358" id="La5-Nu-ueZ"/>
+                            <constraint firstItem="MMd-7B-bCg" firstAttribute="centerX" secondItem="bbd-yY-tzY" secondAttribute="centerX" id="OY3-qa-Dnt"/>
+                            <constraint firstItem="bbd-yY-tzY" firstAttribute="leading" secondItem="mzj-f5-WXX" secondAttribute="leading" constant="12" id="Pva-yu-osN"/>
+                            <constraint firstItem="vfU-vF-dYf" firstAttribute="top" secondItem="mzj-f5-WXX" secondAttribute="top" constant="20" id="Trh-7r-rVB"/>
+                            <constraint firstItem="vfU-vF-dYf" firstAttribute="centerX" secondItem="MMd-7B-bCg" secondAttribute="centerX" id="fYM-Xj-SEg"/>
+                            <constraint firstItem="mzj-f5-WXX" firstAttribute="trailing" secondItem="bbd-yY-tzY" secondAttribute="trailing" constant="12" id="kJu-RF-OyP"/>
+                            <constraint firstItem="C5L-Kn-zm6" firstAttribute="top" secondItem="mzj-f5-WXX" secondAttribute="top" constant="20" id="ppm-N3-bBT"/>
+                            <constraint firstItem="MMd-7B-bCg" firstAttribute="top" secondItem="vfU-vF-dYf" secondAttribute="bottom" constant="30" id="puZ-7d-1Lu"/>
+                        </constraints>
+                    </view>
+                    <toolbarItems/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="overrideList" destination="3nQ-lr-cii" id="hfV-Gz-WYX"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5Ca-0z-gh3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <exit id="20o-Rx-sVx" userLabel="Exit" sceneMemberID="exit"/>
+            </objects>
+            <point key="canvasLocation" x="290" y="1422"/>
         </scene>
     </scenes>
     <resources>
