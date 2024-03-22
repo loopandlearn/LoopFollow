@@ -21,6 +21,54 @@ class RemoteSettingsViewController: FormViewController {
         buildAdvancedSettings()
     }
     private func buildAdvancedSettings() {
+        // Define the section
+        let remoteCommandsSection = Section(header: "Twilo Settings", footer: "") {
+            $0.hidden = Condition.function(["method"], { form in
+                // Retrieve the value of the segmented row
+                guard let methodRow = form.rowBy(tag: "method") as? SegmentedRow<String>,
+                      let selectedOption = methodRow.value else {
+                    return true // Default to hiding if there's no selected value
+                }
+                // Return true to hide the section if "iOS Shortcuts" is selected
+                return selectedOption != "SMS API"
+            })
+        }
+
+        // Add rows to the section
+        remoteCommandsSection 
+        <<< TextRow("twilioSID"){ row in
+            row.title = "Twilio SID"
+            row.value = UserDefaultsRepository.twilioSIDString.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.twilioSIDString.value = value
+        }
+        
+        <<< TextRow("twilioSecret"){ row in
+            row.title = "Twilio Secret"
+            row.value = UserDefaultsRepository.twilioSecretString.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.twilioSecretString.value = value
+        }
+        
+        <<< TextRow("twilioFromNumberString"){ row in
+            row.title = "Twilio from Number"
+            row.value = UserDefaultsRepository.twilioFromNumberString.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.twilioFromNumberString.value = value
+        }
+        
+        <<< TextRow("twilioToNumberString"){ row in
+            row.title = "Twilio to Number"
+            row.value = UserDefaultsRepository.twilioToNumberString.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.twilioToNumberString.value = value
+        }
+
+        // Add the section to the form
         form
         +++ Section(header: "Remote commands method", footer: "")
        <<< SegmentedRow<String>("method") { row in
@@ -31,6 +79,8 @@ class RemoteSettingsViewController: FormViewController {
            guard let value = row.value else { return }
            UserDefaultsRepository.method.value = value
        }
+        
+        +++ remoteCommandsSection
         
         +++ Section(header: "Remote Settings", footer: "Add the overrides you would like to be able to choose from in the remote override picker. Separate them by comma + blank space.  Example: Override 1, Override 2, Override 3")
                    
