@@ -73,7 +73,7 @@ class MealViewController: UIViewController {
         
         let mealNotesValue = mealNotes.text ?? ""
         
-        let combinedString = "mealtoenact_ carbs\(carbs)fat\(fats)protein\(proteins)note\(mealNotesValue)"
+        let combinedString = "mealtoenact_carbs\(carbs)fat\(fats)protein\(proteins)note\(mealNotesValue)"
         
         print("Combined string:", combinedString)
         
