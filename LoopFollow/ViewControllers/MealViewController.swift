@@ -64,7 +64,7 @@ class MealViewController: UIViewController {
         }
         
         if carbs > maxCarbs || fats > maxCarbs || proteins > maxCarbs {
-            let alertController = UIAlertController(title: "Max setting exceeded", message: "The maximum allowed entry of \(maxCarbs)g is exceeded for one or more of the entries! Please try again with a smaller amount.", preferredStyle: .alert)
+            let alertController = UIAlertController(title: "Max setting exceeded", message: "The maximum allowed amount of \(maxCarbs)g is exceeded for one or more of the entries! Please try again with a smaller amount.", preferredStyle: .alert)
             alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
             present(alertController, animated: true, completion: nil)
             return
