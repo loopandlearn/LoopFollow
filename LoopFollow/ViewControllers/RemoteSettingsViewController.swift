@@ -12,7 +12,7 @@ import EventKit
 import EventKitUI
 
 class RemoteSettingsViewController: FormViewController {
-
+    
     override func viewDidLoad()  {
         super.viewDidLoad()
         if UserDefaultsRepository.forceDarkMode.value {
@@ -33,7 +33,7 @@ class RemoteSettingsViewController: FormViewController {
                 return selectedOption != "SMS API"
             })
         }
-
+        
         // Add rows to the section
         remoteCommandsSection 
         <<< TextRow("twilioSID"){ row in
@@ -82,7 +82,7 @@ class RemoteSettingsViewController: FormViewController {
         
         // Add rows to the section
         shortcutsSection
-
+        
         <<< TextRow("Remote Meal"){ row in
             row.title = ""
             row.value = "Remote Meal • mealtoenact_carbs25fat15protein10noteTestmeal"
@@ -115,35 +115,35 @@ class RemoteSettingsViewController: FormViewController {
         // Add the section to the form
         form
         +++ Section(header: "Remote commands method", footer: "")
-       <<< SegmentedRow<String>("method") { row in
-           row.title = "Use:"
-           row.options = ["iOS Shortcuts", "SMS API"]
-           row.value = UserDefaultsRepository.method.value
-       }.onChange { row in
-           guard let value = row.value else { return }
-           UserDefaultsRepository.method.value = value
-       }
+        <<< SegmentedRow<String>("method") { row in
+            row.title = "Use:"
+            row.options = ["iOS Shortcuts", "SMS API"]
+            row.value = UserDefaultsRepository.method.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.method.value = value
+        }
         
         +++ remoteCommandsSection
         
         +++ shortcutsSection
         
         +++ Section(header: "Remote Settings", footer: "Add the overrides and/or temp targets you would like to be able to choose from in the remote override/temp target pickers. Separate them by comma + blank space.  Example: Override 1, Override 2, Override 3")
-                   
-            <<< StepperRow("maxCarbs") { row in
-                row.title = "Max Carbs (g)"
-                row.cell.stepper.stepValue = 5
-                row.cell.stepper.minimumValue = 0
-                row.cell.stepper.maximumValue = 200
-                row.value = Double(UserDefaultsRepository.maxCarbs.value)
-                row.displayValueFor = { value in
-                        guard let value = value else { return nil }
-                        return "\(Int(value))"
-                    }
-            }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.maxCarbs.value = Int(value)
+        
+        <<< StepperRow("maxCarbs") { row in
+            row.title = "Max Carbs (g)"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 0
+            row.cell.stepper.maximumValue = 200
+            row.value = Double(UserDefaultsRepository.maxCarbs.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
             }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.maxCarbs.value = Int(value)
+        }
         
         <<< StepperRow("maxBolus") { row in
             row.title = "Max Bolus (U)"
@@ -177,12 +177,10 @@ class RemoteSettingsViewController: FormViewController {
             UserDefaultsRepository.tempTargetsString.value = value
         }
         
-            +++ ButtonRow() {
-                $0.title = "DONE"
-            }.onCellSelection { (row, arg)  in
-                self.dismiss(animated:true, completion: nil)
-            }
+        +++ ButtonRow() {
+            $0.title = "DONE"
+        }.onCellSelection { (row, arg)  in
+            self.dismiss(animated:true, completion: nil)
+        }
     }
-    
-
 }

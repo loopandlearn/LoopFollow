@@ -10,7 +10,7 @@ import UIKit
 import LocalAuthentication
 
 class BolusViewController: UIViewController {
-
+    
     @IBOutlet weak var bolusAmount: UITextField!
     
     override func viewDidLoad() {
@@ -30,38 +30,38 @@ class BolusViewController: UIViewController {
         }
         
         // Replace all occurrences of ',' with '.'
-            bolusText = bolusText.replacingOccurrences(of: ",", with: ".")
+        bolusText = bolusText.replacingOccurrences(of: ",", with: ".")
+        
+        guard let bolusValue = Double(bolusText) else {
+            print("Error: Bolus amount conversion failed")
+            return
+        }
+        
+        if bolusValue > maxBolus {
+            // Format maxBolus to display only one decimal place
+            let formattedMaxBolus = String(format: "%.1f", maxBolus)
             
-            guard let bolusValue = Double(bolusText) else {
-                print("Error: Bolus amount conversion failed")
-                return
-            }
-            
-            if bolusValue > maxBolus {
-                // Format maxBolus to display only one decimal place
-                let formattedMaxBolus = String(format: "%.1f", maxBolus)
-                
-                let alertController = UIAlertController(title: "Max setting exceeded", message: "The maximum allowed bolus of \(formattedMaxBolus) U is exceeded! Please try again with a smaller amount.", preferredStyle: .alert)
-                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                present(alertController, animated: true, completion: nil)
-                return
-            }
-            
-            // Confirmation alert before sending the request
-            let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to give \(bolusValue) U bolus?", preferredStyle: .alert)
-            
+            let alertController = UIAlertController(title: "Max setting exceeded", message: "The maximum allowed bolus of \(formattedMaxBolus) U is exceeded! Please try again with a smaller amount.", preferredStyle: .alert)
+            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            present(alertController, animated: true, completion: nil)
+            return
+        }
+        
+        // Confirmation alert before sending the request
+        let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to give \(bolusValue) U bolus?", preferredStyle: .alert)
+        
         confirmationAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
             // Authenticate with Face ID
             self.authenticateWithBiometrics {
                 // Proceed with the request after successful authentication
                 self.sendBolusRequest(bolusValue: bolusValue)
             }
-            }))
-            
-            confirmationAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-            
-            present(confirmationAlert, animated: true, completion: nil)
-        }
+        }))
+        
+        confirmationAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        present(confirmationAlert, animated: true, completion: nil)
+    }
     
     func authenticateWithBiometrics(completion: @escaping () -> Void) {
         let context = LAContext()
@@ -94,7 +94,7 @@ class BolusViewController: UIViewController {
             self.authenticateWithPasscode(completion: completion)
         }
     }
-
+    
     func authenticateWithPasscode(completion: @escaping () -> Void) {
         let context = LAContext()
         
@@ -112,55 +112,55 @@ class BolusViewController: UIViewController {
             }
         }
     }
-
-
-        func sendBolusRequest(bolusValue: Double) {
-
-            let combinedString = "bolustoenact_\(bolusValue)"
-            print("Combined string:", combinedString)
+    
+    
+    func sendBolusRequest(bolusValue: Double) {
+        
+        let combinedString = "bolustoenact_\(bolusValue)"
+        print("Combined string:", combinedString)
+        
+        // Retrieve the method value from UserDefaultsRepository
+        let method = UserDefaultsRepository.method.value
+        
+        // Use combinedString as the text in the URL
+        if method != "SMS API" {
+            let urlString = "shortcuts://run-shortcut?name=Remote%20Bolus&input=text&text=\(combinedString)"
+            if let url = URL(string: urlString) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+        } else {
+            // If method is "SMS API", proceed with sending the request
             
-            // Retrieve the method value from UserDefaultsRepository
-            let method = UserDefaultsRepository.method.value
+            //Initial work/testing: Twilio API (This API is being discontinued. Please see https://support.twilio.com/hc/en-us/articles/223181028-Switching-from-SMS-Messages-resource-URI-to-Messages-resource-URI)
+            let twilioSID = UserDefaultsRepository.twilioSIDString.value
+            let twilioSecret = UserDefaultsRepository.twilioSecretString.value
+            let fromNumber = UserDefaultsRepository.twilioFromNumberString.value
+            let toNumber = UserDefaultsRepository.twilioToNumberString.value
+            let message = combinedString
             
-            // Use combinedString as the text in the URL
-                if method != "SMS API" {
-                    let urlString = "shortcuts://run-shortcut?name=Remote%20Bolus&input=text&text=\(combinedString)"
-                    if let url = URL(string: urlString) {
-                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                    }
+            // Build the request
+            let urlString = "https://\(twilioSID):\(twilioSecret)@api.twilio.com/2010-04-01/Accounts/\(twilioSID)/SMS/Messages"
+            guard let url = URL(string: urlString) else {
+                print("Invalid URL")
+                return
+            }
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = "From=\(fromNumber)&To=\(toNumber)&Body=\(message)".data(using: .utf8)
+            
+            // Build the completion block and send the request
+            URLSession.shared.dataTask(with: request) { (data, response, error) in
+                print("Finished")
+                if let data = data, let responseDetails = String(data: data, encoding: .utf8) {
+                    // Success
+                    print("Response: \(responseDetails)")
                 } else {
-                    // If method is "SMS API", proceed with sending the request
-                    
-                    //Initial work/testing: Twilio API (This API is being discontinued. Please see https://support.twilio.com/hc/en-us/articles/223181028-Switching-from-SMS-Messages-resource-URI-to-Messages-resource-URI)
-                    let twilioSID = UserDefaultsRepository.twilioSIDString.value
-                    let twilioSecret = UserDefaultsRepository.twilioSecretString.value
-                    let fromNumber = UserDefaultsRepository.twilioFromNumberString.value
-                    let toNumber = UserDefaultsRepository.twilioToNumberString.value
-                    let message = combinedString
-                    
-                    // Build the request
-                    let urlString = "https://\(twilioSID):\(twilioSecret)@api.twilio.com/2010-04-01/Accounts/\(twilioSID)/SMS/Messages"
-                    guard let url = URL(string: urlString) else {
-                        print("Invalid URL")
-                        return
-                    }
-                    var request = URLRequest(url: url)
-                    request.httpMethod = "POST"
-                    request.httpBody = "From=\(fromNumber)&To=\(toNumber)&Body=\(message)".data(using: .utf8)
-                    
-                    // Build the completion block and send the request
-                    URLSession.shared.dataTask(with: request) { (data, response, error) in
-                        print("Finished")
-                        if let data = data, let responseDetails = String(data: data, encoding: .utf8) {
-                            // Success
-                            print("Response: \(responseDetails)")
-                        } else {
-                            // Failure
-                            print("Error: \(error?.localizedDescription ?? "Unknown error")")
-                        }
-                    }.resume()
-                    
+                    // Failure
+                    print("Error: \(error?.localizedDescription ?? "Unknown error")")
                 }
+            }.resume()
+            
+        }
         // Dismiss the current view controller
         dismiss(animated: true, completion: nil)
     }
