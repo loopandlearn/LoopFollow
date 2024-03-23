@@ -62,6 +62,21 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
         let combinedString = "overridetoenact_\(selectedOverride)"
         
         print("Combined string:", combinedString)
+        
+        // Confirmation alert before sending the request
+            let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to activate \(selectedOverride)?", preferredStyle: .alert)
+            
+            confirmationAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
+                // Proceed with sending the request
+                self.sendOverrideRequest(combinedString: combinedString)
+            }))
+            
+            confirmationAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            
+            present(confirmationAlert, animated: true, completion: nil)
+        }
+
+        func sendOverrideRequest(combinedString: String) {
  
         //Initial work/testing: Twilio API (This API is being discontinued. Please see https://support.twilio.com/hc/en-us/articles/223181028-Switching-from-SMS-Messages-resource-URI-to-Messages-resource-URI)
         let twilioSID = UserDefaultsRepository.twilioSIDString.value
