@@ -720,7 +720,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="NLZ-Ya-S59" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="334" y="1541"/>
+            <point key="canvasLocation" x="334" y="2075"/>
         </scene>
         <!--Remote-->
         <scene sceneID="HrN-jy-kh8">
@@ -1330,7 +1330,7 @@
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BEz-I9-sPs" userLabel="Override">
                                         <rect key="frame" x="0.0" y="0.0" width="359" height="319.66666666666669"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="wxu-lS-OVn">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="319.66666666666669"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="320"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jzQ-mu-Jca">
@@ -1411,6 +1411,93 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fAP-Pv-dJ3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1023" y="1422"/>
+        </scene>
+        <!--Remote Temp Target-->
+        <scene sceneID="bE3-Bj-pNw">
+            <objects>
+                <viewController storyboardIdentifier="remoteTempTarget" title="Remote Temp Target" id="hkx-V8-5qm" customClass="TempTargetViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="nt0-oB-Llr">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="reS-MW-t9s">
+                                <rect key="frame" x="286.33333333333331" y="70" width="76.666666666666686" height="34.333333333333343"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Cancel" cornerStyle="capsule">
+                                    <fontDescription key="titleFontDescription" type="system" pointSize="17"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="cancelButtonPressed:" destination="hkx-V8-5qm" eventType="touchUpInside" id="boy-89-1B3"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rra-PP-alB">
+                                <rect key="frame" x="12" y="462" width="351" height="70"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="70" id="Efw-r6-zM4"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Send Remote Temp Target">
+                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle3"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="sendRemoteTempTargetPressed:" destination="hkx-V8-5qm" eventType="touchUpInside" id="Mtw-Va-RrB"/>
+                                </connections>
+                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="cq3-7U-8Kv">
+                                <rect key="frame" x="8" y="134.33333333333334" width="359" height="319.66666666666663"/>
+                                <subviews>
+                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RtX-oO-1fw" userLabel="Temp Target">
+                                        <rect key="frame" x="0.0" y="0.0" width="359" height="319.66666666666669"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="znN-mf-lmp">
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="320"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <subviews>
+                                                <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hXU-kG-KPd">
+                                                    <rect key="frame" x="0.0" y="-20" width="359" height="332"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                                </pickerView>
+                                            </subviews>
+                                        </view>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <blurEffect style="regular"/>
+                                    </visualEffectView>
+                                </subviews>
+                            </stackView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote Temp Target" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="L64-fs-yGX" userLabel="Remote Temp Target">
+                                <rect key="frame" x="107.33333333333333" y="70" width="160.33333333333337" height="34.333333333333343"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="RS0-DM-ED5"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="cq3-7U-8Kv" firstAttribute="leading" secondItem="RS0-DM-ED5" secondAttribute="leading" constant="8" id="0sj-yb-2rO"/>
+                            <constraint firstItem="L64-fs-yGX" firstAttribute="top" secondItem="RS0-DM-ED5" secondAttribute="top" constant="20" id="452-3t-EUG"/>
+                            <constraint firstItem="L64-fs-yGX" firstAttribute="centerX" secondItem="nt0-oB-Llr" secondAttribute="centerX" id="C6f-so-hGp"/>
+                            <constraint firstAttribute="bottom" secondItem="cq3-7U-8Kv" secondAttribute="bottom" constant="358" id="Emc-gj-KUW"/>
+                            <constraint firstItem="RS0-DM-ED5" firstAttribute="trailing" secondItem="reS-MW-t9s" secondAttribute="trailing" constant="12" id="GuA-JW-ZpM"/>
+                            <constraint firstItem="reS-MW-t9s" firstAttribute="top" secondItem="RS0-DM-ED5" secondAttribute="top" constant="20" id="MkW-mq-5iM"/>
+                            <constraint firstItem="cq3-7U-8Kv" firstAttribute="top" secondItem="reS-MW-t9s" secondAttribute="bottom" constant="30" id="Nio-9L-Ei2"/>
+                            <constraint firstItem="L64-fs-yGX" firstAttribute="leading" secondItem="RS0-DM-ED5" secondAttribute="leading" constant="107.33333333333331" id="P23-a4-sOM"/>
+                            <constraint firstItem="cq3-7U-8Kv" firstAttribute="top" secondItem="L64-fs-yGX" secondAttribute="bottom" constant="30" id="T9e-qV-MhT"/>
+                            <constraint firstItem="RS0-DM-ED5" firstAttribute="trailing" secondItem="Rra-PP-alB" secondAttribute="trailing" constant="12" id="a8m-gA-sLf"/>
+                            <constraint firstItem="L64-fs-yGX" firstAttribute="centerX" secondItem="cq3-7U-8Kv" secondAttribute="centerX" id="cHn-Q1-wUC"/>
+                            <constraint firstItem="cq3-7U-8Kv" firstAttribute="centerX" secondItem="Rra-PP-alB" secondAttribute="centerX" id="rOQ-8v-9uR"/>
+                            <constraint firstItem="Rra-PP-alB" firstAttribute="leading" secondItem="RS0-DM-ED5" secondAttribute="leading" constant="12" id="sV5-no-xCX"/>
+                            <constraint firstItem="Rra-PP-alB" firstAttribute="top" secondItem="cq3-7U-8Kv" secondAttribute="bottom" constant="8" id="taz-Jf-3yB"/>
+                        </constraints>
+                    </view>
+                    <toolbarItems/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="tempTargetsPicker" destination="hXU-kG-KPd" id="hEv-1v-Sd8"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="PEj-be-N7c" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="334" y="1422"/>
         </scene>
     </scenes>
     <resources>

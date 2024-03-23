@@ -449,6 +449,7 @@ class UserDefaultsRepository {
     static let maxCarbs = UserDefaultsValue<Int>(key: "maxCarbs", default: 30)
     static let maxBolus = UserDefaultsValue<Double>(key: "maxBolus", default: 2.0)
     static let overrideString = UserDefaultsValue<String>(key: "overrideString", default: "👻 Resistance, 🤧 Sick day, 🏃‍♂️ Exercise, 😴 Nightmode")
+    static let tempTargetsString = UserDefaultsValue<String>(key: "tempTargetsString", default: "Exercise, Eating soon, Low treatment")
     
     // API settings
     static let twilioSIDString = UserDefaultsValue<String>(key: "twilioSIDString", default: "EnterSID")

@@ -82,7 +82,7 @@ class RemoteSettingsViewController: FormViewController {
         
         +++ remoteCommandsSection
         
-        +++ Section(header: "Remote Settings", footer: "Add the overrides you would like to be able to choose from in the remote override picker. Separate them by comma + blank space.  Example: Override 1, Override 2, Override 3")
+        +++ Section(header: "Remote Settings", footer: "Add the overrides and/or temp targets you would like to be able to choose from in the remote override/temp target pickers. Separate them by comma + blank space.  Example: Override 1, Override 2, Override 3")
                    
             <<< StepperRow("maxCarbs") { row in
                 row.title = "Max Carbs (g)"
@@ -121,6 +121,14 @@ class RemoteSettingsViewController: FormViewController {
         }.onChange { row in
             guard let value = row.value else { return }
             UserDefaultsRepository.overrideString.value = value
+        }
+        
+        <<< TextRow("temptargets"){ row in
+            row.title = "Temp Targets:"
+            row.value = UserDefaultsRepository.tempTargetsString.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.tempTargetsString.value = value
         }
         
             +++ ButtonRow() {

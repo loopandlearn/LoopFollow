@@ -35,6 +35,8 @@ class RemoteViewController: UIViewController {
     }
     
     @IBAction func tempTargetButtonPressed(_ sender: Any) {
+        let tempTargetViewController = storyboard!.instantiateViewController(withIdentifier: "remoteTempTarget") as! TempTargetViewController
+        self.present(tempTargetViewController, animated: true, completion: nil)
     }
     
     @IBAction func remoteSettingsButtonTapped(_ sender: Any) {
