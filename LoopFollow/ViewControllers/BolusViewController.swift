@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import LocalAuthentication
 
 class BolusViewController: UIViewController {
 
@@ -29,25 +30,93 @@ class BolusViewController: UIViewController {
         }
         
         // Replace all occurrences of ',' with '.'
-        bolusText = bolusText.replacingOccurrences(of: ",", with: ".")
-        
-        guard let bolusValue = Double(bolusText) else {
-            print("Error: Bolus amount conversion failed")
-            return
-        }
-        
-        if bolusValue > maxBolus {
-            // Format maxBolus to display only one decimal place
-            let formattedMaxBolus = String(format: "%.1f", maxBolus)
+            bolusText = bolusText.replacingOccurrences(of: ",", with: ".")
             
-            let alertController = UIAlertController(title: "Max setting exceeded", message: "The maximum allowed bolus of \(formattedMaxBolus) U is exceeded! Please try again with a smaller amount.", preferredStyle: .alert)
-            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            present(alertController, animated: true, completion: nil)
-            return
+            guard let bolusValue = Double(bolusText) else {
+                print("Error: Bolus amount conversion failed")
+                return
+            }
+            
+            if bolusValue > maxBolus {
+                // Format maxBolus to display only one decimal place
+                let formattedMaxBolus = String(format: "%.1f", maxBolus)
+                
+                let alertController = UIAlertController(title: "Max setting exceeded", message: "The maximum allowed bolus of \(formattedMaxBolus) U is exceeded! Please try again with a smaller amount.", preferredStyle: .alert)
+                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                present(alertController, animated: true, completion: nil)
+                return
+            }
+            
+            // Confirmation alert before sending the request
+            let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to give \(bolusValue) U bolus?", preferredStyle: .alert)
+            
+        confirmationAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
+            // Authenticate with Face ID
+            self.authenticateWithBiometrics {
+                // Proceed with the request after successful authentication
+                self.sendBolusRequest(bolusValue: bolusValue)
+            }
+            }))
+            
+            confirmationAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            
+            present(confirmationAlert, animated: true, completion: nil)
         }
+    
+    func authenticateWithBiometrics(completion: @escaping () -> Void) {
+        let context = LAContext()
+        var error: NSError?
         
-        let combinedString = "bolustoenact_\(bolusValue)"
-        print("Combined string:", combinedString)
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "Authenticate with biometrics to proceed"
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+                DispatchQueue.main.async {
+                    if success {
+                        // Authentication successful
+                        completion()
+                    } else {
+                        // Check for passcode authentication
+                        if let error = authenticationError as NSError?,
+                           error.code == LAError.biometryNotAvailable.rawValue || error.code == LAError.biometryNotEnrolled.rawValue {
+                            // Biometry (Face ID or Touch ID) is not available or not enrolled, use passcode
+                            self.authenticateWithPasscode(completion: completion)
+                        } else {
+                            // Authentication failed
+                            if let error = authenticationError {
+                                print("Authentication failed: \(error.localizedDescription)")
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // Biometry (Face ID or Touch ID) is not available, use passcode
+            self.authenticateWithPasscode(completion: completion)
+        }
+    }
+
+    func authenticateWithPasscode(completion: @escaping () -> Void) {
+        let context = LAContext()
+        
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Authenticate with passcode to proceed") { success, error in
+            DispatchQueue.main.async {
+                if success {
+                    // Authentication successful
+                    completion()
+                } else {
+                    // Authentication failed
+                    if let error = error {
+                        print("Authentication failed: \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+
+
+        func sendBolusRequest(bolusValue: Double) {
+            let combinedString = "bolustoenact_\(bolusValue)"
+            print("Combined string:", combinedString)
         
         //Initial work/testing: Twilio API (This API is being discontinued. Please see https://support.twilio.com/hc/en-us/articles/223181028-Switching-from-SMS-Messages-resource-URI-to-Messages-resource-URI)
         let twilioSID = UserDefaultsRepository.twilioSIDString.value

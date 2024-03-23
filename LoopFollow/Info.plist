@@ -102,5 +102,7 @@
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+    <key>NSFaceIDUsageDescription</key>
+    <string>To authenticate before sending a bolus request</string>
 </dict>
 </plist>
