@@ -24,9 +24,10 @@ class MealViewController: UIViewController {
             // Do any additional setup after loading the view.
         }
     }
+    
     @IBAction func sendRemoteMealPressed(_ sender: Any) {
         // Retrieve the maximum carbs value from UserDefaultsRepository
-        let maxCarbs = UserDefaultsRepository.maxCarbs.value 
+        let maxCarbs = UserDefaultsRepository.maxCarbs.value
         
         // Convert carbGrams, fatGrams, and proteinGrams to integers or default to 0 if empty
         let carbs: Int
@@ -67,30 +68,28 @@ class MealViewController: UIViewController {
             let alertController = UIAlertController(title: "Max setting exceeded", message: "The maximum allowed amount of \(maxCarbs)g is exceeded for one or more of the entries! Please try again with a smaller amount.", preferredStyle: .alert)
             alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
             present(alertController, animated: true, completion: nil)
-            return
+            return // Exit the function if any value exceeds maxCarbs
         }
         
-        let mealNotesValue = mealNotes.text ?? ""
+        // Retrieve the method value from UserDefaultsRepository
+        let method = UserDefaultsRepository.method.value
         
-        let combinedString = "mealtoenact_carbs\(carbs)fat\(fats)protein\(proteins)note\(mealNotesValue)"
-        
-        print("Combined string:", combinedString)
-        
-        // Confirmation alert before sending the request
-            let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to register this meal?", preferredStyle: .alert)
-            
-            confirmationAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
-                // Proceed with sending the request
-                self.sendMealRequest(combinedString: combinedString)
-            }))
-            
-            confirmationAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-            
-            present(confirmationAlert, animated: true, completion: nil)
+        // Use combinedString as the text in the URL
+        if let combinedString = createCombinedString() {
+            if method != "SMS API" {
+                let urlString = "shortcuts://run-shortcut?name=Remote%20Meal&input=text&text=\(combinedString)"
+                if let url = URL(string: urlString) {
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                }
+            } else {
+                // If method is "SMS API", proceed with sending the request
+                sendMealRequest(combinedString: combinedString)
+            }
         }
+    }
 
-        func sendMealRequest(combinedString: String) {
-        
+
+    func sendMealRequest(combinedString: String) {
         //Initial work/testing: Twilio API (This API is being discontinued. Please see https://support.twilio.com/hc/en-us/articles/223181028-Switching-from-SMS-Messages-resource-URI-to-Messages-resource-URI)
         let twilioSID = UserDefaultsRepository.twilioSIDString.value
         let twilioSecret = UserDefaultsRepository.twilioSecretString.value
@@ -120,14 +119,59 @@ class MealViewController: UIViewController {
             }
         }.resume()
 
-        
         // Dismiss the current view controller
         dismiss(animated: true, completion: nil)
     }
-
     
     @IBAction func doneButtonTapped(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }
 
+    // Function to create the combinedString
+    func createCombinedString() -> String? {
+        // Retrieve the maximum carbs value from UserDefaultsRepository
+        let maxCarbs = UserDefaultsRepository.maxCarbs.value
+        
+        // Convert carbGrams, fatGrams, and proteinGrams to integers or default to 0 if empty
+        let carbs: Int
+        let fats: Int
+        let proteins: Int
+        
+        if let carbText = carbGrams.text, !carbText.isEmpty {
+            guard let carbsValue = Int(carbText) else {
+                print("Error: Carb input value conversion failed")
+                return nil
+            }
+            carbs = carbsValue
+        } else {
+            carbs = 0
+        }
+        
+        if let fatText = fatGrams.text, !fatText.isEmpty {
+            guard let fatsValue = Int(fatText) else {
+                print("Error: Fat input value conversion failed")
+                return nil
+            }
+            fats = fatsValue
+        } else {
+            fats = 0
+        }
+        
+        if let proteinText = proteinGrams.text, !proteinText.isEmpty {
+            guard let proteinsValue = Int(proteinText) else {
+                print("Error: Protein input value conversion failed")
+                return nil
+            }
+            proteins = proteinsValue
+        } else {
+            proteins = 0
+        }
+        let mealNotesValue = mealNotes.text ?? ""
+        
+        // Construct and return the combinedString
+        let combinedString = "mealtoenact_carbs\(carbs)fat\(fats)protein\(proteins)note\(mealNotesValue)"
+        return combinedString
+    }
 }
+
+
