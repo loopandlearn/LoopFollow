@@ -68,15 +68,20 @@ extension MainViewController {
             if let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController {
                 snoozer.MinAgoLabel.text = minAgoDisplayText
                 
-                let bgLabelText = snoozer.BGLabel.attributedText?.string ?? ""
-                let bgLabelAttributes = snoozer.BGLabel.attributedText?.attributes(at: 0, effectiveRange: nil) ?? [:]
-                let attributeString = NSMutableAttributedString(string: bgLabelText, attributes: bgLabelAttributes)
+                // Start with the current BGLabel text
+                let bgLabelText = snoozer.BGLabel.text ?? ""
+                let attributeString = NSMutableAttributedString(string: bgLabelText)
                 
-                // Apply strikethrough in system red if more than 12 minutes old
-                if secondsAgo >= 720 { // 720 seconds = 12 minutes
-                    attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
-                    attributeString.addAttribute(NSAttributedString.Key.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
+                // Always apply the strikethrough style
+                attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
+                
+                // Conditionally set the strikethrough color based on the freshness of the data
+                if secondsAgo >= 720 { // Data is stale
+                    attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
+                } else { // Data is fresh
+                    attributeString.addAttribute(.strikethroughColor, value: UIColor.clear, range: NSRange(location: 0, length: attributeString.length))
                 }
+                
                 snoozer.BGLabel.attributedText = attributeString
             }
         } else {
@@ -85,6 +90,9 @@ extension MainViewController {
             
             if let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController {
                 snoozer.MinAgoLabel.text = ""
+                // Reset BGLabel to ensure no formatting is carried over
+                snoozer.BGLabel.text = ""
+                snoozer.BGLabel.attributedText = NSAttributedString(string: "")
             }
         }
     }
