@@ -452,7 +452,7 @@ class UserDefaultsRepository {
     static let tempTargetsString = UserDefaultsValue<String>(key: "tempTargetsString", default: "Exercise, Eating soon, Low treatment")
     
     // API settings
-    static let twilioSIDString = UserDefaultsValue<String>(key: "twilioSIDString", default: "EnterSID")
+    static let twilioSIDString = UserDefaultsValue<String>(key: "twilioSIDString", default: "EnterTheSID")
     static let twilioSecretString = UserDefaultsValue<String>(key: "twilioSecretString", default: "EnterSecret")
     static let twilioFromNumberString = UserDefaultsValue<String>(key: "twilioFromNumberString", default: "EnterFromNumber")
     static let twilioToNumberString = UserDefaultsValue<String>(key: "twilioToNumberString", default: "EnterToNumber")

@@ -38,7 +38,8 @@ class RemoteSettingsViewController: FormViewController {
         remoteCommandsSection 
         <<< TextRow("twilioSID"){ row in
             row.title = "Twilio SID"
-            row.value = UserDefaultsRepository.twilioSIDString.value
+            let maskedSID = String(repeating: "*", count: UserDefaultsRepository.twilioSIDString.value.count)
+            row.value = maskedSID
         }.onChange { row in
             guard let value = row.value else { return }
             UserDefaultsRepository.twilioSIDString.value = value
@@ -46,7 +47,8 @@ class RemoteSettingsViewController: FormViewController {
         
         <<< TextRow("twilioSecret"){ row in
             row.title = "Twilio Secret"
-            row.value = UserDefaultsRepository.twilioSecretString.value
+            let maskedSecret = String(repeating: "*", count: UserDefaultsRepository.twilioSecretString.value.count)
+            row.value = maskedSecret
         }.onChange { row in
             guard let value = row.value else { return }
             UserDefaultsRepository.twilioSecretString.value = value
