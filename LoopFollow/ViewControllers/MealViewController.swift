@@ -76,7 +76,7 @@ class MealViewController: UIViewController {
         
         print("Combined string:", combinedString)
         
-        //Initial work/testing: Twilo API (This API is being discontinued. Please see https://support.twilio.com/hc/en-us/articles/223181028-Switching-from-SMS-Messages-resource-URI-to-Messages-resource-URI)
+        //Initial work/testing: Twilio API (This API is being discontinued. Please see https://support.twilio.com/hc/en-us/articles/223181028-Switching-from-SMS-Messages-resource-URI-to-Messages-resource-URI)
         let twilioSID = UserDefaultsRepository.twilioSIDString.value
         let twilioSecret = UserDefaultsRepository.twilioSecretString.value
         let fromNumber = UserDefaultsRepository.twilioFromNumberString.value

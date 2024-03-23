@@ -22,7 +22,7 @@ class RemoteSettingsViewController: FormViewController {
     }
     private func buildAdvancedSettings() {
         // Define the section
-        let remoteCommandsSection = Section(header: "Twilo Settings", footer: "") {
+        let remoteCommandsSection = Section(header: "Twilio Settings", footer: "") {
             $0.hidden = Condition.function(["method"], { form in
                 // Retrieve the value of the segmented row
                 guard let methodRow = form.rowBy(tag: "method") as? SegmentedRow<String>,
