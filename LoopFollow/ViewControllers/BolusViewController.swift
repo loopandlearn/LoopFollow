@@ -116,7 +116,10 @@ class BolusViewController: UIViewController {
     
     func sendBolusRequest(bolusValue: Double) {
         
-        let combinedString = "bolustoenact_\(bolusValue)"
+        // Convert bolusValue to string and trim any leading or trailing whitespace
+        let trimmedBolusValue = "\(bolusValue)".trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        let combinedString = "bolustoenact_\(trimmedBolusValue)"
         print("Combined string:", combinedString)
         
         // Retrieve the method value from UserDefaultsRepository

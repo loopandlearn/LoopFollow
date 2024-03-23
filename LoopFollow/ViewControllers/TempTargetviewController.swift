@@ -59,12 +59,14 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
             return
         }
         
-        let combinedString = "temptargettoenact_\(selectedTempTarget)"
+        // Remove emojis and blank spaces from the selected temp target
+        let cleanedTempTarget = removeEmojisAndBlankSpaces(from: selectedTempTarget)
         
+        let combinedString = "temptargettoenact_\(cleanedTempTarget)"
         print("Combined string:", combinedString)
         
         // Confirmation alert before sending the request
-        let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to activate \(selectedTempTarget)?", preferredStyle: .alert)
+        let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to activate \(cleanedTempTarget)?", preferredStyle: .alert)
         
         confirmationAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
             // Proceed with sending the request
@@ -74,6 +76,28 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
         confirmationAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
         present(confirmationAlert, animated: true, completion: nil)
+    }
+
+    func removeEmojisAndBlankSpaces(from text: String) -> String {
+        // Remove emojis
+        let cleanedText = removeEmojis(from: text)
+        
+        // Remove all whitespace characters
+        let trimmedAndCleanedText = cleanedText.replacingOccurrences(of: "\\s+", with: "", options: .regularExpression)
+        
+        return trimmedAndCleanedText
+    }
+
+    func removeEmojis(from text: String) -> String {
+        let emojiPattern = "\\p{Emoji}"
+        do {
+            let regex = try NSRegularExpression(pattern: emojiPattern, options: [])
+            let range = NSRange(location: 0, length: text.utf16.count)
+            return regex.stringByReplacingMatches(in: text, options: [], range: range, withTemplate: "")
+        } catch {
+            print("Error removing emojis: \(error)")
+            return text
+        }
     }
     
     func sendTTRequest(combinedString: String) {
