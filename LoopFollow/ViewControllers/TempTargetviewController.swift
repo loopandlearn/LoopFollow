@@ -113,8 +113,6 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
             }
         } else {
             // If method is "SMS API", proceed with sending the request
-            
-            //Initial work/testing: Twilio API (This API is being discontinued. Please see https://support.twilio.com/hc/en-us/articles/223181028-Switching-from-SMS-Messages-resource-URI-to-Messages-resource-URI)
             let twilioSID = UserDefaultsRepository.twilioSIDString.value
             let twilioSecret = UserDefaultsRepository.twilioSecretString.value
             let fromNumber = UserDefaultsRepository.twilioFromNumberString.value
@@ -122,7 +120,7 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
             let message = combinedString
             
             // Build the request
-            let urlString = "https://\(twilioSID):\(twilioSecret)@api.twilio.com/2010-04-01/Accounts/\(twilioSID)/SMS/Messages"
+            let urlString = "https://\(twilioSID):\(twilioSecret)@api.twilio.com/2010-04-01/Accounts/\(twilioSID)/Messages"
             guard let url = URL(string: urlString) else {
                 print("Invalid URL")
                 return
