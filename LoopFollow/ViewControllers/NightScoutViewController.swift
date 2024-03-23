@@ -49,6 +49,16 @@ class NightscoutViewController: UIViewController {
         self.webView.reload()
         sender.endRefreshing()
     }
+
+    // New code to clear web cache
+    func clearWebCache() {
+        let dataStore = WKWebsiteDataStore.default()
+        let cacheTypes = Set([WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache])
+        let date = Date(timeIntervalSince1970: 0)
+        dataStore.removeData(ofTypes: cacheTypes, modifiedSince: date) {
+          print("Web cache cleared.")
+        }
+      }
     
     // New code to clear web cache
     func clearWebCache() {

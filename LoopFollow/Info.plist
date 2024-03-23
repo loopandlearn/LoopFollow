@@ -96,7 +96,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>loopfollow</string>
+				<string>loop</string>
 			</array>
 		</dict>
 	</array>

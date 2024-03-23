@@ -37,7 +37,7 @@ class InfoDisplaySettingsViewController: FormViewController {
                     UserDefaultsRepository.hideInfoTable.value = value           
         }
         
-        +++ MultivaluedSection(multivaluedOptions: .Reorder, header: "Information Display Settings", footer: "Arrage/Enable Information Desired") {
+        +++ MultivaluedSection(multivaluedOptions: .Reorder, header: "Information Display Settings", footer: "Välj och sortera ordning på önskad information") {
         
            // TODO: add the other display values
            $0.tag = "InfoDisplay"
@@ -71,7 +71,7 @@ class InfoDisplaySettingsViewController: FormViewController {
        }
     
        +++ ButtonRow() {
-          $0.title = "DONE"
+          $0.title = "KLAR"
        }.onCellSelection { (row, arg)  in
           self.dismiss(animated:true, completion: nil)
        }

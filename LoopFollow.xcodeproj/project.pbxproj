@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
+
 		65047E912BAC5C9E00894A39 /* RemoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047E902BAC5C9E00894A39 /* RemoteViewController.swift */; };
 		65047E932BAC6A5F00894A39 /* MealViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047E922BAC6A5F00894A39 /* MealViewController.swift */; };
 		65047E952BAC6A6F00894A39 /* BolusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047E942BAC6A6F00894A39 /* BolusViewController.swift */; };
 		65047E972BAC6A7B00894A39 /* OverrideViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047E962BAC6A7B00894A39 /* OverrideViewController.swift */; };
 		65047E992BAC6A8B00894A39 /* TempTargetviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047E982BAC6A8B00894A39 /* TempTargetviewController.swift */; };
 		65A5A4072BADCC6D00AE4B55 /* RemoteSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A5A4062BADCC6D00AE4B55 /* RemoteSettingsViewController.swift */; };
+		654CB0692BA4626E004650B3 /* Smb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654CB0682BA4626E004650B3 /* Smb.swift */; };
 		DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */; };
 		DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */; };
 		DD493AD52ACF2109009A6922 /* ResumePump.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AD42ACF2109009A6922 /* ResumePump.swift */; };
@@ -204,6 +206,7 @@
 		65047E962BAC6A7B00894A39 /* OverrideViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideViewController.swift; sourceTree = "<group>"; };
 		65047E982BAC6A8B00894A39 /* TempTargetviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetviewController.swift; sourceTree = "<group>"; };
 		65A5A4062BADCC6D00AE4B55 /* RemoteSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsViewController.swift; sourceTree = "<group>"; };
+		654CB0682BA4626E004650B3 /* Smb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smb.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutUtils.swift; sourceTree = "<group>"; };
 		DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsViewController.swift; sourceTree = "<group>"; };
@@ -437,6 +440,7 @@
 				DD493ADA2ACF21A3009A6922 /* Bolus.swift */,
 				DD493AD42ACF2109009A6922 /* ResumePump.swift */,
 				DDF9676D2AD08C6E00C5EB95 /* SiteChange.swift */,
+				654CB0682BA4626E004650B3 /* Smb.swift */,
 			);
 			path = Treatments;
 			sourceTree = "<group>";
@@ -998,6 +1002,7 @@
 				DD493AE92ACF2445009A6922 /* BGData.swift in Sources */,
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */,
+				654CB0692BA4626E004650B3 /* Smb.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
 				DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */,
@@ -1162,7 +1167,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = RMSRR5SURS;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1184,7 +1189,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = RMSRR5SURS;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

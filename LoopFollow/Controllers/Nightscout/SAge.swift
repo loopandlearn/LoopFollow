@@ -67,9 +67,18 @@ extension MainViewController {
             formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
             formatter.allowedUnits = [ .day, .hour] // Units to display in the formatted string
             formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
+
+            // Set maximumUnitCount to 0 to include all available units
+            formatter.maximumUnitCount = 0
             
-            let formattedDuration = formatter.string(from: secondsAgo)
-            tableData[6].value = formattedDuration ?? ""
+            if let formattedDuration = formatter.string(from: secondsAgo) {
+            // Manually add spaces between the number and units
+            let spacedDuration = formattedDuration
+            .replacingOccurrences(of: "d", with: " d")
+            .replacingOccurrences(of: "h", with: " h")
+
+            tableData[6].value = spacedDuration
+            }
         }
         infoTable.reloadData()
     }

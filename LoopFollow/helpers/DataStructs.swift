@@ -44,7 +44,8 @@ class DataStructs {
         var duration: Double
         var correctionRange: [Int]
         var enteredBy: String
-        var reason: String
+        var notes: String?
+        var reason: String?
         var sgv: Float
     }
     

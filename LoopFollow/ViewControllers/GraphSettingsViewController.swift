@@ -147,7 +147,7 @@ class GraphSettingsViewController: FormViewController {
                 }
             }
             <<< SwitchRow("show90MinLine") { row in
-                row.title = "Show -90 min line"
+                row.title = "Show -24 h line"
                 row.value = UserDefaultsRepository.show90MinLine.value
             }.onChange { [weak self] row in
                 guard let value = row.value else { return }
