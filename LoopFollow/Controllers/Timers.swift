@@ -42,7 +42,6 @@ extension MainViewController {
     }
     
     // Updates Min Ago display
-    //Auggie - I like to see the seconds all the time
     @objc func minAgoTimerDidEnd(_ timer:Timer) {
         
         // print("min ago timer ended")
@@ -55,19 +54,24 @@ extension MainViewController {
             let formatter = DateComponentsFormatter()
             formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
             
-            formatter.allowedUnits = [ .minute, .second] // Units to display in the formatted string
+            if secondsAgo < 270 {
+                formatter.allowedUnits = [ .minute] // Units to display in the formatted string
+            } else {
+                formatter.allowedUnits = [ .minute, .second] // Units to display in the formatted string
+            }
+            
             
             //formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
             let formattedDuration = formatter.string(from: secondsAgo)
             
             MinAgoText.text = formattedDuration ?? ""
-            MinAgoText.text! += " sedan"
+            MinAgoText.text! += " min ago"
             latestMinAgoString = formattedDuration ?? ""
-            latestMinAgoString += " sedan"
+            latestMinAgoString += " min ago"
             
             if let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController {
                 snoozer.MinAgoLabel.text = formattedDuration ?? ""
-                snoozer.MinAgoLabel.text! += " sedan"
+                snoozer.MinAgoLabel.text! += " min ago"
             } else { return }
             
         } else {

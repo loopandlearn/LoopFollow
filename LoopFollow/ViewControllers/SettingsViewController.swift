@@ -256,7 +256,6 @@ class SettingsViewController: FormViewController {
 
        +++ Section(header: "App Expiration", footer: String(expiration.description))
 
-
         showHideNSDetails()
        checkNightscoutStatus()
     }

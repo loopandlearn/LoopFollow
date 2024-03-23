@@ -22,7 +22,7 @@ class NightscoutUtils {
     enum EventType: String {
         case cage = "Site Change"
         case carbsToday = "Carb Correction"
-        case sage = "Sensor Change"
+        case sage = "Sensor Start"
         case sgv
         case profile
         case treatments

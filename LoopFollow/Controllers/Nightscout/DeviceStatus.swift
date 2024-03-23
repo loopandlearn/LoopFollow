@@ -34,10 +34,6 @@ extension MainViewController {
         }
     }
     
-    func mgdlToMmol(_ mgdl: Double) -> Double {
-        return mgdl * 0.05551
-    }
-    
     private func handleDeviceStatusError() {
         if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
             globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
@@ -50,7 +46,7 @@ extension MainViewController {
             self.startDeviceStatusTimer(time: 10)
         }
     }
-    
+        
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
         self.clearLastInfoData(index: 0)
@@ -76,15 +72,15 @@ extension MainViewController {
             if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
-                    tableData[5].value = String(format:"%.0f", reservoirData) + " E"
+                    tableData[5].value = String(format:"%.0f", reservoirData) + "U"
                 } else {
                     latestPumpVolume = 50.0
-                    tableData[5].value = "50+E"
+                    tableData[5].value = "50+U"
                 }
                 
                 if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
                     let upbat = uploader["battery"] as! Double
-                    tableData[4].value = String(format:"%.0f", upbat) + " %"
+                    tableData[4].value = String(format:"%.0f", upbat) + "%"
                     UserDefaultsRepository.deviceBatteryLevel.value = upbat
                 }
             }
@@ -110,11 +106,11 @@ extension MainViewController {
                         }
                     }
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double)) + " E"
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
                         latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
                     }
                     if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double) + " g"
+                        tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
                         latestCOB = String(format:"%.0f", cobdata["cob"] as! Double)
                     }
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
@@ -141,13 +137,13 @@ extension MainViewController {
                             
                             let predMin = prediction.min()
                             let predMax = prediction.max()
-                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "-" + bgUnits.toDisplayUnits(String(predMax!)) + " mmol/L"
+                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
                             
                             updatePredictionGraph()
                         }
                     }
                     if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
-                        tableData[8].value = String(format:"%.2f", recBolus) + " E"
+                        tableData[8].value = String(format:"%.2fU", recBolus)
                     }
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
                         if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
@@ -203,50 +199,19 @@ extension MainViewController {
                     }
                     
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double)) + " E"
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
                         latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
                     }
-                    if let enactedData = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.0f", enactedData["COB"] as! Double) + " g"
-                        latestCOB = String(format:"%.0f", enactedData["COB"] as! Double) + " g"
-                        
-                        tableData[8].value = String(format:"%.2f", enactedData["insulinReq"] as! Double) + " E"
-                        
-                        let sens = enactedData["sensitivityRatio"] as! Double * 100.0
-                        tableData[11].value = String(format:"%.0f", sens) + " %"
-                        
-                        //Auggie - get TDD, ISF, CR, target
-                        tableData[13].value = String(format:"%.1f", enactedData["TDD"] as! Double) + " E"
-                        tableData[14].value = String(format:"%.1f", enactedData["ISF"] as! Double) + " mmol/L/E"
-                        tableData[15].value = String(format:"%.1f", enactedData["CR"] as! Double) + " g/E"
-                        
-                        //Daniel mmol version of target
-                        let currentTargetMgdl = enactedData["current_target"] as! Double
-                        let currentTargetMmol = mgdlToMmol(currentTargetMgdl)
-                        tableData[16].value = String(format: "%.1f", currentTargetMmol) + " mmol/L"
-                        
-                    } else {
-                        // If enactedData is nil, set all tableData values to "Waiting"
-                        for i in 1..<tableData.count {
-                            tableData[i].value = "---"
-                        }
-                        
+                    if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double)
+                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double)
                     }
-                    
-                    //Auggie - override name
-                    let recentOverride = overrideGraphData.last
-                    let overrideName: String?
-                    if let notes = recentOverride?.notes, !notes.isEmpty {
-                        overrideName = notes
-                    } else {
-                        overrideName = recentOverride?.reason
+                    if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        tableData[8].value = String(format:"%.2fU", recbolusdata["insulinReq"] as! Double)
                     }
-                    let recentEnd: TimeInterval = recentOverride?.endDate ?? 0
-                    let now = dateTimeUtils.getNowTimeIntervalUTC()
-                    if recentEnd >= now {
-                        tableData[3].value = String(overrideName ?? "Normal profil")
-                    } else {
-                        tableData[3].value = "Normal profil"
+                    if let autosensdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
+                        tableData[11].value = String(format:"%.0f", sens) + "%"
                     }
                     
                     //Picks COB prediction if available, else UAM, else IOB, else ZT
@@ -254,10 +219,10 @@ extension MainViewController {
                     var graphtype = ""
                     var predictioncolor = UIColor.systemGray
                     PredictionLabel.textColor = predictioncolor
-                    
+
                     if let enactdata = lastLoopRecord["enacted"] as? [String:AnyObject],
                        let predbgdata = enactdata["predBGs"] as? [String:AnyObject] {
-                        
+
                         if predbgdata["COB"] != nil {
                             graphtype = "COB"
                         } else if predbgdata["UAM"] != nil {
@@ -267,43 +232,31 @@ extension MainViewController {
                         } else {
                             graphtype = "ZT"
                         }
-                        
+
                         // Access the color based on graphtype
                         var colorName = ""
-                        var additionalText = ""
-                        
                         switch graphtype {
-                        case "COB":
-                            colorName = "LoopYellow"
-                            additionalText = "COB"
-                        case "UAM":
-                            colorName = "UAM"
-                            additionalText = "UAM"
-                        case "IOB":
-                            colorName = "Insulin"
-                            additionalText = "IOB"
-                        case "ZT":
-                            colorName = "ZT"
-                            additionalText = "ZT"
-                        default:
-                            break
+                        case "COB": colorName = "LoopYellow"
+                        case "UAM": colorName = "UAM"
+                        case "IOB": colorName = "Insulin"
+                        case "ZT": colorName = "ZT"
+                        default: break
                         }
-                        
+
                         if let selectedColor = UIColor(named: colorName) {
                             predictioncolor = selectedColor
                             PredictionLabel.textColor = predictioncolor
                         }
-                        
+
                         let graphdata = predbgdata[graphtype] as! [Double]
-                        
-                        if let eventualdata = lastLoopRecord["enacted"] as? [String: AnyObject] {
+
+                        if let eventualdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                             if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
                                 let eventualBGStringValue = String(describing: eventualBGValue)
-                                let formattedBGString = bgUnits.toDisplayUnits(eventualBGStringValue)
-                                PredictionLabel.text = "\(additionalText) ⇢ \(formattedBGString)"
+                                PredictionLabel.text = bgUnits.toDisplayUnits(eventualBGStringValue)
                             }
                         }
-                        
+
                         if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
                             predictionData.removeAll()
                             var predictionTime = lastLoopTime
@@ -318,11 +271,11 @@ extension MainViewController {
                                 i += 1
                             }
                         }
-                        
+
                         let predMin = graphdata.min()
                         let predMax = graphdata.max()
-                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "-" + bgUnits.toDisplayUnits(String(predMax!)) + " mmol/L"
-                        
+                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
+
                         updatePredictionGraph(color: predictioncolor)
                     }
                     
@@ -360,7 +313,7 @@ extension MainViewController {
             }
         }
         
-        /*var oText = "" as String
+        var oText = "" as String
         currentOverride = 1.0
         if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
             if lastOverride["active"] as! Bool {
@@ -381,7 +334,7 @@ extension MainViewController {
                 
                 tableData[3].value =  oText
             }
-        }*/
+        }
         
         infoTable.reloadData()
         

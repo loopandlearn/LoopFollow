@@ -513,7 +513,7 @@ open class LineChartRenderer: LineRadarRenderer
         
         return filled
     }
-
+    
     open override func drawValues(context: CGContext)
     {
         guard
@@ -545,7 +545,7 @@ open class LineChartRenderer: LineRadarRenderer
                 
                 let iconsOffset = dataSet.iconsOffset
                 
-                // make sure the values do not interfere with the circles
+                // make sure the values do not interfear with the circles
                 var valOffset = Int(dataSet.circleRadius * 1.75)
                 
                 if !dataSet.isDrawCirclesEnabled
@@ -573,18 +573,14 @@ open class LineChartRenderer: LineRadarRenderer
                         continue
                     }
                     
-                    // Replace time text with empty string
-                    let originalText = formatter.stringForValue(e.y,
-                                                                  entry: e,
-                                                                  dataSetIndex: i,
-                                                                  viewPortHandler: viewPortHandler)
-                    let replacedText = replaceTimeText(originalText)
-                    
                     if dataSet.isDrawValuesEnabled
                     {
-                        context.drawText(replacedText,
+                        context.drawText(formatter.stringForValue(e.y,
+                                                                  entry: e,
+                                                                  dataSetIndex: i,
+                                                                  viewPortHandler: viewPortHandler),
                                          at: CGPoint(x: pt.x,
-                                                     y: pt.y - CGFloat(valOffset) - valueFont.lineHeight - 12), // Daniel: Offset to make room for extra line in labels
+                                                     y: pt.y - CGFloat(valOffset) - valueFont.lineHeight),
                                          align: .center,
                                          angleRadians: angleRadians,
                                          attributes: [.font: valueFont,
@@ -600,18 +596,6 @@ open class LineChartRenderer: LineRadarRenderer
                     }
                 }
             }
-        }
-    }
-    //Daniel: Added to filter out strings from chart rendering (but still keep it visible in highlight popup)
-    func replaceTimeText(_ text: String) -> String {
-        let timePattern = "\\b(\\d{2}:\\d{2}|Kolhydrater|Bolus|SMB|E)\\b"
-        
-        if let regex = try? NSRegularExpression(pattern: timePattern) {
-            let range = NSRange(location: 0, length: text.utf16.count)
-            return regex.stringByReplacingMatches(in: text, options: [], range: range, withTemplate: "")
-        } else {
-            print("Error creating regular expression.")
-            return text
         }
     }
     

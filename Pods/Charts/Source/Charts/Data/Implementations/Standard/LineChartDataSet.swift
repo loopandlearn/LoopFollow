@@ -76,7 +76,7 @@ open class LineChartDataSet: LineRadarChartDataSet, LineChartDataSetProtocol
     open var circleRadius = CGFloat(8.0)
     
     /// The hole radius of the drawn circles
-    open var circleHoleRadius = CGFloat(3.0) //(4.0) // Daniel: Change to smaller holes
+    open var circleHoleRadius = CGFloat(4.0)
     
     open var circleColors = [NSUIColor]()
     
@@ -120,7 +120,7 @@ open class LineChartDataSet: LineRadarChartDataSet, LineChartDataSetProtocol
     open var isDrawCirclesEnabled: Bool { return drawCirclesEnabled }
     
     /// The color of the inner circle (the circle-hole).
-    open var circleHoleColor: NSUIColor? = NSUIColor.clear
+    open var circleHoleColor: NSUIColor? = NSUIColor.white
     
     /// `true` if drawing circles for this DataSet is enabled, `false` ifnot
     open var drawCircleHoleEnabled = true

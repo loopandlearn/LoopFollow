@@ -18,9 +18,9 @@ extension MainViewController {
         }
     }
     
-    // NS Sensor Change Response Processor
-    func processSensorChange(entries: [sageData]) {
-        sensorChangeGraphData.removeAll()
+    // NS Sensor Start Response Processor
+    func processSensorStart(entries: [sageData]) {
+        sensorStartGraphData.removeAll()
         var lastFoundIndex = 0
         for entry in entries {
             let date = entry.created_at
@@ -32,14 +32,14 @@ extension MainViewController {
                 
                 if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                     let dot = DataStructs.timestampOnlyStruct(date: Double(dateTimeStamp), sgv: Int(sgv.sgv))
-                    sensorChangeGraphData.append(dot)
+                    sensorStartGraphData.append(dot)
                 }
             } else {
                 print("Failed to parse date")
             }
         }
         if UserDefaultsRepository.graphOtherTreatments.value {
-            updateSensorChange()
+            updateSensorStart()
         }
     }
 }

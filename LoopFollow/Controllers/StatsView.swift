@@ -55,26 +55,20 @@ extension MainViewController {
         statsPieChart.rotationEnabled = false
         
         var chartEntry = [PieChartDataEntry]()
-        var colors = [UIColor]()
+        var colors = [NSUIColor]()
         
         for i in 0..<pieData.count{
             var slice = Double(pieData[i].value)
             if slice == 0 { slice = 0.1 }
             let value = PieChartDataEntry(value: slice)
             chartEntry.append(value)
-            
-            if pieData[i].name == "high" {
-                if let color = UIColor(named: "LoopYellow")?.withAlphaComponent(0.8) {
-                    colors.append(color)
-                }
+
+             if pieData[i].name == "high" {
+                colors.append(NSUIColor.systemYellow)
             } else if pieData[i].name == "low" {
-                if let color = UIColor(named: "LoopRed")?.withAlphaComponent(0.8) {
-                    colors.append(color)
-                }
+               colors.append(NSUIColor.systemRed)
             } else {
-                if let color = UIColor(named: "LoopGreen")?.withAlphaComponent(0.8) {
-                    colors.append(color)
-                }
+                colors.append(NSUIColor.systemGreen)
             }
         }
         

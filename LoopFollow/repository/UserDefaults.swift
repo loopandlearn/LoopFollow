@@ -20,25 +20,21 @@ class UserDefaultsRepository {
     // DisplayValues total
     static let infoDataTotal = UserDefaultsValue<Int>(key: "infoDataTotal", default: 0)
     static let infoNames = UserDefaultsValue<[String]>(key: "infoNames", default: [
-        "IOB", //0
-        "COB", //1
-        "Basal", //2
-        "Override", //3
-        "Looptelefon", //4
-        "Reservoar", //5
-        "Sensorbyte", //6
-        "Poddbyte", //7
-        "Behov", //8
-        "Prognos", //9
-        "Kh idag", //10
-        "Autosens", //11
-        "Profil", //12
-        "Total daglig dos", //13
-        "ISF", //14
-        "CR", //15
-        "Målvärde"]) //16
-    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [3,0,1,11,14,15,8,2,16,9,4,10,13,5,6,7,12])
-    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true])
+        "IOB",
+        "COB",
+        "Basal",
+        "Override",
+        "Battery",
+        "Pump",
+        "SAGE",
+        "CAGE",
+        "Rec. Bolus",
+        "Pred.",
+        "Carbs today",
+        "Autosens",
+        "Profile"])
+    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [0,1,2,3,4,5,6,7,8,9,10,11,12])
+    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true,true,false,false])
     static let hideInfoTable = UserDefaultsValue<Bool>(key: "hideInfoTable", default: false)
     
     // Nightscout Settings
@@ -60,24 +56,24 @@ class UserDefaultsRepository {
     static let smallGraphTreatments = UserDefaultsValue<Bool>(key: "smallGraphTreatments", default: true)
     static let showValues = UserDefaultsValue<Bool>(key: "showValues", default: true)
     static let showAbsorption = UserDefaultsValue<Bool>(key: "showAbsorption", default: true)
-    static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: false)
+    static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
     static let predictionToLoad = UserDefaultsValue<Double>(key: "predictionToLoad", default: 1)
-    static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 2.0)
+    static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
     static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
     static let showDIALines = UserDefaultsValue<Bool>(key: "showDIAMarkers", default: true)
-    static let show30MinLine = UserDefaultsValue<Bool>(key: "show30MinLine", default: true)
-    static let show90MinLine = UserDefaultsValue<Bool>(key: "show90MinLine", default: true)
-    static let showMidnightLines = UserDefaultsValue<Bool>(key: "showMidnightMarkers", default: true)
+    static let show30MinLine = UserDefaultsValue<Bool>(key: "show30MinLine", default: false)
+    static let show90MinLine = UserDefaultsValue<Bool>(key: "show90MinLine", default: false)
+    static let showMidnightLines = UserDefaultsValue<Bool>(key: "showMidnightMarkers", default: false)
     static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
-    static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 140.0)
-    static let smallGraphHeight = UserDefaultsValue<Int>(key: "smallGraphHeight", default: 60)
+    static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
+    static let smallGraphHeight = UserDefaultsValue<Int>(key: "smallGraphHeight", default: 40)
     
     
     // General Settings
     static let colorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
     static let showStats = UserDefaultsValue<Bool>(key: "showStats", default: true)
-    static let useIFCC = UserDefaultsValue<Bool>(key: "useIFCC", default: true)
+    static let useIFCC = UserDefaultsValue<Bool>(key: "useIFCC", default: false)
     static let showSmallGraph = UserDefaultsValue<Bool>(key: "showSmallGraph", default: true)
     static let speakBG = UserDefaultsValue<Bool>(key: "speakBG", default: false)
     static let showDisplayName = UserDefaultsValue<Bool>(key: "showDisplayName", default: false)
@@ -102,7 +98,6 @@ class UserDefaultsRepository {
     static let graphOtherTreatments = UserDefaultsValue<Bool>(key: "graphOtherTreatments", default: true)
     static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
     static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
-    static let graphSmb = UserDefaultsValue<Bool>(key: "graphSmb", default: true)
     static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
     static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
     static let alwaysDownloadAllBG = UserDefaultsValue<Bool>(key: "alwaysDownloadAllBG", default: true)
@@ -116,7 +111,7 @@ class UserDefaultsRepository {
     static let lastCalendarStartDate = UserDefaultsValue<Date?>(key: "lastCalendarStartDate", default: nil)
     static let writeCalendarEvent = UserDefaultsValue<Bool>(key: "writeCalendarEvent", default: false)
     static let watchLine1 = UserDefaultsValue<String>(key: "watchLine1", default: "%BG% %DIRECTION% %DELTA% %MINAGO%")
-    static let watchLine2 = UserDefaultsValue<String>(key: "watchLine2", default: "%15MIN% • %IOB% • %IOB%")
+    static let watchLine2 = UserDefaultsValue<String>(key: "watchLine2", default: "C:%COB% I:%IOB% B:%BASAL%")
     static let saveImage = UserDefaultsValue<Bool>(key: "saveImage", default: false)
     
     // Alarm Settings
