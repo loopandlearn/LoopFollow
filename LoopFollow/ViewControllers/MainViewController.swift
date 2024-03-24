@@ -425,26 +425,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         showHideNSDetails()
     }
     
-    
-
-    //update Min Ago Text. We need to call this separately because it updates between readings
-    func updateMinAgo(){
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Update min ago text") }
-        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        if bgData.count > 0 {
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
-            minAgoBG = Double(TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date)
-            MinAgoText.text = String(Int(deltaTime)) + " min ago"
-            snoozer.MinAgoLabel.text = String(Int(deltaTime)) + " min ago"
-            latestMinAgoString = String(Int(deltaTime)) + " min ago"
-        } else {
-            MinAgoText.text = ""
-            snoozer.MinAgoLabel.text = ""
-            latestMinAgoString = ""
-        }
-        
-    }
-    
     //Clear the info data before next pull. This ensures we aren't displaying old data if something fails.
     func clearLastInfoData(index: Int){
         tableData[index].value = ""
