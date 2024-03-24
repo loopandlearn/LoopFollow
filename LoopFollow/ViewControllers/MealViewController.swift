@@ -87,6 +87,10 @@ class MealViewController: UIViewController {
 
         // Construct and return the combinedString
         let combinedString = "mealtoenact_carbs\(carbs)fat\(fats)protein\(proteins)note\(cleanedMealNotes)"
+                
+        //Alterntive combinedString formatting below, to present the meal more like a visual menu in imessage on receiving iPhone.
+        //let combinedString = "Mealtime\nCarbs \(carbs)g\nFat \(fats)g\nProtein \(proteins)g \nNote \(cleanedMealNotes)"
+        
         return combinedString
     }
 
