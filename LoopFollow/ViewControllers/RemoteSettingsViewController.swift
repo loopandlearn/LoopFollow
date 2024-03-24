@@ -118,7 +118,7 @@ class RemoteSettingsViewController: FormViewController {
         form
         +++ Section(header: "Remote commands method", footer: "")
         <<< SegmentedRow<String>("method") { row in
-            row.title = "Use:"
+            row.title = ""
             row.options = ["iOS Shortcuts", "SMS API"]
             row.value = UserDefaultsRepository.method.value
         }.onChange { row in

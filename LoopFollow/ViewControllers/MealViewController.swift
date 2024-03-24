@@ -80,35 +80,18 @@ class MealViewController: UIViewController {
 
     func createCombinedString(carbs: Int, fats: Int, proteins: Int) -> String? {
         let mealNotesValue = mealNotes.text ?? ""
+        var cleanedMealNotes = mealNotesValue
         
-        // Remove emojis and blank spaces
-        let cleanedMealNotes = removeEmojisAndBlankSpaces(from: mealNotesValue)
-        
-        // Construct and return the combinedString without emojis and blank spaces
+        // Retrieve the method value from UserDefaultsRepository
+        let method = UserDefaultsRepository.method.value
+
+        // Construct and return the combinedString
         let combinedString = "mealtoenact_carbs\(carbs)fat\(fats)protein\(proteins)note\(cleanedMealNotes)"
+                
+        //Alterntive combinedString formatting below, to present the meal more like a visual menu in imessage on receiving iPhone.
+        //let combinedString = "Mealtime\nCarbs \(carbs)g\nFat \(fats)g\nProtein \(proteins)g \nNote \(cleanedMealNotes)"
+        
         return combinedString
-    }
-
-    func removeEmojisAndBlankSpaces(from text: String) -> String {
-        // Remove emojis
-        let cleanedText = removeEmojis(from: text)
-        
-        // Remove all whitespace characters
-        let trimmedAndCleanedText = cleanedText.replacingOccurrences(of: "\\s+", with: "", options: .regularExpression)
-        
-        return trimmedAndCleanedText
-    }
-
-    func removeEmojis(from text: String) -> String {
-        let emojiPattern = "\\p{Emoji}"
-        do {
-            let regex = try NSRegularExpression(pattern: emojiPattern, options: [])
-            let range = NSRange(location: 0, length: text.utf16.count)
-            return regex.stringByReplacingMatches(in: text, options: [], range: range, withTemplate: "")
-        } catch {
-            print("Error removing emojis: \(error)")
-            return text
-        }
     }
 
     func showConfirmationAlert(combinedString: String) {
@@ -131,12 +114,16 @@ class MealViewController: UIViewController {
         let method = UserDefaultsRepository.method.value
         
         if method != "SMS API" {
-            let urlString = "shortcuts://run-shortcut?name=Remote%20Meal&input=text&text=\(combinedString)"
+            // URL encode combinedString
+            guard let encodedString = combinedString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+                print("Failed to encode URL string")
+                return
+            }
+            let urlString = "shortcuts://run-shortcut?name=Remote%20Meal&input=text&text=\(encodedString)"
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
-        } else {
-            // If method is "SMS API", proceed with sending the request
+        } else {            // If method is "SMS API", proceed with sending the request
 
             let twilioSID = UserDefaultsRepository.twilioSIDString.value
             let twilioSecret = UserDefaultsRepository.twilioSecretString.value

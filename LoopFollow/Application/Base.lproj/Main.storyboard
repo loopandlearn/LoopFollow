@@ -731,10 +731,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="ns4-YC-Awz">
-                                <rect key="frame" x="20" y="120" width="335" height="489"/>
+                                <rect key="frame" x="20" y="190" width="335" height="399"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Srr-Hj-3UX">
-                                        <rect key="frame" x="4" y="0.0" width="327" height="113.33333333333333"/>
+                                        <rect key="frame" x="4" y="0.0" width="327" height="90.666666666666671"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" image="fork.knife" catalog="system" imagePadding="8" cornerStyle="large" titleAlignment="center">
                                             <backgroundConfiguration key="background">
@@ -754,7 +754,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Vg-R6-0Rz">
-                                        <rect key="frame" x="4" y="125.33333333333334" width="327" height="113.33333333333334"/>
+                                        <rect key="frame" x="4" y="102.66666666666669" width="327" height="91"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" image="drop.fill" catalog="system" imagePadding="8" cornerStyle="large" titleAlignment="center">
                                             <backgroundConfiguration key="background">
@@ -775,7 +775,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p4l-1b-Z8k">
-                                        <rect key="frame" x="4" y="250.66666666666669" width="327" height="113"/>
+                                        <rect key="frame" x="4" y="205.66666666666669" width="327" height="90.666666666666686"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" image="person.fill" catalog="system" imagePadding="8" cornerStyle="large" titleAlignment="center">
                                             <backgroundConfiguration key="background">
@@ -795,7 +795,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eWa-bY-PRf">
-                                        <rect key="frame" x="4" y="375.66666666666669" width="327" height="113.33333333333331"/>
+                                        <rect key="frame" x="4" y="308.33333333333331" width="327" height="90.666666666666686"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" image="target" catalog="system" imagePadding="8" cornerStyle="large" titleAlignment="center">
                                             <backgroundConfiguration key="background">
@@ -840,8 +840,8 @@
                                     <color key="titleColor" systemColor="systemGrayColor"/>
                                     <imageReference key="image" image="gearshape.fill" catalog="system" symbolScale="large"/>
                                 </state>
-                                <buttonConfiguration key="configuration" style="plain" title="" subtitle="" titleAlignment="trailing">
-                                    <imageReference key="image" image="gearshape.fill" catalog="system" symbolScale="large"/>
+                                <buttonConfiguration key="configuration" style="plain" title="" subtitle="">
+                                    <imageReference key="image" image="gearshape" catalog="system" symbolScale="large"/>
                                     <color key="baseForegroundColor" systemColor="systemGrayColor"/>
                                 </buttonConfiguration>
                                 <connections>
@@ -855,9 +855,9 @@
                             <constraint firstItem="qde-S1-0zf" firstAttribute="trailing" secondItem="ns4-YC-Awz" secondAttribute="trailing" constant="20" id="Hby-Md-VcH"/>
                             <constraint firstItem="AuC-IH-cun" firstAttribute="top" secondItem="qde-S1-0zf" secondAttribute="top" id="I97-VF-O3r"/>
                             <constraint firstItem="ns4-YC-Awz" firstAttribute="leading" secondItem="qde-S1-0zf" secondAttribute="leading" constant="20" id="Lxf-Mg-SV4"/>
-                            <constraint firstItem="ns4-YC-Awz" firstAttribute="top" secondItem="qde-S1-0zf" secondAttribute="top" constant="70" id="MKZ-4o-aUj"/>
+                            <constraint firstItem="ns4-YC-Awz" firstAttribute="top" secondItem="qde-S1-0zf" secondAttribute="top" constant="140" id="MKZ-4o-aUj"/>
                             <constraint firstItem="qde-S1-0zf" firstAttribute="trailing" secondItem="AuC-IH-cun" secondAttribute="trailing" constant="12" id="PDf-VX-rV6"/>
-                            <constraint firstItem="qde-S1-0zf" firstAttribute="bottom" secondItem="ns4-YC-Awz" secondAttribute="bottom" constant="120" id="SgO-Lo-oHR"/>
+                            <constraint firstItem="qde-S1-0zf" firstAttribute="bottom" secondItem="ns4-YC-Awz" secondAttribute="bottom" constant="140" id="SgO-Lo-oHR"/>
                             <constraint firstItem="AuC-IH-cun" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="qde-S1-0zf" secondAttribute="leading" symbolic="YES" id="aPj-IA-K2k"/>
                             <constraint firstItem="ns4-YC-Awz" firstAttribute="centerX" secondItem="C1V-fP-B5M" secondAttribute="centerX" id="byz-Xb-czv"/>
                         </constraints>
@@ -921,7 +921,7 @@
                                                                 <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="4O6-tP-VAz">
                                                                     <rect key="frame" x="0.0" y="14" width="204" height="22"/>
                                                                     <constraints>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="25" id="DUz-UG-kI5"/>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="DUz-UG-kI5"/>
                                                                     </constraints>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
@@ -982,7 +982,7 @@
                                                                 <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ic7-Xb-WJk">
                                                                     <rect key="frame" x="0.0" y="14" width="204" height="22"/>
                                                                     <constraints>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="25" id="uww-92-0d5"/>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="uww-92-0d5"/>
                                                                     </constraints>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
@@ -1043,7 +1043,7 @@
                                                                 <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="9FK-17-HsT">
                                                                     <rect key="frame" x="0.0" y="14" width="204" height="22"/>
                                                                     <constraints>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="25" id="7ZT-aW-0ca"/>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="7ZT-aW-0ca"/>
                                                                     </constraints>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
@@ -1093,7 +1093,7 @@
                                                     <rect key="frame" x="12" y="12" width="319" height="50"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="📝 Notes" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RDn-3Y-aqP">
-                                                            <rect key="frame" x="0.0" y="0.0" width="90" height="50"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="120" height="50"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="width" constant="90" id="wjw-sb-WiA"/>
                                                             </constraints>
@@ -1141,14 +1141,20 @@
                                     </visualEffectView>
                                 </subviews>
                             </stackView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2mm-PR-C91">
-                                <rect key="frame" x="12" y="462.33333333333331" width="351" height="70"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2mm-PR-C91">
+                                <rect key="frame" x="12" y="462.33333333333331" width="351" height="69.999999999999943"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="9uo-Pv-QIT"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Send Remote Meal">
-                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle3"/>
+                                <buttonConfiguration key="configuration" style="filled">
+                                    <attributedString key="attributedTitle">
+                                        <fragment content="Send Remote Meal">
+                                            <attributes>
+                                                <font key="NSFont" size="20" name="HelveticaNeue-Medium"/>
+                                            </attributes>
+                                        </fragment>
+                                    </attributedString>
                                 </buttonConfiguration>
                                 <connections>
                                     <action selector="sendRemoteMealPressed:" destination="vZZ-Gp-n6j" eventType="touchUpInside" id="NPm-EP-8Fr"/>
@@ -1213,7 +1219,7 @@
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="AXN-Zg-5F4">
                                 <rect key="frame" x="12" y="134.33333333333337" width="351" height="320"/>
                                 <subviews>
-                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="T1N-w2-ljR" userLabel="Bolus">
+                                    <visualEffectView clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="T1N-w2-ljR" userLabel="Bolus">
                                         <rect key="frame" x="0.0" y="0.0" width="351" height="74"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="hbT-CS-rnz">
                                             <rect key="frame" x="0.0" y="0.0" width="351" height="74"/>
@@ -1283,7 +1289,7 @@
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <blurEffect style="regular"/>
                                     </visualEffectView>
-                                    <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Shx-wl-iBh" userLabel="Empty">
+                                    <visualEffectView clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Shx-wl-iBh" userLabel="Empty">
                                         <rect key="frame" x="0.0" y="163.99999999999997" width="351" height="74"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="QMu-Ys-3Pc">
                                             <rect key="frame" x="0.0" y="0.0" width="351" height="74"/>
@@ -1303,14 +1309,20 @@
                                     </visualEffectView>
                                 </subviews>
                             </stackView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="omd-J4-dQH">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="omd-J4-dQH">
                                 <rect key="frame" x="12" y="462.33333333333331" width="351" height="69.999999999999943"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="3N4-yk-D95"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Send Remote Bolus">
-                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle3"/>
+                                <buttonConfiguration key="configuration" style="filled">
+                                    <attributedString key="attributedTitle">
+                                        <fragment content="Send Remote Bolus">
+                                            <attributes>
+                                                <font key="NSFont" size="20" name="HelveticaNeue-Medium"/>
+                                            </attributes>
+                                        </fragment>
+                                    </attributedString>
                                 </buttonConfiguration>
                                 <connections>
                                     <action selector="sendRemoteBolusPressed:" destination="gGw-b9-Weh" eventType="touchUpInside" id="fCh-ew-Thy"/>
@@ -1364,14 +1376,20 @@
                                     <action selector="cancelButtonPressed:" destination="20o-Rx-sVx" eventType="touchUpInside" id="MAF-Vt-eRM"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bbd-yY-tzY">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bbd-yY-tzY">
                                 <rect key="frame" x="12" y="462" width="351" height="70"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="edq-xu-cV5"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Send Remote Override">
-                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle3"/>
+                                <buttonConfiguration key="configuration" style="filled">
+                                    <attributedString key="attributedTitle">
+                                        <fragment content="Send Remote Override">
+                                            <attributes>
+                                                <font key="NSFont" size="20" name="HelveticaNeue-Medium"/>
+                                            </attributes>
+                                        </fragment>
+                                    </attributedString>
                                 </buttonConfiguration>
                                 <connections>
                                     <action selector="sendRemoteOverridePressed:" destination="Qgl-GY-Qpe" eventType="touchUpInside" id="Mm7-Rz-6MO"/>
@@ -1383,7 +1401,7 @@
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BEz-I9-sPs" userLabel="Override">
                                         <rect key="frame" x="0.0" y="0.0" width="359" height="319.66666666666669"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="wxu-lS-OVn">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="319.66666666666669"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="320"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jzQ-mu-Jca">
@@ -1483,14 +1501,20 @@
                                     <action selector="cancelButtonPressed:" destination="hkx-V8-5qm" eventType="touchUpInside" id="boy-89-1B3"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rra-PP-alB">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rra-PP-alB">
                                 <rect key="frame" x="12" y="462" width="351" height="70"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="Efw-r6-zM4"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Send Remote Temp Target">
-                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle3"/>
+                                <buttonConfiguration key="configuration" style="filled">
+                                    <attributedString key="attributedTitle">
+                                        <fragment content="Send Remote Temp Target">
+                                            <attributes>
+                                                <font key="NSFont" size="22" name="HelveticaNeue-Medium"/>
+                                            </attributes>
+                                        </fragment>
+                                    </attributedString>
                                 </buttonConfiguration>
                                 <connections>
                                     <action selector="sendRemoteTempTargetPressed:" destination="hkx-V8-5qm" eventType="touchUpInside" id="Mtw-Va-RrB"/>
@@ -1502,7 +1526,7 @@
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RtX-oO-1fw" userLabel="Temp Target">
                                         <rect key="frame" x="0.0" y="0.0" width="359" height="319.66666666666669"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="znN-mf-lmp">
-                                            <rect key="frame" x="0.0" y="0.0" width="359" height="319.66666666666669"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="359" height="320"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hXU-kG-KPd">
@@ -1559,6 +1583,7 @@
         <image name="drop.fill" catalog="system" width="96" height="128"/>
         <image name="fork.knife" catalog="system" width="94" height="128"/>
         <image name="gear" catalog="system" width="128" height="122"/>
+        <image name="gearshape" catalog="system" width="128" height="123"/>
         <image name="gearshape.fill" catalog="system" width="128" height="123"/>
         <image name="house" catalog="system" width="128" height="104"/>
         <image name="person.fill" catalog="system" width="128" height="120"/>
