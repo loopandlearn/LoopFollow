@@ -59,9 +59,6 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
             return
         }
         
-        // Remove emojis and blank spaces from the selected temp target (not neccessary works in both iOS Shortcuts and Twilio API)
-        //let cleanedOverride = removeEmojisAndBlankSpaces(from: selectedOverride)
-        
         let combinedString = "overridetoenact_\(selectedOverride)"
         print("Combined string:", combinedString)
         
@@ -77,28 +74,6 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
         
         present(confirmationAlert, animated: true, completion: nil)
     }
-
-    /*func removeEmojisAndBlankSpaces(from text: String) -> String {
-        // Remove emojis
-        let cleanedText = removeEmojis(from: text)
-        
-        // Remove all whitespace characters
-        let trimmedAndCleanedText = cleanedText.replacingOccurrences(of: "\\s+", with: "", options: .regularExpression)
-        
-        return trimmedAndCleanedText
-    }
-
-    func removeEmojis(from text: String) -> String {
-        let emojiPattern = "\\p{Emoji}"
-        do {
-            let regex = try NSRegularExpression(pattern: emojiPattern, options: [])
-            let range = NSRange(location: 0, length: text.utf16.count)
-            return regex.stringByReplacingMatches(in: text, options: [], range: range, withTemplate: "")
-        } catch {
-            print("Error removing emojis: \(error)")
-            return text
-        }
-    }*/
     
     func sendOverrideRequest(combinedString: String) {
         
@@ -107,7 +82,12 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
         
         // Use combinedString as the text in the URL
         if method != "SMS API" {
-            let urlString = "shortcuts://run-shortcut?name=Remote%20Override&input=text&text=\(combinedString)"
+            // URL encode combinedString
+            guard let encodedString = combinedString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+                print("Failed to encode URL string")
+                return
+            }
+            let urlString = "shortcuts://run-shortcut?name=Remote%20Override&input=text&text=\(encodedString)"
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }

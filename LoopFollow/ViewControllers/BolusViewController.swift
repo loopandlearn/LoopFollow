@@ -127,7 +127,12 @@ class BolusViewController: UIViewController {
         
         // Use combinedString as the text in the URL
         if method != "SMS API" {
-            let urlString = "shortcuts://run-shortcut?name=Remote%20Bolus&input=text&text=\(combinedString)"
+            // URL encode combinedString
+            guard let encodedString = combinedString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+                print("Failed to encode URL string")
+                return
+            }
+            let urlString = "shortcuts://run-shortcut?name=Remote%20Bolus&input=text&text=\(encodedString)"
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
