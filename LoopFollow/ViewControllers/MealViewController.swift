@@ -80,14 +80,21 @@ class MealViewController: UIViewController {
 
     func createCombinedString(carbs: Int, fats: Int, proteins: Int) -> String? {
         let mealNotesValue = mealNotes.text ?? ""
+        var cleanedMealNotes = mealNotesValue
         
-        // Remove emojis and blank spaces
-        let cleanedMealNotes = removeEmojisAndBlankSpaces(from: mealNotesValue)
+        // Retrieve the method value from UserDefaultsRepository
+        let method = UserDefaultsRepository.method.value
         
-        // Construct and return the combinedString without emojis and blank spaces
+        if method != "SMS API" {
+            // Only remove emojis and blank spaces if using iOS Shortcuts
+            cleanedMealNotes = removeEmojisAndBlankSpaces(from: mealNotesValue)
+        }
+        
+        // Construct and return the combinedString
         let combinedString = "mealtoenact_carbs\(carbs)fat\(fats)protein\(proteins)note\(cleanedMealNotes)"
         return combinedString
     }
+
 
     func removeEmojisAndBlankSpaces(from text: String) -> String {
         // Remove emojis
