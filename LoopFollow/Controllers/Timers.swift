@@ -41,10 +41,7 @@ extension MainViewController {
                                            repeats: true)
     }
     
-    // Updates Min Ago display
-    @objc func minAgoTimerDidEnd(_ timer:Timer) {
-        
-        // print("min ago timer ended")
+    @objc func minAgoTimerDidEnd(_ timer: Timer) {
         if bgData.count > 0 {
             let bgSeconds = bgData.last!.date
             let now = Date().timeIntervalSince1970
@@ -54,36 +51,50 @@ extension MainViewController {
             let formatter = DateComponentsFormatter()
             formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
             
-            if secondsAgo < 270 {
-                formatter.allowedUnits = [ .minute] // Units to display in the formatted string
+            if secondsAgo >= 720 { // 720 seconds = 12 minutes
+                formatter.allowedUnits = [.minute] // Only show minutes after 12 minutes have passed
+            } else if secondsAgo < 270 { // Less than 4.5 minutes
+                formatter.allowedUnits = [.minute] // Show only minutes if less than 4.5 minutes
             } else {
-                formatter.allowedUnits = [ .minute, .second] // Units to display in the formatted string
+                formatter.allowedUnits = [.minute, .second] // Show minutes and seconds otherwise
             }
             
+            let formattedDuration = formatter.string(from: secondsAgo) ?? ""
+            let minAgoDisplayText = formattedDuration + " min ago"
             
-            //formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
-            let formattedDuration = formatter.string(from: secondsAgo)
-            
-            MinAgoText.text = formattedDuration ?? ""
-            MinAgoText.text! += " min ago"
-            latestMinAgoString = formattedDuration ?? ""
-            latestMinAgoString += " min ago"
+            MinAgoText.text = minAgoDisplayText
+            latestMinAgoString = minAgoDisplayText
             
             if let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController {
-                snoozer.MinAgoLabel.text = formattedDuration ?? ""
-                snoozer.MinAgoLabel.text! += " min ago"
-            } else { return }
-            
+                snoozer.MinAgoLabel.text = minAgoDisplayText
+                
+                // Start with the current BGLabel text
+                let bgLabelText = snoozer.BGLabel.text ?? ""
+                let attributeString = NSMutableAttributedString(string: bgLabelText)
+                
+                // Always apply the strikethrough style
+                attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
+                
+                // Conditionally set the strikethrough color based on the freshness of the data
+                if secondsAgo >= 720 { // Data is stale
+                    attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
+                } else { // Data is fresh
+                    attributeString.addAttribute(.strikethroughColor, value: UIColor.clear, range: NSRange(location: 0, length: attributeString.length))
+                }
+                
+                snoozer.BGLabel.attributedText = attributeString
+            }
         } else {
             MinAgoText.text = ""
             latestMinAgoString = ""
             
             if let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController {
                 snoozer.MinAgoLabel.text = ""
-            } else { return }
-            
+                // Reset BGLabel to ensure no formatting is carried over
+                snoozer.BGLabel.text = ""
+                snoozer.BGLabel.attributedText = NSAttributedString(string: "")
+            }
         }
-        
     }
     
     // Runs a 60 second timer when an alarm is snoozed

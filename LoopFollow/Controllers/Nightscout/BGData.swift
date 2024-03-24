@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 extension MainViewController {
     // Dex Share Web Call
     func webLoadDexShare() {
@@ -213,25 +214,26 @@ extension MainViewController {
     }
     
     // NS BG Data Front end updater
-    func viewUpdateNSBG (sourceName: String) {
+    func viewUpdateNSBG(sourceName: String) {
         DispatchQueue.main.async {
             if UserDefaultsRepository.debugLog.value {
                 self.writeDebugLog(value: "Display: BG")
                 self.writeDebugLog(value: "Num BG: " + self.bgData.count.description)
             }
+            
             let entries = self.bgData
-            if entries.count < 2 { return } // protect index out of bounds
+            if entries.count < 2 { return } // Protect index out of bounds
             
             self.updateBGGraph()
             self.updateStats()
             
-            let latestEntryi = entries.count - 1
-            let latestBG = entries[latestEntryi].sgv
-            let priorBG = entries[latestEntryi - 1].sgv
-            let deltaBG = latestBG - priorBG as Int
-            let lastBGTime = entries[latestEntryi].date
+            let latestEntryIndex = entries.count - 1
+            let latestBG = entries[latestEntryIndex].sgv
+            let priorBG = entries[latestEntryIndex - 1].sgv
+            let deltaBG = latestBG - priorBG
+            let lastBGTime = entries[latestEntryIndex].date
             
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-lastBGTime) / 60
+            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
             var userUnit = " mg/dL"
             if self.mmol {
                 userUnit = " mmol/L"
@@ -243,40 +245,49 @@ extension MainViewController {
             var snoozerDirection = ""
             var snoozerDelta = ""
             
+            // Set BGText with the latest BG value
             self.BGText.text = bgUnits.toDisplayUnits(String(latestBG))
             snoozerBG = bgUnits.toDisplayUnits(String(latestBG))
             self.setBGTextColor()
             
-            if let directionBG = entries[latestEntryi].direction {
+            // Direction handling
+            if let directionBG = entries[latestEntryIndex].direction {
                 self.DirectionText.text = self.bgDirectionGraphic(directionBG)
                 snoozerDirection = self.bgDirectionGraphic(directionBG)
                 self.latestDirectionString = self.bgDirectionGraphic(directionBG)
-            }
-            else
-            {
+            } else {
                 self.DirectionText.text = ""
                 snoozerDirection = ""
                 self.latestDirectionString = ""
             }
             
+            // Delta handling
             if deltaBG < 0 {
                 self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
                 snoozerDelta = bgUnits.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = String(deltaBG)
-            }
-            else
-            {
+            } else {
                 self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 snoozerDelta = "+" + bgUnits.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = "+" + String(deltaBG)
             }
+            
+            // Apply strikethrough to BGText based on the staleness of the data
+            let bgTextStr = self.BGText.text ?? ""
+            let attributeString = NSMutableAttributedString(string: bgTextStr)
+            attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
+            if deltaTime >= 12 { // Data is stale
+                attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
+            } else { // Data is fresh
+                attributeString.addAttribute(.strikethroughColor, value: UIColor.clear, range: NSRange(location: 0, length: attributeString.length))
+            }
+            self.BGText.attributedText = attributeString
             
             // Snoozer Display
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             snoozer.BGLabel.text = snoozerBG
             snoozer.DirectionLabel.text = snoozerDirection
             snoozer.DeltaLabel.text = snoozerDelta
-            
         }
     }
 }
