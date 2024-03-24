@@ -59,14 +59,14 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
             return
         }
         
-        // Remove emojis and blank spaces from the selected temp target
-        let cleanedTempTarget = removeEmojisAndBlankSpaces(from: selectedTempTarget)
+        // Remove emojis and blank spaces from the selected temp target (not neccessary works in both iOS Shortcuts and Twilio API)
+        //let cleanedTempTarget = removeEmojisAndBlankSpaces(from: selectedTempTarget)
         
-        let combinedString = "temptargettoenact_\(cleanedTempTarget)"
+        let combinedString = "temptargettoenact_\(selectedTempTarget)"
         print("Combined string:", combinedString)
         
         // Confirmation alert before sending the request
-        let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to activate \(cleanedTempTarget)?", preferredStyle: .alert)
+        let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to activate \(selectedTempTarget)?", preferredStyle: .alert)
         
         confirmationAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
             // Proceed with sending the request
@@ -78,7 +78,7 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
         present(confirmationAlert, animated: true, completion: nil)
     }
 
-    func removeEmojisAndBlankSpaces(from text: String) -> String {
+    /*func removeEmojisAndBlankSpaces(from text: String) -> String {
         // Remove emojis
         let cleanedText = removeEmojis(from: text)
         
@@ -98,7 +98,7 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
             print("Error removing emojis: \(error)")
             return text
         }
-    }
+    }*/
     
     func sendTTRequest(combinedString: String) {
         
@@ -107,7 +107,7 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
         
         // Use combinedString as the text in the URL
         if method != "SMS API" {
-            let urlString = "shortcuts://run-shortcut?name=Remote%20Temp%20Target&input=text&text=\(combinedString)"
+            let urlString = "shortcuts://run-shortcut?name=Remote%20Temp Target&input=text&text=\(combinedString)"
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }

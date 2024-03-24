@@ -59,14 +59,14 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
             return
         }
         
-        // Remove emojis and blank spaces from the selected override
-        let cleanedOverride = removeEmojisAndBlankSpaces(from: selectedOverride)
+        // Remove emojis and blank spaces from the selected temp target (not neccessary works in both iOS Shortcuts and Twilio API)
+        //let cleanedOverride = removeEmojisAndBlankSpaces(from: selectedOverride)
         
-        let combinedString = "overridetoenact_\(cleanedOverride)"
+        let combinedString = "overridetoenact_\(selectedOverride)"
         print("Combined string:", combinedString)
         
         // Confirmation alert before sending the request
-        let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to activate \(cleanedOverride)?", preferredStyle: .alert)
+        let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to activate \(selectedOverride)?", preferredStyle: .alert)
         
         confirmationAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
             // Proceed with sending the request
@@ -78,7 +78,7 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
         present(confirmationAlert, animated: true, completion: nil)
     }
 
-    func removeEmojisAndBlankSpaces(from text: String) -> String {
+    /*func removeEmojisAndBlankSpaces(from text: String) -> String {
         // Remove emojis
         let cleanedText = removeEmojis(from: text)
         
@@ -98,7 +98,7 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
             print("Error removing emojis: \(error)")
             return text
         }
-    }
+    }*/
     
     func sendOverrideRequest(combinedString: String) {
         
@@ -107,7 +107,7 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
         
         // Use combinedString as the text in the URL
         if method != "SMS API" {
-            let urlString = "shortcuts://run-shortcut?name=Remote%20Override&input=text&text=\(combinedString)"
+            let urlString = "shortcuts://run-shortcut?name=Remote Override&input=text&text=\(combinedString)"
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }

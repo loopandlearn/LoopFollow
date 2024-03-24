@@ -85,10 +85,10 @@ class MealViewController: UIViewController {
         // Retrieve the method value from UserDefaultsRepository
         let method = UserDefaultsRepository.method.value
         
-        if method != "SMS API" {
+        /*if method != "SMS API" {
             // Only remove emojis and blank spaces if using iOS Shortcuts
             cleanedMealNotes = removeEmojisAndBlankSpaces(from: mealNotesValue)
-        }
+        }*/
         
         // Construct and return the combinedString
         let combinedString = "mealtoenact_carbs\(carbs)fat\(fats)protein\(proteins)note\(cleanedMealNotes)"
@@ -96,7 +96,7 @@ class MealViewController: UIViewController {
     }
 
 
-    func removeEmojisAndBlankSpaces(from text: String) -> String {
+    /*func removeEmojisAndBlankSpaces(from text: String) -> String {
         // Remove emojis
         let cleanedText = removeEmojis(from: text)
         
@@ -116,7 +116,7 @@ class MealViewController: UIViewController {
             print("Error removing emojis: \(error)")
             return text
         }
-    }
+    }*/
 
     func showConfirmationAlert(combinedString: String) {
         // Confirmation alert before sending the request
@@ -138,7 +138,7 @@ class MealViewController: UIViewController {
         let method = UserDefaultsRepository.method.value
         
         if method != "SMS API" {
-            let urlString = "shortcuts://run-shortcut?name=Remote%20Meal&input=text&text=\(combinedString)"
+            let urlString = "shortcuts://run-shortcut?name=Remote Meal&input=text&text=\(combinedString)"
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
