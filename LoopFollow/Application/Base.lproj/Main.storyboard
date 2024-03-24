@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22684"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
@@ -907,16 +907,19 @@
                                                     <rect key="frame" x="12" y="12" width="319" height="50"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="🥨 Carbs" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Cv-Q7-W6A">
-                                                            <rect key="frame" x="0.0" y="0.0" width="268.33333333333331" height="50"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="90" height="50"/>
+                                                            <constraints>
+                                                                <constraint firstAttribute="width" constant="90" id="zQR-DD-kOb"/>
+                                                            </constraints>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="KBn-Yj-VaA">
-                                                            <rect key="frame" x="268.33333333333331" y="0.0" width="50.666666666666686" height="50"/>
+                                                            <rect key="frame" x="90" y="0.0" width="229" height="50"/>
                                                             <subviews>
                                                                 <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="4O6-tP-VAz">
-                                                                    <rect key="frame" x="0.0" y="14" width="25.666666666666668" height="22"/>
+                                                                    <rect key="frame" x="0.0" y="14" width="204" height="22"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="25" id="DUz-UG-kI5"/>
                                                                     </constraints>
@@ -924,7 +927,7 @@
                                                                     <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                                                                 </textField>
                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="g" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="baO-vE-pOZ">
-                                                                    <rect key="frame" x="25.666666666666686" y="4" width="25" height="42"/>
+                                                                    <rect key="frame" x="204" y="4" width="25" height="42"/>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
@@ -948,6 +951,12 @@
                                         </view>
                                         <color key="backgroundColor" name="LoopGray"/>
                                         <blurEffect style="regular"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="10"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
                                     </visualEffectView>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ic4-aO-51F" userLabel="Fat">
                                         <rect key="frame" x="0.0" y="82" width="343" height="74"/>
@@ -959,16 +968,19 @@
                                                     <rect key="frame" x="12" y="12" width="319" height="50"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="🧀 Fat" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iun-NK-l8K">
-                                                            <rect key="frame" x="0.0" y="0.0" width="268.33333333333331" height="50"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="90" height="50"/>
+                                                            <constraints>
+                                                                <constraint firstAttribute="width" constant="90" id="Mgd-nB-tLe"/>
+                                                            </constraints>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="oEN-OD-4RN">
-                                                            <rect key="frame" x="268.33333333333331" y="0.0" width="50.666666666666686" height="50"/>
+                                                            <rect key="frame" x="90" y="0.0" width="229" height="50"/>
                                                             <subviews>
                                                                 <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ic7-Xb-WJk">
-                                                                    <rect key="frame" x="0.0" y="14" width="25.666666666666668" height="22"/>
+                                                                    <rect key="frame" x="0.0" y="14" width="204" height="22"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="25" id="uww-92-0d5"/>
                                                                     </constraints>
@@ -976,7 +988,7 @@
                                                                     <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                                                                 </textField>
                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="g" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g1d-xD-XcR">
-                                                                    <rect key="frame" x="25.666666666666686" y="4" width="25" height="42"/>
+                                                                    <rect key="frame" x="204" y="4" width="25" height="42"/>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
@@ -1000,6 +1012,12 @@
                                         </view>
                                         <color key="backgroundColor" name="LoopGray"/>
                                         <blurEffect style="regular"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="10"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
                                     </visualEffectView>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gne-oa-kl9" userLabel="Protein">
                                         <rect key="frame" x="0.0" y="163.99999999999997" width="343" height="74"/>
@@ -1007,21 +1025,23 @@
                                             <rect key="frame" x="0.0" y="0.0" width="343" height="74"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="40U-fK-Tgy">
+                                                <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="40U-fK-Tgy" userLabel="Stack View 1">
                                                     <rect key="frame" x="12" y="12" width="319" height="50"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="🍗 Protein" lineBreakMode="clip" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BvB-qu-5hy">
-                                                            <rect key="frame" x="0.0" y="0.0" width="268.33333333333331" height="50"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="90" height="50"/>
+                                                            <constraints>
+                                                                <constraint firstAttribute="width" constant="90" id="DFT-Ba-01v"/>
+                                                            </constraints>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
-                                                            <lineBreakStrategy key="lineBreakStrategy"/>
                                                         </label>
-                                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="nus-BQ-Npx">
-                                                            <rect key="frame" x="268.33333333333331" y="0.0" width="50.666666666666686" height="50"/>
+                                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="nus-BQ-Npx" userLabel="Stack View 2">
+                                                            <rect key="frame" x="90" y="0.0" width="229" height="50"/>
                                                             <subviews>
                                                                 <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="9FK-17-HsT">
-                                                                    <rect key="frame" x="0.0" y="14" width="25.666666666666668" height="22"/>
+                                                                    <rect key="frame" x="0.0" y="14" width="204" height="22"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="25" id="7ZT-aW-0ca"/>
                                                                     </constraints>
@@ -1029,7 +1049,7 @@
                                                                     <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                                                                 </textField>
                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="g" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sjy-0R-Ngg">
-                                                                    <rect key="frame" x="25.666666666666686" y="4" width="25" height="42"/>
+                                                                    <rect key="frame" x="204" y="4" width="25" height="42"/>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
@@ -1042,6 +1062,9 @@
                                                             </constraints>
                                                         </stackView>
                                                     </subviews>
+                                                    <constraints>
+                                                        <constraint firstItem="nus-BQ-Npx" firstAttribute="leading" secondItem="BvB-qu-5hy" secondAttribute="trailing" id="wqP-R9-onQ"/>
+                                                    </constraints>
                                                 </stackView>
                                             </subviews>
                                             <constraints>
@@ -1053,6 +1076,12 @@
                                         </view>
                                         <color key="backgroundColor" name="LoopGray"/>
                                         <blurEffect style="regular"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="10"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
                                     </visualEffectView>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wWb-zP-DKr" userLabel="Notes">
                                         <rect key="frame" x="0.0" y="246" width="343" height="74"/>
@@ -1060,37 +1089,55 @@
                                             <rect key="frame" x="0.0" y="0.0" width="343" height="74"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <stackView opaque="NO" contentMode="scaleToFill" spacing="76" translatesAutoresizingMaskIntoConstraints="NO" id="LDf-Sa-0ca">
-                                                    <rect key="frame" x="12" y="12" width="316" height="50"/>
+                                                <stackView opaque="NO" contentMode="scaleToFill" spacing="76" translatesAutoresizingMaskIntoConstraints="NO" id="LDf-Sa-0ca" userLabel="Stack View 1">
+                                                    <rect key="frame" x="12" y="12" width="319" height="50"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="📝 Notes" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RDn-3Y-aqP">
                                                             <rect key="frame" x="0.0" y="0.0" width="90" height="50"/>
                                                             <constraints>
-                                                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="90" id="wjw-sb-WiA"/>
+                                                                <constraint firstAttribute="width" constant="90" id="wjw-sb-WiA"/>
                                                             </constraints>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
-                                                        <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="trailing" contentVerticalAlignment="center" placeholder="..." textAlignment="right" adjustsFontForContentSizeCategory="YES" minimumFontSize="10" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="nEW-4g-bv5">
-                                                            <rect key="frame" x="166" y="0.0" width="150" height="50"/>
+                                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="hxD-8a-MFi" userLabel="Stack View 2">
+                                                            <rect key="frame" x="166" y="0.0" width="153" height="50"/>
+                                                            <subviews>
+                                                                <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="trailing" contentVerticalAlignment="center" placeholder="..." textAlignment="right" adjustsFontForContentSizeCategory="YES" minimumFontSize="10" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="nEW-4g-bv5">
+                                                                    <rect key="frame" x="0.0" y="14" width="153" height="22"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="25" id="cEg-ZW-eBU"/>
+                                                                    </constraints>
+                                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                                    <textInputTraits key="textInputTraits" keyboardType="alphabet"/>
+                                                                </textField>
+                                                            </subviews>
                                                             <constraints>
-                                                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="150" id="cEg-ZW-eBU"/>
+                                                                <constraint firstAttribute="trailing" secondItem="nEW-4g-bv5" secondAttribute="trailing" constant="25" id="qJw-8A-PnU"/>
                                                             </constraints>
-                                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                            <textInputTraits key="textInputTraits" keyboardType="alphabet"/>
-                                                        </textField>
+                                                        </stackView>
                                                     </subviews>
+                                                    <constraints>
+                                                        <constraint firstItem="hxD-8a-MFi" firstAttribute="leading" secondItem="RDn-3Y-aqP" secondAttribute="leading" id="cGW-US-yMg"/>
+                                                    </constraints>
                                                 </stackView>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="bottomMargin" secondItem="LDf-Sa-0ca" secondAttribute="bottom" constant="4" id="17T-pj-kco"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="LDf-Sa-0ca" secondAttribute="trailing" constant="4" id="2sN-I6-YTR"/>
                                                 <constraint firstItem="LDf-Sa-0ca" firstAttribute="leading" secondItem="QdL-8U-aOW" secondAttribute="leadingMargin" constant="4" id="Sov-Vi-Obd"/>
                                                 <constraint firstItem="LDf-Sa-0ca" firstAttribute="top" secondItem="QdL-8U-aOW" secondAttribute="topMargin" constant="4" id="rjX-Kp-nae"/>
                                             </constraints>
                                         </view>
                                         <color key="backgroundColor" name="LoopGray"/>
                                         <blurEffect style="regular"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="10"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
                                     </visualEffectView>
                                 </subviews>
                             </stackView>
@@ -1176,27 +1223,24 @@
                                                     <rect key="frame" x="12" y="12" width="327" height="50"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="💧 Bolus" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GRa-sN-dca">
-                                                            <rect key="frame" x="0.0" y="0.0" width="277" height="50"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="90" height="50"/>
                                                             <constraints>
-                                                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="90" id="KqT-Nu-lDH"/>
+                                                                <constraint firstAttribute="width" constant="90" id="9Nw-t2-mMx"/>
                                                             </constraints>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="aA6-Bf-K9h">
-                                                            <rect key="frame" x="277" y="0.0" width="50" height="50"/>
+                                                            <rect key="frame" x="90" y="0.0" width="237" height="50"/>
                                                             <subviews>
                                                                 <textField toolTip="Amount of carbs" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" highlighted="YES" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="0HU-rw-87i">
-                                                                    <rect key="frame" x="0.0" y="14" width="25" height="22"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="25" id="O1J-MV-8dA"/>
-                                                                    </constraints>
+                                                                    <rect key="frame" x="0.0" y="14" width="212" height="22"/>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                                                                 </textField>
                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="U" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YIt-Qz-s6v">
-                                                                    <rect key="frame" x="25" y="4" width="25" height="42"/>
+                                                                    <rect key="frame" x="212" y="4" width="25" height="42"/>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
@@ -1209,6 +1253,9 @@
                                                             </constraints>
                                                         </stackView>
                                                     </subviews>
+                                                    <constraints>
+                                                        <constraint firstItem="aA6-Bf-K9h" firstAttribute="leading" secondItem="GRa-sN-dca" secondAttribute="trailing" id="Cie-ZW-BqF"/>
+                                                    </constraints>
                                                 </stackView>
                                             </subviews>
                                             <constraints>
@@ -1220,6 +1267,12 @@
                                         </view>
                                         <color key="backgroundColor" name="LoopGray"/>
                                         <blurEffect style="regular"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="10"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
                                     </visualEffectView>
                                     <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fvF-iv-pGc" userLabel="Empty">
                                         <rect key="frame" x="0.0" y="82" width="351" height="74"/>
@@ -1522,16 +1575,16 @@
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="secondarySystemBackgroundColor">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGrayColor">
-            <color red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemPurpleColor">
-            <color red="0.68627450980000004" green="0.32156862749999998" blue="0.87058823529999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.68627450980392157" green="0.32156862745098042" blue="0.87058823529411766" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
