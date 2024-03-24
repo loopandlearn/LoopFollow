@@ -138,7 +138,7 @@ class MealViewController: UIViewController {
         let method = UserDefaultsRepository.method.value
         
         if method != "SMS API" {
-            let urlString = "shortcuts://run-shortcut?name=Remote Meal&input=text&text=\(combinedString)"
+            let urlString = "shortcuts://run-shortcut?name=Remote%20Meal&input=text&text=\(combinedString)"
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }

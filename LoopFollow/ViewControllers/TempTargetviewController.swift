@@ -107,7 +107,7 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
         
         // Use combinedString as the text in the URL
         if method != "SMS API" {
-            let urlString = "shortcuts://run-shortcut?name=Remote%20Temp Target&input=text&text=\(combinedString)"
+            let urlString = "shortcuts://run-shortcut?name=Remote%20Temp%20Target&input=text&text=\(combinedString)"
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
