@@ -228,16 +228,6 @@ class SettingsViewController: FormViewController {
            ), onDismiss: nil)
             
         }
-            <<< LabelRow("Clear Images"){ row in
-                row.title = "Delete Watch Face Images"
-            }.onCellSelection{ cell,row  in
-                if UserDefaultsRepository.saveImage.value {
-                    guard let mainScreen = self.tabBarController!.viewControllers?[0] as? MainViewController else { return }
-                    
-                    mainScreen.deleteOldImages()
-                    mainScreen.saveChartImage()
-                }
-            }
         
        +++ Section("Advanced Settings")
         <<< ButtonRow() {
