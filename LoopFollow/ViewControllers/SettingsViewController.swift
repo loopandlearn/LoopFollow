@@ -94,6 +94,10 @@ class SettingsViewController: FormViewController {
        UserDefaultsRepository.showDex.value = false
     
        let expiration = calculateExpirationDate()
+       var expirationHeaderString = "App Expiration"
+       if isTestFlightBuild() {
+          expirationHeaderString = "Beta (TestFlight) Expiration"
+       }
                         
         form
         +++ Section(header: "Data Settings", footer: "")
@@ -295,7 +299,7 @@ class SettingsViewController: FormViewController {
 
        +++ Section(header: getAppVersion(), footer: "")
 
-       +++ Section(header: "App Expiration", footer: String(expiration.description))
+       +++ Section(header: expirationHeaderString, footer: String(expiration.description))
 
         showHideNSDetails()
        checkNightscoutStatus()
