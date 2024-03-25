@@ -41,6 +41,50 @@ class SettingsViewController: FormViewController {
         
     }
    
+    // Determine if the build is from TestFlight
+    func isTestFlightBuild() -> Bool {
+#if targetEnvironment(simulator)
+        return false
+#else
+        if Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision") != nil {
+            return false
+        }
+        guard let receiptName = Bundle.main.appStoreReceiptURL?.lastPathComponent else {
+            return false
+        }
+        return "sandboxReceipt".caseInsensitiveCompare(receiptName) == .orderedSame
+#endif
+    }
+    
+    // Get the build date from the build details
+    func buildDate() -> Date? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEE MMM d HH:mm:ss 'UTC' yyyy"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(identifier: "UTC")
+        
+        guard let dateString = BuildDetails.default.buildDateString,
+              let date = dateFormatter.date(from: dateString) else {
+            return nil
+        }
+        return date
+    }
+    
+    // Calculate the expiration date based on the build type
+    func calculateExpirationDate() -> Date {
+        if isTestFlightBuild(), let buildDate = buildDate() {
+            // For TestFlight, add 90 days to the build date
+            return Calendar.current.date(byAdding: .day, value: 90, to: buildDate)!
+        } else {
+            // For Xcode builds, use the provisioning profile's expiration date
+            if let provision = MobileProvision.read() {
+                return provision.expirationDate
+            } else {
+                return Date() // Fallback to current date if unable to read provisioning profile
+            }
+        }
+    }
+    
    override func viewDidLoad() {
         super.viewDidLoad()
         if UserDefaultsRepository.forceDarkMode.value {
@@ -49,10 +93,7 @@ class SettingsViewController: FormViewController {
        UserDefaultsRepository.showNS.value = false
        UserDefaultsRepository.showDex.value = false
     
-        var expiration: Date = Date()
-        if let provision = MobileProvision.read() {
-            expiration = provision.expirationDate
-        }
+       let expiration = calculateExpirationDate()
                         
         form
         +++ Section(header: "Data Settings", footer: "")
