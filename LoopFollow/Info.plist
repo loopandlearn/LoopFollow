@@ -32,10 +32,6 @@
 	<true/>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Loop Follow would like to access your calendar to save BG readings</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Loop Follow would like to access to your photo library to save graph images</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Loop Follow would like to access to your photo library to save graph images</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
