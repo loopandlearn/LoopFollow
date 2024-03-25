@@ -24,6 +24,6 @@ class BuildDetails {
     }
     
     var buildDateString: String? {
-        return dict["com-LoopFollow-date"] as? String
+        return dict["com-LoopFollow-build-date"] as? String
     }
 }
