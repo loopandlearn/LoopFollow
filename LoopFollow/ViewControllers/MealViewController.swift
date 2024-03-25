@@ -77,23 +77,23 @@ class MealViewController: UIViewController {
             showConfirmationAlert(combinedString: combinedString)
         }
     }
-
+    
     func createCombinedString(carbs: Int, fats: Int, proteins: Int) -> String? {
         let mealNotesValue = mealNotes.text ?? ""
         var cleanedMealNotes = mealNotesValue
         
         // Retrieve the method value from UserDefaultsRepository
         let method = UserDefaultsRepository.method.value
-
+        
         // Construct and return the combinedString
         let combinedString = "mealtoenact_carbs\(carbs)fat\(fats)protein\(proteins)note\(cleanedMealNotes)"
-                
+        
         //Alterntive combinedString formatting below, to present the meal more like a visual menu in imessage on receiving iPhone.
         //let combinedString = "Mealtime\nCarbs \(carbs)g\nFat \(fats)g\nProtein \(proteins)g \nNote \(cleanedMealNotes)"
         
         return combinedString
     }
-
+    
     func showConfirmationAlert(combinedString: String) {
         // Confirmation alert before sending the request
         let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to register this meal?", preferredStyle: .alert)
@@ -107,8 +107,8 @@ class MealViewController: UIViewController {
         
         present(confirmationAlert, animated: true, completion: nil)
     }
-
-
+    
+    
     func sendMealRequest(combinedString: String) {
         // Retrieve the method value from UserDefaultsRepository
         let method = UserDefaultsRepository.method.value
@@ -123,8 +123,9 @@ class MealViewController: UIViewController {
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
-        } else {            // If method is "SMS API", proceed with sending the request
-
+            dismiss(animated: true, completion: nil)
+        } else {
+            // If method is "SMS API", proceed with sending the request
             let twilioSID = UserDefaultsRepository.twilioSIDString.value
             let twilioSecret = UserDefaultsRepository.twilioSecretString.value
             let fromNumber = UserDefaultsRepository.twilioFromNumberString.value
@@ -143,21 +144,39 @@ class MealViewController: UIViewController {
             
             // Build the completion block and send the request
             URLSession.shared.dataTask(with: request) { (data, response, error) in
-                print("Finished")
-                if let data = data, let responseDetails = String(data: data, encoding: .utf8) {
-                    // Success
-                    print("Response: \(responseDetails)")
-                } else {
-                    // Failure
-                    print("Error: \(error?.localizedDescription ?? "Unknown error")")
+                DispatchQueue.main.async {
+                    if let error = error {
+                        // Failure: Show error alert for network error
+                        let alertController = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                        alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                        self.present(alertController, animated: true, completion: nil)
+                    } else if let httpResponse = response as? HTTPURLResponse {
+                        if (200..<300).contains(httpResponse.statusCode) {
+                            // Success: Show success alert for successful response
+                            let alertController = UIAlertController(title: "Success", message: "Message sent successfully!", preferredStyle: .alert)
+                            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                                // Dismiss the current view controller
+                                self.dismiss(animated: true, completion: nil)
+                            }))
+                            self.present(alertController, animated: true, completion: nil)
+                        } else {
+                            // Failure: Show error alert for non-successful HTTP status code
+                            let message = "HTTP Status Code: \(httpResponse.statusCode)"
+                            let alertController = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+                            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                            self.present(alertController, animated: true, completion: nil)
+                        }
+                    } else {
+                        // Failure: Show generic error alert for unexpected response
+                        let alertController = UIAlertController(title: "Error", message: "Unexpected response", preferredStyle: .alert)
+                        alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                        self.present(alertController, animated: true, completion: nil)
+                    }
                 }
             }.resume()
         }
-        
-        // Dismiss the current view controller
-        dismiss(animated: true, completion: nil)
     }
-
+    
     @IBAction func doneButtonTapped(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }
