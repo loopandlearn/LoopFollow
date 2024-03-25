@@ -1,34 +1,37 @@
 //
-//  OverrideViewController.swift
+//  PresetViewController.swift
 //  LoopFollow
 //
-//  Created by Daniel Snällfot on 2024-03-21.
+//  Created by Daniel Snällfot on 2024-03-25.
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
 import UIKit
+import LocalAuthentication
 
-class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
+class CustomViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
     
-    @IBOutlet weak var overridePicker: UIPickerView!
+    @IBOutlet weak var customPicker: UIPickerView!
     
     // Property to store the selected override option
-    var selectedOverride: String?
+    var selectedCustom: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         if UserDefaultsRepository.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
+            
+            // Do any additional setup after loading the view.
         }
         // Set the delegate and data source for the UIPickerView
-        overridePicker.delegate = self
-        overridePicker.dataSource = self
+        customPicker.delegate = self
+        customPicker.dataSource = self
         
         // Set the default selected item for the UIPickerView
-        overridePicker.selectRow(0, inComponent: 0, animated: false)
+        customPicker.selectRow(0, inComponent: 0, animated: false)
         
         // Set the initial selected override
-        selectedOverride = overrideOptions[0]
+        selectedCustom = customOptions[0]
     }
     
     // MARK: - UIPickerViewDataSource
@@ -38,36 +41,39 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return overrideOptions.count
+        return customOptions.count
     }
     
     // MARK: - UIPickerViewDelegate
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return overrideOptions[row]
+        return customOptions[row]
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         // Update the selectedOverride property when an option is selected
-        selectedOverride = overrideOptions[row]
-        print("Override Picker selected: \(selectedOverride!)")
+        selectedCustom = customOptions[row]
+        print("Custom Picker selected: \(selectedCustom!)")
     }
     
-    @IBAction func sendRemoteOverridePressed(_ sender: Any) {
-        guard let selectedOverride = selectedOverride else {
-            print("No override option selected")
+    @IBAction func sendRemoteCustomPressed(_ sender: Any) {
+        guard let selectedCustom = selectedCustom else {
+            print("No custom option selected")
             return
         }
         
-        let combinedString = "Override_\(selectedOverride)"
+        let combinedString = "Custom_\(selectedCustom)"
         print("Combined string:", combinedString)
         
         // Confirmation alert before sending the request
-        let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to activate \(selectedOverride)?", preferredStyle: .alert)
+        let confirmationAlert = UIAlertController(title: "Confirmation", message: "Do you want to activate \(selectedCustom)?", preferredStyle: .alert)
         
         confirmationAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
-            // Proceed with sending the request
-            self.sendOverrideRequest(combinedString: combinedString)
+            // Authenticate with Face ID
+            self.authenticateWithBiometrics {
+                // Proceed with the request after successful authentication
+                self.sendCustomRequest(combinedString: combinedString)
+            }
         }))
         
         confirmationAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
@@ -75,7 +81,57 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
         present(confirmationAlert, animated: true, completion: nil)
     }
     
-    func sendOverrideRequest(combinedString: String) {
+    func authenticateWithBiometrics(completion: @escaping () -> Void) {
+        let context = LAContext()
+        var error: NSError?
+        
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "Authenticate with biometrics to proceed"
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+                DispatchQueue.main.async {
+                    if success {
+                        // Authentication successful
+                        completion()
+                    } else {
+                        // Check for passcode authentication
+                        if let error = authenticationError as NSError?,
+                           error.code == LAError.biometryNotAvailable.rawValue || error.code == LAError.biometryNotEnrolled.rawValue {
+                            // Biometry (Face ID or Touch ID) is not available or not enrolled, use passcode
+                            self.authenticateWithPasscode(completion: completion)
+                        } else {
+                            // Authentication failed
+                            if let error = authenticationError {
+                                print("Authentication failed: \(error.localizedDescription)")
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // Biometry (Face ID or Touch ID) is not available, use passcode
+            self.authenticateWithPasscode(completion: completion)
+        }
+    }
+    
+    func authenticateWithPasscode(completion: @escaping () -> Void) {
+        let context = LAContext()
+        
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Authenticate with passcode to proceed") { success, error in
+            DispatchQueue.main.async {
+                if success {
+                    // Authentication successful
+                    completion()
+                } else {
+                    // Authentication failed
+                    if let error = error {
+                        print("Authentication failed: \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+    
+    func sendCustomRequest(combinedString: String) {
         
         // Retrieve the method value from UserDefaultsRepository
         let method = UserDefaultsRepository.method.value
@@ -87,11 +143,12 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
                 print("Failed to encode URL string")
                 return
             }
-            let urlString = "shortcuts://run-shortcut?name=Remote%20Override&input=text&text=\(encodedString)"
+            let urlString = "shortcuts://run-shortcut?name=Remote%20Preset&input=text&text=\(encodedString)"
             if let url = URL(string: urlString) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
             dismiss(animated: true, completion: nil)
+            
         } else {
             // If method is "SMS API", proceed with sending the request
             let twilioSID = UserDefaultsRepository.twilioSIDString.value
@@ -143,6 +200,7 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
                 }
             }.resume()
         }
+        
     }
     
     @IBAction func cancelButtonPressed(_ sender: Any) {
@@ -150,10 +208,10 @@ class OverrideViewController: UIViewController, UIPickerViewDataSource, UIPicker
     }
     
     // Data for the UIPickerView
-    lazy var overrideOptions: [String] = {
-        let overrideString = UserDefaultsRepository.overrideString.value
-        // Split the overrideString by ", " to get individual options
-        return overrideString.components(separatedBy: ", ")
+    lazy var customOptions: [String] = {
+        let customString = UserDefaultsRepository.customString.value
+        // Split the customString by ", " to get individual options
+        return customString.components(separatedBy: ", ")
     }()
 }
 

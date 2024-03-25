@@ -119,7 +119,7 @@ class BolusViewController: UIViewController {
         // Convert bolusValue to string and trim any leading or trailing whitespace
         let trimmedBolusValue = "\(bolusValue)".trimmingCharacters(in: .whitespacesAndNewlines)
         
-        let combinedString = "bolustoenact_\(trimmedBolusValue)"
+        let combinedString = "Bolus_\(trimmedBolusValue)"
         print("Combined string:", combinedString)
         
         // Retrieve the method value from UserDefaultsRepository

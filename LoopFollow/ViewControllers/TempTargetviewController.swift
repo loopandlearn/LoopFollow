@@ -59,7 +59,7 @@ class TempTargetViewController: UIViewController, UIPickerViewDataSource, UIPick
             return
         }
         
-        let combinedString = "temptargettoenact_\(selectedTempTarget)"
+        let combinedString = "TempTarget_\(selectedTempTarget)"
         print("Combined string:", combinedString)
         
         // Confirmation alert before sending the request

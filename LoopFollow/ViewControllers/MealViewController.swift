@@ -86,7 +86,7 @@ class MealViewController: UIViewController {
         let method = UserDefaultsRepository.method.value
         
         // Construct and return the combinedString
-        let combinedString = "mealtoenact_carbs\(carbs)fat\(fats)protein\(proteins)note\(cleanedMealNotes)"
+        let combinedString = "Meal_Carbs_\(carbs)g_Fat_\(fats)g_Protein_\(proteins)g_Note_\(cleanedMealNotes)"
         
         //Alterntive combinedString formatting below, to present the meal more like a visual menu in imessage on receiving iPhone.
         //let combinedString = "Mealtime\nCarbs \(carbs)g\nFat \(fats)g\nProtein \(proteins)g \nNote \(cleanedMealNotes)"

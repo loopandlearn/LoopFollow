@@ -18,6 +18,10 @@ class RemoteViewController: UIViewController {
             // Do any additional setup after loading the view.
         }
     }
+    @IBAction func customButtonPressed(_ sender: Any) {
+        let customViewController = storyboard!.instantiateViewController(withIdentifier: "remoteCustom") as! CustomViewController
+        self.present(customViewController, animated: true, completion: nil)
+    }
     
     @IBAction func mealButtonPressed(_ sender: Any) {
         let mealViewController = storyboard!.instantiateViewController(withIdentifier: "remoteMeal") as! MealViewController

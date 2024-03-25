@@ -87,32 +87,40 @@ class RemoteSettingsViewController: FormViewController {
         
         <<< TextRow("Remote Meal"){ row in
             row.title = ""
-            row.value = "Remote Meal • mealtoenact_carbs25fat15protein10noteTestmeal"
+            row.value = "Remote Meal • Meal_Carbs_25g_Fat_15g_Protein_10g_Note_🍔"
             row.cellSetup { cell, row in
                 cell.textLabel?.font = UIFont.systemFont(ofSize: 10)
             }
         }
         <<< TextRow("Remote Bolus"){ row in
             row.title = ""
-            row.value = "Remote Bolus • bolustoenact_0.6"
+            row.value = "Remote Bolus • Bolus_0.6"
             row.cellSetup { cell, row in
                 cell.textLabel?.font = UIFont.systemFont(ofSize: 10)
             }
         }
         <<< TextRow("Remote Override"){ row in
             row.title = ""
-            row.value = "Remote Override • overridetoenact_Partytime"
+            row.value = "Remote Override • Override_🎉 Partytime"
             row.cellSetup { cell, row in
                 cell.textLabel?.font = UIFont.systemFont(ofSize: 10)
             }
         }
         <<< TextRow("Remote Temp Target"){ row in
             row.title = ""
-            row.value = "Remote Temp Target • temptargettoenact_Exercise"
+            row.value = "Remote Temp Target • TempTarget_🏃‍♂️ Exercise"
             row.cellSetup { cell, row in
                 cell.textLabel?.font = UIFont.systemFont(ofSize: 10)
             }
         }
+        
+    <<< TextRow("Remote Custom Action"){ row in
+        row.title = ""
+        row.value = "Remote Custom Action • Custom_Any custom textstring"
+        row.cellSetup { cell, row in
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 10)
+        }
+    }
         
         // Add the section to the form
         form
@@ -130,7 +138,7 @@ class RemoteSettingsViewController: FormViewController {
         
         +++ shortcutsSection
         
-        +++ Section(header: "Remote Settings", footer: "Add the overrides and/or temp targets you would like to be able to choose from in the remote override/temp target pickers. Separate them by comma + blank space.  Example: Override 1, Override 2, Override 3")
+        +++ Section(header: "Guardrails", footer: "")
         
         <<< StepperRow("maxCarbs") { row in
             row.title = "Max Carbs (g)"
@@ -162,6 +170,8 @@ class RemoteSettingsViewController: FormViewController {
             guard let value = row.value else { return }
             UserDefaultsRepository.maxBolus.value = Double(value)
         }
+ 
+        +++ Section(header: "Presets and Customizations", footer: "Add the overrides, temp targets and custom actions you would like to be able to choose from in respective views picker. Separate them by comma + blank space.  Example: Override 1, Override 2, Override 3\nA Custom Action can be any text string you want to send over sms to trigger anything on the receiving iPhone ")
         
         <<< TextRow("overrides"){ row in
             row.title = "Overrides:"
@@ -177,6 +187,14 @@ class RemoteSettingsViewController: FormViewController {
         }.onChange { row in
             guard let value = row.value else { return }
             UserDefaultsRepository.tempTargetsString.value = value
+        }
+        
+        <<< TextRow("customactions"){ row in
+            row.title = "Custom Actions:"
+            row.value = UserDefaultsRepository.customString.value
+        }.onChange { row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.customString.value = value
         }
         
         +++ ButtonRow() {
