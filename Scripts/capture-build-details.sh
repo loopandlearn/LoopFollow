@@ -17,4 +17,4 @@ fi
 echo "Gathering build date..."
 
 # Capture the current date and write it to BuildDetails.plist
-plutil -replace com-LoopFollow-date -string "$(date)" "${info_plist_path}"
+plutil -replace com-LoopFollow-build-date -string "$(date)" "${info_plist_path}"
