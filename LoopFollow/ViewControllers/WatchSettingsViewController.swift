@@ -119,14 +119,6 @@ class WatchSettingsViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.watchLine2.value = value
             }
-            <<< SwitchRow("saveImage"){ row in
-                row.title = "Save Graph Image for Watch Face"
-                row.value = UserDefaultsRepository.saveImage.value
-            }.onChange { [weak self] row in
-                guard let value = row.value else { return }
-                UserDefaultsRepository.saveImage.value = value
-            }
-            
         
         
             +++ Section(header: "Available Variables", footer: "")
