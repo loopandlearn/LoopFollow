@@ -183,6 +183,47 @@ class GeneralSettingsViewController: FormViewController {
            self?.handleLowProactiveLowToggle(row: row, opposingRowTag: "speakLowBG")
        }
        
+       <<< StepperRow("speakLowBGLimit") { row in
+           row.title = "Low BG Limit"
+           row.cell.stepper.stepValue = 1
+           row.cell.stepper.minimumValue = 40
+           row.cell.stepper.maximumValue = 108
+           row.value = Double(UserDefaultsRepository.speakLowBGLimit.value)
+           row.displayValueFor = { value in
+               guard let value = value else { return nil }
+               return bgUnits.toDisplayUnits(String(value))
+           }
+           // Visibility depends on either 'speakLowBG' or 'speakProactiveLowBG' being true
+           row.hidden = Condition.function(["speakLowBG", "speakProactiveLowBG"], { form in
+               let speakLowBGRow: SwitchRow! = form.rowBy(tag: "speakLowBG")
+               let speakProactiveLowBGRow: SwitchRow! = form.rowBy(tag: "speakProactiveLowBG")
+               return !(speakLowBGRow.value ?? false) && !(speakProactiveLowBGRow.value ?? false)
+           })
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakLowBGLimit.value = Float(value)
+       }
+
+       <<< StepperRow("speakFastDropDelta") { row in
+           row.title = "Fast Drop Delta"
+           row.cell.stepper.stepValue = 1
+           row.cell.stepper.minimumValue = 3
+           row.cell.stepper.maximumValue = 20
+           row.value = Double(UserDefaultsRepository.speakFastDropDelta.value)
+           row.displayValueFor = { value in
+               guard let value = value else { return nil }
+               return bgUnits.toDisplayUnits(String(value))
+           }
+           // Visibility depends on 'speakProactiveLowBG' being true
+           row.hidden = Condition.function(["speakProactiveLowBG"], { form in
+               let speakProactiveLowBGRow: SwitchRow! = form.rowBy(tag: "speakProactiveLowBG")
+               return !(speakProactiveLowBGRow.value ?? false)
+           })
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakFastDropDelta.value = Float(value)
+       }
+       
        <<< SwitchRow("speakHighBG") { row in
            row.title = "High"
            row.value = UserDefaultsRepository.speakHighBG.value
@@ -191,6 +232,27 @@ class GeneralSettingsViewController: FormViewController {
            UserDefaultsRepository.speakHighBG.value = value
        }
        
+       <<< StepperRow("speakHighBGLimit") { row in
+           row.title = "High BG Limit"
+           row.cell.stepper.stepValue = 1
+           row.cell.stepper.minimumValue = 140
+           row.cell.stepper.maximumValue = 300
+           row.value = Double(UserDefaultsRepository.speakHighBGLimit.value)
+           row.displayValueFor = { value in
+               guard let value = value else { return nil }
+               return bgUnits.toDisplayUnits(String(value))
+           }
+           // Visibility depends on 'speakHighBG' or 'speakProactiveLowBG' being true
+           row.hidden = Condition.function(["speakHighBG", "speakProactiveLowBG"], { form in
+               let speakHighBGRow: SwitchRow! = form.rowBy(tag: "speakHighBG")
+               let speakProactiveLowBGRow: SwitchRow! = form.rowBy(tag: "speakProactiveLowBG")
+               return !(speakHighBGRow.value ?? false) && !(speakProactiveLowBGRow.value ?? false)
+           })
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakHighBGLimit.value = Float(value)
+       }
+
        +++ ButtonRow() {
           $0.title = "DONE"
        }.onCellSelection { (row, arg)  in
