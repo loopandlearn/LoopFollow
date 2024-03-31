@@ -868,9 +868,9 @@ extension MainViewController {
         }
         
         let always = UserDefaultsRepository.speakBGAlways.value
-        let lowThreshold = UserDefaultsRepository.alertLowBG.value
-        let highThreshold = UserDefaultsRepository.alertHighBG.value
-        let fastDropDelta = UserDefaultsRepository.alertFastDropDelta.value
+        let lowThreshold = UserDefaultsRepository.speakLowBGLimit.value
+        let fastDropDelta = UserDefaultsRepository.speakFastDropDelta.value
+        let highThreshold = UserDefaultsRepository.speakHighBGLimit.value
         let speakLowBG = UserDefaultsRepository.speakLowBG.value
         let speakProactiveLowBG = UserDefaultsRepository.speakProactiveLowBG.value
         let speakHighBG = UserDefaultsRepository.speakHighBG.value
