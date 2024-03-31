@@ -143,7 +143,7 @@ class GeneralSettingsViewController: FormViewController {
        }.onChange { [weak self] row in
            guard let value = row.value else { return }
            UserDefaultsRepository.showDisplayName.value = value
-           
+
            if let appState = self!.appStateController {
                appState.generalSettingsChanged = true
                appState.generalSettingsChanges |= GeneralSettingsChangeEnum.showDisplayNameChange.rawValue
