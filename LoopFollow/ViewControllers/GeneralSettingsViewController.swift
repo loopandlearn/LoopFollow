@@ -136,41 +136,117 @@ class GeneralSettingsViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.screenlockSwitchState.value = value
             }
-        
-        
-            
-        
-        <<< SwitchRow("speakBG"){ row in
-            row.title = "Speak BG"
-            row.value = UserDefaultsRepository.speakBG.value
-        }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.speakBG.value = value
-
-                    // Post a "toggleSpeakBG" notification whenever the "Speak BG" switch value changes in the General Settings. This allows the SceneDelegate to update the Home Screen Quick Action appearance and ensures consistency between the switch and the Quick Action.
-                    NotificationCenter.default.post(name: Notification.Name("toggleSpeakBG"), object: nil)
-        }
-        
+       
        <<< SwitchRow("showDisplayName") { row in
            row.title = "Show Display Name"
            row.value = UserDefaultsRepository.showDisplayName.value
        }.onChange { [weak self] row in
            guard let value = row.value else { return }
            UserDefaultsRepository.showDisplayName.value = value
-
+           
            if let appState = self!.appStateController {
                appState.generalSettingsChanged = true
                appState.generalSettingsChanges |= GeneralSettingsChangeEnum.showDisplayNameChange.rawValue
            }
        }
-
+        
+       +++ Section("Speak BG Settings")
+       <<< SwitchRow("speakBG") { row in
+           row.title = "Speak BG"
+           row.value = UserDefaultsRepository.speakBG.value
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakBG.value = value
+           self?.updateSpeakBGSettingsVisibility()
+       }
+       
+       <<< SwitchRow("speakBGAlways") { row in
+           row.title = "Always"
+           row.value = UserDefaultsRepository.speakBGAlways.value
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakBGAlways.value = value
+           self?.updateSpeakBGSettingsVisibility()
+       }
+       
+       <<< SwitchRow("speakLowBG") { row in
+           row.title = "Low"
+           row.value = UserDefaultsRepository.speakLowBG.value
+       }.onChange { [weak self] row in
+           self?.handleLowProactiveLowToggle(row: row, opposingRowTag: "speakProactiveLowBG")
+       }
+       
+       <<< SwitchRow("speakProactiveLowBG") { row in
+           row.title = "Proactive Low"
+           row.value = UserDefaultsRepository.speakProactiveLowBG.value
+       }.onChange { [weak self] row in
+           self?.handleLowProactiveLowToggle(row: row, opposingRowTag: "speakLowBG")
+       }
+       
+       <<< SwitchRow("speakHighBG") { row in
+           row.title = "High"
+           row.value = UserDefaultsRepository.speakHighBG.value
+       }.onChange { row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakHighBG.value = value
+       }
+       
        +++ ButtonRow() {
           $0.title = "DONE"
        }.onCellSelection { (row, arg)  in
           self.dismiss(animated:true, completion: nil)
        }
+       
+       // Call to update initial visibility based on current settings
+       updateSpeakBGSettingsVisibility()
     }
-   
+    
+    func updateSpeakBGSettingsVisibility() {
+        let alwaysOn = UserDefaultsRepository.speakBGAlways.value
+        let speakBGOn = UserDefaultsRepository.speakBG.value
+        
+        // Determine visibility for "Always", "Low", "Proactive Low", and "High" based on "Speak BG" and "Always"
+        let shouldHideAlways = !speakBGOn
+        let shouldHideSettings = alwaysOn || !speakBGOn
+        
+        form.rowBy(tag: "speakBGAlways")?.hidden = Condition(booleanLiteral: shouldHideAlways)
+        form.rowBy(tag: "speakBGAlways")?.evaluateHidden()
+        
+        ["speakLowBG", "speakProactiveLowBG", "speakHighBG"].forEach { tag in
+            if let row = form.rowBy(tag: tag) {
+                row.hidden = Condition(booleanLiteral: shouldHideSettings)
+                row.evaluateHidden()
+                row.updateCell()
+            }
+        }
+    }
+    
+    func handleLowProactiveLowToggle(row: BaseRow, opposingRowTag: String) {
+        guard let switchRow = row as? SwitchRow, let value = switchRow.value else { return }
+        
+        // Update the UserDefaults value for the current row.
+        if row.tag == "speakLowBG" {
+            UserDefaultsRepository.speakLowBG.value = value
+        } else if row.tag == "speakProactiveLowBG" {
+            UserDefaultsRepository.speakProactiveLowBG.value = value
+        }
+        
+        // If the current switch is being turned ON, turn the opposing switch OFF.
+        if value {
+            if let opposingRow = form.rowBy(tag: opposingRowTag) as? SwitchRow {
+                opposingRow.value = false
+                opposingRow.updateCell()
+                
+                // Update the UserDefaults value for the opposing row.
+                if opposingRowTag == "speakLowBG" {
+                    UserDefaultsRepository.speakLowBG.value = false
+                } else if opposingRowTag == "speakProactiveLowBG" {
+                    UserDefaultsRepository.speakProactiveLowBG.value = false
+                }
+            }
+        }
+    }
+        
     // Update the "Speak BG" SwitchRow value in the General Settings when the app enters the foreground. This ensures that the switch reflects the current setting in UserDefaultsRepository, even if it was changed using the Home Screen Quick Action while the app was in the background.
     @objc func handleAppWillEnterForeground() {
         if let row = self.form.rowBy(tag: "speakBG") as? SwitchRow {

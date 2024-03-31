@@ -861,6 +861,63 @@ extension MainViewController {
         }
         
     }
+
+    func evaluateSpeakConditions(currentValue: Int, previousValue: Int) {
+        if !UserDefaultsRepository.speakBG.value {
+            return
+        }
+        
+        let always = UserDefaultsRepository.speakBGAlways.value
+        let lowThreshold = UserDefaultsRepository.alertLowBG.value
+        let highThreshold = UserDefaultsRepository.alertHighBG.value
+        let fastDropDelta = UserDefaultsRepository.alertFastDropDelta.value
+        let speakLowBG = UserDefaultsRepository.speakLowBG.value
+        let speakProactiveLowBG = UserDefaultsRepository.speakProactiveLowBG.value
+        let speakHighBG = UserDefaultsRepository.speakHighBG.value
+        
+        // Speak always
+        if always {
+            speakBG(currentValue: currentValue, previousValue: previousValue)
+            print("Speaking because 'Always' is enabled.")
+            return
+        }
+        
+        // Speak if low or last value was low
+        if speakLowBG {
+            if currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) {
+                speakBG(currentValue: currentValue, previousValue: previousValue)
+                print("Speaking because of 'Low' condition.")
+                return
+            }
+        }
+        
+        // Speak predictive low if...
+        // * low or last value was low
+        // * next predictive value is low
+        // * fast drop occurs below high
+        if speakProactiveLowBG {
+            let predictiveTrigger = !predictionData.isEmpty && Float(predictionData.first!.sgv) <= lowThreshold
+            
+            if predictiveTrigger ||
+                currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) ||
+                ((currentValue <= Int(highThreshold) && (previousValue - currentValue) >= Int(fastDropDelta))) {
+                speakBG(currentValue: currentValue, previousValue: previousValue)
+                print("Speaking because of 'Proactive Low' condition. Predictive trigger: \(predictiveTrigger)")
+                return
+            }
+        }
+        
+        //Speak if high or if last value was high
+        if speakHighBG {
+            if currentValue >= Int(highThreshold) || previousValue >= Int(highThreshold) {
+                speakBG(currentValue: currentValue, previousValue: previousValue)
+                print("Speaking because of 'High' condition.")
+                return
+            }
+        }
+        
+        print("No condition met for speaking.")
+    }
     
     // Speaks the current blood glucose value and the change from the previous value.
     // Repeated calls to the function within 30 seconds are prevented.
