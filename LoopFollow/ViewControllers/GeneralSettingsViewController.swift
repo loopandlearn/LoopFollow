@@ -194,10 +194,12 @@ class GeneralSettingsViewController: FormViewController {
                return bgUnits.toDisplayUnits(String(value))
            }
            // Visibility depends on either 'speakLowBG' or 'speakProactiveLowBG' being true
-           row.hidden = Condition.function(["speakLowBG", "speakProactiveLowBG"], { form in
+           row.hidden = Condition.function(["speakLowBG", "speakProactiveLowBG", "speakBG", "speakBGAlways"], { form in
+               let speakBGRow: SwitchRow! = form.rowBy(tag: "speakBG")
+               let speakBGAlwaysRow: SwitchRow! = form.rowBy(tag: "speakBGAlways")
                let speakLowBGRow: SwitchRow! = form.rowBy(tag: "speakLowBG")
                let speakProactiveLowBGRow: SwitchRow! = form.rowBy(tag: "speakProactiveLowBG")
-               return !(speakLowBGRow.value ?? false) && !(speakProactiveLowBGRow.value ?? false)
+               return !(speakLowBGRow.value ?? false) && !(speakProactiveLowBGRow.value ?? false) || !(speakBGRow.value ?? true) || (speakBGAlwaysRow.value ?? false)
            })
        }.onChange { [weak self] row in
            guard let value = row.value else { return }
@@ -215,9 +217,11 @@ class GeneralSettingsViewController: FormViewController {
                return bgUnits.toDisplayUnits(String(value))
            }
            // Visibility depends on 'speakProactiveLowBG' being true
-           row.hidden = Condition.function(["speakProactiveLowBG"], { form in
+           row.hidden = Condition.function(["speakProactiveLowBG", "speakBG", "speakBGAlways"], { form in
+               let speakBGRow: SwitchRow! = form.rowBy(tag: "speakBG")
+               let speakBGAlwaysRow: SwitchRow! = form.rowBy(tag: "speakBGAlways")
                let speakProactiveLowBGRow: SwitchRow! = form.rowBy(tag: "speakProactiveLowBG")
-               return !(speakProactiveLowBGRow.value ?? false)
+               return !(speakProactiveLowBGRow.value ?? false) || !(speakBGRow.value ?? true) || (speakBGAlwaysRow.value ?? false)
            })
        }.onChange { [weak self] row in
            guard let value = row.value else { return }
@@ -243,10 +247,12 @@ class GeneralSettingsViewController: FormViewController {
                return bgUnits.toDisplayUnits(String(value))
            }
            // Visibility depends on 'speakHighBG' or 'speakProactiveLowBG' being true
-           row.hidden = Condition.function(["speakHighBG", "speakProactiveLowBG"], { form in
+           row.hidden = Condition.function(["speakHighBG", "speakProactiveLowBG", "speakBG", "speakBGAlways"], { form in
+               let speakBGRow: SwitchRow! = form.rowBy(tag: "speakBG")
+               let speakBGAlwaysRow: SwitchRow! = form.rowBy(tag: "speakBGAlways")
                let speakHighBGRow: SwitchRow! = form.rowBy(tag: "speakHighBG")
                let speakProactiveLowBGRow: SwitchRow! = form.rowBy(tag: "speakProactiveLowBG")
-               return !(speakHighBGRow.value ?? false) && !(speakProactiveLowBGRow.value ?? false)
+               return !(speakHighBGRow.value ?? false) && !(speakProactiveLowBGRow.value ?? false) || !(speakBGRow.value ?? true) || (speakBGAlwaysRow.value ?? false)
            })
        }.onChange { [weak self] row in
            guard let value = row.value else { return }
