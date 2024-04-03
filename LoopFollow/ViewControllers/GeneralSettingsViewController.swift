@@ -177,6 +177,13 @@ class GeneralSettingsViewController: FormViewController {
                let speakBGRow: SwitchRow! = form.rowBy(tag: "speakBG")
                return !(speakBGRow.value ?? false)
            })
+           row.presentationMode = PresentationMode.presentModally(
+            controllerProvider: ControllerProvider.callback {
+                return SelectorViewController<SelectorRow<PushSelectorCell<String>>> { _ in }
+            },
+            onDismiss: { vc in
+                vc.dismiss(animated: true)
+            })
        }.onChange { row in
            guard let value = row.value else { return }
            UserDefaultsRepository.speakLanguage.value = value
