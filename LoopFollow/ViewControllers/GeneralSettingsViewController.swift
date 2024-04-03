@@ -136,21 +136,7 @@ class GeneralSettingsViewController: FormViewController {
                 guard let value = row.value else { return }
                 UserDefaultsRepository.screenlockSwitchState.value = value
             }
-        
-        
-            
-        
-        <<< SwitchRow("speakBG"){ row in
-            row.title = "Speak BG"
-            row.value = UserDefaultsRepository.speakBG.value
-        }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.speakBG.value = value
-
-                    // Post a "toggleSpeakBG" notification whenever the "Speak BG" switch value changes in the General Settings. This allows the SceneDelegate to update the Home Screen Quick Action appearance and ensures consistency between the switch and the Quick Action.
-                    NotificationCenter.default.post(name: Notification.Name("toggleSpeakBG"), object: nil)
-        }
-        
+       
        <<< SwitchRow("showDisplayName") { row in
            row.title = "Show Display Name"
            row.value = UserDefaultsRepository.showDisplayName.value
@@ -163,14 +149,194 @@ class GeneralSettingsViewController: FormViewController {
                appState.generalSettingsChanges |= GeneralSettingsChangeEnum.showDisplayNameChange.rawValue
            }
        }
+        
+       +++ Section("Speak BG Settings")
+       <<< SwitchRow("speakBG") { row in
+           row.title = "Speak BG"
+           row.value = UserDefaultsRepository.speakBG.value
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakBG.value = value
+           self?.updateSpeakBGSettingsVisibility()
+       }
+       
+       <<< PushRow<String>("speakLanguage") { row in
+           row.title = "Speaking Language"
+           row.options = ["en", "it", "sk", "sv"]
+           row.value = UserDefaultsRepository.speakLanguage.value
+           row.displayValueFor = { value in
+               switch value {
+               case "en": return "English"
+               case "it": return "Italian"
+               case "sk": return "Slovak"
+               case "sv": return "Swedish"
+               default: return "Unknown"
+               }
+           }
+           row.hidden = Condition.function(["speakBG"], { form in
+               let speakBGRow: SwitchRow! = form.rowBy(tag: "speakBG")
+               return !(speakBGRow.value ?? false)
+           })
+       }.onChange { row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakLanguage.value = value
+       }
+
+       <<< SwitchRow("speakBGAlways") { row in
+           row.title = "Always"
+           row.value = UserDefaultsRepository.speakBGAlways.value
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakBGAlways.value = value
+           self?.updateSpeakBGSettingsVisibility()
+       }
+       
+       <<< SwitchRow("speakLowBG") { row in
+           row.title = "Low"
+           row.value = UserDefaultsRepository.speakLowBG.value
+       }.onChange { [weak self] row in
+           self?.handleLowProactiveLowToggle(row: row, opposingRowTag: "speakProactiveLowBG")
+       }
+       
+       <<< SwitchRow("speakProactiveLowBG") { row in
+           row.title = "Proactive Low"
+           row.value = UserDefaultsRepository.speakProactiveLowBG.value
+       }.onChange { [weak self] row in
+           self?.handleLowProactiveLowToggle(row: row, opposingRowTag: "speakLowBG")
+       }
+       
+       <<< StepperRow("speakLowBGLimit") { row in
+           row.title = "Low BG Limit"
+           row.cell.stepper.stepValue = 1
+           row.cell.stepper.minimumValue = 40
+           row.cell.stepper.maximumValue = 108
+           row.value = Double(UserDefaultsRepository.speakLowBGLimit.value)
+           row.displayValueFor = { value in
+               guard let value = value else { return nil }
+               return bgUnits.toDisplayUnits(String(value))
+           }
+           // Visibility depends on either 'speakLowBG' or 'speakProactiveLowBG' being true
+           row.hidden = Condition.function(["speakLowBG", "speakProactiveLowBG", "speakBG", "speakBGAlways"], { form in
+               let speakBGRow: SwitchRow! = form.rowBy(tag: "speakBG")
+               let speakBGAlwaysRow: SwitchRow! = form.rowBy(tag: "speakBGAlways")
+               let speakLowBGRow: SwitchRow! = form.rowBy(tag: "speakLowBG")
+               let speakProactiveLowBGRow: SwitchRow! = form.rowBy(tag: "speakProactiveLowBG")
+               return !(speakLowBGRow.value ?? false) && !(speakProactiveLowBGRow.value ?? false) || !(speakBGRow.value ?? true) || (speakBGAlwaysRow.value ?? false)
+           })
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakLowBGLimit.value = Float(value)
+       }
+
+       <<< StepperRow("speakFastDropDelta") { row in
+           row.title = "Fast Drop Delta"
+           row.cell.stepper.stepValue = 1
+           row.cell.stepper.minimumValue = 3
+           row.cell.stepper.maximumValue = 20
+           row.value = Double(UserDefaultsRepository.speakFastDropDelta.value)
+           row.displayValueFor = { value in
+               guard let value = value else { return nil }
+               return bgUnits.toDisplayUnits(String(value))
+           }
+           // Visibility depends on 'speakProactiveLowBG' being true
+           row.hidden = Condition.function(["speakProactiveLowBG", "speakBG", "speakBGAlways"], { form in
+               let speakBGRow: SwitchRow! = form.rowBy(tag: "speakBG")
+               let speakBGAlwaysRow: SwitchRow! = form.rowBy(tag: "speakBGAlways")
+               let speakProactiveLowBGRow: SwitchRow! = form.rowBy(tag: "speakProactiveLowBG")
+               return !(speakProactiveLowBGRow.value ?? false) || !(speakBGRow.value ?? true) || (speakBGAlwaysRow.value ?? false)
+           })
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakFastDropDelta.value = Float(value)
+       }
+       
+       <<< SwitchRow("speakHighBG") { row in
+           row.title = "High"
+           row.value = UserDefaultsRepository.speakHighBG.value
+       }.onChange { row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakHighBG.value = value
+       }
+       
+       <<< StepperRow("speakHighBGLimit") { row in
+           row.title = "High BG Limit"
+           row.cell.stepper.stepValue = 1
+           row.cell.stepper.minimumValue = 140
+           row.cell.stepper.maximumValue = 300
+           row.value = Double(UserDefaultsRepository.speakHighBGLimit.value)
+           row.displayValueFor = { value in
+               guard let value = value else { return nil }
+               return bgUnits.toDisplayUnits(String(value))
+           }
+           // Visibility depends on 'speakHighBG' or 'speakProactiveLowBG' being true
+           row.hidden = Condition.function(["speakHighBG", "speakProactiveLowBG", "speakBG", "speakBGAlways"], { form in
+               let speakBGRow: SwitchRow! = form.rowBy(tag: "speakBG")
+               let speakBGAlwaysRow: SwitchRow! = form.rowBy(tag: "speakBGAlways")
+               let speakHighBGRow: SwitchRow! = form.rowBy(tag: "speakHighBG")
+               let speakProactiveLowBGRow: SwitchRow! = form.rowBy(tag: "speakProactiveLowBG")
+               return !(speakHighBGRow.value ?? false) && !(speakProactiveLowBGRow.value ?? false) || !(speakBGRow.value ?? true) || (speakBGAlwaysRow.value ?? false)
+           })
+       }.onChange { [weak self] row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakHighBGLimit.value = Float(value)
+       }
 
        +++ ButtonRow() {
           $0.title = "DONE"
        }.onCellSelection { (row, arg)  in
           self.dismiss(animated:true, completion: nil)
        }
+       
+       // Call to update initial visibility based on current settings
+       updateSpeakBGSettingsVisibility()
     }
-   
+    
+    func updateSpeakBGSettingsVisibility() {
+        let alwaysOn = UserDefaultsRepository.speakBGAlways.value
+        let speakBGOn = UserDefaultsRepository.speakBG.value
+        
+        // Determine visibility for "Always", "Low", "Proactive Low", and "High" based on "Speak BG" and "Always"
+        let shouldHideAlways = !speakBGOn
+        let shouldHideSettings = alwaysOn || !speakBGOn
+        
+        form.rowBy(tag: "speakBGAlways")?.hidden = Condition(booleanLiteral: shouldHideAlways)
+        form.rowBy(tag: "speakBGAlways")?.evaluateHidden()
+        
+        ["speakLowBG", "speakProactiveLowBG", "speakHighBG"].forEach { tag in
+            if let row = form.rowBy(tag: tag) {
+                row.hidden = Condition(booleanLiteral: shouldHideSettings)
+                row.evaluateHidden()
+                row.updateCell()
+            }
+        }
+    }
+    
+    func handleLowProactiveLowToggle(row: BaseRow, opposingRowTag: String) {
+        guard let switchRow = row as? SwitchRow, let value = switchRow.value else { return }
+        
+        // Update the UserDefaults value for the current row.
+        if row.tag == "speakLowBG" {
+            UserDefaultsRepository.speakLowBG.value = value
+        } else if row.tag == "speakProactiveLowBG" {
+            UserDefaultsRepository.speakProactiveLowBG.value = value
+        }
+        
+        // If the current switch is being turned ON, turn the opposing switch OFF.
+        if value {
+            if let opposingRow = form.rowBy(tag: opposingRowTag) as? SwitchRow {
+                opposingRow.value = false
+                opposingRow.updateCell()
+                
+                // Update the UserDefaults value for the opposing row.
+                if opposingRowTag == "speakLowBG" {
+                    UserDefaultsRepository.speakLowBG.value = false
+                } else if opposingRowTag == "speakProactiveLowBG" {
+                    UserDefaultsRepository.speakProactiveLowBG.value = false
+                }
+            }
+        }
+    }
+        
     // Update the "Speak BG" SwitchRow value in the General Settings when the app enters the foreground. This ensures that the switch reflects the current setting in UserDefaultsRepository, even if it was changed using the Home Screen Quick Action while the app was in the background.
     @objc func handleAppWillEnterForeground() {
         if let row = self.form.rowBy(tag: "speakBG") as? SwitchRow {

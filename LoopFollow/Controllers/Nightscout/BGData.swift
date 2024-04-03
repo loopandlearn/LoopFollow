@@ -177,9 +177,7 @@ extension MainViewController {
                 let timerVal = 310 - secondsAgo
                 print("##### started 5:10 bg timer: \(timerVal)")
                 self.updateBadge(val: data[0].sgv)
-                if UserDefaultsRepository.speakBG.value {
-                    self.speakBG(currentValue: data[0].sgv, previousValue: data[1].sgv)
-                }
+                self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
             }
         }
         

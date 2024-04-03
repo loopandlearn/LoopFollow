@@ -861,7 +861,119 @@ extension MainViewController {
         }
         
     }
+
+    func evaluateSpeakConditions(currentValue: Int, previousValue: Int) {
+        if !UserDefaultsRepository.speakBG.value {
+            return
+        }
+        
+        let always = UserDefaultsRepository.speakBGAlways.value
+        let lowThreshold = UserDefaultsRepository.speakLowBGLimit.value
+        let fastDropDelta = UserDefaultsRepository.speakFastDropDelta.value
+        let highThreshold = UserDefaultsRepository.speakHighBGLimit.value
+        let speakLowBG = UserDefaultsRepository.speakLowBG.value
+        let speakProactiveLowBG = UserDefaultsRepository.speakProactiveLowBG.value
+        let speakHighBG = UserDefaultsRepository.speakHighBG.value
+        
+        // Speak always
+        if always {
+            speakBG(currentValue: currentValue, previousValue: previousValue)
+            print("Speaking because 'Always' is enabled.")
+            return
+        }
+        
+        // Speak if low or last value was low
+        if speakLowBG {
+            if currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) {
+                speakBG(currentValue: currentValue, previousValue: previousValue)
+                print("Speaking because of 'Low' condition.")
+                return
+            }
+        }
+        
+        // Speak predictive low if...
+        // * low or last value was low
+        // * next predictive value is low
+        // * fast drop occurs below high
+        if speakProactiveLowBG {
+            let predictiveTrigger = !predictionData.isEmpty && Float(predictionData.first!.sgv) <= lowThreshold
+            
+            if predictiveTrigger ||
+                currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) ||
+                ((currentValue <= Int(highThreshold) && (previousValue - currentValue) >= Int(fastDropDelta))) {
+                speakBG(currentValue: currentValue, previousValue: previousValue)
+                print("Speaking because of 'Proactive Low' condition. Predictive trigger: \(predictiveTrigger)")
+                return
+            }
+        }
+        
+        //Speak if high or if last value was high
+        if speakHighBG {
+            if currentValue >= Int(highThreshold) || previousValue >= Int(highThreshold) {
+                speakBG(currentValue: currentValue, previousValue: previousValue)
+                print("Speaking because of 'High' condition.")
+                return
+            }
+        }
+        
+        print("No condition met for speaking.")
+    }
     
+    struct AnnouncementTexts {
+        var stable: String
+        var increase: String
+        var decrease: String
+        var currentBGIs: String
+        
+        static func forLanguage(_ language: String) -> AnnouncementTexts {
+            switch language {
+            case "it":
+                return AnnouncementTexts(
+                    stable: "ed è stabile",
+                    increase: "ed è salita di",
+                    decrease: "ed è scesa di",
+                    currentBGIs: "Glicemia attuale è"
+                )
+            case "sk":
+                return AnnouncementTexts(
+                    stable: "a je stabilná",
+                    increase: "a stúpla o",
+                    decrease: "a klesla o",
+                    currentBGIs: "Aktuálna glykémia je"
+                )
+            case "sv":
+                return AnnouncementTexts(
+                    stable: "och det är stabilt",
+                    increase: "och det har ökat med",
+                    decrease: "och det har minskat med",
+                    currentBGIs: "Blodsockret är"
+                )
+            case "en": fallthrough
+            default:
+                return AnnouncementTexts(
+                    stable: "and it is stable",
+                    increase: "and it is up",
+                    decrease: "and it is down",
+                    currentBGIs: "Glucose is"
+                )
+            }
+        }
+    }
+    
+    struct LanguageVoiceMapping {
+        static let voiceLanguageMap: [String: String] = [
+            "en": "en-US",
+            "it": "it-IT",
+            "sk": "sk-SK",
+            "sv": "sv-SE"
+        ]
+        
+        static func voiceLanguageCode(forAppLanguage appLanguage: String) -> String {
+            return voiceLanguageMap[appLanguage, default: "en-US"]
+        }
+    }
+
+
     // Speaks the current blood glucose value and the change from the previous value.
     // Repeated calls to the function within 30 seconds are prevented.
     func speakBG(currentValue: Int, previousValue: Int) {
@@ -880,21 +992,28 @@ extension MainViewController {
         self.lastSpeechTime = currentTime
 
         let bloodGlucoseDifference = currentValue - previousValue
+
+        let preferredLanguage = UserDefaultsRepository.speakLanguage.value
+        let voiceLanguageCode = LanguageVoiceMapping.voiceLanguageCode(forAppLanguage: preferredLanguage)
+
+        let texts = AnnouncementTexts.forLanguage(preferredLanguage)
+        
         let negligibleThreshold = 3
-        let differenceText: String
-
+        let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference)))
+        let announcementText: String
+        
         if abs(bloodGlucoseDifference) <= negligibleThreshold {
-            differenceText = "stable"
+            announcementText = "\(texts.currentBGIs) \(bgUnits.toDisplayUnits(String(currentValue))) \(texts.stable)"
         } else {
-            let direction = bloodGlucoseDifference < 0 ? "down" : "up"
-            let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference)))
-            differenceText = "\(direction) \(absoluteDifference)"
+            let directionText = bloodGlucoseDifference < 0 ? texts.decrease : texts.increase
+            announcementText = "\(texts.currentBGIs) \(bgUnits.toDisplayUnits(String(currentValue))) \(directionText) \(absoluteDifference)"
         }
-
-        let announcementText = "Current BG is \(bgUnits.toDisplayUnits(String(currentValue))), and it is \(differenceText)"
+        
         let speechUtterance = AVSpeechUtterance(string: announcementText)
-        speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        speechUtterance.voice = AVSpeechSynthesisVoice(language: voiceLanguageCode)
+        
         speechSynthesizer.speak(speechUtterance)
+
     }
     
     func isOnPhoneCall() -> Bool {
