@@ -160,6 +160,26 @@ class GeneralSettingsViewController: FormViewController {
            self?.updateSpeakBGSettingsVisibility()
        }
        
+       <<< PushRow<String>("speakLanguage") { row in
+           row.title = "Speaking Language"
+           row.options = ["en", "sv"]
+           row.value = UserDefaultsRepository.speakLanguage.value
+           row.displayValueFor = { value in
+               switch value {
+               case "sv": return "Swedish"
+               case "en": fallthrough
+               default: return "English"
+               }
+           }
+           row.hidden = Condition.function(["speakBG"], { form in
+               let speakBGRow: SwitchRow! = form.rowBy(tag: "speakBG")
+               return !(speakBGRow.value ?? false)
+           })
+       }.onChange { row in
+           guard let value = row.value else { return }
+           UserDefaultsRepository.speakLanguage.value = value
+       }
+       
        <<< SwitchRow("speakBGAlways") { row in
            row.title = "Always"
            row.value = UserDefaultsRepository.speakBGAlways.value

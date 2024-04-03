@@ -83,6 +83,7 @@ class UserDefaultsRepository {
     static let speakLowBGLimit = UserDefaultsValue<Float>(key: "speakLowBGLimit", default: 72.0)
     static let speakHighBGLimit = UserDefaultsValue<Float>(key: "speakHighBGLimit", default: 180.0)
     static let speakHighBG = UserDefaultsValue<Bool>(key: "speakHighBG", default: false)
+    static let speakLanguage = UserDefaultsValue<String>(key: "speakLanguage", default: "en")
     static let showDisplayName = UserDefaultsValue<Bool>(key: "showDisplayName", default: false)
     static let backgroundRefreshFrequency = UserDefaultsValue<Double>(key: "backgroundRefreshFrequency", default: 1)
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
