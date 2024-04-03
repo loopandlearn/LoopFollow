@@ -921,18 +921,41 @@ extension MainViewController {
     
     struct AnnouncementTexts {
         var stable: String
-        var down: String
-        var up: String
+        var increase: String
+        var decrease: String
         var currentBGIs: String
-        var andItIs: String
         
         static func forLanguage(_ language: String) -> AnnouncementTexts {
             switch language {
+            case "it":
+                return AnnouncementTexts(
+                    stable: "ed è stabile",
+                    increase: "ed è salita di",
+                    decrease: "ed è scesa di",
+                    currentBGIs: "Glicemia attuale è"
+                )
+            case "sk":
+                return AnnouncementTexts(
+                    stable: "a je stabilná",
+                    increase: "a stúpla o",
+                    decrease: "a klesla o",
+                    currentBGIs: "Aktuálna glykémia je"
+                )
             case "sv":
-                return AnnouncementTexts(stable: "stabil", down: "nedåt", up: "uppåt", currentBGIs: "Aktuellt BG är", andItIs: "och det är")
+                return AnnouncementTexts(
+                    stable: "och det är stabilt",
+                    increase: "och det har ökat med",
+                    decrease: "och det har minskat med",
+                    currentBGIs: "Aktuellt BG är"
+                )
             case "en": fallthrough
             default:
-                return AnnouncementTexts(stable: "stable", down: "down", up: "up", currentBGIs: "Current BG is", andItIs: "and it is")
+                return AnnouncementTexts(
+                    stable: "and it is stable",
+                    increase: "and it is up",
+                    decrease: "and it is down",
+                    currentBGIs: "Current BG is"
+                )
             }
         }
     }
@@ -940,6 +963,8 @@ extension MainViewController {
     struct LanguageVoiceMapping {
         static let voiceLanguageMap: [String: String] = [
             "en": "en-US",
+            "it": "it-IT",
+            "sk": "sk-SK",
             "sv": "sv-SE"
         ]
         
@@ -947,6 +972,7 @@ extension MainViewController {
             return voiceLanguageMap[appLanguage, default: "en-US"]
         }
     }
+
 
     // Speaks the current blood glucose value and the change from the previous value.
     // Repeated calls to the function within 30 seconds are prevented.
@@ -966,27 +992,28 @@ extension MainViewController {
         self.lastSpeechTime = currentTime
 
         let bloodGlucoseDifference = currentValue - previousValue
-        let negligibleThreshold = 3
-        let differenceText: String
 
         let preferredLanguage = UserDefaultsRepository.speakLanguage.value
         let voiceLanguageCode = LanguageVoiceMapping.voiceLanguageCode(forAppLanguage: preferredLanguage)
 
         let texts = AnnouncementTexts.forLanguage(preferredLanguage)
         
+        let negligibleThreshold = 3
+        let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference)))
+        let announcementText: String
+        
         if abs(bloodGlucoseDifference) <= negligibleThreshold {
-            differenceText = texts.stable
+            announcementText = "\(texts.currentBGIs) \(bgUnits.toDisplayUnits(String(currentValue))) \(texts.stable)"
         } else {
-            let directionText = bloodGlucoseDifference < 0 ? texts.down : texts.up
-            let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference)))
-            differenceText = "\(directionText) \(absoluteDifference)"
+            let directionText = bloodGlucoseDifference < 0 ? texts.decrease : texts.increase
+            announcementText = "\(texts.currentBGIs) \(bgUnits.toDisplayUnits(String(currentValue))) \(directionText) \(absoluteDifference)"
         }
         
-        let announcementText = "\(texts.currentBGIs) \(bgUnits.toDisplayUnits(String(currentValue))), \(texts.andItIs) \(differenceText)"
         let speechUtterance = AVSpeechUtterance(string: announcementText)
         speechUtterance.voice = AVSpeechSynthesisVoice(language: voiceLanguageCode)
         
         speechSynthesizer.speak(speechUtterance)
+
     }
     
     func isOnPhoneCall() -> Bool {
