@@ -465,14 +465,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     func updateBadge(val: Int) {
-        DispatchQueue.main.async {
         if UserDefaultsRepository.appBadge.value {
             let latestBG = String(val)
             UIApplication.shared.applicationIconBadgeNumber = Int(bgUnits.removePeriodForBadge(bgUnits.toDisplayUnits(latestBG))) ?? val
         } else {
             UIApplication.shared.applicationIconBadgeNumber = 0
-        }
-//        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "updated badge") }
         }
     }
     
