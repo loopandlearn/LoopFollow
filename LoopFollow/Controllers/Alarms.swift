@@ -954,7 +954,7 @@ extension MainViewController {
                     stable: "and it is stable",
                     increase: "and it is up",
                     decrease: "and it is down",
-                    currentBGIs: "Current BG is"
+                    currentBGIs: "Glucose is"
                 )
             }
         }
