@@ -919,6 +919,35 @@ extension MainViewController {
         print("No condition met for speaking.")
     }
     
+    struct AnnouncementTexts {
+        var stable: String
+        var down: String
+        var up: String
+        var currentBGIs: String
+        var andItIs: String
+        
+        static func forLanguage(_ language: String) -> AnnouncementTexts {
+            switch language {
+            case "sv":
+                return AnnouncementTexts(stable: "stabil", down: "nedåt", up: "uppåt", currentBGIs: "Aktuellt BG är", andItIs: "och det är")
+            case "en": fallthrough
+            default:
+                return AnnouncementTexts(stable: "stable", down: "down", up: "up", currentBGIs: "Current BG is", andItIs: "and it is")
+            }
+        }
+    }
+    
+    struct LanguageVoiceMapping {
+        static let voiceLanguageMap: [String: String] = [
+            "en": "en-US",
+            "sv": "sv-SE"
+        ]
+        
+        static func voiceLanguageCode(forAppLanguage appLanguage: String) -> String {
+            return voiceLanguageMap[appLanguage, default: "en-US"]
+        }
+    }
+
     // Speaks the current blood glucose value and the change from the previous value.
     // Repeated calls to the function within 30 seconds are prevented.
     func speakBG(currentValue: Int, previousValue: Int) {
@@ -940,17 +969,23 @@ extension MainViewController {
         let negligibleThreshold = 3
         let differenceText: String
 
-        if abs(bloodGlucoseDifference) <= negligibleThreshold {
-            differenceText = "stable"
-        } else {
-            let direction = bloodGlucoseDifference < 0 ? "down" : "up"
-            let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference)))
-            differenceText = "\(direction) \(absoluteDifference)"
-        }
+        let preferredLanguage = UserDefaultsRepository.speakLanguage.value
+        let voiceLanguageCode = LanguageVoiceMapping.voiceLanguageCode(forAppLanguage: preferredLanguage)
 
-        let announcementText = "Current BG is \(bgUnits.toDisplayUnits(String(currentValue))), and it is \(differenceText)"
+        let texts = AnnouncementTexts.forLanguage(preferredLanguage)
+        
+        if abs(bloodGlucoseDifference) <= negligibleThreshold {
+            differenceText = texts.stable
+        } else {
+            let directionText = bloodGlucoseDifference < 0 ? texts.down : texts.up
+            let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference)))
+            differenceText = "\(directionText) \(absoluteDifference)"
+        }
+        
+        let announcementText = "\(texts.currentBGIs) \(bgUnits.toDisplayUnits(String(currentValue))), \(texts.andItIs) \(differenceText)"
         let speechUtterance = AVSpeechUtterance(string: announcementText)
-        speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        speechUtterance.voice = AVSpeechSynthesisVoice(language: voiceLanguageCode)
+        
         speechSynthesizer.speak(speechUtterance)
     }
     

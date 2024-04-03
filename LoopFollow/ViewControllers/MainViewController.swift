@@ -277,6 +277,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         restartAllTimers()
         currentCage = nil
         currentSage = nil
+        lastSpeechTime = nil
         refreshControl.endRefreshing()
     }
     
