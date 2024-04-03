@@ -946,7 +946,7 @@ extension MainViewController {
                     stable: "och det är stabilt",
                     increase: "och det har ökat med",
                     decrease: "och det har minskat med",
-                    currentBGIs: "Blodockret är"
+                    currentBGIs: "Blodsockret är"
                 )
             case "en": fallthrough
             default:
