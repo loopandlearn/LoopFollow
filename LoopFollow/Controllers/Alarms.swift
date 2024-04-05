@@ -977,6 +977,14 @@ extension MainViewController {
     // Speaks the current blood glucose value and the change from the previous value.
     // Repeated calls to the function within 30 seconds are prevented.
     func speakBG(currentValue: Int, previousValue: Int) {
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.playback, mode: .default)
+            try audioSession.setActive(true)
+        } catch {
+            print("Failed to set up audio session: \(error)")
+        }
+        
         // Get the current time
         let currentTime = Date()
 
