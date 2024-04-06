@@ -149,6 +149,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var lastSpeechTime: Date?
 
     var autoScrollPauseUntil: Date? = nil
+    
+    var IsNotLooping = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -449,7 +451,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         
         LoopStatusLabel.isHidden = isHidden
-        PredictionLabel.isHidden = isHidden
+        if IsNotLooping {
+            PredictionLabel.isHidden = true
+        }
+        else {
+            PredictionLabel.isHidden = isHidden
+        }
         infoTable.isHidden = isHidden
         
         if UserDefaultsRepository.hideInfoTable.value {
