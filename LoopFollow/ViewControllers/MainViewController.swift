@@ -11,7 +11,7 @@ import Charts
 import EventKit
 import ShareClient
 import UserNotifications
-import Photos
+import AVFAudio
 
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
     
@@ -147,6 +147,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // Stores the time of the last speech announcement to prevent repeated announcements.
     // This is a temporary safeguard until the issue with multiple calls to speakBG is fixed.
     var lastSpeechTime: Date?
+
+    var autoScrollPauseUntil: Date? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -425,26 +427,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         showHideNSDetails()
     }
     
-    
-
-    //update Min Ago Text. We need to call this separately because it updates between readings
-    func updateMinAgo(){
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Update min ago text") }
-        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        if bgData.count > 0 {
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date) / 60
-            minAgoBG = Double(TimeInterval(Date().timeIntervalSince1970)-bgData[bgData.count - 1].date)
-            MinAgoText.text = String(Int(deltaTime)) + " min ago"
-            snoozer.MinAgoLabel.text = String(Int(deltaTime)) + " min ago"
-            latestMinAgoString = String(Int(deltaTime)) + " min ago"
-        } else {
-            MinAgoText.text = ""
-            snoozer.MinAgoLabel.text = ""
-            latestMinAgoString = ""
-        }
-        
-    }
-    
     //Clear the info data before next pull. This ensures we aren't displaying old data if something fails.
     func clearLastInfoData(index: Int){
         tableData[index].value = ""
@@ -523,146 +505,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NONE":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
         return graphics[value]!
     }
-    
-    // Test code to save an image of graph for viewing on watch
-    func saveChartImage() {
-        var originalColor = BGChart.backgroundColor
-        BGChart.backgroundColor = NSUIColor.black
-        guard var image = BGChart.getChartImage(transparent: true) else {
-            BGChart.backgroundColor = originalColor
-            return }
-        var newImage = image.resizeImage(448.0, landscape: false, opaque: false, contentMode: .scaleAspectFit)
-        createAlbums(name1: "Loop Follow", name2: "Loop Follow Old")
-        if let collection1 = fetchAssetCollection("Loop Follow"), let collection2 = fetchAssetCollection("Loop Follow Old") {
-            deleteExistingImagesFromCollection(collection: collection1)
-            saveImageToAssetCollection(image, collection1: collection1, collection2: collection2)
-        }
         
-        BGChart.backgroundColor = originalColor
-    }
-    
-    func createAlbums(name1: String, name2: String) {
-        if let collection1 = fetchAssetCollection(name1) {
-        } else {
-            // Album does not exist, create it and attempt to save the image
-            PHPhotoLibrary.shared().performChanges({
-                PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: name1)
-            }, completionHandler: { (success: Bool, error: Error?) in
-                guard success == true && error == nil else {
-                    NSLog("Could not create the album")
-                    if let err = error {
-                        NSLog("Error: \(err)")
-                    }
-                    return
-                }
-
-                if let newCollection1 = self.fetchAssetCollection(name1) {
-                }
-            })
-        }
-        
-        if let collection2 = fetchAssetCollection(name2) {
-        } else {
-            // Album does not exist, create it and attempt to save the image
-            PHPhotoLibrary.shared().performChanges({
-                PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: name2)
-            }, completionHandler: { (success: Bool, error: Error?) in
-                guard success == true && error == nil else {
-                    NSLog("Could not create the album")
-                    if let err = error {
-                        NSLog("Error: \(err)")
-                    }
-                    return
-                }
-
-                if let newCollection2 = self.fetchAssetCollection(name2) {
-                }
-            })
-        }
-    }
-    
-    func fetchAssetCollection(_ name: String) -> PHAssetCollection? {
-
-        let fetchOption = PHFetchOptions()
-        fetchOption.predicate = NSPredicate(format: "title == '" + name + "'")
-
-        let fetchResult = PHAssetCollection.fetchAssetCollections(
-            with: PHAssetCollectionType.album,
-            subtype: PHAssetCollectionSubtype.albumRegular,
-            options: fetchOption)
-
-        return fetchResult.firstObject
-    }
-    
-    func deleteOldImages() {
-        if let collection = fetchAssetCollection("Loop Follow Old") {
-            let library = PHPhotoLibrary.shared()
-            library.performChanges({
-                let fetchOptions = PHFetchOptions()
-                let allPhotos = PHAsset.fetchAssets(in: collection, options: .none)
-                PHAssetChangeRequest.deleteAssets(allPhotos)
-            }, completionHandler: { (success: Bool, error: Error?) in
-                guard success == true && error == nil else {
-                    NSLog("Could not delete the image")
-                    if let err = error {
-                        NSLog("Error: " + err.localizedDescription)
-                    }
-                    return
-                }
-            })
-        }
-        
-        self.sendGeneralNotification(self, title: "Watch Face Cleanup", subtitle: "", body: "Delete old watch face graph images", timer: 86400)
-        
-        
-    }
-    
-    func deleteExistingImagesFromCollection(collection: PHAssetCollection) {
-        
-        // This code removes existing photos from collection but does not delete them
-        if collection.estimatedAssetCount < 1 { return }
-
-        PHPhotoLibrary.shared().performChanges( {
-
-            if let request = PHAssetCollectionChangeRequest(for: collection) {
-                request.removeAssets(at: [0])
-            }
-
-        }, completionHandler: { (success: Bool, error: Error?) in
-            guard success == true && error == nil else {
-                NSLog("Could not delete the image")
-                if let err = error {
-                    NSLog("Error: " + err.localizedDescription)
-                }
-                return
-            }
-        })
-    }
-
-    func saveImageToAssetCollection(_ image: UIImage, collection1: PHAssetCollection, collection2: PHAssetCollection) {
-        
-        PHPhotoLibrary.shared().performChanges({
-            
-            let creationRequest = PHAssetCreationRequest.creationRequestForAsset(from: image)
-            if let request = PHAssetCollectionChangeRequest(for: collection1),
-               let placeHolder = creationRequest.placeholderForCreatedAsset {
-                request.addAssets([placeHolder] as NSFastEnumeration)
-            }
-            if let request2 = PHAssetCollectionChangeRequest(for: collection2),
-               let placeHolder2 = creationRequest.placeholderForCreatedAsset {
-                request2.addAssets([placeHolder2] as NSFastEnumeration)
-            }
-        }, completionHandler: { (success: Bool, error: Error?) in
-            guard success == true && error == nil else {
-                NSLog("Could not save the image")
-                if let err = error {
-                    NSLog("Error: " + err.localizedDescription)
-                }
-                return
-            }
-        })
-    }
-
     func writeCalendar() {
         if UserDefaultsRepository.debugLog.value {
             self.writeDebugLog(value: "Write calendar start")
@@ -786,13 +629,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 // Display error to user
                 //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Error: Calendar Write") }
             }
-        
-        if UserDefaultsRepository.saveImage.value {
-            DispatchQueue.main.async {
-                self.saveChartImage()
-            }
-                
-        }
     }
     
     
@@ -844,6 +680,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
     }
     
-    
+    // User has scrolled the chart
+    func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
+        let isViewingLatestData = abs(BGChart.highestVisibleX - BGChart.chartXMax) < 0.001
+        if isViewingLatestData {
+            autoScrollPauseUntil = nil // User is back at the latest data, allow auto-scrolling
+        } else {
+            autoScrollPauseUntil = Date().addingTimeInterval(5 * 60) // User is viewing historical data, pause auto-scrolling
+        }
+    }
 }
-
