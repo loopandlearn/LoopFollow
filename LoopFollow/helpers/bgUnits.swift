@@ -12,26 +12,31 @@ import Foundation
 class bgUnits {
     
     static func toDisplayUnits(_ value: String) -> String {
-        if UserDefaultsRepository.units.value == "mg/dL" {
-            return removeDecimals(value)
-        } else {
-            // convert mg/dL to mmol/l
-            let floatValue : Float = Float(value)! * 0.0555
-            return String(floatValue.cleanValue)
-        }
-    }
-    
-    // if a "." is contained, simply takes the left part of the string only
-    static func removeDecimals(_ value : String) -> String {
-        if !value.contains(".") {
-            return value
-        }
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.maximumFractionDigits = UserDefaultsRepository.units.value == "mg/dL" ? 0 : 1
+        numberFormatter.locale = Locale.current
         
-        return String(value[..<value.firstIndex(of: ".")!])
+        if UserDefaultsRepository.units.value == "mg/dL" {
+            if let number = Float(value) {
+                let numberValue = NSNumber(value: number)
+                return numberFormatter.string(from: numberValue) ?? value
+            }
+        } else {
+            if let number = Float(value) {
+                let mmolValue = number / 18
+                let numberValue = NSNumber(value: mmolValue)
+                return numberFormatter.string(from: numberValue) ?? value
+            }
+        }
+        return value
     }
-    
-    static func removePeriodForBadge(_ value: String) -> String {
-        return value.replacingOccurrences(of: ".", with: "")
+
+    static func removePeriodAndCommaForBadge(_ value: String) -> String {
+        var modifiedValue = value
+        modifiedValue = modifiedValue.replacingOccurrences(of: ".", with: "")
+        modifiedValue = modifiedValue.replacingOccurrences(of: ",", with: "")
+        return modifiedValue
     }
 }
 
