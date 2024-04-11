@@ -14,21 +14,27 @@ class bgUnits {
     static func toDisplayUnits(_ value: String) -> String {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
-        numberFormatter.maximumFractionDigits = UserDefaultsRepository.units.value == "mg/dL" ? 0 : 1
-        numberFormatter.locale = Locale.current
         
         if UserDefaultsRepository.units.value == "mg/dL" {
-            if let number = Float(value) {
+            numberFormatter.maximumFractionDigits = 0 // No decimal places for mg/dL
+        } else {
+            numberFormatter.maximumFractionDigits = 1 // Always one decimal place for mmol/L
+            numberFormatter.minimumFractionDigits = 1 // This ensures even .0 is displayed
+        }
+        
+        numberFormatter.locale = Locale.current
+        
+        if let number = Float(value) {
+            if UserDefaultsRepository.units.value == "mg/dL" {
                 let numberValue = NSNumber(value: number)
                 return numberFormatter.string(from: numberValue) ?? value
-            }
-        } else {
-            if let number = Float(value) {
+            } else {
                 let mmolValue = number / 18
                 let numberValue = NSNumber(value: mmolValue)
                 return numberFormatter.string(from: numberValue) ?? value
             }
         }
+        
         return value
     }
 
