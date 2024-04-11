@@ -70,7 +70,7 @@ class StatsData {
         
         stdDev = sqrt(partialSum / Float(bgData.count))
         if UserDefaultsRepository.units.value != "mg/dL" {
-            stdDev = Float( bgUnits.toDisplayUnits( String( stdDev ) ) ) ?? 0.0;
+            stdDev = stdDev / 18
         }
         
         if UserDefaultsRepository.useIFCC.value {
