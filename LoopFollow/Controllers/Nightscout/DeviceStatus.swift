@@ -46,6 +46,43 @@ extension MainViewController {
             self.startDeviceStatusTimer(time: 10)
         }
     }
+    
+    func evaluateNotLooping(lastLoopTime: TimeInterval) {
+        if let statusStackView = LoopStatusLabel.superview as? UIStackView {
+            if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
+                IsNotLooping = true
+                // Change the distribution to 'fill' to allow manual resizing of arranged subviews
+                statusStackView.distribution = .fill
+                
+                // Hide PredictionLabel and expand LoopStatusLabel to fill the entire stack view
+                PredictionLabel.isHidden = true
+                LoopStatusLabel.frame = CGRect(x: 0, y: 0, width: statusStackView.frame.width, height: statusStackView.frame.height)
+                
+                // Update LoopStatusLabel's properties to display Not Looping
+                LoopStatusLabel.textAlignment = .center
+                LoopStatusLabel.text = "⚠️ Not Looping!"
+                LoopStatusLabel.textColor = UIColor.systemYellow
+                LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
+                
+            } else {
+                IsNotLooping = false
+                // Restore the original distribution and visibility of labels
+                statusStackView.distribution = .fillEqually
+                PredictionLabel.isHidden = false
+                
+                // Reset LoopStatusLabel's properties
+                LoopStatusLabel.textAlignment = .right
+                LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
+
+                if UserDefaultsRepository.forceDarkMode.value {
+                    LoopStatusLabel.textColor = UIColor.white
+                } else {
+                    LoopStatusLabel.textColor = UIColor.black
+                }
+            }
+        }
+        latestLoopTime = lastLoopTime
+    }
         
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
@@ -171,12 +208,8 @@ extension MainViewController {
                     }
                     
                 }
-                
-                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
-                    LoopStatusLabel.text = "⚠"
-                    latestLoopStatusString = "⚠"
-                }
-                latestLoopTime = lastLoopTime
+
+                evaluateNotLooping(lastLoopTime: lastLoopTime)
             } // end lastLoopTime
         } // end lastLoop Record
         
@@ -305,11 +338,8 @@ extension MainViewController {
                     }
                     
                 }
-                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
-                    LoopStatusLabel.text = "⚠"
-                    latestLoopStatusString = "⚠"
-                }
-                latestLoopTime = lastLoopTime
+
+                evaluateNotLooping(lastLoopTime: lastLoopTime)
             }
         }
         

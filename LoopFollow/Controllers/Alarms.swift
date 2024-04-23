@@ -349,7 +349,7 @@ extension MainViewController {
                 if (UserDefaultsRepository.alertNotLoopingUseLimits.value
                     && (
                         (Float(currentBG) >= UserDefaultsRepository.alertNotLoopingUpperLimit.value
-                            && Float(currentBG) <= UserDefaultsRepository.alertNotLoopingLowerLimit.value) ||
+                            || Float(currentBG) <= UserDefaultsRepository.alertNotLoopingLowerLimit.value) ||
                             // Ignore Limits if BG reading is older than non looping time
                             (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
                     ) ||
