@@ -1785,7 +1785,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertNotLoopingUseLimits.value = value
         }
         <<< StepperRow("alertNotLoopingLowerLimit") { row in
-            row.title = "Below BG"
+            row.title = "If Below BG"
             row.cell.stepper.stepValue = 1
             row.cell.stepper.minimumValue = 50
             row.cell.stepper.maximumValue = 200
@@ -1800,7 +1800,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertNotLoopingLowerLimit.value = Float(value)
         }
         <<< StepperRow("alertNotLoopingUpperLimit") { row in
-            row.title = "Above BG"
+            row.title = "If Above BG"
             row.cell.stepper.stepValue = 1
             row.cell.stepper.minimumValue = 100
             row.cell.stepper.maximumValue = 300
