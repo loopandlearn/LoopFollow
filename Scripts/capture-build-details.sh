@@ -10,11 +10,10 @@ info_plist_path="${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/BuildDetails.plis
 
 # Ensure the path to BuildDetails.plist is valid.
 if [ "${info_plist_path}" == "/" -o ! -e "${info_plist_path}" ]; then
-  echo "ERROR: BuildDetails.plist file does not exist at path: ${info_plist_path}" >&2
-  exit 1
+  echo "BuildDetails.plist file does not exist at path: ${info_plist_path}" >&2
+else
+  echo "Gathering build date..."
+
+  # Capture the current date and write it to BuildDetails.plist
+  plutil -replace com-LoopFollow-build-date -string "$(date)" "${info_plist_path}"
 fi
-
-echo "Gathering build date..."
-
-# Capture the current date and write it to BuildDetails.plist
-plutil -replace com-LoopFollow-build-date -string "$(date)" "${info_plist_path}"

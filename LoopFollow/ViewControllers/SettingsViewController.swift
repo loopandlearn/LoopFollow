@@ -98,7 +98,7 @@ class SettingsViewController: FormViewController {
        if isTestFlightBuild() {
           expirationHeaderString = "Beta (TestFlight) Expiration"
        }
-                        
+       
         form
         +++ Section(header: "Data Settings", footer: "")
        <<< SegmentedRow<String>("units") { row in
@@ -288,13 +288,23 @@ class SettingsViewController: FormViewController {
         }
 
        +++ Section(header: getAppVersion(), footer: "")
-
-       +++ Section(header: expirationHeaderString, footer: String(expiration.description))
-
-        showHideNSDetails()
+       
+       if !isMacApp() {
+           form +++ Section(header: expirationHeaderString, footer: String(expiration.description))
+       }
+       
+       showHideNSDetails()
        checkNightscoutStatus()
     }
     
+    func isMacApp() -> Bool {
+#if targetEnvironment(macCatalyst)
+        return true
+#else
+        return false
+#endif
+    }
+
     func getAppVersion() -> String {
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
             return "App Version: \(version)"
