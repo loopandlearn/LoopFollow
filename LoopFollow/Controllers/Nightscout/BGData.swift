@@ -176,7 +176,9 @@ extension MainViewController {
                 self.startBGTimer(time: 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
                 let timerVal = 310 - secondsAgo
                 print("##### started 5:10 bg timer: \(timerVal)")
-                self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
+                if data.count > 1 {
+                    self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
+                }
             }
         }
         
