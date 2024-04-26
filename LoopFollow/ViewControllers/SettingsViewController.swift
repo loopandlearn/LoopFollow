@@ -131,13 +131,11 @@ class SettingsViewController: FormViewController {
                return
            }
            
-           // Normalize input: trim, remove unwanted characters, and lowercase
-           let trimmedAndFiltered = value.trimmingCharacters(in: .whitespacesAndNewlines)
-               .replacingOccurrences(of: "[^A-Za-z0-9:/._-]", with: "", options: .regularExpression)
-               .lowercased()
+           // Normalize input: remove unwanted characters and lowercase
+           let filtered = value.replacingOccurrences(of: "[^A-Za-z0-9:/._-]", with: "", options: .regularExpression).lowercased()
            
            // Further clean-up: Remove trailing slashes
-           var cleanURL = trimmedAndFiltered
+           var cleanURL = filtered
            while cleanURL.last == "/" {
                cleanURL = String(cleanURL.dropLast())
            }
