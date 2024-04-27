@@ -1007,21 +1007,21 @@ extension MainViewController {
         let texts = AnnouncementTexts.forLanguage(preferredLanguage)
         
         let negligibleThreshold = 3
-        let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference)))
+        let localizedCurrentValue = bgUnits.toDisplayUnits(String(currentValue)).replacingOccurrences(of: ",", with: ".")
         let announcementText: String
         
         if abs(bloodGlucoseDifference) <= negligibleThreshold {
-            announcementText = "\(texts.currentBGIs) \(bgUnits.toDisplayUnits(String(currentValue))) \(texts.stable)"
+            announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(texts.stable)"
         } else {
             let directionText = bloodGlucoseDifference < 0 ? texts.decrease : texts.increase
-            announcementText = "\(texts.currentBGIs) \(bgUnits.toDisplayUnits(String(currentValue))) \(directionText) \(absoluteDifference)"
+            let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference))).replacingOccurrences(of: ",", with: ".")
+            announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(directionText) \(absoluteDifference)"
         }
         
         let speechUtterance = AVSpeechUtterance(string: announcementText)
         speechUtterance.voice = AVSpeechSynthesisVoice(language: voiceLanguageCode)
         
         speechSynthesizer.speak(speechUtterance)
-
     }
     
     func isOnPhoneCall() -> Bool {
