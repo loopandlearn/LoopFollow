@@ -9,29 +9,31 @@
 import Foundation
 import ShareClient
 
-public struct ShareGlucoseData: Codable {
+public struct ShareGlucoseData: Decodable {
     var sgv: Int
     var date: TimeInterval
     var direction: String?
 
     enum CodingKeys: String, CodingKey {
-        case sgv
+        case sgv  // Sensor Blood Glucose
+        case mbg  // Manual Blood Glucose
         case date
         case direction
     }
 
+    // Decoder initializer for handling JSON data
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        if let sgvAsDouble = try? container.decode(Double.self, forKey: .sgv) {
-            sgv = Int(sgvAsDouble.rounded())
-        } else if let sgvAsInt = try? container.decode(Int.self, forKey: .sgv) {
-            sgv = sgvAsInt
+        
+        if let glucoseValue = try? container.decode(Double.self, forKey: .sgv) {
+            sgv = Int(glucoseValue.rounded())
+        } else if let mbgValue = try? container.decode(Double.self, forKey: .mbg) {
+            sgv = Int(mbgValue.rounded())
         } else {
-            throw DecodingError.dataCorruptedError(forKey: .sgv, in: container, debugDescription: "Expected to decode an Integer or Double.")
+            throw DecodingError.dataCorruptedError(forKey: .sgv, in: container, debugDescription: "Expected to decode Double for sgv or mbg.")
         }
-
-        // Decode the other properties
+    
+        // Decode the date and optional direction
         date = try container.decode(TimeInterval.self, forKey: .date)
         direction = try container.decodeIfPresent(String.self, forKey: .direction)
     }
