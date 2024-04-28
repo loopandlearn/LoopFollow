@@ -29,7 +29,7 @@ class bgUnits {
                 let numberValue = NSNumber(value: number)
                 return numberFormatter.string(from: numberValue) ?? value
             } else {
-                let mmolValue = number / 18
+                let mmolValue = Double(number) * GlucoseConversion.mgDlToMmolL  // Convert number to Double
                 let numberValue = NSNumber(value: mmolValue)
                 return numberFormatter.string(from: numberValue) ?? value
             }
