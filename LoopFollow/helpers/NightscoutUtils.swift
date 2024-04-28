@@ -33,7 +33,7 @@ class NightscoutUtils {
             case .cage, .carbsToday, .sage, .treatments:
                 return "/api/v1/treatments.json"
             case .sgv:
-                return "/api/v1/entries/sgv.json"
+                return "/api/v1/entries.json"
             case .profile:
                 return "/api/v1/profile/current.json"
             case .deviceStatus: 
