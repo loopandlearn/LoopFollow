@@ -225,10 +225,10 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         } else if AlarmSound.whichAlarm == "Rec. Bolus" {
            UserDefaultsRepository.alertRecBolusIsSnoozed.value = true
 
-           UserDefaultsRepository.alertRecBolusSnoozedTime.value = Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60 * 60))
+           UserDefaultsRepository.alertRecBolusSnoozedTime.value = Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60))
            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
            alarms.reloadIsSnoozed(key: "alertRecBolusIsSnoozed", value: true)
-           alarms.reloadSnoozeTime(key: "alertRecBolusSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60 * 60)))
+           alarms.reloadSnoozeTime(key: "alertRecBolusSnoozedTime", setNil: false, value: Date().addingTimeInterval(TimeInterval(snoozeForMinuteStepper.value * 60)))
        }
     }
     
