@@ -3303,20 +3303,19 @@ class AlarmViewController: FormViewController {
             guard let value = row.value else { return }
             UserDefaultsRepository.alertRecBolusLevel.value = value
         }
-        
-        <<< StepperRow("alertRecBolusSnoozeHours") { row in
-            row.title = "Snooze Hours"
-            row.cell.stepper.stepValue = 1
-            row.cell.stepper.minimumValue = 1
-            row.cell.stepper.maximumValue = 24
-            row.value = Double(UserDefaultsRepository.alertRecBolusSnoozeHours.value)
+        <<< StepperRow("alertRecBolusSnooze") { row in
+            row.title = "Default Snooze"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 60
+            row.value = Double(UserDefaultsRepository.alertRecBolusSnooze.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
                 return "\(Int(value))"
             }
         }.onChange { [weak self] row in
             guard let value = row.value else { return }
-            UserDefaultsRepository.alertRecBolusSnoozeHours.value = Int(value)
+            UserDefaultsRepository.alertRecBolusSnooze.value = Int(value)
         }
         <<< PickerInputRow<String>("alertRecBolusSound") { row in
             row.title = "Sound"

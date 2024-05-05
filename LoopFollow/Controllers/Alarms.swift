@@ -517,7 +517,7 @@ extension MainViewController {
                 AlarmSound.whichAlarm = "Rec. Bolus"
 
                 if UserDefaultsRepository.alertRecBolusRepeat.value { numLoops = -1 }
-                triggerAlarm(sound: UserDefaultsRepository.alertRecBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertRecBolusSnoozeHours.value, snoozeIncrement: 1, audio: true)
+                triggerAlarm(sound: UserDefaultsRepository.alertRecBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertRecBolusSnooze.value, snoozeIncrement: 5, audio: true)
                 return
             }
         }
