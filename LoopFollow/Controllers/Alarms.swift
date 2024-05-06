@@ -509,9 +509,21 @@ extension MainViewController {
             }
         }
 
+        if UserDefaultsRepository.alertRecBolusActive.value && !UserDefaultsRepository.alertRecBolusIsSnoozed.value {
+            let currentRecBolus = UserDefaultsRepository.deviceRecBolus.value
+            let alertAtRecBolus = Double(UserDefaultsRepository.alertRecBolusLevel.value)
+
+            if currentRecBolus >= alertAtRecBolus {
+                AlarmSound.whichAlarm = "Rec. Bolus"
+
+                if UserDefaultsRepository.alertRecBolusRepeat.value { numLoops = -1 }
+                triggerAlarm(sound: UserDefaultsRepository.alertRecBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertRecBolusSnooze.value, snoozeIncrement: 5, audio: true)
+                return
+            }
+        }
+
         // still send persistent notification if no alarms trigger and persistent notification is on
         persistentNotification(bgTime: currentBGTime)
-        
     }
        
     func checkOverrideAlarms()
@@ -773,7 +785,14 @@ extension MainViewController {
             alarms.reloadSnoozeTime(key: "alertBatterySnoozedTime", setNil: true)
             alarms.reloadIsSnoozed(key: "alertBatteryIsSnoozed", value: false)
         }
-      }
+
+        if date > UserDefaultsRepository.alertRecBolusSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertRecBolusSnoozedTime.setNil(key: "alertRecBolusSnoozedTime")
+            UserDefaultsRepository.alertRecBolusIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertRecBolusSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertRecBolusIsSnoozed", value: false)
+        }
+    }
     
     func checkQuietHours() {
         if UserDefaultsRepository.quietHourStart.value == nil || UserDefaultsRepository.quietHourEnd.value == nil { return }

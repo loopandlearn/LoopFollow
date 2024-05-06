@@ -181,6 +181,7 @@ extension MainViewController {
                     }
                     if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
                         tableData[8].value = String(format:"%.2fU", recBolus)
+                        UserDefaultsRepository.deviceRecBolus.value = recBolus
                     }
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
                         if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
@@ -239,9 +240,16 @@ extension MainViewController {
                         tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double)
                         latestCOB = String(format:"%.0f", cobdata["COB"] as! Double)
                     }
-                    if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[8].value = String(format:"%.2fU", recbolusdata["insulinReq"] as! Double)
+                    if let recbolusdata = lastLoopRecord["enacted"] as? [String: AnyObject],
+                       let insulinReq = recbolusdata["insulinReq"] as? Double {
+                        tableData[8].value = String(format: "%.2fU", insulinReq)
+                        UserDefaultsRepository.deviceRecBolus.value = insulinReq
+                    } else {
+                        tableData[8].value = "N/A"
+                        UserDefaultsRepository.deviceRecBolus.value = 0
+                        print("Warning: Failed to extract insulinReq from recbolusdata.")
                     }
+
                     if let autosensdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
                         tableData[11].value = String(format:"%.0f", sens) + "%"
