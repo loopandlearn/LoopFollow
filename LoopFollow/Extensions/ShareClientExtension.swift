@@ -17,6 +17,7 @@ public struct ShareGlucoseData: Decodable {
     enum CodingKeys: String, CodingKey {
         case sgv  // Sensor Blood Glucose
         case mbg  // Manual Blood Glucose
+        case glucose  // Other type of entry
         case date
         case direction
     }
@@ -29,8 +30,10 @@ public struct ShareGlucoseData: Decodable {
             sgv = Int(glucoseValue.rounded())
         } else if let mbgValue = try? container.decode(Double.self, forKey: .mbg) {
             sgv = Int(mbgValue.rounded())
+        } else if let mbgValue = try? container.decode(Double.self, forKey: .glucose) {
+            sgv = Int(mbgValue.rounded())
         } else {
-            throw DecodingError.dataCorruptedError(forKey: .sgv, in: container, debugDescription: "Expected to decode Double for sgv or mbg.")
+            throw DecodingError.dataCorruptedError(forKey: .sgv, in: container, debugDescription: "Expected to decode Double for sgv, mbg or glucose.")
         }
     
         // Decode the date and optional direction
