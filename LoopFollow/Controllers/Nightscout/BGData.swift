@@ -229,13 +229,12 @@ extension MainViewController {
             self.updateBGGraph()
             self.updateStats()
             
-            let latestEntryi = entries.count - 1
-            let latestBG = entries[latestEntryi].sgv
-            let priorBG = entries[latestEntryi - 1].sgv
-            let deltaBG = latestBG - priorBG as Int
+            let latestEntryIndex = entries.count - 1
+            let latestBG = entries[latestEntryIndex].sgv
+            let priorBG = entries[latestEntryIndex - 1].sgv
+            let deltaBG = latestBG - priorBG
             sharedDeltaBG = deltaBG
-            let lastBGTime = entries[latestEntryi].date
-
+            let lastBGTime = entries[latestEntryIndex].date
             
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
             var userUnit = " mg/dL"

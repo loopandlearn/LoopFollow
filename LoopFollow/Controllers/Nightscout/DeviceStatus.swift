@@ -62,6 +62,7 @@ extension MainViewController {
         if let statusStackView = LoopStatusLabel.superview as? UIStackView {
             if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
                 IsNotLooping = true
+                /*
                 // Change the distribution to 'fill' to allow manual resizing of arranged subviews
                 statusStackView.distribution = .fill
                 
@@ -70,13 +71,15 @@ extension MainViewController {
                 LoopStatusLabel.frame = CGRect(x: 0, y: 0, width: statusStackView.frame.width, height: statusStackView.frame.height)
                 
                 // Update LoopStatusLabel's properties to display Not Looping
-                LoopStatusLabel.textAlignment = .center
-                LoopStatusLabel.text = "⚠️ Not Looping!"
+                LoopStatusLabel.textAlignment = .right
+                LoopStatusLabel.text = "⚠️"
                 LoopStatusLabel.textColor = UIColor.systemYellow
-                LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
+                LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
+                 */
                 
             } else {
                 IsNotLooping = false
+                /*
                 // Restore the original distribution and visibility of labels
                 statusStackView.distribution = .fillEqually
                 PredictionLabel.isHidden = false
@@ -89,7 +92,7 @@ extension MainViewController {
                     LoopStatusLabel.textColor = UIColor.white
                 } else {
                     LoopStatusLabel.textColor = UIColor.black
-                }
+                }*/
             }
         }
         latestLoopTime = lastLoopTime
@@ -251,71 +254,6 @@ extension MainViewController {
                         }
                     }
 
-                    /*
-                    if let enactedData = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        if let COB = enactedData["COB"] as? Double {
-                            tableData[1].value = String(format:"%.0f", COB) + " g"
-                            latestCOB = String(format:"%.0f", COB)
-                            sharedLatestCOB = latestCOB
-                        }
-                        
-                        if let insulinReq = enactedData["insulinReq"] as? Double {
-                            tableData[8].value = String(format:"%.2f", insulinReq) + " E"
-                        }
-                        
-                        if let sensitivityRatio = enactedData["sensitivityRatio"] as? Double {
-                            let sens = sensitivityRatio * 100.0
-                            tableData[11].value = String(format:"%.0f", sens) + " %"
-                        }
-                        
-                        if let TDD = enactedData["TDD"] as? Double {
-                            tableData[13].value = String(format:"%.1f", TDD) + " E"
-                        }
-                        
-                        if let ISF = enactedData["ISF"] as? Double {
-                            tableData[14].value = String(format:"%.1f", ISF) + " mmol/L/E"
-                        }
-                        
-                        if let CR = enactedData["CR"] as? Double {
-                            tableData[15].value = String(format:"%.1f", CR) + " g/E"
-                            sharedCRValue = String(format:"%.1f", CR)
-                        }
-                        
-                        if let currentTargetMgdl = enactedData["current_target"] as? Double {
-                            let currentTargetMmol = mgdlToMmol(currentTargetMgdl)
-                            tableData[16].value = String(format: "%.1f", currentTargetMmol) + " mmol/L"
-                        }
-                        //Daniel: Added enacted data for bolus calculator and info
-                        if let minGuardBG = enactedData["minGuardBG"] as? Double {
-                                let formattedMinGuardBGString = bgUnits.toDisplayUnits(String(format:"%.1f", minGuardBG))
-                                sharedMinGuardBG = Double(formattedMinGuardBGString) ?? 0
-                            } else {
-                                let formattedLowLine = bgUnits.toDisplayUnits(String(format:"%.1f", UserDefaultsRepository.lowLine.value))
-                                sharedMinGuardBG = Double(formattedLowLine) ?? 0
-                            }
-                        
-                        if let insulinReq = enactedData["insulinReq"] as? Double {
-                                let formattedInsulinReqString = String(format:"%.2f", insulinReq)
-                                sharedInsulinReq = Double(formattedInsulinReqString) ?? 0
-                            } else {
-                                sharedInsulinReq = 0
-                            }
-                        
-                        if let LastSMBUnits = enactedData["units"] as? Double {
-                                let formattedLastSMBUnitsString = String(format:"%.2f", LastSMBUnits)
-                                sharedLastSMBUnits = Double(formattedLastSMBUnitsString) ?? 0
-                            } else {
-                                sharedLastSMBUnits = 0
-                            }
-                        
-                    } else {
-                        // If enactedData is nil, set all tableData values to "Waiting"
-                        for i in 1..<tableData.count {
-                            tableData[i].value = "---"
-                        }
-                        
-                    }
-                     */
                     //Daniel: Use suggested instead of enacted to populate infotable even when not enacted
                     if let suggestedData = lastLoopRecord["suggested"] as? [String:AnyObject] {
                         if let COB = suggestedData["COB"] as? Double {
@@ -521,6 +459,11 @@ extension MainViewController {
                     }
                     
                 }
+                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
+                    LoopStatusLabel.text = "⚠"
+                    latestLoopStatusString = "⚠"
+                }
+                latestLoopTime = lastLoopTime
 
                 evaluateNotLooping(lastLoopTime: lastLoopTime)
             }

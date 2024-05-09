@@ -485,12 +485,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         
         LoopStatusLabel.isHidden = isHidden
-        if IsNotLooping {
-            PredictionLabel.isHidden = true
-        }
-        else {
-            PredictionLabel.isHidden = isHidden
-        }
+        PredictionLabel.isHidden = isHidden
         infoTable.isHidden = isHidden
         
         if UserDefaultsRepository.hideInfoTable.value {
@@ -748,16 +743,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         
-    }
-
-     // User has scrolled the chart
-    func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
-        let isViewingLatestData = abs(BGChart.highestVisibleX - BGChart.chartXMax) < 0.001
-        if isViewingLatestData {
-            autoScrollPauseUntil = nil // User is back at the latest data, allow auto-scrolling
-        } else {
-            autoScrollPauseUntil = Date().addingTimeInterval(5 * 60) // User is viewing historical data, pause auto-scrolling
-        }
     }
     
     // User has scrolled the chart
