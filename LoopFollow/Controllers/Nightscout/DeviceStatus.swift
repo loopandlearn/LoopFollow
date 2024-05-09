@@ -307,11 +307,11 @@ extension MainViewController {
                         
                         //Daniel: Added suggested data for bolus calculator and info
                         if let minGuardBG = suggestedData["minGuardBG"] as? Double {
-                                let formattedMinGuardBGString = bgUnits.toDisplayUnits(String(format:"%.1f", minGuardBG))
-                                sharedMinGuardBG = Double(formattedMinGuardBGString) ?? 0
+                                let formattedMinGuardBGString = mgdlToMmol(minGuardBG)
+                                sharedMinGuardBG = Double(formattedMinGuardBGString)
                             } else {
-                                let formattedLowLine = bgUnits.toDisplayUnits(String(format:"%.1f", UserDefaultsRepository.lowLine.value))
-                                sharedMinGuardBG = Double(formattedLowLine) ?? 0
+                                let formattedLowLine = mgdlToMmol(Double(UserDefaultsRepository.lowLine.value))
+                                sharedMinGuardBG = Double(formattedLowLine)
                             }
                         
                         if let insulinReq = suggestedData["insulinReq"] as? Double {
@@ -353,7 +353,6 @@ extension MainViewController {
                     }
                     
                     //Picks COB prediction if available, else UAM, else IOB, else ZT
-                    //Ideal is to predict all 4 in Loop Follow but this is a quick start
                     var graphtype = ""
                     var predictioncolor = UIColor.systemGray
                     PredictionLabel.textColor = predictioncolor
@@ -420,13 +419,90 @@ extension MainViewController {
                                 }
                                 i += 1
                             }
+                            
+                        if let graphdataCOB = predbgdata["COB"] as? [Double] {
+                            //print(graphdataCOB)
+                            predictionDataCOB.removeAll()
+                            var predictionTimeCOB = lastLoopTime
+                            let toLoadCOB = Int(UserDefaultsRepository.predictionToLoad.value * 12)
+                            var iCOB = 0
+                            while iCOB <= toLoadCOB {
+                                if iCOB < graphdataCOB.count {
+                                    let predictionCOB = ShareGlucoseData(sgv: Int(round(graphdataCOB[iCOB])), date: predictionTimeCOB, direction: "flat")
+                                    predictionDataCOB.append(predictionCOB)
+                                    predictionTimeCOB += 300
+                                }
+                                iCOB += 1
+                            }
+                        } else {
+                          print("No COB prediction found")
+                        }
+                        updatePredictionGraphCOB(color: UIColor(named: "LoopYellow"))
+                        
+                        if let graphdataUAM = predbgdata["UAM"] as? [Double] {
+                            //print(graphdataUAM)
+                            predictionDataUAM.removeAll()
+                            var predictionTimeUAM = lastLoopTime
+                            let toLoadUAM = Int(UserDefaultsRepository.predictionToLoad.value * 12)
+                            var iUAM = 0
+                            while iUAM <= toLoadUAM {
+                                if iUAM < graphdataUAM.count {
+                                    let predictionUAM = ShareGlucoseData(sgv: Int(round(graphdataUAM[iUAM])), date: predictionTimeUAM, direction: "flat")
+                                    predictionDataUAM.append(predictionUAM)
+                                    predictionTimeUAM += 300
+                                }
+                                iUAM += 1
+                            }
+                        } else {
+                            print("No UAM prediction found")
+                        }
+                        updatePredictionGraphUAM(color: UIColor(named: "UAM"))
+                        
+                        if let graphdataIOB = predbgdata["IOB"] as? [Double] {
+                            //print(graphdataIOB)
+                            predictionDataIOB.removeAll()
+                            var predictionTimeIOB = lastLoopTime
+                            let toLoadIOB = Int(UserDefaultsRepository.predictionToLoad.value * 12)
+                            var iIOB = 0
+                            while iIOB <= toLoadIOB {
+                                if iIOB < graphdataIOB.count {
+                                    let predictionIOB = ShareGlucoseData(sgv: Int(round(graphdataIOB[iIOB])), date: predictionTimeIOB, direction: "flat")
+                                    predictionDataIOB.append(predictionIOB)
+                                    predictionTimeIOB += 300
+                                }
+                                iIOB += 1
+                            }
+                    } else {
+                        print("No IOB prediction found")
+                    }
+                        updatePredictionGraphIOB(color: UIColor(named: "Insulin"))
+                        
+                    if let graphdataZT = predbgdata["ZT"] as? [Double] {
+                        //print(graphdataZT)
+                            predictionDataZT.removeAll()
+                            var predictionTimeZT = lastLoopTime
+                            let toLoadZT = Int(UserDefaultsRepository.predictionToLoad.value * 12)
+                            var iZT = 0
+                            while iZT <= toLoadZT {
+                                if iZT < graphdataZT.count {
+                                    let predictionZT = ShareGlucoseData(sgv: Int(round(graphdataZT[iZT])), date: predictionTimeZT, direction: "flat")
+                                    predictionDataZT.append(predictionZT)
+                                    predictionTimeZT += 300
+                                }
+                                iZT += 1
+                            }
+                } else {
+                    print("No ZT prediction found")
+                }
+                        updatePredictionGraphZT(color: UIColor(named: "ZT"))
+                        
                         }
                         
                         if let predMin = graphdata.min(), let predMax = graphdata.max() {
                             let formattedPredMin = bgUnits.toDisplayUnits(String(predMin))
                             let formattedPredMax = bgUnits.toDisplayUnits(String(predMax))
                             tableData[9].value = "\(formattedPredMin) - \(formattedPredMax) mmol/L"
-                            updatePredictionGraph(color: predictioncolor)
+                            //updatePredictionGraph(color: predictioncolor)
                         } else {
                             tableData[9].value = "N/A"
                             // Handle the case where predMin or predMax is nil
@@ -468,29 +544,6 @@ extension MainViewController {
                 evaluateNotLooping(lastLoopTime: lastLoopTime)
             }
         }
-        
-        /*var oText = "" as String
-        currentOverride = 1.0
-        if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
-            if lastOverride["active"] as! Bool {
-                
-                let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
-                if let multiplier = lastOverride["multiplier"] as? Double {
-                    currentOverride = multiplier
-                    oText += String(format: "%.0f%%", (multiplier * 100))
-                }
-                else
-                {
-                    oText += "100%"
-                }
-                oText += " ("
-                let minValue = lastCorrection["minValue"] as! Double
-                let maxValue = lastCorrection["maxValue"] as! Double
-                oText += bgUnits.toDisplayUnits(String(minValue)) + "-" + bgUnits.toDisplayUnits(String(maxValue)) + ")"
-                
-                tableData[3].value =  oText
-            }
-        }*/
         
         infoTable.reloadData()
         

@@ -85,6 +85,102 @@ extension MainViewController {
         linePrediction.setDrawHighlightIndicators(false)
         linePrediction.valueFont.withSize(50)
         
+        // Setup Prediction line COB details
+        let predictionChartEntryCOB = [ChartDataEntry]()
+        let linePredictionCOB = LineChartDataSet(entries:predictionChartEntryCOB, label: "")
+        linePredictionCOB.circleRadius = CGFloat(globalVariables.dotBG)
+        linePredictionCOB.circleColors = [NSUIColor.systemPurple]
+        linePredictionCOB.colors = [NSUIColor.systemPurple]
+        linePredictionCOB.drawCircleHoleEnabled = true
+        linePredictionCOB.axisDependency = YAxis.AxisDependency.right
+        linePredictionCOB.highlightEnabled = true
+        linePredictionCOB.drawValuesEnabled = false
+        
+        if UserDefaultsRepository.showLines.value {
+            linePredictionCOB.lineWidth = 2
+        } else {
+            linePredictionCOB.lineWidth = 0
+        }
+        if UserDefaultsRepository.showDots.value {
+            linePredictionCOB.drawCirclesEnabled = true
+        } else {
+            linePredictionCOB.drawCirclesEnabled = false
+        }
+        linePredictionCOB.setDrawHighlightIndicators(false)
+        linePredictionCOB.valueFont.withSize(50)
+        
+        // Setup Prediction line UAM details
+        let predictionChartEntryUAM = [ChartDataEntry]()
+        let linePredictionUAM = LineChartDataSet(entries:predictionChartEntryUAM, label: "")
+        linePredictionUAM.circleRadius = CGFloat(globalVariables.dotBG)
+        linePredictionUAM.circleColors = [NSUIColor.systemPurple]
+        linePredictionUAM.colors = [NSUIColor.systemPurple]
+        linePredictionUAM.drawCircleHoleEnabled = true
+        linePredictionUAM.axisDependency = YAxis.AxisDependency.right
+        linePredictionUAM.highlightEnabled = true
+        linePredictionUAM.drawValuesEnabled = false
+        
+        if UserDefaultsRepository.showLines.value {
+            linePredictionUAM.lineWidth = 2
+        } else {
+            linePredictionUAM.lineWidth = 0
+        }
+        if UserDefaultsRepository.showDots.value {
+            linePredictionUAM.drawCirclesEnabled = true
+        } else {
+            linePredictionUAM.drawCirclesEnabled = false
+        }
+        linePredictionUAM.setDrawHighlightIndicators(false)
+        linePredictionUAM.valueFont.withSize(50)
+        
+        // Setup Prediction line IOB details
+        let predictionChartEntryIOB = [ChartDataEntry]()
+        let linePredictionIOB = LineChartDataSet(entries:predictionChartEntryIOB, label: "")
+        linePredictionIOB.circleRadius = CGFloat(globalVariables.dotBG)
+        linePredictionIOB.circleColors = [NSUIColor.systemPurple]
+        linePredictionIOB.colors = [NSUIColor.systemPurple]
+        linePredictionIOB.drawCircleHoleEnabled = true
+        linePredictionIOB.axisDependency = YAxis.AxisDependency.right
+        linePredictionIOB.highlightEnabled = true
+        linePredictionIOB.drawValuesEnabled = false
+        
+        if UserDefaultsRepository.showLines.value {
+            linePredictionIOB.lineWidth = 2
+        } else {
+            linePredictionIOB.lineWidth = 0
+        }
+        if UserDefaultsRepository.showDots.value {
+            linePredictionIOB.drawCirclesEnabled = true
+        } else {
+            linePredictionIOB.drawCirclesEnabled = false
+        }
+        linePredictionIOB.setDrawHighlightIndicators(false)
+        linePredictionIOB.valueFont.withSize(50)
+        
+        // Setup Prediction line ZT details
+        let predictionChartEntryZT = [ChartDataEntry]()
+        let linePredictionZT = LineChartDataSet(entries:predictionChartEntryZT, label: "")
+        linePredictionZT.circleRadius = CGFloat(globalVariables.dotBG)
+        linePredictionZT.circleColors = [NSUIColor.systemPurple]
+        linePredictionZT.colors = [NSUIColor.systemPurple]
+        linePredictionZT.drawCircleHoleEnabled = true
+        linePredictionZT.axisDependency = YAxis.AxisDependency.right
+        linePredictionZT.highlightEnabled = true
+        linePredictionZT.drawValuesEnabled = false
+        
+        if UserDefaultsRepository.showLines.value {
+            linePredictionZT.lineWidth = 2
+        } else {
+            linePredictionZT.lineWidth = 0
+        }
+        if UserDefaultsRepository.showDots.value {
+            linePredictionZT.drawCirclesEnabled = true
+        } else {
+            linePredictionZT.drawCirclesEnabled = false
+        }
+        linePredictionZT.setDrawHighlightIndicators(false)
+        linePredictionZT.valueFont.withSize(50)
+        
         // create Basal graph data
         let chartEntry = [ChartDataEntry]()
         let maxBasal = UserDefaultsRepository.minBasalScale.value
@@ -314,6 +410,10 @@ extension MainViewController {
         data.append(lineNote) // Dataset 11
         data.append(lineSmb) // Dataset 12
         data.append(linePump) // Dataset 13
+        data.append(linePredictionCOB) // Dataset 14
+        data.append(linePredictionUAM) // Dataset 15
+        data.append(linePredictionIOB) // Dataset 16
+        data.append(linePredictionZT) // Dataset 17
         
         data.setValueFont(UIFont.systemFont(ofSize: 10))
         
@@ -474,19 +574,40 @@ extension MainViewController {
         let dataIndexPrediction = 1
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
         let linePrediction = BGChart.lineData!.dataSets[dataIndexPrediction] as! LineChartDataSet
+        let linePredictionCOB = BGChart.lineData!.dataSets[dataIndexPrediction] as! LineChartDataSet
+        let linePredictionUAM = BGChart.lineData!.dataSets[dataIndexPrediction] as! LineChartDataSet
+        let linePredictionIOB = BGChart.lineData!.dataSets[dataIndexPrediction] as! LineChartDataSet
+        let linePredictionZT = BGChart.lineData!.dataSets[dataIndexPrediction] as! LineChartDataSet
         if UserDefaultsRepository.showLines.value {
             lineBG.lineWidth = 2
             linePrediction.lineWidth = 2
+            linePredictionCOB.lineWidth = 2
+            linePredictionUAM.lineWidth = 2
+            linePredictionIOB.lineWidth = 2
+            linePredictionZT.lineWidth = 2
         } else {
             lineBG.lineWidth = 0
             linePrediction.lineWidth = 0
+            linePredictionCOB.lineWidth = 0
+            linePredictionUAM.lineWidth = 0
+            linePredictionIOB.lineWidth = 0
+            linePredictionZT.lineWidth = 0
         }
         if UserDefaultsRepository.showDots.value {
             lineBG.drawCirclesEnabled = true
             linePrediction.drawCirclesEnabled = true
+            linePredictionCOB.drawCirclesEnabled = true
+            linePredictionUAM.drawCirclesEnabled = true
+            linePredictionIOB.drawCirclesEnabled = true
+            linePredictionZT.drawCirclesEnabled = true
         } else {
             lineBG.drawCirclesEnabled = false
             linePrediction.drawCirclesEnabled = false
+            linePredictionCOB.drawCirclesEnabled = false
+            linePredictionUAM.drawCirclesEnabled = false
+            linePredictionIOB.drawCirclesEnabled = false
+            linePredictionZT.drawCirclesEnabled = false
+            
         }
         
         BGChart.rightAxis.axisMinimum = 0
@@ -641,6 +762,226 @@ extension MainViewController {
                 mainChart.circleColors.append(colors[i])
                 smallChart.addColor(colors[i])
                 smallChart.circleColors.append(colors[i])
+            }
+        }
+        BGChart.rightAxis.axisMaximum = Double(topBG)
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChartFull.data?.notifyDataChanged()
+        BGChartFull.notifyDataSetChanged()
+    }
+    
+    func updatePredictionGraphCOB(color: UIColor? = nil) {
+        let dataIndex = 14
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
+        
+        var colors = [NSUIColor]()
+        let maxBGOffset: Float = 20
+        for iCOB in 0..<predictionDataCOB.count {
+            var predictionValCOB = Double(predictionDataCOB[iCOB].sgv)
+            if Float(predictionValCOB) > topBG - maxBGOffset {
+                topBG = Float(predictionValCOB) + maxBGOffset
+            }
+            
+            if iCOB == 0 {
+                if UserDefaultsRepository.showDots.value {
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(0.0))
+                } else {
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(1.0))
+                }
+            } else if predictionValCOB > 400 {
+                colors.append(color ?? NSUIColor.systemYellow)
+            } else if predictionValCOB < 0 {
+                colors.append(color ?? NSUIColor.systemRed)
+            } else {
+                colors.append(color ?? NSUIColor.systemPurple)
+            }
+            
+            let valueCOB = ChartDataEntry(x: predictionDataCOB[iCOB].date, y: predictionValCOB, data: formatPillTextExtraLine(line1: "COB", line2: bgUnits.toDisplayUnits(String(predictionDataCOB[iCOB].sgv)) + " mmol/L", time: predictionDataCOB[iCOB].date))
+            mainChart.addEntry(valueCOB)
+            smallChart.addEntry(valueCOB)
+        }
+        
+        smallChart.circleColors.removeAll()
+        smallChart.colors.removeAll()
+        mainChart.colors.removeAll()
+        mainChart.circleColors.removeAll()
+        if colors.count > 0 {
+            for iCOB in 0..<colors.count {
+                mainChart.addColor(colors[iCOB])
+                mainChart.circleColors.append(colors[iCOB])
+                smallChart.addColor(colors[iCOB])
+                smallChart.circleColors.append(colors[iCOB])
+            }
+        }
+        BGChart.rightAxis.axisMaximum = Double(topBG)
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChartFull.data?.notifyDataChanged()
+        BGChartFull.notifyDataSetChanged()
+    }
+    
+    func updatePredictionGraphUAM(color: UIColor? = nil) {
+        let dataIndex = 15
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
+        
+        var colors = [NSUIColor]()
+        let maxBGOffset: Float = 20
+        for iUAM in 0..<predictionDataUAM.count {
+            var predictionValUAM = Double(predictionDataUAM[iUAM].sgv)
+            if Float(predictionValUAM) > topBG - maxBGOffset {
+                topBG = Float(predictionValUAM) + maxBGOffset
+            }
+            
+            if iUAM == 0 {
+                if UserDefaultsRepository.showDots.value {
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(0.0))
+                } else {
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(1.0))
+                }
+            } else if predictionValUAM > 400 {
+                colors.append(color ?? NSUIColor.systemYellow)
+            } else if predictionValUAM < 0 {
+                colors.append(color ?? NSUIColor.systemRed)
+            } else {
+                colors.append(color ?? NSUIColor.systemPurple)
+            }
+            
+            let valueUAM = ChartDataEntry(x: predictionDataUAM[iUAM].date, y: predictionValUAM, data: formatPillTextExtraLine(line1: "UAM", line2: bgUnits.toDisplayUnits(String(predictionDataUAM[iUAM].sgv)) + " mmol/L", time: predictionDataUAM[iUAM].date))
+            mainChart.addEntry(valueUAM)
+            smallChart.addEntry(valueUAM)
+        }
+        
+        smallChart.circleColors.removeAll()
+        smallChart.colors.removeAll()
+        mainChart.colors.removeAll()
+        mainChart.circleColors.removeAll()
+        if colors.count > 0 {
+            for iUAM in 0..<colors.count {
+                mainChart.addColor(colors[iUAM])
+                mainChart.circleColors.append(colors[iUAM])
+                smallChart.addColor(colors[iUAM])
+                smallChart.circleColors.append(colors[iUAM])
+            }
+        }
+        BGChart.rightAxis.axisMaximum = Double(topBG)
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChartFull.data?.notifyDataChanged()
+        BGChartFull.notifyDataSetChanged()
+    }
+    
+    func updatePredictionGraphIOB(color: UIColor? = nil) {
+        let dataIndex = 16
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
+        
+        var colors = [NSUIColor]()
+        let maxBGOffset: Float = 20
+        for iIOB in 0..<predictionDataIOB.count {
+            var predictionValIOB = Double(predictionDataIOB[iIOB].sgv)
+            if Float(predictionValIOB) > topBG - maxBGOffset {
+                topBG = Float(predictionValIOB) + maxBGOffset
+            }
+            
+            if iIOB == 0 {
+                if UserDefaultsRepository.showDots.value {
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(0.0))
+                } else {
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(1.0))
+                }
+            } else if predictionValIOB > 400 {
+                colors.append(color ?? NSUIColor.systemYellow)
+            } else if predictionValIOB < 0 {
+                colors.append(color ?? NSUIColor.systemRed)
+            } else {
+                colors.append(color ?? NSUIColor.systemPurple)
+            }
+            
+            let valueIOB = ChartDataEntry(x: predictionDataIOB[iIOB].date, y: predictionValIOB, data: formatPillTextExtraLine(line1: "IOB", line2: bgUnits.toDisplayUnits(String(predictionDataIOB[iIOB].sgv)) + " mmol/L", time: predictionDataIOB[iIOB].date))
+            mainChart.addEntry(valueIOB)
+            smallChart.addEntry(valueIOB)
+        }
+        
+        smallChart.circleColors.removeAll()
+        smallChart.colors.removeAll()
+        mainChart.colors.removeAll()
+        mainChart.circleColors.removeAll()
+        if colors.count > 0 {
+            for iIOB in 0..<colors.count {
+                mainChart.addColor(colors[iIOB])
+                mainChart.circleColors.append(colors[iIOB])
+                smallChart.addColor(colors[iIOB])
+                smallChart.circleColors.append(colors[iIOB])
+            }
+        }
+        BGChart.rightAxis.axisMaximum = Double(topBG)
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChartFull.data?.notifyDataChanged()
+        BGChartFull.notifyDataSetChanged()
+    }
+    
+    func updatePredictionGraphZT(color: UIColor? = nil) {
+        let dataIndex = 17
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
+        
+        var colors = [NSUIColor]()
+        let maxBGOffset: Float = 20
+        for iZT in 0..<predictionDataZT.count {
+            var predictionValZT = Double(predictionDataZT[iZT].sgv)
+            if Float(predictionValZT) > topBG - maxBGOffset {
+                topBG = Float(predictionValZT) + maxBGOffset
+            }
+            
+            if iZT == 0 {
+                if UserDefaultsRepository.showDots.value {
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(0.0))
+                } else {
+                    colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(1.0))
+                }
+            } else if predictionValZT > 400 {
+                colors.append(color ?? NSUIColor.systemYellow)
+            } else if predictionValZT < 0 {
+                colors.append(color ?? NSUIColor.systemRed)
+            } else {
+                colors.append(color ?? NSUIColor.systemPurple)
+            }
+            
+            let valueZT = ChartDataEntry(x: predictionDataZT[iZT].date, y: predictionValZT, data: formatPillTextExtraLine(line1: "ZT", line2: bgUnits.toDisplayUnits(String(predictionDataZT[iZT].sgv)) + " mmol/L", time: predictionDataZT[iZT].date))
+            mainChart.addEntry(valueZT)
+            smallChart.addEntry(valueZT)
+        }
+        
+        smallChart.circleColors.removeAll()
+        smallChart.colors.removeAll()
+        mainChart.colors.removeAll()
+        mainChart.circleColors.removeAll()
+        if colors.count > 0 {
+            for iZT in 0..<colors.count {
+                mainChart.addColor(colors[iZT])
+                mainChart.circleColors.append(colors[iZT])
+                smallChart.addColor(colors[iZT])
+                smallChart.circleColors.append(colors[iZT])
             }
         }
         BGChart.rightAxis.axisMaximum = Double(topBG)
@@ -1153,6 +1494,62 @@ extension MainViewController {
         linePrediction.lineWidth = 1.5
         linePrediction.axisDependency = YAxis.AxisDependency.right
         
+        // Setup Prediction line COB details
+        var predictionChartEntryCOB = [ChartDataEntry]()
+        let linePredictionCOB = LineChartDataSet(entries:predictionChartEntryCOB, label: "")
+        linePredictionCOB.drawCirclesEnabled = false
+        //line2.setDrawHighlightIndicators(false)
+        linePredictionCOB.setColor(NSUIColor.systemPurple)
+        linePredictionCOB.highlightEnabled = true
+        linePredictionCOB.drawHorizontalHighlightIndicatorEnabled = false
+        linePredictionCOB.drawVerticalHighlightIndicatorEnabled = false
+        linePredictionCOB.highlightColor = NSUIColor.label
+        linePredictionCOB.drawValuesEnabled = false
+        linePredictionCOB.lineWidth = 1.5
+        linePredictionCOB.axisDependency = YAxis.AxisDependency.right
+        
+        // Setup Prediction line UAM details
+        var predictionChartEntryUAM = [ChartDataEntry]()
+        let linePredictionUAM = LineChartDataSet(entries:predictionChartEntryUAM, label: "")
+        linePredictionUAM.drawCirclesEnabled = false
+        //line2.setDrawHighlightIndicators(false)
+        linePredictionUAM.setColor(NSUIColor.systemPurple)
+        linePredictionUAM.highlightEnabled = true
+        linePredictionUAM.drawHorizontalHighlightIndicatorEnabled = false
+        linePredictionUAM.drawVerticalHighlightIndicatorEnabled = false
+        linePredictionUAM.highlightColor = NSUIColor.label
+        linePredictionUAM.drawValuesEnabled = false
+        linePredictionUAM.lineWidth = 1.5
+        linePredictionUAM.axisDependency = YAxis.AxisDependency.right
+        
+        // Setup Prediction line IOB details
+        var predictionChartEntryIOB = [ChartDataEntry]()
+        let linePredictionIOB = LineChartDataSet(entries:predictionChartEntryIOB, label: "")
+        linePredictionIOB.drawCirclesEnabled = false
+        //line2.setDrawHighlightIndicators(false)
+        linePredictionIOB.setColor(NSUIColor.systemPurple)
+        linePredictionIOB.highlightEnabled = true
+        linePredictionIOB.drawHorizontalHighlightIndicatorEnabled = false
+        linePredictionIOB.drawVerticalHighlightIndicatorEnabled = false
+        linePredictionIOB.highlightColor = NSUIColor.label
+        linePredictionIOB.drawValuesEnabled = false
+        linePredictionIOB.lineWidth = 1.5
+        linePredictionIOB.axisDependency = YAxis.AxisDependency.right
+        
+        // Setup Prediction line ZT details
+        var predictionChartEntryZT = [ChartDataEntry]()
+        let linePredictionZT = LineChartDataSet(entries:predictionChartEntryZT, label: "")
+        linePredictionZT.drawCirclesEnabled = false
+        //line2.setDrawHighlightIndicators(false)
+        linePredictionZT.setColor(NSUIColor.systemPurple)
+        linePredictionZT.highlightEnabled = true
+        linePredictionZT.drawHorizontalHighlightIndicatorEnabled = false
+        linePredictionZT.drawVerticalHighlightIndicatorEnabled = false
+        linePredictionZT.highlightColor = NSUIColor.label
+        linePredictionZT.drawValuesEnabled = false
+        linePredictionZT.lineWidth = 1.5
+        linePredictionZT.axisDependency = YAxis.AxisDependency.right
+        
         // create Basal graph data
         var chartEntry = [ChartDataEntry]()
         var maxBasal = UserDefaultsRepository.minBasalScale.value
@@ -1361,6 +1758,11 @@ extension MainViewController {
         data.append(lineNote) // Dataset 11
         data.append(lineSmb) // Dataset 12
         data.append(linePump) // Dataset 13
+        data.append(linePredictionCOB) // Dataset 14
+        data.append(linePredictionUAM) // Dataset 15
+        data.append(linePredictionIOB) // Dataset 16
+        data.append(linePredictionZT) // Dataset 17
+        
         
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false

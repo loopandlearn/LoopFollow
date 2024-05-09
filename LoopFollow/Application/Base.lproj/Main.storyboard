@@ -1091,10 +1091,10 @@
                                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" id="aE4-eh-QsG">
                                                                 <rect key="frame" x="0.0" y="1.3333333333333321" width="21" height="41.666666666666671"/>
                                                                 <color key="tintColor" systemColor="labelColor"/>
-                                                                <imageReference key="image" image="exclamationmark.triangle.fill" catalog="system" symbolScale="medium" renderingMode="hierarchical">
+                                                                <imageReference key="image" image="exclamationmark.triangle" catalog="system" symbolScale="medium" renderingMode="hierarchical">
                                                                     <hierarchicalColors>
                                                                         <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                        <color name="LoopRed"/>
+                                                                        <color systemColor="systemRedColor"/>
                                                                         <color systemColor="systemRedColor"/>
                                                                     </hierarchicalColors>
                                                                 </imageReference>
@@ -1107,7 +1107,6 @@
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="51" id="5W6-UB-3Ty"/>
                                                                 </constraints>
-                                                                <color key="textColor" systemColor="secondaryLabelColor"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits"/>
                                                             </textField>
@@ -1440,10 +1439,10 @@
                                                     <imageView opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="8xF-xo-m7m">
                                                         <rect key="frame" x="0.0" y="1.3333333333333321" width="21" height="18"/>
                                                         <color key="tintColor" systemColor="labelColor"/>
-                                                        <imageReference key="image" image="exclamationmark.triangle.fill" catalog="system" symbolScale="medium" renderingMode="hierarchical">
+                                                        <imageReference key="image" image="exclamationmark.triangle" catalog="system" symbolScale="medium" renderingMode="hierarchical">
                                                             <hierarchicalColors>
                                                                 <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                <color name="LoopRed"/>
+                                                                <color systemColor="systemRedColor"/>
                                                                 <color systemColor="systemRedColor"/>
                                                             </hierarchicalColors>
                                                         </imageReference>
@@ -1456,7 +1455,6 @@
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="51" id="F0p-eL-iol"/>
                                                         </constraints>
-                                                        <color key="textColor" systemColor="secondaryLabelColor"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                         <textInputTraits key="textInputTraits"/>
                                                     </textField>
@@ -1813,10 +1811,10 @@
                                                     <imageView opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="9Zo-V2-kti">
                                                         <rect key="frame" x="0.0" y="1.3333333333333321" width="21" height="18"/>
                                                         <color key="tintColor" systemColor="labelColor"/>
-                                                        <imageReference key="image" image="exclamationmark.triangle.fill" catalog="system" symbolScale="medium" renderingMode="hierarchical">
+                                                        <imageReference key="image" image="exclamationmark.triangle" catalog="system" symbolScale="medium" renderingMode="hierarchical">
                                                             <hierarchicalColors>
                                                                 <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                                <color name="LoopRed"/>
+                                                                <color systemColor="systemRedColor"/>
                                                                 <color systemColor="systemRedColor"/>
                                                             </hierarchicalColors>
                                                         </imageReference>
@@ -1829,7 +1827,6 @@
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="51" id="2g7-fg-QQs"/>
                                                         </constraints>
-                                                        <color key="textColor" systemColor="secondaryLabelColor"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                         <textInputTraits key="textInputTraits"/>
                                                     </textField>
@@ -1923,7 +1920,7 @@
         <image name="alarm" catalog="system" width="123" height="128"/>
         <image name="appletvremote.gen1" catalog="system" width="80" height="128"/>
         <image name="drop.fill" catalog="system" width="96" height="128"/>
-        <image name="exclamationmark.triangle.fill" catalog="system" width="128" height="109"/>
+        <image name="exclamationmark.triangle" catalog="system" width="128" height="109"/>
         <image name="fork.knife" catalog="system" width="94" height="128"/>
         <image name="gear" catalog="system" width="128" height="122"/>
         <image name="gearshape" catalog="system" width="128" height="123"/>
