@@ -289,9 +289,14 @@ class GeneralSettingsViewController: FormViewController {
        }
 
        +++ ButtonRow() {
-          $0.title = "DONE"
-       }.onCellSelection { (row, arg)  in
-          self.dismiss(animated:true, completion: nil)
+           $0.title = "DONE"
+       }.onCellSelection { (row, arg) in
+           if let navigationController = self.navigationController {
+               navigationController.popViewController(animated: true)
+           } else {
+               // If there's no navigation controller, dismiss the current view controller
+               self.dismiss(animated: true, completion: nil)
+           }
        }
        
        // Call to update initial visibility based on current settings

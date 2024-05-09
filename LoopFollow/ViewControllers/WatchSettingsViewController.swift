@@ -120,7 +120,6 @@ class WatchSettingsViewController: FormViewController {
                 UserDefaultsRepository.watchLine2.value = value
             }
         
-        
             +++ Section(header: "Available Variables", footer: "")
             <<< LabelRow("BG"){ row in
                 row.title = "%BG% : Blood Glucose Reading"
@@ -149,12 +148,20 @@ class WatchSettingsViewController: FormViewController {
             <<< LabelRow("MINAGO"){ row in
                 row.title = "%MINAGO% : Only displays for old readings"
             }
+            <<< LabelRow("15MIN"){ row in
+                row.title = "%15MIN% : Display 15min trend"
+        }
             
             
-            +++ ButtonRow() {
-                $0.title = "DONE"
-            }.onCellSelection { (row, arg)  in
-                self.dismiss(animated:true, completion: nil)
+        +++ ButtonRow() {
+            $0.title = "DONE"
+        }.onCellSelection { (row, arg) in
+            if let navigationController = self.navigationController {
+                navigationController.popViewController(animated: true)
+            } else {
+                // If there's no navigation controller, dismiss the current view controller
+                self.dismiss(animated: true, completion: nil)
+            }
         }
     }
     

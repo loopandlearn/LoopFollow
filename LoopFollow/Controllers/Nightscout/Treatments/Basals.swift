@@ -136,10 +136,10 @@ extension MainViewController {
             //if i == tempArray.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
             if i == tempArray.count - 1 && duration == 0.0 {
                 lastEndDot = dateTimeStamp + (30 * 60)
-                latestBasal = String(format:"%.2f", basalRate)
+                latestBasal = String(format:"%.2f", basalRate) + " E/h"
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
-                latestBasal = String(format:"%.2f", basalRate)
+                latestBasal = String(format:"%.2f", basalRate) + " E/h"
             }
             
             // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
@@ -186,7 +186,7 @@ extension MainViewController {
                 }
             }
             
-            latestBasal = String(format:"%.2f", scheduled)
+            latestBasal = String(format:"%.2f", scheduled) + " E/h"
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)

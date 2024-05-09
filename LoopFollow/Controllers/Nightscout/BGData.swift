@@ -8,6 +8,9 @@
 
 import Foundation
 import UIKit
+
+var sharedDeltaBG: Int = 0
+
 extension MainViewController {
     // Dex Share Web Call
     func webLoadDexShare() {
@@ -65,7 +68,7 @@ extension MainViewController {
         var parameters: [String: String] = [:]
         let utcISODateFormatter = ISO8601DateFormatter()
         let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
-        parameters["count"] = "1000"
+        parameters["count"] = "1200" //increased from 1000 to 1200 to allow 48h of bg data when 2 bg uploaders are used in NS (Dexcom and iAPS for instance = 576 readings/day, 1152 during 48h)
         parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: date)
         
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
@@ -226,11 +229,13 @@ extension MainViewController {
             self.updateBGGraph()
             self.updateStats()
             
-            let latestEntryIndex = entries.count - 1
-            let latestBG = entries[latestEntryIndex].sgv
-            let priorBG = entries[latestEntryIndex - 1].sgv
-            let deltaBG = latestBG - priorBG
-            let lastBGTime = entries[latestEntryIndex].date
+            let latestEntryi = entries.count - 1
+            let latestBG = entries[latestEntryi].sgv
+            let priorBG = entries[latestEntryi - 1].sgv
+            let deltaBG = latestBG - priorBG as Int
+            sharedDeltaBG = deltaBG
+            let lastBGTime = entries[latestEntryi].date
+
             
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
             var userUnit = " mg/dL"

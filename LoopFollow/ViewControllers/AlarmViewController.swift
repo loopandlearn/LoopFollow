@@ -424,7 +424,6 @@ class AlarmViewController: FormViewController {
         buildCOB()
         buildBatteryAlarm()
         buildRecBolus()
-
         buildSnoozeAll()
         buildAlarmSettings()
         
@@ -676,7 +675,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertUrgentLowPredictiveMinutes.value = Int(value)
         }
         <<< StepperRow("alertUrgentLowSnooze") { row in
-            row.title = "Default Snooze"
+            row.title = "Snooze Minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 5
             row.cell.stepper.maximumValue = 15
@@ -852,7 +851,7 @@ class AlarmViewController: FormViewController {
         
             
         <<< StepperRow("alertLowSnooze") { row in
-            row.title = "Snooze"
+            row.title = "Snooze Minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 5
             row.cell.stepper.maximumValue = 30
@@ -1013,7 +1012,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertHighPersistent.value = Int(value)
         }
         <<< StepperRow("alertHighSnooze") { row in
-            row.title = "Snooze"
+            row.title = "Snooze Minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 10
             row.cell.stepper.maximumValue = 120
@@ -1158,7 +1157,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertUrgentHighBG.value = Float(value)
         }
         <<< StepperRow("alertUrgentHighSnooze") { row in
-            row.title = "Snooze"
+            row.title = "Snooze Minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 10
             row.cell.stepper.maximumValue = 120
@@ -1339,7 +1338,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertFastDropBelowBG.value = Float(value)
         }
         <<< StepperRow("alertFastDropSnooze") { row in
-            row.title = "Snooze"
+            row.title = "Snooze Minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 5
             row.cell.stepper.maximumValue = 60
@@ -1521,7 +1520,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertFastRiseAboveBG.value = Float(value)
         }
         <<< StepperRow("alertFastRiseSnooze") { row in
-            row.title = "Snooze"
+            row.title = "Snooze Minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 5
             row.cell.stepper.maximumValue = 60
@@ -1653,7 +1652,7 @@ class AlarmViewController: FormViewController {
                     }
         
             <<< StepperRow("alertMissedReading") { row in
-                row.title = "Time"
+                row.title = "Alert after minutes"
                 row.cell.stepper.stepValue = 5
                 row.cell.stepper.minimumValue = 10
                 row.cell.stepper.maximumValue = 120
@@ -1667,7 +1666,7 @@ class AlarmViewController: FormViewController {
                     UserDefaultsRepository.alertMissedReading.value = Int(value)
             }
             <<< StepperRow("alertMissedReadingSnooze") { row in
-                row.title = "Snooze"
+                row.title = "Snooze Minutes"
                 row.cell.stepper.stepValue = 5
                 row.cell.stepper.minimumValue = 10
                 row.cell.stepper.maximumValue = 180
@@ -1797,7 +1796,7 @@ class AlarmViewController: FormViewController {
                         UserDefaultsRepository.alertNotLoopingActive.value = value
                 }
         <<< StepperRow("alertNotLooping") { row in
-            row.title = "Time"
+            row.title = "Altert after minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 10
             row.cell.stepper.maximumValue = 60
@@ -1849,7 +1848,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertNotLoopingUpperLimit.value = Float(value)
         }
         <<< StepperRow("alertNotLoopingSnooze") { row in
-            row.title = "Snooze"
+            row.title = "Snooze Minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 10
             row.cell.stepper.maximumValue = 120
@@ -1978,7 +1977,7 @@ class AlarmViewController: FormViewController {
                         UserDefaultsRepository.alertMissedBolusActive.value = value
                 }
         <<< StepperRow("alertMissedBolus") { row in
-            row.title = "Time"
+            row.title = "Alert after minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 5
             row.cell.stepper.maximumValue = 60
@@ -2049,7 +2048,7 @@ class AlarmViewController: FormViewController {
         }
         
         <<< StepperRow("alertMissedBolusSnooze") { row in
-            row.title = "Snooze"
+            row.title = "Snooze Minutes"
             row.cell.stepper.stepValue = 5
             row.cell.stepper.minimumValue = 5
             row.cell.stepper.maximumValue = 60
@@ -2189,7 +2188,7 @@ class AlarmViewController: FormViewController {
             }
             
             <<< StepperRow("alertSAGE") { row in
-                row.title = "Time"
+                row.title = "Alert when hours left"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
@@ -2203,7 +2202,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertSAGE.value = Int(value)
             }
             <<< StepperRow("alertSAGESnooze") { row in
-                row.title = "Snooze"
+                row.title = "Snooze Hours"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
@@ -2341,7 +2340,7 @@ class AlarmViewController: FormViewController {
             }
             
             <<< StepperRow("alertCAGE") { row in
-                row.title = "Time"
+                row.title = "Alert when hours left"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
@@ -2355,7 +2354,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertCAGE.value = Int(value)
             }
             <<< StepperRow("alertCAGESnooze") { row in
-                row.title = "Snooze"
+                row.title = "Snooze Hours"
                 row.cell.stepper.stepValue = 1
                 row.cell.stepper.minimumValue = 1
                 row.cell.stepper.maximumValue = 24
@@ -3340,6 +3339,70 @@ class AlarmViewController: FormViewController {
             UserDefaultsRepository.alertRecBolusRepeat.value = value
         }
     }
+    
+    func buildRecBolus(){
+            form
+            +++ Section(header: "Rec. Bolus Alert", footer: "Activates a notification alert whenever recommended bolus is above a user-defined threshold, allowing for proactive manual bolusing.") { row in
+                row.hidden = "$otherAlerts4 != 'Rec. Bolus'"
+            }
+            <<< SwitchRow("alertRecBolusActive"){ row in
+                row.title = "Active"
+                row.value = UserDefaultsRepository.alertRecBolusActive.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertRecBolusActive.value = value
+            }
+            <<< StepperRow("alertRecBolusAt") { row in
+                row.title = "Rec. Bolus threshold"
+                row.cell.stepper.stepValue = 0.1
+                row.cell.stepper.minimumValue = 0.1
+                row.cell.stepper.maximumValue = 50
+                row.value = Double(UserDefaultsRepository.alertRecBolusLevel.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Double(round(10*value)/10))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertRecBolusLevel.value = value
+            }
+            <<< StepperRow("alertRecBolusSnooze") { row in
+                row.title = "Snooze Minutes"
+                row.cell.stepper.stepValue = 5
+                row.cell.stepper.minimumValue = 5
+                row.cell.stepper.maximumValue = 60
+                row.value = Double(UserDefaultsRepository.alertRecBolusSnooze.value)
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(Int(value))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertRecBolusSnooze.value = Int(value)
+            }
+            <<< PickerInputRow<String>("alertRecBolusSound") { row in
+                row.title = "Sound"
+                row.options = soundFiles
+                row.value = UserDefaultsRepository.alertRecBolusSound.value
+                row.displayValueFor = { value in
+                    guard let value = value else { return nil }
+                    return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+                }
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertRecBolusSound.value = value
+                AlarmSound.setSoundFile(str: value)
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            }
+            <<< SwitchRow("alertRecBolusRepeat"){ row in
+                row.title = "Repeat Sound"
+                row.value = UserDefaultsRepository.alertRecBolusRepeat.value
+            }.onChange { [weak self] row in
+                guard let value = row.value else { return }
+                UserDefaultsRepository.alertRecBolusRepeat.value = value
+            }
+        }
     
     func buildAlarmSettings() {
            form

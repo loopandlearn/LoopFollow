@@ -37,7 +37,7 @@ class InfoDisplaySettingsViewController: FormViewController {
                     UserDefaultsRepository.hideInfoTable.value = value           
         }
         
-        +++ MultivaluedSection(multivaluedOptions: .Reorder, header: "Information Display Settings", footer: "Arrage/Enable Information Desired") {
+        +++ MultivaluedSection(multivaluedOptions: .Reorder, header: "Information Display Settings", footer: "Välj och sortera ordning på önskad information") {
         
            // TODO: add the other display values
            $0.tag = "InfoDisplay"
@@ -65,16 +65,23 @@ class InfoDisplaySettingsViewController: FormViewController {
                  } else {
                     row.title = "\u{2001}\t\(UserDefaultsRepository.infoNames.value[UserDefaultsRepository.infoSort.value[i]])"
                  }
-                 self.appStateController!.infoDataSettingsChanged = true
+                  if let appStateController = self.appStateController {
+                      appStateController.infoDataSettingsChanged = true
+                  }
               }
            }
        }
     
-       +++ ButtonRow() {
-          $0.title = "DONE"
-       }.onCellSelection { (row, arg)  in
-          self.dismiss(animated:true, completion: nil)
-       }
+        +++ ButtonRow() {
+            $0.title = "DONE"
+        }.onCellSelection { (row, arg) in
+            if let navigationController = self.navigationController {
+                navigationController.popViewController(animated: true)
+            } else {
+                // If there's no navigation controller, dismiss the current view controller
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
     }
     
     override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
@@ -84,7 +91,9 @@ class InfoDisplaySettingsViewController: FormViewController {
         
         // new sort
         if(destIndex != sourceIndex ) {
-           self.appStateController!.infoDataSettingsChanged = true
+            if let appStateController = self.appStateController {
+                appStateController.infoDataSettingsChanged = true
+            }
            
             let tmpVal = UserDefaultsRepository.infoSort.value[sourceIndex]
             UserDefaultsRepository.infoSort.value.remove(at:sourceIndex)

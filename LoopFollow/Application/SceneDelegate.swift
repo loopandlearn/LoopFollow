@@ -24,33 +24,34 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
          
         // get the tabBar
         guard let tabBarController = window?.rootViewController as? UITabBarController,
-           let viewControllers = tabBarController.viewControllers
+              var viewControllers = tabBarController.viewControllers
         else {
-           return
-         }
-                  
-         // set the main controllers' connection to the app sate
-         // other controllers that need to know app state are setup programatically
-         for i in 0..<viewControllers.count {
+            return
+        }
+
+        // Create an array to hold the view controllers that can be customized
+        var customizableViewControllers: [UIViewController] = []
+
+        // Your existing code for setting up controllers
+        for i in 0..<viewControllers.count {
             if let vc = viewControllers[i] as? MainViewController {
-               vc.appStateController = appStateController
+                vc.appStateController = appStateController
+            } else if let vc = viewControllers[i] as? AlarmViewController {
+                vc.appStateController = appStateController
+            } else if let vc = viewControllers[i] as? SnoozeViewController {
+                vc.appStateController = appStateController
+            } else if let vc = viewControllers[i] as? SettingsViewController {
+                vc.appStateController = appStateController
+            } else if let vc = viewControllers[i] as? debugViewController {
+                vc.appStateController = appStateController
+            } else {
+                // For Nightscout and remote view controllers, add them to the customizableViewControllers array
+                customizableViewControllers.append(viewControllers[i])
             }
-            if let vc = viewControllers[i] as? NightscoutViewController {
-               vc.appStateController = appStateController
-            }
-            if let vc = viewControllers[i] as? SettingsViewController {
-               vc.appStateController = appStateController
-            }
-            if let vc = viewControllers[i] as? AlarmViewController {
-               vc.appStateController = appStateController
-            }
-            if let vc = viewControllers[i] as? SnoozeViewController {
-               vc.appStateController = appStateController
-            }
-            if let vc = viewControllers[i] as? debugViewController {
-               vc.appStateController = appStateController
-            }
-         }
+        }
+
+        // Set the customizableViewControllers property to allow customization for specific view controllers
+        tabBarController.customizableViewControllers = customizableViewControllers
 
         // Register the SceneDelegate as an observer for the "toggleSpeakBG" notification, which will be triggered when the user toggles the "Speak BG" feature in General Settings. This helps ensure that the Quick Action is updated according to the current setting.
         NotificationCenter.default.addObserver(self, selector: #selector(handleToggleSpeakBGEvent), name: NSNotification.Name("toggleSpeakBG"), object: nil)

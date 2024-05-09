@@ -92,11 +92,13 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>loopfollow</string>
+				<string>loop</string>
 			</array>
 		</dict>
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+    <key>NSFaceIDUsageDescription</key>
+    <string>To authenticate before sending a bolus request</string>
 </dict>
 </plist>

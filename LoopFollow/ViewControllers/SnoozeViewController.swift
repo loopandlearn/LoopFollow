@@ -16,10 +16,10 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
     var mainTabItem: UITabBarItem = UITabBarItem()
     var clockTimer: Timer = Timer()
     
-   
+    
     
     @IBOutlet weak var SnoozeButton: UIButton!
-
+    
     @IBOutlet weak var BGLabel: UILabel!
     @IBOutlet weak var DirectionLabel: UILabel!
     @IBOutlet weak var DeltaLabel: UILabel!
@@ -59,10 +59,10 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
     // Update Time
     func startClockTimer(time: TimeInterval) {
         clockTimer = Timer.scheduledTimer(timeInterval: time,
-                                           target: self,
-                                           selector: #selector(clockTimerDidEnd(_:)),
-                                           userInfo: nil,
-                                           repeats: true)
+                                          target: self,
+                                          selector: #selector(clockTimerDidEnd(_:)),
+                                          userInfo: nil,
+                                          repeats: true)
     }
     
     // Update Time Ended
@@ -476,7 +476,7 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
         clockLabel.text = ""
         startClockTimer(time: 1)
     }
-
-
+    
+    
     
 }

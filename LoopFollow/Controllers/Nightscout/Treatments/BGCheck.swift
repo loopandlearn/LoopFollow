@@ -20,6 +20,7 @@ extension MainViewController {
             
             guard let parsedDate = NightscoutUtils.parseDate(dateStr),
                   let glucose = currentEntry["glucose"] as? Double else {
+
                 if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Non-Double Glucose entry") }
                 return
             }

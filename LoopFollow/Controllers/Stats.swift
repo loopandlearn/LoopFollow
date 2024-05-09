@@ -70,6 +70,7 @@ class StatsData {
         
         stdDev = sqrt(partialSum / Float(bgData.count))
         if UserDefaultsRepository.units.value != "mg/dL" {
+
             stdDev = stdDev * Float(GlucoseConversion.mgDlToMmolL)
         }
         

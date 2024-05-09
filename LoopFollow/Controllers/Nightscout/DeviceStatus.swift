@@ -9,6 +9,13 @@
 import Foundation
 import UIKit
 
+var sharedCRValue: String = ""
+var sharedLatestIOB: String = ""
+var sharedLatestCOB: String = ""
+var sharedMinGuardBG: Double = 0.0
+var sharedInsulinReq: Double = 0.0
+var sharedLastSMBUnits: Double = 0.0
+
 extension MainViewController {
     // NS Device Status Web Call
     func webLoadNSDeviceStatus() {
@@ -32,6 +39,10 @@ extension MainViewController {
                 self.handleDeviceStatusError()
             }
         }
+    }
+    
+    func mgdlToMmol(_ mgdl: Double) -> Double {
+        return mgdl * 0.05551
     }
     
     private func handleDeviceStatusError() {
@@ -109,15 +120,15 @@ extension MainViewController {
             if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
-                    tableData[5].value = String(format:"%.0f", reservoirData) + "U"
+                    tableData[5].value = String(format:"%.0f", reservoirData) + " E"
                 } else {
                     latestPumpVolume = 50.0
-                    tableData[5].value = "50+U"
+                    tableData[5].value = "50+E"
                 }
                 
                 if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
                     let upbat = uploader["battery"] as! Double
-                    tableData[4].value = String(format:"%.0f", upbat) + "%"
+                    tableData[4].value = String(format:"%.0f", upbat) + " %"
                     UserDefaultsRepository.deviceBatteryLevel.value = upbat
                 }
             }
@@ -143,11 +154,11 @@ extension MainViewController {
                         }
                     }
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
+                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double)) + " E"
                         latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
                     }
                     if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
+                        tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double) + " g"
                         latestCOB = String(format:"%.0f", cobdata["cob"] as! Double)
                     }
                     if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
@@ -174,13 +185,13 @@ extension MainViewController {
                             
                             let predMin = prediction.min()
                             let predMax = prediction.max()
-                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
+                            tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "-" + bgUnits.toDisplayUnits(String(predMax!)) + " mmol/L"
                             
                             updatePredictionGraph()
                         }
                     }
                     if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
-                        tableData[8].value = String(format:"%.2fU", recBolus)
+                        tableData[8].value = String(format:"%.2f", recBolus) + " E"
                         UserDefaultsRepository.deviceRecBolus.value = recBolus
                     }
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
@@ -228,31 +239,179 @@ extension MainViewController {
                         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
                         wasEnacted = true
                         if let lastTempBasal = enacted["rate"] as? Double {
-                            
+                            // Handle lastTempBasal if needed
                         }
                     }
-                    
+
                     if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                        tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
-                        latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
-                    }
-                    if let cobdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double)
-                        latestCOB = String(format:"%.0f", cobdata["COB"] as! Double)
-                    }
-                    if let recbolusdata = lastLoopRecord["enacted"] as? [String: AnyObject],
-                       let insulinReq = recbolusdata["insulinReq"] as? Double {
-                        tableData[8].value = String(format: "%.2fU", insulinReq)
-                        UserDefaultsRepository.deviceRecBolus.value = insulinReq
-                    } else {
-                        tableData[8].value = "N/A"
-                        UserDefaultsRepository.deviceRecBolus.value = 0
-                        print("Warning: Failed to extract insulinReq from recbolusdata.")
+                        if let iob = iobdata["iob"] as? Double {
+                            tableData[0].value = String(format:"%.2f", iob) + " E"
+                            latestIOB = String(format:"%.2f", iob)
+                            sharedLatestIOB = latestIOB
+                        }
                     }
 
-                    if let autosensdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
-                        tableData[11].value = String(format:"%.0f", sens) + "%"
+                    /*
+                    if let enactedData = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        if let COB = enactedData["COB"] as? Double {
+                            tableData[1].value = String(format:"%.0f", COB) + " g"
+                            latestCOB = String(format:"%.0f", COB)
+                            sharedLatestCOB = latestCOB
+                        }
+                        
+                        if let insulinReq = enactedData["insulinReq"] as? Double {
+                            tableData[8].value = String(format:"%.2f", insulinReq) + " E"
+                        }
+                        
+                        if let sensitivityRatio = enactedData["sensitivityRatio"] as? Double {
+                            let sens = sensitivityRatio * 100.0
+                            tableData[11].value = String(format:"%.0f", sens) + " %"
+                        }
+                        
+                        if let TDD = enactedData["TDD"] as? Double {
+                            tableData[13].value = String(format:"%.1f", TDD) + " E"
+                        }
+                        
+                        if let ISF = enactedData["ISF"] as? Double {
+                            tableData[14].value = String(format:"%.1f", ISF) + " mmol/L/E"
+                        }
+                        
+                        if let CR = enactedData["CR"] as? Double {
+                            tableData[15].value = String(format:"%.1f", CR) + " g/E"
+                            sharedCRValue = String(format:"%.1f", CR)
+                        }
+                        
+                        if let currentTargetMgdl = enactedData["current_target"] as? Double {
+                            let currentTargetMmol = mgdlToMmol(currentTargetMgdl)
+                            tableData[16].value = String(format: "%.1f", currentTargetMmol) + " mmol/L"
+                        }
+                        //Daniel: Added enacted data for bolus calculator and info
+                        if let minGuardBG = enactedData["minGuardBG"] as? Double {
+                                let formattedMinGuardBGString = bgUnits.toDisplayUnits(String(format:"%.1f", minGuardBG))
+                                sharedMinGuardBG = Double(formattedMinGuardBGString) ?? 0
+                            } else {
+                                let formattedLowLine = bgUnits.toDisplayUnits(String(format:"%.1f", UserDefaultsRepository.lowLine.value))
+                                sharedMinGuardBG = Double(formattedLowLine) ?? 0
+                            }
+                        
+                        if let insulinReq = enactedData["insulinReq"] as? Double {
+                                let formattedInsulinReqString = String(format:"%.2f", insulinReq)
+                                sharedInsulinReq = Double(formattedInsulinReqString) ?? 0
+                            } else {
+                                sharedInsulinReq = 0
+                            }
+                        
+                        if let LastSMBUnits = enactedData["units"] as? Double {
+                                let formattedLastSMBUnitsString = String(format:"%.2f", LastSMBUnits)
+                                sharedLastSMBUnits = Double(formattedLastSMBUnitsString) ?? 0
+                            } else {
+                                sharedLastSMBUnits = 0
+                            }
+                        
+                    } else {
+                        // If enactedData is nil, set all tableData values to "Waiting"
+                        for i in 1..<tableData.count {
+                            tableData[i].value = "---"
+                        }
+                        
+                    }
+                     */
+                    //Daniel: Use suggested instead of enacted to populate infotable even when not enacted
+                    if let suggestedData = lastLoopRecord["suggested"] as? [String:AnyObject] {
+                        if let COB = suggestedData["COB"] as? Double {
+                            tableData[1].value = String(format:"%.0f", COB) + " g"
+                            latestCOB = String(format:"%.0f", COB)
+                            sharedLatestCOB = latestCOB
+                        }
+                        
+                        /*if let insulinReq = suggestedData["insulinReq"] as? Double {
+                            tableData[8].value = String(format:"%.2f", insulinReq) + " E"
+                         }*/
+                        if let recbolusdata = lastLoopRecord["suggested"] as? [String: AnyObject],
+                           let insulinReq = recbolusdata["insulinReq"] as? Double {
+                            tableData[8].value = String(format: "%.2f", insulinReq) + " E"
+                            UserDefaultsRepository.deviceRecBolus.value = insulinReq
+                        } else {
+                            tableData[8].value = "---"
+                            UserDefaultsRepository.deviceRecBolus.value = 0
+                            print("Warning: Failed to extract insulinReq from recbolusdata.")
+                        }
+                        
+                        if let sensitivityRatio = suggestedData["sensitivityRatio"] as? Double {
+                            let sens = sensitivityRatio * 100.0
+                            tableData[11].value = String(format:"%.0f", sens) + " %"
+                        }
+                        
+                        if let TDD = suggestedData["TDD"] as? Double {
+                            tableData[13].value = String(format:"%.1f", TDD) + " E"
+                        }
+                        
+                        if let ISF = suggestedData["ISF"] as? Double {
+                            tableData[14].value = String(format:"%.1f", ISF) + " mmol/L/E"
+                        }
+                        
+                        if let CR = suggestedData["CR"] as? Double {
+                            tableData[15].value = String(format:"%.1f", CR) + " g/E"
+                            sharedCRValue = String(format:"%.1f", CR)
+                        }
+                        
+                        if let currentTargetMgdl = suggestedData["current_target"] as? Double {
+                            let currentTargetMmol = mgdlToMmol(currentTargetMgdl)
+                            tableData[16].value = String(format: "%.1f", currentTargetMmol) + " mmol/L"
+                        }
+                        
+                        if let carbsReq = suggestedData["carbsReq"] as? Double {
+                            tableData[17].value = String(format:"%.0f", carbsReq) + " g"
+                        } else {
+                            // If "carbsReq" is not present in suggestedData, set it to 0
+                            tableData[17].value = "0 g"
+                        }
+                        
+                        //Daniel: Added suggested data for bolus calculator and info
+                        if let minGuardBG = suggestedData["minGuardBG"] as? Double {
+                                let formattedMinGuardBGString = bgUnits.toDisplayUnits(String(format:"%.1f", minGuardBG))
+                                sharedMinGuardBG = Double(formattedMinGuardBGString) ?? 0
+                            } else {
+                                let formattedLowLine = bgUnits.toDisplayUnits(String(format:"%.1f", UserDefaultsRepository.lowLine.value))
+                                sharedMinGuardBG = Double(formattedLowLine) ?? 0
+                            }
+                        
+                        if let insulinReq = suggestedData["insulinReq"] as? Double {
+                                let formattedInsulinReqString = String(format:"%.2f", insulinReq)
+                                sharedInsulinReq = Double(formattedInsulinReqString) ?? 0
+                            } else {
+                                sharedInsulinReq = 0
+                            }
+                        
+                        if let LastSMBUnits = suggestedData["units"] as? Double {
+                                let formattedLastSMBUnitsString = String(format:"%.2f", LastSMBUnits)
+                                sharedLastSMBUnits = Double(formattedLastSMBUnitsString) ?? 0
+                            } else {
+                                sharedLastSMBUnits = 0
+                            }
+                        
+                    } else {
+                        // If suggestedData is nil, set all tableData values to "Waiting"
+                        for i in 1..<tableData.count {
+                            tableData[i].value = "---"
+                        }
+                        
+                    }
+                    
+                    //Auggie - override name
+                    let recentOverride = overrideGraphData.last
+                    let overrideName: String?
+                    if let notes = recentOverride?.notes, !notes.isEmpty {
+                        overrideName = notes
+                    } else {
+                        overrideName = recentOverride?.reason
+                    }
+                    let recentEnd: TimeInterval = recentOverride?.endDate ?? 0
+                    let now = dateTimeUtils.getNowTimeIntervalUTC()
+                    if recentEnd >= now {
+                        tableData[3].value = String(overrideName ?? "Normal profil")
+                    } else {
+                        tableData[3].value = "Normal profil"
                     }
                     
                     //Picks COB prediction if available, else UAM, else IOB, else ZT
@@ -260,10 +419,10 @@ extension MainViewController {
                     var graphtype = ""
                     var predictioncolor = UIColor.systemGray
                     PredictionLabel.textColor = predictioncolor
-
-                    if let enactdata = lastLoopRecord["enacted"] as? [String:AnyObject],
+                    
+                    if let enactdata = lastLoopRecord["suggested"] as? [String:AnyObject],
                        let predbgdata = enactdata["predBGs"] as? [String:AnyObject] {
-
+                        
                         if predbgdata["COB"] != nil {
                             graphtype = "COB"
                         } else if predbgdata["UAM"] != nil {
@@ -273,31 +432,43 @@ extension MainViewController {
                         } else {
                             graphtype = "ZT"
                         }
-
+                        
                         // Access the color based on graphtype
                         var colorName = ""
+                        var additionalText = ""
+                        
                         switch graphtype {
-                        case "COB": colorName = "LoopYellow"
-                        case "UAM": colorName = "UAM"
-                        case "IOB": colorName = "Insulin"
-                        case "ZT": colorName = "ZT"
-                        default: break
+                        case "COB":
+                            colorName = "LoopYellow"
+                            additionalText = "COB"
+                        case "UAM":
+                            colorName = "UAM"
+                            additionalText = "UAM"
+                        case "IOB":
+                            colorName = "Insulin"
+                            additionalText = "IOB"
+                        case "ZT":
+                            colorName = "ZT"
+                            additionalText = "ZT"
+                        default:
+                            break
                         }
-
+                        
                         if let selectedColor = UIColor(named: colorName) {
                             predictioncolor = selectedColor
                             PredictionLabel.textColor = predictioncolor
                         }
-
+                        
                         let graphdata = predbgdata[graphtype] as! [Double]
-
-                        if let eventualdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                        
+                        if let eventualdata = lastLoopRecord["suggested"] as? [String: AnyObject] {
                             if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
                                 let eventualBGStringValue = String(describing: eventualBGValue)
-                                PredictionLabel.text = bgUnits.toDisplayUnits(eventualBGStringValue)
+                                let formattedBGString = bgUnits.toDisplayUnits(eventualBGStringValue)
+                                PredictionLabel.text = "\(additionalText) ⇢ \(formattedBGString)"
                             }
                         }
-
+                        
                         if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
                             predictionData.removeAll()
                             var predictionTime = lastLoopTime
@@ -312,12 +483,16 @@ extension MainViewController {
                                 i += 1
                             }
                         }
-
-                        let predMin = graphdata.min()
-                        let predMax = graphdata.max()
-                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
-
-                        updatePredictionGraph(color: predictioncolor)
+                        
+                        if let predMin = graphdata.min(), let predMax = graphdata.max() {
+                            let formattedPredMin = bgUnits.toDisplayUnits(String(predMin))
+                            let formattedPredMax = bgUnits.toDisplayUnits(String(predMax))
+                            tableData[9].value = "\(formattedPredMin) - \(formattedPredMax) mmol/L"
+                            updatePredictionGraph(color: predictioncolor)
+                        } else {
+                            tableData[9].value = "N/A"
+                            // Handle the case where predMin or predMax is nil
+                        }
                     }
                     
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
@@ -351,7 +526,7 @@ extension MainViewController {
             }
         }
         
-        var oText = "" as String
+        /*var oText = "" as String
         currentOverride = 1.0
         if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
             if lastOverride["active"] as! Bool {
@@ -372,7 +547,7 @@ extension MainViewController {
                 
                 tableData[3].value =  oText
             }
-        }
+        }*/
         
         infoTable.reloadData()
         

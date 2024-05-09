@@ -20,21 +20,26 @@ class UserDefaultsRepository {
     // DisplayValues total
     static let infoDataTotal = UserDefaultsValue<Int>(key: "infoDataTotal", default: 0)
     static let infoNames = UserDefaultsValue<[String]>(key: "infoNames", default: [
-        "IOB",
-        "COB",
-        "Basal",
-        "Override",
-        "Battery",
-        "Pump",
-        "SAGE",
-        "CAGE",
-        "Rec. Bolus",
-        "Pred.",
-        "Carbs today",
-        "Autosens",
-        "Profile"])
-    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [0,1,2,3,4,5,6,7,8,9,10,11,12])
-    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true,true,false,false])
+        "IOB", //0
+        "COB", //1
+        "Basal", //2
+        "Override", //3
+        "Looptelefon", //4
+        "Reservoar", //5
+        "Sensorbyte", //6
+        "Poddbyte", //7
+        "Behov Insulin", //8
+        "Prognos", //9
+        "Kh idag", //10
+        "Autosens", //11
+        "Profil", //12
+        "Total daglig dos", //13
+        "ISF", //14
+        "CR", //15
+        "Målvärde", //16
+        "Behov KH"]) //17
+    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [3,0,1,11,14,15,2,8,17,16,9,4,10,13,5,6,7,12])
+    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,false])
     static let hideInfoTable = UserDefaultsValue<Bool>(key: "hideInfoTable", default: false)
     
     // Nightscout Settings
@@ -56,24 +61,24 @@ class UserDefaultsRepository {
     static let smallGraphTreatments = UserDefaultsValue<Bool>(key: "smallGraphTreatments", default: true)
     static let showValues = UserDefaultsValue<Bool>(key: "showValues", default: true)
     static let showAbsorption = UserDefaultsValue<Bool>(key: "showAbsorption", default: true)
-    static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
+    static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: false)
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
     static let predictionToLoad = UserDefaultsValue<Double>(key: "predictionToLoad", default: 1)
-    static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
+    static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 2.0)
     static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
     static let showDIALines = UserDefaultsValue<Bool>(key: "showDIAMarkers", default: true)
-    static let show30MinLine = UserDefaultsValue<Bool>(key: "show30MinLine", default: false)
-    static let show90MinLine = UserDefaultsValue<Bool>(key: "show90MinLine", default: false)
-    static let showMidnightLines = UserDefaultsValue<Bool>(key: "showMidnightMarkers", default: false)
+    static let show30MinLine = UserDefaultsValue<Bool>(key: "show30MinLine", default: true)
+    static let show90MinLine = UserDefaultsValue<Bool>(key: "show90MinLine", default: true)
+    static let showMidnightLines = UserDefaultsValue<Bool>(key: "showMidnightMarkers", default: true)
     static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
-    static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
-    static let smallGraphHeight = UserDefaultsValue<Int>(key: "smallGraphHeight", default: 40)
+    static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 140.0)
+    static let smallGraphHeight = UserDefaultsValue<Int>(key: "smallGraphHeight", default: 60)
     
     
     // General Settings
     static let colorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
     static let showStats = UserDefaultsValue<Bool>(key: "showStats", default: true)
-    static let useIFCC = UserDefaultsValue<Bool>(key: "useIFCC", default: false)
+    static let useIFCC = UserDefaultsValue<Bool>(key: "useIFCC", default: true)
     static let showSmallGraph = UserDefaultsValue<Bool>(key: "showSmallGraph", default: true)
     static let speakBG = UserDefaultsValue<Bool>(key: "speakBG", default: false)
     static let speakBGAlways = UserDefaultsValue<Bool>(key: "speakBGAlways", default: true)
@@ -106,6 +111,7 @@ class UserDefaultsRepository {
     static let graphOtherTreatments = UserDefaultsValue<Bool>(key: "graphOtherTreatments", default: true)
     static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
     static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
+    static let graphSmb = UserDefaultsValue<Bool>(key: "graphSmb", default: true)
     static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
     static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
     static let alwaysDownloadAllBG = UserDefaultsValue<Bool>(key: "alwaysDownloadAllBG", default: true)
@@ -120,6 +126,7 @@ class UserDefaultsRepository {
     static let writeCalendarEvent = UserDefaultsValue<Bool>(key: "writeCalendarEvent", default: false)
     static let watchLine1 = UserDefaultsValue<String>(key: "watchLine1", default: "%BG% %DIRECTION% %DELTA% %MINAGO%")
     static let watchLine2 = UserDefaultsValue<String>(key: "watchLine2", default: "C:%COB% I:%IOB% B:%BASAL%")
+
     
     // Alarm Settings
     static let systemOutputVolume = UserDefaultsValue<Float>(key: "systemOutputVolume", default: 0.5)
@@ -459,4 +466,31 @@ class UserDefaultsRepository {
     static let alertRecBolusSnooze = UserDefaultsValue<Int>(key: "alertRecBolusSnooze", default: 5)
     static let alertRecBolusSnoozedTime = UserDefaultsValue<Date?>(key: "alertRecBolusSnoozedTime", default: nil)
     static var deviceRecBolus: UserDefaultsValue<Double> = UserDefaultsValue(key: "deviceRecBolus", default: 0.0)
+    
+    // Remote configuration
+    static let method = UserDefaultsValue<String>(key: "method", default: "SMS API")
+    static let caregiverName = UserDefaultsValue<String>(key: "caregiverName", default: "")
+    static let remoteSecretCode = UserDefaultsValue<String>(key: "remoteSecretCode", default: "")
+    
+    static let overrideString = UserDefaultsValue<String>(key: "overrideString", default: "🚫 Avbryt Override, ⬇️ 75%, 🤢 Magsjuka, 🍬 Efter dextro, 🍬😴 Efter dextro natt, 🏃‍♂️ Hög aktivitet, ⬇️ 90%, ❌ Blocka SMB, ⚽️ Gympa, 😴 Nattläge, 🍇 Vindruvor, 🍭 Godisdag, 🐌 Ledig dag, 🤧 Förkyld, 👻 Resistens, 🥯 Sen frukost")
+    static let tempTargetsString = UserDefaultsValue<String>(key: "tempTargetsString", default: "🚫 Avbryt Temp Target, 🏃‍♂️ Hög aktivitet, 🍬 Efter dextro, 🍽️ Äter snart, ❌ Blocka SMB, ⬆️ Boost, ⚽️ Gympa, 🍬😴 Efter dextro natt, 😴 Nattläge")
+    static let customActionsString = UserDefaultsValue<String>(key: "customActionsString", default: "🍬 1 Dextro, 🍬 2 Dextro, 🥭 Frukt (med Insulin), 🥯 Frukost (med Insulin), 🍝 Lunch (med Insulin), 🥪 Mellis (med Insulin), 🥘 Middag (med Insulin), 🍭 Godis (med Insulin), 🍔 McDonalds (med Insulin), 🍿 Snacks (med Insulin)")
+    
+    //Show or Hide advanced features
+    static let hideRemoteBolus = UserDefaultsValue<Bool>(key: "hideRemoteBolus", default: true)
+    static let hideRemoteCustomActions = UserDefaultsValue<Bool>(key: "hideCustomActions", default: true)
+    static let hideBolusCalc = UserDefaultsValue<Bool>(key: "hideBolusCalc", default: true)
+    
+    //Remote guardrails
+    static let maxCarbs = UserDefaultsValue<Double>(key: "maxCarbs", default: 30)
+    static let maxFatProtein = UserDefaultsValue<Double>(key: "maxFatProtein", default: 30)
+    static let maxBolus = UserDefaultsValue<Double>(key: "maxBolus", default: 2.0)
+    static let carbRatio = UserDefaultsValue<Double>(key: "carbRatio", default: 30)
+    
+    // API settings
+    static let twilioSIDString = UserDefaultsValue<String>(key: "twilioSIDString", default: "")
+    static let twilioSecretString = UserDefaultsValue<String>(key: "twilioSecretString", default: "")
+    static let twilioFromNumberString = UserDefaultsValue<String>(key: "twilioFromNumberString", default: "")
+    static let twilioToNumberString = UserDefaultsValue<String>(key: "twilioToNumberString", default: "")
+
 }

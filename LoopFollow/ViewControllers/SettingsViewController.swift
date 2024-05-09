@@ -319,6 +319,19 @@ class SettingsViewController: FormViewController {
            ), onDismiss: nil)
             
         }
+       
+       +++ Section("Remote Settings")
+        <<< ButtonRow() {
+           $0.title = "Remote Settings"
+           $0.presentationMode = .show(
+               controllerProvider: .callback(builder: {
+                  let controller = RemoteSettingsViewController()
+                  controller.appStateController = self.appStateController
+                  return controller
+               }
+           ), onDismiss: nil)
+            
+        }
 
        +++ Section(header: getAppVersion(), footer: "")
        

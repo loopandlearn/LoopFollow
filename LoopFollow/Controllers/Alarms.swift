@@ -508,6 +508,19 @@ extension MainViewController {
                 return
             }
         }
+        
+        if UserDefaultsRepository.alertRecBolusActive.value && !UserDefaultsRepository.alertRecBolusIsSnoozed.value {
+                    let currentRecBolus = UserDefaultsRepository.deviceRecBolus.value
+                    let alertAtRecBolus = Double(UserDefaultsRepository.alertRecBolusLevel.value)
+
+                    if currentRecBolus >= alertAtRecBolus {
+                        AlarmSound.whichAlarm = "Rec. Bolus"
+
+                        if UserDefaultsRepository.alertRecBolusRepeat.value { numLoops = -1 }
+                        triggerAlarm(sound: UserDefaultsRepository.alertRecBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertRecBolusSnooze.value, snoozeIncrement: 5, audio: true)
+                        return
+                    }
+                }
 
         if UserDefaultsRepository.alertRecBolusActive.value && !UserDefaultsRepository.alertRecBolusIsSnoozed.value {
             let currentRecBolus = UserDefaultsRepository.deviceRecBolus.value
@@ -547,7 +560,7 @@ extension MainViewController {
             return
         }
         
-        let overrideName = recentOverride?.reason as! String
+        let overrideName = recentOverride?.notes as! String
        
         var numLoops = 0
         var playSound = true
