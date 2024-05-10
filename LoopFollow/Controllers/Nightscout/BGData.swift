@@ -176,9 +176,8 @@ extension MainViewController {
                 self.startBGTimer(time: 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
                 let timerVal = 310 - secondsAgo
                 print("##### started 5:10 bg timer: \(timerVal)")
-                self.updateBadge(val: data[0].sgv)
-                if UserDefaultsRepository.speakBG.value {
-                    self.speakBG(currentValue: data[0].sgv, previousValue: data[1].sgv)
+                if data.count > 1 {
+                    self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
                 }
             }
         }
@@ -278,8 +277,10 @@ extension MainViewController {
             attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
             if deltaTime >= 12 { // Data is stale
                 attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
+                self.updateBadge(val: 0)
             } else { // Data is fresh
                 attributeString.addAttribute(.strikethroughColor, value: UIColor.clear, range: NSRange(location: 0, length: attributeString.length))
+                self.updateBadge(val: latestBG)
             }
             self.BGText.attributedText = attributeString
             

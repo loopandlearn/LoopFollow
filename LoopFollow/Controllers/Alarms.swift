@@ -349,7 +349,7 @@ extension MainViewController {
                 if (UserDefaultsRepository.alertNotLoopingUseLimits.value
                     && (
                         (Float(currentBG) >= UserDefaultsRepository.alertNotLoopingUpperLimit.value
-                            && Float(currentBG) <= UserDefaultsRepository.alertNotLoopingLowerLimit.value) ||
+                            || Float(currentBG) <= UserDefaultsRepository.alertNotLoopingLowerLimit.value) ||
                             // Ignore Limits if BG reading is older than non looping time
                             (Double(now - currentBGTime) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))
                     ) ||
@@ -509,9 +509,21 @@ extension MainViewController {
             }
         }
 
+        if UserDefaultsRepository.alertRecBolusActive.value && !UserDefaultsRepository.alertRecBolusIsSnoozed.value {
+            let currentRecBolus = UserDefaultsRepository.deviceRecBolus.value
+            let alertAtRecBolus = Double(UserDefaultsRepository.alertRecBolusLevel.value)
+
+            if currentRecBolus >= alertAtRecBolus {
+                AlarmSound.whichAlarm = "Rec. Bolus"
+
+                if UserDefaultsRepository.alertRecBolusRepeat.value { numLoops = -1 }
+                triggerAlarm(sound: UserDefaultsRepository.alertRecBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertRecBolusSnooze.value, snoozeIncrement: 5, audio: true)
+                return
+            }
+        }
+
         // still send persistent notification if no alarms trigger and persistent notification is on
         persistentNotification(bgTime: currentBGTime)
-        
     }
        
     func checkOverrideAlarms()
@@ -773,7 +785,14 @@ extension MainViewController {
             alarms.reloadSnoozeTime(key: "alertBatterySnoozedTime", setNil: true)
             alarms.reloadIsSnoozed(key: "alertBatteryIsSnoozed", value: false)
         }
-      }
+
+        if date > UserDefaultsRepository.alertRecBolusSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertRecBolusSnoozedTime.setNil(key: "alertRecBolusSnoozedTime")
+            UserDefaultsRepository.alertRecBolusIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertRecBolusSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertRecBolusIsSnoozed", value: false)
+        }
+    }
     
     func checkQuietHours() {
         if UserDefaultsRepository.quietHourStart.value == nil || UserDefaultsRepository.quietHourEnd.value == nil { return }
@@ -861,10 +880,130 @@ extension MainViewController {
         }
         
     }
+
+    func evaluateSpeakConditions(currentValue: Int, previousValue: Int) {
+        if !UserDefaultsRepository.speakBG.value {
+            return
+        }
+        
+        let always = UserDefaultsRepository.speakBGAlways.value
+        let lowThreshold = UserDefaultsRepository.speakLowBGLimit.value
+        let fastDropDelta = UserDefaultsRepository.speakFastDropDelta.value
+        let highThreshold = UserDefaultsRepository.speakHighBGLimit.value
+        let speakLowBG = UserDefaultsRepository.speakLowBG.value
+        let speakProactiveLowBG = UserDefaultsRepository.speakProactiveLowBG.value
+        let speakHighBG = UserDefaultsRepository.speakHighBG.value
+        
+        // Speak always
+        if always {
+            speakBG(currentValue: currentValue, previousValue: previousValue)
+            print("Speaking because 'Always' is enabled.")
+            return
+        }
+        
+        // Speak if low or last value was low
+        if speakLowBG {
+            if currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) {
+                speakBG(currentValue: currentValue, previousValue: previousValue)
+                print("Speaking because of 'Low' condition.")
+                return
+            }
+        }
+        
+        // Speak predictive low if...
+        // * low or last value was low
+        // * next predictive value is low
+        // * fast drop occurs below high
+        if speakProactiveLowBG {
+            let predictiveTrigger = !predictionData.isEmpty && Float(predictionData.first!.sgv) <= lowThreshold
+            
+            if predictiveTrigger ||
+                currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) ||
+                ((currentValue <= Int(highThreshold) && (previousValue - currentValue) >= Int(fastDropDelta))) {
+                speakBG(currentValue: currentValue, previousValue: previousValue)
+                print("Speaking because of 'Proactive Low' condition. Predictive trigger: \(predictiveTrigger)")
+                return
+            }
+        }
+        
+        //Speak if high or if last value was high
+        if speakHighBG {
+            if currentValue >= Int(highThreshold) || previousValue >= Int(highThreshold) {
+                speakBG(currentValue: currentValue, previousValue: previousValue)
+                print("Speaking because of 'High' condition.")
+                return
+            }
+        }
+        
+        print("No condition met for speaking.")
+    }
     
+    struct AnnouncementTexts {
+        var stable: String
+        var increase: String
+        var decrease: String
+        var currentBGIs: String
+        
+        static func forLanguage(_ language: String) -> AnnouncementTexts {
+            switch language {
+            case "it":
+                return AnnouncementTexts(
+                    stable: "ed è stabile",
+                    increase: "ed è salita di",
+                    decrease: "ed è scesa di",
+                    currentBGIs: "Glicemia attuale è"
+                )
+            case "sk":
+                return AnnouncementTexts(
+                    stable: "a je stabilná",
+                    increase: "a stúpla o",
+                    decrease: "a klesla o",
+                    currentBGIs: "Aktuálna glykémia je"
+                )
+            case "sv":
+                return AnnouncementTexts(
+                    stable: "och det är stabilt",
+                    increase: "och det har ökat med",
+                    decrease: "och det har minskat med",
+                    currentBGIs: "Blodsockret är"
+                )
+            case "en": fallthrough
+            default:
+                return AnnouncementTexts(
+                    stable: "and it is stable",
+                    increase: "and it is up",
+                    decrease: "and it is down",
+                    currentBGIs: "Glucose is"
+                )
+            }
+        }
+    }
+    
+    struct LanguageVoiceMapping {
+        static let voiceLanguageMap: [String: String] = [
+            "en": "en-US",
+            "it": "it-IT",
+            "sk": "sk-SK",
+            "sv": "sv-SE"
+        ]
+        
+        static func voiceLanguageCode(forAppLanguage appLanguage: String) -> String {
+            return voiceLanguageMap[appLanguage, default: "en-US"]
+        }
+    }
+
+
     // Speaks the current blood glucose value and the change from the previous value.
     // Repeated calls to the function within 30 seconds are prevented.
     func speakBG(currentValue: Int, previousValue: Int) {
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.playback, mode: .default)
+            try audioSession.setActive(true)
+        } catch {
+            print("Failed to set up audio session: \(error)")
+        }
+        
         // Get the current time
         let currentTime = Date()
 
@@ -880,20 +1019,27 @@ extension MainViewController {
         self.lastSpeechTime = currentTime
 
         let bloodGlucoseDifference = currentValue - previousValue
+
+        let preferredLanguage = UserDefaultsRepository.speakLanguage.value
+        let voiceLanguageCode = LanguageVoiceMapping.voiceLanguageCode(forAppLanguage: preferredLanguage)
+
+        let texts = AnnouncementTexts.forLanguage(preferredLanguage)
+        
         let negligibleThreshold = 3
-        let differenceText: String
-
+        let localizedCurrentValue = bgUnits.toDisplayUnits(String(currentValue)).replacingOccurrences(of: ",", with: ".")
+        let announcementText: String
+        
         if abs(bloodGlucoseDifference) <= negligibleThreshold {
-            differenceText = "stable"
+            announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(texts.stable)"
         } else {
-            let direction = bloodGlucoseDifference < 0 ? "down" : "up"
-            let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference)))
-            differenceText = "\(direction) \(absoluteDifference)"
+            let directionText = bloodGlucoseDifference < 0 ? texts.decrease : texts.increase
+            let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference))).replacingOccurrences(of: ",", with: ".")
+            announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(directionText) \(absoluteDifference)"
         }
-
-        let announcementText = "Current BG is \(bgUnits.toDisplayUnits(String(currentValue))), and it is \(differenceText)"
+        
         let speechUtterance = AVSpeechUtterance(string: announcementText)
-        speechUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        speechUtterance.voice = AVSpeechSynthesisVoice(language: voiceLanguageCode)
+        
         speechSynthesizer.speak(speechUtterance)
     }
     

@@ -46,6 +46,43 @@ extension MainViewController {
             self.startDeviceStatusTimer(time: 10)
         }
     }
+    
+    func evaluateNotLooping(lastLoopTime: TimeInterval) {
+        if let statusStackView = LoopStatusLabel.superview as? UIStackView {
+            if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
+                IsNotLooping = true
+                // Change the distribution to 'fill' to allow manual resizing of arranged subviews
+                statusStackView.distribution = .fill
+                
+                // Hide PredictionLabel and expand LoopStatusLabel to fill the entire stack view
+                PredictionLabel.isHidden = true
+                LoopStatusLabel.frame = CGRect(x: 0, y: 0, width: statusStackView.frame.width, height: statusStackView.frame.height)
+                
+                // Update LoopStatusLabel's properties to display Not Looping
+                LoopStatusLabel.textAlignment = .center
+                LoopStatusLabel.text = "⚠️ Not Looping!"
+                LoopStatusLabel.textColor = UIColor.systemYellow
+                LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
+                
+            } else {
+                IsNotLooping = false
+                // Restore the original distribution and visibility of labels
+                statusStackView.distribution = .fillEqually
+                PredictionLabel.isHidden = false
+                
+                // Reset LoopStatusLabel's properties
+                LoopStatusLabel.textAlignment = .right
+                LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
+
+                if UserDefaultsRepository.forceDarkMode.value {
+                    LoopStatusLabel.textColor = UIColor.white
+                } else {
+                    LoopStatusLabel.textColor = UIColor.black
+                }
+            }
+        }
+        latestLoopTime = lastLoopTime
+    }
         
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
@@ -144,6 +181,7 @@ extension MainViewController {
                     }
                     if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
                         tableData[8].value = String(format:"%.2fU", recBolus)
+                        UserDefaultsRepository.deviceRecBolus.value = recBolus
                     }
                     if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
                         if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
@@ -171,12 +209,8 @@ extension MainViewController {
                     }
                     
                 }
-                
-                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
-                    LoopStatusLabel.text = "⚠"
-                    latestLoopStatusString = "⚠"
-                }
-                latestLoopTime = lastLoopTime
+
+                evaluateNotLooping(lastLoopTime: lastLoopTime)
             } // end lastLoopTime
         } // end lastLoop Record
         
@@ -206,9 +240,16 @@ extension MainViewController {
                         tableData[1].value = String(format:"%.0f", cobdata["COB"] as! Double)
                         latestCOB = String(format:"%.0f", cobdata["COB"] as! Double)
                     }
-                    if let recbolusdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                        tableData[8].value = String(format:"%.2fU", recbolusdata["insulinReq"] as! Double)
+                    if let recbolusdata = lastLoopRecord["enacted"] as? [String: AnyObject],
+                       let insulinReq = recbolusdata["insulinReq"] as? Double {
+                        tableData[8].value = String(format: "%.2fU", insulinReq)
+                        UserDefaultsRepository.deviceRecBolus.value = insulinReq
+                    } else {
+                        tableData[8].value = "N/A"
+                        UserDefaultsRepository.deviceRecBolus.value = 0
+                        print("Warning: Failed to extract insulinReq from recbolusdata.")
                     }
+
                     if let autosensdata = lastLoopRecord["enacted"] as? [String:AnyObject] {
                         let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
                         tableData[11].value = String(format:"%.0f", sens) + "%"
@@ -305,11 +346,8 @@ extension MainViewController {
                     }
                     
                 }
-                if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
-                    LoopStatusLabel.text = "⚠"
-                    latestLoopStatusString = "⚠"
-                }
-                latestLoopTime = lastLoopTime
+
+                evaluateNotLooping(lastLoopTime: lastLoopTime)
             }
         }
         

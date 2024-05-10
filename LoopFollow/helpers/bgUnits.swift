@@ -12,26 +12,37 @@ import Foundation
 class bgUnits {
     
     static func toDisplayUnits(_ value: String) -> String {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        
         if UserDefaultsRepository.units.value == "mg/dL" {
-            return removeDecimals(value)
+            numberFormatter.maximumFractionDigits = 0 // No decimal places for mg/dL
         } else {
-            // convert mg/dL to mmol/l
-            let floatValue : Float = Float(value)! * 0.0555
-            return String(floatValue.cleanValue)
-        }
-    }
-    
-    // if a "." is contained, simply takes the left part of the string only
-    static func removeDecimals(_ value : String) -> String {
-        if !value.contains(".") {
-            return value
+            numberFormatter.maximumFractionDigits = 1 // Always one decimal place for mmol/L
+            numberFormatter.minimumFractionDigits = 1 // This ensures even .0 is displayed
         }
         
-        return String(value[..<value.firstIndex(of: ".")!])
+        numberFormatter.locale = Locale.current
+        
+        if let number = Float(value) {
+            if UserDefaultsRepository.units.value == "mg/dL" {
+                let numberValue = NSNumber(value: number)
+                return numberFormatter.string(from: numberValue) ?? value
+            } else {
+                let mmolValue = Double(number) * GlucoseConversion.mgDlToMmolL  // Convert number to Double
+                let numberValue = NSNumber(value: mmolValue)
+                return numberFormatter.string(from: numberValue) ?? value
+            }
+        }
+        
+        return value
     }
-    
-    static func removePeriodForBadge(_ value: String) -> String {
-        return value.replacingOccurrences(of: ".", with: "")
+
+    static func removePeriodAndCommaForBadge(_ value: String) -> String {
+        var modifiedValue = value
+        modifiedValue = modifiedValue.replacingOccurrences(of: ".", with: "")
+        modifiedValue = modifiedValue.replacingOccurrences(of: ",", with: "")
+        return modifiedValue
     }
 }
 

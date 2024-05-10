@@ -252,7 +252,6 @@ class AlarmViewController: FormViewController {
           <<< SegmentedRow<String>("bgAlerts"){ row in
                 row.title = ""
                 row.options = ["Urgent Low", "Low", "High", "Urgent High"]
-                   // row.value = "Urgent Low"
         }.onChange { [weak self] row in
             guard let value = row.value else { return }
             let otherRow = self?.form.rowBy(tag: "bgExtraAlerts") as! SegmentedRow<String>
@@ -267,12 +266,14 @@ class AlarmViewController: FormViewController {
             let otherRow4 = self?.form.rowBy(tag: "otherAlerts3") as! SegmentedRow<String>
             otherRow4.value = nil
             otherRow4.reload()
+            let otherRow5 = self?.form.rowBy(tag: "otherAlerts4") as! SegmentedRow<String>
+            otherRow5.value = nil
+            otherRow5.reload()
             row.value = value
         }
             <<< SegmentedRow<String>("bgExtraAlerts"){ row in
                 row.title = ""
                 row.options = ["No Readings", "Fast Drop", "Fast Rise", "Temporary"]
-                    //row.value = "Missed Readings"
         }.onChange { [weak self] row in
              guard let value = row.value else { return }
             let otherRow = self?.form.rowBy(tag: "bgAlerts") as! SegmentedRow<String>
@@ -287,6 +288,9 @@ class AlarmViewController: FormViewController {
             let otherRow4 = self?.form.rowBy(tag: "otherAlerts3") as! SegmentedRow<String>
             otherRow4.value = nil
             otherRow4.reload()
+            let otherRow5 = self?.form.rowBy(tag: "otherAlerts4") as! SegmentedRow<String>
+            otherRow5.value = nil
+            otherRow5.reload()
             row.value = value
         }
             <<< SegmentedRow<String>("otherAlerts"){ row in
@@ -295,8 +299,6 @@ class AlarmViewController: FormViewController {
                 if UserDefaultsRepository.url.value == "" {
                     row.hidden = true
                 }
-                
-                //row.value = "Not Looping"
         }.onChange { [weak self] row in
              guard let value = row.value else { return }
             let otherRow = self?.form.rowBy(tag: "bgExtraAlerts") as! SegmentedRow<String>
@@ -311,6 +313,9 @@ class AlarmViewController: FormViewController {
             let otherRow4 = self?.form.rowBy(tag: "otherAlerts3") as! SegmentedRow<String>
             otherRow4.value = nil
             otherRow4.reload()
+            let otherRow5 = self?.form.rowBy(tag: "otherAlerts4") as! SegmentedRow<String>
+            otherRow5.value = nil
+            otherRow5.reload()
             row.value = value
         }
         <<< SegmentedRow<String>("otherAlerts2"){ row in
@@ -319,7 +324,6 @@ class AlarmViewController: FormViewController {
                 if UserDefaultsRepository.url.value == "" {
                     row.hidden = true
                 }
-                //row.value = "Not Looping"
         }.onChange { [weak self] row in
              guard let value = row.value else { return }
             let otherRow = self?.form.rowBy(tag: "bgExtraAlerts") as! SegmentedRow<String>
@@ -334,6 +338,9 @@ class AlarmViewController: FormViewController {
             let otherRow4 = self?.form.rowBy(tag: "otherAlerts3") as! SegmentedRow<String>
             otherRow4.value = nil
             otherRow4.reload()
+            let otherRow5 = self?.form.rowBy(tag: "otherAlerts4") as! SegmentedRow<String>
+            otherRow5.value = nil
+            otherRow5.reload()
             row.value = value
         }
         
@@ -343,7 +350,6 @@ class AlarmViewController: FormViewController {
                 if UserDefaultsRepository.url.value == "" {
                     row.hidden = true
                 }
-                //row.value = "Not Looping"
         }.onChange { [weak self] row in
              guard let value = row.value else { return }
             let otherRow = self?.form.rowBy(tag: "bgExtraAlerts") as! SegmentedRow<String>
@@ -358,10 +364,37 @@ class AlarmViewController: FormViewController {
             let otherRow4 = self?.form.rowBy(tag: "otherAlerts2") as! SegmentedRow<String>
             otherRow4.value = nil
             otherRow4.reload()
+            let otherRow5 = self?.form.rowBy(tag: "otherAlerts4") as! SegmentedRow<String>
+            otherRow5.value = nil
+            otherRow5.reload()
             row.value = value
         }
         
-
+        <<< SegmentedRow<String>("otherAlerts4"){ row in
+            row.title = ""
+            row.options = ["Rec. Bolus"]
+            if UserDefaultsRepository.url.value == "" {
+                row.hidden = true
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            let otherRow = self?.form.rowBy(tag: "bgExtraAlerts") as! SegmentedRow<String>
+            otherRow.value = nil
+            otherRow.reload()
+            let otherRow2 = self?.form.rowBy(tag: "bgAlerts") as! SegmentedRow<String>
+            otherRow2.value = nil
+            otherRow2.reload()
+            let otherRow3 = self?.form.rowBy(tag: "otherAlerts") as! SegmentedRow<String>
+            otherRow3.value = nil
+            otherRow3.reload()
+            let otherRow4 = self?.form.rowBy(tag: "otherAlerts2") as! SegmentedRow<String>
+            otherRow4.value = nil
+            otherRow4.reload()
+            let otherRow5 = self?.form.rowBy(tag: "otherAlerts3") as! SegmentedRow<String>
+            otherRow5.value = nil
+            otherRow5.reload()
+            row.value = value
+        }
         
         buildUrgentLow()
         buildLow()
@@ -390,7 +423,8 @@ class AlarmViewController: FormViewController {
         buildIOB()
         buildCOB()
         buildBatteryAlarm()
-        
+        buildRecBolus()
+
         buildSnoozeAll()
         buildAlarmSettings()
         
@@ -1785,7 +1819,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertNotLoopingUseLimits.value = value
         }
         <<< StepperRow("alertNotLoopingLowerLimit") { row in
-            row.title = "Below BG"
+            row.title = "If Below BG"
             row.cell.stepper.stepValue = 1
             row.cell.stepper.minimumValue = 50
             row.cell.stepper.maximumValue = 200
@@ -1800,7 +1834,7 @@ class AlarmViewController: FormViewController {
                 UserDefaultsRepository.alertNotLoopingLowerLimit.value = Float(value)
         }
         <<< StepperRow("alertNotLoopingUpperLimit") { row in
-            row.title = "Above BG"
+            row.title = "If Above BG"
             row.cell.stepper.stepValue = 1
             row.cell.stepper.minimumValue = 100
             row.cell.stepper.maximumValue = 300
@@ -3240,6 +3274,70 @@ class AlarmViewController: FormViewController {
         }.onChange { [weak self] row in
             guard let value = row.value else { return }
             UserDefaultsRepository.alertBatteryRepeat.value = value
+        }
+    }
+
+    func buildRecBolus(){
+        form
+        +++ Section(header: "Rec. Bolus Alert", footer: "Activates a notification alert whenever recommended bolus is above a user-defined threshold, allowing for proactive manual bolusing.") { row in
+            row.hidden = "$otherAlerts4 != 'Rec. Bolus'"
+        }
+        <<< SwitchRow("alertRecBolusActive"){ row in
+            row.title = "Active"
+            row.value = UserDefaultsRepository.alertRecBolusActive.value
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertRecBolusActive.value = value
+        }
+        <<< StepperRow("alertRecBolusAt") { row in
+            row.title = "Rec. Bolus threshold"
+            row.cell.stepper.stepValue = 0.1
+            row.cell.stepper.minimumValue = 0.1
+            row.cell.stepper.maximumValue = 50
+            row.value = Double(UserDefaultsRepository.alertRecBolusLevel.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Double(round(10*value)/10))"
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertRecBolusLevel.value = value
+        }
+        <<< StepperRow("alertRecBolusSnooze") { row in
+            row.title = "Default Snooze"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 60
+            row.value = Double(UserDefaultsRepository.alertRecBolusSnooze.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertRecBolusSnooze.value = Int(value)
+        }
+        <<< PickerInputRow<String>("alertRecBolusSound") { row in
+            row.title = "Sound"
+            row.options = soundFiles
+            row.value = UserDefaultsRepository.alertRecBolusSound.value
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertRecBolusSound.value = value
+            AlarmSound.setSoundFile(str: value)
+            AlarmSound.stop()
+            AlarmSound.playTest()
+        }
+        <<< SwitchRow("alertRecBolusRepeat"){ row in
+            row.title = "Repeat Sound"
+            row.value = UserDefaultsRepository.alertRecBolusRepeat.value
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertRecBolusRepeat.value = value
         }
     }
     
