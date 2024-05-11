@@ -37,6 +37,9 @@
 		DDCF979C24C14EFB002C9752 /* AdvancedSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979B24C14EFB002C9752 /* AdvancedSettingsViewController.swift */; };
 		DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979D24C2382A002C9752 /* AppStateController.swift */; };
 		DDCFCAF22B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */; };
+		DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */; };
+		DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */; };
+		DDF2C0142BEFD468007A20E6 /* blacklisted-versions.json in Resources */ = {isa = PBXBuildFile; fileRef = DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */; };
 		DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF9676D2AD08C6E00C5EB95 /* SiteChange.swift */; };
 		FC16A97A24996673003D6245 /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97924996673003D6245 /* NightScout.swift */; };
 		FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
@@ -225,6 +228,9 @@
 		DDCF979B24C14EFB002C9752 /* AdvancedSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979D24C2382A002C9752 /* AppStateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateController.swift; sourceTree = "<group>"; };
 		DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = LoopFollowDisplayNameConfig.xcconfig; sourceTree = "<group>"; };
+		DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubService.swift; sourceTree = "<group>"; };
+		DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionManager.swift; sourceTree = "<group>"; };
+		DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "blacklisted-versions.json"; sourceTree = "<group>"; };
 		DDF9676D2AD08C6E00C5EB95 /* SiteChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteChange.swift; sourceTree = "<group>"; };
 		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
 		FC16A97924996673003D6245 /* NightScout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScout.swift; sourceTree = "<group>"; };
@@ -644,6 +650,7 @@
 		FC97880B2485969B00A7906C = {
 			isa = PBXGroup;
 			children = (
+				DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */,
 				DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */,
 				DDB0AF4F2BB1A81F00AFA48B /* Scripts */,
 				DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */,
@@ -692,6 +699,8 @@
 				DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */,
 				DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */,
 				DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */,
+				DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */,
+				DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -818,6 +827,7 @@
 				FC7CE55D248ABE37001F83B8 /* Metallic.caf in Resources */,
 				FC7CE568248ABE37001F83B8 /* Sci-Fi_Engine_Shut_Down.caf in Resources */,
 				FC7CE580248ABE37001F83B8 /* Sci-Fi_Alarm.caf in Resources */,
+				DDF2C0142BEFD468007A20E6 /* blacklisted-versions.json in Resources */,
 				FC7CE533248ABE37001F83B8 /* Ending_Reached.caf in Resources */,
 				FC7CE558248ABE37001F83B8 /* Rush.caf in Resources */,
 				FC7CE52A248ABE37001F83B8 /* Nightguard.caf in Resources */,
@@ -977,9 +987,11 @@
 				FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */,
 				FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */,
 				DD7E19842ACDA50C00DBD158 /* Overrides.swift in Sources */,
+				DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */,
 				FC16A97A24996673003D6245 /* NightScout.swift in Sources */,
 				DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */,
 				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,
+				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
 				FC16A97D24996747003D6245 /* Alarms.swift in Sources */,
 				FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */,
