@@ -90,4 +90,15 @@ class dateTimeUtils {
 
         return dateFormat.firstIndex(of: "a") == nil
     }
+
+    static func formattedDate(from date: Date?) -> String {
+        guard let date = date else {
+            return "Unknown"
+        }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .short
+        dateFormatter.locale = Locale.current
+        return dateFormatter.string(from: date)
+    }
 }

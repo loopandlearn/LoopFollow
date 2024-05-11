@@ -39,50 +39,6 @@ class SettingsViewController: FormViewController {
         guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
         nightscoutTab.isEnabled = isEnabled
     }
-   
-    // Determine if the build is from TestFlight
-    func isTestFlightBuild() -> Bool {
-#if targetEnvironment(simulator)
-        return false
-#else
-        if Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision") != nil {
-            return false
-        }
-        guard let receiptName = Bundle.main.appStoreReceiptURL?.lastPathComponent else {
-            return false
-        }
-        return "sandboxReceipt".caseInsensitiveCompare(receiptName) == .orderedSame
-#endif
-    }
-    
-    // Get the build date from the build details
-    func buildDate() -> Date? {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEE MMM d HH:mm:ss 'UTC' yyyy"
-        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.timeZone = TimeZone(identifier: "UTC")
-        
-        guard let dateString = BuildDetails.default.buildDateString,
-              let date = dateFormatter.date(from: dateString) else {
-            return nil
-        }
-        return date
-    }
-    
-    // Calculate the expiration date based on the build type
-    func calculateExpirationDate() -> Date {
-        if isTestFlightBuild(), let buildDate = buildDate() {
-            // For TestFlight, add 90 days to the build date
-            return Calendar.current.date(byAdding: .day, value: 90, to: buildDate)!
-        } else {
-            // For Xcode builds, use the provisioning profile's expiration date
-            if let provision = MobileProvision.read() {
-                return provision.expirationDate
-            } else {
-                return Date() // Fallback to current date if unable to read provisioning profile
-            }
-        }
-    }
     
    override func viewDidLoad() {
         super.viewDidLoad()
@@ -92,12 +48,14 @@ class SettingsViewController: FormViewController {
        UserDefaultsRepository.showNS.value = false
        UserDefaultsRepository.showDex.value = false
     
-       let expiration = calculateExpirationDate()
-       var expirationHeaderString = "App Expiration"
-       if isTestFlightBuild() {
-          expirationHeaderString = "Beta (TestFlight) Expiration"
-       }
-       
+       let buildDetails = BuildDetails.default
+       let formattedBuildDate = dateTimeUtils.formattedDate(from: buildDetails.buildDate())
+       let branchAndSha = buildDetails.branchAndSha
+       let expiration = dateTimeUtils.formattedDate(from: buildDetails.calculateExpirationDate())
+       let expirationHeaderString = buildDetails.expirationHeaderString
+       let versionManager = AppVersionManager()
+       let version = versionManager.version()
+
         form
         +++ Section(header: "Data Settings", footer: "")
        <<< SegmentedRow<String>("units") { row in
@@ -320,14 +278,69 @@ class SettingsViewController: FormViewController {
             
         }
 
-       +++ Section(header: getAppVersion(), footer: "")
-       
-       if !isMacApp() {
-           form +++ Section(header: expirationHeaderString, footer: String(expiration.description))
+       +++ Section("Build Information")
+       <<< LabelRow() {
+           $0.title = "Version"
+           $0.value = version
+           $0.tag = "currentVersionRow"
+       }
+       <<< LabelRow() {
+           $0.title = "Latest version"
+           $0.value = "Fetching..."
+           $0.tag = "latestVersionRow"
+       }
+       <<< LabelRow() {
+           $0.title = expirationHeaderString
+           $0.value = expiration
+           $0.hidden = Condition(booleanLiteral: isMacApp())
+       }
+       <<< LabelRow() {
+           $0.title = "Built"
+           $0.value = formattedBuildDate
+       }
+       <<< LabelRow() {
+           $0.title = "Branch"
+           $0.value = branchAndSha
        }
        
        showHideNSDetails()
        checkNightscoutStatus()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        refreshVersionInfo()
+        checkNightscoutStatus()
+    }
+    
+    func refreshVersionInfo() {
+        let versionManager = AppVersionManager()
+        versionManager.checkForNewVersion { latestVersion, isNewer, isBlacklisted in
+            DispatchQueue.main.async {
+                if let currentVersionRow = self.form.rowBy(tag: "currentVersionRow") as? LabelRow {
+                    currentVersionRow.cell.detailTextLabel?.textColor = self.getColor(isBlacklisted: isBlacklisted, isNewer: isNewer, isCurrent: latestVersion == versionManager.version())
+                    currentVersionRow.updateCell()
+                }
+                
+                if let latestVersionRow = self.form.rowBy(tag: "latestVersionRow") as? LabelRow {
+                    latestVersionRow.value = latestVersion ?? "Unknown"
+                    latestVersionRow.updateCell()
+                }
+            }
+        }
+    }
+    
+    private func getColor(isBlacklisted: Bool, isNewer: Bool, isCurrent: Bool) -> UIColor {
+        if isBlacklisted {
+            return .red
+        } else if isNewer {
+            return .orange
+        } else if isCurrent {
+            return .green
+        } else {
+            return .secondaryLabel
+        }
     }
     
     func isMacApp() -> Bool {
@@ -336,13 +349,6 @@ class SettingsViewController: FormViewController {
 #else
         return false
 #endif
-    }
-
-    func getAppVersion() -> String {
-        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-            return "App Version: \(version)"
-        }
-        return "Version Unknown"
     }
     
     func updateStatusLabel(error: NightscoutUtils.NightscoutError?) {
