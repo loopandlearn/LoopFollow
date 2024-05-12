@@ -11,23 +11,32 @@ import Foundation
 class AppVersionManager {
     private let githubService = GitHubService()
     
+    /// Checks for the availability of a new app version and if the current version is blacklisted.
+    /// - Parameter completion: Returns latest version, a boolean for newer version existence, and blacklist status.
+    /// Usage: `versionManager.checkForNewVersion { latestVersion, isNewer, isBlacklisted in ... }`
     func checkForNewVersion(completion: @escaping (String?, Bool, Bool) -> Void) {
         let currentVersion = version()
         let now = Date()
-        
-        // Retrieve cache
-        let lastChecked = UserDefaults.standard.object(forKey: "latestVersionChecked") as? Date ?? Date.distantPast
-        let cachedLatestVersion = UserDefaults.standard.string(forKey: "latestVersion")
-        let isBlacklistedCached = UserDefaults.standard.bool(forKey: "isCurrentVersionBlacklisted")
 
+        // Retrieve cache
+        let latestVersionChecked = UserDefaultsRepository.latestVersionChecked.value ?? Date.distantPast
+        let latestVersion = UserDefaultsRepository.latestVersion.value
+        let currentVersionBlackListed = UserDefaultsRepository.currentVersionBlackListed.value
+        let cachedForVersion = UserDefaultsRepository.cachedForVersion.value
+        
         // Check if the cache is still valid
-        if now.timeIntervalSince(lastChecked) < 24 * 3600, let latestVersion = cachedLatestVersion {
+        if let cachedVersion = cachedForVersion, cachedVersion == currentVersion,
+           now.timeIntervalSince(latestVersionChecked) < 24 * 3600, let latestVersion = latestVersion {
             let isNewer = isVersion(latestVersion, newerThan: currentVersion)
-            completion(latestVersion, isNewer, isBlacklistedCached)
+            completion(latestVersion, isNewer, currentVersionBlackListed)
             return
         }
-        
-        // Fetch new data if cache is outdated
+
+        // Fetch new data if cache is outdated or not for current version
+        fetchDataAndUpdateCache(currentVersion: currentVersion, completion: completion)
+    }
+
+    private func fetchDataAndUpdateCache(currentVersion: String, completion: @escaping (String?, Bool, Bool) -> Void) {
         githubService.fetchData(for: .versionConfig) { versionData in
             self.githubService.fetchData(for: .blacklistedVersions) { blacklistData in
                 DispatchQueue.main.async {
@@ -42,6 +51,7 @@ class AppVersionManager {
                     UserDefaults.standard.set(fetchedVersion, forKey: "latestVersion")
                     UserDefaults.standard.set(Date(), forKey: "latestVersionChecked")
                     UserDefaults.standard.set(isBlacklisted, forKey: "isCurrentVersionBlacklisted")
+                    UserDefaults.standard.set(currentVersion, forKey: "cachedForVersion")
                     
                     // Call completion with new data
                     completion(fetchedVersion, isNewer, isBlacklisted)
@@ -62,7 +72,7 @@ class AppVersionManager {
         }
         return nil
     }
-    
+
     private func isVersion(_ fetchedVersion: String, newerThan currentVersion: String) -> Bool {
         let fetchedVersionComponents = fetchedVersion.split(separator: ".").map { Int($0) ?? 0 }
         let currentVersionComponents = currentVersion.split(separator: ".").map { Int($0) ?? 0 }
@@ -79,18 +89,18 @@ class AppVersionManager {
         }
         return false
     }
-    
+
     func version() -> String {
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
             return version
         }
         return "Unknown"
     }
-    
+
     struct Blacklist: Decodable {
         let blacklistedVersions: [VersionEntry]
     }
-    
+
     struct VersionEntry: Decodable {
         let version: String
     }
