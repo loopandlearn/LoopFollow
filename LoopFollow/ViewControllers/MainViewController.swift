@@ -436,7 +436,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             if isBlacklisted {
                 let lastBlacklistShown = UserDefaultsRepository.lastBlacklistNotificationShown.value ?? Date.distantPast
                 if now.timeIntervalSince(lastBlacklistShown) > 86400 { // 24 hours
-                    self.versionAlert(message: "The current version has a critical issue and should be updated immediately.")
+                    self.versionAlert(message: "The current version has a critical issue and should be updated as soon as possible.")
                     UserDefaultsRepository.lastBlacklistNotificationShown.value = now
                     UserDefaultsRepository.lastVersionUpdateNotificationShown.value = now
                 }
