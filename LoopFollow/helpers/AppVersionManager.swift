@@ -24,6 +24,12 @@ class AppVersionManager {
         let currentVersionBlackListed = UserDefaultsRepository.currentVersionBlackListed.value
         let cachedForVersion = UserDefaultsRepository.cachedForVersion.value
         
+        // Reset notifications if version has changed
+        if let cachedVersion = cachedForVersion, cachedVersion != currentVersion {
+            UserDefaultsRepository.lastBlacklistNotificationShown.value = Date.distantPast
+            UserDefaultsRepository.lastVersionUpdateNotificationShown.value = Date.distantPast
+        }
+        
         // Check if the cache is still valid
         if let cachedVersion = cachedForVersion, cachedVersion == currentVersion,
            now.timeIntervalSince(latestVersionChecked) < 24 * 3600, let latestVersion = latestVersion {
