@@ -48,10 +48,10 @@ class AppVersionManager {
                         .map { $0.blacklistedVersions.map { $0.version }.contains(currentVersion) } ?? false
                     
                     // Update cache with new data
-                    UserDefaults.standard.set(fetchedVersion, forKey: "latestVersion")
-                    UserDefaults.standard.set(Date(), forKey: "latestVersionChecked")
-                    UserDefaults.standard.set(isBlacklisted, forKey: "isCurrentVersionBlacklisted")
-                    UserDefaults.standard.set(currentVersion, forKey: "cachedForVersion")
+                    UserDefaultsRepository.latestVersion.value = fetchedVersion
+                    UserDefaultsRepository.latestVersionChecked.value = Date()
+                    UserDefaultsRepository.currentVersionBlackListed.value = isBlacklisted
+                    UserDefaultsRepository.cachedForVersion.value = currentVersion
                     
                     // Call completion with new data
                     completion(fetchedVersion, isNewer, isBlacklisted)
