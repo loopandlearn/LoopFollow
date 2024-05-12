@@ -71,7 +71,7 @@ class BuildDetails {
             if let provision = MobileProvision.read() {
                 return provision.expirationDate
             } else {
-                return Date()
+                return .distantFuture
             }
         }
     }
