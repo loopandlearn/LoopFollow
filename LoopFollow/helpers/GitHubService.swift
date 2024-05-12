@@ -18,7 +18,6 @@ class GitHubService {
             case .versionConfig:
                 return "https://raw.githubusercontent.com/loopandlearn/LoopFollow/main/Config.xcconfig"
             case .blacklistedVersions:
-                return "https://raw.githubusercontent.com/bjorkert/LoopFollow/Main/blacklisted-versions.json"
                 return "https://raw.githubusercontent.com/loopandlearn/LoopFollow/main/blacklisted-versions.json"
             }
         }
