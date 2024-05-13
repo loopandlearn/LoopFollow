@@ -19,8 +19,7 @@ class SettingsViewController: FormViewController {
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        var isLoopHidden = false;
-        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
+        if UserDefaultsRepository.url.value == "" {
             isHidden = true
             isEnabled = false
         }
@@ -202,16 +201,6 @@ class SettingsViewController: FormViewController {
            statusLabelRow = row
            row.hidden = "$showNS == false"
        }
-       <<< SwitchRow("loopUser"){ row in
-           row.title = "Download Loop/iAPS Data"
-           row.tag = "loopUser"
-           row.value = UserDefaultsRepository.loopUser.value
-           row.hidden = "$showNS == false"
-       }.onChange { row in
-                   guard let value = row.value else { return }
-                   UserDefaultsRepository.loopUser.value = value
-           }
-        
        <<< SwitchRow("showDex"){ row in
        row.title = "Show Dexcom Settings"
        row.value = UserDefaultsRepository.showDex.value

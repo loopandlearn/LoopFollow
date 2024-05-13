@@ -175,7 +175,7 @@ extension MainViewController {
     @objc func deviceStatusTimerDidEnd(_ timer:Timer) {
         
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
+        if UserDefaultsRepository.url.value == "" {
             startDeviceStatusTimer(time: 60)
             return
         }
@@ -200,7 +200,7 @@ extension MainViewController {
         
         
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
+        if UserDefaultsRepository.url.value == "" {
             startTreatmentsTimer(time: 60)
             return
         }
@@ -225,7 +225,7 @@ extension MainViewController {
     @objc func profileTimerDidEnd(_ timer:Timer) {
         
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
+        if UserDefaultsRepository.url.value == "" {
             startProfileTimer(time: 60)
             return
         }
