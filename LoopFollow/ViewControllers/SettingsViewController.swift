@@ -19,8 +19,7 @@ class SettingsViewController: FormViewController {
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        var isLoopHidden = false;
-        if UserDefaultsRepository.url.value == "" || !UserDefaultsRepository.loopUser.value {
+        if UserDefaultsRepository.url.value == "" {
             isHidden = true
             isEnabled = false
         }
@@ -114,21 +113,21 @@ class SettingsViewController: FormViewController {
            if !useTokenUrl {
                // Normalize input: remove unwanted characters and lowercase
                let filtered = value.replacingOccurrences(of: "[^A-Za-z0-9:/._-]", with: "", options: .regularExpression).lowercased()
-               
+
                // Further clean-up: Remove trailing slashes
                var cleanURL = filtered
-               while cleanURL.last == "/" {
+               while cleanURL.count > 8 && cleanURL.last == "/" {
                    cleanURL = String(cleanURL.dropLast())
                }
-               
+
                UserDefaultsRepository.url.value = cleanURL
                row.value = cleanURL
                row.updateCell()
            }
-           
+
            self.showHideNSDetails()
            globalVariables.nsVerifiedAlert = 0
-           
+
            // Verify Nightscout URL and token
            self.checkNightscoutStatus()
        }
@@ -160,16 +159,6 @@ class SettingsViewController: FormViewController {
            statusLabelRow = row
            row.hidden = "$showNS == false"
        }
-       <<< SwitchRow("loopUser"){ row in
-           row.title = "Download Loop/iAPS Data"
-           row.tag = "loopUser"
-           row.value = UserDefaultsRepository.loopUser.value
-           row.hidden = "$showNS == false"
-       }.onChange { row in
-                   guard let value = row.value else { return }
-                   UserDefaultsRepository.loopUser.value = value
-           }
-        
        <<< SwitchRow("showDex"){ row in
        row.title = "Show Dexcom Settings"
        row.value = UserDefaultsRepository.showDex.value
