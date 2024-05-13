@@ -155,21 +155,21 @@ class SettingsViewController: FormViewController {
            if !useTokenUrl {
                // Normalize input: remove unwanted characters and lowercase
                let filtered = value.replacingOccurrences(of: "[^A-Za-z0-9:/._-]", with: "", options: .regularExpression).lowercased()
-               
+
                // Further clean-up: Remove trailing slashes
                var cleanURL = filtered
-               while cleanURL.last == "/" {
+               while cleanURL.count > 8 && cleanURL.last == "/" {
                    cleanURL = String(cleanURL.dropLast())
                }
-               
+
                UserDefaultsRepository.url.value = cleanURL
                row.value = cleanURL
                row.updateCell()
            }
-           
+
            self.showHideNSDetails()
            globalVariables.nsVerifiedAlert = 0
-           
+
            // Verify Nightscout URL and token
            self.checkNightscoutStatus()
        }
