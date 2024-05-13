@@ -42,7 +42,6 @@ class UserDefaultsRepository {
     static let url = UserDefaultsValue<String>(key: "url", default: "")
     static let token = UserDefaultsValue<String>(key: "token", default: "")
     static let units = UserDefaultsValue<String>(key: "units", default: "mg/dL")
-    static let loopUser = UserDefaultsValue<Bool>(key: "loopUser", default: false)
     
     // Dexcom Share Settings
     static let showDex = UserDefaultsValue<Bool>(key: "showDex", default: false)
