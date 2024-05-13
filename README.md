@@ -86,7 +86,7 @@ Each of the features below is selectable - you decide whether to use them.  Add
     * Supports compatible data from Nightscout when the URL is provided (enable `Show Nightscout Settings` to see the URL, Token and Status rows)
         * Loop: Loop status, Loop Prediction
         * Trio and iAPS: status, Prediction lines, Autosens
-        * To remove the Data Table assoicated with NS, enter a blank line in URL
+        * To remove the Data Table associated with NS, enter a blank line in URL
 2. Tap on Alarms on Toolbar to configure.
     * Override DND (Do Not Disturb) and system volume for all alerts with a Snooze All Until and a Mute All Until
     * List of Alarms covers the standard high/low/rise/fall/urgent glucose but also include alerts for missed glucose readings, if below configured glucose, IOB, COB, Not Looping, Overrides, Pump, Missed Bolus, SAGE, CAGE, Battery and Rec. Bolus
