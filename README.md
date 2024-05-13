@@ -83,21 +83,22 @@ Each of the features below is selectable - you decide whether to use them.  Add
 
 1. Scrollable/scalable graph display with BG, IOB, COB, Basal, Bolus, and the General Nightscout Care portal info
     * Supports Glucose display when Dexcom is available but Nightscout is not
-    * Supports Loop and iAPS when Nightscout URL is provided and Download Loop/iAPS data is enabled (show Nightscout Settings to see the enable slider)
+    * Supports compatible data from Nightscout when the URL is provided (enable `Show Nightscout Settings` to see the URL, Token and Status rows)
         * Loop: Loop status, Loop Prediction
-        * iAPS: iAPS status, iAPS Prediction lines, Autosens
+        * Trio and iAPS: status, Prediction lines, Autosens
+        * To remove the Data Table assoicated with NS, enter a blank line in URL
 2. Tap on Alarms on Toolbar to configure.
     * Override DND (Do Not Disturb) and system volume for all alerts with a Snooze All Until and a Mute All Until
-    * List of Alarms covers the standard high/low/rise/fall/urgent glucose but also include alerts for missed glucose readings, if below configured glucose, IOB, COB, Not Looping, Overrides, Pump, Missed Bolus, SAGE, CAGE and Battery
-    * Each Alarm has configurable settings including Sound selection, PreSnooze (set to be quiet At Night, During Day or Never) and Snooze Until
+    * List of Alarms covers the standard high/low/rise/fall/urgent glucose but also include alerts for missed glucose readings, if below configured glucose, IOB, COB, Not Looping, Overrides, Pump, Missed Bolus, SAGE, CAGE, Battery and Rec. Bolus
+    * Each Alarm has configurable settings including Sound selection, PreSnooze (set to be quiet At Night, During Day or Never) and Snooze Until and in some cases glucose ranges at which they are active
 3. Calendar entries (displayed on watch and/or carplay at 5 minute intervals) pre-formatted with two lines that the user can modify:
     * BG, arrow, delta,  MINAGO (minutes ago for reading)
     * COB, IOB, Basal (U/hr)
 4. Background silent audio is played to keep iOS from killing the app; this trick is why it can’t go into the App Store for a simple download and why Loop Follow puts an extra load on the phone battery
 5. Badge displays the current BG value on the app icon
 6. Information Display Settings allows user to configure the items selected and their order for the right panel when Nightscout URL is provided
-    * IOB, COB, Basal, Override, Battery, Pump, SAGE, CAGE, (Recommended) Rec. Bolus, (Glucose Eventually) Pred., Carbs today (Loop and iAPS)
-    * Autosens (iAPS only)
+    * IOB, COB, Basal, Override, Battery, Pump, SAGE, CAGE, (Recommended) Rec. Bolus, (Glucose Eventually) Pred., Carbs today (Loop, Trio and iAPS)
+    * Autosens (Trio and iAPS only)
 7. Pull down on the glucose value to force a refresh from Nightscout (iPhone only - does not work on Mac)
 8. When adding a Nightscout site, NS Status says "Checking", "Site Not Found", "Token Required", "Invalid Token", or "OK"
 9. New with v2.1.2: Multiple Loopers (up to 3) are easily supported with either Browser Build or Mac-Xcode build
@@ -120,7 +121,7 @@ For the most part, the deveopers keep main and dev branches at the same level. B
 
 ## For Developers
 
-> * If you are interested in assisting with this app and want to work on new features and improvements for Loop, iAPS and Nightscout functionality, please reach out. 
+> * If you are interested in assisting with this app and want to work on new features and improvements for Loop, Trio, iAPS and Nightscout functionality, please reach out. 
 > * Issues and Pull Requests in GitHub are monitored and will get a response. 
 
 New PR are directed to the dev branch. If you direct one to main, we will move it to point to dev. So always start with your code aligned with dev.
