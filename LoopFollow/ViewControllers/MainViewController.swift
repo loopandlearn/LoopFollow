@@ -112,6 +112,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var carbData: [carbGraphStruct] = []
     var overrideGraphData: [DataStructs.overrideStruct] = []
     var predictionData: [ShareGlucoseData] = []
+    var predictionDataOpenAPS: [String: [ShareGlucoseData]] = [
+        "COB": [],
+        "IOB": [],
+        "UAM": [],
+        "ZT": []
+    ]
     var bgCheckData: [ShareGlucoseData] = []
     var suspendGraphData: [DataStructs.timestampOnlyStruct] = []
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
