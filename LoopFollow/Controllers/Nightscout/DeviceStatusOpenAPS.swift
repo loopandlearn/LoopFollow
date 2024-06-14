@@ -54,8 +54,8 @@ extension MainViewController {
                     ]
                     
                     for (type, colorName, dataIndex) in predictionTypes {
+                        var predictionData = [ShareGlucoseData]()
                         if let graphdata = predbgdata[type] as? [Double] {
-                            var predictionData = [ShareGlucoseData]()
                             var predictionTime = lastLoopTime
                             let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
                             
@@ -66,23 +66,15 @@ extension MainViewController {
                                     predictionTime += 300
                                 }
                             }
-                            
-                            if let color = UIColor(named: colorName) {
-                                updatePredictionGraphGeneric(
-                                    dataIndex: dataIndex,
-                                    predictionData: predictionData,
-                                    chartLabel: type,
-                                    color: color
-                                )
-                            } else {
-                                updatePredictionGraphGeneric(
-                                    dataIndex: dataIndex,
-                                    predictionData: predictionData,
-                                    chartLabel: type,
-                                    color: UIColor.systemPurple
-                                )
-                            }
                         }
+                        
+                        let color = UIColor(named: colorName) ?? UIColor.systemPurple
+                        updatePredictionGraphGeneric(
+                            dataIndex: dataIndex,
+                            predictionData: predictionData,
+                            chartLabel: type,
+                            color: color
+                        )
                     }
                 }
             }
