@@ -366,10 +366,10 @@ extension MainViewController {
         data.append(lineResume) // Dataset 9
         data.append(lineSensor) // Dataset 10
         data.append(lineNote) // Dataset 11
-        data.append(COBlinePrediction) // Dataset 12
+        data.append(ZTlinePrediction) // Dataset 12
         data.append(IOBlinePrediction) // Dataset 13
-        data.append(UAMlinePrediction) // Dataset 14
-        data.append(ZTlinePrediction) // Dataset 15
+        data.append(COBlinePrediction) // Dataset 14
+        data.append(UAMlinePrediction) // Dataset 15
 
         data.setValueFont(UIFont.systemFont(ofSize: 12))
         
@@ -1304,10 +1304,10 @@ extension MainViewController {
         data.append(lineResume) // Dataset 9
         data.append(lineSensor) // Dataset 10
         data.append(lineNote) // Dataset 11
-        data.append(COBlinePrediction) // Dataset 12
+        data.append(ZTlinePrediction) // Dataset 12
         data.append(IOBlinePrediction) // Dataset 13
-        data.append(UAMlinePrediction) // Dataset 14
-        data.append(ZTlinePrediction) // Dataset 15
+        data.append(COBlinePrediction) // Dataset 14
+        data.append(UAMlinePrediction) // Dataset 15
 
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false
