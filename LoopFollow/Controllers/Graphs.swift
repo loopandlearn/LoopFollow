@@ -1393,21 +1393,22 @@ extension MainViewController {
         }
     }
     
-    func formatPillText(line1: String, time: TimeInterval) -> String {
+    func formatPillText(line1: String, time: TimeInterval, line2: String? = nil) -> String {
         let dateFormatter = DateFormatter()
-        //let timezoneOffset = TimeZone.current.secondsFromGMT()
-        //let epochTimezoneOffset = value + Double(timezoneOffset)
         if dateTimeUtils.is24Hour() {
             dateFormatter.setLocalizedDateFormatFromTemplate("HH:mm")
         } else {
             dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
         }
         
-        //let date = Date(timeIntervalSince1970: epochTimezoneOffset)
         let date = Date(timeIntervalSince1970: time)
         let formattedDate = dateFormatter.string(from: date)
-
-        return line1 + "\r\n" + formattedDate
+        
+        if let line2 = line2 {
+            return line1 + "\r\n" + line2 + "\r\n" + formattedDate
+        } else {
+            return line1 + "\r\n" + formattedDate
+        }
     }
   
     func updatePredictionGraphGeneric(
@@ -1445,7 +1446,8 @@ extension MainViewController {
                 y: predictionVal,
                 data: formatPillText(
                     line1: chartLabel,
-                    time: predictionData[i].date
+                    time: predictionData[i].date,
+                    line2: bgUnits.toDisplayUnits(String(predictionVal))
                 )
             )
             mainChart.addEntry(value)
