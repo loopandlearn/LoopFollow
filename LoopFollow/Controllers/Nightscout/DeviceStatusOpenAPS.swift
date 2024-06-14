@@ -47,10 +47,10 @@ extension MainViewController {
                 if let enactdata = lastLoopRecord["enacted"] as? [String:AnyObject],
                    let predbgdata = enactdata["predBGs"] as? [String: AnyObject] {
                     let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
-                        ("COB", "LoopYellow", 12),
+                        ("ZT", "ZT", 12),
                         ("IOB", "Insulin", 13),
-                        ("UAM", "UAM", 14),
-                        ("ZT", "ZT", 15)
+                        ("COB", "LoopYellow", 14),
+                        ("UAM", "UAM", 15)
                     ]
                     
                     for (type, colorName, dataIndex) in predictionTypes {
