@@ -11,11 +11,6 @@ import UIKit
 
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
-        // Check if Loop prediction data exists and clear it if necessary
-        if !predictionData.isEmpty {
-            predictionData.removeAll()
-            updatePredictionGraph()
-        }
         
         if let lastLoopTime = formatter.date(from: (lastDeviceStatus?["created_at"] as! String))?.timeIntervalSince1970  {
             UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime

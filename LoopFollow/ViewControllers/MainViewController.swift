@@ -274,6 +274,30 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // Clean all timers and start new ones when refreshing
     @objc func refresh() {
         print("Refreshing")
+
+        // Clear prediction for both Loop or OpenAPS
+
+        // Check if Loop prediction data exists and clear it if necessary
+        if !predictionData.isEmpty {
+            predictionData.removeAll()
+            updatePredictionGraph()
+        }
+
+        // Check if OpenAPS prediction data exists and clear it if necessary
+        let openAPSDataIndices = [12, 13, 14, 15]
+        for dataIndex in openAPSDataIndices {
+            let mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+            let smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+            if !mainChart.entries.isEmpty || !smallChart.entries.isEmpty {
+                updatePredictionGraphGeneric(
+                    dataIndex: dataIndex,
+                    predictionData: [],
+                    chartLabel: "",
+                    color: UIColor.systemGray
+                )
+            }
+        }
+
         MinAgoText.text = "Refreshing"
         invalidateTimers()
         restartAllTimers()
