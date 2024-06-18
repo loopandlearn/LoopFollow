@@ -12,22 +12,6 @@ import Charts
 
 extension MainViewController {
     func DeviceStatusLoop(formatter: ISO8601DateFormatter, lastLoopRecord: [String: AnyObject]) {
-        // Check if OpenAPS prediction data exists and clear it if necessary
-        let openAPSDataIndices = [12, 13, 14, 15]
-        
-        for dataIndex in openAPSDataIndices {
-            let mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
-            let smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
-            
-            if !mainChart.entries.isEmpty || !smallChart.entries.isEmpty {
-                updatePredictionGraphGeneric(
-                    dataIndex: dataIndex,
-                    predictionData: [],
-                    chartLabel: "",
-                    color: UIColor.systemGray
-                )
-            }
-        }
         
         if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
             UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime

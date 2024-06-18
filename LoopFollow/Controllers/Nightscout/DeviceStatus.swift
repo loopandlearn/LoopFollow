@@ -124,12 +124,12 @@ extension MainViewController {
             }
         }
         
-        // Loop
+        // Loop - handle new data
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             DeviceStatusLoop(formatter: formatter, lastLoopRecord: lastLoopRecord)
         }
-        
-        // Trio
+
+        // OpenAPS - handle new data
         if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String : AnyObject]? {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
         }
