@@ -350,6 +350,32 @@ extension MainViewController {
         }
         ZTlinePrediction.setDrawHighlightIndicators(false)
         ZTlinePrediction.valueFont.withSize(50)
+
+        // SMB
+        let chartEntrySmb = [ChartDataEntry]()
+        let lineSmb = LineChartDataSet(entries:chartEntrySmb, label: "")
+        lineSmb.circleRadius = CGFloat(globalVariables.dotBolus)
+        lineSmb.circleColors = [NSUIColor.red.withAlphaComponent(0.75)]
+        lineSmb.drawCircleHoleEnabled = false
+        lineSmb.setDrawHighlightIndicators(false)
+        lineSmb.setColor(NSUIColor.red, alpha: 1.0)
+        lineSmb.lineWidth = 0
+        lineSmb.axisDependency = YAxis.AxisDependency.right
+        lineSmb.valueFormatter = ChartYDataValueFormatter()
+        lineSmb.valueTextColor = NSUIColor.label
+        lineSmb.fillColor = NSUIColor.red
+        lineSmb.fillAlpha = 0.6
+        
+        lineSmb.drawCirclesEnabled = true
+        lineSmb.drawFilledEnabled = false
+        
+        if UserDefaultsRepository.showValues.value  {
+            lineSmb.drawValuesEnabled = true
+            lineSmb.highlightEnabled = false
+        } else {
+            lineSmb.drawValuesEnabled = false
+            lineSmb.highlightEnabled = true
+        }
         
         // Setup the chart data of all lines
         let data = LineChartData()
@@ -370,6 +396,7 @@ extension MainViewController {
         data.append(IOBlinePrediction) // Dataset 13
         data.append(COBlinePrediction) // Dataset 14
         data.append(UAMlinePrediction) // Dataset 15
+        data.append(lineSmb) // Dataset 16
 
         data.setValueFont(UIFont.systemFont(ofSize: 12))
         
@@ -786,6 +813,82 @@ extension MainViewController {
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
   
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+            mainChart.addEntry(dot)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                smallChart.addEntry(dot)
+            }
+        }
+        
+        // Set Colors
+        let lineBolus = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        let lineBolusSmall = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        lineBolus.colors.removeAll()
+        lineBolus.circleColors.removeAll()
+        lineBolusSmall.colors.removeAll()
+        lineBolusSmall.circleColors.removeAll()
+        
+        if colors.count > 0 {
+            for i in 0..<colors.count{
+                mainChart.addColor(colors[i])
+                mainChart.circleColors.append(colors[i])
+                smallChart.addColor(colors[i])
+                smallChart.circleColors.append(colors[i])
+            }
+        }
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
+    }
+    
+    func updateSmbGraph() {
+        var dataIndex = 16
+        var yTop: Double = 370
+        var yBottom: Double = 345
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
+        let lightBlue = NSUIColor(red: 135/255, green: 206/255, blue: 235/255, alpha: 1.0) // Light Sky Blue
+
+        var colors = [NSUIColor]()
+        for i in 0..<smbData.count{
+            let formatter = NumberFormatter()
+            formatter.minimumFractionDigits = 0
+            formatter.maximumFractionDigits = 2
+            formatter.minimumIntegerDigits = 0
+            
+            // Check overlapping carbs to shift left if needed
+            let bolusShift = findNextBolusTime(timeWithin: 240, needle: smbData[i].date, haystack: smbData, startingIndex: i)
+            var dateTimeStamp = smbData[i].date
+            
+            // Alpha colors for DIA
+            let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
+            let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
+            if diffTimeHours <= 1 {
+                colors.append(lightBlue.withAlphaComponent(1.0))
+            } else if diffTimeHours > 6 {
+                colors.append(lightBlue.withAlphaComponent(0.25))
+            } else {
+                let thisAlpha = 1.0 - (0.15 * diffTimeHours)
+                colors.append(lightBlue.withAlphaComponent(CGFloat(thisAlpha)))
+            }
+            
+            if bolusShift {
+                // Move it half the distance between BG readings
+                dateTimeStamp = dateTimeStamp - 150
+            }
+            
+            // skip if outside of visible area
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
+            
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: formatter.string(from: NSNumber(value: smbData[i].value)))
             mainChart.addEntry(dot)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 smallChart.addEntry(dot)
@@ -1290,6 +1393,25 @@ extension MainViewController {
         ZTlinePrediction.lineWidth = 1.5
         ZTlinePrediction.axisDependency = YAxis.AxisDependency.right
         
+        // SMB
+        var chartEntrySmb = [ChartDataEntry]()
+        let lineSmb = LineChartDataSet(entries:chartEntrySmb, label: "")
+        lineSmb.circleRadius = 2
+        lineSmb.circleColors = [NSUIColor.systemBlue.withAlphaComponent(0.75)]
+        lineSmb.drawCircleHoleEnabled = false
+        lineSmb.setDrawHighlightIndicators(false)
+        lineSmb.setColor(NSUIColor.systemBlue, alpha: 1.0)
+        lineSmb.lineWidth = 0
+        lineSmb.axisDependency = YAxis.AxisDependency.right
+        lineSmb.valueFormatter = ChartYDataValueFormatter()
+        lineSmb.valueTextColor = NSUIColor.label
+        lineSmb.fillColor = NSUIColor.systemBlue
+        lineSmb.fillAlpha = 0.6
+        lineSmb.drawCirclesEnabled = true
+        lineSmb.drawFilledEnabled = false
+        lineSmb.drawValuesEnabled = false
+        lineSmb.highlightEnabled = false
+        
         // Setup the chart data of all lines
         let data = LineChartData()
         data.append(lineBG) // Dataset 0
@@ -1308,6 +1430,7 @@ extension MainViewController {
         data.append(IOBlinePrediction) // Dataset 13
         data.append(COBlinePrediction) // Dataset 14
         data.append(UAMlinePrediction) // Dataset 15
+        data.append(lineSmb) // Dataset 16
 
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false
