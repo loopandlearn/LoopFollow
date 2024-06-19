@@ -90,6 +90,12 @@ extension MainViewController {
         updateBolusGraph()
     }
     
+    func clearOldSmb()
+    {
+        smbData.removeAll()
+        updateSmbGraph()
+    }
+
     func clearOldCarb()
     {
         carbData.removeAll()
