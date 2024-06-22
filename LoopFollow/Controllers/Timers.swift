@@ -143,7 +143,6 @@ extension MainViewController {
     }
     
     @objc func bgTimerDidEnd(_ timer:Timer) {
-        
         // reset timer to 1 minute if settings aren't entered
         if UserDefaultsRepository.shareUserName.value == "" && UserDefaultsRepository.sharePassword.value == "" && UserDefaultsRepository.url.value == "" {
             startBGTimer(time: 60)
@@ -155,7 +154,7 @@ extension MainViewController {
         } else {
             webLoadNSBGData()
         }
-        
+        BackgroundAlertManager.shared.scheduleBackgroundAlert()
     }
     
     // Device Status Timer
