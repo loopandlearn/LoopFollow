@@ -959,17 +959,7 @@ extension MainViewController {
             let carbShift = findNextCarbTime(timeWithin: 250, needle: carbData[i].date, haystack: carbData, startingIndex: i)
             var dateTimeStamp = carbData[i].date
             
-            // Alpha colors for DIA
-            let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
-            let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
-            if diffTimeHours <= 0.5 {
-                colors.append(NSUIColor.systemOrange.withAlphaComponent(1.0))
-            } else if diffTimeHours > Double(hours) {
-                colors.append(NSUIColor.systemOrange.withAlphaComponent(0.25))
-            } else {
-                let thisAlpha = 1.0 - ((0.75 / Double(hours)) * diffTimeHours)
-                colors.append(NSUIColor.systemOrange.withAlphaComponent(CGFloat(thisAlpha)))
-            }
+            colors.append(NSUIColor.systemOrange.withAlphaComponent(1.0))
             
             // skip if outside of visible area
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
@@ -978,7 +968,6 @@ extension MainViewController {
             if carbShift {
                 dateTimeStamp = dateTimeStamp - 250
             }
-            
             
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
