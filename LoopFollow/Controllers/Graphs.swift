@@ -829,17 +829,7 @@ extension MainViewController {
             let bolusShift = findNextBolusTime(timeWithin: 240, needle: bolusData[i].date, haystack: bolusData, startingIndex: i)
             var dateTimeStamp = bolusData[i].date
             
-            // Alpha colors for DIA
-            let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
-            let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
-            if diffTimeHours <= 1 {
-                colors.append(NSUIColor.systemBlue.withAlphaComponent(1.0))
-            } else if diffTimeHours > 6 {
-                colors.append(NSUIColor.systemBlue.withAlphaComponent(0.25))
-            } else {
-                let thisAlpha = 1.0 - (0.15 * diffTimeHours)
-                colors.append(NSUIColor.systemBlue.withAlphaComponent(CGFloat(thisAlpha)))
-            }
+            colors.append(NSUIColor.systemBlue.withAlphaComponent(1.0))
             
             if bolusShift {
                 // Move it half the distance between BG readings
