@@ -16,10 +16,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     let notificationCenter = UNUserNotificationCenter.current()
-   
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        
         
         let options: UNAuthorizationOptions = [.alert, .sound, .badge]
         notificationCenter.requestAuthorization(options: options) {
@@ -37,11 +36,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
+        let action = UNNotificationAction(identifier: "OPEN_APP_ACTION", title: "Open App", options: .foreground)
+        let category = UNNotificationCategory(identifier: "loopfollow.background.alert", actions: [action], intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+
         UNUserNotificationCenter.current().delegate = self
-        
-         return true
-      }
-        
+
+        return true
+    }
+
     func applicationWillTerminate(_ application: UIApplication) {
         if UserDefaultsRepository.alertAppInactive.value {
             AlarmSound.setSoundFile(str: "Alarm_Buzzer")
@@ -53,7 +56,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-
         // This application should be called in background every X Minutes
         UIApplication.shared.setMinimumBackgroundFetchInterval(
             TimeInterval(UserDefaultsRepository.backgroundRefreshFrequency.value * 60)
@@ -91,13 +93,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
          creates and returns a container, having loaded the store for the
          application to it. This property is optional since there are legitimate
          error conditions that could cause the creation of the store to fail.
-        */
+         */
         let container = NSPersistentCloudKitContainer(name: "LoopFollow")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.
                 // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                 
+
                 /*
                  Typical reasons for an error here include:
                  * The parent directory does not exist, cannot be created, or disallows writing.
@@ -128,13 +130,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.actionIdentifier == "OPEN_APP_ACTION" {
+            if let window = window {
+                window.rootViewController?.dismiss(animated: true, completion: nil)
+                window.rootViewController?.present(MainViewController(), animated: true, completion: nil)
+            }
+        }
+        completionHandler()
+    }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-
     func userNotificationCenter(_ center: UNUserNotificationCenter,
-           willPresent notification: UNNotification,
-           withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
     {
         completionHandler(.alert)
     }
