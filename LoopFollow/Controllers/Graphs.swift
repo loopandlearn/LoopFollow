@@ -10,6 +10,46 @@ import Foundation
 import Charts
 import UIKit
 
+import Charts
+
+class TriangleRenderer: LineChartRenderer {
+    let smbDataSetIndex: Int
+    
+    init(dataProvider: LineChartDataProvider?, animator: Animator?, viewPortHandler: ViewPortHandler?, smbDataSetIndex: Int) {
+        self.smbDataSetIndex = smbDataSetIndex
+        super.init(dataProvider: dataProvider!, animator: animator!, viewPortHandler: viewPortHandler!)
+    }
+    
+    override func drawExtras(context: CGContext) {
+        super.drawExtras(context: context)
+        
+        guard let dataProvider = dataProvider else { return }
+        
+        if dataProvider.lineData?.dataSets.count ?? 0 > smbDataSetIndex, let lineDataSet = dataProvider.lineData?.dataSets[smbDataSetIndex] as? LineChartDataSet {
+            let trans = dataProvider.getTransformer(forAxis: lineDataSet.axisDependency)
+            let phaseY = animator.phaseY
+            
+            for j in 0 ..< lineDataSet.entryCount {
+                guard let e = lineDataSet.entryForIndex(j) else { continue }
+                
+                let pt = trans.pixelForValues(x: e.x, y: e.y * phaseY)
+                
+                context.saveGState()
+                context.beginPath()
+                context.move(to: CGPoint(x: pt.x, y: pt.y + 9))
+                context.addLine(to: CGPoint(x: pt.x - 5, y: pt.y - 1))
+                context.addLine(to: CGPoint(x: pt.x + 5, y: pt.y - 1))
+                context.closePath()
+                
+                context.setFillColor(lineDataSet.circleColors.first!.cgColor)
+                context.fillPath()
+                
+                context.restoreGState()
+            }
+        }
+    }
+}
+
 let ScaleXMax:Float = 150.0
 extension MainViewController {
     
@@ -350,6 +390,30 @@ extension MainViewController {
         }
         ZTlinePrediction.setDrawHighlightIndicators(false)
         ZTlinePrediction.valueFont.withSize(50)
+
+        // SMB
+        let chartEntrySmb = [ChartDataEntry]()
+        let lineSmb = LineChartDataSet(entries: chartEntrySmb, label: "")
+        lineSmb.circleRadius = CGFloat(globalVariables.dotBolus)
+        lineSmb.circleColors = [NSUIColor.systemBlue.withAlphaComponent(1.0)]
+        lineSmb.drawCircleHoleEnabled = false
+        lineSmb.setDrawHighlightIndicators(false)
+        lineSmb.setColor(NSUIColor.red, alpha: 1.0)
+        lineSmb.lineWidth = 0
+        lineSmb.axisDependency = YAxis.AxisDependency.right
+        lineSmb.valueFormatter = ChartYDataValueFormatter()
+        lineSmb.valueTextColor = NSUIColor.label
+        
+        lineSmb.drawCirclesEnabled = false
+        lineSmb.drawFilledEnabled = false
+        
+        if UserDefaultsRepository.showValues.value {
+            lineSmb.drawValuesEnabled = true
+            lineSmb.highlightEnabled = false
+        } else {
+            lineSmb.drawValuesEnabled = false
+            lineSmb.highlightEnabled = true
+        }
         
         // Setup the chart data of all lines
         let data = LineChartData()
@@ -370,6 +434,7 @@ extension MainViewController {
         data.append(IOBlinePrediction) // Dataset 13
         data.append(COBlinePrediction) // Dataset 14
         data.append(UAMlinePrediction) // Dataset 15
+        data.append(lineSmb) // Dataset 16
 
         data.setValueFont(UIFont.systemFont(ofSize: 12))
         
@@ -764,17 +829,7 @@ extension MainViewController {
             let bolusShift = findNextBolusTime(timeWithin: 240, needle: bolusData[i].date, haystack: bolusData, startingIndex: i)
             var dateTimeStamp = bolusData[i].date
             
-            // Alpha colors for DIA
-            let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
-            let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
-            if diffTimeHours <= 1 {
-                colors.append(NSUIColor.systemBlue.withAlphaComponent(1.0))
-            } else if diffTimeHours > 6 {
-                colors.append(NSUIColor.systemBlue.withAlphaComponent(0.25))
-            } else {
-                let thisAlpha = 1.0 - (0.15 * diffTimeHours)
-                colors.append(NSUIColor.systemBlue.withAlphaComponent(CGFloat(thisAlpha)))
-            }
+            colors.append(NSUIColor.systemBlue.withAlphaComponent(1.0))
             
             if bolusShift {
                 // Move it half the distance between BG readings
@@ -819,6 +874,64 @@ extension MainViewController {
         }
     }
     
+    func updateSmbGraph() {
+        var dataIndex = 16
+        var yTop: Double = 370
+        var yBottom: Double = 345
+        var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        smallChart.clear()
+        let lightBlue = NSUIColor(red: 135/255, green: 206/255, blue: 235/255, alpha: 1.0) // Light Sky Blue
+        
+        var colors = [NSUIColor]()
+        for i in 0..<smbData.count {
+            let formatter = NumberFormatter()
+            formatter.minimumFractionDigits = 0
+            formatter.maximumFractionDigits = 2
+            formatter.minimumIntegerDigits = 0
+            
+            let bolusShift = findNextBolusTime(timeWithin: 240, needle: smbData[i].date, haystack: smbData, startingIndex: i)
+            var dateTimeStamp = smbData[i].date
+            
+            let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
+            let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
+            if diffTimeHours <= 1 {
+                colors.append(lightBlue.withAlphaComponent(1.0))
+            } else if diffTimeHours > 6 {
+                colors.append(lightBlue.withAlphaComponent(0.25))
+            } else {
+                let thisAlpha = 1.0 - (0.15 * diffTimeHours)
+                colors.append(lightBlue.withAlphaComponent(CGFloat(thisAlpha)))
+            }
+            
+            if bolusShift {
+                dateTimeStamp = dateTimeStamp - 150
+            }
+            
+            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
+            
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: formatter.string(from: NSNumber(value: smbData[i].value)))
+            mainChart.addEntry(dot)
+            if UserDefaultsRepository.smallGraphTreatments.value {
+                smallChart.addEntry(dot)
+            }
+        }
+        
+        let smbRenderer = TriangleRenderer(dataProvider: BGChart, animator: Animator(), viewPortHandler: BGChart.viewPortHandler, smbDataSetIndex: dataIndex)
+        BGChart.renderer = smbRenderer
+        
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+        if UserDefaultsRepository.smallGraphTreatments.value {
+            BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
+    }
+    
     func updateCarbGraph() {
         var dataIndex = 4
         var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
@@ -846,17 +959,7 @@ extension MainViewController {
             let carbShift = findNextCarbTime(timeWithin: 250, needle: carbData[i].date, haystack: carbData, startingIndex: i)
             var dateTimeStamp = carbData[i].date
             
-            // Alpha colors for DIA
-            let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
-            let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
-            if diffTimeHours <= 0.5 {
-                colors.append(NSUIColor.systemOrange.withAlphaComponent(1.0))
-            } else if diffTimeHours > Double(hours) {
-                colors.append(NSUIColor.systemOrange.withAlphaComponent(0.25))
-            } else {
-                let thisAlpha = 1.0 - ((0.75 / Double(hours)) * diffTimeHours)
-                colors.append(NSUIColor.systemOrange.withAlphaComponent(CGFloat(thisAlpha)))
-            }
+            colors.append(NSUIColor.systemOrange.withAlphaComponent(1.0))
             
             // skip if outside of visible area
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
@@ -865,7 +968,6 @@ extension MainViewController {
             if carbShift {
                 dateTimeStamp = dateTimeStamp - 250
             }
-            
             
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
@@ -1290,6 +1392,25 @@ extension MainViewController {
         ZTlinePrediction.lineWidth = 1.5
         ZTlinePrediction.axisDependency = YAxis.AxisDependency.right
         
+        // SMB
+        var chartEntrySmb = [ChartDataEntry]()
+        let lineSmb = LineChartDataSet(entries:chartEntrySmb, label: "")
+        lineSmb.circleRadius = 2
+        lineSmb.circleColors = [NSUIColor.systemBlue.withAlphaComponent(0.75)]
+        lineSmb.drawCircleHoleEnabled = false
+        lineSmb.setDrawHighlightIndicators(false)
+        lineSmb.setColor(NSUIColor.systemBlue, alpha: 1.0)
+        lineSmb.lineWidth = 0
+        lineSmb.axisDependency = YAxis.AxisDependency.right
+        lineSmb.valueFormatter = ChartYDataValueFormatter()
+        lineSmb.valueTextColor = NSUIColor.label
+        lineSmb.fillColor = NSUIColor.systemBlue
+        lineSmb.fillAlpha = 0.6
+        lineSmb.drawCirclesEnabled = true
+        lineSmb.drawFilledEnabled = false
+        lineSmb.drawValuesEnabled = false
+        lineSmb.highlightEnabled = false
+        
         // Setup the chart data of all lines
         let data = LineChartData()
         data.append(lineBG) // Dataset 0
@@ -1308,6 +1429,7 @@ extension MainViewController {
         data.append(IOBlinePrediction) // Dataset 13
         data.append(COBlinePrediction) // Dataset 14
         data.append(UAMlinePrediction) // Dataset 15
+        data.append(lineSmb) // Dataset 16
 
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false
