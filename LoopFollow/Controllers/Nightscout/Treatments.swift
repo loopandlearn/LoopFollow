@@ -60,7 +60,11 @@ extension MainViewController {
             case "Temp Basal":
                 tempBasal.append(entry)
             case "Correction Bolus", "Bolus":
-                bolus.append(entry)
+                if let automatic = entry["automatic"] as? Bool, automatic {
+                    smb.append(entry)
+                } else {
+                    bolus.append(entry)
+                }
             case "SMB":
                 smb.append(entry)
             case "Meal Bolus":

@@ -10,6 +10,46 @@ import Foundation
 import Charts
 import UIKit
 
+import Charts
+
+class TriangleRenderer: LineChartRenderer {
+    let smbDataSetIndex: Int
+    
+    init(dataProvider: LineChartDataProvider?, animator: Animator?, viewPortHandler: ViewPortHandler?, smbDataSetIndex: Int) {
+        self.smbDataSetIndex = smbDataSetIndex
+        super.init(dataProvider: dataProvider!, animator: animator!, viewPortHandler: viewPortHandler!)
+    }
+    
+    override func drawExtras(context: CGContext) {
+        super.drawExtras(context: context)
+        
+        guard let dataProvider = dataProvider else { return }
+        
+        if dataProvider.lineData?.dataSets.count ?? 0 > smbDataSetIndex, let lineDataSet = dataProvider.lineData?.dataSets[smbDataSetIndex] as? LineChartDataSet {
+            let trans = dataProvider.getTransformer(forAxis: lineDataSet.axisDependency)
+            let phaseY = animator.phaseY
+            
+            for j in 0 ..< lineDataSet.entryCount {
+                guard let e = lineDataSet.entryForIndex(j) else { continue }
+                
+                let pt = trans.pixelForValues(x: e.x, y: e.y * phaseY)
+                
+                context.saveGState()
+                context.beginPath()
+                context.move(to: CGPoint(x: pt.x, y: pt.y + 9))
+                context.addLine(to: CGPoint(x: pt.x - 5, y: pt.y - 1))
+                context.addLine(to: CGPoint(x: pt.x + 5, y: pt.y - 1))
+                context.closePath()
+                
+                context.setFillColor(lineDataSet.circleColors.first!.cgColor)
+                context.fillPath()
+                
+                context.restoreGState()
+            }
+        }
+    }
+}
+
 let ScaleXMax:Float = 150.0
 extension MainViewController {
     
@@ -353,9 +393,9 @@ extension MainViewController {
 
         // SMB
         let chartEntrySmb = [ChartDataEntry]()
-        let lineSmb = LineChartDataSet(entries:chartEntrySmb, label: "")
+        let lineSmb = LineChartDataSet(entries: chartEntrySmb, label: "")
         lineSmb.circleRadius = CGFloat(globalVariables.dotBolus)
-        lineSmb.circleColors = [NSUIColor.red.withAlphaComponent(0.75)]
+        lineSmb.circleColors = [NSUIColor.systemBlue.withAlphaComponent(1.0)]
         lineSmb.drawCircleHoleEnabled = false
         lineSmb.setDrawHighlightIndicators(false)
         lineSmb.setColor(NSUIColor.red, alpha: 1.0)
@@ -363,13 +403,11 @@ extension MainViewController {
         lineSmb.axisDependency = YAxis.AxisDependency.right
         lineSmb.valueFormatter = ChartYDataValueFormatter()
         lineSmb.valueTextColor = NSUIColor.label
-        lineSmb.fillColor = NSUIColor.red
-        lineSmb.fillAlpha = 0.6
         
-        lineSmb.drawCirclesEnabled = true
+        lineSmb.drawCirclesEnabled = false
         lineSmb.drawFilledEnabled = false
         
-        if UserDefaultsRepository.showValues.value  {
+        if UserDefaultsRepository.showValues.value {
             lineSmb.drawValuesEnabled = true
             lineSmb.highlightEnabled = false
         } else {
@@ -855,19 +893,17 @@ extension MainViewController {
         mainChart.clear()
         smallChart.clear()
         let lightBlue = NSUIColor(red: 135/255, green: 206/255, blue: 235/255, alpha: 1.0) // Light Sky Blue
-
+        
         var colors = [NSUIColor]()
-        for i in 0..<smbData.count{
+        for i in 0..<smbData.count {
             let formatter = NumberFormatter()
             formatter.minimumFractionDigits = 0
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 0
             
-            // Check overlapping carbs to shift left if needed
             let bolusShift = findNextBolusTime(timeWithin: 240, needle: smbData[i].date, haystack: smbData, startingIndex: i)
             var dateTimeStamp = smbData[i].date
             
-            // Alpha colors for DIA
             let nowTime = dateTimeUtils.getNowTimeIntervalUTC()
             let diffTimeHours = (nowTime - dateTimeStamp) / 60 / 60
             if diffTimeHours <= 1 {
@@ -880,11 +916,9 @@ extension MainViewController {
             }
             
             if bolusShift {
-                // Move it half the distance between BG readings
                 dateTimeStamp = dateTimeStamp - 150
             }
             
-            // skip if outside of visible area
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
@@ -895,22 +929,8 @@ extension MainViewController {
             }
         }
         
-        // Set Colors
-        let lineBolus = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
-        let lineBolusSmall = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
-        lineBolus.colors.removeAll()
-        lineBolus.circleColors.removeAll()
-        lineBolusSmall.colors.removeAll()
-        lineBolusSmall.circleColors.removeAll()
-        
-        if colors.count > 0 {
-            for i in 0..<colors.count{
-                mainChart.addColor(colors[i])
-                mainChart.circleColors.append(colors[i])
-                smallChart.addColor(colors[i])
-                smallChart.circleColors.append(colors[i])
-            }
-        }
+        let smbRenderer = TriangleRenderer(dataProvider: BGChart, animator: Animator(), viewPortHandler: BGChart.viewPortHandler, smbDataSetIndex: dataIndex)
+        BGChart.renderer = smbRenderer
         
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
