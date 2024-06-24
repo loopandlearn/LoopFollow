@@ -126,7 +126,6 @@ class SettingsViewController: FormViewController {
            }
 
            self.showHideNSDetails()
-           globalVariables.nsVerifiedAlert = 0
 
            // Verify Nightscout URL and token
            self.checkNightscoutStatus()
@@ -148,7 +147,6 @@ class SettingsViewController: FormViewController {
            }
            guard let value = row.value else { return }
            UserDefaultsRepository.token.value = value
-           globalVariables.nsVerifiedAlert = 0
            
            // Verify Nightscout URL and token
            self.checkNightscoutStatus()
@@ -179,7 +177,6 @@ class SettingsViewController: FormViewController {
             }
             guard let value = row.value else { return }
             UserDefaultsRepository.shareUserName.value = value
-            globalVariables.dexVerifiedAlert = 0
         }
         <<< TextRow(){ row in
             row.title = "Password"
@@ -195,7 +192,6 @@ class SettingsViewController: FormViewController {
             }
             guard let value = row.value else { return }
             UserDefaultsRepository.sharePassword.value = value
-            globalVariables.dexVerifiedAlert = 0
         }
         <<< SegmentedRow<String>("shareServer") { row in
             row.title = "Server"
