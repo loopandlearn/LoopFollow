@@ -132,7 +132,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var latestIOB = ""
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
+    
     var topBG: Float = UserDefaultsRepository.minBGScale.value
+    var topPredictionBG: Float = UserDefaultsRepository.minBGScale.value
+
     var lastOverrideAlarm: TimeInterval = 0
     
     // share
@@ -195,7 +198,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
         self.view.layoutIfNeeded()
-      
+
         // TODO: need non-us server ?
         let shareUserName = UserDefaultsRepository.shareUserName.value
         let sharePassword = UserDefaultsRepository.sharePassword.value
@@ -228,9 +231,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
-            notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-            notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-         
+        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+
         // Setup the Graph
         if firstGraphLoad {
             createGraph()
@@ -406,8 +409,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 self.derivedTableData.append(self.tableData[UserDefaultsRepository.infoSort.value[i]])
             }
         }
-   }
-   
+    }
+    
     // Info Table Functions
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         //return tableData.count
@@ -438,7 +441,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         
     }
-
+    
     @objc func appCameToForeground() {
         // reset screenlock state if needed
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
@@ -476,7 +479,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         }
     }
-
+    
     func versionAlert(title: String = "Update Available", message: String) {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -484,7 +487,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.present(alert, animated: true)
         }
     }
-
+    
     func checkAppExpirationStatus() {
         let now = Date()
         let expirationDate = BuildDetails.default.calculateExpirationDate()
@@ -498,7 +501,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         }
     }
-
+    
     func expirationAlert() {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: "App Expiration Warning", message: "This app will expire in less than a week. Please rebuild to continue using it.", preferredStyle: .alert)
@@ -506,7 +509,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.present(alert, animated: true)
         }
     }
-
+    
     @objc override func viewDidAppear(_ animated: Bool) {
         showHideNSDetails()
     }
@@ -515,14 +518,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     func clearLastInfoData(index: Int){
         tableData[index].value = ""
     }
-
+    
     func stringFromTimeInterval(interval: TimeInterval) -> String {
         let interval = Int(interval)
         let minutes = (interval / 60) % 60
         let hours = (interval / 3600)
         return String(format: "%02d:%02d", hours, minutes)
     }
-
+    
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
@@ -563,7 +566,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     
-
+    
     func setBGTextColor() {
         if bgData.count > 0 {
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
@@ -588,10 +591,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     {
         if value == nil { return "-" }
         let //graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
-        graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NONE":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
+    graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NONE":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
         return graphics[value]!
     }
-        
+    
     func writeCalendar() {
         if UserDefaultsRepository.debugLog.value {
             self.writeDebugLog(value: "Write calendar start")
@@ -610,111 +613,111 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if UserDefaultsRepository.calendarIdentifier.value == "" { return }
         
         if self.bgData.count < 1 { return }
-            
+        
         // This lets us fire the method to write Min Ago entries only once a minute starting after 6 minutes but allows new readings through
         if self.lastCalDate == self.bgData[self.bgData.count - 1].date
             && (self.calTimer.isValid || (dateTimeUtils.getNowTimeIntervalUTC() - self.lastCalDate) < 360) {
             return
         }
-
-            // Create Event info
+        
+        // Create Event info
         var deltaBG = 0 // protect index out of bounds
         if self.bgData.count > 1 {
             deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
         }
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
-            var deltaString = ""
-            if deltaBG < 0 {
-                deltaString = bgUnits.toDisplayUnits(String(deltaBG))
-            }
-            else
-            {
-                deltaString = "+" + bgUnits.toDisplayUnits(String(deltaBG))
-            }
-            let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
-            
-            var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
-//                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar start date") }
-            var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
-            var  eventTitle = UserDefaultsRepository.watchLine1.value
-            if (UserDefaultsRepository.watchLine2.value.count > 1) {
-                eventTitle += "\n" + UserDefaultsRepository.watchLine2.value
-            }
-            eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: bgUnits.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
-            eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
-            eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
-            if self.currentOverride != 1.0 {
-                let val = Int( self.currentOverride*100)
-                // let overrideText = String(format:"%f1", self.currentOverride*100)
-                let text = String(val) + "%"
-                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: text)
-            } else {
-                eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
-            }
-            eventTitle = eventTitle.replacingOccurrences(of: "%LOOP%", with: self.latestLoopStatusString)
-            var minAgo = ""
-            if deltaTime > 9 {
-                // write old BG reading and continue pushing out end date to show last entry
-                minAgo = String(Int(deltaTime)) + " min"
-                eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
-            }
-            var cob = "0"
-            if self.latestCOB != "" {
-                cob = self.latestCOB
-            }
-            var basal = "~"
-            if self.latestBasal != "" {
-                basal = self.latestBasal
-            }
-            var iob = "0"
-            if self.latestIOB != "" {
-                iob = self.latestIOB
-            }
-            eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
-            eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
-            eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: cob)
-            eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal)
-            
-            
-            
-            // Delete Events from last 2 hours and 2 hours in future
-            var deleteStartDate = Date().addingTimeInterval(-60*60*2)
-            var deleteEndDate = Date().addingTimeInterval(60*60*2)
-            // guard solves for some ios upgrades removing the calendar
-            guard let deleteCalendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value) as? EKCalendar else { return }
-            var predicate2 = self.store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
-            var eVDelete = self.store.events(matching: predicate2) as [EKEvent]?
-            if eVDelete != nil {
-                for i in eVDelete! {
-                    do {
-                        try self.store.remove(i, span: EKSpan.thisEvent, commit: true)
-                        //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Delete") }
-                    } catch let error {
-                        //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Error - Calendar Delete") }
-                        print(error)
-                    }
+        let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
+        var deltaString = ""
+        if deltaBG < 0 {
+            deltaString = bgUnits.toDisplayUnits(String(deltaBG))
+        }
+        else
+        {
+            deltaString = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+        }
+        let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
+        
+        var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
+        //                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar start date") }
+        var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
+        var  eventTitle = UserDefaultsRepository.watchLine1.value
+        if (UserDefaultsRepository.watchLine2.value.count > 1) {
+            eventTitle += "\n" + UserDefaultsRepository.watchLine2.value
+        }
+        eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: bgUnits.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
+        eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
+        eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
+        if self.currentOverride != 1.0 {
+            let val = Int( self.currentOverride*100)
+            // let overrideText = String(format:"%f1", self.currentOverride*100)
+            let text = String(val) + "%"
+            eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: text)
+        } else {
+            eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
+        }
+        eventTitle = eventTitle.replacingOccurrences(of: "%LOOP%", with: self.latestLoopStatusString)
+        var minAgo = ""
+        if deltaTime > 9 {
+            // write old BG reading and continue pushing out end date to show last entry
+            minAgo = String(Int(deltaTime)) + " min"
+            eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
+        }
+        var cob = "0"
+        if self.latestCOB != "" {
+            cob = self.latestCOB
+        }
+        var basal = "~"
+        if self.latestBasal != "" {
+            basal = self.latestBasal
+        }
+        var iob = "0"
+        if self.latestIOB != "" {
+            iob = self.latestIOB
+        }
+        eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
+        eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
+        eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: cob)
+        eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal)
+        
+        
+        
+        // Delete Events from last 2 hours and 2 hours in future
+        var deleteStartDate = Date().addingTimeInterval(-60*60*2)
+        var deleteEndDate = Date().addingTimeInterval(60*60*2)
+        // guard solves for some ios upgrades removing the calendar
+        guard let deleteCalendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value) as? EKCalendar else { return }
+        var predicate2 = self.store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
+        var eVDelete = self.store.events(matching: predicate2) as [EKEvent]?
+        if eVDelete != nil {
+            for i in eVDelete! {
+                do {
+                    try self.store.remove(i, span: EKSpan.thisEvent, commit: true)
+                    //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Delete") }
+                } catch let error {
+                    //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Error - Calendar Delete") }
+                    print(error)
                 }
             }
+        }
+        
+        // Write New Event
+        var event = EKEvent(eventStore: self.store)
+        event.title = eventTitle
+        event.startDate = eventStartDate
+        event.endDate = eventEndDate
+        event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
+        do {
+            try self.store.save(event, span: .thisEvent, commit: true)
+            self.calTimer.invalidate()
+            self.startCalTimer(time: (60 * 1))
             
-            // Write New Event
-            var event = EKEvent(eventStore: self.store)
-            event.title = eventTitle
-            event.startDate = eventStartDate
-            event.endDate = eventEndDate
-            event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
-            do {
-                try self.store.save(event, span: .thisEvent, commit: true)
-                self.calTimer.invalidate()
-                self.startCalTimer(time: (60 * 1))
-                
-                self.lastCalDate = self.bgData[self.bgData.count - 1].date
-                //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Write: " + eventTitle) }
-                //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
-            } catch {
-                print("*** Error storing to the calendar")
-                // Display error to user
-                //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Error: Calendar Write") }
-            }
+            self.lastCalDate = self.bgData[self.bgData.count - 1].date
+            //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Write: " + eventTitle) }
+            //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
+        } catch {
+            print("*** Error storing to the calendar")
+            // Display error to user
+            //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Error: Calendar Write") }
+        }
     }
     
     
@@ -733,7 +736,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             guard let debug = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             if debug.debugTextView.text.lengthOfBytes(using: .utf8) > 20000 {
                 debug.debugTextView.text = ""
-                    }
+            }
             debug.debugTextView.text += logText
         }
         
@@ -774,5 +777,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         } else {
             autoScrollPauseUntil = Date().addingTimeInterval(5 * 60) // User is viewing historical data, pause auto-scrolling
         }
+    }
+
+    func calculateMaxBgGraphValue() -> Float {
+        return max(topBG, topPredictionBG)
     }
 }

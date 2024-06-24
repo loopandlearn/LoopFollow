@@ -44,7 +44,7 @@ extension MainViewController {
                 
                 var predictioncolor = UIColor.systemGray
                 PredictionLabel.textColor = predictioncolor
-                
+                topPredictionBG = UserDefaultsRepository.minBGScale.value
                 if let enactdata = lastLoopRecord["enacted"] as? [String:AnyObject],
                    let predbgdata = enactdata["predBGs"] as? [String: AnyObject] {
                     let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [

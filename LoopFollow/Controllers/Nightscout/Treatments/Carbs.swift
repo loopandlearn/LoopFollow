@@ -36,7 +36,7 @@ extension MainViewController {
             lastFoundIndex = sgv.foundIndex
             
             var offset = -50
-            if sgv.sgv < Double(topBG - 100) {
+            if sgv.sgv < Double(calculateMaxBgGraphValue() - 100) {
                 let bolusTime = findNearestBolusbyTime(timeWithin: 300, needle: dateTimeStamp, haystack: bolusData, startingIndex: lastFoundBolus)
                 lastFoundBolus = bolusTime.foundIndex
                 
