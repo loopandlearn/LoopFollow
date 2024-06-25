@@ -36,10 +36,6 @@ extension MainViewController {
     }
     
     private func handleDeviceStatusError() {
-        if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
-            globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-            //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
-        }
         DispatchQueue.main.async {
             if self.deviceStatusTimer.isValid {
                 self.deviceStatusTimer.invalidate()
