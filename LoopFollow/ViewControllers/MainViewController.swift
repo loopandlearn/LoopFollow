@@ -69,7 +69,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var defaults : UserDefaults?
     let consoleLogging = true
     var timeofLastBGUpdate = 0 as TimeInterval
-    var nsVerifiedAlerted = false
     var currentSage : sageData?
     var currentCage : cageData?
 
@@ -141,7 +140,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // share
     var bgDataShare: [ShareGlucoseData] = []
     var dexShare: ShareClient?;
-    var dexVerifiedAlerted = false
     
     // calendar setup
     let store = EKEventStore()
