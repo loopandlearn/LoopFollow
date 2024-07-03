@@ -64,6 +64,7 @@ class UserDefaultsRepository {
     static let show30MinLine = UserDefaultsValue<Bool>(key: "show30MinLine", default: false)
     static let show90MinLine = UserDefaultsValue<Bool>(key: "show90MinLine", default: false)
     static let showMidnightLines = UserDefaultsValue<Bool>(key: "showMidnightMarkers", default: false)
+    static let simplifiedTrioPrediction = UserDefaultsValue<Bool>(key: "simplifiedTrioPrediction", default: false)
     static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
     static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
     static let smallGraphHeight = UserDefaultsValue<Int>(key: "smallGraphHeight", default: 40)

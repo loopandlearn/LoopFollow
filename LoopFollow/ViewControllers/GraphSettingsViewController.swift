@@ -297,12 +297,19 @@ class GraphSettingsViewController: FormViewController {
                appState.chartSettingsChanges |= ChartSettingsChangeEnum.showMidnightLinesChanged.rawValue
             }
         }
-
+        <<< SwitchRow("simplifiedTrioPrediction"){ row in
+            row.title = "Simplified Trio Prediction"
+            row.value = UserDefaultsRepository.simplifiedTrioPrediction.value
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.simplifiedTrioPrediction.value = value
+            NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
+        }
             
-       +++ ButtonRow() {
+        +++ ButtonRow() {
           $0.title = "DONE"
-       }.onCellSelection { (row, arg)  in
+        }.onCellSelection { (row, arg)  in
           self.dismiss(animated:true, completion: nil)
-       }
+        }
     }
 }

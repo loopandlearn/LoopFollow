@@ -61,14 +61,29 @@ extension MainViewController {
                     let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
                         ("ZT", "ZT", 12),
                         ("IOB", "Insulin", 13),
-                        ("COB", "LoopYellow", 14),
-                        ("UAM", "UAM", 15)
+                        ("UAM", "UAM", 15),
+                        ("COB", "LoopYellow", 14)
                     ]
                     
                     var minPredBG = Double.infinity
                     var maxPredBG = -Double.infinity
+                    var selectedPredictionType: (type: String, colorName: String, dataIndex: Int)?
+                    
+                    if UserDefaultsRepository.simplifiedTrioPrediction.value {
+                        // Simplified mode: determine which prediction type to use
+                        for (type, _, _) in predictionTypes.reversed() {
+                            if let _ = predbgdata[type] {
+                                selectedPredictionType = predictionTypes.first { $0.type == type }
+                                break
+                            }
+                        }
+                    }
                     
                     for (type, colorName, dataIndex) in predictionTypes {
+                        if let simplifiedType = selectedPredictionType, simplifiedType.type != type {
+                            continue
+                        }
+                        
                         var predictionData = [ShareGlucoseData]()
                         if let graphdata = predbgdata[type] as? [Double] {
                             var predictionTime = lastLoopTime
