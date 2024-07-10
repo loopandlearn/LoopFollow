@@ -222,7 +222,7 @@ PLATFORMS
 
 DEPENDENCIES
   fastlane
-  rexml (>= 3.2.7)
+  rexml (= 3.2.9)
 
 BUNDLED WITH
    2.4.19
