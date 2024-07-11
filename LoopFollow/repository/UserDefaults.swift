@@ -10,33 +10,35 @@
 //
 //
 
-
-
 import Foundation
 import UIKit
 
 class UserDefaultsRepository {
-    
-    // DisplayValues total
-    static let infoDataTotal = UserDefaultsValue<Int>(key: "infoDataTotal", default: 0)
-    static let infoNames = UserDefaultsValue<[String]>(key: "infoNames", default: [
-        "IOB",
-        "COB",
-        "Basal",
-        "Override",
-        "Battery",
-        "Pump",
-        "SAGE",
-        "CAGE",
-        "Rec. Bolus",
-        "Min/Max", //Previously "Pred."
-        "Carbs today",
-        "Autosens",
-        "Profile"])
-    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [0,1,2,3,4,5,6,7,8,9,10,11,12])
-    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true,true,false,false])
+    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: InfoType.allCases.map { $0.sortOrder })
+    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: InfoType.allCases.map { $0.defaultVisible })
+
+    static func synchronizeInfoTypes() {
+        // Ensure infoSort array is the correct size
+        var sortArray = infoSort.value
+        if sortArray.count != InfoType.allCases.count {
+            sortArray = InfoType.allCases.map { $0.sortOrder }
+            infoSort.value = sortArray
+        }
+
+        // Ensure infoVisible array is the correct size
+        var visibleArray = infoVisible.value
+        if visibleArray.count < InfoType.allCases.count {
+            for infoType in InfoType.allCases[visibleArray.count..<InfoType.allCases.count] {
+                visibleArray.append(infoType.defaultVisible)
+            }
+        } else if visibleArray.count > InfoType.allCases.count {
+            visibleArray = Array(visibleArray.prefix(InfoType.allCases.count))
+        }
+        infoVisible.value = visibleArray
+    }
+
     static let hideInfoTable = UserDefaultsValue<Bool>(key: "hideInfoTable", default: false)
-    
+
     // Nightscout Settings
     static let showNS = UserDefaultsValue<Bool>(key: "showNS", default: false)
     static let url = UserDefaultsValue<String>(key: "url", default: "")
@@ -107,7 +109,6 @@ class UserDefaultsRepository {
     static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
     static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
     static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
-    static let alwaysDownloadAllBG = UserDefaultsValue<Bool>(key: "alwaysDownloadAllBG", default: true)
     static let bgUpdateDelay = UserDefaultsValue<Int>(key: "bgUpdateDelay", default: 10)
     static let downloadDays = UserDefaultsValue<Int>(key: "downloadDays", default: 1)
     

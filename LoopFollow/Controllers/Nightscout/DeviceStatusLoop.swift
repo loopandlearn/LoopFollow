@@ -29,14 +29,20 @@ extension MainViewController {
                         
                     }
                 }
-                if let iobdata = lastLoopRecord["iob"] as? [String:AnyObject] {
-                    tableData[0].value = String(format:"%.2f", (iobdata["iob"] as! Double))
-                    latestIOB = String(format:"%.2f", (iobdata["iob"] as! Double))
+                if let iobdata = lastLoopRecord["iob"] as? [String: AnyObject],
+                   let iobValue = iobdata["iob"] as? Double {
+                    let formattedIOB = String(format: "%.2f", iobValue)
+                    infoManager.updateInfoData(type: .iob, value: formattedIOB)
+                    latestIOB = formattedIOB
                 }
-                if let cobdata = lastLoopRecord["cob"] as? [String:AnyObject] {
-                    tableData[1].value = String(format:"%.0f", cobdata["cob"] as! Double)
-                    latestCOB = String(format:"%.0f", cobdata["cob"] as! Double)
+
+                if let cobdata = lastLoopRecord["cob"] as? [String: AnyObject],
+                   let cobValue = cobdata["cob"] as? Double {
+                    let formattedCOB = String(format: "%.0f", cobValue)
+                    infoManager.updateInfoData(type: .cob, value: formattedCOB)
+                    latestCOB = formattedCOB
                 }
+
                 if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
                     let prediction = predictdata["values"] as! [Double]
                     PredictionLabel.text = bgUnits.toDisplayUnits(String(Int(prediction.last!)))
@@ -59,19 +65,23 @@ extension MainViewController {
                             i += 1
                         }
                         
-                        let predMin = prediction.min()
-                        let predMax = prediction.max()
-                        tableData[9].value = bgUnits.toDisplayUnits(String(predMin!)) + "/" + bgUnits.toDisplayUnits(String(predMax!))
-                        
+                        if let predMin = prediction.min(), let predMax = prediction.max() {
+                            let formattedMin = bgUnits.toDisplayUnits(String(predMin))
+                            let formattedMax = bgUnits.toDisplayUnits(String(predMax))
+                            let value = "\(formattedMin)/\(formattedMax)"
+                            infoManager.updateInfoData(type: .minMax, value: value)
+                        }
+
                         updatePredictionGraph()
                     }
                 } else {
                     predictionData.removeAll()
-                    tableData[9].value = ""
+                    infoManager.clearInfoData(type: .minMax)
                     updatePredictionGraph()
                 }
                 if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
-                    tableData[8].value = String(format:"%.2fU", recBolus)
+                    let formattedRecBolus = String(format: "%.2fU", recBolus)
+                    infoManager.updateInfoData(type: .recBolus, value: formattedRecBolus)
                     UserDefaultsRepository.deviceRecBolus.value = recBolus
                 }
                 if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {

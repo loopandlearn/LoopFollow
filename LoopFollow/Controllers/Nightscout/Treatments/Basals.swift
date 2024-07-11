@@ -10,7 +10,8 @@ import Foundation
 extension MainViewController {
     // NS Temp Basal Response Processor
     func processNSBasals(entries: [[String:AnyObject]]) {
-        self.clearLastInfoData(index: 2)
+        infoManager.clearInfoData(type: .basal)
+
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Basal") }
         // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
         basalData.removeAll()
@@ -196,11 +197,9 @@ extension MainViewController {
             basalData.append(endDot)
             
         }
-        tableData[2].value = latestBasal
-        infoTable.reloadData()
         if UserDefaultsRepository.graphBasal.value {
             updateBasalGraph()
         }
-        infoTable.reloadData()
+        infoManager.updateInfoData(type: .basal, value: latestBasal)
     }
 }

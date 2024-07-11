@@ -28,9 +28,8 @@ extension MainViewController {
             return
         }
                 
-        tableData[12].value = profileData.defaultProfile
-        infoTable.reloadData()
-
+        infoManager.updateInfoData(type: .profile, value: profileData.defaultProfile)
+        
         basalProfile.removeAll()
         for basalEntry in store.basal {
             let entry = basalProfileStruct(value: basalEntry.value, time: basalEntry.time, timeAsSeconds: basalEntry.timeAsSeconds)
