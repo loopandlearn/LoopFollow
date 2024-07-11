@@ -83,11 +83,8 @@ extension MainViewController {
         
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
-        self.clearLastInfoData(index: 0)
-        self.clearLastInfoData(index: 1)
-        self.clearLastInfoData(index: 3)
-        self.clearLastInfoData(index: 4)
-        self.clearLastInfoData(index: 5)
+        infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump])
+
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
             return
@@ -106,15 +103,15 @@ extension MainViewController {
             if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
-                    tableData[5].value = String(format:"%.0f", reservoirData) + "U"
+                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U")
                 } else {
                     latestPumpVolume = 50.0
-                    tableData[5].value = "50+U"
+                    infoManager.updateInfoData(type: .pump, value: "50+U")
                 }
-                
-                if let uploader = lastDeviceStatus?["uploader"] as? [String:AnyObject] {
-                    let upbat = uploader["battery"] as! Double
-                    tableData[4].value = String(format:"%.0f", upbat) + "%"
+
+                if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
+                   let upbat = uploader["battery"] as? Double {
+                    infoManager.updateInfoData(type: .battery, value: String(format: "%.0f", upbat) + "%")
                     UserDefaultsRepository.deviceBatteryLevel.value = upbat
                 }
             }
@@ -130,31 +127,30 @@ extension MainViewController {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
         }
         
-        var oText = "" as String
+        var oText = ""
         currentOverride = 1.0
-        if let lastOverride = lastDeviceStatus?["override"] as! [String : AnyObject]? {
-            if lastOverride["active"] as! Bool {
-                
-                let lastCorrection  = lastOverride["currentCorrectionRange"] as! [String: AnyObject]
+        if let lastOverride = lastDeviceStatus?["override"] as? [String: AnyObject],
+           let isActive = lastOverride["active"] as? Bool, isActive {
+            if let lastCorrection = lastOverride["currentCorrectionRange"] as? [String: AnyObject],
+               let minValue = lastCorrection["minValue"] as? Double,
+               let maxValue = lastCorrection["maxValue"] as? Double {
+
                 if let multiplier = lastOverride["multiplier"] as? Double {
                     currentOverride = multiplier
                     oText += String(format: "%.0f%%", (multiplier * 100))
-                }
-                else
-                {
+                } else {
                     oText += "100%"
                 }
+
                 oText += " ("
-                let minValue = lastCorrection["minValue"] as! Double
-                let maxValue = lastCorrection["maxValue"] as! Double
                 oText += bgUnits.toDisplayUnits(String(minValue)) + "-" + bgUnits.toDisplayUnits(String(maxValue)) + ")"
-                
-                tableData[3].value =  oText
             }
+
+            infoManager.updateInfoData(type: .override, value: oText)
+        } else {
+            infoManager.clearInfoData(type: .override)
         }
-        
-        infoTable.reloadData()
-        
+
         // Start the timer based on the timestamp
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         let secondsAgo = now - latestLoopTime

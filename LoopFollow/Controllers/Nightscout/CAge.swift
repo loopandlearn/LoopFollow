@@ -30,7 +30,7 @@ extension MainViewController {
     
     // NS Cage Response Processor
     func updateCage(data: [cageData]) {
-        self.clearLastInfoData(index: 7)
+        infoManager.clearInfoData(type: .cage)
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: CAGE") }
         if data.count == 0 {
             return
@@ -55,9 +55,9 @@ extension MainViewController {
             formatter.allowedUnits = [ .day, .hour ] // Units to display in the formatted string
             formatter.zeroFormattingBehavior = [ .pad ] // Pad with zeroes where appropriate for the locale
             
-            let formattedDuration = formatter.string(from: secondsAgo)
-            tableData[7].value = formattedDuration ?? ""
+            if let formattedDuration = formatter.string(from: secondsAgo) {
+                infoManager.updateInfoData(type: .cage, value: formattedDuration)
+            }
         }
-        infoTable.reloadData()
     }
 }

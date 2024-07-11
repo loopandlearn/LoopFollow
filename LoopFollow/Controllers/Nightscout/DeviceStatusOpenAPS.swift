@@ -24,28 +24,36 @@ extension MainViewController {
                     wasEnacted = true
                 }
                 
-                if let iobdata = lastLoopRecord["iob"] as? [String: AnyObject] {
-                    tableData[0].value = String(format: "%.2f", (iobdata["iob"] as! Double))
-                    latestIOB = String(format: "%.2f", (iobdata["iob"] as! Double))
+                if let iobdata = lastLoopRecord["iob"] as? [String: AnyObject],
+                   let iobValue = iobdata["iob"] as? Double {
+                    let formattedIOB = String(format: "%.2f", iobValue)
+                    infoManager.updateInfoData(type: .iob, value: formattedIOB)
+                    latestIOB = formattedIOB
                 }
-                if let cobdata = lastLoopRecord["enacted"] as? [String: AnyObject] {
-                    tableData[1].value = String(format: "%.0f", cobdata["COB"] as! Double)
-                    latestCOB = String(format: "%.0f", cobdata["COB"] as! Double)
+
+                if let cobdata = lastLoopRecord["enacted"] as? [String: AnyObject],
+                   let cobValue = cobdata["COB"] as? Double {
+                    let formattedCOB = String(format: "%.0f", cobValue)
+                    infoManager.updateInfoData(type: .cob, value: formattedCOB)
+                    latestCOB = formattedCOB
                 }
+
                 if let recbolusdata = lastLoopRecord["enacted"] as? [String: AnyObject],
                    let insulinReq = recbolusdata["insulinReq"] as? Double {
-                    tableData[8].value = String(format: "%.2fU", insulinReq)
+                    let formattedRecBolus = String(format: "%.2fU", insulinReq)
+                    infoManager.updateInfoData(type: .recBolus, value: formattedRecBolus)
                     UserDefaultsRepository.deviceRecBolus.value = insulinReq
                 } else {
-                    tableData[8].value = "N/A"
+                    infoManager.updateInfoData(type: .recBolus, value: "N/A")
                     UserDefaultsRepository.deviceRecBolus.value = 0
                 }
-                
-                if let autosensdata = lastLoopRecord["enacted"] as? [String: AnyObject] {
-                    let sens = autosensdata["sensitivityRatio"] as! Double * 100.0
-                    tableData[11].value = String(format: "%.0f", sens) + "%"
+
+                if let autosensdata = lastLoopRecord["enacted"] as? [String: AnyObject],
+                   let sens = autosensdata["sensitivityRatio"] as? Double {
+                    let formattedSens = String(format: "%.0f", sens * 100.0) + "%"
+                    infoManager.updateInfoData(type: .autosens, value: formattedSens)
                 }
-                
+
                 if let eventualdata = lastLoopRecord["enacted"] as? [String: AnyObject] {
                     if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
                         let eventualBGStringValue = String(describing: eventualBGValue)
@@ -97,12 +105,13 @@ extension MainViewController {
                     }
                     
                     if minPredBG != Double.infinity && maxPredBG != -Double.infinity {
-                        tableData[9].value = "\(bgUnits.toDisplayUnits(String(minPredBG)))/\(bgUnits.toDisplayUnits(String(maxPredBG)))"
+                        let value = "\(bgUnits.toDisplayUnits(String(minPredBG)))/\(bgUnits.toDisplayUnits(String(maxPredBG)))"
+                        infoManager.updateInfoData(type: .minMax, value: value)
                     } else {
-                        tableData[9].value = "N/A"
+                        infoManager.updateInfoData(type: .minMax, value: "N/A")
                     }
                 }
-                
+
                 if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
                     if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
                         var lastBGTime = lastLoopTime

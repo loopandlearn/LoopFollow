@@ -41,16 +41,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     let speechSynthesizer = AVSpeechSynthesizer()
 
-    // Data Table class
-    class infoData {
-        public var name: String
-        public var value: String
-        init(name: String, value: String) {
-            self.name = name
-            self.value = value
-        }
-    }
-    
     var appStateController: AppStateController?
 
     // Variables for BG Charts
@@ -100,9 +90,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var graphNowTimer = Timer()
     
     // Info Table Setup
-    var tableData : [infoData] = []
-    var derivedTableData: [infoData] = []
-    
+    var infoManager: InfoManager!
+
     var bgData: [ShareGlucoseData] = []
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
@@ -157,53 +146,27 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // reset the infoTable names in case we add or delete items
-        UserDefaultsRepository.infoNames.value.removeAll()
-        UserDefaultsRepository.infoNames.value.append("IOB")
-        UserDefaultsRepository.infoNames.value.append("COB")
-        UserDefaultsRepository.infoNames.value.append("Basal")
-        UserDefaultsRepository.infoNames.value.append("Override")
-        UserDefaultsRepository.infoNames.value.append("Battery")
-        UserDefaultsRepository.infoNames.value.append("Pump")
-        UserDefaultsRepository.infoNames.value.append("SAGE")
-        UserDefaultsRepository.infoNames.value.append("CAGE")
-        UserDefaultsRepository.infoNames.value.append("Rec. Bolus")
-        UserDefaultsRepository.infoNames.value.append("Min/Max") //Previously "Pred."
-        UserDefaultsRepository.infoNames.value.append("Carbs today")
-        UserDefaultsRepository.infoNames.value.append("Autosens")
-        UserDefaultsRepository.infoNames.value.append("Profile")
-
+        // Synchronize info types to ensure arrays are the correct size
+        UserDefaultsRepository.synchronizeInfoTypes()
+        
         // Reset deprecated settings
         UserDefaultsRepository.debugLog.value = false;
-        UserDefaultsRepository.alwaysDownloadAllBG.value = true;
         
-        // table view
-        //infoTable.layer.borderColor = UIColor.darkGray.cgColor
-        //infoTable.layer.borderWidth = 1.0
-        //infoTable.layer.cornerRadius = 6
         infoTable.rowHeight = 21
         infoTable.dataSource = self
-        infoTable.tableFooterView = UIView(frame: .zero) // get rid of extra rows
+        infoTable.tableFooterView = UIView(frame: .zero)
         infoTable.bounces = false
         infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
         
-        // initialize the tableData
-        self.tableData = []
-        for i in 0..<UserDefaultsRepository.infoNames.value.count {
-            self.tableData.append(infoData(name:UserDefaultsRepository.infoNames.value[i], value:""))
-        }
-        createDerivedData()
-        
+        self.infoManager = InfoManager(tableView: infoTable)
+
         smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
         self.view.layoutIfNeeded()
 
-        // TODO: need non-us server ?
         let shareUserName = UserDefaultsRepository.shareUserName.value
         let sharePassword = UserDefaultsRepository.sharePassword.value
         let shareServer = UserDefaultsRepository.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
         dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer )
-        
-        //print("Share: \(dexShare)")
         
         // setup show/hide small graph and stats
         BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
@@ -216,13 +179,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             overrideUserInterfaceStyle = .dark
             self.tabBarController?.overrideUserInterfaceStyle = .dark
         }
-        // Disable the snoozer tab unless an alarm is active
-        //let tabBarControllerItems = self.tabBarController?.tabBar.items
-        //if let arrayOfTabBarItems = tabBarControllerItems as AnyObject as? NSArray{
-        //    snoozeTabItem = arrayOfTabBarItems[2] as! UITabBarItem
-        //}
-        //snoozeTabItem.isEnabled = false;
-        
+
         // Load the snoozer tab
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.loadViewIfNeeded()
@@ -379,7 +336,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 appState.generalSettingsChanges = 0
             }
             if appState.infoDataSettingsChanged {
-                createDerivedData()
                 self.infoTable.reloadData()
                 
                 // reset
@@ -389,36 +345,18 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             // add more processing of the app state
         }
     }
-    
-    private func createDerivedData() {
-        let currentCount = UserDefaultsRepository.infoSort.value.count
-        if currentCount < self.tableData.count {
-            for i in currentCount..<self.tableData.count {
-                UserDefaultsRepository.infoSort.value.append(i)
-            }
-        }
-        
-        self.derivedTableData = []
-        while UserDefaultsRepository.infoVisible.value.count < self.tableData.count {
-            UserDefaultsRepository.infoVisible.value.append(false)
-        }
-        for i in 0..<self.tableData.count {
-            if(UserDefaultsRepository.infoVisible.value[UserDefaultsRepository.infoSort.value[i]]) {
-                self.derivedTableData.append(self.tableData[UserDefaultsRepository.infoSort.value[i]])
-            }
-        }
-    }
-    
+
     // Info Table Functions
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        //return tableData.count
-        return derivedTableData.count
-        
+        guard let infoManager = infoManager else {
+            return 0
+        }
+        return infoManager.numberOfRows()
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "LabelCell", for: indexPath)
-        let values = derivedTableData[indexPath.row]
+        let values = infoManager.dataForIndexPath(indexPath)
         cell.textLabel?.text = values.name
         cell.detailTextLabel?.text = values.value
         return cell
@@ -512,11 +450,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         showHideNSDetails()
     }
     
-    //Clear the info data before next pull. This ensures we aren't displaying old data if something fails.
-    func clearLastInfoData(index: Int){
-        tableData[index].value = ""
-    }
-    
     func stringFromTimeInterval(interval: TimeInterval) -> String {
         let interval = Int(interval)
         let minutes = (interval / 60) % 60
@@ -562,9 +495,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             UIApplication.shared.applicationIconBadgeNumber = 0
         }
     }
-    
-    
-    
+
     func setBGTextColor() {
         if bgData.count > 0 {
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
@@ -737,12 +668,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             debug.debugTextView.text += logText
         }
-        
-        
-        
     }
-    
-    
+
     // General Notifications
     
     func sendGeneralNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
