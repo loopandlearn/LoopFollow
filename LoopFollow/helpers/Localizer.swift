@@ -10,11 +10,11 @@ import Foundation
 
 
 class Localizer {
-    static func formatToLocalizedString(_ value: Double) -> String {
+    static func formatToLocalizedString(_ value: Double, maxFractionDigits: Int = 1, minFractionDigits: Int = 0) -> String {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
-        numberFormatter.maximumFractionDigits = 1
-        numberFormatter.minimumFractionDigits = 0
+        numberFormatter.maximumFractionDigits = maxFractionDigits
+        numberFormatter.minimumFractionDigits = minFractionDigits
         numberFormatter.locale = Locale.current
 
         let numberValue = NSNumber(value: value)

@@ -137,12 +137,11 @@ extension MainViewController {
             //if i == tempArray.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
             if i == tempArray.count - 1 && duration == 0.0 {
                 lastEndDot = dateTimeStamp + (30 * 60)
-                latestBasal = String(format:"%.2f", basalRate)
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
-                latestBasal = String(format:"%.2f", basalRate)
             }
-            
+            latestBasal = Localizer.formatToLocalizedString(basalRate, maxFractionDigits: 2, minFractionDigits: 0)
+
             // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
             if i < tempArray.count - 1 {
                 let nextEntry = tempArray[i + 1] as [String : AnyObject]?
@@ -187,7 +186,7 @@ extension MainViewController {
                 }
             }
             
-            latestBasal = String(format:"%.2f", scheduled)
+            latestBasal = Localizer.formatToLocalizedString(scheduled, maxFractionDigits: 2, minFractionDigits: 0)
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)
@@ -199,6 +198,10 @@ extension MainViewController {
         }
         if UserDefaultsRepository.graphBasal.value {
             updateBasalGraph()
+        }
+
+        if let profileBasal = profileManager.currentBasal(), profileBasal != latestBasal {
+            latestBasal = "\(profileBasal) → \(latestBasal)"
         }
         infoManager.updateInfoData(type: .basal, value: latestBasal)
     }
