@@ -67,10 +67,9 @@ struct ProfileManager {
         return nil
     }
 
-    //TODO: Formatting
     func currentBasal() -> String? {
         if let basal = getCurrentValue(from: basalSchedule) {
-            return formatValue(basal)
+            return Localizer.formatToLocalizedString(basal, maxFractionDigits: 2, minFractionDigits: 0)
         }
         return nil
     }

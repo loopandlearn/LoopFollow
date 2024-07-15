@@ -83,7 +83,7 @@ extension MainViewController {
         
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
-        infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump, .target, .isf])
+        infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump, .target, .isf, .carbRatio])
 
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
