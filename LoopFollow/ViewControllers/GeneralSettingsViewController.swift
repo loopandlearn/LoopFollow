@@ -220,7 +220,7 @@ class GeneralSettingsViewController: FormViewController {
            row.value = Double(UserDefaultsRepository.speakLowBGLimit.value)
            row.displayValueFor = { value in
                guard let value = value else { return nil }
-               return bgUnits.toDisplayUnits(String(value))
+               return Localizer.toDisplayUnits(String(value))
            }
            // Visibility depends on either 'speakLowBG' or 'speakProactiveLowBG' being true
            row.hidden = Condition.function(["speakLowBG", "speakProactiveLowBG", "speakBG", "speakBGAlways"], { form in
@@ -243,7 +243,7 @@ class GeneralSettingsViewController: FormViewController {
            row.value = Double(UserDefaultsRepository.speakFastDropDelta.value)
            row.displayValueFor = { value in
                guard let value = value else { return nil }
-               return bgUnits.toDisplayUnits(String(value))
+               return Localizer.toDisplayUnits(String(value))
            }
            // Visibility depends on 'speakProactiveLowBG' being true
            row.hidden = Condition.function(["speakProactiveLowBG", "speakBG", "speakBGAlways"], { form in
@@ -273,7 +273,7 @@ class GeneralSettingsViewController: FormViewController {
            row.value = Double(UserDefaultsRepository.speakHighBGLimit.value)
            row.displayValueFor = { value in
                guard let value = value else { return nil }
-               return bgUnits.toDisplayUnits(String(value))
+               return Localizer.toDisplayUnits(String(value))
            }
            // Visibility depends on 'speakHighBG' or 'speakProactiveLowBG' being true
            row.hidden = Condition.function(["speakHighBG", "speakProactiveLowBG", "speakBG", "speakBGAlways"], { form in

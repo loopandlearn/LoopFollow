@@ -29,6 +29,23 @@ extension MainViewController {
                         
                     }
                 }
+
+                /*
+                 ISF
+                 */
+                let profileISF = profileManager.currentISF()
+                if let profileISF = profileISF {
+                    infoManager.updateInfoData(type: .isf, value: profileISF)
+                }
+
+                /*
+                 Carb Ratio (CR)
+                 */
+                let profileCR = profileManager.currentCarbRatio()
+                if let profileCR = profileCR {
+                    infoManager.updateInfoData(type: .carbRatio, value: profileCR)
+                }
+
                 if let iobdata = lastLoopRecord["iob"] as? [String: AnyObject],
                    let iobValue = iobdata["iob"] as? Double {
                     let formattedIOB = String(format: "%.2f", iobValue)
@@ -45,7 +62,7 @@ extension MainViewController {
 
                 if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
                     let prediction = predictdata["values"] as! [Double]
-                    PredictionLabel.text = bgUnits.toDisplayUnits(String(Int(prediction.last!)))
+                    PredictionLabel.text = Localizer.toDisplayUnits(String(Int(prediction.last!)))
                     PredictionLabel.textColor = UIColor.systemPurple
                     if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
                         predictionData.removeAll()
@@ -66,8 +83,8 @@ extension MainViewController {
                         }
                         
                         if let predMin = prediction.min(), let predMax = prediction.max() {
-                            let formattedMin = bgUnits.toDisplayUnits(String(predMin))
-                            let formattedMax = bgUnits.toDisplayUnits(String(predMax))
+                            let formattedMin = Localizer.toDisplayUnits(String(predMin))
+                            let formattedMax = Localizer.toDisplayUnits(String(predMax))
                             let value = "\(formattedMin)/\(formattedMax)"
                             infoManager.updateInfoData(type: .minMax, value: value)
                         }

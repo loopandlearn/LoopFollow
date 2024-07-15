@@ -66,7 +66,7 @@ final class ChartYOverrideValueFormatter: ValueFormatter {
 
 final class ChartYMMOLValueFormatter: AxisValueFormatter {
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
-        return bgUnits.toDisplayUnits(String(value))
+        return Localizer.toDisplayUnits(String(value))
     }
 }
 

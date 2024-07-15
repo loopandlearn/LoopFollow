@@ -83,7 +83,7 @@ extension MainViewController {
         
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
-        infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump])
+        infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump, .target, .isf])
 
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
@@ -143,7 +143,7 @@ extension MainViewController {
                 }
 
                 oText += " ("
-                oText += bgUnits.toDisplayUnits(String(minValue)) + "-" + bgUnits.toDisplayUnits(String(maxValue)) + ")"
+                oText += Localizer.toDisplayUnits(String(minValue)) + "-" + Localizer.toDisplayUnits(String(maxValue)) + ")"
             }
 
             infoManager.updateInfoData(type: .override, value: oText)

@@ -27,7 +27,7 @@ extension MainViewController {
         guard let store = profileData.store["default"] ?? profileData.store["Default"] else {
             return
         }
-                
+        profileManager.loadProfile(from: profileData)
         infoManager.updateInfoData(type: .profile, value: profileData.defaultProfile)
         
         basalProfile.removeAll()
