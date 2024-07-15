@@ -9,22 +9,7 @@
 import Foundation
 
 enum InfoType: Int, CaseIterable {
-/*
-    case iob = 0          // 0
-    case cob = 1          // 1
-    case basal = 2        // 2
-    case override = 3     // 3
-    case battery = 4      // 4
-    case pump = 5         // 5
-    case sage = 6         // 6
-    case cage = 7         // 7
-    case recBolus = 8     // 8
-    case minMax = 9       // 9
-    case carbsToday = 10  // 10
-    case autosens = 11    // 11
-    case profile = 12     // 12
-  */
-    case iob, cob, basal, override, battery, pump, sage, cage, recBolus, minMax, carbsToday, autosens, profile
+    case iob, cob, basal, override, battery, pump, sage, cage, recBolus, minMax, carbsToday, autosens, profile, target, isf, carbRatio
 
     var name: String {
         switch self {
@@ -41,15 +26,18 @@ enum InfoType: Int, CaseIterable {
         case .carbsToday: return "Carbs today"
         case .autosens: return "Autosens"
         case .profile: return "Profile"
+        case .target: return "Target"
+        case .isf: return "ISF"
+        case .carbRatio: return "CR"
         }
     }
 
     var defaultVisible: Bool {
         switch self {
-        case .autosens, .profile:
-            return false
-        default:
+        case .iob, .cob, .basal, .override, .battery, .pump, .sage, .cage, .recBolus, .minMax, .carbsToday:
             return true
+        default:
+            return false
         }
     }
 

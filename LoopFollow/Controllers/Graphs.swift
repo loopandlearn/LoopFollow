@@ -636,7 +636,7 @@ extension MainViewController {
             if Float(entries[i].sgv) > topBG - maxBGOffset {
                 topBG = Float(entries[i].sgv) + maxBGOffset
             }
-            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
+            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillText(line1: Localizer.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
             if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "BG: " + value.description) }
             mainChart.append(value)
             smallChart.append(value)
@@ -731,7 +731,7 @@ extension MainViewController {
                 colors.append(color ?? NSUIColor.systemPurple)
             }
             
-            let value = ChartDataEntry(x: predictionData[i].date, y: predictionVal, data: formatPillText(line1: bgUnits.toDisplayUnits(String(predictionData[i].sgv)), time: predictionData[i].date))
+            let value = ChartDataEntry(x: predictionData[i].date, y: predictionVal, data: formatPillText(line1: Localizer.toDisplayUnits(String(predictionData[i].sgv)), time: predictionData[i].date))
             mainChart.addEntry(value)
             smallChart.addEntry(value)
         }
@@ -1025,7 +1025,7 @@ extension MainViewController {
             let graphHours = 24 * UserDefaultsRepository.downloadDays.value
             if bgCheckData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
             
-            let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatPillText(line1: bgUnits.toDisplayUnits(String(bgCheckData[i].sgv)), time: bgCheckData[i].date))
+            let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatPillText(line1: Localizer.toDisplayUnits(String(bgCheckData[i].sgv)), time: bgCheckData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
             if UserDefaultsRepository.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
@@ -1573,7 +1573,7 @@ extension MainViewController {
                 data: formatPillText(
                     line1: chartLabel,
                     time: predictionData[i].date,
-                    line2: bgUnits.toDisplayUnits(String(predictionVal))
+                    line2: Localizer.toDisplayUnits(String(predictionVal))
                 )
             )
             mainChart.addEntry(value)

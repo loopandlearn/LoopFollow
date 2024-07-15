@@ -73,7 +73,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var minAgoTimer = Timer()
     var minAgoTimeInterval: TimeInterval = 1.0
     
-    
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
     var checkAlarmTimer = Timer()
@@ -88,9 +87,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var alarmTimer = Timer()
     var calendarTimer = Timer()
     var graphNowTimer = Timer()
-    
+
     // Info Table Setup
     var infoManager: InfoManager!
+    var profileManager = ProfileManager()
 
     var bgData: [ShareGlucoseData] = []
     var basalProfile: [basalProfileStruct] = []
@@ -148,7 +148,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         // Synchronize info types to ensure arrays are the correct size
         UserDefaultsRepository.synchronizeInfoTypes()
-        
+
         // Reset deprecated settings
         UserDefaultsRepository.debugLog.value = false;
         
@@ -490,7 +490,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     func updateBadge(val: Int) {
         if UserDefaultsRepository.appBadge.value {
             let latestBG = String(val)
-            UIApplication.shared.applicationIconBadgeNumber = Int(bgUnits.removePeriodAndCommaForBadge(bgUnits.toDisplayUnits(latestBG))) ?? val
+            UIApplication.shared.applicationIconBadgeNumber = Int(Localizer.removePeriodAndCommaForBadge(Localizer.toDisplayUnits(latestBG))) ?? val
         } else {
             UIApplication.shared.applicationIconBadgeNumber = 0
         }
@@ -557,11 +557,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
         var deltaString = ""
         if deltaBG < 0 {
-            deltaString = bgUnits.toDisplayUnits(String(deltaBG))
+            deltaString = Localizer.toDisplayUnits(String(deltaBG))
         }
         else
         {
-            deltaString = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+            deltaString = "+" + Localizer.toDisplayUnits(String(deltaBG))
         }
         let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
         
@@ -572,7 +572,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if (UserDefaultsRepository.watchLine2.value.count > 1) {
             eventTitle += "\n" + UserDefaultsRepository.watchLine2.value
         }
-        eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: bgUnits.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
+        eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: Localizer.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
         eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
         eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
         if self.currentOverride != 1.0 {
@@ -654,7 +654,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     {
         if UserDefaultsRepository.persistentNotification.value && bgTime > UserDefaultsRepository.persistentNotificationLastBGTime.value && bgData.count > 0 {
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-            snoozer.sendNotification(self, bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString, deltaVal: bgUnits.toDisplayUnits(String(latestDeltaString)), minAgoVal: latestMinAgoString, alertLabelVal: "Latest BG")
+            snoozer.sendNotification(self, bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString, deltaVal: Localizer.toDisplayUnits(String(latestDeltaString)), minAgoVal: latestMinAgoString, alertLabelVal: "Latest BG")
         }
     }
     

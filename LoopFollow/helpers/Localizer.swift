@@ -9,8 +9,37 @@
 import Foundation
 
 
-class bgUnits {
-    
+class Localizer {
+    static func formatToLocalizedString(_ value: Double) -> String {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.maximumFractionDigits = 1
+        numberFormatter.minimumFractionDigits = 0
+        numberFormatter.locale = Locale.current
+
+        let numberValue = NSNumber(value: value)
+        return numberFormatter.string(from: numberValue) ?? String(value)
+    }
+
+    static func formatLocalDouble(_ value: Double, unit: String? = nil) -> String {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+
+        let units = unit ?? UserDefaultsRepository.units.value
+
+        if units == "mg/dL" {
+            numberFormatter.maximumFractionDigits = 0 // No decimal places for mg/dL
+        } else {
+            numberFormatter.maximumFractionDigits = 1 // Always one decimal place for mmol/L
+            numberFormatter.minimumFractionDigits = 1 // This ensures even .0 is displayed
+        }
+
+        numberFormatter.locale = Locale.current
+
+        let numberValue = NSNumber(value: value)
+        return numberFormatter.string(from: numberValue) ?? String(value)
+    }
+
     static func toDisplayUnits(_ value: String) -> String {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal

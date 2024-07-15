@@ -586,7 +586,7 @@ extension MainViewController {
         if !UserDefaultsRepository.alertAudioDuringPhone.value && isOnPhoneCall() { audioDuringCall = false }
         
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        snoozer.updateDisplayWhenTriggered(bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: Localizer.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         if audio && !UserDefaultsRepository.alertMuteAllIsMuted.value && audioDuringCall{
             AlarmSound.setSoundFile(str: sound)
             AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
@@ -600,7 +600,7 @@ extension MainViewController {
         if !UserDefaultsRepository.alertAudioDuringPhone.value && isOnPhoneCall() { audioDuringCall = false }
         
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        snoozer.updateDisplayWhenTriggered(bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: Localizer.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozer.SnoozeButton.isHidden = false
         snoozer.AlertLabel.isHidden = false
         snoozer.clockLabel.isHidden = true
@@ -633,7 +633,7 @@ extension MainViewController {
         
         AlarmSound.whichAlarm = "none"
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.updateDisplayWhenTriggered(bgVal: bgUnits.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: bgUnits.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        snoozer.updateDisplayWhenTriggered(bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: Localizer.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozer.SnoozeButton.isHidden = true
         snoozer.AlertLabel.isHidden = true
         if AlarmSound.isPlaying {
@@ -1026,14 +1026,14 @@ extension MainViewController {
         let texts = AnnouncementTexts.forLanguage(preferredLanguage)
         
         let negligibleThreshold = 3
-        let localizedCurrentValue = bgUnits.toDisplayUnits(String(currentValue)).replacingOccurrences(of: ",", with: ".")
+        let localizedCurrentValue = Localizer.toDisplayUnits(String(currentValue)).replacingOccurrences(of: ",", with: ".")
         let announcementText: String
         
         if abs(bloodGlucoseDifference) <= negligibleThreshold {
             announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(texts.stable)"
         } else {
             let directionText = bloodGlucoseDifference < 0 ? texts.decrease : texts.increase
-            let absoluteDifference = bgUnits.toDisplayUnits(String(abs(bloodGlucoseDifference))).replacingOccurrences(of: ",", with: ".")
+            let absoluteDifference = Localizer.toDisplayUnits(String(abs(bloodGlucoseDifference))).replacingOccurrences(of: ",", with: ".")
             announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(directionText) \(absoluteDifference)"
         }
         

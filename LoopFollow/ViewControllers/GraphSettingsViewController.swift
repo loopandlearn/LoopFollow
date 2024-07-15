@@ -204,7 +204,7 @@ class GraphSettingsViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.minBGScale.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
+                return Localizer.toDisplayUnits(String(value))
                 
             }
         }.onChange { [weak self] row in
@@ -231,7 +231,7 @@ class GraphSettingsViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.lowLine.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
+                return Localizer.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -254,7 +254,7 @@ class GraphSettingsViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.highLine.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
+                return Localizer.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
