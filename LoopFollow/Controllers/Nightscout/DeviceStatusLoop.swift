@@ -46,6 +46,23 @@ extension MainViewController {
                     infoManager.updateInfoData(type: .carbRatio, value: profileCR)
                 }
 
+                /*
+                 Target
+                 */
+                let profileTargetLow = profileManager.currentTargetLow()
+                let profileTargetHigh = profileManager.currentTargetHigh()
+                var profileTarget: String?
+
+                if let profileTargetLow = profileTargetLow, let profileTargetHigh = profileTargetHigh, profileTargetLow != profileTargetHigh {
+                    profileTarget = "\(profileTargetLow) - \(profileTargetHigh)"
+                } else if let profileTargetLow = profileTargetLow {
+                    profileTarget = profileTargetLow
+                }
+
+                if let profileTarget = profileTarget {
+                    infoManager.updateInfoData(type: .target, value: profileTarget)
+                }
+
                 if let iobdata = lastLoopRecord["iob"] as? [String: AnyObject],
                    let iobValue = iobdata["iob"] as? Double {
                     let formattedIOB = String(format: "%.2f", iobValue)

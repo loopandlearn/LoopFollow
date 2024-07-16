@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import HealthKit
 
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
@@ -24,9 +25,28 @@ extension MainViewController {
                     wasEnacted = true
                 }
 
+                var determinedUnit: HKUnit = .millimolesPerLiter
+
+                // Determine the unit based on the target value since no unit is provided
+                if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject],
+                   let enactedTargetValue = enacted["current_target"] as? Double {
+                    if enactedTargetValue > 40 {
+                        determinedUnit = .milligramsPerDeciliter
+                    }
+                }
+
                 /*
-                ISF
-                */
+                 Updated
+                 */
+                if let enactedTimestamp = lastLoopRecord["enacted"]?["timestamp"] as? String,
+                   let enactedTime = formatter.date(from: enactedTimestamp)?.timeIntervalSince1970 {
+                    let formattedTime = Localizer.formatTimestampToLocalString(enactedTime)
+                    infoManager.updateInfoData(type: .updated, value: formattedTime)
+                }
+
+                /*
+                 ISF
+                 */
                 let profileISF = profileManager.currentISF()
                 var enactedISF: String?
                 if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject],
@@ -100,10 +120,19 @@ extension MainViewController {
                     }
                 }
 
+                /*
+                 Target
+                 */
+                let profileTargetHigh = profileManager.currentTargetHigh()
+                var enactedTarget: String?
                 if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject],
-                   let currentTarget = enacted["current_target"] as? Double {
-                    let formattedTarget = Localizer.toDisplayUnits(String(currentTarget))
-                    infoManager.updateInfoData(type: .target, value: formattedTarget)
+                   let enactedTargetValue = enacted["current_target"] as? Double {
+                    enactedTarget = Localizer.toDisplayUnits(String(enactedTargetValue))
+                }
+                if let profileTargetHigh = profileTargetHigh, let enactedTarget = enactedTarget, profileTargetHigh != enactedTarget {
+                    infoManager.updateInfoData(type: .target, value: "\(profileTargetHigh) → \(enactedTarget)")
+                } else if let profileTargetHigh = profileTargetHigh {
+                    infoManager.updateInfoData(type: .target, value: profileTargetHigh)
                 }
 
                 var predictioncolor = UIColor.systemGray
