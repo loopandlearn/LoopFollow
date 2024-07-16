@@ -1,10 +1,7 @@
-//
-//  NSProfile.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-12.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// NSProfile.swift
+// LoopFollow
+// Created by Jonas Björkert on 2024-07-12.
+// Copyright © 2024 Jon Fawcett. All rights reserved.
 
 import Foundation
 
@@ -32,11 +29,18 @@ struct NSProfile: Decodable {
             let insulinNeedsScaleFactor: Double?
             let symbol: String?
         }
+        struct TargetEntry: Decodable {
+            let value: Double
+            let time: String
+            let timeAsSeconds: Double
+        }
 
         let basal: [BasalEntry]
         let sens: [SensEntry]
         let carbratio: [CarbRatioEntry]
         let overrides: [OverrideEntry]?
+        let target_high: [TargetEntry]?
+        let target_low: [TargetEntry]?
         let timezone: String
     }
 

@@ -1,42 +1,43 @@
-//
-//  ProfileManager.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-12.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// ProfileManager.swift
+// LoopFollow
+// Created by Jonas Björkert on 2024-07-12.
+// Copyright © 2024 Jon Fawcett. All rights reserved.
 
 import Foundation
+import HealthKit
 
 struct ProfileManager {
-    var isfSchedule: [TimeValue]
-    var basalSchedule: [TimeValue]
-    var carbRatioSchedule: [TimeValue]
+    var isfSchedule: [TimeValue<HKQuantity>]
+    var basalSchedule: [TimeValue<Double>]
+    var carbRatioSchedule: [TimeValue<Double>]
+    var targetLowSchedule: [TimeValue<HKQuantity>]
+    var targetHighSchedule: [TimeValue<HKQuantity>]
     var overrides: [Override]
-    var units: String
+    var units: HKUnit
     var timezone: String
     var defaultProfile: String
 
-    struct TimeValue {
+    struct TimeValue<T> {
         let timeAsSeconds: Int
-        let value: Double
+        let value: T
     }
 
     struct Override {
         let name: String
-        let targetRange: [Double]
+        let targetRange: [HKQuantity]
         let duration: Int
         let insulinNeedsScaleFactor: Double
         let symbol: String
     }
 
     init() {
-        // Initialize with default values
         self.isfSchedule = []
         self.basalSchedule = []
         self.carbRatioSchedule = []
+        self.targetLowSchedule = []
+        self.targetHighSchedule = []
         self.overrides = []
-        self.units = "mmol/L"
+        self.units = .millimolesPerLiter
         self.timezone = "UTC"
         self.defaultProfile = ""
     }
@@ -46,15 +47,17 @@ struct ProfileManager {
             return
         }
 
-        self.units = profileData.units
+        self.units = profileData.units == "mg/dL" ? .milligramsPerDeciliter : .millimolesPerLiter
         self.timezone = store.timezone
         self.defaultProfile = profileData.defaultProfile
 
-        self.isfSchedule = store.sens.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: $0.value) }
+        self.isfSchedule = store.sens.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) }
         self.basalSchedule = store.basal.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: $0.value) }
         self.carbRatioSchedule = store.carbratio.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: $0.value) }
+        self.targetLowSchedule = store.target_low?.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) } ?? []
+        self.targetHighSchedule = store.target_high?.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) } ?? []
         if let overrides = store.overrides {
-            self.overrides = overrides.map { Override(name: $0.name ?? "", targetRange: $0.targetRange ?? [], duration: $0.duration ?? 0, insulinNeedsScaleFactor: $0.insulinNeedsScaleFactor ?? 1.0, symbol: $0.symbol ?? "") }
+            self.overrides = overrides.map { Override(name: $0.name ?? "", targetRange: $0.targetRange?.map { HKQuantity(unit: self.units, doubleValue: $0) } ?? [], duration: $0.duration ?? 0, insulinNeedsScaleFactor: $0.insulinNeedsScaleFactor ?? 1.0, symbol: $0.symbol ?? "") }
         } else {
             self.overrides = []
         }
@@ -62,7 +65,7 @@ struct ProfileManager {
 
     func currentISF() -> String? {
         if let isf = getCurrentValue(from: isfSchedule) {
-            return Localizer.formatLocalDouble(isf, unit: self.units)
+            return Localizer.formatQuantity(isf)
         }
         return nil
     }
@@ -76,12 +79,26 @@ struct ProfileManager {
 
     func currentCarbRatio() -> String? {
         if let carbRatio = getCurrentValue(from: carbRatioSchedule) {
-            return Localizer.formatToLocalizedString(carbRatio)
+            return Localizer.formatToLocalizedString(carbRatio, maxFractionDigits: 1, minFractionDigits: 0)
         }
         return nil
     }
 
-    private func getCurrentValue(from schedule: [TimeValue]) -> Double? {
+    func currentTargetLow() -> String? {
+        if let targetLow = getCurrentValue(from: targetLowSchedule) {
+            return Localizer.formatQuantity(targetLow)
+        }
+        return nil
+    }
+
+    func currentTargetHigh() -> String? {
+        if let targetHigh = getCurrentValue(from: targetHighSchedule) {
+            return Localizer.formatQuantity(targetHigh)
+        }
+        return nil
+    }
+
+    private func getCurrentValue<T>(from schedule: [TimeValue<T>]) -> T? {
         guard !schedule.isEmpty else { return nil }
 
         let now = Date()
@@ -90,7 +107,7 @@ struct ProfileManager {
         calendar.component(.minute, from: now) * 60 +
         calendar.component(.second, from: now)
 
-        var lastValue: Double?
+        var lastValue: T?
         for timeValue in schedule {
             if currentTimeInSeconds >= timeValue.timeAsSeconds {
                 lastValue = timeValue.value
@@ -101,20 +118,14 @@ struct ProfileManager {
         return lastValue
     }
 
-    private func formatValue(_ value: Double) -> String {
-        if units == "mg/dL" {
-            return String(format: "%.0f", value)
-        } else {
-            return String(format: "%.2f", value)
-        }
-    }
-
     mutating func clear() {
         self.isfSchedule = []
         self.basalSchedule = []
         self.carbRatioSchedule = []
+        self.targetLowSchedule = []
+        self.targetHighSchedule = []
         self.overrides = []
-        self.units = "mmol/L"
+        self.units = HKUnit.millimolesPerLiter
         self.timezone = "UTC"
         self.defaultProfile = ""
     }

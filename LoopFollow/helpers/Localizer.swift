@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import HealthKit
 
 class Localizer {
     static func formatToLocalizedString(_ value: Double, maxFractionDigits: Int = 1, minFractionDigits: Int = 0) -> String {
@@ -19,6 +19,27 @@ class Localizer {
 
         let numberValue = NSNumber(value: value)
         return numberFormatter.string(from: numberValue) ?? String(value)
+    }
+
+    static func formatQuantity(_ quantity: HKQuantity) -> String {
+        let unitPreference = UserDefaultsRepository.units.value
+
+        if unitPreference == "mg/dL" {
+            let valueInMgdL = quantity.doubleValue(for: .milligramsPerDeciliter)
+            return formatToLocalizedString(valueInMgdL, maxFractionDigits: 0, minFractionDigits: 0)
+        } else {
+            let valueInMmolL = quantity.doubleValue(for: .millimolesPerLiter)
+            return formatToLocalizedString(valueInMmolL, maxFractionDigits: 1, minFractionDigits: 1)
+        }
+    }
+
+    static func formatTimestampToLocalString(_ timestamp: TimeInterval) -> String {
+        let date = Date(timeIntervalSince1970: timestamp)
+        let dateFormatter = DateFormatter()
+        dateFormatter.setLocalizedDateFormatFromTemplate("jms")
+        dateFormatter.locale = Locale.current
+        dateFormatter.timeZone = TimeZone.current
+        return dateFormatter.string(from: date)
     }
 
     static func formatLocalDouble(_ value: Double, unit: String? = nil) -> String {
