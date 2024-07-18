@@ -78,18 +78,12 @@ struct ProfileManager {
         return getCurrentValue(from: carbRatioSchedule)
     }
 
-    func currentTargetLow() -> String? {
-        if let targetLow = getCurrentValue(from: targetLowSchedule) {
-            return Localizer.formatQuantity(targetLow)
-        }
-        return nil
+    func currentTargetLow() -> HKQuantity? {
+        return getCurrentValue(from: targetLowSchedule)
     }
 
-    func currentTargetHigh() -> String? {
-        if let targetHigh = getCurrentValue(from: targetHighSchedule) {
-            return Localizer.formatQuantity(targetHigh)
-        }
-        return nil
+    func currentTargetHigh() -> HKQuantity? {
+        return getCurrentValue(from: targetHighSchedule)
     }
 
     private func getCurrentValue<T>(from schedule: [TimeValue<T>]) -> T? {

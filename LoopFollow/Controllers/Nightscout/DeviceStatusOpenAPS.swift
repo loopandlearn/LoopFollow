@@ -123,17 +123,32 @@ extension MainViewController {
                  Target
                  */
                 let profileTargetHigh = profileManager.currentTargetHigh()
-                var enactedTarget: String?
+                var enactedTarget: HKQuantity?
                 if let enactedTargetValue = enacted["current_target"] as? Double {
-                    enactedTarget = Localizer.toDisplayUnits(String(enactedTargetValue))
-                }
-                if let profileTargetHigh = profileTargetHigh, let enactedTarget = enactedTarget, profileTargetHigh != enactedTarget {
-                    infoManager.updateInfoData(type: .target, value: "\(profileTargetHigh) → \(enactedTarget)")
-                } else if let profileTargetHigh = profileTargetHigh {
-                    infoManager.updateInfoData(type: .target, value: profileTargetHigh)
+                    enactedTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: enactedTargetValue)
                 }
 
-                var predictioncolor = UIColor.systemGray
+                if let profileTargetHigh = profileTargetHigh, let enactedTarget = enactedTarget {
+                    let profileTargetHighFormatted = Localizer.formatQuantity(profileTargetHigh)
+                    let enactedTargetFormatted = Localizer.formatQuantity(enactedTarget)
+
+                    // Compare formatted values to avoid issues with minor floating-point differences
+                    // Profile target could be in another unit than enacted target
+                    if profileTargetHighFormatted != enactedTargetFormatted {
+                        infoManager.updateInfoData(type: .target, firstValue: profileTargetHigh, secondValue: enactedTarget, separator: .arrow)
+                    } else {
+                        infoManager.updateInfoData(type: .target, value: profileTargetHigh)
+                    }
+                }
+
+                /*
+                 TDD
+                 */
+                if let tddMetric = InsulinMetric(from: enacted, key: "TDD") {
+                    infoManager.updateInfoData(type: .tdd, value: tddMetric)
+                }
+
+                let predictioncolor = UIColor.systemGray
                 PredictionLabel.textColor = predictioncolor
                 topPredictionBG = UserDefaultsRepository.minBGScale.value
                 if let predbgdata = enacted["predBGs"] as? [String: AnyObject] {

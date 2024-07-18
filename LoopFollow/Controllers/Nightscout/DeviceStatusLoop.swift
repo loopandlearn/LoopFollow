@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Charts
+import HealthKit
 
 extension MainViewController {
     func DeviceStatusLoop(formatter: ISO8601DateFormatter, lastLoopRecord: [String: AnyObject]) {
@@ -51,16 +52,11 @@ extension MainViewController {
                  */
                 let profileTargetLow = profileManager.currentTargetLow()
                 let profileTargetHigh = profileManager.currentTargetHigh()
-                var profileTarget: String?
 
                 if let profileTargetLow = profileTargetLow, let profileTargetHigh = profileTargetHigh, profileTargetLow != profileTargetHigh {
-                    profileTarget = "\(profileTargetLow) - \(profileTargetHigh)"
+                    infoManager.updateInfoData(type: .target, firstValue: profileTargetLow, secondValue: profileTargetHigh, separator: .dash)
                 } else if let profileTargetLow = profileTargetLow {
-                    profileTarget = profileTargetLow
-                }
-
-                if let profileTarget = profileTarget {
-                    infoManager.updateInfoData(type: .target, value: profileTarget)
+                    infoManager.updateInfoData(type: .target, value: profileTargetLow)
                 }
 
                 /*
@@ -70,7 +66,6 @@ extension MainViewController {
                     infoManager.updateInfoData(type: .iob, value: insulinMetric)
                     latestIOB = insulinMetric
                 }
-
 
                 /*
                  COB
