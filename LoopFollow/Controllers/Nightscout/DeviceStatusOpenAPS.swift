@@ -1,10 +1,7 @@
-//
-//  DeviceStatusOpenAPS.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-05-19.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// DeviceStatusOpenAPS.swift
+// LoopFollow
+// Created by Jonas Björkert on 2024-05-19.
+// Copyright © 2024 Jon Fawcett. All rights reserved.
 
 import Foundation
 import UIKit
@@ -12,33 +9,33 @@ import HealthKit
 
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
-
         if let lastLoopTime = formatter.date(from: (lastDeviceStatus?["created_at"] as! String))?.timeIntervalSince1970 {
             UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
             if lastLoopRecord["failureReason"] != nil {
                 LoopStatusLabel.text = "X"
                 latestLoopStatusString = "X"
-                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop Failure: X") }
             } else {
-                var wasEnacted = false
-                if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] {
-                    wasEnacted = true
+                guard let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] else {
+                    LoopStatusLabel.text = "↻"
+                    latestLoopStatusString = "↻"
+                    evaluateNotLooping(lastLoopTime: lastLoopTime)
+                    return
                 }
+                let wasEnacted = true
 
-                var determinedUnit: HKUnit = .millimolesPerLiter
+                var determinedUnit: HKUnit = .milligramsPerDeciliter
 
-                // Determine the unit based on the target value since no unit is provided
-                if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject],
-                   let enactedTargetValue = enacted["current_target"] as? Double {
-                    if enactedTargetValue > 40 {
-                        determinedUnit = .milligramsPerDeciliter
+                // Determine the unit based on the threshold value since no unit is provided
+                if let enactedTargetValue = enacted["threshold"] as? Double {
+                    if enactedTargetValue < 40 {
+                        determinedUnit = .millimolesPerLiter
                     }
                 }
 
                 /*
                  Updated
                  */
-                if let enactedTimestamp = lastLoopRecord["enacted"]?["timestamp"] as? String,
+                if let enactedTimestamp = enacted["timestamp"] as? String,
                    let enactedTime = formatter.date(from: enactedTimestamp)?.timeIntervalSince1970 {
                     let formattedTime = Localizer.formatTimestampToLocalString(enactedTime)
                     infoManager.updateInfoData(type: .updated, value: formattedTime)
@@ -48,13 +45,12 @@ extension MainViewController {
                  ISF
                  */
                 let profileISF = profileManager.currentISF()
-                var enactedISF: String?
-                if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject],
-                   let enactedISFValue = enacted["ISF"] as? Double {
-                    enactedISF = Localizer.formatLocalDouble(enactedISFValue)
+                var enactedISF: HKQuantity?
+                if let enactedISFValue = enacted["ISF"] as? Double {
+                    enactedISF = HKQuantity(unit: determinedUnit, doubleValue: enactedISFValue)
                 }
                 if let profileISF = profileISF, let enactedISF = enactedISF, profileISF != enactedISF {
-                    infoManager.updateInfoData(type: .isf, value: "\(profileISF) → \(enactedISF)")
+                    infoManager.updateInfoData(type: .isf, firstValue: profileISF, secondValue: enactedISF, separator: .arrow)
                 } else if let profileISF = profileISF {
                     infoManager.updateInfoData(type: .isf, value: profileISF)
                 }
@@ -63,61 +59,64 @@ extension MainViewController {
                  Carb Ratio (CR)
                  */
                 let profileCR = profileManager.currentCarbRatio()
-                var enactedCR: String?
-                if let reasonString = lastLoopRecord["enacted"]?["reason"] as? String {
+                var enactedCR: Double?
+                if let reasonString = enacted["reason"] as? String {
                     let pattern = "CR: (\\d+(?:\\.\\d+)?)"
                     if let regex = try? NSRegularExpression(pattern: pattern) {
                         let nsString = reasonString as NSString
                         if let match = regex.firstMatch(in: reasonString, range: NSRange(location: 0, length: nsString.length)) {
                             let crString = nsString.substring(with: match.range(at: 1))
-                            if let crValue = Double(crString) {
-                                enactedCR = Localizer.formatToLocalizedString(crValue)
-                            }
+                            enactedCR = Double(crString)
                         }
                     }
                 }
 
                 if let profileCR = profileCR, let enactedCR = enactedCR, profileCR != enactedCR {
-                    infoManager.updateInfoData(type: .carbRatio, value: "\(profileCR) → \(enactedCR)")
+                    infoManager.updateInfoData(type: .carbRatio, value: profileCR, enactedValue: enactedCR, separator: .arrow)
                 } else if let profileCR = profileCR {
                     infoManager.updateInfoData(type: .carbRatio, value: profileCR)
                 }
 
-                if let iobdata = lastLoopRecord["iob"] as? [String: AnyObject],
-                   let iobValue = iobdata["iob"] as? Double {
-                    let formattedIOB = String(format: "%.2f", iobValue)
-                    infoManager.updateInfoData(type: .iob, value: formattedIOB)
-                    latestIOB = formattedIOB
+                /*
+                 IOB
+                 */
+                if let iobMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
+                    infoManager.updateInfoData(type: .iob, value: iobMetric)
+                    latestIOB = iobMetric
                 }
 
-                if let cobdata = lastLoopRecord["enacted"] as? [String: AnyObject],
-                   let cobValue = cobdata["COB"] as? Double {
-                    let formattedCOB = String(format: "%.0f", cobValue)
-                    infoManager.updateInfoData(type: .cob, value: formattedCOB)
-                    latestCOB = formattedCOB
+                /*
+                 COB
+                 */
+                if let cobMetric = CarbMetric(from: enacted, key: "COB") {
+                    infoManager.updateInfoData(type: .cob, value: cobMetric)
+                    latestCOB = cobMetric
                 }
 
-                if let recbolusdata = lastLoopRecord["enacted"] as? [String: AnyObject],
-                   let insulinReq = recbolusdata["insulinReq"] as? Double {
-                    let formattedRecBolus = String(format: "%.2fU", insulinReq)
-                    infoManager.updateInfoData(type: .recBolus, value: formattedRecBolus)
-                    UserDefaultsRepository.deviceRecBolus.value = insulinReq
+                /*
+                 Insulin Required
+                 */
+                if let insulinReqMetric = InsulinMetric(from: enacted, key: "insulinReq") {
+                    infoManager.updateInfoData(type: .recBolus, value: insulinReqMetric)
+                    UserDefaultsRepository.deviceRecBolus.value = insulinReqMetric.value
                 } else {
-                    infoManager.updateInfoData(type: .recBolus, value: "N/A")
                     UserDefaultsRepository.deviceRecBolus.value = 0
                 }
 
-                if let autosensdata = lastLoopRecord["enacted"] as? [String: AnyObject],
-                   let sens = autosensdata["sensitivityRatio"] as? Double {
+                /*
+                 Autosens
+                 */
+                if let sens = enacted["sensitivityRatio"] as? Double {
                     let formattedSens = String(format: "%.0f", sens * 100.0) + "%"
                     infoManager.updateInfoData(type: .autosens, value: formattedSens)
                 }
 
-                if let eventualdata = lastLoopRecord["enacted"] as? [String: AnyObject] {
-                    if let eventualBGValue = eventualdata["eventualBG"] as? NSNumber {
-                        let eventualBGStringValue = String(describing: eventualBGValue)
-                        PredictionLabel.text = Localizer.toDisplayUnits(eventualBGStringValue)
-                    }
+                /*
+                 Eventual BG
+                 */
+                if let eventualBGValue = enacted["eventualBG"] as? Double {
+                    let eventualBGQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: eventualBGValue)
+                    PredictionLabel.text = Localizer.formatQuantity(eventualBGQuantity)
                 }
 
                 /*
@@ -125,8 +124,7 @@ extension MainViewController {
                  */
                 let profileTargetHigh = profileManager.currentTargetHigh()
                 var enactedTarget: String?
-                if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject],
-                   let enactedTargetValue = enacted["current_target"] as? Double {
+                if let enactedTargetValue = enacted["current_target"] as? Double {
                     enactedTarget = Localizer.toDisplayUnits(String(enactedTargetValue))
                 }
                 if let profileTargetHigh = profileTargetHigh, let enactedTarget = enactedTarget, profileTargetHigh != enactedTarget {
@@ -138,8 +136,7 @@ extension MainViewController {
                 var predictioncolor = UIColor.systemGray
                 PredictionLabel.textColor = predictioncolor
                 topPredictionBG = UserDefaultsRepository.minBGScale.value
-                if let enactdata = lastLoopRecord["enacted"] as? [String: AnyObject],
-                   let predbgdata = enactdata["predBGs"] as? [String: AnyObject] {
+                if let predbgdata = enacted["predBGs"] as? [String: AnyObject] {
                     let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
                         ("ZT", "ZT", 12),
                         ("IOB", "Insulin", 13),

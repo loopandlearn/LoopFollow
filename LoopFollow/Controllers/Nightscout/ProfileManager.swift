@@ -47,7 +47,7 @@ struct ProfileManager {
             return
         }
 
-        self.units = profileData.units == "mg/dL" ? .milligramsPerDeciliter : .millimolesPerLiter
+        self.units = profileData.units.lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
         self.timezone = store.timezone
         self.defaultProfile = profileData.defaultProfile
 
@@ -63,13 +63,10 @@ struct ProfileManager {
         }
     }
 
-    func currentISF() -> String? {
-        if let isf = getCurrentValue(from: isfSchedule) {
-            return Localizer.formatQuantity(isf)
-        }
-        return nil
+    func currentISF() -> HKQuantity? {
+        return getCurrentValue(from: isfSchedule)
     }
-
+    
     func currentBasal() -> String? {
         if let basal = getCurrentValue(from: basalSchedule) {
             return Localizer.formatToLocalizedString(basal, maxFractionDigits: 2, minFractionDigits: 0)
@@ -77,11 +74,8 @@ struct ProfileManager {
         return nil
     }
 
-    func currentCarbRatio() -> String? {
-        if let carbRatio = getCurrentValue(from: carbRatioSchedule) {
-            return Localizer.formatToLocalizedString(carbRatio, maxFractionDigits: 1, minFractionDigits: 0)
-        }
-        return nil
+    func currentCarbRatio() -> Double? {
+        return getCurrentValue(from: carbRatioSchedule)
     }
 
     func currentTargetLow() -> String? {
