@@ -32,18 +32,14 @@ extension MainViewController {
                     }
                 }
 
-                /*
-                 Updated
-                 */
+                // Updated
                 if let enactedTimestamp = enacted["timestamp"] as? String,
                    let enactedTime = formatter.date(from: enactedTimestamp)?.timeIntervalSince1970 {
                     let formattedTime = Localizer.formatTimestampToLocalString(enactedTime)
                     infoManager.updateInfoData(type: .updated, value: formattedTime)
                 }
 
-                /*
-                 ISF
-                 */
+                // ISF
                 let profileISF = profileManager.currentISF()
                 var enactedISF: HKQuantity?
                 if let enactedISFValue = enacted["ISF"] as? Double {
@@ -55,9 +51,7 @@ extension MainViewController {
                     infoManager.updateInfoData(type: .isf, value: profileISF)
                 }
 
-                /*
-                 Carb Ratio (CR)
-                 */
+                // Carb Ratio (CR)
                 let profileCR = profileManager.currentCarbRatio()
                 var enactedCR: Double?
                 if let reasonString = enacted["reason"] as? String {
@@ -77,25 +71,19 @@ extension MainViewController {
                     infoManager.updateInfoData(type: .carbRatio, value: profileCR)
                 }
 
-                /*
-                 IOB
-                 */
+                // IOB
                 if let iobMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
                     infoManager.updateInfoData(type: .iob, value: iobMetric)
                     latestIOB = iobMetric
                 }
 
-                /*
-                 COB
-                 */
+                // COB
                 if let cobMetric = CarbMetric(from: enacted, key: "COB") {
                     infoManager.updateInfoData(type: .cob, value: cobMetric)
                     latestCOB = cobMetric
                 }
 
-                /*
-                 Insulin Required
-                 */
+                // Insulin Required
                 if let insulinReqMetric = InsulinMetric(from: enacted, key: "insulinReq") {
                     infoManager.updateInfoData(type: .recBolus, value: insulinReqMetric)
                     UserDefaultsRepository.deviceRecBolus.value = insulinReqMetric.value
@@ -103,25 +91,19 @@ extension MainViewController {
                     UserDefaultsRepository.deviceRecBolus.value = 0
                 }
 
-                /*
-                 Autosens
-                 */
+                // Autosens
                 if let sens = enacted["sensitivityRatio"] as? Double {
                     let formattedSens = String(format: "%.0f", sens * 100.0) + "%"
                     infoManager.updateInfoData(type: .autosens, value: formattedSens)
                 }
 
-                /*
-                 Eventual BG
-                 */
+                // Eventual BG
                 if let eventualBGValue = enacted["eventualBG"] as? Double {
                     let eventualBGQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: eventualBGValue)
                     PredictionLabel.text = Localizer.formatQuantity(eventualBGQuantity)
                 }
 
-                /*
-                 Target
-                 */
+                // Target
                 let profileTargetHigh = profileManager.currentTargetHigh()
                 var enactedTarget: HKQuantity?
                 if let enactedTargetValue = enacted["current_target"] as? Double {
@@ -141,9 +123,7 @@ extension MainViewController {
                     }
                 }
 
-                /*
-                 TDD
-                 */
+                // TDD
                 if let tddMetric = InsulinMetric(from: enacted, key: "TDD") {
                     infoManager.updateInfoData(type: .tdd, value: tddMetric)
                 }
