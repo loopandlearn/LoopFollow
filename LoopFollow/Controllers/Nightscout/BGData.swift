@@ -239,8 +239,8 @@ extension MainViewController {
             var snoozerDelta = ""
             
             // Set BGText with the latest BG value
-            self.BGText.text = bgUnits.toDisplayUnits(String(latestBG))
-            snoozerBG = bgUnits.toDisplayUnits(String(latestBG))
+            self.BGText.text = Localizer.toDisplayUnits(String(latestBG))
+            snoozerBG = Localizer.toDisplayUnits(String(latestBG))
             self.setBGTextColor()
             
             // Direction handling
@@ -256,12 +256,12 @@ extension MainViewController {
             
             // Delta handling
             if deltaBG < 0 {
-                self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
-                snoozerDelta = bgUnits.toDisplayUnits(String(deltaBG))
+                self.DeltaText.text = Localizer.toDisplayUnits(String(deltaBG))
+                snoozerDelta = Localizer.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = String(deltaBG)
             } else {
-                self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
-                snoozerDelta = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                self.DeltaText.text = "+" + Localizer.toDisplayUnits(String(deltaBG))
+                snoozerDelta = "+" + Localizer.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = "+" + String(deltaBG)
             }
             
