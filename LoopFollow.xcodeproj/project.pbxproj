@@ -12,6 +12,10 @@
 		DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */; };
 		DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C612C4175FD00DBADDF /* NSProfile.swift */; };
 		DD0C0C642C45A59400DBADDF /* HKUnit+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C632C45A59400DBADDF /* HKUnit+Extensions.swift */; };
+		DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C652C46E54C00DBADDF /* InfoDataSeparator.swift */; };
+		DD0C0C682C48529400DBADDF /* Metric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C672C48529400DBADDF /* Metric.swift */; };
+		DD0C0C6B2C48562000DBADDF /* InsulinMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6A2C48562000DBADDF /* InsulinMetric.swift */; };
+		DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */; };
 		DD13BC752C3FD6210062313B /* InfoType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC742C3FD6200062313B /* InfoType.swift */; };
 		DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC762C3FD64E0062313B /* InfoData.swift */; };
 		DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC782C3FE63A0062313B /* InfoManager.swift */; };
@@ -212,6 +216,10 @@
 		DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
 		DD0C0C612C4175FD00DBADDF /* NSProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSProfile.swift; sourceTree = "<group>"; };
 		DD0C0C632C45A59400DBADDF /* HKUnit+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HKUnit+Extensions.swift"; sourceTree = "<group>"; };
+		DD0C0C652C46E54C00DBADDF /* InfoDataSeparator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDataSeparator.swift; sourceTree = "<group>"; };
+		DD0C0C672C48529400DBADDF /* Metric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metric.swift; sourceTree = "<group>"; };
+		DD0C0C6A2C48562000DBADDF /* InsulinMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinMetric.swift; sourceTree = "<group>"; };
+		DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbMetric.swift; sourceTree = "<group>"; };
 		DD13BC742C3FD6200062313B /* InfoType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoType.swift; sourceTree = "<group>"; };
 		DD13BC762C3FD64E0062313B /* InfoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoData.swift; sourceTree = "<group>"; };
 		DD13BC782C3FE63A0062313B /* InfoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoManager.swift; sourceTree = "<group>"; };
@@ -443,12 +451,23 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		DD0C0C692C4852A100DBADDF /* Metric */ = {
+			isa = PBXGroup;
+			children = (
+				DD0C0C672C48529400DBADDF /* Metric.swift */,
+				DD0C0C6A2C48562000DBADDF /* InsulinMetric.swift */,
+				DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */,
+			);
+			path = Metric;
+			sourceTree = "<group>";
+		};
 		DD13BC732C3FD60E0062313B /* InfoTable */ = {
 			isa = PBXGroup;
 			children = (
 				DD13BC742C3FD6200062313B /* InfoType.swift */,
 				DD13BC762C3FD64E0062313B /* InfoData.swift */,
 				DD13BC782C3FE63A0062313B /* InfoManager.swift */,
+				DD0C0C652C46E54C00DBADDF /* InfoDataSeparator.swift */,
 			);
 			path = InfoTable;
 			sourceTree = "<group>";
@@ -671,6 +690,7 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				DD0C0C692C4852A100DBADDF /* Metric */,
 				DD13BC732C3FD60E0062313B /* InfoTable */,
 				FCC688702489A57C00A0279D /* Loop Follow.entitlements */,
 				FC8DEEE62485D1ED0075863F /* Info.plist */,
@@ -1041,6 +1061,7 @@
 				DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */,
 				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
 				DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */,
+				DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */,
 				DD7E19882ACDA5DA00DBD158 /* Notes.swift in Sources */,
 				FCEF87AC24A141A700AE6FA0 /* Localizer.swift in Sources */,
 				FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */,
@@ -1063,6 +1084,7 @@
 				DD493AD72ACF2139009A6922 /* SuspendPump.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */,
+				DD0C0C6B2C48562000DBADDF /* InsulinMetric.swift in Sources */,
 				DD493AD92ACF2171009A6922 /* Carbs.swift in Sources */,
 				DD493AE92ACF2445009A6922 /* BGData.swift in Sources */,
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
@@ -1070,8 +1092,10 @@
 				DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */,
 				DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */,
 				DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
+				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
+				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
 				DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */,
 				FCD49B6C24AA536E007879DC /* DebugViewController.swift in Sources */,
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,

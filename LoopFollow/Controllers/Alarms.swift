@@ -86,7 +86,7 @@ extension MainViewController {
             }
             if bolusCount >= UserDefaultsRepository.alertIOBNumber.value ||
                 totalBoluses >= Double(UserDefaultsRepository.alertIOBMaxBoluses.value) ||
-                Double(latestIOB) ?? 0 >= Double(UserDefaultsRepository.alertIOBMaxBoluses.value) {
+                (latestIOB?.value ?? 0) >= Double(UserDefaultsRepository.alertIOBMaxBoluses.value) {
                 AlarmSound.whichAlarm = "IOB Alert"
                 //determine if it is day or night and what should happen
                 if UserDefaultsRepository.nightTime.value {
@@ -104,7 +104,7 @@ extension MainViewController {
         // Check COB
         if UserDefaultsRepository.alertCOB.value && !UserDefaultsRepository.alertCOBIsSnoozed.value {
             let alertAt = Double(UserDefaultsRepository.alertCOBAt.value)
-            if Double(latestCOB) ?? 0 >= alertAt {
+            if (latestCOB?.value ?? 0) >= alertAt {
                 AlarmSound.whichAlarm = "COB Alert"
                 //determine if it is day or night and what should happen
                 if UserDefaultsRepository.nightTime.value {

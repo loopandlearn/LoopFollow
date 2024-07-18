@@ -63,18 +63,21 @@ extension MainViewController {
                     infoManager.updateInfoData(type: .target, value: profileTarget)
                 }
 
-                if let iobdata = lastLoopRecord["iob"] as? [String: AnyObject],
-                   let iobValue = iobdata["iob"] as? Double {
-                    let formattedIOB = String(format: "%.2f", iobValue)
-                    infoManager.updateInfoData(type: .iob, value: formattedIOB)
-                    latestIOB = formattedIOB
+                /*
+                 IOB
+                 */
+                if let insulinMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
+                    infoManager.updateInfoData(type: .iob, value: insulinMetric)
+                    latestIOB = insulinMetric
                 }
 
-                if let cobdata = lastLoopRecord["cob"] as? [String: AnyObject],
-                   let cobValue = cobdata["cob"] as? Double {
-                    let formattedCOB = String(format: "%.0f", cobValue)
-                    infoManager.updateInfoData(type: .cob, value: formattedCOB)
-                    latestCOB = formattedCOB
+
+                /*
+                 COB
+                 */
+                if let cobMetric = CarbMetric(from: lastLoopRecord["cob"], key: "cob") {
+                    infoManager.updateInfoData(type: .cob, value: cobMetric)
+                    latestCOB = cobMetric
                 }
 
                 if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {

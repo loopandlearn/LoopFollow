@@ -114,10 +114,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var latestDeltaString = ""
     var latestLoopStatusString = ""
     var latestLoopTime: Double = 0
-    var latestCOB = ""
+    var latestCOB: CarbMetric?
     var latestBasal = ""
     var latestPumpVolume: Double = 50.0
-    var latestIOB = ""
+    var latestIOB: InsulinMetric?
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
     
@@ -590,24 +590,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             minAgo = String(Int(deltaTime)) + " min"
             eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
         }
-        var cob = "0"
-        if self.latestCOB != "" {
-            cob = self.latestCOB
-        }
         var basal = "~"
         if self.latestBasal != "" {
             basal = self.latestBasal
         }
-        var iob = "0"
-        if self.latestIOB != "" {
-            iob = self.latestIOB
-        }
         eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
-        eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: iob)
-        eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: cob)
+        eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: latestIOB?.formattedValue() ?? "0")
+        eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: latestCOB?.formattedValue() ?? "0")
         eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal)
-        
-        
         
         // Delete Events from last 2 hours and 2 hours in future
         var deleteStartDate = Date().addingTimeInterval(-60*60*2)
