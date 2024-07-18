@@ -31,25 +31,19 @@ extension MainViewController {
                     }
                 }
 
-                /*
-                 ISF
-                 */
+                // ISF
                 let profileISF = profileManager.currentISF()
                 if let profileISF = profileISF {
                     infoManager.updateInfoData(type: .isf, value: profileISF)
                 }
 
-                /*
-                 Carb Ratio (CR)
-                 */
+                // Carb Ratio (CR)
                 let profileCR = profileManager.currentCarbRatio()
                 if let profileCR = profileCR {
                     infoManager.updateInfoData(type: .carbRatio, value: profileCR)
                 }
 
-                /*
-                 Target
-                 */
+                // Target
                 let profileTargetLow = profileManager.currentTargetLow()
                 let profileTargetHigh = profileManager.currentTargetHigh()
 
@@ -59,17 +53,13 @@ extension MainViewController {
                     infoManager.updateInfoData(type: .target, value: profileTargetLow)
                 }
 
-                /*
-                 IOB
-                 */
+                // IOB
                 if let insulinMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
                     infoManager.updateInfoData(type: .iob, value: insulinMetric)
                     latestIOB = insulinMetric
                 }
 
-                /*
-                 COB
-                 */
+                // COB
                 if let cobMetric = CarbMetric(from: lastLoopRecord["cob"], key: "cob") {
                     infoManager.updateInfoData(type: .cob, value: cobMetric)
                     latestCOB = cobMetric
