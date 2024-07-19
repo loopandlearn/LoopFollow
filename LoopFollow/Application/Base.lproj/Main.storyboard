@@ -505,20 +505,36 @@
             </objects>
             <point key="canvasLocation" x="-703" y="746"/>
         </scene>
-        <!--Alarms-->
+        <!--Remote-->
         <scene sceneID="sEH-4N-YEn">
             <objects>
-                <viewController storyboardIdentifier="AlarmViewController" id="7an-Fz-r9u" customClass="AlarmViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="RemoteViewController" id="7an-Fz-r9u" customClass="RemoteViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="53u-XU-GCk">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <viewLayoutGuide key="safeArea" id="SlM-Sc-PIr"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Alarms" image="alarm" catalog="system" id="c7L-5b-Di9"/>
+                    <tabBarItem key="tabBarItem" title="Remote" image="antenna.radiowaves.left.and.right" catalog="system" id="c7L-5b-Di9"/>
                     <navigationItem key="navigationItem" id="Lph-Pi-ZZL"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rld-0Y-q4t" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="130" y="700"/>
+        </scene>
+        <!--Alarms-->
+        <scene sceneID="a12-B3-C4d">
+            <objects>
+                <viewController storyboardIdentifier="AlarmViewController" id="b34-C5-D6e" customClass="AlarmViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="c56-D7-E8f">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="d78-E9-F0g"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="e90-F1-G2h"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="f12-G3-H4i" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="130" y="700"/>
         </scene>
