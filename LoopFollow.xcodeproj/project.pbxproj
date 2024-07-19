@@ -16,6 +16,8 @@
 		DD0C0C682C48529400DBADDF /* Metric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C672C48529400DBADDF /* Metric.swift */; };
 		DD0C0C6B2C48562000DBADDF /* InsulinMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6A2C48562000DBADDF /* InsulinMetric.swift */; };
 		DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */; };
+		DD0C0C702C4AFFE800DBADDF /* RemoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */; };
+		DD0C0C722C4B000800DBADDF /* RemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C712C4B000800DBADDF /* RemoteView.swift */; };
 		DD13BC752C3FD6210062313B /* InfoType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC742C3FD6200062313B /* InfoType.swift */; };
 		DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC762C3FD64E0062313B /* InfoData.swift */; };
 		DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC782C3FE63A0062313B /* InfoManager.swift */; };
@@ -220,6 +222,8 @@
 		DD0C0C672C48529400DBADDF /* Metric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metric.swift; sourceTree = "<group>"; };
 		DD0C0C6A2C48562000DBADDF /* InsulinMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinMetric.swift; sourceTree = "<group>"; };
 		DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbMetric.swift; sourceTree = "<group>"; };
+		DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteViewController.swift; sourceTree = "<group>"; };
+		DD0C0C712C4B000800DBADDF /* RemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteView.swift; sourceTree = "<group>"; };
 		DD13BC742C3FD6200062313B /* InfoType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoType.swift; sourceTree = "<group>"; };
 		DD13BC762C3FD64E0062313B /* InfoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoData.swift; sourceTree = "<group>"; };
 		DD13BC782C3FE63A0062313B /* InfoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoManager.swift; sourceTree = "<group>"; };
@@ -461,6 +465,15 @@
 			path = Metric;
 			sourceTree = "<group>";
 		};
+		DD0C0C6E2C4AFFB800DBADDF /* Remote */ = {
+			isa = PBXGroup;
+			children = (
+				DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */,
+				DD0C0C712C4B000800DBADDF /* RemoteView.swift */,
+			);
+			path = Remote;
+			sourceTree = "<group>";
+		};
 		DD13BC732C3FD60E0062313B /* InfoTable */ = {
 			isa = PBXGroup;
 			children = (
@@ -690,6 +703,7 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				DD0C0C6E2C4AFFB800DBADDF /* Remote */,
 				DD0C0C692C4852A100DBADDF /* Metric */,
 				DD13BC732C3FD60E0062313B /* InfoTable */,
 				FCC688702489A57C00A0279D /* Loop Follow.entitlements */,
@@ -1059,6 +1073,7 @@
 				DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
 				DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */,
+				DD0C0C702C4AFFE800DBADDF /* RemoteViewController.swift in Sources */,
 				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
 				DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */,
 				DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */,
@@ -1070,6 +1085,7 @@
 				FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */,
 				DD493AE12ACF22FE009A6922 /* Profile.swift in Sources */,
 				DD493ADF2ACF22BB009A6922 /* SAge.swift in Sources */,
+				DD0C0C722C4B000800DBADDF /* RemoteView.swift in Sources */,
 				DD493ADB2ACF21A3009A6922 /* Bolus.swift in Sources */,
 				DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */,
 				DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */,
