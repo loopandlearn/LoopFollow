@@ -248,6 +248,11 @@ class AlarmViewController: FormViewController {
         
         
         form
+            +++ ButtonRow() {
+                $0.title = "DONE"
+            }.onCellSelection { (row, arg)  in
+                self.dismiss(animated: true, completion: nil)
+            }
             +++ Section("Select Alert")
           <<< SegmentedRow<String>("bgAlerts"){ row in
                 row.title = ""

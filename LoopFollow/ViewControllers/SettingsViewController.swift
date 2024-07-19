@@ -236,7 +236,17 @@ class SettingsViewController: FormViewController {
            ), onDismiss: nil)
             
         }
-        
+       <<< ButtonRow("alarmsSettings") {
+           $0.title = "Alarms"
+           $0.presentationMode = .show(
+            controllerProvider: .callback(builder: {
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let controller = storyboard.instantiateViewController(withIdentifier: "AlarmViewController") as! AlarmViewController
+                controller.appStateController = self.appStateController
+                return controller
+            }), onDismiss: nil)
+       }
+
         +++ Section("Integrations")
         <<< ButtonRow() {
            $0.title = "Apple Watch and Carplay"
