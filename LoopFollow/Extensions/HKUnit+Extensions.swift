@@ -19,10 +19,15 @@ extension HKUnit {
     }()
 
     var preferredFractionDigits: Int {
-        if self == .milligramsPerDeciliter {
+        switch self {
+        case .minute():
             return 0
-        } else {
+        case .milligramsPerDeciliter:
+            return 0
+        case .millimolesPerLiter:
             return 1
+        default:
+            return 0
         }
     }
 

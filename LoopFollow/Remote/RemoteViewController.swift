@@ -55,14 +55,14 @@ class RemoteViewController: UIViewController {
         // Cancel the existing temp target
     }
 
-    private func sendTempTarget(newTarget: HKQuantity, duration: Int) {
+    private func sendTempTarget(newTarget: HKQuantity, duration: HKQuantity) {
         let tempTargetBody: [String: Any] = [
             "enteredBy": "LoopFollow",
             "eventType": "Temporary Target",
             "reason": "Manual",
             "targetTop": newTarget.doubleValue(for: .milligramsPerDeciliter),
             "targetBottom": newTarget.doubleValue(for: .milligramsPerDeciliter),
-            "duration": duration,
+            "duration": Int(duration.doubleValue(for: .minute())),
             "created_at": ISO8601DateFormatter().string(from: Date())
         ]
 
