@@ -13,6 +13,10 @@ import ShareClient
 import UserNotifications
 import AVFAudio
 
+func IsNightscoutEnabled() -> Bool {
+    return !ObservableUserDefaults.shared.url.value.isEmpty
+}
+
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
     
     @IBOutlet weak var BGText: UILabel!
@@ -54,7 +58,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Vars for NS Pull
     var mmol = false as Bool
-    var urlUser = UserDefaultsRepository.url.value as String
     var token = UserDefaultsRepository.token.value as String
     var defaults : UserDefaults?
     let consoleLogging = true
@@ -183,7 +186,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Load the snoozer tab
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
         snoozer.loadViewIfNeeded()
-        
+
         // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -460,7 +463,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        if UserDefaultsRepository.url.value == "" {
+        if !IsNightscoutEnabled() {
             isHidden = true
             isEnabled = false
         }
@@ -478,7 +481,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             infoTable.isHidden = true
         }
         
-        if UserDefaultsRepository.url.value != "" {
+        if IsNightscoutEnabled() {
             isEnabled = true
         }
         

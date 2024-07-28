@@ -23,7 +23,7 @@ class NightscoutViewController: UIViewController {
             overrideUserInterfaceStyle = .dark
         }
         
-        var url = UserDefaultsRepository.url.value
+        var url = ObservableUserDefaults.shared.url.value
         let token = UserDefaultsRepository.token.value
         
         if token != "" {

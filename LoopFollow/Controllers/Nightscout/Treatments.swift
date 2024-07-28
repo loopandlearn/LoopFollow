@@ -44,6 +44,7 @@ extension MainViewController {
         var smb: [[String:AnyObject]] = []
         var carbs: [[String:AnyObject]] = []
         var temporaryOverride: [[String:AnyObject]] = []
+        var temporaryTarget: [[String:AnyObject]] = []
         var note: [[String:AnyObject]] = []
         var bgCheck: [[String:AnyObject]] = []
         var suspendPump: [[String:AnyObject]] = []
@@ -72,8 +73,10 @@ extension MainViewController {
                 bolus.append(entry)
             case "Carb Correction":
                 carbs.append(entry)
-            case "Temporary Override", "Temporary Target":
+            case "Temporary Override":
                 temporaryOverride.append(entry)
+            case "Temporary Target":
+                temporaryTarget.append(entry)
             case "Note":
                 note.append(entry)
                 print("Note: \(String(describing: entry))")
@@ -139,6 +142,13 @@ extension MainViewController {
         } else {
             if overrideGraphData.count > 0 {
                 clearOldOverride()
+            }
+        }
+        if temporaryTarget.count > 0 {
+            processNSTemporaryTarget(entries: temporaryTarget)
+        } else {
+            if overrideGraphData.count > 0 {
+                clearOldOverride() //Temporary Targets are plotted as override for now
             }
         }
         if suspendPump.count > 0 {

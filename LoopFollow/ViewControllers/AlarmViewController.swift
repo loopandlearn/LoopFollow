@@ -301,7 +301,7 @@ class AlarmViewController: FormViewController {
             <<< SegmentedRow<String>("otherAlerts"){ row in
                 row.title = ""
                 row.options = ["Not Looping", "Missed Bolus", "SAGE", "CAGE"]
-                if UserDefaultsRepository.url.value == "" {
+                if !IsNightscoutEnabled() {
                     row.hidden = true
                 }
         }.onChange { [weak self] row in
@@ -326,7 +326,7 @@ class AlarmViewController: FormViewController {
         <<< SegmentedRow<String>("otherAlerts2"){ row in
                 row.title = ""
                 row.options = ["Override Start", "Override End", "Pump"]
-                if UserDefaultsRepository.url.value == "" {
+            if !IsNightscoutEnabled() {
                     row.hidden = true
                 }
         }.onChange { [weak self] row in
@@ -352,7 +352,7 @@ class AlarmViewController: FormViewController {
         <<< SegmentedRow<String>("otherAlerts3"){ row in
                 row.title = ""
                 row.options = ["IOB", "COB", "Battery"]
-                if UserDefaultsRepository.url.value == "" {
+            if !IsNightscoutEnabled() {
                     row.hidden = true
                 }
         }.onChange { [weak self] row in
@@ -378,7 +378,7 @@ class AlarmViewController: FormViewController {
         <<< SegmentedRow<String>("otherAlerts4"){ row in
             row.title = ""
             row.options = ["Rec. Bolus"]
-            if UserDefaultsRepository.url.value == "" {
+            if !IsNightscoutEnabled() {
                 row.hidden = true
             }
         }.onChange { [weak self] row in
@@ -442,7 +442,7 @@ class AlarmViewController: FormViewController {
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        if UserDefaultsRepository.url.value == "" {
+        if !IsNightscoutEnabled() {
             isHidden = true
             isEnabled = false
         }
@@ -481,7 +481,7 @@ class AlarmViewController: FormViewController {
         
         
         
-        if UserDefaultsRepository.url.value != "" {
+        if IsNightscoutEnabled() {
             isEnabled = true
         }
         

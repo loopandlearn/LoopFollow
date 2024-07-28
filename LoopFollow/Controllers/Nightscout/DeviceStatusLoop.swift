@@ -13,7 +13,7 @@ import HealthKit
 
 extension MainViewController {
     func DeviceStatusLoop(formatter: ISO8601DateFormatter, lastLoopRecord: [String: AnyObject]) {
-        
+        ObservableUserDefaults.shared.device.value = "Loop"
         if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
             UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
             if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
