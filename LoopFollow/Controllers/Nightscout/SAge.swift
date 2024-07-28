@@ -50,15 +50,15 @@ extension MainViewController {
                                    .withColonSeparatorInTime]
         UserDefaultsRepository.alertSageInsertTime.value = formatter.date(from: (lastSageString))?.timeIntervalSince1970 as! TimeInterval
         
-        if UserDefaultsRepository.alertAutoSnoozeCGMStart.value && (dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertSageInsertTime.value < 7200){
+        if UserDefaultsRepository.alertAutoSnoozeCGMStart.value && (dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertSageInsertTime.value < 7200) {
             let snoozeTime = Date(timeIntervalSince1970: UserDefaultsRepository.alertSageInsertTime.value + 7200)
             UserDefaultsRepository.alertSnoozeAllTime.value = snoozeTime
             UserDefaultsRepository.alertSnoozeAllIsSnoozed.value = true
-            guard let alarms = self.tabBarController!.viewControllers?[1] as? AlarmViewController else { return }
+            guard let alarms = ViewControllerManager.shared.alarmViewController else { return }
             alarms.reloadIsSnoozed(key: "alertSnoozeAllIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertSnoozeAllTime", setNil: false, value: snoozeTime)
         }
-        
+
         if let sageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
             let now = dateTimeUtils.getNowTimeIntervalUTC()
             let secondsAgo = now - sageTime

@@ -9,8 +9,10 @@ import HealthKit
 
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
-        if let lastLoopTime = formatter.date(from: (lastDeviceStatus?["created_at"] as! String))?.timeIntervalSince1970 {
+        if let createdAtString = lastDeviceStatus?["created_at"] as? String,
+           let lastLoopTime = formatter.date(from: createdAtString)?.timeIntervalSince1970 {
             UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+            ObservableUserDefaults.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
             if lastLoopRecord["failureReason"] != nil {
                 LoopStatusLabel.text = "X"
                 latestLoopStatusString = "X"

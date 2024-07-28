@@ -43,7 +43,7 @@ class NightscoutUtils {
     }
     
     static func executeRequest<T: Decodable>(eventType: EventType, parameters: [String: String], completion: @escaping (Result<T, Error>) -> Void) {
-        let baseURL = UserDefaultsRepository.url.value
+        let baseURL = ObservableUserDefaults.shared.url.value
         let token = UserDefaultsRepository.token.value
         
         guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
@@ -75,7 +75,7 @@ class NightscoutUtils {
     
     
     static func executeDynamicRequest(eventType: EventType, parameters: [String: String], completion: @escaping (Result<Any, Error>) -> Void) {
-        let baseURL = UserDefaultsRepository.url.value
+        let baseURL = ObservableUserDefaults.shared.url.value
         let token = UserDefaultsRepository.token.value
         
         guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
@@ -147,47 +147,73 @@ class NightscoutUtils {
         return components?.url
     }
     
-    static func verifyURLAndToken(urlUser: String, token: String?, completion: @escaping (NightscoutError?) -> Void) {
+    static func verifyURLAndToken(completion: @escaping (NightscoutError?, String?, Bool) -> Void) {
+        let urlUser = ObservableUserDefaults.shared.url.value
+        let token = UserDefaultsRepository.token.value
+
         if urlUser.isEmpty {
-            completion(.emptyAddress)
+            completion(.emptyAddress, nil, false)
             return
         }
-        
+
         guard let _ = URL(string: urlUser), urlUser.hasPrefix("http://") || urlUser.hasPrefix("https://") else {
-            completion(.invalidURL)
+            completion(.invalidURL, nil, false)
             return
         }
-        
-        guard let request = createURLRequest(url: urlUser, token: token, path: "/api/v1/status") else {
-            completion(.invalidURL)
+
+        guard let request = createURLRequest(url: urlUser, token: token, path: "/api/v1/status.json") else {
+            completion(.invalidURL, nil, false)
             return
         }
-        
+
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            var nsWriteAuth = false
+
             if let httpResponse = response as? HTTPURLResponse {
                 switch httpResponse.statusCode {
                 case 200:
-                    completion(nil)
-                case 401:
-                    if token == nil || token!.isEmpty {
-                        completion(.tokenRequired)
+                    if let data = data {
+                        do {
+                            if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                               let authorized = jsonResponse["authorized"] as? [String: Any],
+                               let token = authorized["token"] as? String,
+                               let permissionGroups = authorized["permissionGroups"] as? [[String]] {
+
+                                if permissionGroups.contains(where: { $0.contains("*") }) {
+                                    nsWriteAuth = true
+                                } else if permissionGroups.contains(where: { $0.contains("api:treatments:create") }) {
+                                    nsWriteAuth = true
+                                }
+                                completion(nil, token, nsWriteAuth)
+                            } else {
+                                completion(.invalidToken, nil, false)
+                            }
+                        } catch {
+                            completion(.invalidToken, nil, false)
+                        }
                     } else {
-                        completion(.invalidToken) // Change this from "unauthorized"
+                        completion(.invalidToken, nil, false)
+                    }
+                case 401:
+                    if token.isEmpty {
+                        completion(.tokenRequired, nil, false)
+                    } else {
+                        completion(.invalidToken, nil, false)
                     }
                 default:
-                    completion(.unknown)
+                    completion(.unknown, nil, false)
                 }
-            }  else {
+            } else {
                 if let _ = error {
-                    completion(.siteNotFound)
+                    completion(.siteNotFound, nil, false)
                 } else {
-                    completion(.networkError)
+                    completion(.networkError, nil, false)
                 }
             }
         }
         task.resume()
     }
-    
+
     static func parseDate(_ dateString: String) -> Date? {
         let dateFormatterWithMilliseconds = DateFormatter()
         dateFormatterWithMilliseconds.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
@@ -208,4 +234,66 @@ class NightscoutUtils {
         return nil
     }
 
+    static func executePostRequest<T: Decodable>(eventType: EventType, body: [String: Any], completion: @escaping (Result<T, Error>) -> Void) {
+        verifyURLAndToken { error, jwtToken, nsWriteAuth in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Token verification failed: \(error)"])))
+                }
+                return
+            }
+
+            guard let jwtToken = jwtToken else {
+                DispatchQueue.main.async {
+                    completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "No JWT token received"])))
+                }
+                return
+            }
+
+            let baseURL = ObservableUserDefaults.shared.url.value
+
+            guard let url = URL(string: "\(baseURL)\(eventType.endpoint)") else {
+                DispatchQueue.main.async {
+                    completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+                }
+                return
+            }
+
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
+
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+            } catch {
+                DispatchQueue.main.async {
+                    completion(.failure(NSError(domain: "NightscoutUtils", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid body parameters"])))
+                }
+                return
+            }
+
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                guard let data = data, error == nil else {
+                    DispatchQueue.main.async {
+                        completion(.failure(error!))
+                    }
+                    return
+                }
+
+                let decoder = JSONDecoder()
+                do {
+                    let decodedObject = try decoder.decode(T.self, from: data)
+                    DispatchQueue.main.async {
+                        completion(.success(decodedObject))
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        completion(.failure(error))
+                    }
+                }
+            }
+            task.resume()
+        }
+    }
 }

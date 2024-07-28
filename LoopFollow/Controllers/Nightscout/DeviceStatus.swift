@@ -120,35 +120,35 @@ extension MainViewController {
         // Loop - handle new data
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             DeviceStatusLoop(formatter: formatter, lastLoopRecord: lastLoopRecord)
+
+            var oText = ""
+            currentOverride = 1.0
+            if let lastOverride = lastDeviceStatus?["override"] as? [String: AnyObject],
+               let isActive = lastOverride["active"] as? Bool, isActive {
+                if let lastCorrection = lastOverride["currentCorrectionRange"] as? [String: AnyObject],
+                   let minValue = lastCorrection["minValue"] as? Double,
+                   let maxValue = lastCorrection["maxValue"] as? Double {
+
+                    if let multiplier = lastOverride["multiplier"] as? Double {
+                        currentOverride = multiplier
+                        oText += String(format: "%.0f%%", (multiplier * 100))
+                    } else {
+                        oText += "100%"
+                    }
+
+                    oText += " ("
+                    oText += Localizer.toDisplayUnits(String(minValue)) + "-" + Localizer.toDisplayUnits(String(maxValue)) + ")"
+                }
+
+                infoManager.updateInfoData(type: .override, value: oText)
+            } else {
+                infoManager.clearInfoData(type: .override)
+            }
         }
 
         // OpenAPS - handle new data
         if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String : AnyObject]? {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
-        }
-        
-        var oText = ""
-        currentOverride = 1.0
-        if let lastOverride = lastDeviceStatus?["override"] as? [String: AnyObject],
-           let isActive = lastOverride["active"] as? Bool, isActive {
-            if let lastCorrection = lastOverride["currentCorrectionRange"] as? [String: AnyObject],
-               let minValue = lastCorrection["minValue"] as? Double,
-               let maxValue = lastCorrection["maxValue"] as? Double {
-                
-                if let multiplier = lastOverride["multiplier"] as? Double {
-                    currentOverride = multiplier
-                    oText += String(format: "%.0f%%", (multiplier * 100))
-                } else {
-                    oText += "100%"
-                }
-                
-                oText += " ("
-                oText += Localizer.toDisplayUnits(String(minValue)) + "-" + Localizer.toDisplayUnits(String(maxValue)) + ")"
-            }
-            
-            infoManager.updateInfoData(type: .override, value: oText)
-        } else {
-            infoManager.clearInfoData(type: .override)
         }
 
         // Start the timer based on the timestamp
