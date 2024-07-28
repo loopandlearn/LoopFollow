@@ -144,7 +144,7 @@ extension MainViewController {
     
     @objc func bgTimerDidEnd(_ timer:Timer) {
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.shareUserName.value == "" && UserDefaultsRepository.sharePassword.value == "" && UserDefaultsRepository.url.value == "" {
+        if UserDefaultsRepository.shareUserName.value == "" && UserDefaultsRepository.sharePassword.value == "" && !IsNightscoutEnabled() {
             startBGTimer(time: 60)
             return
         }
@@ -174,12 +174,10 @@ extension MainViewController {
     @objc func deviceStatusTimerDidEnd(_ timer:Timer) {
         
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" {
+        if !IsNightscoutEnabled() {
             startDeviceStatusTimer(time: 60)
             return
-        }
-        
-        if UserDefaultsRepository.url.value != "" {
+        } else {
             webLoadNSDeviceStatus()
         }
     }
@@ -196,18 +194,16 @@ extension MainViewController {
     }
     
     @objc func treatmentsTimerDidEnd(_ timer:Timer) {
-        
-        
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" {
+        if !IsNightscoutEnabled() {
             startTreatmentsTimer(time: 60)
             return
         }
         
-        if UserDefaultsRepository.url.value != "" && UserDefaultsRepository.downloadTreatments.value {
-                WebLoadNSTreatments()
-            }
-            startTreatmentsTimer()
+        if IsNightscoutEnabled() && UserDefaultsRepository.downloadTreatments.value {
+            WebLoadNSTreatments()
+        }
+        startTreatmentsTimer()
     }
     
     // Profile Timer
@@ -222,14 +218,13 @@ extension MainViewController {
     }
     
     @objc func profileTimerDidEnd(_ timer:Timer) {
-        
         // reset timer to 1 minute if settings aren't entered
-        if UserDefaultsRepository.url.value == "" {
+        if !IsNightscoutEnabled() {
             startProfileTimer(time: 60)
             return
         }
         
-        if !isStaleData() && UserDefaultsRepository.url.value != "" {
+        if !isStaleData() && IsNightscoutEnabled() {
             webLoadNSProfile()
             startProfileTimer()
         }
