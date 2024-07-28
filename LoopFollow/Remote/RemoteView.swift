@@ -16,7 +16,7 @@ struct RemoteView: View {
     @ObservedObject var tempTarget = Observable.shared.tempTarget
     @ObservedObject var statusMessage = Observable.shared.statusMessage
 
-    @State private var newTarget: Double = 0
+//    @State private var newTarget: Double = 0
     @State private var newHKTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0.0)
     @State private var duration: Double = 0
     @State private var intDuration: Int = 0
@@ -61,23 +61,23 @@ struct RemoteView: View {
                             HStack {
                                 Text("Target")
                                 Spacer()
-                                TextFieldWithToolBar(text: $newTarget, placeholder: "0", numberFormatter: glucoseFormatter)
+                                TextFieldWithToolBar(quantity: $newHKTarget, placeholder: "0", unit: UserDefaultsRepository.getPreferredUnit())
                                 Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                             }
-                            HStack {
+/*                            HStack {
                                 Text("Duration")
                                 Spacer()
                                 TextFieldWithToolBar(text: $duration, placeholder: "0", numberFormatter: formatter)
                                 Text("minutes").foregroundColor(.secondary)
-                            }
+                            }*/
                             HStack {
                                 Button {
-                                    newHKTarget = HKQuantity(unit: UserDefaultsRepository.getPreferredUnit(), doubleValue: newTarget)
+                                    //newHKTarget = HKQuantity(unit: UserDefaultsRepository.getPreferredUnit(), doubleValue: newTarget)
                                     intDuration = Int(duration)
                                     showConfirmation = true
                                 }
                             label: { Text("Enact") }
-                                    .disabled(newTarget == 0 || duration == 0)
+                                    //.disabled(duration == 0)//newTarget == 0 || 
                                     .buttonStyle(BorderlessButtonStyle())
                                     .font(.callout)
                                     .controlSize(.mini)

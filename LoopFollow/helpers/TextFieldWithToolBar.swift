@@ -8,9 +8,10 @@
 
 import SwiftUI
 import UIKit
+import HealthKit
 
 public struct TextFieldWithToolBar: UIViewRepresentable {
-    @Binding var text: Double
+    @Binding var quantity: HKQuantity
     var placeholder: String
     var textColor: UIColor
     var textAlignment: NSTextAlignment
@@ -21,11 +22,11 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
     var maxLength: Int?
     var isDismissible: Bool
     var textFieldDidBeginEditing: (() -> Void)?
-    var numberFormatter: NumberFormatter
+    var unit: HKUnit
     var allowDecimalSeparator: Bool
 
     public init(
-        text: Binding<Double>,
+        quantity: Binding<HKQuantity>,
         placeholder: String,
         textColor: UIColor = .label,
         textAlignment: NSTextAlignment = .right,
@@ -36,10 +37,10 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         maxLength: Int? = nil,
         isDismissible: Bool = true,
         textFieldDidBeginEditing: (() -> Void)? = nil,
-        numberFormatter: NumberFormatter,
+        unit: HKUnit,
         allowDecimalSeparator: Bool = true
     ) {
-        _text = text
+        _quantity = quantity
         self.placeholder = placeholder
         self.textColor = textColor
         self.textAlignment = textAlignment
@@ -50,8 +51,7 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         self.maxLength = maxLength
         self.isDismissible = isDismissible
         self.textFieldDidBeginEditing = textFieldDidBeginEditing
-        self.numberFormatter = numberFormatter
-        self.numberFormatter.numberStyle = .decimal
+        self.unit = unit
         self.allowDecimalSeparator = allowDecimalSeparator
     }
 
@@ -60,12 +60,9 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         context.coordinator.textField = textField
         textField.inputAccessoryView = isDismissible ? makeDoneToolbar(for: textField, context: context) : nil
         textField.addTarget(context.coordinator, action: #selector(Coordinator.editingDidBegin), for: .editingDidBegin)
+        textField.addTarget(context.coordinator, action: #selector(Coordinator.editingDidEnd), for: .editingDidEnd)
         textField.delegate = context.coordinator
-        if text == 0 { /// show no value initially, i.e. empty String
-            textField.text = ""
-        } else {
-            textField.text = numberFormatter.string(for: text)
-        }
+        textField.text = quantity.doubleValue(for: unit) == 0 ? "" : context.coordinator.format(quantity: quantity, for: unit)
         textField.placeholder = placeholder
         return textField
     }
@@ -92,8 +89,8 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
     }
 
     public func updateUIView(_ textField: UITextField, context: Context) {
-        if text != 0 {
-            let newText = numberFormatter.string(for: text) ?? ""
+        if !context.coordinator.isEditing {
+            let newText = quantity.doubleValue(for: unit) == 0 ? "" : context.coordinator.format(quantity: quantity, for: unit)
             if textField.text != newText {
                 textField.text = newText
             }
@@ -115,80 +112,102 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
     }
 
     public func makeCoordinator() -> Coordinator {
-        Coordinator(self, maxLength: maxLength)
+        Coordinator(self, maxLength: maxLength, unit: unit)
     }
 
-    public final class Coordinator: NSObject {
+    public final class Coordinator: NSObject, UITextFieldDelegate {
         var parent: TextFieldWithToolBar
         var textField: UITextField?
         let maxLength: Int?
         var didBecomeFirstResponder = false
-        let decimalFormatter: NumberFormatter
+        var isEditing = false
+        var unit: HKUnit
 
-        init(_ parent: TextFieldWithToolBar, maxLength: Int?) {
+        init(_ parent: TextFieldWithToolBar, maxLength: Int?, unit: HKUnit) {
             self.parent = parent
             self.maxLength = maxLength
-            decimalFormatter = NumberFormatter()
-            decimalFormatter.locale = Locale.current
-            decimalFormatter.numberStyle = .decimal
+            self.unit = unit
         }
 
         @objc fileprivate func clearText() {
-            parent.text = 0
-            textField?.text = ""
+            DispatchQueue.main.async {
+                self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: 0)
+                self.textField?.text = ""
+            }
         }
 
         @objc fileprivate func editingDidBegin(_ textField: UITextField) {
+            isEditing = true
             DispatchQueue.main.async {
+                if self.parent.quantity.doubleValue(for: self.unit) == 0 {
+                    textField.text = ""
+                }
                 textField.moveCursorToEnd()
             }
         }
-    }
-}
 
-extension TextFieldWithToolBar.Coordinator: UITextFieldDelegate {
-    public func textField(
-        _ textField: UITextField,
-        shouldChangeCharactersIn range: NSRange,
-        replacementString string: String
-    ) -> Bool {
-        // Check if the input is a number or the decimal separator
-        let isNumber = CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: string))
-        let isDecimalSeparator = (string == decimalFormatter.decimalSeparator && textField.text?.contains(string) == false)
-
-        // Only proceed if the input is a valid number or decimal separator
-        if isNumber || isDecimalSeparator && parent.allowDecimalSeparator,
-           let currentText = textField.text as NSString?
-        {
-            // Get the proposed new text
-            let proposedTextOriginal = currentText.replacingCharacters(in: range, with: string)
-
-            // Remove thousand separator
-            let proposedText = proposedTextOriginal.replacingOccurrences(of: decimalFormatter.groupingSeparator, with: "")
-
-            // Try to convert proposed text to number
-            let number = parent.numberFormatter.number(from: proposedText) ?? decimalFormatter.number(from: proposedText)
-
-            // Update the binding value if conversion is successful
-            if let number = number {
-                let lastCharIndex = proposedText.index(before: proposedText.endIndex)
-                let hasDecimalSeparator = proposedText.contains(decimalFormatter.decimalSeparator)
-                let hasTrailingZeros = (hasDecimalSeparator && proposedText[lastCharIndex] == "0") || isDecimalSeparator
-                if !hasTrailingZeros
-                {
-                    parent.text = number.doubleValue
+        @objc fileprivate func editingDidEnd(_ textField: UITextField) {
+            isEditing = false
+            DispatchQueue.main.async {
+                let decimalSeparator = Locale.current.decimalSeparator ?? "."
+                let text = textField.text?.replacingOccurrences(of: decimalSeparator, with: ".") ?? ""
+                if let number = Double(text) {
+                    self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: number)
+                } else {
+                    self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: 0)
                 }
-            } else {
-                parent.text = 0
+                textField.text = self.format(quantity: self.parent.quantity, for: self.unit)
             }
         }
 
-        // Allow the change if it's a valid number or decimal separator
-        return isNumber || isDecimalSeparator && parent.allowDecimalSeparator
-    }
+        func format(quantity: HKQuantity, for unit: HKUnit) -> String {
+            let value = quantity.doubleValue(for: unit)
+            let formatter = NumberFormatter()
+            formatter.minimumFractionDigits = unit.preferredFractionDigits
+            formatter.maximumFractionDigits = unit.preferredFractionDigits
+            formatter.numberStyle = .decimal
+            return formatter.string(from: NSNumber(value: value)) ?? ""
+        }
 
-    public func textFieldDidBeginEditing(_: UITextField) {
-        parent.textFieldDidBeginEditing?()
+        public func textField(
+            _ textField: UITextField,
+            shouldChangeCharactersIn range: NSRange,
+            replacementString string: String
+        ) -> Bool {
+            // Check if the input is a number or the decimal separator
+            let decimalSeparator = Locale.current.decimalSeparator ?? "."
+            let isNumber = CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: string))
+            let isDecimalSeparator = (string == decimalSeparator && textField.text?.contains(decimalSeparator) == false)
+
+            // Only proceed if the input is a valid number or decimal separator
+            if isNumber || (isDecimalSeparator && parent.allowDecimalSeparator),
+               let currentText = textField.text as NSString?
+            {
+                // Get the proposed new text
+                let proposedTextOriginal = currentText.replacingCharacters(in: range, with: string)
+
+                // Remove thousand separator
+                let proposedText = proposedTextOriginal.replacingOccurrences(of: ",", with: "")
+
+                // Try to convert proposed text to number
+                if let number = Double(proposedText.replacingOccurrences(of: decimalSeparator, with: ".")) {
+                    DispatchQueue.main.async {
+                        self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: number)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: 0)
+                    }
+                }
+            }
+
+            // Allow the change if it's a valid number or decimal separator
+            return isNumber || (isDecimalSeparator && parent.allowDecimalSeparator)
+        }
+
+        public func textFieldDidBeginEditing(_: UITextField) {
+            parent.textFieldDidBeginEditing?()
+        }
     }
 }
 
@@ -203,130 +222,5 @@ extension UITextField {
 extension UIApplication {
     func endEditing() {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-}
-
-public struct TextFieldWithToolBarString: UIViewRepresentable {
-    @Binding var text: String
-    var placeholder: String
-    var textAlignment: NSTextAlignment = .right
-    var keyboardType: UIKeyboardType = .default
-    var autocapitalizationType: UITextAutocapitalizationType = .none
-    var autocorrectionType: UITextAutocorrectionType = .no
-    var shouldBecomeFirstResponder: Bool = false
-    var maxLength: Int? = nil
-    var isDismissible: Bool = true
-
-    public func makeUIView(context: Context) -> UITextField {
-        let textField = UITextField()
-        context.coordinator.textField = textField
-        textField.inputAccessoryView = isDismissible ? makeDoneToolbar(for: textField, context: context) : nil
-        textField.addTarget(context.coordinator, action: #selector(Coordinator.editingDidBegin), for: .editingDidBegin)
-        textField.delegate = context.coordinator
-        textField.text = text
-        textField.placeholder = placeholder
-        textField.textAlignment = textAlignment
-        textField.keyboardType = keyboardType
-        textField.autocapitalizationType = autocapitalizationType
-        textField.autocorrectionType = autocorrectionType
-        textField.adjustsFontSizeToFitWidth = true
-        return textField
-    }
-
-    private func makeDoneToolbar(for textField: UITextField, context: Context) -> UIToolbar {
-        let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 50))
-        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let doneButton = UIBarButtonItem(
-            image: UIImage(systemName: "keyboard.chevron.compact.down"),
-            style: .done,
-            target: textField,
-            action: #selector(UITextField.resignFirstResponder)
-        )
-        let clearButton = UIBarButtonItem(
-            image: UIImage(systemName: "trash"),
-            style: .plain,
-            target: context.coordinator,
-            action: #selector(Coordinator.clearText)
-        )
-
-        toolbar.items = [clearButton, flexibleSpace, doneButton]
-        toolbar.sizeToFit()
-        return toolbar
-    }
-
-    public func updateUIView(_ textField: UITextField, context: Context) {
-        if textField.text != text {
-            textField.text = text
-        }
-
-        textField.textAlignment = textAlignment
-        textField.keyboardType = keyboardType
-        textField.autocapitalizationType = autocapitalizationType
-        textField.autocorrectionType = autocorrectionType
-
-        if shouldBecomeFirstResponder, !context.coordinator.didBecomeFirstResponder {
-            if textField.window != nil, textField.becomeFirstResponder() {
-                context.coordinator.didBecomeFirstResponder = true
-            }
-        } else if !shouldBecomeFirstResponder, context.coordinator.didBecomeFirstResponder {
-            context.coordinator.didBecomeFirstResponder = false
-        }
-    }
-
-    public func makeCoordinator() -> Coordinator {
-        Coordinator(self, maxLength: maxLength)
-    }
-
-    public final class Coordinator: NSObject {
-        var parent: TextFieldWithToolBarString
-        var textField: UITextField?
-        let maxLength: Int?
-        var didBecomeFirstResponder = false
-
-        init(_ parent: TextFieldWithToolBarString, maxLength: Int?) {
-            self.parent = parent
-            self.maxLength = maxLength
-        }
-
-        @objc fileprivate func clearText() {
-            parent.text = ""
-            textField?.text = ""
-        }
-
-        @objc fileprivate func editingDidBegin(_ textField: UITextField) {
-            DispatchQueue.main.async {
-                textField.moveCursorToEnd()
-            }
-        }
-    }
-}
-
-extension TextFieldWithToolBarString.Coordinator: UITextFieldDelegate {
-    public func textField(
-        _ textField: UITextField,
-        shouldChangeCharactersIn range: NSRange,
-        replacementString string: String
-    ) -> Bool {
-        guard let currentText = textField.text as NSString? else {
-            return false
-        }
-
-        // Calculate the new text length
-        let newLength = currentText.length + string.count - range.length
-
-        // If there's a maxLength, ensure the new length is within the limit
-        if let maxLength = parent.maxLength, newLength > maxLength {
-            return false
-        }
-
-        // Attempt to replace characters in range with the replacement string
-        let newText = currentText.replacingCharacters(in: range, with: string)
-
-        // Update the binding text state
-        DispatchQueue.main.async {
-            self.parent.text = newText
-        }
-
-        return true
     }
 }
