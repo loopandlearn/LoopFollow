@@ -16,16 +16,14 @@ struct RemoteView: View {
     @ObservedObject var tempTarget = Observable.shared.tempTarget
     @ObservedObject var statusMessage = Observable.shared.statusMessage
 
-//    @State private var newTarget: Double = 0
     @State private var newHKTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0.0)
-    @State private var duration: Double = 0
-    @State private var intDuration: Int = 0
+    @State private var duration = HKQuantity(unit: .minute(), doubleValue: 0.0)
     @State private var showConfirmation: Bool = false
     @State private var showCheckmark: Bool = false
 
     var onRefreshStatus: () -> Void
     var onCancelExistingTarget: () -> Void
-    var sendTempTarget: (HKQuantity, Int) -> Void
+    var sendTempTarget: (HKQuantity, HKQuantity) -> Void
 
     var body: some View {
         NavigationView {
@@ -64,20 +62,18 @@ struct RemoteView: View {
                                 TextFieldWithToolBar(quantity: $newHKTarget, placeholder: "0", unit: UserDefaultsRepository.getPreferredUnit())
                                 Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                             }
-/*                            HStack {
+                            HStack {
                                 Text("Duration")
                                 Spacer()
-                                TextFieldWithToolBar(text: $duration, placeholder: "0", numberFormatter: formatter)
+                                TextFieldWithToolBar(quantity: $duration, placeholder: "0", unit: HKUnit.minute())
                                 Text("minutes").foregroundColor(.secondary)
-                            }*/
+                            }
                             HStack {
                                 Button {
-                                    //newHKTarget = HKQuantity(unit: UserDefaultsRepository.getPreferredUnit(), doubleValue: newTarget)
-                                    intDuration = Int(duration)
                                     showConfirmation = true
                                 }
                             label: { Text("Enact") }
-                                    //.disabled(duration == 0)//newTarget == 0 || 
+                                    //.disabled(duration == 0)//newTarget == 0 ||
                                     .buttonStyle(BorderlessButtonStyle())
                                     .font(.callout)
                                     .controlSize(.mini)
@@ -87,9 +83,9 @@ struct RemoteView: View {
                         .alert(isPresented: $showConfirmation) {
                             Alert(
                                 title: Text("Confirm Command"),
-                                message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)\nDuration: \(intDuration) minutes"),
+                                message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
                                 primaryButton: .default(Text("Confirm"), action: {
-                                    sendTempTarget(newHKTarget , intDuration)
+                                    sendTempTarget(newHKTarget , duration)
                                 }),
                                 secondaryButton: .cancel()
                             )
