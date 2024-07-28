@@ -73,7 +73,7 @@ struct RemoteView: View {
                                     showConfirmation = true
                                 }
                             label: { Text("Enact") }
-                                    //.disabled(duration == 0)//newTarget == 0 ||
+                                    .disabled(isButtonDisabled)
                                     .buttonStyle(BorderlessButtonStyle())
                                     .font(.callout)
                                     .controlSize(.mini)
@@ -109,24 +109,10 @@ struct RemoteView: View {
         }
     }
 
-    private var formatter: NumberFormatter {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 0
-        return formatter
+    private var isButtonDisabled: Bool {
+        return newHKTarget.doubleValue(for: UserDefaultsRepository.getPreferredUnit()) == 0 ||
+        duration.doubleValue(for: HKUnit.minute()) == 0
     }
-
-    private var glucoseFormatter: NumberFormatter {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 0
-        if UserDefaultsRepository.getPreferredUnit() == .millimolesPerLiter {
-            formatter.maximumFractionDigits = 1
-        }
-        formatter.roundingMode = .halfUp
-        return formatter
-    }
-
 }
 
 struct ErrorMessageView: View {
