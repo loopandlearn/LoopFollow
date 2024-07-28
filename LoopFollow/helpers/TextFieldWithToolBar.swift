@@ -12,10 +12,8 @@ import HealthKit
 
 public struct TextFieldWithToolBar: UIViewRepresentable {
     @Binding var quantity: HKQuantity
-    var placeholder: String
     var textColor: UIColor
     var textAlignment: NSTextAlignment
-    var keyboardType: UIKeyboardType
     var autocapitalizationType: UITextAutocapitalizationType
     var autocorrectionType: UITextAutocorrectionType
     var shouldBecomeFirstResponder: Bool
@@ -27,10 +25,8 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
 
     public init(
         quantity: Binding<HKQuantity>,
-        placeholder: String,
         textColor: UIColor = .label,
         textAlignment: NSTextAlignment = .right,
-        keyboardType: UIKeyboardType = .decimalPad,
         autocapitalizationType: UITextAutocapitalizationType = .none,
         autocorrectionType: UITextAutocorrectionType = .no,
         shouldBecomeFirstResponder: Bool = false,
@@ -41,10 +37,8 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         allowDecimalSeparator: Bool = true
     ) {
         _quantity = quantity
-        self.placeholder = placeholder
         self.textColor = textColor
         self.textAlignment = textAlignment
-        self.keyboardType = keyboardType
         self.autocapitalizationType = autocapitalizationType
         self.autocorrectionType = autocorrectionType
         self.shouldBecomeFirstResponder = shouldBecomeFirstResponder
@@ -55,6 +49,14 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         self.allowDecimalSeparator = allowDecimalSeparator
     }
 
+    private func formattedPlaceholder(for unit: HKUnit) -> String {
+        let formatter = NumberFormatter()
+        formatter.minimumFractionDigits = unit.preferredFractionDigits
+        formatter.maximumFractionDigits = unit.preferredFractionDigits
+        formatter.numberStyle = .decimal
+        return formatter.string(from: NSNumber(value: 0)) ?? "0"
+    }
+
     public func makeUIView(context: Context) -> UITextField {
         let textField = UITextField()
         context.coordinator.textField = textField
@@ -63,7 +65,8 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         textField.addTarget(context.coordinator, action: #selector(Coordinator.editingDidEnd), for: .editingDidEnd)
         textField.delegate = context.coordinator
         textField.text = quantity.doubleValue(for: unit) == 0 ? "" : context.coordinator.format(quantity: quantity, for: unit)
-        textField.placeholder = placeholder
+        textField.placeholder = formattedPlaceholder(for: unit)
+        textField.keyboardType = unit.preferredFractionDigits == 0 ? .numberPad : .decimalPad
         return textField
     }
 
@@ -98,7 +101,7 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
 
         textField.textColor = textColor
         textField.textAlignment = textAlignment
-        textField.keyboardType = keyboardType
+        textField.keyboardType = unit.preferredFractionDigits == 0 ? .numberPad : .decimalPad
         textField.autocapitalizationType = autocapitalizationType
         textField.autocorrectionType = autocorrectionType
 
@@ -180,7 +183,7 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
             let isDecimalSeparator = (string == decimalSeparator && textField.text?.contains(decimalSeparator) == false)
 
             // Only proceed if the input is a valid number or decimal separator
-            if isNumber || (isDecimalSeparator && parent.allowDecimalSeparator),
+            if isNumber || (isDecimalSeparator && parent.allowDecimalSeparator && unit.preferredFractionDigits > 0),
                let currentText = textField.text as NSString?
             {
                 // Get the proposed new text
@@ -202,7 +205,7 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
             }
 
             // Allow the change if it's a valid number or decimal separator
-            return isNumber || (isDecimalSeparator && parent.allowDecimalSeparator)
+            return isNumber || (isDecimalSeparator && parent.allowDecimalSeparator && unit.preferredFractionDigits > 0)
         }
 
         public func textFieldDidBeginEditing(_: UITextField) {
