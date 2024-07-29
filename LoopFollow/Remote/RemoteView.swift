@@ -19,11 +19,12 @@ struct RemoteView: View {
     @State private var newHKTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0.0)
     @State private var duration = HKQuantity(unit: .minute(), doubleValue: 0.0)
     @State private var showConfirmation: Bool = false
+    @State private var showCancelConfirmation: Bool = false
     @State private var showCheckmark: Bool = false
     @State private var isLoading: Bool = false
 
     var onRefreshStatus: () -> Void
-    var onCancelExistingTarget: () -> Void
+    var onCancelExistingTarget: (@escaping (Bool) -> Void) -> Void
     var sendTempTarget: (HKQuantity, HKQuantity, @escaping (Bool) -> Void) -> Void
 
     var body: some View {
@@ -46,16 +47,23 @@ struct RemoteView: View {
                         if let tempTargetValue = tempTarget.value {
                             Section(header: Text("Existing Temp Target")) {
                                 HStack {
-                                    Text("Current Target: \(Localizer.formatQuantity(tempTargetValue)) mg/dL")
+                                    Text("Current Target")
                                     Spacer()
-                                    Button(action: onCancelExistingTarget) {
-                                        Text("Cancel")
-                                            .foregroundColor(.red)
-                                    }
+                                    Text(Localizer.formatQuantity(tempTargetValue))
+                                    Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
+                                }
+                                Button { showCancelConfirmation = true }
+                            label: {
+                                HStack {
+                                    Text("Cancel Temp Target")
+                                    Spacer()
+                                    Image(systemName: "xmark.app")
+                                        .font(.title)
                                 }
                             }
+                            .tint(.red)
+                            }
                         }
-
                         Section(header: Text("Temporary Target")) {
                             HStack {
                                 Text("Target")
@@ -95,7 +103,6 @@ struct RemoteView: View {
                     .navigationBarItems(trailing: Button(action: onRefreshStatus) {
                         Image(systemName: "arrow.clockwise")
                     })
-                    .padding()
                     .disabled(isLoading) // Disable the form when loading
 
                     if isLoading {
@@ -104,7 +111,6 @@ struct RemoteView: View {
                     }
                 }
             }
-            .padding()
             .navigationTitle("Remote")
             .navigationBarTitleDisplayMode(.inline)
             .alert(isPresented: .constant(!statusMessage.value.isEmpty)) {
@@ -114,6 +120,16 @@ struct RemoteView: View {
                     dismissButton: .default(Text("OK"), action: {
                         statusMessage.value = ""
                     })
+                )
+            }
+            .alert(isPresented: $showCancelConfirmation) {
+                Alert(
+                    title: Text("Confirm Cancellation"),
+                    message: Text("Are you sure you want to cancel the existing temp target?"),
+                    primaryButton: .default(Text("Confirm"), action: {
+                        cancelTempTarget()
+                    }),
+                    secondaryButton: .cancel()
                 )
             }
         }
@@ -132,6 +148,19 @@ struct RemoteView: View {
                 statusMessage.value = "Target successfully enacted."
             } else {
                 statusMessage.value = "Failed to enact target."
+            }
+        }
+    }
+
+    private func cancelTempTarget() {
+        isLoading = true
+        let zeroDuration = HKQuantity(unit: .minute(), doubleValue: 0.0)
+        onCancelExistingTarget() { success in
+            isLoading = false
+            if success {
+                statusMessage.value = "Temp target successfully cancelled."
+            } else {
+                statusMessage.value = "Failed to cancel temp target."
             }
         }
     }

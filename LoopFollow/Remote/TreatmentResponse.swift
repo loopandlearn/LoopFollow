@@ -31,3 +31,23 @@ struct TreatmentResponse: Decodable {
         case id = "_id"
     }
 }
+
+struct TreatmentCancelResponse: Decodable {
+    let enteredBy: String
+    let eventType: String
+    let reason: String
+    let duration: Int
+    let createdAt: String
+    let utcOffset: Int
+    let id: String
+
+    enum CodingKeys: String, CodingKey {
+        case enteredBy = "enteredBy"
+        case eventType = "eventType"
+        case reason = "reason"
+        case duration = "duration"
+        case createdAt = "created_at"
+        case utcOffset = "utcOffset"
+        case id = "_id"
+    }
+}

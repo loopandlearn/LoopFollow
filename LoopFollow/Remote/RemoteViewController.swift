@@ -51,8 +51,31 @@ class RemoteViewController: UIViewController {
         // Refresh the status to check current temp targets and other relevant info
     }
 
-    private func cancelExistingTarget() {
-        // Cancel the existing temp target
+    private func cancelExistingTarget(completion: @escaping (Bool) -> Void) {
+        let tempTargetBody: [String: Any] = [
+            "enteredBy": "LoopFollow",
+            "eventType": "Temporary Target",
+            "reason": "Manual",
+            "duration": 0,
+            "created_at": ISO8601DateFormatter().string(from: Date())
+        ]
+
+        NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentCancelResponse], Error>) in
+            switch result {
+            case .success(let response):
+                print("Success: \(response)")
+                DispatchQueue.main.async {
+                    self.statusMessage.set("Temp target successfully cancelled.")
+                    completion(true)
+                }
+            case .failure(let error):
+                print("Error: \(error)")
+                DispatchQueue.main.async {
+                    self.statusMessage.set("Failed to cancel temp target: \(error.localizedDescription)")
+                    completion(false)
+                }
+            }
+        }
     }
 
     private func sendTempTarget(newTarget: HKQuantity, duration: HKQuantity, completion: @escaping (Bool) -> Void) {
