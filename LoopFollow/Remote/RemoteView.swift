@@ -142,13 +142,16 @@ struct RemoteView: View {
 
     private func enactTempTarget() {
         isLoading = true
+        print("Enacting Temp Target with target: \(newHKTarget) and duration: \(duration)")
         sendTempTarget(newHKTarget, duration) { success in
             DispatchQueue.main.async {
-                isLoading = false
+                self.isLoading = false
                 if success {
-                    statusMessage.value = "Target successfully enacted."
+                    print("Target successfully enacted.")
+                    self.statusMessage.value = "Target successfully enacted."
                 } else {
-                    statusMessage.value = "Failed to enact target."
+                    print("Failed to enact target.")
+                    self.statusMessage.value = "Failed to enact target."
                 }
             }
         }
@@ -156,13 +159,16 @@ struct RemoteView: View {
 
     private func cancelTempTarget() {
         isLoading = true
+        print("Cancelling Temp Target...")
         onCancelExistingTarget() { success in
             DispatchQueue.main.async {
-                isLoading = false
+                self.isLoading = false
                 if success {
-                    statusMessage.value = "Temp target successfully cancelled."
+                    print("Temp target successfully cancelled.")
+                    self.statusMessage.value = "Temp target successfully cancelled."
                 } else {
-                    statusMessage.value = "Failed to cancel temp target."
+                    print("Failed to cancel temp target.")
+                    self.statusMessage.value = "Failed to cancel temp target."
                 }
             }
         }
