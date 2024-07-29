@@ -20,10 +20,11 @@ struct RemoteView: View {
     @State private var duration = HKQuantity(unit: .minute(), doubleValue: 0.0)
     @State private var showConfirmation: Bool = false
     @State private var showCheckmark: Bool = false
+    @State private var isLoading: Bool = false
 
     var onRefreshStatus: () -> Void
     var onCancelExistingTarget: () -> Void
-    var sendTempTarget: (HKQuantity, HKQuantity) -> Void
+    var sendTempTarget: (HKQuantity, HKQuantity, @escaping (Bool) -> Void) -> Void
 
     var body: some View {
         NavigationView {
@@ -71,21 +72,21 @@ struct RemoteView: View {
                             HStack {
                                 Button {
                                     showConfirmation = true
+                                } label: {
+                                    Text("Enact")
                                 }
-                            label: { Text("Enact") }
-                                    .disabled(isButtonDisabled)
-                                    .buttonStyle(BorderlessButtonStyle())
-                                    .font(.callout)
-                                    .controlSize(.mini)
+                                .disabled(isButtonDisabled)
+                                .buttonStyle(BorderlessButtonStyle())
+                                .font(.callout)
+                                .controlSize(.mini)
                             }
                         }
-
                         .alert(isPresented: $showConfirmation) {
                             Alert(
                                 title: Text("Confirm Command"),
                                 message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
                                 primaryButton: .default(Text("Confirm"), action: {
-                                    sendTempTarget(newHKTarget , duration)
+                                    enactTempTarget()
                                 }),
                                 secondaryButton: .cancel()
                             )
@@ -95,10 +96,10 @@ struct RemoteView: View {
                         Image(systemName: "arrow.clockwise")
                     })
                     .padding()
+                    .disabled(isLoading) // Disable the form when loading
 
-                    if !statusMessage.value.isEmpty {
-                        Text(statusMessage.value)
-                            .foregroundColor(.green)
+                    if isLoading {
+                        ProgressView("Please wait...")
                             .padding()
                     }
                 }
@@ -106,12 +107,33 @@ struct RemoteView: View {
             .padding()
             .navigationTitle("Remote")
             .navigationBarTitleDisplayMode(.inline)
+            .alert(isPresented: .constant(!statusMessage.value.isEmpty)) {
+                Alert(
+                    title: Text("Status"),
+                    message: Text(statusMessage.value),
+                    dismissButton: .default(Text("OK"), action: {
+                        statusMessage.value = ""
+                    })
+                )
+            }
         }
     }
 
     private var isButtonDisabled: Bool {
         return newHKTarget.doubleValue(for: UserDefaultsRepository.getPreferredUnit()) == 0 ||
         duration.doubleValue(for: HKUnit.minute()) == 0
+    }
+
+    private func enactTempTarget() {
+        isLoading = true
+        sendTempTarget(newHKTarget, duration) { success in
+            isLoading = false
+            if success {
+                statusMessage.value = "Target successfully enacted."
+            } else {
+                statusMessage.value = "Failed to enact target."
+            }
+        }
     }
 }
 

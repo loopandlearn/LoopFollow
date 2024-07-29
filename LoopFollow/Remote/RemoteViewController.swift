@@ -55,7 +55,7 @@ class RemoteViewController: UIViewController {
         // Cancel the existing temp target
     }
 
-    private func sendTempTarget(newTarget: HKQuantity, duration: HKQuantity) {
+    private func sendTempTarget(newTarget: HKQuantity, duration: HKQuantity, completion: @escaping (Bool) -> Void) {
         let tempTargetBody: [String: Any] = [
             "enteredBy": "LoopFollow",
             "eventType": "Temporary Target",
@@ -72,11 +72,13 @@ class RemoteViewController: UIViewController {
                 print("Success: \(response)")
                 DispatchQueue.main.async {
                     self.statusMessage.set("Temp target sent successfully.")
+                    completion(true)
                 }
             case .failure(let error):
                 print("Error: \(error)")
                 DispatchQueue.main.async {
                     self.statusMessage.set("Failed to send temp target: \(error.localizedDescription)")
+                    completion(false)
                 }
             }
         }
