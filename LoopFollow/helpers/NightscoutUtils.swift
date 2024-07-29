@@ -36,7 +36,7 @@ class NightscoutUtils {
                 return "/api/v1/entries.json"
             case .profile:
                 return "/api/v1/profile/current.json"
-            case .deviceStatus: 
+            case .deviceStatus:
                 return "/api/v1/devicestatus.json"
             }
         }
@@ -150,25 +150,25 @@ class NightscoutUtils {
     static func verifyURLAndToken(completion: @escaping (NightscoutError?, String?, Bool) -> Void) {
         let urlUser = ObservableUserDefaults.shared.url.value
         let token = UserDefaultsRepository.token.value
-
+        
         if urlUser.isEmpty {
             completion(.emptyAddress, nil, false)
             return
         }
-
+        
         guard let _ = URL(string: urlUser), urlUser.hasPrefix("http://") || urlUser.hasPrefix("https://") else {
             completion(.invalidURL, nil, false)
             return
         }
-
+        
         guard let request = createURLRequest(url: urlUser, token: token, path: "/api/v1/status.json") else {
             completion(.invalidURL, nil, false)
             return
         }
-
+        
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             var nsWriteAuth = false
-
+            
             if let httpResponse = response as? HTTPURLResponse {
                 switch httpResponse.statusCode {
                 case 200:
@@ -178,7 +178,7 @@ class NightscoutUtils {
                                let authorized = jsonResponse["authorized"] as? [String: Any],
                                let token = authorized["token"] as? String,
                                let permissionGroups = authorized["permissionGroups"] as? [[String]] {
-
+                                
                                 if permissionGroups.contains(where: { $0.contains("*") }) {
                                     nsWriteAuth = true
                                 } else if permissionGroups.contains(where: { $0.contains("api:treatments:create") }) {
@@ -213,7 +213,7 @@ class NightscoutUtils {
         }
         task.resume()
     }
-
+    
     static func parseDate(_ dateString: String) -> Date? {
         let dateFormatterWithMilliseconds = DateFormatter()
         dateFormatterWithMilliseconds.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
@@ -233,64 +233,117 @@ class NightscoutUtils {
         
         return nil
     }
-
+    
+    static func retrieveJWTToken(completion: @escaping (NightscoutError?, String?) -> Void) {
+        let urlUser = ObservableUserDefaults.shared.url.value
+        let token = UserDefaultsRepository.token.value
+        
+        if urlUser.isEmpty {
+            completion(.emptyAddress, nil)
+            return
+        }
+        
+        guard let _ = URL(string: urlUser), urlUser.hasPrefix("http://") || urlUser.hasPrefix("https://") else {
+            completion(.invalidURL, nil)
+            return
+        }
+        
+        guard let request = createURLRequest(url: urlUser, token: token, path: "/api/v1/status.json") else {
+            completion(.invalidURL, nil)
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let httpResponse = response as? HTTPURLResponse {
+                switch httpResponse.statusCode {
+                case 200:
+                    if let data = data {
+                        do {
+                            if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                               let authorized = jsonResponse["authorized"] as? [String: Any],
+                               let jwtToken = authorized["token"] as? String {
+                                completion(nil, jwtToken)
+                            } else {
+                                completion(.invalidToken, nil)
+                            }
+                        } catch {
+                            completion(.invalidToken, nil)
+                        }
+                    } else {
+                        completion(.invalidToken, nil)
+                    }
+                case 401:
+                    if token.isEmpty {
+                        completion(.tokenRequired, nil)
+                    } else {
+                        completion(.invalidToken, nil)
+                    }
+                default:
+                    completion(.unknown, nil)
+                }
+            } else {
+                if let _ = error {
+                    completion(.siteNotFound, nil)
+                } else {
+                    completion(.networkError, nil)
+                }
+            }
+            
+        }
+        task.resume()
+    }
+    
     static func executePostRequest<T: Decodable>(eventType: EventType, body: [String: Any], completion: @escaping (Result<T, Error>) -> Void) {
-        verifyURLAndToken { error, jwtToken, nsWriteAuth in
+        retrieveJWTToken { error, jwtToken in
             if let error = error {
-                DispatchQueue.main.async {
-                    completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Token verification failed: \(error)"])))
-                }
+                completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Token retrieval failed: \(error)"])))
                 return
             }
-
+            
             guard let jwtToken = jwtToken else {
-                DispatchQueue.main.async {
-                    completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "No JWT token received"])))
-                }
+                completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "No JWT token received"])))
                 return
             }
-
+            
             let baseURL = ObservableUserDefaults.shared.url.value
-
+            
             guard let url = URL(string: "\(baseURL)\(eventType.endpoint)") else {
-                DispatchQueue.main.async {
-                    completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
-                }
+                completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
                 return
             }
-
+            
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
-
+            
             do {
                 request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
             } catch {
-                DispatchQueue.main.async {
-                    completion(.failure(NSError(domain: "NightscoutUtils", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid body parameters"])))
-                }
+                completion(.failure(NSError(domain: "NightscoutUtils", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid body parameters"])))
                 return
             }
-
+            
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 guard let data = data, error == nil else {
-                    DispatchQueue.main.async {
-                        completion(.failure(error!))
-                    }
+                    completion(.failure(error!))
                     return
                 }
                 print("Network response received on thread: \(Thread.current)")
                 let decoder = JSONDecoder()
                 do {
                     let decodedObject = try decoder.decode(T.self, from: data)
-                    DispatchQueue.main.async {
-                        completion(.success(decodedObject))
-                    }
-                } catch {
-                    DispatchQueue.main.async {
+                    completion(.success(decodedObject))
+                } catch DecodingError.typeMismatch(let type, let context) {
+                    print("Type mismatch error: \(type), \(context.debugDescription)")
+                    do {
+                        let fallbackDecodedObject = try JSONSerialization.jsonObject(with: data, options: [])
+                        print("Fallback JSON decoding success: \(fallbackDecodedObject)")
+                    } catch {
                         completion(.failure(error))
                     }
+                } catch {
+                    completion(.failure(error))
                 }
             }
             task.resume()
