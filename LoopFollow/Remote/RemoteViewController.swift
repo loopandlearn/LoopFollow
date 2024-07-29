@@ -36,22 +36,20 @@ class RemoteViewController: UIViewController {
     }
 
     private func cancelExistingTarget(completion: @escaping (Bool) -> Void) {
-        let tempTargetBody: [String: Any] = [
-            "enteredBy": "LoopFollow",
-            "eventType": "Temporary Target",
-            "reason": "Manual",
-            "duration": 0,
-            "created_at": ISO8601DateFormatter().string(from: Date())
-        ]
+        Task {
+            let tempTargetBody: [String: Any] = [
+                "enteredBy": "LoopFollow",
+                "eventType": "Temporary Target",
+                "reason": "Manual",
+                "duration": 0,
+                "created_at": ISO8601DateFormatter().string(from: Date())
+            ]
 
-        print("Executing cancelExistingTarget on thread: \(Thread.current), QoS: \(qos_class_self())")
-        NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentCancelResponse], Error>) in
-            print("Handling cancelExistingTarget result on thread: \(Thread.current), QoS: \(qos_class_self())")
-            switch result {
-            case .success(let response):
+            do {
+                let response: [TreatmentCancelResponse] = try await NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody)
                 print("Success: \(response)")
                 completion(true)
-            case .failure(let error):
+            } catch {
                 print("Error: \(error)")
                 completion(false)
             }
@@ -69,16 +67,12 @@ class RemoteViewController: UIViewController {
             "created_at": ISO8601DateFormatter().string(from: Date())
         ]
 
-        completion(true)
-
-        print("Executing sendTempTarget on thread: \(Thread.current), QoS: \(qos_class_self())")
-        NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentResponse], Error>) in
-            print("Handling sendTempTarget result on thread: \(Thread.current), QoS: \(qos_class_self())")
-            switch result {
-            case .success(let response):
+        Task {
+            do {
+                let response: [TreatmentResponse] = try await NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody)
                 print("Success: \(response)")
                 completion(true)
-            case .failure(let error):
+            } catch {
                 print("Error: \(error)")
                 completion(false)
             }
