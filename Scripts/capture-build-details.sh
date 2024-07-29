@@ -31,16 +31,20 @@ else
     plutil -replace com-LoopFollow-build-date -string "$formatted_date" "${info_plist_path}"
 
     # Retrieve the current branch
-    git_branch=$(git symbolic-ref --short -q HEAD)
+    git_branch=$(git symbolic-ref --short -q HEAD 2>/dev/null || echo "")
 
     # Attempt to retrieve the current tag
     git_tag=$(git describe --tags --exact-match 2>/dev/null || echo "")
 
     # Retrieve the current SHA of the latest commit
-    git_commit_sha=$(git log -1 --format="%h" --abbrev=7)
+    git_commit_sha=$(git log -1 --format="%h" --abbrev=7 2>/dev/null || echo "")
 
-    # Determine the branch or tag information
-    git_branch_or_tag="${git_branch:-${git_tag}}"
+    # Determine the branch or tag information, defaulting to "detached" if neither is available
+    if [ -z "$git_branch" ] && [ -z "$git_tag" ]; then
+        git_branch_or_tag="detached"
+    else
+        git_branch_or_tag="${git_branch:-${git_tag}}"
+    fi
 
     # Update BuildDetails.plist with the branch or tag information
     plutil -replace com-LoopFollow-branch -string "${git_branch_or_tag}" "${info_plist_path}"
