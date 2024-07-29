@@ -14,18 +14,22 @@ struct RemoteView: View {
     @ObservedObject var device = ObservableUserDefaults.shared.device
     @ObservedObject var nsWriteAuth = ObservableUserDefaults.shared.nsWriteAuth
     @ObservedObject var tempTarget = Observable.shared.tempTarget
-    @ObservedObject var statusMessage = Observable.shared.statusMessage
 
     @State private var newHKTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0.0)
     @State private var duration = HKQuantity(unit: .minute(), doubleValue: 0.0)
-    @State private var showConfirmation: Bool = false
-    @State private var showCancelConfirmation: Bool = false
-    @State private var showCheckmark: Bool = false
+    @State private var showAlert: Bool = false
+    @State private var alertType: AlertType? = nil
     @State private var isLoading: Bool = false
+    @State private var statusMessage: String? = nil
 
-    var onRefreshStatus: () -> Void
     var onCancelExistingTarget: (@escaping (Bool) -> Void) -> Void
     var sendTempTarget: (HKQuantity, HKQuantity, @escaping (Bool) -> Void) -> Void
+
+    enum AlertType {
+        case confirmCommand
+        case status
+        case confirmCancellation
+    }
 
     var body: some View {
         NavigationView {
@@ -52,16 +56,18 @@ struct RemoteView: View {
                                     Text(Localizer.formatQuantity(tempTargetValue))
                                     Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                                 }
-                                Button { showCancelConfirmation = true }
-                            label: {
-                                HStack {
-                                    Text("Cancel Temp Target")
-                                    Spacer()
-                                    Image(systemName: "xmark.app")
-                                        .font(.title)
+                                Button {
+                                    alertType = .confirmCancellation
+                                    showAlert = true
+                                } label: {
+                                    HStack {
+                                        Text("Cancel Temp Target")
+                                        Spacer()
+                                        Image(systemName: "xmark.app")
+                                            .font(.title)
+                                    }
                                 }
-                            }
-                            .tint(.red)
+                                .tint(.red)
                             }
                         }
                         Section(header: Text("Temporary Target")) {
@@ -79,7 +85,8 @@ struct RemoteView: View {
                             }
                             HStack {
                                 Button {
-                                    showConfirmation = true
+                                    alertType = .confirmCommand
+                                    showAlert = true
                                 } label: {
                                     Text("Enact")
                                 }
@@ -89,21 +96,8 @@ struct RemoteView: View {
                                 .controlSize(.mini)
                             }
                         }
-                        .alert(isPresented: $showConfirmation) {
-                            Alert(
-                                title: Text("Confirm Command"),
-                                message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
-                                primaryButton: .default(Text("Confirm"), action: {
-                                    enactTempTarget()
-                                }),
-                                secondaryButton: .cancel()
-                            )
-                        }
                     }
-                    .navigationBarItems(trailing: Button(action: onRefreshStatus) {
-                        Image(systemName: "arrow.clockwise")
-                    })
-                    .disabled(isLoading) // Disable the form when loading
+                    .disabled(isLoading)
 
                     if isLoading {
                         ProgressView("Please wait...")
@@ -113,24 +107,37 @@ struct RemoteView: View {
             }
             .navigationTitle("Remote")
             .navigationBarTitleDisplayMode(.inline)
-            .alert(isPresented: .constant(!statusMessage.value.isEmpty)) {
-                Alert(
-                    title: Text("Status"),
-                    message: Text(statusMessage.value),
-                    dismissButton: .default(Text("OK"), action: {
-                        statusMessage.value = ""
-                    })
-                )
-            }
-            .alert(isPresented: $showCancelConfirmation) {
-                Alert(
-                    title: Text("Confirm Cancellation"),
-                    message: Text("Are you sure you want to cancel the existing temp target?"),
-                    primaryButton: .default(Text("Confirm"), action: {
-                        cancelTempTarget()
-                    }),
-                    secondaryButton: .cancel()
-                )
+            .alert(isPresented: $showAlert) {
+                switch alertType {
+                case .confirmCommand:
+                    return Alert(
+                        title: Text("Confirm Command"),
+                        message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
+                        primaryButton: .default(Text("Confirm"), action: {
+                            enactTempTarget()
+                        }),
+                        secondaryButton: .cancel()
+                    )
+                case .status:
+                    return Alert(
+                        title: Text("Status"),
+                        message: Text(statusMessage ?? ""),
+                        dismissButton: .default(Text("OK"), action: {
+                            showAlert = false
+                        })
+                    )
+                case .confirmCancellation:
+                    return Alert(
+                        title: Text("Confirm Cancellation"),
+                        message: Text("Are you sure you want to cancel the existing temp target?"),
+                        primaryButton: .default(Text("Confirm"), action: {
+                            cancelTempTarget()
+                        }),
+                        secondaryButton: .cancel()
+                    )
+                case .none:
+                    return Alert(title: Text("Unknown Alert"))
+                }
             }
         }
     }
@@ -144,15 +151,17 @@ struct RemoteView: View {
         isLoading = true
         print("Enacting Temp Target with target: \(newHKTarget) and duration: \(duration)")
         sendTempTarget(newHKTarget, duration) { success in
+            self.isLoading = false
+            if success {
+                print("Target successfully enacted.")
+                self.statusMessage = "Target successfully enacted."
+            } else {
+                print("Failed to enact target.")
+                self.statusMessage = "Failed to enact target."
+            }
             DispatchQueue.main.async {
-                self.isLoading = false
-                if success {
-                    print("Target successfully enacted.")
-                    self.statusMessage.value = "Target successfully enacted."
-                } else {
-                    print("Failed to enact target.")
-                    self.statusMessage.value = "Failed to enact target."
-                }
+                self.alertType = .status
+                self.showAlert = true
             }
         }
     }
@@ -161,15 +170,17 @@ struct RemoteView: View {
         isLoading = true
         print("Cancelling Temp Target...")
         onCancelExistingTarget() { success in
+            self.isLoading = false
+            if success {
+                print("Temp target successfully cancelled.")
+                self.statusMessage = "Temp target successfully cancelled."
+            } else {
+                print("Failed to cancel temp target.")
+                self.statusMessage = "Failed to cancel temp target."
+            }
             DispatchQueue.main.async {
-                self.isLoading = false
-                if success {
-                    print("Temp target successfully cancelled.")
-                    self.statusMessage.value = "Temp target successfully cancelled."
-                } else {
-                    print("Failed to cancel temp target.")
-                    self.statusMessage.value = "Failed to cancel temp target."
-                }
+                self.alertType = .status
+                self.showAlert = true
             }
         }
     }
