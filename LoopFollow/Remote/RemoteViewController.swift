@@ -61,8 +61,10 @@ class RemoteViewController: UIViewController {
         ]
 
         DispatchQueue.global(qos: .userInitiated).async {
+            print("Executing cancelExistingTarget on thread: \(Thread.current)")
             NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentCancelResponse], Error>) in
                 DispatchQueue.main.async {
+                    print("Handling cancelExistingTarget result on thread: \(Thread.current)")
                     switch result {
                     case .success(let response):
                         print("Success: \(response)")
@@ -90,8 +92,10 @@ class RemoteViewController: UIViewController {
         ]
 
         DispatchQueue.global(qos: .userInitiated).async {
+            print("Executing sendTempTarget on thread: \(Thread.current)")
             NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentResponse], Error>) in
                 DispatchQueue.main.async {
+                    print("Handling sendTempTarget result on thread: \(Thread.current)")
                     switch result {
                     case .success(let response):
                         print("Success: \(response)")

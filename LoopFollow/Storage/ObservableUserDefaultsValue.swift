@@ -9,8 +9,6 @@
 import Foundation
 import Combine
 
-/// An observable value holder that keeps its internal data (the value) synchronized with its UserDefaults value.
-/// The value is read from UserDefaults on initialization (if exists, otherwise a default value is used) and written when the value changes.
 class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObject, UserDefaultsAnyValue {
     // user defaults key (UserDefaultsAnyValue protocol implementation)
     let key: String
@@ -24,7 +22,9 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
 
             if let validation = validation {
                 guard let validatedValue = validation(value) else {
-                    value = oldValue
+                    DispatchQueue.main.async {
+                        self.value = oldValue
+                    }
                     return
                 }
                 value = validatedValue
@@ -34,13 +34,17 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
             ObservableUserDefaultsValue.defaults.setValue(value.toAny(), forKey: key)
 
             // Execute custom closure
-            onChange?(value)
+            DispatchQueue.main.async {
+                self.onChange?(self.value)
 
-            // Notify observers
-            observers.values.forEach { $0(value) }
+                // Notify observers
+                self.observers.values.forEach { $0(self.value) }
 
-            // Notify UserDefaultsValueGroups that value has changed
-            UserDefaultsValueGroups.valueChanged(self)
+                // Notify UserDefaultsValueGroups that value has changed
+                UserDefaultsValueGroups.valueChanged(self)
+
+                print("Value for \(self.key) changed to \(self.value)")  // Logging
+            }
         }
     }
 
@@ -53,7 +57,9 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
             guard let newValue = T.fromAny(newValue) as T? else {
                 return
             }
-            self.value = newValue
+            DispatchQueue.main.async {
+                self.value = newValue
+            }
         }
     }
 

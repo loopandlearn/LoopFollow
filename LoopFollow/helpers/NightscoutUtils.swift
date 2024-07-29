@@ -280,14 +280,7 @@ class NightscoutUtils {
                     }
                     return
                 }
-                // Print the JSON string for debugging
-                /*
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    print("JSON Response: \(jsonString)")
-                } else {
-                    print("Failed to convert data to JSON string")
-                }
-                */
+                print("Network response received on thread: \(Thread.current)")
                 let decoder = JSONDecoder()
                 do {
                     let decodedObject = try decoder.decode(T.self, from: data)

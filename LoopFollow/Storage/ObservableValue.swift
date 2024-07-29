@@ -20,6 +20,7 @@ class ObservableValue<T>: ObservableObject {
 
     func set(_ newValue: T) {
         DispatchQueue.main.async {
+            print("Setting new value: \(newValue)")  // Logging
             self.value = newValue
         }
     }
