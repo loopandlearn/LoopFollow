@@ -60,19 +60,19 @@ class RemoteViewController: UIViewController {
             "created_at": ISO8601DateFormatter().string(from: Date())
         ]
 
-        NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentCancelResponse], Error>) in
-            switch result {
-            case .success(let response):
-                print("Success: \(response)")
+        DispatchQueue.global(qos: .userInitiated).async {
+            NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentCancelResponse], Error>) in
                 DispatchQueue.main.async {
-                    self.statusMessage.set("Temp target successfully cancelled.")
-                    completion(true)
-                }
-            case .failure(let error):
-                print("Error: \(error)")
-                DispatchQueue.main.async {
-                    self.statusMessage.set("Failed to cancel temp target: \(error.localizedDescription)")
-                    completion(false)
+                    switch result {
+                    case .success(let response):
+                        print("Success: \(response)")
+                        self.statusMessage.set("Temp target successfully cancelled.")
+                        completion(true)
+                    case .failure(let error):
+                        print("Error: \(error)")
+                        self.statusMessage.set("Failed to cancel temp target: \(error.localizedDescription)")
+                        completion(false)
+                    }
                 }
             }
         }
@@ -89,19 +89,19 @@ class RemoteViewController: UIViewController {
             "created_at": ISO8601DateFormatter().string(from: Date())
         ]
 
-        NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentResponse], Error>) in
-            switch result {
-            case .success(let response):
-                print("Success: \(response)")
+        DispatchQueue.global(qos: .userInitiated).async {
+            NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentResponse], Error>) in
                 DispatchQueue.main.async {
-                    self.statusMessage.set("Temp target sent successfully.")
-                    completion(true)
-                }
-            case .failure(let error):
-                print("Error: \(error)")
-                DispatchQueue.main.async {
-                    self.statusMessage.set("Failed to send temp target: \(error.localizedDescription)")
-                    completion(false)
+                    switch result {
+                    case .success(let response):
+                        print("Success: \(response)")
+                        self.statusMessage.set("Temp target sent successfully.")
+                        completion(true)
+                    case .failure(let error):
+                        print("Error: \(error)")
+                        self.statusMessage.set("Failed to send temp target: \(error.localizedDescription)")
+                        completion(false)
+                    }
                 }
             }
         }
