@@ -12,15 +12,10 @@ import SwiftUI
 import HealthKit
 
 class RemoteViewController: UIViewController {
-    private var statusMessage: ObservableValue<String> {
-        return Observable.shared.statusMessage
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
         let remoteView = RemoteView(
-            onRefreshStatus: refreshStatus,
             onCancelExistingTarget: cancelExistingTarget,
             sendTempTarget: sendTempTarget
         )
@@ -38,17 +33,6 @@ class RemoteViewController: UIViewController {
         ])
 
         hostingController.didMove(toParent: self)
-
-        initialSetup()
-    }
-
-    private func initialSetup() {
-        // Perform initial setup checks here
-        // For example, load the Nightscout URL and token from user defaults or another source
-    }
-
-    private func refreshStatus() {
-        // Refresh the status to check current temp targets and other relevant info
     }
 
     private func cancelExistingTarget(completion: @escaping (Bool) -> Void) {
@@ -60,22 +44,16 @@ class RemoteViewController: UIViewController {
             "created_at": ISO8601DateFormatter().string(from: Date())
         ]
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            print("Executing cancelExistingTarget on thread: \(Thread.current)")
-            NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentCancelResponse], Error>) in
-                DispatchQueue.main.async {
-                    print("Handling cancelExistingTarget result on thread: \(Thread.current)")
-                    switch result {
-                    case .success(let response):
-                        print("Success: \(response)")
-                        self.statusMessage.set("Temp target successfully cancelled.")
-                        completion(true)
-                    case .failure(let error):
-                        print("Error: \(error)")
-                        self.statusMessage.set("Failed to cancel temp target: \(error.localizedDescription)")
-                        completion(false)
-                    }
-                }
+        print("Executing cancelExistingTarget on thread: \(Thread.current), QoS: \(qos_class_self())")
+        NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentCancelResponse], Error>) in
+            print("Handling cancelExistingTarget result on thread: \(Thread.current), QoS: \(qos_class_self())")
+            switch result {
+            case .success(let response):
+                print("Success: \(response)")
+                completion(true)
+            case .failure(let error):
+                print("Error: \(error)")
+                completion(false)
             }
         }
     }
@@ -91,22 +69,18 @@ class RemoteViewController: UIViewController {
             "created_at": ISO8601DateFormatter().string(from: Date())
         ]
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            print("Executing sendTempTarget on thread: \(Thread.current)")
-            NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentResponse], Error>) in
-                DispatchQueue.main.async {
-                    print("Handling sendTempTarget result on thread: \(Thread.current)")
-                    switch result {
-                    case .success(let response):
-                        print("Success: \(response)")
-                        self.statusMessage.set("Temp target sent successfully.")
-                        completion(true)
-                    case .failure(let error):
-                        print("Error: \(error)")
-                        self.statusMessage.set("Failed to send temp target: \(error.localizedDescription)")
-                        completion(false)
-                    }
-                }
+        completion(true)
+
+        print("Executing sendTempTarget on thread: \(Thread.current), QoS: \(qos_class_self())")
+        NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody) { (result: Result<[TreatmentResponse], Error>) in
+            print("Handling sendTempTarget result on thread: \(Thread.current), QoS: \(qos_class_self())")
+            switch result {
+            case .success(let response):
+                print("Success: \(response)")
+                completion(true)
+            case .failure(let error):
+                print("Error: \(error)")
+                completion(false)
             }
         }
     }

@@ -13,7 +13,6 @@ class Observable {
     static let shared = Observable()
 
     var tempTarget = ObservableValue<HKQuantity?>(default: nil)
-    var statusMessage = ObservableValue<String>(default: "")
 
     private init() {}
 }
