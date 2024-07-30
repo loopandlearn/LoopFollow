@@ -44,7 +44,7 @@ struct RemoteView: View {
                     )
                 } else if !nsWriteAuth.value {
                     ErrorMessageView(
-                        message: "Please enter a valid token with appropriate permissions."
+                        message: "Please enter a valid token with appropriate permissions in the settings."
                     )
                 } else {
                     Form {
@@ -204,12 +204,6 @@ struct ErrorMessageView: View {
                 }
             }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.systemBackground))
-                .shadow(color: .gray, radius: 5, x: 0, y: 2)
-        )
         .padding()
     }
 }
