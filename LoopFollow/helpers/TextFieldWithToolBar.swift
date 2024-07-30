@@ -182,16 +182,17 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
             let isNumber = CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: string))
             let isDecimalSeparator = (string == decimalSeparator && textField.text?.contains(decimalSeparator) == false)
 
+            // Get the proposed new text
+            let currentText = textField.text ?? ""
+            let proposedText = (currentText as NSString).replacingCharacters(in: range, with: string)
+
+            // Enforce maxLength if set
+            if let maxLength = maxLength, proposedText.count > maxLength {
+                return false
+            }
+
             // Only proceed if the input is a valid number or decimal separator
-            if isNumber || (isDecimalSeparator && parent.allowDecimalSeparator && unit.preferredFractionDigits > 0),
-               let currentText = textField.text as NSString?
-            {
-                // Get the proposed new text
-                let proposedTextOriginal = currentText.replacingCharacters(in: range, with: string)
-
-                // Remove thousand separator
-                let proposedText = proposedTextOriginal.replacingOccurrences(of: ",", with: "")
-
+            if isNumber || (isDecimalSeparator && parent.allowDecimalSeparator && unit.preferredFractionDigits > 0) {
                 // Try to convert proposed text to number
                 if let number = Double(proposedText.replacingOccurrences(of: decimalSeparator, with: ".")) {
                     DispatchQueue.main.async {
