@@ -266,7 +266,12 @@ class NightscoutUtils {
             throw NightscoutError.invalidURL
         }
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.waitsForConnectivity = true
+        sessionConfig.networkServiceType = .responsiveData
+        let session = URLSession(configuration: sessionConfig)
+
+        let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NightscoutError.networkError
@@ -303,7 +308,12 @@ class NightscoutUtils {
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.waitsForConnectivity = true
+        sessionConfig.networkServiceType = .responsiveData
+        let session = URLSession(configuration: sessionConfig)
+
+        let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw NightscoutError.networkError
