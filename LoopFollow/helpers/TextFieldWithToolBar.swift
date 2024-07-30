@@ -212,6 +212,42 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
             UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
         }
 
+        public func textField(
+            _ textField: UITextField,
+            shouldChangeCharactersIn range: NSRange,
+            replacementString string: String
+        ) -> Bool {
+            let decimalSeparator = Locale.current.decimalSeparator ?? "."
+            let isNumber = CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: string))
+            let isDecimalSeparator = (string == decimalSeparator && textField.text?.contains(decimalSeparator) == false)
+
+            let currentText = textField.text ?? ""
+            let proposedText = (currentText as NSString).replacingCharacters(in: range, with: string)
+
+            if let maxLength = maxLength, proposedText.count > maxLength {
+                return false
+            }
+
+            let isValidInput = isNumber || (isDecimalSeparator && parent.allowDecimalSeparator && unit.preferredFractionDigits > 0)
+
+            if isValidInput, let number = Double(proposedText.replacingOccurrences(of: decimalSeparator, with: ".")) {
+                let quantity = HKQuantity(unit: unit, doubleValue: number)
+                if isWithinLimits(quantity) {
+                    parent.quantity = quantity
+                } else {
+                    parent.quantity = HKQuantity(unit: unit, doubleValue: 0)
+                }
+            } else {
+                parent.quantity = HKQuantity(unit: unit, doubleValue: 0)
+            }
+
+            return isValidInput
+        }
+
+        public func textFieldDidBeginEditing(_: UITextField) {
+            parent.textFieldDidBeginEditing?()
+        }
+
         func format(quantity: HKQuantity, for unit: HKUnit) -> String {
             let value = quantity.doubleValue(for: unit)
             let formatter = NumberFormatter()
@@ -229,33 +265,6 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
                 return false
             }
             return true
-        }
-
-        public func textField(
-            _ textField: UITextField,
-            shouldChangeCharactersIn range: NSRange,
-            replacementString string: String
-        ) -> Bool {
-            // Check if the input is a number or the decimal separator
-            let decimalSeparator = Locale.current.decimalSeparator ?? "."
-            let isNumber = CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: string))
-            let isDecimalSeparator = (string == decimalSeparator && textField.text?.contains(decimalSeparator) == false)
-
-            // Get the proposed new text
-            let currentText = textField.text ?? ""
-            let proposedText = (currentText as NSString).replacingCharacters(in: range, with: string)
-
-            // Enforce maxLength if set
-            if let maxLength = maxLength, proposedText.count > maxLength {
-                return false
-            }
-
-            // Only proceed if the input is a valid number or decimal separator
-            return isNumber || (isDecimalSeparator && parent.allowDecimalSeparator && unit.preferredFractionDigits > 0)
-        }
-
-        public func textFieldDidBeginEditing(_: UITextField) {
-            parent.textFieldDidBeginEditing?()
         }
     }
 }
