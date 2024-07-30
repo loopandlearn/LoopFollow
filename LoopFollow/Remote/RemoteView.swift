@@ -74,13 +74,13 @@ struct RemoteView: View {
                             HStack {
                                 Text("Target")
                                 Spacer()
-                                TextFieldWithToolBar(quantity: $newHKTarget, maxLength: 4, unit: UserDefaultsRepository.getPreferredUnit())
+                                TextFieldWithToolBar(quantity: $newHKTarget, maxLength: 4, unit: UserDefaultsRepository.getPreferredUnit(), minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60), maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 300))
                                 Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                             }
                             HStack {
                                 Text("Duration")
                                 Spacer()
-                                TextFieldWithToolBar(quantity: $duration, maxLength: 4, unit: HKUnit.minute())
+                                TextFieldWithToolBar(quantity: $duration, maxLength: 4, unit: HKUnit.minute(), minValue: HKQuantity(unit: .minute(), doubleValue: 5))
                                 Text("minutes").foregroundColor(.secondary)
                             }
                             HStack {
