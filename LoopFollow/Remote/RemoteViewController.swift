@@ -47,12 +47,10 @@ class RemoteViewController: UIViewController {
 
             do {
                 let response: [TreatmentCancelResponse] = try await NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody)
-                print("Success: \(response)")
                 Observable.shared.tempTarget.value = nil
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
                 completion(true)
             } catch {
-                print("Error: \(error)")
                 completion(false)
             }
         }
@@ -72,12 +70,10 @@ class RemoteViewController: UIViewController {
         Task {
             do {
                 let response: [TreatmentResponse] = try await NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody)
-                print("Success: \(response)")
                 Observable.shared.tempTarget.value = newTarget
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
                 completion(true)
             } catch {
-                print("Error: \(error)")
                 completion(false)
             }
         }
