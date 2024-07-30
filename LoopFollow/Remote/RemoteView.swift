@@ -97,7 +97,6 @@ struct RemoteView: View {
                             }
                         }
                     }
-                    .disabled(isLoading)
 
                     if isLoading {
                         ProgressView("Please wait...")
@@ -144,44 +143,34 @@ struct RemoteView: View {
 
     private var isButtonDisabled: Bool {
         return newHKTarget.doubleValue(for: UserDefaultsRepository.getPreferredUnit()) == 0 ||
-        duration.doubleValue(for: HKUnit.minute()) == 0
+        duration.doubleValue(for: HKUnit.minute()) == 0 || isLoading
     }
 
     private func enactTempTarget() {
         isLoading = true
-        print("Enacting Temp Target with target: \(newHKTarget) and duration: \(duration)")
         sendTempTarget(newHKTarget, duration) { success in
             self.isLoading = false
             if success {
-                print("Target successfully enacted.")
                 self.statusMessage = "Target successfully enacted."
             } else {
-                print("Failed to enact target.")
                 self.statusMessage = "Failed to enact target."
             }
-            DispatchQueue.main.async {
-                self.alertType = .status
-                self.showAlert = true
-            }
+            self.alertType = .status
+            self.showAlert = true
         }
     }
 
     private func cancelTempTarget() {
         isLoading = true
-        print("Cancelling Temp Target...")
         onCancelExistingTarget() { success in
             self.isLoading = false
             if success {
-                print("Temp target successfully cancelled.")
                 self.statusMessage = "Temp target successfully cancelled."
             } else {
-                print("Failed to cancel temp target.")
                 self.statusMessage = "Failed to cancel temp target."
             }
-            DispatchQueue.main.async {
-                self.alertType = .status
-                self.showAlert = true
-            }
+            self.alertType = .status
+            self.showAlert = true
         }
     }
 }
