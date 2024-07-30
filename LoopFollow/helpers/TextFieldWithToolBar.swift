@@ -12,6 +12,10 @@ import HealthKit
 
 public struct TextFieldWithToolBar: UIViewRepresentable {
     @Binding var quantity: HKQuantity
+
+    @State private var alertMessage: String? = nil
+    @State private var showAlert: Bool = false
+
     var textColor: UIColor
     var textAlignment: NSTextAlignment
     var autocapitalizationType: UITextAutocapitalizationType
@@ -22,6 +26,8 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
     var textFieldDidBeginEditing: (() -> Void)?
     var unit: HKUnit
     var allowDecimalSeparator: Bool
+    var minValue: HKQuantity?
+    var maxValue: HKQuantity?
 
     public init(
         quantity: Binding<HKQuantity>,
@@ -34,7 +40,9 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         isDismissible: Bool = true,
         textFieldDidBeginEditing: (() -> Void)? = nil,
         unit: HKUnit,
-        allowDecimalSeparator: Bool = true
+        allowDecimalSeparator: Bool = true,
+        minValue: HKQuantity? = nil,
+        maxValue: HKQuantity? = nil
     ) {
         _quantity = quantity
         self.textColor = textColor
@@ -47,6 +55,8 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         self.textFieldDidBeginEditing = textFieldDidBeginEditing
         self.unit = unit
         self.allowDecimalSeparator = allowDecimalSeparator
+        self.minValue = minValue
+        self.maxValue = maxValue
     }
 
     private func formattedPlaceholder(for unit: HKUnit) -> String {
@@ -67,6 +77,15 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         textField.text = quantity.doubleValue(for: unit) == 0 ? "" : context.coordinator.format(quantity: quantity, for: unit)
         textField.placeholder = formattedPlaceholder(for: unit)
         textField.keyboardType = unit.preferredFractionDigits == 0 ? .numberPad : .decimalPad
+
+        if showAlert {
+            let alert = UIAlertController(title: "Input Error", message: alertMessage, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+                showAlert = false
+            })
+            UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
+        }
+
         return textField
     }
 
@@ -115,7 +134,7 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
     }
 
     public func makeCoordinator() -> Coordinator {
-        Coordinator(self, maxLength: maxLength, unit: unit)
+        Coordinator(self, maxLength: maxLength, unit: unit, minValue: minValue, maxValue: maxValue)
     }
 
     public final class Coordinator: NSObject, UITextFieldDelegate {
@@ -125,11 +144,15 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         var didBecomeFirstResponder = false
         var isEditing = false
         var unit: HKUnit
+        var minValue: HKQuantity?
+        var maxValue: HKQuantity?
 
-        init(_ parent: TextFieldWithToolBar, maxLength: Int?, unit: HKUnit) {
+        init(_ parent: TextFieldWithToolBar, maxLength: Int?, unit: HKUnit, minValue: HKQuantity?, maxValue: HKQuantity?) {
             self.parent = parent
             self.maxLength = maxLength
             self.unit = unit
+            self.minValue = minValue
+            self.maxValue = maxValue
         }
 
         @objc fileprivate func clearText() {
@@ -154,13 +177,39 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
             DispatchQueue.main.async {
                 let decimalSeparator = Locale.current.decimalSeparator ?? "."
                 let text = textField.text?.replacingOccurrences(of: decimalSeparator, with: ".") ?? ""
-                if let number = Double(text) {
-                    self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: number)
-                } else {
+                if text.isEmpty {
                     self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: 0)
+                } else if let number = Double(text) {
+                    let quantity = HKQuantity(unit: self.unit, doubleValue: number)
+                    if self.isWithinLimits(quantity) {
+                        self.parent.quantity = quantity
+                        textField.text = self.format(quantity: self.parent.quantity, for: self.unit)
+                    } else {
+                        var message = "Value outside of guardrails: \(text)\n"
+                        if let minValue = self.parent.minValue {
+                            message += "Minimum: \(self.format(quantity: minValue, for: self.unit))\n"
+                        }
+                        if let maxValue = self.parent.maxValue {
+                            message += "Maximum: \(self.format(quantity: maxValue, for: self.unit))"
+                        }
+                        self.showInvalidInputAlert(textField, message: message)
+                    }
+                } else {
+                    self.showInvalidInputAlert(textField, message: "Invalid number format")
                 }
-                textField.text = self.format(quantity: self.parent.quantity, for: self.unit)
             }
+        }
+
+        private func showInvalidInputAlert(_ textField: UITextField, message: String) {
+            let alert = UIAlertController(title: "Input Validation Error", message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+                textField.becomeFirstResponder()
+            })
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: 0)
+                textField.text = ""
+            })
+            UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
         }
 
         func format(quantity: HKQuantity, for unit: HKUnit) -> String {
@@ -170,6 +219,16 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
             formatter.maximumFractionDigits = unit.preferredFractionDigits
             formatter.numberStyle = .decimal
             return formatter.string(from: NSNumber(value: value)) ?? ""
+        }
+
+        private func isWithinLimits(_ quantity: HKQuantity) -> Bool {
+            if let minValue = minValue, quantity.doubleValue(for: unit) < minValue.doubleValue(for: unit) {
+                return false
+            }
+            if let maxValue = maxValue, quantity.doubleValue(for: unit) > maxValue.doubleValue(for: unit) {
+                return false
+            }
+            return true
         }
 
         public func textField(
@@ -192,20 +251,6 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
             }
 
             // Only proceed if the input is a valid number or decimal separator
-            if isNumber || (isDecimalSeparator && parent.allowDecimalSeparator && unit.preferredFractionDigits > 0) {
-                // Try to convert proposed text to number
-                if let number = Double(proposedText.replacingOccurrences(of: decimalSeparator, with: ".")) {
-                    DispatchQueue.main.async {
-                        self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: number)
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: 0)
-                    }
-                }
-            }
-
-            // Allow the change if it's a valid number or decimal separator
             return isNumber || (isDecimalSeparator && parent.allowDecimalSeparator && unit.preferredFractionDigits > 0)
         }
 
