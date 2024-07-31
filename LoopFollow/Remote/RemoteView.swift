@@ -22,6 +22,10 @@ struct RemoteView: View {
     @State private var isLoading: Bool = false
     @State private var statusMessage: String? = nil
 
+    @State private var showPresetSheet: Bool = false
+    @State private var presetName = ""
+    @ObservedObject var presetManager = TempTargetPresetManager.shared
+
     var onCancelExistingTarget: (@escaping (Bool) -> Void) -> Void
     var sendTempTarget: (HKQuantity, HKQuantity, @escaping (Bool) -> Void) -> Void
 
@@ -94,6 +98,45 @@ struct RemoteView: View {
                                 .buttonStyle(BorderlessButtonStyle())
                                 .font(.callout)
                                 .controlSize(.mini)
+
+                                Spacer() // Pushes the next button to the right
+
+                                Button {
+                                    showPresetSheet = true
+                                } label: {
+                                    Text("Save as Preset")
+                                }
+                                .disabled(isButtonDisabled)
+                                .buttonStyle(BorderlessButtonStyle())
+                                .font(.callout)
+                                .controlSize(.mini)
+                            }
+                        }
+
+                        if !presetManager.presets.isEmpty {
+                            Section(header: Text("Presets")) {
+                                ForEach(presetManager.presets) { preset in
+                                    HStack {
+                                        Text(preset.name)
+                                        Spacer()
+                                    }
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        alertType = .confirmCommand
+                                        newHKTarget = preset.target
+                                        duration = preset.duration
+                                        showAlert = true
+                                    }
+                                    .swipeActions {
+                                        Button(role: .destructive) {
+                                            if let index = presetManager.presets.firstIndex(where: { $0.id == preset.id }) {
+                                                presetManager.deletePreset(at: index)
+                                            }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -138,6 +181,32 @@ struct RemoteView: View {
                     return Alert(title: Text("Unknown Alert"))
                 }
             }
+            .sheet(isPresented: $showPresetSheet) {
+                VStack {
+                    Text("Save Preset")
+                        .font(.headline)
+                        .padding()
+                    TextField("Preset Name", text: $presetName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                    HStack {
+                        Button("Cancel") {
+                            showPresetSheet = false
+                        }
+                        .padding()
+                        Spacer()
+                        Button("Save") {
+                            presetManager.addPreset(name: presetName, target: newHKTarget, duration: duration)
+                            presetName = "" // Clear the preset name after saving
+                            showPresetSheet = false
+                        }
+                        .disabled(presetName.isEmpty)
+                        .padding()
+                    }
+                    Spacer()
+                }
+                .padding()
+            }
         }
     }
 
@@ -172,38 +241,5 @@ struct RemoteView: View {
             self.alertType = .status
             self.showAlert = true
         }
-    }
-}
-
-struct ErrorMessageView: View {
-    var message: String
-    var buttonTitle: String?
-    var buttonAction: (() -> Void)?
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Text(message)
-                .foregroundColor(.red)
-                .multilineTextAlignment(.center)
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white)
-                        .shadow(color: .gray, radius: 5, x: 0, y: 2)
-                )
-                .padding()
-
-            if let buttonTitle = buttonTitle, let buttonAction = buttonAction {
-                Button(action: buttonAction) {
-                    Text(buttonTitle)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-            }
-        }
-        .padding()
     }
 }
