@@ -201,13 +201,25 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         }
 
         private func showInvalidInputAlert(_ textField: UITextField, message: String) {
+            var message = "Value outside of guardrails\n"
+            let preferredFractionDigits = self.unit.preferredFractionDigits
+            let roundingFactor = pow(10.0, Double(preferredFractionDigits))
+
+            if let minValue = self.parent.minValue {
+                let minValueValue = minValue.doubleValue(for: self.unit)
+                let minValueRoundedUp = ceil(minValueValue * roundingFactor) / roundingFactor
+                message += "Minimum: \(self.format(quantity: HKQuantity(unit: self.unit, doubleValue: minValueRoundedUp), for: self.unit))\n"
+            }
+            if let maxValue = self.parent.maxValue {
+                let maxValueValue = maxValue.doubleValue(for: self.unit)
+                let maxValueRoundedDown = floor(maxValueValue * roundingFactor) / roundingFactor
+                message += "Maximum: \(self.format(quantity: HKQuantity(unit: self.unit, doubleValue: maxValueRoundedDown), for: self.unit))"
+            }
             let alert = UIAlertController(title: "Input Validation Error", message: message, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
                 textField.becomeFirstResponder()
             })
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
-                self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: 0)
-                textField.text = ""
             })
             UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
         }
