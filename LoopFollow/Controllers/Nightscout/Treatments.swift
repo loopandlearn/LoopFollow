@@ -137,19 +137,14 @@ extension MainViewController {
                 clearOldBGCheck()
             }
         }
+        if temporaryOverride.count == 0 && temporaryTarget.count == 0 && overrideGraphData.count > 0 {
+            clearOldOverride()
+        }
         if temporaryOverride.count > 0 {
             processNSOverrides(entries: temporaryOverride)
-        } else {
-            if overrideGraphData.count > 0 {
-                clearOldOverride()
-            }
         }
         if temporaryTarget.count > 0 {
             processNSTemporaryTarget(entries: temporaryTarget)
-        } else {
-            if overrideGraphData.count > 0 {
-                clearOldOverride() //Temporary Targets are plotted as override for now
-            }
         }
         if suspendPump.count > 0 {
             processSuspendPump(entries: suspendPump)

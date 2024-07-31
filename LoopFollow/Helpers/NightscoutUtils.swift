@@ -205,13 +205,13 @@ class NightscoutUtils {
                                 }
                                 completion(nil, token, nsWriteAuth)
                             } else {
-                                completion(.invalidToken, nil, false)
+                                completion(nil, nil, false)
                             }
                         } catch {
-                            completion(.invalidToken, nil, false)
+                            completion(nil, nil, false)
                         }
                     } else {
-                        completion(.invalidToken, nil, false)
+                        completion(nil, nil, false)
                     }
                 case 401:
                     if token.isEmpty {
