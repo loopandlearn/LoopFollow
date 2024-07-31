@@ -64,6 +64,9 @@
 		DDF2C0142BEFD468007A20E6 /* blacklisted-versions.json in Resources */ = {isa = PBXBuildFile; fileRef = DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */; };
 		DDF699942C555B310058A8D9 /* ViewControllerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF699932C555B310058A8D9 /* ViewControllerManager.swift */; };
 		DDF699962C5582290058A8D9 /* TextFieldWithToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF699952C5582290058A8D9 /* TextFieldWithToolBar.swift */; };
+		DDF699992C5AA3060058A8D9 /* TempTargetPresetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF699982C5AA3060058A8D9 /* TempTargetPresetManager.swift */; };
+		DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF6999A2C5AA32E0058A8D9 /* TempTargetPreset.swift */; };
+		DDF6999E2C5AAA640058A8D9 /* ErrorMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */; };
 		DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF9676D2AD08C6E00C5EB95 /* SiteChange.swift */; };
 		FC16A97A24996673003D6245 /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97924996673003D6245 /* NightScout.swift */; };
 		FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
@@ -279,6 +282,9 @@
 		DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "blacklisted-versions.json"; sourceTree = "<group>"; };
 		DDF699932C555B310058A8D9 /* ViewControllerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerManager.swift; sourceTree = "<group>"; };
 		DDF699952C5582290058A8D9 /* TextFieldWithToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldWithToolBar.swift; sourceTree = "<group>"; };
+		DDF699982C5AA3060058A8D9 /* TempTargetPresetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetPresetManager.swift; sourceTree = "<group>"; };
+		DDF6999A2C5AA32E0058A8D9 /* TempTargetPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetPreset.swift; sourceTree = "<group>"; };
+		DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorMessageView.swift; sourceTree = "<group>"; };
 		DDF9676D2AD08C6E00C5EB95 /* SiteChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteChange.swift; sourceTree = "<group>"; };
 		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
 		FC16A97924996673003D6245 /* NightScout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScout.swift; sourceTree = "<group>"; };
@@ -484,6 +490,7 @@
 		DD0C0C6E2C4AFFB800DBADDF /* Remote */ = {
 			isa = PBXGroup;
 			children = (
+				DDF699972C5AA2E50058A8D9 /* TempTargetPreset */,
 				DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */,
 				DD0C0C712C4B000800DBADDF /* RemoteView.swift */,
 				DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */,
@@ -556,6 +563,23 @@
 				DDB0AF502BB1A84500AFA48B /* capture-build-details.sh */,
 			);
 			path = Scripts;
+			sourceTree = "<group>";
+		};
+		DDF699972C5AA2E50058A8D9 /* TempTargetPreset */ = {
+			isa = PBXGroup;
+			children = (
+				DDF699982C5AA3060058A8D9 /* TempTargetPresetManager.swift */,
+				DDF6999A2C5AA32E0058A8D9 /* TempTargetPreset.swift */,
+			);
+			path = TempTargetPreset;
+			sourceTree = "<group>";
+		};
+		DDF6999C2C5AAA4C0058A8D9 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		FC16A97624995FEE003D6245 /* Application */ = {
@@ -731,7 +755,7 @@
 				FCC68871248A736700A0279D /* ViewControllers */,
 				DD98F54224BCEF190007425A /* Extensions */,
 				FC16A9782499657E003D6245 /* Controllers */,
-				FCC688542489367300A0279D /* helpers */,
+				FCC688542489367300A0279D /* Helpers */,
 				FCC688512489363F00A0279D /* Storage */,
 				FC16A97624995FEE003D6245 /* Application */,
 			);
@@ -776,9 +800,10 @@
 			path = Storage;
 			sourceTree = "<group>";
 		};
-		FCC688542489367300A0279D /* helpers */ = {
+		FCC688542489367300A0279D /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				DDF6999C2C5AAA4C0058A8D9 /* Views */,
 				FCC6886E2489A53800A0279D /* AppConstants.swift */,
 				FCC6886A24898FD800A0279D /* ObservationToken.swift */,
 				FCC6886C2489909D00A0279D /* AnyConvertible.swift */,
@@ -798,7 +823,7 @@
 				DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */,
 				DDF699952C5582290058A8D9 /* TextFieldWithToolBar.swift */,
 			);
-			path = helpers;
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 		FCC68871248A736700A0279D /* ViewControllers */ = {
@@ -1075,6 +1100,7 @@
 			files = (
 				FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */,
 				FC7CE59F248D8D23001F83B8 /* SnoozeViewController.swift in Sources */,
+				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				DDF699942C555B310058A8D9 /* ViewControllerManager.swift in Sources */,
@@ -1107,11 +1133,13 @@
 				DD7E19882ACDA5DA00DBD158 /* Notes.swift in Sources */,
 				FCEF87AC24A141A700AE6FA0 /* Localizer.swift in Sources */,
 				FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */,
+				DDF6999E2C5AAA640058A8D9 /* ErrorMessageView.swift in Sources */,
 				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
 				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
 				FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */,
 				DD493AE12ACF22FE009A6922 /* Profile.swift in Sources */,
 				DD493ADF2ACF22BB009A6922 /* SAge.swift in Sources */,
+				DDF699992C5AA3060058A8D9 /* TempTargetPresetManager.swift in Sources */,
 				DD0C0C722C4B000800DBADDF /* RemoteView.swift in Sources */,
 				DD493ADB2ACF21A3009A6922 /* Bolus.swift in Sources */,
 				DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */,
