@@ -33,6 +33,14 @@ class RemoteViewController: UIViewController {
         ])
 
         hostingController.didMove(toParent: self)
+
+        if(!ObservableUserDefaults.shared.nsWriteAuth.value) {
+            NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth in
+                DispatchQueue.main.async {
+                    ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
+                }
+            }
+        }
     }
 
     private func cancelExistingTarget(completion: @escaping (Bool) -> Void) {
