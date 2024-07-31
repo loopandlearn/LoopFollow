@@ -44,7 +44,7 @@ struct RemoteView: View {
                     )
                 } else if !nsWriteAuth.value {
                     ErrorMessageView(
-                        message: "Please enter a valid token with appropriate permissions in the settings."
+                        message: "Please update your token to include the 'careportal' and 'readable' roles in order to do remote commands."
                     )
                 } else {
                     Form {
