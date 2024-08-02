@@ -29,7 +29,7 @@ class UserDefaultsRepository {
         "SAGE",
         "CAGE",
         "Rec. Bolus",
-        "Pred.",
+        "Min/Max", //Previously "Pred."
         "Carbs today",
         "Autosens",
         "Profile"])

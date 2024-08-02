@@ -17,37 +17,35 @@ extension MainViewController {
         let count = graphHours * 12
         dexShare?.fetchData(count) { (err, result) -> () in
             
-            // TODO: add error checking
-            if(err == nil) {
-                let data = result!
+            if let error = err {
+                print("Error fetching Dexcom data: \(error.localizedDescription)")
                 
-                // If Dex data is old, load from NS instead
-                let latestDate = data[0].date
-                let now = dateTimeUtils.getNowTimeIntervalUTC()
-                if (latestDate + 330) < now && UserDefaultsRepository.url.value != "" {
-                    self.webLoadNSBGData()
-                    print("dex didn't load, triggered NS attempt")
-                    return
-                }
-                
-                // Dexcom only returns 24 hrs of data. If we need more, call NS.
-                if graphHours > 24 && UserDefaultsRepository.url.value != "" {
-                    self.webLoadNSBGData(dexData: data)
-                } else {
-                    self.ProcessDexBGData(data: data, sourceName: "Dexcom")
-                }
-            } else {
                 // If we get an error, immediately try to pull NS BG Data
                 if UserDefaultsRepository.url.value != "" {
                     self.webLoadNSBGData()
                 }
-                
-                if globalVariables.dexVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
-                    globalVariables.dexVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    DispatchQueue.main.async {
-                        //self.sendNotification(title: "Dexcom Share Error", body: "Please double check user name and password, internet connection, and sharing status.")
-                    }
-                }
+                return
+            }
+            
+            guard let data = result else {
+                print("Received nil data from Dexcom")
+                return
+            }
+            
+            // If Dex data is old, load from NS instead
+            let latestDate = data[0].date
+            let now = dateTimeUtils.getNowTimeIntervalUTC()
+            if (latestDate + 330) < now && UserDefaultsRepository.url.value != "" {
+                self.webLoadNSBGData()
+                print("Dex data is old, loading from NS instead")
+                return
+            }
+            
+            // Dexcom only returns 24 hrs of data. If we need more, call NS.
+            if graphHours > 24 && UserDefaultsRepository.url.value != "" {
+                self.webLoadNSBGData(dexData: data)
+            } else {
+                self.ProcessDexBGData(data: data, sourceName: "Dexcom")
             }
         }
     }
@@ -65,7 +63,7 @@ extension MainViewController {
         var parameters: [String: String] = [:]
         let utcISODateFormatter = ISO8601DateFormatter()
         let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
-        parameters["count"] = "1000"
+        parameters["count"] = "\(UserDefaultsRepository.downloadDays.value * 2 * 24 * 60 / 5)"
         parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: date)
         
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
@@ -115,10 +113,6 @@ extension MainViewController {
                 }
             case .failure(let error):
                 print("Failed to fetch data: \(error)")
-                if globalVariables.nsVerifiedAlert < dateTimeUtils.getNowTimeIntervalUTC() + 300 {
-                    globalVariables.nsVerifiedAlert = dateTimeUtils.getNowTimeIntervalUTC()
-                    //self.sendNotification(title: "Nightscout Error", body: "Please double check url, token, and internet connection. This may also indicate a temporary Nightscout issue")
-                }
                 DispatchQueue.main.async {
                     if self.bgTimer.isValid {
                         self.bgTimer.invalidate()
