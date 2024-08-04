@@ -220,7 +220,7 @@ struct RemoteView: View {
         sendTempTarget(newHKTarget, duration) { success in
             self.isLoading = false
             if success {
-                self.statusMessage = "Target successfully enacted."
+                self.statusMessage = "Command successfully sent to Nightscout."
             } else {
                 self.statusMessage = "Failed to enact target."
             }
@@ -234,7 +234,7 @@ struct RemoteView: View {
         onCancelExistingTarget() { success in
             self.isLoading = false
             if success {
-                self.statusMessage = "Temp target successfully cancelled."
+                self.statusMessage = "Cancellation request successfully sent to Nightscout."
             } else {
                 self.statusMessage = "Failed to cancel temp target."
             }
