@@ -26,6 +26,9 @@ struct RemoteView: View {
     @State private var presetName = ""
     @ObservedObject var presetManager = TempTargetPresetManager.shared
 
+    @FocusState private var targetFieldIsFocused: Bool
+    @FocusState private var durationFieldIsFocused: Bool
+
     var onCancelExistingTarget: (@escaping (Bool) -> Void) -> Void
     var sendTempTarget: (HKQuantity, HKQuantity, @escaping (Bool) -> Void) -> Void
 
@@ -78,19 +81,34 @@ struct RemoteView: View {
                             HStack {
                                 Text("Target")
                                 Spacer()
-                                TextFieldWithToolBar(quantity: $newHKTarget, maxLength: 4, unit: UserDefaultsRepository.getPreferredUnit(), minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60), maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 300))
+                                TextFieldWithToolBar(
+                                    quantity: $newHKTarget,
+                                    maxLength: 4,
+                                    unit: UserDefaultsRepository.getPreferredUnit(),
+                                    minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60),
+                                    maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 300)
+                                )
+                                .focused($targetFieldIsFocused)
                                 Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                             }
                             HStack {
                                 Text("Duration")
                                 Spacer()
-                                TextFieldWithToolBar(quantity: $duration, maxLength: 4, unit: HKUnit.minute(), minValue: HKQuantity(unit: .minute(), doubleValue: 5))
+                                TextFieldWithToolBar(
+                                    quantity: $duration,
+                                    maxLength: 4,
+                                    unit: HKUnit.minute(),
+                                    minValue: HKQuantity(unit: .minute(), doubleValue: 5)
+                                )
+                                .focused($durationFieldIsFocused)
                                 Text("minutes").foregroundColor(.secondary)
                             }
                             HStack {
                                 Button {
                                     alertType = .confirmCommand
                                     showAlert = true
+                                    targetFieldIsFocused = false
+                                    durationFieldIsFocused = false
                                 } label: {
                                     Text("Enact")
                                 }
@@ -99,10 +117,12 @@ struct RemoteView: View {
                                 .font(.callout)
                                 .controlSize(.mini)
 
-                                Spacer() // Pushes the next button to the right
+                                Spacer()
 
                                 Button {
                                     showPresetSheet = true
+                                    targetFieldIsFocused = false
+                                    durationFieldIsFocused = false
                                 } label: {
                                     Text("Save as Preset")
                                 }
@@ -126,12 +146,16 @@ struct RemoteView: View {
                                         newHKTarget = preset.target
                                         duration = preset.duration
                                         showAlert = true
+                                        targetFieldIsFocused = false
+                                        durationFieldIsFocused = false
                                     }
                                     .swipeActions {
                                         Button(role: .destructive) {
                                             if let index = presetManager.presets.firstIndex(where: { $0.id == preset.id }) {
                                                 presetManager.deletePreset(at: index)
                                             }
+                                            targetFieldIsFocused = false
+                                            durationFieldIsFocused = false
                                         } label: {
                                             Label("Delete", systemImage: "trash")
                                         }
@@ -197,7 +221,7 @@ struct RemoteView: View {
                         Spacer()
                         Button("Save") {
                             presetManager.addPreset(name: presetName, target: newHKTarget, duration: duration)
-                            presetName = "" // Clear the preset name after saving
+                            presetName = ""
                             showPresetSheet = false
                         }
                         .disabled(presetName.isEmpty)
