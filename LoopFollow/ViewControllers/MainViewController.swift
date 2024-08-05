@@ -64,6 +64,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var timeofLastBGUpdate = 0 as TimeInterval
     var currentSage : sageData?
     var currentCage : cageData?
+    var currentIage : iageData?
 
     var backgroundTask = BackgroundTask()
     
@@ -265,6 +266,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         restartAllTimers()
         currentCage = nil
         currentSage = nil
+        currentIage = nil
         lastSpeechTime = nil
         refreshControl.endRefreshing()
     }

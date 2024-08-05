@@ -19,22 +19,50 @@ class UserDefaultsRepository {
     static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: InfoType.allCases.map { $0.defaultVisible })
 
     static func synchronizeInfoTypes() {
-        // Ensure infoSort array is the correct size
+        // Print current state of arrays before synchronization
+        print("Before Synchronization:")
+        print("infoSort: \(infoSort.value)")
+        print("infoVisible: \(infoVisible.value)")
+
         var sortArray = infoSort.value
-        if sortArray.count != InfoType.allCases.count {
-            sortArray = InfoType.allCases.map { $0.sortOrder }
-            infoSort.value = sortArray
+        var visibleArray = infoVisible.value
+
+        // Current valid indices based on InfoType
+        let currentValidIndices = InfoType.allCases.map { $0.rawValue }
+
+        // Add missing indices to sortArray
+        for index in currentValidIndices {
+            if !sortArray.contains(index) {
+                sortArray.append(index) // Append missing types at the end
+                print("Added missing index \(index) to sortArray")
+            }
         }
 
-        // Ensure infoVisible array is the correct size
-        var visibleArray = infoVisible.value
-        if visibleArray.count < InfoType.allCases.count {
-            for infoType in InfoType.allCases[visibleArray.count..<InfoType.allCases.count] {
-                visibleArray.append(infoType.defaultVisible)
+        // Remove deprecated indices
+        sortArray = sortArray.filter { currentValidIndices.contains($0) }
+        print("Filtered sortArray to remove invalid indices: \(sortArray)")
+
+        // Ensure visibleArray is updated with new entries
+        if visibleArray.count < currentValidIndices.count {
+            for i in visibleArray.count..<currentValidIndices.count {
+                visibleArray.append(InfoType(rawValue: i)?.defaultVisible ?? false)
+                print("Added default visibility for new index \(i)")
             }
-        } else if visibleArray.count > InfoType.allCases.count {
-            visibleArray = Array(visibleArray.prefix(InfoType.allCases.count))
         }
+
+        // Trim excess elements if there are more than needed
+        if visibleArray.count > currentValidIndices.count {
+            visibleArray = Array(visibleArray.prefix(currentValidIndices.count))
+            print("Trimmed visibleArray to match current valid indices")
+        }
+
+        // Print updated state of arrays after synchronization
+        print("After Synchronization:")
+        print("infoSort: \(sortArray)")
+        print("infoVisible: \(visibleArray)")
+
+        // Save updated arrays
+        infoSort.value = sortArray
         infoVisible.value = visibleArray
     }
 
