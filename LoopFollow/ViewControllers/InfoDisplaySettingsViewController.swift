@@ -25,6 +25,7 @@ class InfoDisplaySettingsViewController: FormViewController {
     }
 
     private func createForm() {
+        form.removeAll()  // Clear any existing form to ensure we start fresh
         form
         +++ Section("General")
         <<< SwitchRow("hideInfoTable"){ row in
@@ -40,41 +41,46 @@ class InfoDisplaySettingsViewController: FormViewController {
 
             $0.tag = "InfoDisplay"
 
+            // Iterate through the current infoSort array to set up UI elements
             for i in 0..<UserDefaultsRepository.infoSort.value.count {
                 let sortedIndex = UserDefaultsRepository.infoSort.value[i]
 
-                // Debug print to track the sortedIndex and corresponding InfoType
-                print("Index \(i): sortedIndex = \(sortedIndex)")
-
-                // Check if the sortedIndex maps to a valid InfoType
+                // Ensure sortedIndex is valid and maps to an InfoType
                 if let infoType = InfoType(rawValue: sortedIndex) {
-                    print("InfoType for sortedIndex \(sortedIndex): \(infoType.name)")
-
                     $0 <<< TextRow() { row in
                         if UserDefaultsRepository.infoVisible.value[sortedIndex] {
                             row.title = "\u{2713}\t\(infoType.name)"
                         } else {
                             row.title = "\u{2001}\t\(infoType.name)"
                         }
-                    }.onCellSelection { (cell, row) in
+                    }.onCellSelection { [weak self] (cell, row) in
+                        guard let self = self else { return }
+
                         let i = row.indexPath!.row
                         let sortedIndex = UserDefaultsRepository.infoSort.value[i]
+
+                        // Toggle visibility directly
                         UserDefaultsRepository.infoVisible.value[sortedIndex] = !UserDefaultsRepository.infoVisible.value[sortedIndex]
 
+                        // Reload the entire table to reflect changes
                         self.tableView.reloadData()
                     }.cellSetup { (cell, row) in
                         cell.textField.isUserInteractionEnabled = false
-                    }.cellUpdate { (cell, row) in
+                    }.cellUpdate { [weak self] (cell, row) in
+                        guard let self = self else { return }
+
+                        let i = row.indexPath!.row
                         let sortedIndex = UserDefaultsRepository.infoSort.value[i]
+
                         if UserDefaultsRepository.infoVisible.value[sortedIndex] {
                             row.title = "\u{2713}\t\(infoType.name)"
                         } else {
                             row.title = "\u{2001}\t\(infoType.name)"
                         }
+
                         self.appStateController!.infoDataSettingsChanged = true
                     }
                 } else {
-                    // Handle the case where sortedIndex doesn't map to a valid InfoType
                     print("Warning: sortedIndex \(sortedIndex) does not map to a valid InfoType!")
                 }
             }
@@ -91,8 +97,8 @@ class InfoDisplaySettingsViewController: FormViewController {
         let sourceIndex = sourceIndexPath.row
         let destIndex = destinationIndexPath.row
 
-        // new sort
-        if(destIndex != sourceIndex ) {
+        // Update sort order if there's a move
+        if destIndex != sourceIndex {
             self.appStateController!.infoDataSettingsChanged = true
 
             let tmpVal = UserDefaultsRepository.infoSort.value[sourceIndex]
