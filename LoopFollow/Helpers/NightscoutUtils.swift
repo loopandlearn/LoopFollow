@@ -46,7 +46,7 @@ class NightscoutUtils {
         case profile
         case treatments
         case deviceStatus
-        case iage = "Insulin Cartridge Change"
+        case iage = "Insulin Change"
 
         var endpoint: String {
             switch self {

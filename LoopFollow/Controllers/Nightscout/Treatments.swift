@@ -97,7 +97,7 @@ extension MainViewController {
                     let newEntry = sageData(created_at: createdAt)
                     cgmSensorStart.append(newEntry)
                 }
-            case "Insulin Cartridge Change":
+            case "Insulin Change":
                 if let createdAt = entry["created_at"] as? String {
                     let newEntry = iageData(created_at: createdAt)
                     insulinCartridge.append(newEntry)
