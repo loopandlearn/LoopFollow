@@ -42,30 +42,40 @@ class InfoDisplaySettingsViewController: FormViewController {
 
             for i in 0..<UserDefaultsRepository.infoSort.value.count {
                 let sortedIndex = UserDefaultsRepository.infoSort.value[i]
-                let infoType = InfoType(rawValue: sortedIndex)!
 
-                $0 <<< TextRow() { row in
-                    if(UserDefaultsRepository.infoVisible.value[sortedIndex]) {
-                        row.title = "\u{2713}\t\(infoType.name)"
-                    } else {
-                        row.title = "\u{2001}\t\(infoType.name)"
-                    }
-                }.onCellSelection { (cell, row) in
-                    let i = row.indexPath!.row
-                    let sortedIndex = UserDefaultsRepository.infoSort.value[i]
-                    UserDefaultsRepository.infoVisible.value[sortedIndex] = !UserDefaultsRepository.infoVisible.value[sortedIndex]
+                // Debug print to track the sortedIndex and corresponding InfoType
+                print("Index \(i): sortedIndex = \(sortedIndex)")
 
-                    self.tableView.reloadData()
-                }.cellSetup { (cell, row) in
-                    cell.textField.isUserInteractionEnabled = false
-                }.cellUpdate { (cell, row) in
-                    let sortedIndex = UserDefaultsRepository.infoSort.value[i]
-                    if(UserDefaultsRepository.infoVisible.value[sortedIndex]) {
-                        row.title = "\u{2713}\t\(infoType.name)"
-                    } else {
-                        row.title = "\u{2001}\t\(infoType.name)"
+                // Check if the sortedIndex maps to a valid InfoType
+                if let infoType = InfoType(rawValue: sortedIndex) {
+                    print("InfoType for sortedIndex \(sortedIndex): \(infoType.name)")
+
+                    $0 <<< TextRow() { row in
+                        if UserDefaultsRepository.infoVisible.value[sortedIndex] {
+                            row.title = "\u{2713}\t\(infoType.name)"
+                        } else {
+                            row.title = "\u{2001}\t\(infoType.name)"
+                        }
+                    }.onCellSelection { (cell, row) in
+                        let i = row.indexPath!.row
+                        let sortedIndex = UserDefaultsRepository.infoSort.value[i]
+                        UserDefaultsRepository.infoVisible.value[sortedIndex] = !UserDefaultsRepository.infoVisible.value[sortedIndex]
+
+                        self.tableView.reloadData()
+                    }.cellSetup { (cell, row) in
+                        cell.textField.isUserInteractionEnabled = false
+                    }.cellUpdate { (cell, row) in
+                        let sortedIndex = UserDefaultsRepository.infoSort.value[i]
+                        if UserDefaultsRepository.infoVisible.value[sortedIndex] {
+                            row.title = "\u{2713}\t\(infoType.name)"
+                        } else {
+                            row.title = "\u{2001}\t\(infoType.name)"
+                        }
+                        self.appStateController!.infoDataSettingsChanged = true
                     }
-                    self.appStateController!.infoDataSettingsChanged = true
+                } else {
+                    // Handle the case where sortedIndex doesn't map to a valid InfoType
+                    print("Warning: sortedIndex \(sortedIndex) does not map to a valid InfoType!")
                 }
             }
         }

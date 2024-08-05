@@ -51,7 +51,8 @@ extension MainViewController {
         var resumePump: [[String:AnyObject]] = []
         var pumpSiteChange: [cageData] = []
         var cgmSensorStart: [sageData] = []
-        
+        var insulinCartridge: [iageData] = []
+
         for entry in entries {
             guard let eventType = entry["eventType"] as? String else {
                 continue
@@ -95,6 +96,11 @@ extension MainViewController {
                 if let createdAt = entry["created_at"] as? String {
                     let newEntry = sageData(created_at: createdAt)
                     cgmSensorStart.append(newEntry)
+                }
+            case "Insulin Cartridge Change":
+                if let createdAt = entry["created_at"] as? String {
+                    let newEntry = iageData(created_at: createdAt)
+                    insulinCartridge.append(newEntry)
                 }
             default:
                 print("No Match: \(String(describing: entry))")
@@ -168,6 +174,9 @@ extension MainViewController {
                 clearOldSensor()
             }
         }
+
+        processIage(entries: insulinCartridge)
+
         if note.count > 0 {
             processNotes(entries: note)
         } else {

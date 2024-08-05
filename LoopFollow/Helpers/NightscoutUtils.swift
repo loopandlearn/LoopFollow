@@ -46,10 +46,11 @@ class NightscoutUtils {
         case profile
         case treatments
         case deviceStatus
+        case iage = "Insulin Cartridge Change"
 
         var endpoint: String {
             switch self {
-            case .cage, .carbsToday, .sage, .treatments:
+            case .cage, .carbsToday, .sage, .treatments, .iage:
                 return "/api/v1/treatments.json"
             case .sgv:
                 return "/api/v1/entries.json"
