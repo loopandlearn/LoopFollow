@@ -10,6 +10,7 @@ import UIKit
 import Eureka
 import EventKit
 import EventKitUI
+import SwiftUI
 
 class SettingsViewController: FormViewController {
     var tokenRow: TextRow?
@@ -229,12 +230,10 @@ class SettingsViewController: FormViewController {
             $0.title = "Information Display Settings"
             $0.presentationMode = .show(
                 controllerProvider: .callback(builder: {
-                    let controller = InfoDisplaySettingsViewController()
-                    controller.appStateController = self.appStateController
-                    return controller
+                    self.presentInfoDisplaySettings()
+                    return UIViewController()
                 }
                                              ), onDismiss: nil)
-
         }
         <<< ButtonRow("alarmsSettings") {
             $0.title = "Alarms"
@@ -379,5 +378,21 @@ class SettingsViewController: FormViewController {
                 self.updateStatusLabel(error: error)
             }
         }
+    }
+
+    func presentInfoDisplaySettings() {
+        let viewModel = InfoDisplaySettingsViewModel()
+        let settingsView = InfoDisplaySettingsView(viewModel: viewModel)
+
+        let hostingController = UIHostingController(rootView: settingsView)
+        hostingController.modalPresentationStyle = .formSheet
+
+        if UserDefaultsRepository.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        } else {
+            hostingController.overrideUserInterfaceStyle = .light
+        }
+
+        present(hostingController, animated: true, completion: nil)
     }
 }

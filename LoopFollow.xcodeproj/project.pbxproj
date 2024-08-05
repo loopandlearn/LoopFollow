@@ -21,7 +21,6 @@
 		DD13BC752C3FD6210062313B /* InfoType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC742C3FD6200062313B /* InfoType.swift */; };
 		DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC762C3FD64E0062313B /* InfoData.swift */; };
 		DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC782C3FE63A0062313B /* InfoManager.swift */; };
-		DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */; };
 		DD493AD52ACF2109009A6922 /* ResumePump.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AD42ACF2109009A6922 /* ResumePump.swift */; };
 		DD493AD72ACF2139009A6922 /* SuspendPump.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AD62ACF2139009A6922 /* SuspendPump.swift */; };
 		DD493AD92ACF2171009A6922 /* Carbs.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AD82ACF2171009A6922 /* Carbs.swift */; };
@@ -35,6 +34,8 @@
 		DD493AE92ACF2445009A6922 /* BGData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE82ACF2445009A6922 /* BGData.swift */; };
 		DD5334212C60EBEE00062F9D /* InsulinCartridgeChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334202C60EBEE00062F9D /* InsulinCartridgeChange.swift */; };
 		DD5334232C60ED3600062F9D /* IAge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334222C60ED3600062F9D /* IAge.swift */; };
+		DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334262C61668700062F9D /* InfoDisplaySettingsViewModel.swift */; };
+		DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334282C6166A500062F9D /* InfoDisplaySettingsView.swift */; };
 		DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */; };
 		DD608A0A2C23593900F91132 /* SMB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A092C23593900F91132 /* SMB.swift */; };
 		DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */; };
@@ -240,7 +241,6 @@
 		DD13BC742C3FD6200062313B /* InfoType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoType.swift; sourceTree = "<group>"; };
 		DD13BC762C3FD64E0062313B /* InfoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoData.swift; sourceTree = "<group>"; };
 		DD13BC782C3FE63A0062313B /* InfoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoManager.swift; sourceTree = "<group>"; };
-		DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsViewController.swift; sourceTree = "<group>"; };
 		DD493AD42ACF2109009A6922 /* ResumePump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumePump.swift; sourceTree = "<group>"; };
 		DD493AD62ACF2139009A6922 /* SuspendPump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuspendPump.swift; sourceTree = "<group>"; };
 		DD493AD82ACF2171009A6922 /* Carbs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Carbs.swift; sourceTree = "<group>"; };
@@ -254,6 +254,8 @@
 		DD493AE82ACF2445009A6922 /* BGData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGData.swift; sourceTree = "<group>"; };
 		DD5334202C60EBEE00062F9D /* InsulinCartridgeChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinCartridgeChange.swift; sourceTree = "<group>"; };
 		DD5334222C60ED3600062F9D /* IAge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAge.swift; sourceTree = "<group>"; };
+		DD5334262C61668700062F9D /* InfoDisplaySettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsViewModel.swift; sourceTree = "<group>"; };
+		DD5334282C6166A500062F9D /* InfoDisplaySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsView.swift; sourceTree = "<group>"; };
 		DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusLoop.swift; sourceTree = "<group>"; };
 		DD608A092C23593900F91132 /* SMB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMB.swift; sourceTree = "<group>"; };
 		DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundAlertManager.swift; sourceTree = "<group>"; };
@@ -533,6 +535,15 @@
 			path = Treatments;
 			sourceTree = "<group>";
 		};
+		DD5334252C61667700062F9D /* InfoDisplaySettings */ = {
+			isa = PBXGroup;
+			children = (
+				DD5334262C61668700062F9D /* InfoDisplaySettingsViewModel.swift */,
+				DD5334282C6166A500062F9D /* InfoDisplaySettingsView.swift */,
+			);
+			path = InfoDisplaySettings;
+			sourceTree = "<group>";
+		};
 		DD7E19802ACDA0EA00DBD158 /* Nightscout */ = {
 			isa = PBXGroup;
 			children = (
@@ -752,6 +763,7 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				DD5334252C61667700062F9D /* InfoDisplaySettings */,
 				DD0C0C6E2C4AFFB800DBADDF /* Remote */,
 				DD0C0C692C4852A100DBADDF /* Metric */,
 				DD13BC732C3FD60E0062313B /* InfoTable */,
@@ -841,7 +853,6 @@
 				FCFEECA1248857A600402A7F /* SettingsViewController.swift */,
 				FCC6884F248935D800A0279D /* AlarmViewController.swift */,
 				FC7CE59E248D8D23001F83B8 /* SnoozeViewController.swift */,
-				DD152D3A24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift */,
 				DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */,
 				DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */,
 				DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */,
@@ -1104,6 +1115,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */,
 				FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */,
 				FC7CE59F248D8D23001F83B8 /* SnoozeViewController.swift in Sources */,
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
@@ -1130,6 +1142,7 @@
 				DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */,
 				DDD10F032C518A6500D76A8E /* TreatmentResponse.swift in Sources */,
 				DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */,
+				DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */,
 				DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
 				DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */,
@@ -1149,7 +1162,6 @@
 				DDF699992C5AA3060058A8D9 /* TempTargetPresetManager.swift in Sources */,
 				DD0C0C722C4B000800DBADDF /* RemoteView.swift in Sources */,
 				DD493ADB2ACF21A3009A6922 /* Bolus.swift in Sources */,
-				DD152D3B24C01B2300361FA2 /* InfoDisplaySettingsViewController.swift in Sources */,
 				DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */,
 				DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */,
 				DD13BC752C3FD6210062313B /* InfoType.swift in Sources */,
