@@ -70,9 +70,19 @@ class InfoManager {
         return UserDefaultsRepository.infoSort.value.filter { UserDefaultsRepository.infoVisible.value[$0] }.count
     }
 
-    func dataForIndexPath(_ indexPath: IndexPath) -> InfoData {
+    func dataForIndexPath(_ indexPath: IndexPath) -> InfoData? {
         let sortedAndVisibleIndexes = UserDefaultsRepository.infoSort.value.filter { UserDefaultsRepository.infoVisible.value[$0] }
+
+        guard indexPath.row < sortedAndVisibleIndexes.count else {
+            return nil
+        }
+
         let infoIndex = sortedAndVisibleIndexes[indexPath.row]
+
+        guard infoIndex < tableData.count else {
+            return nil
+        }
+
         return tableData[infoIndex]
     }
 }

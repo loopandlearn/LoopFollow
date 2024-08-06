@@ -361,12 +361,18 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "LabelCell", for: indexPath)
-        let values = infoManager.dataForIndexPath(indexPath)
-        cell.textLabel?.text = values.name
-        cell.detailTextLabel?.text = values.value
+
+        if let values = infoManager.dataForIndexPath(indexPath) {
+            cell.textLabel?.text = values.name
+            cell.detailTextLabel?.text = values.value
+        } else {
+            cell.textLabel?.text = ""
+            cell.detailTextLabel?.text = ""
+        }
+
         return cell
     }
-    
+
     @objc func appMovedToBackground() {
         // Allow screen to turn off
         UIApplication.shared.isIdleTimerDisabled = false;

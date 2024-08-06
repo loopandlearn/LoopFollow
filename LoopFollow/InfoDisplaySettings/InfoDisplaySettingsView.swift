@@ -47,6 +47,9 @@ struct InfoDisplaySettingsView: View {
             .navigationBarItems(trailing: Button("Done") {
                 presentationMode.wrappedValue.dismiss()
             })
+            .onDisappear {
+                NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
+            }
         }
     }
 }
