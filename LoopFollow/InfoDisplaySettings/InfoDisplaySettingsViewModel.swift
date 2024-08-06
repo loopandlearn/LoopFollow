@@ -20,13 +20,11 @@ class InfoDisplaySettingsViewModel: ObservableObject {
 
     func toggleVisibility(for sortedIndex: Int) {
         infoVisible[sortedIndex].toggle()
-        // Update UserDefaults
         UserDefaultsRepository.infoVisible.value = infoVisible
     }
 
     func move(from source: IndexSet, to destination: Int) {
         infoSort.move(fromOffsets: source, toOffset: destination)
-        // Update UserDefaults
         UserDefaultsRepository.infoSort.value = infoSort
     }
 

@@ -389,8 +389,6 @@ class SettingsViewController: FormViewController {
 
         if UserDefaultsRepository.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
-        } else {
-            hostingController.overrideUserInterfaceStyle = .light
         }
 
         present(hostingController, animated: true, completion: nil)
