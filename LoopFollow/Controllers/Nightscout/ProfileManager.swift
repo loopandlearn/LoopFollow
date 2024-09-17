@@ -46,7 +46,6 @@ struct ProfileManager {
         guard let store = profileData.store["default"] ?? profileData.store["Default"] else {
             return
         }
-
         self.units = profileData.units.lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
         self.timezone = store.timezone
         self.defaultProfile = profileData.defaultProfile
@@ -61,6 +60,9 @@ struct ProfileManager {
         } else {
             self.overrides = []
         }
+        Storage.shared.deviceToken.value = profileData.deviceToken
+        Storage.shared.bundleId.value = profileData.bundleIdentifier
+        Storage.shared.productionEnvironment.value = profileData.isAPNSProduction
     }
 
     func currentISF() -> HKQuantity? {
