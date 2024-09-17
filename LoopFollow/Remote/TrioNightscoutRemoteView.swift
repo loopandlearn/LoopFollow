@@ -9,7 +9,9 @@
 import SwiftUI
 import HealthKit
 
-struct RemoteView: View {
+struct TrioNightscoutRemoteView: View {
+    private let remoteController = TrioNightscoutRemoteController()
+
     @ObservedObject var nightscoutURL = ObservableUserDefaults.shared.url
     @ObservedObject var device = ObservableUserDefaults.shared.device
     @ObservedObject var nsWriteAuth = ObservableUserDefaults.shared.nsWriteAuth
@@ -28,9 +30,6 @@ struct RemoteView: View {
 
     @FocusState private var targetFieldIsFocused: Bool
     @FocusState private var durationFieldIsFocused: Bool
-
-    var onCancelExistingTarget: (@escaping (Bool) -> Void) -> Void
-    var sendTempTarget: (HKQuantity, HKQuantity, @escaping (Bool) -> Void) -> Void
 
     enum AlertType {
         case confirmCommand
@@ -241,7 +240,7 @@ struct RemoteView: View {
 
     private func enactTempTarget() {
         isLoading = true
-        sendTempTarget(newHKTarget, duration) { success in
+        remoteController.sendTempTarget(newTarget: newHKTarget, duration: duration) { success in
             self.isLoading = false
             if success {
                 self.statusMessage = "Command successfully sent to Nightscout."
@@ -255,7 +254,7 @@ struct RemoteView: View {
 
     private func cancelTempTarget() {
         isLoading = true
-        onCancelExistingTarget() { success in
+        remoteController.cancelExistingTarget { success in
             self.isLoading = false
             if success {
                 self.statusMessage = "Cancellation request successfully sent to Nightscout."
