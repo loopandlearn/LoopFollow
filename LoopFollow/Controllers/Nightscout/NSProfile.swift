@@ -48,7 +48,7 @@ struct NSProfile: Decodable {
     let defaultProfile: String
     let units: String
 
-    let bundleIdentifier: String
-    let isAPNSProduction: Bool
-    let deviceToken: String
+    let bundleIdentifier: String?
+    let isAPNSProduction: Bool?
+    let deviceToken: String?
 }
