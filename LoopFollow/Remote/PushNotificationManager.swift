@@ -36,7 +36,7 @@ class PushNotificationManager {
         self.bundleId = Storage.shared.bundleId.value
     }
 
-    func sendBolusPushNotification(commandType: String, bolusAmount: HKQuantity, completion: @escaping (Bool) -> Void) {
+    func sendBolusPushNotification(commandType: String, bolusAmount: HKQuantity, completion: @escaping (Bool, String?) -> Void) {
         let bolusAmount = Decimal(bolusAmount.doubleValue(for: .internationalUnit()))
 
         let message = PushMessage(
@@ -50,7 +50,7 @@ class PushNotificationManager {
         sendPushNotification(message: message, completion: completion)
     }
 
-    func sendTempTargetPushNotification(target: HKQuantity, duration: HKQuantity, completion: @escaping (Bool) -> Void) {
+    func sendTempTargetPushNotification(target: HKQuantity, duration: HKQuantity, completion: @escaping (Bool, String?) -> Void) {
         let targetValue = Int(target.doubleValue(for: HKUnit.milligramsPerDeciliter))
         let durationValue = Int(duration.doubleValue(for: HKUnit.minute()))
 
@@ -67,7 +67,7 @@ class PushNotificationManager {
         sendPushNotification(message: message, completion: completion)
     }
 
-    func sendCancelTempTargetPushNotification(completion: @escaping (Bool) -> Void) {
+    func sendCancelTempTargetPushNotification(completion: @escaping (Bool, String?) -> Void) {
         let message = PushMessage(
             user: user,
             commandType: "cancel_temp_target",
@@ -78,7 +78,7 @@ class PushNotificationManager {
         sendPushNotification(message: message, completion: completion)
     }
 
-    func sendMealPushNotification(carbs: HKQuantity, protein: HKQuantity, fat: HKQuantity, completion: @escaping (Bool) -> Void) {
+    func sendMealPushNotification(carbs: HKQuantity, protein: HKQuantity, fat: HKQuantity, completion: @escaping (Bool, String?) -> Void) {
         let carbsValue = Int(carbs.doubleValue(for: .gram()))
         let proteinValue = Int(protein.doubleValue(for: .gram()))
         let fatValue = Int(fat.doubleValue(for: .gram()))
@@ -96,17 +96,37 @@ class PushNotificationManager {
         sendPushNotification(message: message, completion: completion)
     }
 
-    private func sendPushNotification(message: PushMessage, completion: @escaping (Bool) -> Void) {
+    private func sendPushNotification(message: PushMessage, completion: @escaping (Bool, String?) -> Void) {
         print("Push message to send: \(message)")
+
+        // Validate that all required fields are filled
+        var missingFields = [String]()
+        if deviceToken.isEmpty { missingFields.append("deviceToken") }
+        if sharedSecret.isEmpty { missingFields.append("sharedSecret") }
+        if token.isEmpty { missingFields.append("token") }
+        if teamId.isEmpty { missingFields.append("teamId") }
+        if keyId.isEmpty { missingFields.append("keyId") }
+        if user.isEmpty { missingFields.append("user") }
+        if bundleId.isEmpty { missingFields.append("bundleId") }
+
+        if !missingFields.isEmpty {
+            let errorMessage = "Missing required fields: \(missingFields.joined(separator: ", "))"
+            print(errorMessage)
+            completion(false, errorMessage)
+            return
+        }
+
         guard let url = constructAPNsURL() else {
-            print("Failed to construct APNs URL")
-            completion(false)
+            let errorMessage = "Failed to construct APNs URL"
+            print(errorMessage)
+            completion(false, errorMessage)
             return
         }
 
         guard let jwt = generateJWT() else {
-            print("Failed to generate JWT")
-            completion(false)
+            let errorMessage = "Failed to generate JWT, please check that the token is correct."
+            print(errorMessage)
+            completion(false, errorMessage)
             return
         }
 
@@ -125,23 +145,45 @@ class PushNotificationManager {
 
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    print("Failed to send push notification: \(error.localizedDescription)")
-                    completion(false)
+                    let errorMessage = "Failed to send push notification: \(error.localizedDescription)"
+                    print(errorMessage)
+                    completion(false, errorMessage)
                     return
                 }
 
                 if let httpResponse = response as? HTTPURLResponse {
-                    print("Push notification sent. Status code: \(httpResponse)")
-                    completion(httpResponse.statusCode == 200)
+                    print("Push notification sent. Status code: \(httpResponse.statusCode)")
+
+                    switch httpResponse.statusCode {
+                    case 200:
+                        completion(true, nil)
+                    case 400:
+                        completion(false, "Bad request.")
+                    case 403:
+                        completion(false, "Authentication error. Check Token, Team ID and Key ID.")
+                    case 405:
+                        completion(false, "Method not allowed.")
+                    case 413:
+                        completion(false, "Payload too large.")
+                    case 429:
+                        completion(false, "Too many requests. Rate limit exceeded.")
+                    case 500:
+                        completion(false, "Internal server error at APNs.")
+                    case 503:
+                        completion(false, "Service unavailable. Try again later.")
+                    default:
+                        completion(false, "Unexpected status code: \(httpResponse.statusCode)")
+                    }
                 } else {
-                    completion(false)
+                    completion(false, "Failed to get a valid HTTP response.")
                 }
             }
             task.resume()
 
         } catch {
-            print("Failed to encode push message: \(error.localizedDescription)")
-            completion(false)
+            let errorMessage = "Failed to encode push message: \(error.localizedDescription)"
+            print(errorMessage)
+            completion(false, errorMessage)
         }
     }
 

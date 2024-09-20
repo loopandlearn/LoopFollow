@@ -96,14 +96,13 @@ struct BolusView: View {
         isLoading = true
         bolusFieldIsFocused = false
 
-        pushNotificationManager.sendBolusPushNotification(commandType: "bolus", bolusAmount: bolusAmount) { success in
+        pushNotificationManager.sendBolusPushNotification(commandType: "bolus", bolusAmount: bolusAmount) { success, errorMessage in
             DispatchQueue.main.async {
                 isLoading = false
                 if success {
-                    bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
                     statusMessage = "Bolus command sent successfully."
                 } else {
-                    statusMessage = "Failed to send bolus command."
+                    statusMessage = errorMessage ?? "Failed to send bolus command."
                 }
                 alertType = .status
                 showAlert = true
