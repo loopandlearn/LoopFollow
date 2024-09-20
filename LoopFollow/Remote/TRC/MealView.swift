@@ -146,13 +146,13 @@ struct MealView: View {
         fatFieldIsFocused = false
         isLoading = true
 
-        pushNotificationManager.sendMealPushNotification(carbs: carbs, protein: protein, fat: fat) { success in
+        pushNotificationManager.sendMealPushNotification(carbs: carbs, protein: protein, fat: fat) { success, errorMessage in
             DispatchQueue.main.async {
                 isLoading = false
                 if success {
                     statusMessage = "Meal command sent successfully."
                 } else {
-                    statusMessage = "Failed to send meal command."
+                    statusMessage = errorMessage ?? "Failed to send meal command."
                 }
                 alertType = .status
                 showAlert = true

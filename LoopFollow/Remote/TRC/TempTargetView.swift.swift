@@ -231,10 +231,10 @@ struct TempTargetView: View {
     private func enactTempTarget() {
         isLoading = true
 
-        pushNotificationManager.sendTempTargetPushNotification(target: newHKTarget, duration: duration) { success in
+        pushNotificationManager.sendTempTargetPushNotification(target: newHKTarget, duration: duration) { success, errorMessage in
             DispatchQueue.main.async {
                 self.isLoading = false
-                self.statusMessage = success ? "Command successfully sent." : "Failed to send command."
+                self.statusMessage = success ? "Command successfully sent." : (errorMessage ?? "Failed to send command.")
                 self.alertType = .status
                 self.showAlert = true
             }
@@ -244,10 +244,10 @@ struct TempTargetView: View {
     private func cancelTempTarget() {
         isLoading = true
 
-        pushNotificationManager.sendCancelTempTargetPushNotification { success in
+        pushNotificationManager.sendCancelTempTargetPushNotification { success, errorMessage in
             DispatchQueue.main.async {
                 self.isLoading = false
-                self.statusMessage = success ? "Command successfully sent." : "Failed to send command."
+                self.statusMessage = success ? "Command successfully sent." : (errorMessage ?? "Failed to send command.")
                 self.alertType = .status
                 self.showAlert = true
             }
