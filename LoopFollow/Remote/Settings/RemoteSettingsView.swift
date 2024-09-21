@@ -15,6 +15,10 @@ struct RemoteSettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     @FocusState private var focusedField: Field?
 
+    @State private var showAlert: Bool = false
+    @State private var alertType: AlertType? = nil
+    @State private var alertMessage: String? = nil
+
     enum Field: Hashable {
         case user
         case deviceToken
@@ -24,6 +28,10 @@ struct RemoteSettingsView: View {
         case keyId
         case bundleId
         case maxBolus
+    }
+
+    enum AlertType {
+        case validation
     }
 
     var body: some View {
@@ -63,7 +71,7 @@ struct RemoteSettingsView: View {
                                 .disableAutocorrection(true)
                                 .focused($focusedField, equals: .deviceToken)
                                 .multilineTextAlignment(.trailing)
-                                .disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+                                .disabled(true)
                         }
 
                         HStack {
@@ -77,7 +85,7 @@ struct RemoteSettingsView: View {
 
                         Toggle("Production Environment", isOn: $viewModel.productionEnvironment)
                             .padding(.vertical, 5)
-                            .disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+                            .disabled(true)
 
                         VStack(alignment: .leading) {
                             Text("Token")
@@ -118,7 +126,7 @@ struct RemoteSettingsView: View {
                                 .focused($focusedField, equals: .bundleId)
                                 .multilineTextAlignment(.trailing)
                         }
-                        .disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+                        .disabled(true)
                     }
 
                     // Guardrails Section
@@ -132,7 +140,10 @@ struct RemoteSettingsView: View {
                                 unit: HKUnit.internationalUnit(),
                                 allowDecimalSeparator: true,
                                 minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.0),
-                                maxValue: HKQuantity(unit: .internationalUnit(), doubleValue: 10.0)
+                                maxValue: HKQuantity(unit: .internationalUnit(), doubleValue: 10.0),
+                                onValidationError: { message in
+                                    handleValidationError(message)
+                                }
                             )
                             .frame(width: 100)
                             Text("U")
@@ -148,7 +159,10 @@ struct RemoteSettingsView: View {
                                 unit: HKUnit.gram(),
                                 allowDecimalSeparator: true,
                                 minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                                maxValue: HKQuantity(unit: .gram(), doubleValue: 100)
+                                maxValue: HKQuantity(unit: .gram(), doubleValue: 100),
+                                onValidationError: { message in
+                                    handleValidationError(message)
+                                }
                             )
                             .frame(width: 100)
                             Text("g")
@@ -164,7 +178,10 @@ struct RemoteSettingsView: View {
                                 unit: HKUnit.gram(),
                                 allowDecimalSeparator: true,
                                 minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                                maxValue: HKQuantity(unit: .gram(), doubleValue: 100)
+                                maxValue: HKQuantity(unit: .gram(), doubleValue: 100),
+                                onValidationError: { message in
+                                    handleValidationError(message)
+                                }
                             )
                             .frame(width: 100)
                             Text("g")
@@ -180,7 +197,10 @@ struct RemoteSettingsView: View {
                                 unit: HKUnit.gram(),
                                 allowDecimalSeparator: true,
                                 minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                                maxValue: HKQuantity(unit: .gram(), doubleValue: 100)
+                                maxValue: HKQuantity(unit: .gram(), doubleValue: 100),
+                                onValidationError: { message in
+                                    handleValidationError(message)
+                                }
                             )
                             .frame(width: 100)
                             Text("g")
@@ -200,6 +220,24 @@ struct RemoteSettingsView: View {
             .onTapGesture {
                 focusedField = nil
             }
+            .alert(isPresented: $showAlert) {
+                switch alertType {
+                case .validation:
+                    return Alert(
+                        title: Text("Validation Error"),
+                        message: Text(alertMessage ?? "Invalid input."),
+                        dismissButton: .default(Text("OK"))
+                    )
+                case .none:
+                    return Alert(title: Text("Unknown Alert"))
+                }
+            }
         }
+    }
+
+    private func handleValidationError(_ message: String) {
+        alertMessage = message
+        alertType = .validation
+        showAlert = true
     }
 }

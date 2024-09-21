@@ -19,6 +19,8 @@ struct HKQuantityInputView: View {
     var maxValue: HKQuantity
     @FocusState.Binding var isFocused: Bool
 
+    var onValidationError: (String) -> Void
+
     var body: some View {
         HStack {
             Text(label)
@@ -28,7 +30,8 @@ struct HKQuantityInputView: View {
                 maxLength: maxLength,
                 unit: unit,
                 minValue: minValue,
-                maxValue: maxValue
+                maxValue: maxValue,
+                onValidationError: onValidationError
             )
             .focused($isFocused)
             Text(unit.localizedShortUnitString)

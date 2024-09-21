@@ -30,7 +30,7 @@
 		DD48780A2C7B30D40048F05C /* RemoteSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */; };
 		DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */; };
 		DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */; };
-		DD4878132C7B750D0048F05C /* TempTargetView.swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878122C7B750D0048F05C /* TempTargetView.swift.swift */; };
+		DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878122C7B750D0048F05C /* TempTargetView.swift */; };
 		DD4878152C7B75230048F05C /* MealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878142C7B75230048F05C /* MealView.swift */; };
 		DD4878172C7B75350048F05C /* BolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878162C7B75350048F05C /* BolusView.swift */; };
 		DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift */; };
@@ -267,7 +267,7 @@
 		DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsViewModel.swift; sourceTree = "<group>"; };
 		DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioRemoteControlViewModel.swift; sourceTree = "<group>"; };
 		DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioRemoteControlView.swift; sourceTree = "<group>"; };
-		DD4878122C7B750D0048F05C /* TempTargetView.swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetView.swift.swift; sourceTree = "<group>"; };
+		DD4878122C7B750D0048F05C /* TempTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetView.swift; sourceTree = "<group>"; };
 		DD4878142C7B75230048F05C /* MealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealView.swift; sourceTree = "<group>"; };
 		DD4878162C7B75350048F05C /* BolusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusView.swift; sourceTree = "<group>"; };
 		DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioNightscoutRemoteController.swift.swift; sourceTree = "<group>"; };
@@ -569,7 +569,7 @@
 		DD4878112C7B74F90048F05C /* TRC */ = {
 			isa = PBXGroup;
 			children = (
-				DD4878122C7B750D0048F05C /* TempTargetView.swift.swift */,
+				DD4878122C7B750D0048F05C /* TempTargetView.swift */,
 				DD4878142C7B75230048F05C /* MealView.swift */,
 				DD4878162C7B75350048F05C /* BolusView.swift */,
 			);
@@ -1268,7 +1268,7 @@
 				DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */,
 				DDF699962C5582290058A8D9 /* TextFieldWithToolBar.swift in Sources */,
 				DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
-				DD4878132C7B750D0048F05C /* TempTargetView.swift.swift in Sources */,
+				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
