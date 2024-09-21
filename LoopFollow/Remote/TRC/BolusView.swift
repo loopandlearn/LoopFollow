@@ -54,9 +54,11 @@ struct BolusView: View {
                         isLoading: isLoading,
                         action: {
                             bolusFieldIsFocused = false
-                            if bolusAmount.doubleValue(for: HKUnit.internationalUnit()) > 0.0 {
-                                alertType = .confirmBolus
-                                showAlert = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                if bolusAmount.doubleValue(for: HKUnit.internationalUnit()) > 0.0 {
+                                    alertType = .confirmBolus
+                                    showAlert = true
+                                }
                             }
                         },
                         isDisabled: isLoading
@@ -75,10 +77,6 @@ struct BolusView: View {
                             authenticateUser { success in
                                 if success {
                                     sendBolus()
-                                } else {
-                                    statusMessage = "Authentication failed. Please try again."
-                                    alertType = .status
-                                    showAlert = true
                                 }
                             }
                         }),
@@ -105,7 +103,6 @@ struct BolusView: View {
 
     private func sendBolus() {
         isLoading = true
-        bolusFieldIsFocused = false
 
         pushNotificationManager.sendBolusPushNotification(commandType: "bolus", bolusAmount: bolusAmount) { success, errorMessage in
             DispatchQueue.main.async {
