@@ -19,12 +19,14 @@ struct BolusView: View {
 
     @State private var showAlert = false
     @State private var alertType: AlertType? = nil
+    @State private var alertMessage: String? = nil
     @State private var isLoading = false
     @State private var statusMessage: String? = nil
 
     enum AlertType {
         case confirmBolus
         case status
+        case validation
     }
 
     var body: some View {
@@ -39,7 +41,10 @@ struct BolusView: View {
                             maxLength: 4,
                             minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05),
                             maxValue: maxBolus.value,
-                            isFocused: $bolusFieldIsFocused
+                            isFocused: $bolusFieldIsFocused,
+                            onValidationError: { message in
+                                handleValidationError(message)
+                            }
                         )
                     }
 
@@ -49,7 +54,7 @@ struct BolusView: View {
                         isLoading: isLoading,
                         action: {
                             bolusFieldIsFocused = false
-                            if bolusAmount.doubleValue(for: HKUnit.internationalUnit()) != 0.0 {
+                            if bolusAmount.doubleValue(for: HKUnit.internationalUnit()) > 0.0 {
                                 alertType = .confirmBolus
                                 showAlert = true
                             }
@@ -83,6 +88,12 @@ struct BolusView: View {
                     return Alert(
                         title: Text("Status"),
                         message: Text(statusMessage ?? ""),
+                        dismissButton: .default(Text("OK"))
+                    )
+                case .validation:
+                    return Alert(
+                        title: Text("Validation Error"),
+                        message: Text(alertMessage ?? "Invalid input."),
                         dismissButton: .default(Text("OK"))
                     )
                 case .none:
@@ -133,5 +144,11 @@ struct BolusView: View {
                 completion(false)
             }
         }
+    }
+
+    private func handleValidationError(_ message: String) {
+        alertMessage = message
+        alertType = .validation
+        showAlert = true
     }
 }

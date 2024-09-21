@@ -14,6 +14,7 @@ struct MealView: View {
     @State private var protein = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var fat = HKQuantity(unit: .gram(), doubleValue: 0.0)
     private let pushNotificationManager = PushNotificationManager()
+
     @ObservedObject private var maxCarbs = Storage.shared.maxCarbs
     @ObservedObject private var maxProtein = Storage.shared.maxProtein
     @ObservedObject private var maxFat = Storage.shared.maxFat
@@ -24,12 +25,14 @@ struct MealView: View {
 
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
+    @State private var alertMessage: String? = nil
     @State private var isLoading: Bool = false
     @State private var statusMessage: String? = nil
 
     enum AlertType {
         case confirmMeal
         case status
+        case validationError
     }
 
     var body: some View {
@@ -44,7 +47,10 @@ struct MealView: View {
                             maxLength: 4,
                             minValue: HKQuantity(unit: .gram(), doubleValue: 0),
                             maxValue: maxCarbs.value,
-                            isFocused: $carbsFieldIsFocused
+                            isFocused: $carbsFieldIsFocused,
+                            onValidationError: { message in
+                                handleValidationError(message)
+                            }
                         )
 
                         HKQuantityInputView(
@@ -54,7 +60,10 @@ struct MealView: View {
                             maxLength: 4,
                             minValue: HKQuantity(unit: .gram(), doubleValue: 0),
                             maxValue: maxProtein.value,
-                            isFocused: $proteinFieldIsFocused
+                            isFocused: $proteinFieldIsFocused,
+                            onValidationError: { message in
+                                handleValidationError(message)
+                            }
                         )
 
                         HKQuantityInputView(
@@ -64,7 +73,10 @@ struct MealView: View {
                             maxLength: 4,
                             minValue: HKQuantity(unit: .gram(), doubleValue: 0),
                             maxValue: maxFat.value,
-                            isFocused: $fatFieldIsFocused
+                            isFocused: $fatFieldIsFocused,
+                            onValidationError: { message in
+                                handleValidationError(message)
+                            }
                         )
                     }
 
@@ -129,6 +141,14 @@ struct MealView: View {
                             showAlert = false
                         })
                     )
+                case .validationError:
+                    return Alert(
+                        title: Text("Validation Error"),
+                        message: Text(alertMessage ?? ""),
+                        dismissButton: .default(Text("OK"), action: {
+                            showAlert = false
+                        })
+                    )
                 case .none:
                     return Alert(title: Text("Unknown Alert"))
                 }
@@ -158,5 +178,11 @@ struct MealView: View {
                 showAlert = true
             }
         }
+    }
+
+    private func handleValidationError(_ message: String) {
+        alertMessage = message
+        alertType = .validationError
+        showAlert = true
     }
 }
