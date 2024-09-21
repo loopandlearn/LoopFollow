@@ -89,11 +89,13 @@ struct MealView: View {
                             proteinFieldIsFocused = false
                             fatFieldIsFocused = false
 
-                            let carbsAmount = carbs.doubleValue(for: HKUnit.gram())
-                            let proteinAmount = protein.doubleValue(for: HKUnit.gram())
-                            let fatAmount = fat.doubleValue(for: HKUnit.gram())
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                guard carbs.doubleValue(for: .gram()) != 0 ||
+                                        protein.doubleValue(for: .gram()) != 0 ||
+                                        fat.doubleValue(for: .gram()) != 0 else {
+                                    return
+                                }
 
-                            if carbsAmount > 0 || proteinAmount > 0 || fatAmount > 0 {
                                 alertType = .confirmMeal
                                 showAlert = true
                             }
@@ -129,7 +131,9 @@ struct MealView: View {
                         title: Text("Confirm Meal"),
                         message: Text(message),
                         primaryButton: .default(Text("Confirm"), action: {
-                            sendMealCommand()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                sendMealCommand()
+                            }
                         }),
                         secondaryButton: .cancel()
                     )
@@ -161,9 +165,6 @@ struct MealView: View {
     }
 
     private func sendMealCommand() {
-        carbsFieldIsFocused = false
-        proteinFieldIsFocused = false
-        fatFieldIsFocused = false
         isLoading = true
 
         pushNotificationManager.sendMealPushNotification(carbs: carbs, protein: protein, fat: fat) { success, errorMessage in
