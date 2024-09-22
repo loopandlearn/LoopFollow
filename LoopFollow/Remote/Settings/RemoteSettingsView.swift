@@ -23,7 +23,7 @@ struct RemoteSettingsView: View {
         case user
         case deviceToken
         case sharedSecret
-        case token
+        case apnsKey
         case teamId
         case keyId
         case bundleId
@@ -88,8 +88,8 @@ struct RemoteSettingsView: View {
                             .disabled(true)
 
                         VStack(alignment: .leading) {
-                            Text("Token")
-                            TextEditor(text: $viewModel.token)
+                            Text("APNS Key")
+                            TextEditor(text: $viewModel.apnsKey)
                                 .frame(height: 100)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
@@ -97,7 +97,7 @@ struct RemoteSettingsView: View {
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.gray.opacity(0.5), lineWidth: 1)
                                 )
-                                .focused($focusedField, equals: .token)
+                                .focused($focusedField, equals: .apnsKey)
                         }
 
                         HStack {

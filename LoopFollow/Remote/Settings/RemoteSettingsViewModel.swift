@@ -16,7 +16,7 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var deviceToken: String
     @Published var sharedSecret: String
     @Published var productionEnvironment: Bool
-    @Published var token: String
+    @Published var apnsKey: String
     @Published var teamId: String
     @Published var keyId: String
     @Published var bundleId: String
@@ -35,7 +35,7 @@ class RemoteSettingsViewModel: ObservableObject {
         self.deviceToken = storage.deviceToken.value
         self.sharedSecret = storage.sharedSecret.value
         self.productionEnvironment = storage.productionEnvironment.value
-        self.token = storage.token.value
+        self.apnsKey = storage.apnsKey.value
         self.teamId = storage.teamId.value
         self.keyId = storage.keyId.value
         self.bundleId = storage.bundleId.value
@@ -68,8 +68,8 @@ class RemoteSettingsViewModel: ObservableObject {
             .sink { [weak self] in self?.storage.productionEnvironment.value = $0 }
             .store(in: &cancellables)
 
-        $token
-            .sink { [weak self] in self?.storage.token.value = $0 }
+        $apnsKey
+            .sink { [weak self] in self?.storage.apnsKey.value = $0 }
             .store(in: &cancellables)
 
         $teamId
