@@ -166,7 +166,7 @@ class PushNotificationManager {
                     if let data = data, let responseBody = String(data: data, encoding: .utf8) {
                         print("Response body: \(responseBody)")
 
-                        if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                            if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                            let reason = json["reason"] as? String {
                             responseBodyMessage = reason
                         }
@@ -178,19 +178,23 @@ class PushNotificationManager {
                     case 200:
                         completion(true, nil)
                     case 400:
-                        completion(false, "Bad request. \(responseBodyMessage)")
+                        completion(false, "Bad request. The request was invalid or malformed. \(responseBodyMessage)")
                     case 403:
-                        completion(false, "Authentication error. Check Token, Team ID, and Key ID. \(responseBodyMessage)")
+                        completion(false, "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)")
+                    case 404:
+                        completion(false, "Invalid request: The :path value was incorrect. \(responseBodyMessage)")
                     case 405:
-                        completion(false, "Method not allowed. \(responseBodyMessage)")
+                        completion(false, "Invalid request: Only POST requests are supported. \(responseBodyMessage)")
+                    case 410:
+                        completion(false, "The device token is no longer active for the topic. \(responseBodyMessage)")
                     case 413:
-                        completion(false, "Payload too large. \(responseBodyMessage)")
+                        completion(false, "Payload too large. The notification payload exceeded the size limit. \(responseBodyMessage)")
                     case 429:
-                        completion(false, "Too many requests. Rate limit exceeded. \(responseBodyMessage)")
+                        completion(false, "Too many requests. \(responseBodyMessage)")
                     case 500:
                         completion(false, "Internal server error at APNs. \(responseBodyMessage)")
                     case 503:
-                        completion(false, "Service unavailable. Try again later. \(responseBodyMessage)")
+                        completion(false, "Service unavailable. The server is temporarily unavailable. Try again later. \(responseBodyMessage)")
                     default:
                         completion(false, "Unexpected status code: \(httpResponse.statusCode). \(responseBodyMessage)")
                     }
