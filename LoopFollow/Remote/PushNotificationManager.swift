@@ -25,6 +25,9 @@ class PushNotificationManager {
     private var user: String
     private var bundleId: String
 
+    private var cachedJWT: String?
+    private var jwtExpirationDate: Date?
+
     init() {
         self.deviceToken = Storage.shared.deviceToken.value
         self.sharedSecret = Storage.shared.sharedSecret.value
@@ -99,7 +102,6 @@ class PushNotificationManager {
     private func sendPushNotification(message: PushMessage, completion: @escaping (Bool, String?) -> Void) {
         print("Push message to send: \(message)")
 
-        // Validate that all required fields are filled
         var missingFields = [String]()
         if deviceToken.isEmpty { missingFields.append("deviceToken") }
         if sharedSecret.isEmpty { missingFields.append("sharedSecret") }
@@ -123,7 +125,7 @@ class PushNotificationManager {
             return
         }
 
-        guard let jwt = generateJWT() else {
+        guard let jwt = getOrGenerateJWT() else {
             let errorMessage = "Failed to generate JWT, please check that the token is correct."
             print(errorMessage)
             completion(false, errorMessage)
@@ -152,27 +154,45 @@ class PushNotificationManager {
                 }
 
                 if let httpResponse = response as? HTTPURLResponse {
-                    print("Push notification sent. Status code: \(httpResponse.statusCode)")
+                    print("Push notification sent.")
+                    print("Status code: \(httpResponse.statusCode)")
+
+                    print("Response headers:")
+                    for (key, value) in httpResponse.allHeaderFields {
+                        print("\(key): \(value)")
+                    }
+
+                    var responseBodyMessage = ""
+                    if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                        print("Response body: \(responseBody)")
+
+                        if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                           let reason = json["reason"] as? String {
+                            responseBodyMessage = reason
+                        }
+                    } else {
+                        print("No response body")
+                    }
 
                     switch httpResponse.statusCode {
                     case 200:
                         completion(true, nil)
                     case 400:
-                        completion(false, "Bad request.")
+                        completion(false, "Bad request. \(responseBodyMessage)")
                     case 403:
-                        completion(false, "Authentication error. Check Token, Team ID and Key ID.")
+                        completion(false, "Authentication error. Check Token, Team ID, and Key ID. \(responseBodyMessage)")
                     case 405:
-                        completion(false, "Method not allowed.")
+                        completion(false, "Method not allowed. \(responseBodyMessage)")
                     case 413:
-                        completion(false, "Payload too large.")
+                        completion(false, "Payload too large. \(responseBodyMessage)")
                     case 429:
-                        completion(false, "Too many requests. Rate limit exceeded.")
+                        completion(false, "Too many requests. Rate limit exceeded. \(responseBodyMessage)")
                     case 500:
-                        completion(false, "Internal server error at APNs.")
+                        completion(false, "Internal server error at APNs. \(responseBodyMessage)")
                     case 503:
-                        completion(false, "Service unavailable. Try again later.")
+                        completion(false, "Service unavailable. Try again later. \(responseBodyMessage)")
                     default:
-                        completion(false, "Unexpected status code: \(httpResponse.statusCode)")
+                        completion(false, "Unexpected status code: \(httpResponse.statusCode). \(responseBodyMessage)")
                     }
                 } else {
                     completion(false, "Failed to get a valid HTTP response.")
@@ -193,7 +213,14 @@ class PushNotificationManager {
         return URL(string: urlString)
     }
 
-    private func generateJWT() -> String? {
+
+    private func getOrGenerateJWT() -> String? {
+        if let cachedJWT = cachedJWT, let expirationDate = jwtExpirationDate {
+            if Date() < expirationDate {
+                return cachedJWT
+            }
+        }
+
         let header = Header(kid: keyId)
         let claims = APNsJWTClaims(iss: teamId, iat: Date())
 
@@ -203,6 +230,10 @@ class PushNotificationManager {
             let privateKey = Data(token.utf8)
             let jwtSigner = JWTSigner.es256(privateKey: privateKey)
             let signedJWT = try jwt.sign(using: jwtSigner)
+
+            cachedJWT = signedJWT
+            jwtExpirationDate = Date().addingTimeInterval(3600)
+
             return signedJWT
         } catch {
             print("Failed to sign JWT: \(error.localizedDescription)")
