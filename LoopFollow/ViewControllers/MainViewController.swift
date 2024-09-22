@@ -58,7 +58,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Vars for NS Pull
     var mmol = false as Bool
-    var token = UserDefaultsRepository.token.value as String
+    var apnsKey = UserDefaultsRepository.token.value as String
     var defaults : UserDefaults?
     let consoleLogging = true
     var timeofLastBGUpdate = 0 as TimeInterval
