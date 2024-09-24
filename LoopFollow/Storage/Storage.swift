@@ -14,7 +14,6 @@ class Storage {
     var deviceToken = StorageValue<String>(key: "deviceToken", default: "")
     var sharedSecret = StorageValue<String>(key: "sharedSecret", default: "")
     var productionEnvironment = StorageValue<Bool>(key: "productionEnvironment", default: true)
-    var token = StorageValue<String>(key: "token", default: "")
     var apnsKey = StorageValue<String>(key: "apnsKey", default: "")
     var teamId = StorageValue<String>(key: "teamId", default: "")
     var keyId = StorageValue<String>(key: "keyId", default: "")
@@ -28,9 +27,5 @@ class Storage {
 
     static let shared = Storage()
 
-    private init() {
-        if apnsKey.value.isEmpty && !token.value.isEmpty {
-            apnsKey = token // Migrate the old `token` value to `apnsKey` TODO: Remove this code later on.
-        }
-    }
+    private init() { }
 }
