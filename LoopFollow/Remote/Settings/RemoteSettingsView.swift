@@ -87,6 +87,15 @@ struct RemoteSettingsView: View {
                             .padding(.vertical, 5)
                             .disabled(true)
 
+                        HStack {
+                            Text("APNS Key ID")
+                            TextField("Enter APNS Key ID", text: $viewModel.keyId)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .focused($focusedField, equals: .keyId)
+                                .multilineTextAlignment(.trailing)
+                        }
+
                         VStack(alignment: .leading) {
                             Text("APNS Key")
                             TextEditor(text: $viewModel.apnsKey)
@@ -106,15 +115,6 @@ struct RemoteSettingsView: View {
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
                                 .focused($focusedField, equals: .teamId)
-                                .multilineTextAlignment(.trailing)
-                        }
-
-                        HStack {
-                            Text("Key ID")
-                            TextField("Enter Key ID", text: $viewModel.keyId)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .focused($focusedField, equals: .keyId)
                                 .multilineTextAlignment(.trailing)
                         }
 

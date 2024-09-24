@@ -19,7 +19,7 @@ class PushNotificationManager {
     private var deviceToken: String
     private var sharedSecret: String
     private var productionEnvironment: Bool
-    private var token: String
+    private var apnsKey: String
     private var teamId: String
     private var keyId: String
     private var user: String
@@ -32,7 +32,7 @@ class PushNotificationManager {
         self.deviceToken = Storage.shared.deviceToken.value
         self.sharedSecret = Storage.shared.sharedSecret.value
         self.productionEnvironment = Storage.shared.productionEnvironment.value
-        self.token = Storage.shared.token.value
+        self.apnsKey = Storage.shared.apnsKey.value
         self.teamId = Storage.shared.teamId.value
         self.keyId = Storage.shared.keyId.value
         self.user = Storage.shared.user.value
@@ -105,7 +105,7 @@ class PushNotificationManager {
         var missingFields = [String]()
         if deviceToken.isEmpty { missingFields.append("deviceToken") }
         if sharedSecret.isEmpty { missingFields.append("sharedSecret") }
-        if token.isEmpty { missingFields.append("token") }
+        if apnsKey.isEmpty { missingFields.append("token") }
         if teamId.isEmpty { missingFields.append("teamId") }
         if keyId.isEmpty { missingFields.append("keyId") }
         if user.isEmpty { missingFields.append("user") }
@@ -231,7 +231,7 @@ class PushNotificationManager {
         var jwt = JWT(header: header, claims: claims)
 
         do {
-            let privateKey = Data(token.utf8)
+            let privateKey = Data(apnsKey.utf8)
             let jwtSigner = JWTSigner.es256(privateKey: privateKey)
             let signedJWT = try jwt.sign(using: jwtSigner)
 
