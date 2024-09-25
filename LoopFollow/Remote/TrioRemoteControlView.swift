@@ -30,9 +30,6 @@ struct TrioRemoteControlView: View {
                 Spacer()
             }
             .navigationBarTitle("Trio Remote Control", displayMode: .inline)
-            .navigationBarItems(trailing: Button("Done") {
-                presentationMode.wrappedValue.dismiss()
-            })
         }
     }
 }
