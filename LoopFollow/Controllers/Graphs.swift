@@ -1519,6 +1519,55 @@ extension MainViewController {
         }
     }
     
+    func wrapText(_ text: String, maxLineLength: Int) -> String {
+        var lines: [String] = []
+        var currentLine = ""
+
+        let words = text.components(separatedBy: .whitespacesAndNewlines)
+        for word in words {
+            if word.count > maxLineLength {
+                var wordToProcess = word
+                while !wordToProcess.isEmpty {
+                    let availableSpace = maxLineLength - (currentLine.isEmpty ? 0 : currentLine.count + 1)
+                    let takeCount = min(wordToProcess.count, availableSpace)
+                    let index = wordToProcess.index(wordToProcess.startIndex, offsetBy: takeCount)
+                    let substring = wordToProcess[..<index]
+
+                    if currentLine.isEmpty {
+                        currentLine = String(substring)
+                    } else {
+                        currentLine += " " + substring
+                    }
+
+                    wordToProcess = String(wordToProcess[index...])
+
+                    if currentLine.count >= maxLineLength {
+                        lines.append(currentLine)
+                        currentLine = ""
+                    }
+                }
+            } else {
+                let spaceNeeded = currentLine.isEmpty ? 0 : 1
+                if currentLine.count + spaceNeeded + word.count > maxLineLength {
+                    lines.append(currentLine)
+                    currentLine = word
+                } else {
+                    if currentLine.isEmpty {
+                        currentLine = word
+                    } else {
+                        currentLine += " " + word
+                    }
+                }
+            }
+        }
+
+        if !currentLine.isEmpty {
+            lines.append(currentLine)
+        }
+
+        return lines.joined(separator: "\r\n")
+    }
+
     func formatPillText(line1: String, time: TimeInterval, line2: String? = nil) -> String {
         let dateFormatter = DateFormatter()
         if dateTimeUtils.is24Hour() {
@@ -1526,14 +1575,16 @@ extension MainViewController {
         } else {
             dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
         }
-        
+
+        let wrappedLine1 = wrapText(line1, maxLineLength: 40)
+
         let date = Date(timeIntervalSince1970: time)
         let formattedDate = dateFormatter.string(from: date)
         
         if let line2 = line2 {
-            return line1 + "\r\n" + line2 + "\r\n" + formattedDate
+            return wrappedLine1 + "\r\n" + line2 + "\r\n" + formattedDate
         } else {
-            return line1 + "\r\n" + formattedDate
+            return wrappedLine1 + "\r\n" + formattedDate
         }
     }
   
