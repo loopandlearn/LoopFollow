@@ -109,6 +109,7 @@ struct BolusView: View {
                 isLoading = false
                 if success {
                     statusMessage = "Bolus command sent successfully."
+                    bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
                 } else {
                     statusMessage = errorMessage ?? "Failed to send bolus command."
                 }

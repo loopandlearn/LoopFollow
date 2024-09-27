@@ -172,6 +172,9 @@ struct MealView: View {
                 isLoading = false
                 if success {
                     statusMessage = "Meal command sent successfully."
+                    carbs = HKQuantity(unit: .gram(), doubleValue: 0.0)
+                    protein = HKQuantity(unit: .gram(), doubleValue: 0.0)
+                    fat = HKQuantity(unit: .gram(), doubleValue: 0.0)
                 } else {
                     statusMessage = errorMessage ?? "Failed to send meal command."
                 }
