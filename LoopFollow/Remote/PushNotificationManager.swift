@@ -103,16 +103,24 @@ class PushNotificationManager {
         print("Push message to send: \(message)")
 
         var missingFields = [String]()
-        if deviceToken.isEmpty { missingFields.append("deviceToken") }
         if sharedSecret.isEmpty { missingFields.append("sharedSecret") }
         if apnsKey.isEmpty { missingFields.append("token") }
         if teamId.isEmpty { missingFields.append("teamId") }
         if keyId.isEmpty { missingFields.append("keyId") }
         if user.isEmpty { missingFields.append("user") }
+
+        if !missingFields.isEmpty {
+            let errorMessage = "Missing required fields, check your remote settings: \(missingFields.joined(separator: ", "))"
+            print(errorMessage)
+            completion(false, errorMessage)
+            return
+        }
+
+        if deviceToken.isEmpty { missingFields.append("deviceToken") }
         if bundleId.isEmpty { missingFields.append("bundleId") }
 
         if !missingFields.isEmpty {
-            let errorMessage = "Missing required fields: \(missingFields.joined(separator: ", "))"
+            let errorMessage = "Missing required data, verify that you are using the latest version of Trio: \(missingFields.joined(separator: ", "))"
             print(errorMessage)
             completion(false, errorMessage)
             return

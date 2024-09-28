@@ -65,16 +65,6 @@ struct RemoteSettingsView: View {
                 if viewModel.remoteType == .trc {
                     Section(header: Text("Trio Remote Control Settings")) {
                         HStack {
-                            Text("Device Token")
-                            TextField("Enter Device Token", text: $viewModel.deviceToken)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .focused($focusedField, equals: .deviceToken)
-                                .multilineTextAlignment(.trailing)
-                                .disabled(true)
-                        }
-
-                        HStack {
                             Text("Shared Secret")
                             TextField("Enter Shared Secret", text: $viewModel.sharedSecret)
                                 .autocapitalization(.none)
@@ -82,10 +72,6 @@ struct RemoteSettingsView: View {
                                 .focused($focusedField, equals: .sharedSecret)
                                 .multilineTextAlignment(.trailing)
                         }
-
-                        Toggle("Production Environment", isOn: $viewModel.productionEnvironment)
-                            .padding(.vertical, 5)
-                            .disabled(true)
 
                         HStack {
                             Text("APNS Key ID")
@@ -117,16 +103,6 @@ struct RemoteSettingsView: View {
                                 .focused($focusedField, equals: .teamId)
                                 .multilineTextAlignment(.trailing)
                         }
-
-                        HStack {
-                            Text("Bundle ID")
-                            TextField("Enter Bundle ID", text: $viewModel.bundleId)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .focused($focusedField, equals: .bundleId)
-                                .multilineTextAlignment(.trailing)
-                        }
-                        .disabled(true)
                     }
 
                     // Guardrails Section
