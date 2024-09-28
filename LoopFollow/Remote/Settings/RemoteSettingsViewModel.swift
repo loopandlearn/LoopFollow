@@ -13,13 +13,10 @@ import HealthKit
 class RemoteSettingsViewModel: ObservableObject {
     @Published var remoteType: RemoteType
     @Published var user: String
-    @Published var deviceToken: String
     @Published var sharedSecret: String
-    @Published var productionEnvironment: Bool
     @Published var apnsKey: String
     @Published var teamId: String
     @Published var keyId: String
-    @Published var bundleId: String
 
     @Published var maxBolus: HKQuantity
     @Published var maxCarbs: HKQuantity
@@ -32,13 +29,10 @@ class RemoteSettingsViewModel: ObservableObject {
     init() {
         self.remoteType = storage.remoteType.value
         self.user = storage.user.value
-        self.deviceToken = storage.deviceToken.value
         self.sharedSecret = storage.sharedSecret.value
-        self.productionEnvironment = storage.productionEnvironment.value
         self.apnsKey = storage.apnsKey.value
         self.teamId = storage.teamId.value
         self.keyId = storage.keyId.value
-        self.bundleId = storage.bundleId.value
         self.maxBolus = storage.maxBolus.value
         self.maxCarbs = storage.maxCarbs.value
         self.maxProtein = storage.maxProtein.value
@@ -56,16 +50,8 @@ class RemoteSettingsViewModel: ObservableObject {
             .sink { [weak self] in self?.storage.user.value = $0 }
             .store(in: &cancellables)
 
-        $deviceToken
-            .sink { [weak self] in self?.storage.deviceToken.value = $0 }
-            .store(in: &cancellables)
-
         $sharedSecret
             .sink { [weak self] in self?.storage.sharedSecret.value = $0 }
-            .store(in: &cancellables)
-
-        $productionEnvironment
-            .sink { [weak self] in self?.storage.productionEnvironment.value = $0 }
             .store(in: &cancellables)
 
         $apnsKey
@@ -78,10 +64,6 @@ class RemoteSettingsViewModel: ObservableObject {
 
         $keyId
             .sink { [weak self] in self?.storage.keyId.value = $0 }
-            .store(in: &cancellables)
-
-        $bundleId
-            .sink { [weak self] in self?.storage.bundleId.value = $0 }
             .store(in: &cancellables)
 
         $maxBolus
