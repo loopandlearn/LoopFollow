@@ -10,20 +10,23 @@ import Foundation
 import HealthKit
 
 class Storage {
-    var remoteType = StorageValue<RemoteType>(key: "remoteType", default: .nightscout)
-    var deviceToken = StorageValue<String>(key: "deviceToken", default: "")
-    var sharedSecret = StorageValue<String>(key: "sharedSecret", default: "")
-    var productionEnvironment = StorageValue<Bool>(key: "productionEnvironment", default: true)
-    var apnsKey = StorageValue<String>(key: "apnsKey", default: "")
-    var teamId = StorageValue<String>(key: "teamId", default: "")
-    var keyId = StorageValue<String>(key: "keyId", default: "")
-    var bundleId = StorageValue<String>(key: "bundleId", default: "")
-    var user = StorageValue<String>(key: "user", default: "")
+    var remoteType = StorageValue<RemoteType>(key: "remoteType", defaultValue: .nightscout)
+    var deviceToken = StorageValue<String>(key: "deviceToken", defaultValue: "")
+    var sharedSecret = StorageValue<String>(key: "sharedSecret", defaultValue: "")
+    var productionEnvironment = StorageValue<Bool>(key: "productionEnvironment", defaultValue: true)
+    var apnsKey = StorageValue<String>(key: "apnsKey", defaultValue: "")
+    var teamId = StorageValue<String>(key: "teamId", defaultValue: "")
+    var keyId = StorageValue<String>(key: "keyId", defaultValue: "")
+    var bundleId = StorageValue<String>(key: "bundleId", defaultValue: "")
+    var user = StorageValue<String>(key: "user", defaultValue: "")
 
-    var maxBolus = SecureStorageValue<HKQuantity>(key: "maxBolus", default: HKQuantity(unit: .internationalUnit(), doubleValue: 1.0))
-    var maxCarbs = SecureStorageValue<HKQuantity>(key: "maxCarbs", default: HKQuantity(unit: .gram(), doubleValue: 30.0))
-    var maxProtein = SecureStorageValue<HKQuantity>(key: "maxProtein", default: HKQuantity(unit: .gram(), doubleValue: 30.0))
-    var maxFat = SecureStorageValue<HKQuantity>(key: "maxFat", default: HKQuantity(unit: .gram(), doubleValue: 30.0))
+    var maxBolus = SecureStorageValue<HKQuantity>(key: "maxBolus", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 1.0))
+    var maxCarbs = SecureStorageValue<HKQuantity>(key: "maxCarbs", defaultValue: HKQuantity(unit: .gram(), doubleValue: 30.0))
+    var maxProtein = SecureStorageValue<HKQuantity>(key: "maxProtein", defaultValue: HKQuantity(unit: .gram(), doubleValue: 30.0))
+    var maxFat = SecureStorageValue<HKQuantity>(key: "maxFat", defaultValue: HKQuantity(unit: .gram(), doubleValue: 30.0))
+
+    var cachedJWT = StorageValue<String?>(key: "cachedJWT", defaultValue: nil)
+    var jwtExpirationDate = StorageValue<Date?>(key: "jwtExpirationDate", defaultValue: nil)
 
     static let shared = Storage()
 

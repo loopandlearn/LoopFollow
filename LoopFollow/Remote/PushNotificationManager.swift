@@ -25,9 +25,6 @@ class PushNotificationManager {
     private var user: String
     private var bundleId: String
 
-    private var cachedJWT: String?
-    private var jwtExpirationDate: Date?
-
     init() {
         self.deviceToken = Storage.shared.deviceToken.value
         self.sharedSecret = Storage.shared.sharedSecret.value
@@ -227,7 +224,7 @@ class PushNotificationManager {
 
 
     private func getOrGenerateJWT() -> String? {
-        if let cachedJWT = cachedJWT, let expirationDate = jwtExpirationDate {
+        if let cachedJWT = Storage.shared.cachedJWT.value, let expirationDate = Storage.shared.jwtExpirationDate.value {
             if Date() < expirationDate {
                 return cachedJWT
             }
@@ -243,8 +240,8 @@ class PushNotificationManager {
             let jwtSigner = JWTSigner.es256(privateKey: privateKey)
             let signedJWT = try jwt.sign(using: jwtSigner)
 
-            cachedJWT = signedJWT
-            jwtExpirationDate = Date().addingTimeInterval(3600)
+            Storage.shared.cachedJWT.value = signedJWT
+            Storage.shared.jwtExpirationDate.value = Date().addingTimeInterval(3600)
 
             return signedJWT
         } catch {

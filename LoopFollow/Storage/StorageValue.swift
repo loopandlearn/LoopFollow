@@ -30,10 +30,11 @@ class StorageValue<T: Codable & Equatable>: ObservableObject {
         return UserDefaults.standard
     }
 
-    init(key: String, default defaultValue: T) {
+    init(key: String, defaultValue: T) {
         self.key = key
 
-        if let data = StorageValue.defaults.data(forKey: key), let decodedValue = try? JSONDecoder().decode(T.self, from: data) {
+        if let data = StorageValue.defaults.data(forKey: key),
+           let decodedValue = try? JSONDecoder().decode(T.self, from: data) {
             self.value = decodedValue
         } else {
             self.value = defaultValue
