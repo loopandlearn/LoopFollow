@@ -29,7 +29,7 @@ class SecureStorageValue<T: NSObject & NSSecureCoding & Equatable>: ObservableOb
         return UserDefaults.standard
     }
 
-    init(key: String, default defaultValue: T) {
+    init(key: String, defaultValue: T) {
         self.key = key
         if let data = SecureStorageValue.defaults.data(forKey: key),
            let decodedValue = try? NSKeyedUnarchiver.unarchivedObject(ofClass: T.self, from: data) {
