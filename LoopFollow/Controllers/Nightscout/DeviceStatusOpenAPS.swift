@@ -28,8 +28,8 @@ extension MainViewController {
                 var determinedUnit: HKUnit = .milligramsPerDeciliter
 
                 // Determine the unit based on the threshold value since no unit is provided
-                if let enactedTargetValue = enacted["threshold"] as? Double {
-                    if enactedTargetValue < 40 {
+                if let enactedThresholdValue = enacted["threshold"] as? Double {
+                    if enactedThresholdValue < 40 {
                         determinedUnit = .millimolesPerLiter
                     }
                 }
@@ -109,7 +109,11 @@ extension MainViewController {
                 let profileTargetHigh = profileManager.currentTargetHigh()
                 var enactedTarget: HKQuantity?
                 if let enactedTargetValue = enacted["current_target"] as? Double {
-                    enactedTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: enactedTargetValue)
+                    var targetUnit = HKUnit.milligramsPerDeciliter
+                    if enactedTargetValue < 40 {
+                        targetUnit = .millimolesPerLiter
+                    }
+                    enactedTarget = HKQuantity(unit: targetUnit, doubleValue: enactedTargetValue)
                 }
 
                 if let profileTargetHigh = profileTargetHigh, let enactedTarget = enactedTarget {
