@@ -10,6 +10,7 @@ import SwiftUI
 import HealthKit
 
 struct MealView: View {
+    @Environment(\.presentationMode) private var presentationMode
     @State private var carbs = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var protein = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var fat = HKQuantity(unit: .gram(), doubleValue: 0.0)
@@ -31,7 +32,8 @@ struct MealView: View {
 
     enum AlertType {
         case confirmMeal
-        case status
+        case statusSuccess
+        case statusFailure
         case validationError
     }
 
@@ -137,21 +139,25 @@ struct MealView: View {
                         }),
                         secondaryButton: .cancel()
                     )
-                case .status:
+                case .statusSuccess:
                     return Alert(
                         title: Text("Status"),
                         message: Text(statusMessage ?? ""),
                         dismissButton: .default(Text("OK"), action: {
-                            showAlert = false
+                            presentationMode.wrappedValue.dismiss()
                         })
+                    )
+                case .statusFailure:
+                    return Alert(
+                        title: Text("Status"),
+                        message: Text(statusMessage ?? ""),
+                        dismissButton: .default(Text("OK"))
                     )
                 case .validationError:
                     return Alert(
                         title: Text("Validation Error"),
                         message: Text(alertMessage ?? ""),
-                        dismissButton: .default(Text("OK"), action: {
-                            showAlert = false
-                        })
+                        dismissButton: .default(Text("OK"))
                     )
                 case .none:
                     return Alert(title: Text("Unknown Alert"))
@@ -175,10 +181,11 @@ struct MealView: View {
                     carbs = HKQuantity(unit: .gram(), doubleValue: 0.0)
                     protein = HKQuantity(unit: .gram(), doubleValue: 0.0)
                     fat = HKQuantity(unit: .gram(), doubleValue: 0.0)
+                    alertType = .statusSuccess
                 } else {
                     statusMessage = errorMessage ?? "Failed to send meal command."
+                    alertType = .statusFailure
                 }
-                alertType = .status
                 showAlert = true
             }
         }

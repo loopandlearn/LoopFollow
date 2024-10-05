@@ -11,7 +11,7 @@ import Foundation
 struct PushMessage: Encodable {
     let aps: [String: Int] = ["content-available": 1]
     var user: String
-    var commandType: String
+    var commandType: TRCCommandType
     var bolusAmount: Decimal?
     var target: Int?
     var duration: Int?
@@ -33,5 +33,20 @@ struct PushMessage: Encodable {
         case fat
         case sharedSecret = "shared_secret"
         case timestamp
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(aps, forKey: .aps)
+        try container.encode(user, forKey: .user)
+        try container.encode(commandType.rawValue, forKey: .commandType)
+        try container.encode(bolusAmount, forKey: .bolusAmount)
+        try container.encode(target, forKey: .target)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(carbs, forKey: .carbs)
+        try container.encode(protein, forKey: .protein)
+        try container.encode(fat, forKey: .fat)
+        try container.encode(sharedSecret, forKey: .sharedSecret)
+        try container.encode(timestamp, forKey: .timestamp)
     }
 }

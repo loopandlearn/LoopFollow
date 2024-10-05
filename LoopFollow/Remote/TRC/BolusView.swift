@@ -11,6 +11,7 @@ import HealthKit
 import LocalAuthentication
 
 struct BolusView: View {
+    @Environment(\.presentationMode) private var presentationMode
     @State private var bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
     private let pushNotificationManager = PushNotificationManager()
     @ObservedObject private var maxBolus = Storage.shared.maxBolus
@@ -25,7 +26,8 @@ struct BolusView: View {
 
     enum AlertType {
         case confirmBolus
-        case status
+        case statusSuccess
+        case statusFailure
         case validation
     }
 
@@ -82,7 +84,15 @@ struct BolusView: View {
                         }),
                         secondaryButton: .cancel()
                     )
-                case .status:
+                case .statusSuccess:
+                    return Alert(
+                        title: Text("Status"),
+                        message: Text(statusMessage ?? ""),
+                        dismissButton: .default(Text("OK"), action: {
+                            presentationMode.wrappedValue.dismiss()
+                        })
+                    )
+                case .statusFailure:
                     return Alert(
                         title: Text("Status"),
                         message: Text(statusMessage ?? ""),
@@ -104,16 +114,17 @@ struct BolusView: View {
     private func sendBolus() {
         isLoading = true
 
-        pushNotificationManager.sendBolusPushNotification(commandType: "bolus", bolusAmount: bolusAmount) { success, errorMessage in
+        pushNotificationManager.sendBolusPushNotification(bolusAmount: bolusAmount) { success, errorMessage in
             DispatchQueue.main.async {
                 isLoading = false
                 if success {
                     statusMessage = "Bolus command sent successfully."
                     bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
+                    alertType = .statusSuccess
                 } else {
                     statusMessage = errorMessage ?? "Failed to send bolus command."
+                    alertType = .statusFailure
                 }
-                alertType = .status
                 showAlert = true
             }
         }

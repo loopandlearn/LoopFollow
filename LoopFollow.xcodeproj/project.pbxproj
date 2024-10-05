@@ -88,6 +88,7 @@
 		DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF6999A2C5AA32E0058A8D9 /* TempTargetPreset.swift */; };
 		DDF6999E2C5AAA640058A8D9 /* ErrorMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */; };
 		DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF9676D2AD08C6E00C5EB95 /* SiteChange.swift */; };
+		DDFD5C532CB167DA00D3FD68 /* TRCCommandType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFD5C522CB167DA00D3FD68 /* TRCCommandType.swift */; };
 		FC16A97A24996673003D6245 /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97924996673003D6245 /* NightScout.swift */; };
 		FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
 		FC16A97D24996747003D6245 /* Alarms.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97C24996747003D6245 /* Alarms.swift */; };
@@ -325,6 +326,7 @@
 		DDF6999A2C5AA32E0058A8D9 /* TempTargetPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetPreset.swift; sourceTree = "<group>"; };
 		DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorMessageView.swift; sourceTree = "<group>"; };
 		DDF9676D2AD08C6E00C5EB95 /* SiteChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteChange.swift; sourceTree = "<group>"; };
+		DDFD5C522CB167DA00D3FD68 /* TRCCommandType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TRCCommandType.swift; sourceTree = "<group>"; };
 		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
 		FC16A97924996673003D6245 /* NightScout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScout.swift; sourceTree = "<group>"; };
 		FC16A97C24996747003D6245 /* Alarms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarms.swift; sourceTree = "<group>"; };
@@ -572,6 +574,7 @@
 				DD4878122C7B750D0048F05C /* TempTargetView.swift */,
 				DD4878142C7B75230048F05C /* MealView.swift */,
 				DD4878162C7B75350048F05C /* BolusView.swift */,
+				DDFD5C522CB167DA00D3FD68 /* TRCCommandType.swift */,
 			);
 			path = TRC;
 			sourceTree = "<group>";
@@ -1212,6 +1215,7 @@
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
 				DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */,
 				FC16A97D24996747003D6245 /* Alarms.swift in Sources */,
+				DDFD5C532CB167DA00D3FD68 /* TRCCommandType.swift in Sources */,
 				DD16AF112C997B4600FB655A /* LoadingButtonView.swift in Sources */,
 				FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */,
 				DDB0AF522BB1A8BE00AFA48B /* BuildDetails.swift in Sources */,
