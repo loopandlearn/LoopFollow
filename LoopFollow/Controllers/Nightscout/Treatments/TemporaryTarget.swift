@@ -41,7 +41,9 @@ extension MainViewController {
                 return
             }
 
-            guard let enteredBy = currentEntry["enteredBy"] as? String, let reason = currentEntry["reason"] as? String else {
+            let reason = currentEntry["reason"] as? String ?? ""
+
+            guard let enteredBy = currentEntry["enteredBy"] as? String else {
                 return
             }
 
