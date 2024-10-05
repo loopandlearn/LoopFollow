@@ -10,6 +10,7 @@ import SwiftUI
 import HealthKit
 
 struct TempTargetView: View {
+    @Environment(\.presentationMode) private var presentationMode
     private let pushNotificationManager = PushNotificationManager()
 
     @ObservedObject var device = ObservableUserDefaults.shared.device
@@ -32,7 +33,8 @@ struct TempTargetView: View {
 
     enum AlertType {
         case confirmCommand
-        case status
+        case statusSuccess
+        case statusFailure
         case validation
         case confirmCancellation
     }
@@ -181,7 +183,15 @@ struct TempTargetView: View {
                         }),
                         secondaryButton: .cancel()
                     )
-                case .status:
+                case .statusSuccess:
+                    return Alert(
+                        title: Text("Status"),
+                        message: Text(statusMessage ?? ""),
+                        dismissButton: .default(Text("OK"), action: {
+                            presentationMode.wrappedValue.dismiss()
+                        })
+                    )
+                case .statusFailure:
                     return Alert(
                         title: Text("Status"),
                         message: Text(statusMessage ?? ""),
@@ -246,8 +256,13 @@ struct TempTargetView: View {
         pushNotificationManager.sendTempTargetPushNotification(target: newHKTarget, duration: duration) { success, errorMessage in
             DispatchQueue.main.async {
                 self.isLoading = false
-                self.statusMessage = success ? "Command successfully sent." : (errorMessage ?? "Failed to send command.")
-                self.alertType = .status
+                if success {
+                    self.statusMessage = "Temp target command successfully sent."
+                    self.alertType = .statusSuccess
+                } else {
+                    self.statusMessage = errorMessage ?? "Failed to send temp target command."
+                    self.alertType = .statusFailure
+                }
                 self.showAlert = true
             }
         }
@@ -259,8 +274,13 @@ struct TempTargetView: View {
         pushNotificationManager.sendCancelTempTargetPushNotification { success, errorMessage in
             DispatchQueue.main.async {
                 self.isLoading = false
-                self.statusMessage = success ? "Command successfully sent." : (errorMessage ?? "Failed to send command.")
-                self.alertType = .status
+                if success {
+                    self.statusMessage = "Cancel temp target command successfully sent."
+                    self.alertType = .statusSuccess
+                } else {
+                    self.statusMessage = errorMessage ?? "Failed to send cancel temp target command."
+                    self.alertType = .statusFailure
+                }
                 self.showAlert = true
             }
         }
