@@ -36,6 +36,30 @@ class PushNotificationManager {
         self.bundleId = Storage.shared.bundleId.value
     }
 
+    func sendOverridePushNotification(override: ProfileManager.TrioOverride, completion: @escaping (Bool, String?) -> Void) {
+        let message = PushMessage(
+            user: user,
+            commandType: .startOverride,
+            sharedSecret: sharedSecret,
+            timestamp: Date().timeIntervalSince1970,
+            overrideName: override.name
+        )
+
+        sendPushNotification(message: message, completion: completion)
+    }
+
+    func sendCancelOverridePushNotification(completion: @escaping (Bool, String?) -> Void) {
+        let message = PushMessage(
+            user: user,
+            commandType: .cancelOverride,
+            sharedSecret: sharedSecret,
+            timestamp: Date().timeIntervalSince1970,
+            overrideName: nil
+        )
+
+        sendPushNotification(message: message, completion: completion)
+    }
+
     func sendBolusPushNotification(bolusAmount: HKQuantity, completion: @escaping (Bool, String?) -> Void) {
         let bolusAmount = Decimal(bolusAmount.doubleValue(for: .internationalUnit()))
 

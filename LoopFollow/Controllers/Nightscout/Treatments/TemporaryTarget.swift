@@ -13,7 +13,7 @@ import HealthKit
 extension MainViewController {
     // NS Temporary Target Response Processor
     func processNSTemporaryTarget(entries: [[String: AnyObject]]) {
-        overrideGraphData.removeAll()
+        tempTargetGraphData.removeAll()
         var activeTempTarget: Int? = nil
 
         entries.reversed().enumerated().forEach { (index, currentEntry) in
@@ -26,12 +26,12 @@ extension MainViewController {
                 dateTimeStamp = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             }
 
-            var duration: Double = (currentEntry["duration"] as? Double ?? 5.0) * 60
+            let duration: Double = (currentEntry["duration"] as? Double ?? 5.0) * 60
 
             // If duration is 0, this marks the end of the last temp target
             if duration == 0 {
-                if let activeIndex = overrideGraphData.lastIndex(where: { $0.endDate > dateTimeStamp }) {
-                    overrideGraphData[activeIndex].endDate = dateTimeStamp
+                if let activeIndex = tempTargetGraphData.lastIndex(where: { $0.endDate > dateTimeStamp }) {
+                    tempTargetGraphData[activeIndex].endDate = dateTimeStamp
                     activeTempTarget = nil
                 }
                 return
@@ -57,8 +57,8 @@ extension MainViewController {
 
             let endDate = dateTimeStamp + duration
 
-            let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: 1.0, date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: [Int(targetValue!)], enteredBy: enteredBy, reason: reason, sgv: -20)
-            overrideGraphData.append(dot)
+            let dot = DataStructs.tempTargetStruct(date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: [Int(targetValue!)], enteredBy: enteredBy, reason: reason)
+            tempTargetGraphData.append(dot)
 
             // Set activeTempTarget only if it is still active
             let currentTime = Date().timeIntervalSince1970
@@ -68,7 +68,7 @@ extension MainViewController {
         }
 
         if UserDefaultsRepository.graphOtherTreatments.value {
-            updateOverrideGraph()
+            updateTempTargetGraph()
         }
 
         if let target = activeTempTarget {
