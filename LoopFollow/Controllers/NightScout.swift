@@ -102,6 +102,12 @@ extension MainViewController {
         updateOverrideGraph()
     }
     
+    func clearOldTempTarget()
+    {
+        tempTargetGraphData.removeAll()
+        updateTempTargetGraph()
+    }
+
     func clearOldSuspend()
     {
         suspendGraphData.removeAll()

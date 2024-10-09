@@ -24,6 +24,7 @@ struct TrioRemoteControlView: View {
                     CommandButtonView(command: "Meal", iconName: "fork.knife", destination: MealView())
                     CommandButtonView(command: "Bolus", iconName: "syringe", destination: BolusView())
                     CommandButtonView(command: "Temp Target", iconName: "scope", destination: TempTargetView())
+                    CommandButtonView(command: "Overrides", iconName: "slider.horizontal.3", destination: OverrideView())
                 }
                 .padding(.horizontal)
 

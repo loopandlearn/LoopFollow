@@ -20,6 +20,7 @@ struct PushMessage: Encodable {
     var fat: Int?
     var sharedSecret: String
     var timestamp: TimeInterval
+    var overrideName: String?
 
     enum CodingKeys: String, CodingKey {
         case aps
@@ -33,6 +34,7 @@ struct PushMessage: Encodable {
         case fat
         case sharedSecret = "shared_secret"
         case timestamp
+        case overrideName
     }
 
     func encode(to encoder: Encoder) throws {
@@ -48,5 +50,6 @@ struct PushMessage: Encodable {
         try container.encode(fat, forKey: .fat)
         try container.encode(sharedSecret, forKey: .sharedSecret)
         try container.encode(timestamp, forKey: .timestamp)
+        try container.encode(overrideName, forKey: .overrideName)
     }
 }
