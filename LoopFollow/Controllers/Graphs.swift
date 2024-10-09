@@ -12,6 +12,52 @@ import UIKit
 
 import Charts
 
+enum GraphDataIndex: Int {
+    case bg = 0
+    case prediction = 1
+    case basal = 2
+    case bolus = 3
+    case carbs = 4
+    case basalScheduled = 5
+    case override = 6
+    case bgCheck = 7
+    case suspend = 8
+    case resumePump = 9
+    case sensorStart = 10
+    case note = 11
+    case ztPrediction = 12
+    case iobPrediction = 13
+    case cobPrediction = 14
+    case uamPrediction = 15
+    case smb = 16
+    case tempTarget = 17
+}
+
+extension GraphDataIndex {
+    var description: String {
+        switch self {
+        case .bg: return "BG"
+        case .prediction: return "Prediction"
+        case .basal: return "Basal"
+        case .bolus: return "Bolus"
+        case .carbs: return "Carbs"
+        case .basalScheduled: return "Basal Scheduled"
+        case .override: return "Override"
+        case .bgCheck: return "BG Check"
+        case .suspend: return "Suspend"
+        case .resumePump: return "Resume Pump"
+        case .sensorStart: return "Sensor Start"
+        case .note: return "Note"
+        case .ztPrediction: return "ZT Prediction"
+        case .iobPrediction: return "IOB Prediction"
+        case .cobPrediction: return "COB Prediction"
+        case .uamPrediction: return "UAM Prediction"
+        case .smb: return "SMB"
+        case .tempTarget: return "Temp Target"
+        }
+    }
+}
+
 class TriangleRenderer: LineChartRenderer {
     let smbDataSetIndex: Int
     
@@ -44,6 +90,87 @@ class TriangleRenderer: LineChartRenderer {
                 context.setFillColor(lineDataSet.circleColors.first!.cgColor)
                 context.fillPath()
                 
+                context.restoreGState()
+            }
+        }
+    }
+}
+
+class TempTargetChartDataEntry: ChartDataEntry {
+    var xStart: Double = 0.0
+    var xEnd: Double = 0.0
+    var yTop: Double = 0.0
+    var yBottom: Double = 0.0
+
+    required init() {
+        super.init()
+    }
+
+    init(xStart: Double, xEnd: Double, yTop: Double, yBottom: Double, data: Any?) {
+        self.xStart = xStart
+        self.xEnd = xEnd
+        self.yTop = yTop
+        self.yBottom = yBottom
+
+        super.init(x: xStart, y: yTop)
+        self.data = data
+    }
+
+    override func copy(with zone: NSZone? = nil) -> Any {
+        let copy = TempTargetChartDataEntry(
+            xStart: xStart,
+            xEnd: xEnd,
+            yTop: yTop,
+            yBottom: yBottom,
+            data: data
+        )
+        return copy
+    }
+}
+
+class TempTargetRenderer: LineChartRenderer {
+    let tempTargetDataSetIndex: Int
+
+    init(dataProvider: LineChartDataProvider?, animator: Animator?, viewPortHandler: ViewPortHandler?, tempTargetDataSetIndex: Int) {
+        self.tempTargetDataSetIndex = tempTargetDataSetIndex
+        super.init(dataProvider: dataProvider!, animator: animator!, viewPortHandler: viewPortHandler!)
+    }
+
+    override func drawExtras(context: CGContext) {
+        super.drawExtras(context: context)
+
+        guard let dataProvider = dataProvider else { return }
+
+        if dataProvider.lineData?.dataSets.count ?? 0 > tempTargetDataSetIndex,
+           let lineDataSet = dataProvider.lineData?.dataSets[tempTargetDataSetIndex] as? LineChartDataSet {
+
+            let trans = dataProvider.getTransformer(forAxis: lineDataSet.axisDependency)
+            let phaseY = animator.phaseY
+
+            for i in 0 ..< lineDataSet.entryCount {
+                guard let entry = lineDataSet.entryForIndex(i) as? TempTargetChartDataEntry else { continue }
+
+                let xStart = entry.xStart
+                let xEnd = entry.xEnd
+                let yTop = entry.yTop * phaseY
+                let yBottom = entry.yBottom * phaseY
+
+                let leftTop = trans.pixelForValues(x: xStart, y: yTop)
+                let rightBottom = trans.pixelForValues(x: xEnd, y: yBottom)
+
+                var rect = CGRect(x: leftTop.x, y: leftTop.y, width: rightBottom.x - leftTop.x, height: rightBottom.y - leftTop.y)
+                if rect.width < 0 {
+                    rect.origin.x += rect.width
+                    rect.size.width = abs(rect.width)
+                }
+                if rect.height < 0 {
+                    rect.origin.y += rect.height
+                    rect.size.height = abs(rect.height)
+                }
+
+                context.saveGState()
+                context.setFillColor(NSUIColor.systemPurple.withAlphaComponent(0.5).cgColor)
+                context.fill(rect)
                 context.restoreGState()
             }
         }
@@ -414,7 +541,20 @@ extension MainViewController {
             lineSmb.drawValuesEnabled = false
             lineSmb.highlightEnabled = true
         }
-        
+
+        // TempTarget graph data
+        let chartTempTargetEntry = [ChartDataEntry]()
+        let lineTempTarget = LineChartDataSet(entries:chartTempTargetEntry, label: "")
+        lineTempTarget.setDrawHighlightIndicators(false)
+        lineTempTarget.lineWidth = 0
+        lineTempTarget.drawFilledEnabled = false
+        lineTempTarget.fillColor = NSUIColor.systemPurple
+        lineTempTarget.fillAlpha = 0.6
+        lineTempTarget.drawCirclesEnabled = false
+        lineTempTarget.axisDependency = YAxis.AxisDependency.right
+        lineTempTarget.highlightEnabled = true
+        lineTempTarget.drawValuesEnabled = false
+
         // Setup the chart data of all lines
         let data = LineChartData()
         
@@ -435,6 +575,7 @@ extension MainViewController {
         data.append(COBlinePrediction) // Dataset 14
         data.append(UAMlinePrediction) // Dataset 15
         data.append(lineSmb) // Dataset 16
+        data.append(lineTempTarget)
 
         data.setValueFont(UIFont.systemFont(ofSize: 12))
         
@@ -1414,7 +1555,20 @@ extension MainViewController {
         lineSmb.drawFilledEnabled = false
         lineSmb.drawValuesEnabled = false
         lineSmb.highlightEnabled = false
-        
+
+        // Temp Target graph data
+        let chartTempTargetEntry = [ChartDataEntry]()
+        let lineTempTarget = LineChartDataSet(entries:chartTempTargetEntry, label: "")
+        lineTempTarget.setDrawHighlightIndicators(false)
+        lineTempTarget.lineWidth = 0
+        lineTempTarget.drawFilledEnabled = false
+        lineTempTarget.fillColor = NSUIColor.systemPurple
+        lineTempTarget.fillAlpha = 0.6
+        lineTempTarget.drawCirclesEnabled = false
+        lineTempTarget.axisDependency = YAxis.AxisDependency.right
+        lineTempTarget.highlightEnabled = true
+        lineTempTarget.drawValuesEnabled = false
+
         // Setup the chart data of all lines
         let data = LineChartData()
         data.append(lineBG) // Dataset 0
@@ -1434,6 +1588,7 @@ extension MainViewController {
         data.append(COBlinePrediction) // Dataset 14
         data.append(UAMlinePrediction) // Dataset 15
         data.append(lineSmb) // Dataset 16
+        data.append(lineTempTarget)
 
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false
@@ -1452,8 +1607,6 @@ extension MainViewController {
         BGChartFull.scaleXEnabled = false
         BGChartFull.drawGridBackgroundEnabled = false
         BGChartFull.data = data
-        
-        
     }
     
     func updateOverrideGraph() {
@@ -1518,7 +1671,97 @@ extension MainViewController {
             BGChartFull.notifyDataSetChanged()
         }
     }
-    
+
+    func getChartDataSets(for index: GraphDataIndex) -> (chart: LineChartDataSet?, smallChart: LineChartDataSet?) {
+        guard let chart = BGChart.lineData,
+              index.rawValue < chart.dataSets.count,
+              let smallChartData = BGChartFull.lineData,
+              index.rawValue < smallChartData.dataSets.count else {
+            print("Warning: Invalid GraphDataIndex \(index.description) or lineData is nil.")
+            return (nil, nil)
+        }
+
+        let chartDataSet = chart.dataSets[index.rawValue] as? LineChartDataSet
+        let smallChartDataSet = smallChartData.dataSets[index.rawValue] as? LineChartDataSet
+
+        return (chartDataSet, smallChartDataSet)
+    }
+
+    func addEntryToCharts(entry: ChartDataEntry, chart: LineChartDataSet, smallChart: LineChartDataSet?) {
+        chart.addEntry(entry)
+        if UserDefaultsRepository.smallGraphTreatments.value, let smallChart = smallChart {
+            smallChart.addEntry(entry)
+        }
+    }
+
+    func updateTempTargetGraph() {
+        let dataIndex = GraphDataIndex.tempTarget.rawValue
+        guard let chartData = BGChart.lineData,
+              chartData.dataSets.count > dataIndex,
+              let mainChartDataSet = chartData.dataSets[dataIndex] as? LineChartDataSet else {
+            print("Error: Could not retrieve temp target datasets.")
+            return
+        }
+
+        mainChartDataSet.clear()
+
+        var smallChartDataSet: LineChartDataSet?
+        if UserDefaultsRepository.smallGraphTreatments.value,
+           let smallChartData = BGChartFull.lineData,
+           smallChartData.dataSets.count > dataIndex,
+           let smallDataSet = smallChartData.dataSets[dataIndex] as? LineChartDataSet {
+            smallChartDataSet = smallDataSet
+            smallChartDataSet?.clear()
+        }
+
+        let thisData = tempTargetGraphData
+
+        for tempTarget in thisData {
+            let xStart = tempTarget.date
+            let xEnd = tempTarget.endDate
+            let yCenter = Double(tempTarget.correctionRange[0])
+            let yTop = yCenter + 5.0
+            let yBottom = yCenter - 5.0
+
+            let entry = TempTargetChartDataEntry(
+                xStart: xStart,
+                xEnd: xEnd,
+                yTop: yTop,
+                yBottom: yBottom,
+                data: nil
+            )
+            mainChartDataSet.addEntry(entry)
+
+            if let smallDataSet = smallChartDataSet {
+                smallDataSet.addEntry(entry)
+            }
+        }
+
+        let tempTargetRenderer = TempTargetRenderer(
+            dataProvider: BGChart,
+            animator: BGChart.chartAnimator,
+            viewPortHandler: BGChart.viewPortHandler,
+            tempTargetDataSetIndex: dataIndex
+        )
+        BGChart.renderer = tempTargetRenderer
+
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+
+        if let smallDataSet = smallChartDataSet {
+            let tempTargetRendererSmall = TempTargetRenderer(
+                dataProvider: BGChartFull,
+                animator: BGChartFull.chartAnimator,
+                viewPortHandler: BGChartFull.viewPortHandler,
+                tempTargetDataSetIndex: dataIndex
+            )
+            BGChartFull.renderer = tempTargetRendererSmall
+
+            BGChartFull.data?.notifyDataChanged()
+            BGChartFull.notifyDataSetChanged()
+        }
+    }
+
     func wrapText(_ text: String, maxLineLength: Int) -> String {
         var lines: [String] = []
         var currentLine = ""

@@ -94,7 +94,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     // Info Table Setup
     var infoManager: InfoManager!
-    var profileManager = ProfileManager()
+    var profileManager = ProfileManager.shared
 
     var bgData: [ShareGlucoseData] = []
     var basalProfile: [basalProfileStruct] = []
@@ -104,6 +104,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var smbData: [bolusGraphStruct] = []
     var carbData: [carbGraphStruct] = []
     var overrideGraphData: [DataStructs.overrideStruct] = []
+    var tempTargetGraphData: [DataStructs.tempTargetStruct] = []
     var predictionData: [ShareGlucoseData] = []
     var bgCheckData: [ShareGlucoseData] = []
     var suspendGraphData: [DataStructs.timestampOnlyStruct] = []
