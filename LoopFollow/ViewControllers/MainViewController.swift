@@ -130,7 +130,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var topPredictionBG: Float = UserDefaultsRepository.minBGScale.value
 
     var lastOverrideAlarm: TimeInterval = 0
-    
+
+    var lastTempTargetAlarm: TimeInterval = 0
+    var lastTempTargetStartTime: TimeInterval = 0
+    var lastTempTargetEndTime: TimeInterval = 0
+
     // share
     var bgDataShare: [ShareGlucoseData] = []
     var dexShare: ShareClient?;
