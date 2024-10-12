@@ -58,7 +58,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Vars for NS Pull
     var mmol = false as Bool
-    var token = UserDefaultsRepository.token.value as String
+    var apnsKey = UserDefaultsRepository.token.value as String
     var defaults : UserDefaults?
     let consoleLogging = true
     var timeofLastBGUpdate = 0 as TimeInterval
@@ -94,7 +94,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     // Info Table Setup
     var infoManager: InfoManager!
-    var profileManager = ProfileManager()
+    var profileManager = ProfileManager.shared
 
     var bgData: [ShareGlucoseData] = []
     var basalProfile: [basalProfileStruct] = []
@@ -104,6 +104,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var smbData: [bolusGraphStruct] = []
     var carbData: [carbGraphStruct] = []
     var overrideGraphData: [DataStructs.overrideStruct] = []
+    var tempTargetGraphData: [DataStructs.tempTargetStruct] = []
     var predictionData: [ShareGlucoseData] = []
     var bgCheckData: [ShareGlucoseData] = []
     var suspendGraphData: [DataStructs.timestampOnlyStruct] = []
@@ -129,7 +130,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var topPredictionBG: Float = UserDefaultsRepository.minBGScale.value
 
     var lastOverrideAlarm: TimeInterval = 0
-    
+
+    var lastTempTargetAlarm: TimeInterval = 0
+    var lastTempTargetStartTime: TimeInterval = 0
+    var lastTempTargetEndTime: TimeInterval = 0
+
     // share
     var bgDataShare: [ShareGlucoseData] = []
     var dexShare: ShareClient?;

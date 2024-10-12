@@ -233,6 +233,18 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
             alarms.reloadIsSnoozed(key: "alertRecBolusIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertRecBolusSnoozedTime", setNil: false, value: currentDate.addingTimeInterval(snoozeDuration))
 
+        case "Temp Target Start":
+            UserDefaultsRepository.alertTempTargetStartIsSnoozed.value = true
+            UserDefaultsRepository.alertTempTargetStartSnoozedTime.value = currentDate.addingTimeInterval(snoozeDuration)
+            alarms.reloadIsSnoozed(key: "alertTempTargetStartIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertTempTargetStartSnoozedTime", setNil: false, value: currentDate.addingTimeInterval(snoozeDuration))
+
+        case "Temp Target End":
+            UserDefaultsRepository.alertTempTargetEndIsSnoozed.value = true
+            UserDefaultsRepository.alertTempTargetEndSnoozedTime.value = currentDate.addingTimeInterval(snoozeDuration)
+            alarms.reloadIsSnoozed(key: "alertTempTargetEndIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertTempTargetEndSnoozedTime", setNil: false, value: currentDate.addingTimeInterval(snoozeDuration))
+
         default:
             print("Unhandled alarm: \(AlarmSound.whichAlarm)")
         }
@@ -337,6 +349,18 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
             alarms.reloadIsSnoozed(key: "alertCOBIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertCOBSnoozedTime", setNil: false, value: snoozeTime)
         }
+        if UserDefaultsRepository.alertTempTargetStartAutosnoozeNight.value {
+            UserDefaultsRepository.alertTempTargetStartIsSnoozed.value = true
+            UserDefaultsRepository.alertTempTargetStartSnoozedTime.value = snoozeTime
+            alarms.reloadIsSnoozed(key: "alertTempTargetStartIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertTempTargetStartSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertTempTargetEndAutosnoozeNight.value {
+            UserDefaultsRepository.alertTempTargetEndIsSnoozed.value = true
+            UserDefaultsRepository.alertTempTargetEndSnoozedTime.value = snoozeTime
+            alarms.reloadIsSnoozed(key: "alertTempTargetEndIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertTempTargetEndSnoozedTime", setNil: false, value: snoozeTime)
+        }
     }
 
     func setPreSnoozeDay(snoozeTime: Date) {
@@ -437,6 +461,18 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
             UserDefaultsRepository.alertCOBSnoozedTime.value = snoozeTime
             alarms.reloadIsSnoozed(key: "alertCOBIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertCOBSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertTempTargetStartAutosnoozeDay.value {
+            UserDefaultsRepository.alertTempTargetStartIsSnoozed.value = true
+            UserDefaultsRepository.alertTempTargetStartSnoozedTime.value = snoozeTime
+            alarms.reloadIsSnoozed(key: "alertTempTargetStartIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertTempTargetStartSnoozedTime", setNil: false, value: snoozeTime)
+        }
+        if UserDefaultsRepository.alertTempTargetEndAutosnoozeDay.value {
+            UserDefaultsRepository.alertTempTargetEndIsSnoozed.value = true
+            UserDefaultsRepository.alertTempTargetEndSnoozedTime.value = snoozeTime
+            alarms.reloadIsSnoozed(key: "alertTempTargetEndIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertTempTargetEndSnoozedTime", setNil: false, value: snoozeTime)
         }
     }
 

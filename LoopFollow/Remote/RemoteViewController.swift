@@ -10,31 +10,62 @@ import Foundation
 import UIKit
 import SwiftUI
 import HealthKit
+import Combine
 
 class RemoteViewController: UIViewController {
+
+    private var cancellable: AnyCancellable?
+    private var hostingController: UIHostingController<AnyView>?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let remoteView = RemoteView(
-            onCancelExistingTarget: cancelExistingTarget,
-            sendTempTarget: sendTempTarget
-        )
-        let hostingController = UIHostingController(rootView: remoteView)
+        cancellable = Storage.shared.remoteType.objectWillChange
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.updateView()
+                }
+            }
 
-        addChild(hostingController)
-        view.addSubview(hostingController.view)
+        updateView()
+    }
 
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+    private func updateView() {
+        let remoteType = Storage.shared.remoteType.value
 
-        hostingController.didMove(toParent: self)
+        if let existingHostingController = hostingController {
+            existingHostingController.willMove(toParent: nil)
+            existingHostingController.view.removeFromSuperview()
+            existingHostingController.removeFromParent()
+        }
 
-        if(!ObservableUserDefaults.shared.nsWriteAuth.value) {
+        if remoteType == .nightscout {
+            let remoteView = TrioNightscoutRemoteView()
+            hostingController = UIHostingController(rootView: AnyView(remoteView))
+        } else if remoteType == .trc {
+            let trioRemoteControlViewModel = TrioRemoteControlViewModel()
+            let trioRemoteControlView = TrioRemoteControlView(viewModel: trioRemoteControlViewModel)
+            hostingController = UIHostingController(rootView: AnyView(trioRemoteControlView))
+        } else {
+            hostingController = UIHostingController(rootView: AnyView(Text("Please select a Remote Type in Settings.")))
+        }
+
+        if let hostingController = hostingController {
+            addChild(hostingController)
+            view.addSubview(hostingController.view)
+
+            hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
+                hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
+
+            hostingController.didMove(toParent: self)
+        }
+
+        if remoteType == .nightscout, !ObservableUserDefaults.shared.nsWriteAuth.value {
             NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth in
                 DispatchQueue.main.async {
                     ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
@@ -43,47 +74,7 @@ class RemoteViewController: UIViewController {
         }
     }
 
-    private func cancelExistingTarget(completion: @escaping (Bool) -> Void) {
-        Task {
-            let tempTargetBody: [String: Any] = [
-                "enteredBy": "LoopFollow",
-                "eventType": "Temporary Target",
-                "reason": "Manual",
-                "duration": 0,
-                "created_at": ISO8601DateFormatter().string(from: Date())
-            ]
-
-            do {
-                let response: [TreatmentCancelResponse] = try await NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody)
-                Observable.shared.tempTarget.value = nil
-                NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
-                completion(true)
-            } catch {
-                completion(false)
-            }
-        }
-    }
-
-    private func sendTempTarget(newTarget: HKQuantity, duration: HKQuantity, completion: @escaping (Bool) -> Void) {
-        let tempTargetBody: [String: Any] = [
-            "enteredBy": "LoopFollow",
-            "eventType": "Temporary Target",
-            "reason": "Manual",
-            "targetTop": newTarget.doubleValue(for: .milligramsPerDeciliter),
-            "targetBottom": newTarget.doubleValue(for: .milligramsPerDeciliter),
-            "duration": Int(duration.doubleValue(for: .minute())),
-            "created_at": ISO8601DateFormatter().string(from: Date())
-        ]
-
-        Task {
-            do {
-                let response: [TreatmentResponse] = try await NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody)
-                Observable.shared.tempTarget.value = newTarget
-                NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
-                completion(true)
-            } catch {
-                completion(false)
-            }
-        }
+    deinit {
+        cancellable?.cancel()
     }
 }
