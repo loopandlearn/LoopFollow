@@ -73,6 +73,15 @@ extension MainViewController {
         
         Observable.shared.override.value = activeOverrideNote
 
+        if ObservableUserDefaults.shared.device.value == "Trio" {
+            if let note = activeOverrideNote
+            {
+                infoManager.updateInfoData(type: .override, value: note)
+            } else {
+                infoManager.clearInfoData(type: .override)
+            }
+        }
+
         if UserDefaultsRepository.graphOtherTreatments.value {
             updateOverrideGraph()
         }
