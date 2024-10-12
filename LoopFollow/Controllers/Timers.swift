@@ -265,6 +265,9 @@ extension MainViewController {
         if overrideGraphData.count > 0 {
             self.checkOverrideAlarms()
         }
+        if tempTargetGraphData.count > 0 {
+            self.checkTempTargetAlarms()
+        }
     }
     
     // Calendar Timer
