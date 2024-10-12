@@ -224,7 +224,7 @@ extension MainViewController {
             return
         }
         
-        if !isStaleData() && IsNightscoutEnabled() {
+        if IsNightscoutEnabled() {
             webLoadNSProfile()
             startProfileTimer()
         }
