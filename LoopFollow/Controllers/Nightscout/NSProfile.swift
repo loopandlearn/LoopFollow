@@ -42,6 +42,8 @@ struct NSProfile: Decodable {
         let target_high: [TargetEntry]?
         let target_low: [TargetEntry]?
         let timezone: String
+
+        let units: String
     }
 
     let store: [String: Store]
