@@ -19,29 +19,17 @@ extension MainViewController {
         var created_at: String
     }
 
-    
+    struct iageData: Codable {
+        var created_at: String
+    }
+
     //NS Basal Profile Struct
     struct basalProfileStruct: Codable {
         var value: Double
         var time: String
         var timeAsSeconds: Double
     }
-    
-    struct NSProfile: Decodable {
-        struct Store: Decodable {
-            struct BasalEntry: Decodable {
-                let value: Double
-                let time: String
-                let timeAsSeconds: Double
-            }
-            
-            let basal: [BasalEntry]
-        }
-        
-        let store: [String: Store]
-        let defaultProfile: String
-    }
-    
+
     //NS Basal Data  Struct
     struct basalGraphStruct: Codable {
         var basalRate: Double

@@ -21,7 +21,7 @@ extension MainViewController {
                 print("Error fetching Dexcom data: \(error.localizedDescription)")
                 
                 // If we get an error, immediately try to pull NS BG Data
-                if UserDefaultsRepository.url.value != "" {
+                if IsNightscoutEnabled() {
                     self.webLoadNSBGData()
                 }
                 return
@@ -35,14 +35,14 @@ extension MainViewController {
             // If Dex data is old, load from NS instead
             let latestDate = data[0].date
             let now = dateTimeUtils.getNowTimeIntervalUTC()
-            if (latestDate + 330) < now && UserDefaultsRepository.url.value != "" {
+            if (latestDate + 330) < now && IsNightscoutEnabled() {
                 self.webLoadNSBGData()
                 print("Dex data is old, loading from NS instead")
                 return
             }
             
             // Dexcom only returns 24 hrs of data. If we need more, call NS.
-            if graphHours > 24 && UserDefaultsRepository.url.value != "" {
+            if graphHours > 24 && IsNightscoutEnabled() {
                 self.webLoadNSBGData(dexData: data)
             } else {
                 self.ProcessDexBGData(data: data, sourceName: "Dexcom")
@@ -55,7 +55,7 @@ extension MainViewController {
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
         
         // This kicks it out in the instance where dexcom fails but they aren't using NS &&
-        if UserDefaultsRepository.url.value == "" {
+        if !IsNightscoutEnabled() {
             self.startBGTimer(time: 10)
             return
         }
@@ -65,6 +65,9 @@ extension MainViewController {
         let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
         parameters["count"] = "\(UserDefaultsRepository.downloadDays.value * 2 * 24 * 60 / 5)"
         parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: date)
+
+        // Exclude 'cal' entries
+        parameters["find[type][$ne]"] = "cal"
         
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
             switch result {
@@ -239,8 +242,8 @@ extension MainViewController {
             var snoozerDelta = ""
             
             // Set BGText with the latest BG value
-            self.BGText.text = bgUnits.toDisplayUnits(String(latestBG))
-            snoozerBG = bgUnits.toDisplayUnits(String(latestBG))
+            self.BGText.text = Localizer.toDisplayUnits(String(latestBG))
+            snoozerBG = Localizer.toDisplayUnits(String(latestBG))
             self.setBGTextColor()
             
             // Direction handling
@@ -256,12 +259,12 @@ extension MainViewController {
             
             // Delta handling
             if deltaBG < 0 {
-                self.DeltaText.text = bgUnits.toDisplayUnits(String(deltaBG))
-                snoozerDelta = bgUnits.toDisplayUnits(String(deltaBG))
+                self.DeltaText.text = Localizer.toDisplayUnits(String(deltaBG))
+                snoozerDelta = Localizer.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = String(deltaBG)
             } else {
-                self.DeltaText.text = "+" + bgUnits.toDisplayUnits(String(deltaBG))
-                snoozerDelta = "+" + bgUnits.toDisplayUnits(String(deltaBG))
+                self.DeltaText.text = "+" + Localizer.toDisplayUnits(String(deltaBG))
+                snoozerDelta = "+" + Localizer.toDisplayUnits(String(deltaBG))
                 self.latestDeltaString = "+" + String(deltaBG)
             }
             

@@ -248,6 +248,11 @@ class AlarmViewController: FormViewController {
         
         
         form
+            +++ ButtonRow() {
+                $0.title = "DONE"
+            }.onCellSelection { (row, arg)  in
+                self.dismiss(animated: true, completion: nil)
+            }
             +++ Section("Select Alert")
           <<< SegmentedRow<String>("bgAlerts"){ row in
                 row.title = ""
@@ -296,7 +301,7 @@ class AlarmViewController: FormViewController {
             <<< SegmentedRow<String>("otherAlerts"){ row in
                 row.title = ""
                 row.options = ["Not Looping", "Missed Bolus", "SAGE", "CAGE"]
-                if UserDefaultsRepository.url.value == "" {
+                if !IsNightscoutEnabled() {
                     row.hidden = true
                 }
         }.onChange { [weak self] row in
@@ -321,7 +326,7 @@ class AlarmViewController: FormViewController {
         <<< SegmentedRow<String>("otherAlerts2"){ row in
                 row.title = ""
                 row.options = ["Override Start", "Override End", "Pump"]
-                if UserDefaultsRepository.url.value == "" {
+            if !IsNightscoutEnabled() {
                     row.hidden = true
                 }
         }.onChange { [weak self] row in
@@ -347,7 +352,7 @@ class AlarmViewController: FormViewController {
         <<< SegmentedRow<String>("otherAlerts3"){ row in
                 row.title = ""
                 row.options = ["IOB", "COB", "Battery"]
-                if UserDefaultsRepository.url.value == "" {
+            if !IsNightscoutEnabled() {
                     row.hidden = true
                 }
         }.onChange { [weak self] row in
@@ -373,7 +378,7 @@ class AlarmViewController: FormViewController {
         <<< SegmentedRow<String>("otherAlerts4"){ row in
             row.title = ""
             row.options = ["Rec. Bolus"]
-            if UserDefaultsRepository.url.value == "" {
+            if !IsNightscoutEnabled() {
                 row.hidden = true
             }
         }.onChange { [weak self] row in
@@ -437,7 +442,7 @@ class AlarmViewController: FormViewController {
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
-        if UserDefaultsRepository.url.value == "" {
+        if !IsNightscoutEnabled() {
             isHidden = true
             isEnabled = false
         }
@@ -476,7 +481,7 @@ class AlarmViewController: FormViewController {
         
         
         
-        if UserDefaultsRepository.url.value != "" {
+        if IsNightscoutEnabled() {
             isEnabled = true
         }
         
@@ -605,7 +610,7 @@ class AlarmViewController: FormViewController {
                 row.value = Double(UserDefaultsRepository.alertTemporaryBG.value)
                 row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return bgUnits.toDisplayUnits(String(value))
+                    return Localizer.toDisplayUnits(String(value))
                 }
             }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -655,7 +660,7 @@ class AlarmViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.alertUrgentLowBG.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
+                return Localizer.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -815,7 +820,7 @@ class AlarmViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.alertLowBG.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
+                return Localizer.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -843,7 +848,7 @@ class AlarmViewController: FormViewController {
                 row.value = Double(UserDefaultsRepository.alertLowPersistenceMax.value)
                 row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return bgUnits.toDisplayUnits(String(value))
+                    return Localizer.toDisplayUnits(String(value))
                 }
             }.onChange { [weak self] row in
                     guard let value = row.value else { return }
@@ -992,7 +997,7 @@ class AlarmViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.alertHighBG.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
+                return Localizer.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -1151,7 +1156,7 @@ class AlarmViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.alertUrgentHighBG.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
+                return Localizer.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -1295,7 +1300,7 @@ class AlarmViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.alertFastDropDelta.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
+                return Localizer.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -1332,7 +1337,7 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertFastDropUseLimit == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return bgUnits.toDisplayUnits(String(value))
+                    return Localizer.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -1477,7 +1482,7 @@ class AlarmViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.alertFastRiseDelta.value)
             row.displayValueFor = { value in
                 guard let value = value else { return nil }
-                return bgUnits.toDisplayUnits(String(value))
+                return Localizer.toDisplayUnits(String(value))
             }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -1514,7 +1519,7 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertFastRiseUseLimit == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return bgUnits.toDisplayUnits(String(value))
+                    return Localizer.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -1827,7 +1832,7 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertNotLoopingUseLimits == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return bgUnits.toDisplayUnits(String(value))
+                    return Localizer.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -1842,7 +1847,7 @@ class AlarmViewController: FormViewController {
             row.hidden = "$alertNotLoopingUseLimits == false"
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return bgUnits.toDisplayUnits(String(value))
+                    return Localizer.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }
@@ -2041,7 +2046,7 @@ class AlarmViewController: FormViewController {
             row.value = Double(UserDefaultsRepository.alertMissedBolusLowGramsBG.value)
             row.displayValueFor = { value in
                     guard let value = value else { return nil }
-                    return bgUnits.toDisplayUnits(String(value))
+                    return Localizer.toDisplayUnits(String(value))
                 }
         }.onChange { [weak self] row in
                 guard let value = row.value else { return }

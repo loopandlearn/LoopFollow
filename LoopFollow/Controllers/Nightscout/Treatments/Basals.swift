@@ -10,7 +10,8 @@ import Foundation
 extension MainViewController {
     // NS Temp Basal Response Processor
     func processNSBasals(entries: [[String:AnyObject]]) {
-        self.clearLastInfoData(index: 2)
+        infoManager.clearInfoData(type: .basal)
+
         if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Basal") }
         // due to temp basal durations, we're going to destroy the array and load everything each cycle for the time being.
         basalData.removeAll()
@@ -136,12 +137,11 @@ extension MainViewController {
             //if i == tempArray.count - 1 && dateTimeStamp + duration <= dateTimeUtils.getNowTimeIntervalUTC() {
             if i == tempArray.count - 1 && duration == 0.0 {
                 lastEndDot = dateTimeStamp + (30 * 60)
-                latestBasal = String(format:"%.2f", basalRate)
             } else {
                 lastEndDot = dateTimeStamp + (duration * 60)
-                latestBasal = String(format:"%.2f", basalRate)
             }
-            
+            latestBasal = Localizer.formatToLocalizedString(basalRate, maxFractionDigits: 2, minFractionDigits: 0)
+
             // Double check for overlaps of incorrectly ended TBRs and sent it to end when the next one starts if it finds a discrepancy
             if i < tempArray.count - 1 {
                 let nextEntry = tempArray[i + 1] as [String : AnyObject]?
@@ -186,7 +186,7 @@ extension MainViewController {
                 }
             }
             
-            latestBasal = String(format:"%.2f", scheduled)
+            latestBasal = Localizer.formatToLocalizedString(scheduled, maxFractionDigits: 2, minFractionDigits: 0)
             // Make the starting dot at the last ending dot
             let startDot = basalGraphStruct(basalRate: scheduled, date: Double(lastEndDot))
             basalData.append(startDot)
@@ -196,11 +196,13 @@ extension MainViewController {
             basalData.append(endDot)
             
         }
-        tableData[2].value = latestBasal
-        infoTable.reloadData()
         if UserDefaultsRepository.graphBasal.value {
             updateBasalGraph()
         }
-        infoTable.reloadData()
+
+        if let profileBasal = profileManager.currentBasal(), profileBasal != latestBasal {
+            latestBasal = "\(profileBasal) → \(latestBasal)"
+        }
+        infoManager.updateInfoData(type: .basal, value: latestBasal)
     }
 }

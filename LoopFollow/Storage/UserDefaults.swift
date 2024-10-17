@@ -10,39 +10,76 @@
 //
 //
 
-
-
 import Foundation
 import UIKit
+import HealthKit
 
 class UserDefaultsRepository {
-    
-    // DisplayValues total
-    static let infoDataTotal = UserDefaultsValue<Int>(key: "infoDataTotal", default: 0)
-    static let infoNames = UserDefaultsValue<[String]>(key: "infoNames", default: [
-        "IOB",
-        "COB",
-        "Basal",
-        "Override",
-        "Battery",
-        "Pump",
-        "SAGE",
-        "CAGE",
-        "Rec. Bolus",
-        "Min/Max", //Previously "Pred."
-        "Carbs today",
-        "Autosens",
-        "Profile"])
-    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: [0,1,2,3,4,5,6,7,8,9,10,11,12])
-    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: [true,true,true,true,true,true,true,true,true,true,true,false,false])
+    static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: InfoType.allCases.map { $0.sortOrder })
+    static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: InfoType.allCases.map { $0.defaultVisible })
+
+    static func synchronizeInfoTypes() {
+        var sortArray = infoSort.value
+        var visibleArray = infoVisible.value
+
+        // Current valid indices based on InfoType
+        let currentValidIndices = InfoType.allCases.map { $0.rawValue }
+
+        // Add missing indices to sortArray
+        for index in currentValidIndices {
+            if !sortArray.contains(index) {
+                sortArray.append(index)
+                //print("Added missing index \(index) to sortArray")
+            }
+        }
+
+        // Remove deprecated indices
+        sortArray = sortArray.filter { currentValidIndices.contains($0) }
+
+        // Ensure visibleArray is updated with new entries
+        if visibleArray.count < currentValidIndices.count {
+            for i in visibleArray.count..<currentValidIndices.count {
+                visibleArray.append(InfoType(rawValue: i)?.defaultVisible ?? false)
+                //print("Added default visibility for new index \(i)")
+            }
+        }
+
+        // Trim excess elements if there are more than needed
+        if visibleArray.count > currentValidIndices.count {
+            visibleArray = Array(visibleArray.prefix(currentValidIndices.count))
+            //print("Trimmed visibleArray to match current valid indices")
+        }
+
+        infoSort.value = sortArray
+        infoVisible.value = visibleArray
+    }
+
     static let hideInfoTable = UserDefaultsValue<Bool>(key: "hideInfoTable", default: false)
-    
+
     // Nightscout Settings
     static let showNS = UserDefaultsValue<Bool>(key: "showNS", default: false)
-    static let url = UserDefaultsValue<String>(key: "url", default: "")
+    //static let url = UserDefaultsValue<String>(key: "url", default: "")
     static let token = UserDefaultsValue<String>(key: "token", default: "")
     static let units = UserDefaultsValue<String>(key: "units", default: "mg/dL")
-    
+
+    static func getPreferredUnit() -> HKUnit {
+        let unitString = units.value
+        switch unitString {
+        case "mmol/L":
+            return .millimolesPerLiter
+        default:
+            return .milligramsPerDeciliter
+        }
+    }
+
+    static func setPreferredUnit(_ unit: HKUnit) {
+        var unitString = "mg/dL"
+        if unit == .millimolesPerLiter {
+            unitString = "mmol/L"
+        }
+        units.value = unitString
+    }
+
     // Dexcom Share Settings
     static let showDex = UserDefaultsValue<Bool>(key: "showDex", default: false)
     static let shareUserName = UserDefaultsValue<String>(key: "shareUserName", default: "")
@@ -107,7 +144,6 @@ class UserDefaultsRepository {
     static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
     static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
     static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
-    static let alwaysDownloadAllBG = UserDefaultsValue<Bool>(key: "alwaysDownloadAllBG", default: true)
     static let bgUpdateDelay = UserDefaultsValue<Int>(key: "bgUpdateDelay", default: 10)
     static let downloadDays = UserDefaultsValue<Int>(key: "downloadDays", default: 1)
     
