@@ -15,7 +15,6 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var user: String
     @Published var sharedSecret: String
     @Published var apnsKey: String
-    @Published var teamId: String
     @Published var keyId: String
 
     @Published var maxBolus: HKQuantity
@@ -31,7 +30,6 @@ class RemoteSettingsViewModel: ObservableObject {
         self.user = storage.user.value
         self.sharedSecret = storage.sharedSecret.value
         self.apnsKey = storage.apnsKey.value
-        self.teamId = storage.teamId.value
         self.keyId = storage.keyId.value
         self.maxBolus = storage.maxBolus.value
         self.maxCarbs = storage.maxCarbs.value
@@ -56,10 +54,6 @@ class RemoteSettingsViewModel: ObservableObject {
 
         $apnsKey
             .sink { [weak self] in self?.storage.apnsKey.value = $0 }
-            .store(in: &cancellables)
-
-        $teamId
-            .sink { [weak self] in self?.storage.teamId.value = $0 }
             .store(in: &cancellables)
 
         $keyId

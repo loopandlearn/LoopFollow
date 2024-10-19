@@ -30,7 +30,7 @@ class PushNotificationManager {
         self.sharedSecret = Storage.shared.sharedSecret.value
         self.productionEnvironment = Storage.shared.productionEnvironment.value
         self.apnsKey = Storage.shared.apnsKey.value
-        self.teamId = Storage.shared.teamId.value
+        self.teamId = Storage.shared.teamId.value ?? ""
         self.keyId = Storage.shared.keyId.value
         self.user = Storage.shared.user.value
         self.bundleId = Storage.shared.bundleId.value
@@ -126,7 +126,6 @@ class PushNotificationManager {
         var missingFields = [String]()
         if sharedSecret.isEmpty { missingFields.append("sharedSecret") }
         if apnsKey.isEmpty { missingFields.append("token") }
-        if teamId.isEmpty { missingFields.append("teamId") }
         if keyId.isEmpty { missingFields.append("keyId") }
         if user.isEmpty { missingFields.append("user") }
 
@@ -139,6 +138,7 @@ class PushNotificationManager {
 
         if deviceToken.isEmpty { missingFields.append("deviceToken") }
         if bundleId.isEmpty { missingFields.append("bundleId") }
+        if teamId.isEmpty { missingFields.append("teamId") }
 
         if !missingFields.isEmpty {
             let errorMessage = "Missing required data, verify that you are using the latest version of Trio: \(missingFields.joined(separator: ", "))"

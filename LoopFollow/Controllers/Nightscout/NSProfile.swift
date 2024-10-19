@@ -51,6 +51,7 @@ struct NSProfile: Decodable {
     let bundleIdentifier: String?
     let isAPNSProduction: Bool?
     let deviceToken: String?
+    let teamID: String?
 
     struct TrioOverrideEntry: Decodable {
         let name: String
@@ -69,5 +70,6 @@ struct NSProfile: Decodable {
         case isAPNSProduction
         case deviceToken
         case trioOverrides = "overrides"
+        case teamID
     }
 }
