@@ -101,6 +101,7 @@ final class ProfileManager {
         Storage.shared.deviceToken.value = profileData.deviceToken ?? ""
         Storage.shared.bundleId.value = profileData.bundleIdentifier ?? ""
         Storage.shared.productionEnvironment.value = profileData.isAPNSProduction ?? false
+        Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
     }
 
     func currentISF() -> HKQuantity? {

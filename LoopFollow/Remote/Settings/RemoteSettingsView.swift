@@ -95,14 +95,6 @@ struct RemoteSettingsView: View {
                                 .focused($focusedField, equals: .apnsKey)
                         }
 
-                        HStack {
-                            Text("Team ID")
-                            TextField("Enter Team ID", text: $viewModel.teamId)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .focused($focusedField, equals: .teamId)
-                                .multilineTextAlignment(.trailing)
-                        }
                     }
 
                     // Guardrails Section

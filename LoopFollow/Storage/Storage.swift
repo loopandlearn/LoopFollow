@@ -15,7 +15,7 @@ class Storage {
     var sharedSecret = StorageValue<String>(key: "sharedSecret", defaultValue: "")
     var productionEnvironment = StorageValue<Bool>(key: "productionEnvironment", defaultValue: true)
     var apnsKey = StorageValue<String>(key: "apnsKey", defaultValue: "")
-    var teamId = StorageValue<String>(key: "teamId", defaultValue: "")
+    var teamId = StorageValue<String?>(key: "teamId", defaultValue: nil)
     var keyId = StorageValue<String>(key: "keyId", defaultValue: "")
     var bundleId = StorageValue<String>(key: "bundleId", defaultValue: "")
     var user = StorageValue<String>(key: "user", defaultValue: "")
