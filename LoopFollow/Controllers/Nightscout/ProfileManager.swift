@@ -86,7 +86,7 @@ final class ProfileManager {
 
         if let trioOverrides = profileData.trioOverrides {
             self.trioOverrides = trioOverrides.map { entry in
-                let targetQuantity = entry.target != nil ? HKQuantity(unit: self.units, doubleValue: entry.target!) : nil
+                let targetQuantity = entry.target != nil ? HKQuantity(unit: .milligramsPerDeciliter, doubleValue: entry.target!) : nil
                 return TrioOverride(
                     name: entry.name,
                     duration: entry.duration,
