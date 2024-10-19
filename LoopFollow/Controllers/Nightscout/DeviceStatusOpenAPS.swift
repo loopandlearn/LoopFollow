@@ -87,6 +87,26 @@ extension MainViewController {
                 if let cobMetric = CarbMetric(from: enacted, key: "COB") {
                     infoManager.updateInfoData(type: .cob, value: cobMetric)
                     latestCOB = cobMetric
+                } else if let reasonString = enacted["reason"] as? String {
+                    // Fallback: Extract COB from reason string
+                    let cobPattern = "COB: (\\d+(?:\\.\\d+)?)"
+                    if let cobRegex = try? NSRegularExpression(pattern: cobPattern),
+                       let cobMatch = cobRegex.firstMatch(in: reasonString, range: NSRange(location: 0, length: reasonString.utf16.count)) {
+                        let cobValueString = (reasonString as NSString).substring(with: cobMatch.range(at: 1))
+                        if let cobValue = Double(cobValueString) {
+                            let tempDict: [String: AnyObject] = ["COB": cobValue as AnyObject]
+                            if let fallbackCobMetric = CarbMetric(from: tempDict, key: "COB") {
+                                infoManager.updateInfoData(type: .cob, value: fallbackCobMetric)
+                                latestCOB = fallbackCobMetric
+                            } else {
+                                print("Failed to create CarbMetric from extracted COB value: \(cobValue)")
+                            }
+                        } else {
+                            print("Invalid COB value extracted from reason string: \(cobValueString)")
+                        }
+                    } else {
+                        print("COB pattern not found in reason string.")
+                    }
                 }
 
                 // Insulin Required
