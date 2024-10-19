@@ -32,8 +32,12 @@ class InfoManager {
     func updateInfoData(type: InfoType, firstValue: HKQuantity, secondValue: HKQuantity, separator: InfoDataSeparator) {
         let formattedFirstValue = Localizer.formatQuantity(firstValue)
         let formattedSecondValue = Localizer.formatQuantity(secondValue)
-        let combinedValue = "\(formattedFirstValue) \(separator.rawValue) \(formattedSecondValue)"
-        updateInfoData(type: type, value: combinedValue)
+        if formattedFirstValue != formattedSecondValue {
+            let combinedValue = "\(formattedFirstValue) \(separator.rawValue) \(formattedSecondValue)"
+            updateInfoData(type: type, value: combinedValue)
+        } else {
+            updateInfoData(type: type, value: formattedFirstValue)
+        }
     }
 
     func updateInfoData(type: InfoType, value: Double, maxFractionDigits: Int = 1, minFractionDigits: Int = 0) {
