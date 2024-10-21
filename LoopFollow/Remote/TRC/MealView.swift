@@ -119,6 +119,9 @@ struct MealView: View {
                 .navigationTitle("Meal")
                 .navigationBarTitleDisplayMode(.inline)
             }
+            .onAppear {
+                selectedTime = Date()
+            }
             .alert(isPresented: $showAlert) {
                 switch alertType {
                 case .confirmMeal:
