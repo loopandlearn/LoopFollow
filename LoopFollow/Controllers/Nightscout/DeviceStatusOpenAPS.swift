@@ -25,15 +25,6 @@ extension MainViewController {
                 }
                 let wasEnacted = true
 
-                var determinedUnit: HKUnit = .milligramsPerDeciliter
-
-                // Determine the unit based on the threshold value since no unit is provided
-                if let enactedThresholdValue = enacted["threshold"] as? Double {
-                    if enactedThresholdValue < 40 {
-                        determinedUnit = .millimolesPerLiter
-                    }
-                }
-
                 // Updated
                 if let enactedTimestamp = enacted["timestamp"] as? String,
                    let enactedTime = formatter.date(from: enactedTimestamp)?.timeIntervalSince1970 {
