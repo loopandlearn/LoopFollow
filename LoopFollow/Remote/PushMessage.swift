@@ -21,6 +21,7 @@ struct PushMessage: Encodable {
     var sharedSecret: String
     var timestamp: TimeInterval
     var overrideName: String?
+    var scheduledTime: TimeInterval?
 
     enum CodingKeys: String, CodingKey {
         case aps
@@ -35,6 +36,7 @@ struct PushMessage: Encodable {
         case sharedSecret = "shared_secret"
         case timestamp
         case overrideName
+        case scheduledTime = "scheduled_time"
     }
 
     func encode(to encoder: Encoder) throws {
@@ -51,5 +53,8 @@ struct PushMessage: Encodable {
         try container.encode(sharedSecret, forKey: .sharedSecret)
         try container.encode(timestamp, forKey: .timestamp)
         try container.encode(overrideName, forKey: .overrideName)
+        if let scheduledTime = scheduledTime {
+            try container.encode(scheduledTime, forKey: .scheduledTime)
+        }
     }
 }

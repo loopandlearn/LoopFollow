@@ -14,6 +14,7 @@ struct MealView: View {
     @State private var carbs = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var protein = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var fat = HKQuantity(unit: .gram(), doubleValue: 0.0)
+
     private let pushNotificationManager = PushNotificationManager()
 
     @ObservedObject private var maxCarbs = Storage.shared.maxCarbs
@@ -29,6 +30,7 @@ struct MealView: View {
     @State private var alertMessage: String? = nil
     @State private var isLoading: Bool = false
     @State private var statusMessage: String? = nil
+    @State private var selectedTime: Date = Date()
 
     enum AlertType {
         case confirmMeal
@@ -82,6 +84,15 @@ struct MealView: View {
                         )
                     }
 
+                    Section(header: Text("Schedule")) {
+                        DatePicker(
+                            "Select Time",
+                            selection: $selectedTime,
+                            displayedComponents: .hourAndMinute
+                        )
+                        .datePickerStyle(CompactDatePickerStyle())
+                    }
+
                     LoadingButtonView(
                         buttonText: "Send Meal",
                         progressText: "Sending Meal Data...",
@@ -115,7 +126,11 @@ struct MealView: View {
                     let proteinAmount = protein.doubleValue(for: HKUnit.gram())
                     let fatAmount = fat.doubleValue(for: HKUnit.gram())
 
-                    var message = "Are you sure you want to send the meal data?"
+                    let timeFormatter = DateFormatter()
+                    timeFormatter.timeStyle = .short
+                    let timeString = timeFormatter.string(from: selectedTime)
+
+                    var message = "Are you sure you want to send the meal data for \(timeString)?"
 
                     if carbsAmount > 0 {
                         message += String(format: "\nCarbs: %.0f g", carbsAmount)
@@ -173,7 +188,26 @@ struct MealView: View {
     private func sendMealCommand() {
         isLoading = true
 
-        pushNotificationManager.sendMealPushNotification(carbs: carbs, protein: protein, fat: fat) { success, errorMessage in
+        let calendar = Calendar.current
+        let now = Date()
+        let selectedDateComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+        guard let scheduledDate = calendar.date(bySettingHour: selectedDateComponents.hour ?? 0,
+                                                minute: selectedDateComponents.minute ?? 0,
+                                                second: 0,
+                                                of: now) else {
+            isLoading = false
+            statusMessage = "Invalid time selected."
+            alertType = .statusFailure
+            showAlert = true
+            return
+        }
+
+        pushNotificationManager.sendMealPushNotification(
+            carbs: carbs,
+            protein: protein,
+            fat: fat,
+            scheduledTime: scheduledDate
+        ) { success, errorMessage in
             DispatchQueue.main.async {
                 isLoading = false
                 if success {
@@ -189,6 +223,12 @@ struct MealView: View {
                 showAlert = true
             }
         }
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 
     private func handleValidationError(_ message: String) {

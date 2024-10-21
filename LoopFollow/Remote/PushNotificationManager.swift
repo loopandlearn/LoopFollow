@@ -102,10 +102,11 @@ class PushNotificationManager {
         sendPushNotification(message: message, completion: completion)
     }
 
-    func sendMealPushNotification(carbs: HKQuantity, protein: HKQuantity, fat: HKQuantity, completion: @escaping (Bool, String?) -> Void) {
+    func sendMealPushNotification(carbs: HKQuantity, protein: HKQuantity, fat: HKQuantity, scheduledTime: Date, completion: @escaping (Bool, String?) -> Void) {
         let carbsValue = Int(carbs.doubleValue(for: .gram()))
         let proteinValue = Int(protein.doubleValue(for: .gram()))
         let fatValue = Int(fat.doubleValue(for: .gram()))
+        let scheduledTimeInterval = scheduledTime.timeIntervalSince1970
 
         let message = PushMessage(
             user: user,
@@ -114,7 +115,8 @@ class PushNotificationManager {
             protein: proteinValue,
             fat: fatValue,
             sharedSecret: sharedSecret,
-            timestamp: Date().timeIntervalSince1970
+            timestamp: Date().timeIntervalSince1970,
+            scheduledTime: scheduledTimeInterval
         )
 
         sendPushNotification(message: message, completion: completion)
