@@ -69,7 +69,7 @@ struct NSProfile: Decodable {
         case bundleIdentifier
         case isAPNSProduction
         case deviceToken
-        case trioOverrides = "overrides"
+        case trioOverrides = "overridePresets"
         case teamID
     }
 }
