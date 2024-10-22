@@ -102,11 +102,27 @@ class PushNotificationManager {
         sendPushNotification(message: message, completion: completion)
     }
 
-    func sendMealPushNotification(carbs: HKQuantity, protein: HKQuantity, fat: HKQuantity, scheduledTime: Date, completion: @escaping (Bool, String?) -> Void) {
-        let carbsValue = Int(carbs.doubleValue(for: .gram()))
-        let proteinValue = Int(protein.doubleValue(for: .gram()))
-        let fatValue = Int(fat.doubleValue(for: .gram()))
+    func sendMealPushNotification(
+        carbs: HKQuantity,
+        protein: HKQuantity,
+        fat: HKQuantity,
+        scheduledTime: Date,
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        func convertToOptionalInt(_ quantity: HKQuantity) -> Int? {
+            let valueInGrams = quantity.doubleValue(for: .gram())
+            return valueInGrams > 0 ? Int(valueInGrams) : nil
+        }
+
+        let carbsValue = convertToOptionalInt(carbs)
+        let proteinValue = convertToOptionalInt(protein)
+        let fatValue = convertToOptionalInt(fat)
         let scheduledTimeInterval = scheduledTime.timeIntervalSince1970
+
+        guard carbsValue != nil || proteinValue != nil || fatValue != nil else {
+            completion(false, "No nutrient data provided. At least one of carbs, fat, or protein must be greater than 0.")
+            return
+        }
 
         let message = PushMessage(
             user: user,
