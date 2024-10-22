@@ -69,6 +69,7 @@ extension MainViewController {
 
         if UserDefaultsRepository.graphOtherTreatments.value {
             updateTempTargetGraph()
+            updateChartRenderers()
         }
 
         if let target = activeTempTarget {

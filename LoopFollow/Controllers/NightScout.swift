@@ -82,6 +82,7 @@ extension MainViewController {
     {
         smbData.removeAll()
         updateSmbGraph()
+        updateChartRenderers()
     }
 
     func clearOldCarb()
@@ -106,6 +107,7 @@ extension MainViewController {
     {
         tempTargetGraphData.removeAll()
         updateTempTargetGraph()
+        updateChartRenderers()
     }
 
     func clearOldSuspend()

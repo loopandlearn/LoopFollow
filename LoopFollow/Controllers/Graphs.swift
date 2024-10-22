@@ -58,6 +58,33 @@ extension GraphDataIndex {
     }
 }
 
+class CompositeRenderer: LineChartRenderer {
+    let tempTargetRenderer: TempTargetRenderer
+    let triangleRenderer: TriangleRenderer
+
+    init(dataProvider: LineChartDataProvider?, animator: Animator?, viewPortHandler: ViewPortHandler?, tempTargetDataSetIndex: Int, smbDataSetIndex: Int) {
+        self.tempTargetRenderer = TempTargetRenderer(
+            dataProvider: dataProvider,
+            animator: animator,
+            viewPortHandler: viewPortHandler,
+            tempTargetDataSetIndex: tempTargetDataSetIndex
+        )
+        self.triangleRenderer = TriangleRenderer(
+            dataProvider: dataProvider,
+            animator: animator,
+            viewPortHandler: viewPortHandler,
+            smbDataSetIndex: smbDataSetIndex
+        )
+        super.init(dataProvider: dataProvider!, animator: animator!, viewPortHandler: viewPortHandler!)
+    }
+
+    override func drawExtras(context: CGContext) {
+        super.drawExtras(context: context)
+        tempTargetRenderer.drawExtras(context: context)
+        triangleRenderer.drawExtras(context: context)
+    }
+}
+
 class TriangleRenderer: LineChartRenderer {
     let smbDataSetIndex: Int
     
@@ -179,6 +206,22 @@ class TempTargetRenderer: LineChartRenderer {
 
 let ScaleXMax:Float = 150.0
 extension MainViewController {
+    func updateChartRenderers() {
+        let tempTargetDataIndex = GraphDataIndex.tempTarget.rawValue
+        let smbDataIndex = GraphDataIndex.smb.rawValue
+
+        let compositeRenderer = CompositeRenderer(
+            dataProvider: BGChart,
+            animator: BGChart.chartAnimator,
+            viewPortHandler: BGChart.viewPortHandler,
+            tempTargetDataSetIndex: tempTargetDataIndex,
+            smbDataSetIndex: smbDataIndex
+        )
+        BGChart.renderer = compositeRenderer
+
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+    }
     
     func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
         if chartView == BGChartFull {
@@ -1064,9 +1107,6 @@ extension MainViewController {
             }
         }
         
-        let smbRenderer = TriangleRenderer(dataProvider: BGChart, animator: Animator(), viewPortHandler: BGChart.viewPortHandler, smbDataSetIndex: dataIndex)
-        BGChart.renderer = smbRenderer
-        
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
@@ -1736,14 +1776,6 @@ extension MainViewController {
                 smallDataSet.addEntry(entry)
             }
         }
-
-        let tempTargetRenderer = TempTargetRenderer(
-            dataProvider: BGChart,
-            animator: BGChart.chartAnimator,
-            viewPortHandler: BGChart.viewPortHandler,
-            tempTargetDataSetIndex: dataIndex
-        )
-        BGChart.renderer = tempTargetRenderer
 
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
