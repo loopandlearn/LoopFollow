@@ -106,7 +106,7 @@ class PushNotificationManager {
         carbs: HKQuantity,
         protein: HKQuantity,
         fat: HKQuantity,
-        scheduledTime: Date,
+        scheduledTime: Date?,
         completion: @escaping (Bool, String?) -> Void
     ) {
         func convertToOptionalInt(_ quantity: HKQuantity) -> Int? {
@@ -117,7 +117,7 @@ class PushNotificationManager {
         let carbsValue = convertToOptionalInt(carbs)
         let proteinValue = convertToOptionalInt(protein)
         let fatValue = convertToOptionalInt(fat)
-        let scheduledTimeInterval = scheduledTime.timeIntervalSince1970
+        let scheduledTimeInterval: TimeInterval? = scheduledTime?.timeIntervalSince1970
 
         guard carbsValue != nil || proteinValue != nil || fatValue != nil else {
             completion(false, "No nutrient data provided. At least one of carbs, fat, or protein must be greater than 0.")
