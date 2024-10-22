@@ -30,7 +30,8 @@ struct MealView: View {
     @State private var alertMessage: String? = nil
     @State private var isLoading: Bool = false
     @State private var statusMessage: String? = nil
-    @State private var selectedTime: Date = Date()
+    @State private var selectedTime: Date? = nil
+    @State private var isScheduling: Bool = false
 
     enum AlertType {
         case confirmMeal
@@ -85,12 +86,18 @@ struct MealView: View {
                     }
 
                     Section(header: Text("Schedule")) {
-                        DatePicker(
-                            "Select Time",
-                            selection: $selectedTime,
-                            displayedComponents: .hourAndMinute
-                        )
-                        .datePickerStyle(CompactDatePickerStyle())
+                        Toggle("Schedule for later", isOn: $isScheduling)
+                        if isScheduling {
+                            DatePicker(
+                                "Select Time",
+                                selection: Binding(
+                                    get: { self.selectedTime ?? Date() },
+                                    set: { self.selectedTime = $0 }
+                                ),
+                                displayedComponents: .hourAndMinute
+                            )
+                            .datePickerStyle(CompactDatePickerStyle())
+                        }
                     }
 
                     LoadingButtonView(
@@ -120,7 +127,8 @@ struct MealView: View {
                 .navigationBarTitleDisplayMode(.inline)
             }
             .onAppear {
-                selectedTime = Date()
+                selectedTime = nil
+                isScheduling = false
             }
             .alert(isPresented: $showAlert) {
                 switch alertType {
@@ -129,11 +137,15 @@ struct MealView: View {
                     let proteinAmount = protein.doubleValue(for: HKUnit.gram())
                     let fatAmount = fat.doubleValue(for: HKUnit.gram())
 
-                    let timeFormatter = DateFormatter()
-                    timeFormatter.timeStyle = .short
-                    let timeString = timeFormatter.string(from: selectedTime)
-
-                    var message = "Are you sure you want to send the meal data for \(timeString)?"
+                    var message = "Are you sure you want to send the meal data"
+                    if let selectedTime = selectedTime {
+                        let timeFormatter = DateFormatter()
+                        timeFormatter.timeStyle = .short
+                        let timeString = timeFormatter.string(from: selectedTime)
+                        message += " for \(timeString)?"
+                    } else {
+                        message += " now?"
+                    }
 
                     if carbsAmount > 0 {
                         message += String(format: "\nCarbs: %.0f g", carbsAmount)
@@ -191,18 +203,15 @@ struct MealView: View {
     private func sendMealCommand() {
         isLoading = true
 
-        let calendar = Calendar.current
-        let now = Date()
-        let selectedDateComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
-        guard let scheduledDate = calendar.date(bySettingHour: selectedDateComponents.hour ?? 0,
-                                                minute: selectedDateComponents.minute ?? 0,
-                                                second: 0,
-                                                of: now) else {
-            isLoading = false
-            statusMessage = "Invalid time selected."
-            alertType = .statusFailure
-            showAlert = true
-            return
+        var scheduledDate: Date? = nil
+        if isScheduling, let selectedTime = selectedTime {
+            let calendar = Calendar.current
+            let now = Date()
+            let selectedDateComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+            scheduledDate = calendar.date(bySettingHour: selectedDateComponents.hour ?? 0,
+                                          minute: selectedDateComponents.minute ?? 0,
+                                          second: 0,
+                                          of: now) ?? now
         }
 
         pushNotificationManager.sendMealPushNotification(
@@ -218,6 +227,8 @@ struct MealView: View {
                     carbs = HKQuantity(unit: .gram(), doubleValue: 0.0)
                     protein = HKQuantity(unit: .gram(), doubleValue: 0.0)
                     fat = HKQuantity(unit: .gram(), doubleValue: 0.0)
+                    selectedTime = nil
+                    isScheduling = false
                     alertType = .statusSuccess
                 } else {
                     statusMessage = errorMessage ?? "Failed to send meal command."
