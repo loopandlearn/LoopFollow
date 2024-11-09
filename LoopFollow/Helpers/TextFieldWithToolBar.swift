@@ -210,6 +210,39 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
             }
             return true
         }
+
+        public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+            let currentText = textField.text ?? ""
+
+            guard let textRange = Range(range, in: currentText) else {
+                return false
+            }
+            let updatedText = currentText.replacingCharacters(in: textRange, with: string)
+
+            if let maxLength = maxLength, updatedText.count > maxLength {
+                return false
+            }
+
+            let decimalSeparator = Locale.current.decimalSeparator ?? "."
+            let sanitizedText = updatedText.replacingOccurrences(of: decimalSeparator, with: ".")
+
+            if sanitizedText.isEmpty {
+                DispatchQueue.main.async {
+                    self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: 0)
+                }
+                return true
+            } else if let number = Double(sanitizedText) {
+                let quantity = HKQuantity(unit: self.unit, doubleValue: number)
+                if self.isWithinLimits(quantity) {
+                    DispatchQueue.main.async {
+                        self.parent.quantity = quantity
+                    }
+                }
+                return true
+            } else {
+                return true
+            }
+        }
     }
 }
 
