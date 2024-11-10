@@ -175,6 +175,15 @@ struct RemoteSettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+
+                    // Meal Section
+                    Section(header: Text("Meal Settings")) {
+                        Toggle("Meal with Bolus", isOn: $viewModel.mealWithBolus)
+                            .toggleStyle(SwitchToggleStyle())
+
+                        Toggle("Meal with Fat/Protein", isOn: $viewModel.mealWithFatProtein)
+                            .toggleStyle(SwitchToggleStyle())
+                    }
                 }
             }
             .navigationBarTitle("Remote Settings", displayMode: .inline)

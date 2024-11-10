@@ -21,6 +21,8 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var maxCarbs: HKQuantity
     @Published var maxProtein: HKQuantity
     @Published var maxFat: HKQuantity
+    @Published var mealWithBolus: Bool
+    @Published var mealWithFatProtein: Bool
 
     private var storage = Storage.shared
     private var cancellables = Set<AnyCancellable>()
@@ -35,6 +37,8 @@ class RemoteSettingsViewModel: ObservableObject {
         self.maxCarbs = storage.maxCarbs.value
         self.maxProtein = storage.maxProtein.value
         self.maxFat = storage.maxFat.value
+        self.mealWithBolus = storage.mealWithBolus.value
+        self.mealWithFatProtein = storage.mealWithFatProtein.value
 
         setupBindings()
     }
@@ -74,6 +78,14 @@ class RemoteSettingsViewModel: ObservableObject {
 
         $maxFat
             .sink { [weak self] in self?.storage.maxFat.value = $0 }
+            .store(in: &cancellables)
+
+        $mealWithBolus
+            .sink { [weak self] in self?.storage.mealWithBolus.value = $0 }
+            .store(in: &cancellables)
+
+        $mealWithFatProtein
+            .sink { [weak self] in self?.storage.mealWithFatProtein.value = $0 }
             .store(in: &cancellables)
     }
 }
