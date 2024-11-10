@@ -19,7 +19,7 @@ final class ProfileManager {
     var overrides: [Override]
     var trioOverrides: [TrioOverride]
     var units: HKUnit
-    var timezone: String
+    var timezone: TimeZone
     var defaultProfile: String
 
     // MARK: - Nested Structures
@@ -53,18 +53,20 @@ final class ProfileManager {
         self.overrides = []
         self.trioOverrides = []
         self.units = .millimolesPerLiter
-        self.timezone = "UTC"
+        self.timezone = TimeZone.current
         self.defaultProfile = ""
     }
 
     // MARK: - Methods
     func loadProfile(from profileData: NSProfile) {
-        guard let store = profileData.store["default"] ?? profileData.store["Default"] else {
+        guard let store = profileData.store[profileData.defaultProfile] else {
             return
         }
-        self.units = profileData.units.lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
-        self.timezone = store.timezone
+
+        self.units = store.units.lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
         self.defaultProfile = profileData.defaultProfile
+
+        self.timezone = getTimeZone(from: store.timezone)
 
         self.isfSchedule = store.sens.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) }
         self.basalSchedule = store.basal.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: $0.value) }
@@ -131,7 +133,9 @@ final class ProfileManager {
         guard !schedule.isEmpty else { return nil }
 
         let now = Date()
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.timeZone = self.timezone
+
         let currentTimeInSeconds = calendar.component(.hour, from: now) * 3600 +
         calendar.component(.minute, from: now) * 60 +
         calendar.component(.second, from: now)
@@ -147,7 +151,34 @@ final class ProfileManager {
         return lastValue
     }
 
-    func clear() {
+    private func getTimeZone(from identifier: String) -> TimeZone {
+        if let timeZone = TimeZone(identifier: identifier) {
+            return timeZone
+        }
+
+        let adjustedIdentifier = identifier.replacingOccurrences(of: "ETC/", with: "Etc/")
+        if let timeZone = TimeZone(identifier: adjustedIdentifier) {
+            return timeZone
+        }
+
+        if identifier.uppercased().contains("GMT") {
+            let components = identifier.uppercased().components(separatedBy: "GMT")
+            if components.count > 1 {
+                let offsetString = components[1]
+                if let offsetHours = Int(offsetString) {
+                    let correctedOffsetHours = -offsetHours
+                    let secondsFromGMT = correctedOffsetHours * 3600
+                    if let timeZone = TimeZone(secondsFromGMT: secondsFromGMT) {
+                        return timeZone
+                    }
+                }
+            }
+        }
+
+        return TimeZone.current
+    }
+
+    mutating func clear() {
         self.isfSchedule = []
         self.basalSchedule = []
         self.carbRatioSchedule = []
@@ -155,7 +186,7 @@ final class ProfileManager {
         self.targetHighSchedule = []
         self.overrides = []
         self.units = .millimolesPerLiter
-        self.timezone = "UTC"
+        self.timezone = TimeZone.current
         self.defaultProfile = ""
     }
 }
