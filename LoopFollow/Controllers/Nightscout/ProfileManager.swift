@@ -178,7 +178,7 @@ final class ProfileManager {
         return TimeZone.current
     }
 
-    mutating func clear() {
+    func clear() {
         self.isfSchedule = []
         self.basalSchedule = []
         self.carbRatioSchedule = []
