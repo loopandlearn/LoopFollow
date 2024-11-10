@@ -106,6 +106,7 @@ class PushNotificationManager {
         carbs: HKQuantity,
         protein: HKQuantity,
         fat: HKQuantity,
+        bolusAmount: HKQuantity,
         scheduledTime: Date?,
         completion: @escaping (Bool, String?) -> Void
     ) {
@@ -114,10 +115,17 @@ class PushNotificationManager {
             return valueInGrams > 0 ? Int(valueInGrams) : nil
         }
 
+        func convertToOptionalDecimal(_ quantity: HKQuantity?) -> Decimal? {
+            guard let quantity = quantity else { return nil }
+            let value = quantity.doubleValue(for: .internationalUnit())
+            return value > 0 ? Decimal(value) : nil
+        }
+
         let carbsValue = convertToOptionalInt(carbs)
         let proteinValue = convertToOptionalInt(protein)
         let fatValue = convertToOptionalInt(fat)
         let scheduledTimeInterval: TimeInterval? = scheduledTime?.timeIntervalSince1970
+        let bolusAmountValue = convertToOptionalDecimal(bolusAmount)
 
         guard carbsValue != nil || proteinValue != nil || fatValue != nil else {
             completion(false, "No nutrient data provided. At least one of carbs, fat, or protein must be greater than 0.")
@@ -127,6 +135,7 @@ class PushNotificationManager {
         let message = PushMessage(
             user: user,
             commandType: .meal,
+            bolusAmount: bolusAmountValue,
             carbs: carbsValue,
             protein: proteinValue,
             fat: fatValue,

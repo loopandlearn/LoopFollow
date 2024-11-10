@@ -14,16 +14,21 @@ struct MealView: View {
     @State private var carbs = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var protein = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var fat = HKQuantity(unit: .gram(), doubleValue: 0.0)
+    @State private var bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
 
     private let pushNotificationManager = PushNotificationManager()
 
     @ObservedObject private var maxCarbs = Storage.shared.maxCarbs
     @ObservedObject private var maxProtein = Storage.shared.maxProtein
     @ObservedObject private var maxFat = Storage.shared.maxFat
+    @ObservedObject private var mealWithBolus = Storage.shared.mealWithBolus
+    @ObservedObject private var mealWithFatProtein = Storage.shared.mealWithFatProtein
+    @ObservedObject private var maxBolus = Storage.shared.maxBolus
 
     @FocusState private var carbsFieldIsFocused: Bool
     @FocusState private var proteinFieldIsFocused: Bool
     @FocusState private var fatFieldIsFocused: Bool
+    @FocusState private var bolusFieldIsFocused: Bool
 
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
@@ -58,31 +63,48 @@ struct MealView: View {
                             }
                         )
 
-                        HKQuantityInputView(
-                            label: "Protein",
-                            quantity: $protein,
-                            unit: .gram(),
-                            maxLength: 4,
-                            minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                            maxValue: maxProtein.value,
-                            isFocused: $proteinFieldIsFocused,
-                            onValidationError: { message in
-                                handleValidationError(message)
-                            }
-                        )
+                        if mealWithFatProtein.value {
+                            HKQuantityInputView(
+                                label: "Protein",
+                                quantity: $protein,
+                                unit: .gram(),
+                                maxLength: 4,
+                                minValue: HKQuantity(unit: .gram(), doubleValue: 0),
+                                maxValue: maxProtein.value,
+                                isFocused: $proteinFieldIsFocused,
+                                onValidationError: { message in
+                                    handleValidationError(message)
+                                }
+                            )
 
-                        HKQuantityInputView(
-                            label: "Fat",
-                            quantity: $fat,
-                            unit: .gram(),
-                            maxLength: 4,
-                            minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                            maxValue: maxFat.value,
-                            isFocused: $fatFieldIsFocused,
-                            onValidationError: { message in
-                                handleValidationError(message)
-                            }
-                        )
+                            HKQuantityInputView(
+                                label: "Fat",
+                                quantity: $fat,
+                                unit: .gram(),
+                                maxLength: 4,
+                                minValue: HKQuantity(unit: .gram(), doubleValue: 0),
+                                maxValue: maxFat.value,
+                                isFocused: $fatFieldIsFocused,
+                                onValidationError: { message in
+                                    handleValidationError(message)
+                                }
+                            )
+                        }
+
+                        if mealWithBolus.value {
+                            HKQuantityInputView(
+                                label: "Bolus Amount",
+                                quantity: $bolusAmount,
+                                unit: .internationalUnit(),
+                                maxLength: 4,
+                                minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05),
+                                maxValue: maxBolus.value,
+                                isFocused: $bolusFieldIsFocused,
+                                onValidationError: { message in
+                                    handleValidationError(message)
+                                }
+                            )
+                        }
                     }
 
                     Section(header: Text("Schedule")) {
@@ -136,8 +158,10 @@ struct MealView: View {
                     let carbsAmount = carbs.doubleValue(for: HKUnit.gram())
                     let proteinAmount = protein.doubleValue(for: HKUnit.gram())
                     let fatAmount = fat.doubleValue(for: HKUnit.gram())
+                    let bolusAmount = bolusAmount.doubleValue(for: .internationalUnit())
 
                     var message = "Are you sure you want to send the meal data"
+
                     if let selectedTime = selectedTime {
                         let timeFormatter = DateFormatter()
                         timeFormatter.timeStyle = .short
@@ -159,6 +183,10 @@ struct MealView: View {
                         message += String(format: "\nFat: %.0f g", fatAmount)
                     }
 
+                    if bolusAmount > 0 {
+                        message += String(format: "\nBolus: %.2f U", bolusAmount)
+                    }
+
                     return Alert(
                         title: Text("Confirm Meal"),
                         message: Text(message),
@@ -169,6 +197,7 @@ struct MealView: View {
                         }),
                         secondaryButton: .cancel()
                     )
+
                 case .statusSuccess:
                     return Alert(
                         title: Text("Status"),
@@ -218,6 +247,7 @@ struct MealView: View {
             carbs: carbs,
             protein: protein,
             fat: fat,
+            bolusAmount: bolusAmount,
             scheduledTime: scheduledDate
         ) { success, errorMessage in
             DispatchQueue.main.async {

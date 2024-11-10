@@ -25,6 +25,9 @@ class Storage {
     var maxProtein = SecureStorageValue<HKQuantity>(key: "maxProtein", defaultValue: HKQuantity(unit: .gram(), doubleValue: 30.0))
     var maxFat = SecureStorageValue<HKQuantity>(key: "maxFat", defaultValue: HKQuantity(unit: .gram(), doubleValue: 30.0))
 
+    var mealWithBolus = StorageValue<Bool>(key: "mealWithBolus", defaultValue: false)
+    var mealWithFatProtein = StorageValue<Bool>(key: "mealWithFatProtein", defaultValue: false)
+
     var cachedJWT = StorageValue<String?>(key: "cachedJWT", defaultValue: nil)
     var jwtExpirationDate = StorageValue<Date?>(key: "jwtExpirationDate", defaultValue: nil)
 
