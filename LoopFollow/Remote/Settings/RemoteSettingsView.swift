@@ -38,6 +38,7 @@ struct RemoteSettingsView: View {
         NavigationView {
             Form {
                 // Remote Type Section
+                // Instructions for Remote Type options
                 Section {
                     Picker("Remote Type", selection: $viewModel.remoteType) {
                         Text("None").tag(RemoteType.none)
@@ -45,6 +46,13 @@ struct RemoteSettingsView: View {
                         Text("Trio Remote Control").tag(RemoteType.trc)
                     }
                     .pickerStyle(MenuPickerStyle())
+
+                    Text("Nightscout is the only option available for the released version of Trio.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    Text("Trio Remote Control requires a special version of Trio, which is under development in a private repository until sufficient testing is completed.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                 }
 
                 // User Information Section
