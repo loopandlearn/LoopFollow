@@ -147,6 +147,55 @@ class PushNotificationManager {
         sendPushNotification(message: message, completion: completion)
     }
 
+    private func validateCredentials() -> [String]? {
+        var errors = [String]()
+
+        // Validate keyId (should be 10 alphanumeric characters)
+        let keyIdPattern = "^[A-Z0-9]{10}$"
+        if !matchesRegex(keyId, pattern: keyIdPattern) {
+            errors.append("APNS Key ID (\(keyId)) must be 10 uppercase alphanumeric characters.")
+        }
+
+        // Validate teamId (should be 10 alphanumeric characters)
+        let teamIdPattern = "^[A-Z0-9]{10}$"
+        if !matchesRegex(teamId, pattern: teamIdPattern) {
+            errors.append("Team ID (\(teamId)) must be 10 uppercase alphanumeric characters.")
+        }
+
+        // Validate apnsKey (should contain the BEGIN and END PRIVATE KEY markers)
+        if !apnsKey.contains("-----BEGIN PRIVATE KEY-----") || !apnsKey.contains("-----END PRIVATE KEY-----") {
+            errors.append("APNS Key must be a valid PEM-formatted private key.")
+        } else {
+            // Validate that the key data between the markers is valid Base64
+            if let keyData = extractKeyData(from: apnsKey) {
+                if Data(base64Encoded: keyData) == nil {
+                    errors.append("APNS Key contains invalid Base64 key data.")
+                }
+            } else {
+                errors.append("APNS Key has invalid formatting.")
+            }
+        }
+
+        return errors.isEmpty ? nil : errors
+    }
+
+    private func matchesRegex(_ text: String, pattern: String) -> Bool {
+        let regex = try? NSRegularExpression(pattern: pattern)
+        let range = NSRange(location: 0, length: text.utf16.count)
+        return regex?.firstMatch(in: text, options: [], range: range) != nil
+    }
+
+    private func extractKeyData(from pemString: String) -> String? {
+        let lines = pemString.components(separatedBy: "\n")
+        guard let startIndex = lines.firstIndex(of: "-----BEGIN PRIVATE KEY-----"),
+              let endIndex = lines.firstIndex(of: "-----END PRIVATE KEY-----"),
+              startIndex < endIndex else {
+            return nil
+        }
+        let keyLines = lines[(startIndex + 1)..<endIndex]
+        return keyLines.joined()
+    }
+
     private func sendPushNotification(message: PushMessage, completion: @escaping (Bool, String?) -> Void) {
         print("Push message to send: \(message)")
 
@@ -169,6 +218,13 @@ class PushNotificationManager {
 
         if !missingFields.isEmpty {
             let errorMessage = "Missing required data, verify that you are using the latest version of Trio: \(missingFields.joined(separator: ", "))"
+            print(errorMessage)
+            completion(false, errorMessage)
+            return
+        }
+
+        if let validationErrors = validateCredentials() {
+            let errorMessage = "Credential validation failed: \(validationErrors.joined(separator: ", "))"
             print(errorMessage)
             completion(false, errorMessage)
             return
