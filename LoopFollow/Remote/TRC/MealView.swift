@@ -119,6 +119,10 @@ struct MealView: View {
                                 displayedComponents: .hourAndMinute
                             )
                             .datePickerStyle(CompactDatePickerStyle())
+
+                            if bolusAmount.doubleValue(for: .internationalUnit()) > 0 {
+                                Text("Note: The meal will be scheduled, but the bolus is enacted immediately.")
+                            }
                         }
                     }
 
