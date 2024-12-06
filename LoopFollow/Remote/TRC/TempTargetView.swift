@@ -1,24 +1,26 @@
 //
-//  RemoteView.swift
+//  TempTargetView.swift
 //  LoopFollow
 //
-//  Created by Jonas Björkert on 2024-07-19.
+//  Created by Jonas Björkert on 2024-08-25.
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
 import SwiftUI
 import HealthKit
 
-struct RemoteView: View {
-    @ObservedObject var nightscoutURL = ObservableUserDefaults.shared.url
+struct TempTargetView: View {
+    @Environment(\.presentationMode) private var presentationMode
+    private let pushNotificationManager = PushNotificationManager()
+
     @ObservedObject var device = ObservableUserDefaults.shared.device
-    @ObservedObject var nsWriteAuth = ObservableUserDefaults.shared.nsWriteAuth
     @ObservedObject var tempTarget = Observable.shared.tempTarget
 
     @State private var newHKTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0.0)
     @State private var duration = HKQuantity(unit: .minute(), doubleValue: 0.0)
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
+    @State private var alertMessage: String? = nil
     @State private var isLoading: Bool = false
     @State private var statusMessage: String? = nil
 
@@ -29,29 +31,20 @@ struct RemoteView: View {
     @FocusState private var targetFieldIsFocused: Bool
     @FocusState private var durationFieldIsFocused: Bool
 
-    var onCancelExistingTarget: (@escaping (Bool) -> Void) -> Void
-    var sendTempTarget: (HKQuantity, HKQuantity, @escaping (Bool) -> Void) -> Void
-
     enum AlertType {
         case confirmCommand
-        case status
+        case statusSuccess
+        case statusFailure
+        case validation
         case confirmCancellation
     }
 
     var body: some View {
         NavigationView {
             VStack {
-                if nightscoutURL.value.isEmpty {
-                    ErrorMessageView(
-                        message: "Remote commands are currently only available for Trio. It requires you to enter your Nightscout address and a token with the careportal role in the settings."
-                    )
-                } else if device.value != "Trio" {
+                if device.value != "Trio" {
                     ErrorMessageView(
                         message: "Remote commands are currently only available for Trio."
-                    )
-                } else if !nsWriteAuth.value {
-                    ErrorMessageView(
-                        message: "Please update your token to include the 'careportal' and 'readable' roles in order to do remote commands."
                     )
                 } else {
                     Form {
@@ -86,7 +79,10 @@ struct RemoteView: View {
                                     maxLength: 4,
                                     unit: UserDefaultsRepository.getPreferredUnit(),
                                     minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60),
-                                    maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 300)
+                                    maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 300),
+                                    onValidationError: { message in
+                                        handleValidationError(message)
+                                    }
                                 )
                                 .focused($targetFieldIsFocused)
                                 Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
@@ -98,7 +94,10 @@ struct RemoteView: View {
                                     quantity: $duration,
                                     maxLength: 4,
                                     unit: HKUnit.minute(),
-                                    minValue: HKQuantity(unit: .minute(), doubleValue: 5)
+                                    minValue: HKQuantity(unit: .minute(), doubleValue: 5),
+                                    onValidationError: { message in
+                                        handleValidationError(message)
+                                    }
                                 )
                                 .focused($durationFieldIsFocused)
                                 Text("minutes").foregroundColor(.secondary)
@@ -184,13 +183,19 @@ struct RemoteView: View {
                         }),
                         secondaryButton: .cancel()
                     )
-                case .status:
+                case .statusSuccess:
                     return Alert(
                         title: Text("Status"),
                         message: Text(statusMessage ?? ""),
                         dismissButton: .default(Text("OK"), action: {
-                            showAlert = false
+                            presentationMode.wrappedValue.dismiss()
                         })
+                    )
+                case .statusFailure:
+                    return Alert(
+                        title: Text("Status"),
+                        message: Text(statusMessage ?? ""),
+                        dismissButton: .default(Text("OK"))
                     )
                 case .confirmCancellation:
                     return Alert(
@@ -200,6 +205,12 @@ struct RemoteView: View {
                             cancelTempTarget()
                         }),
                         secondaryButton: .cancel()
+                    )
+                case .validation:
+                    return Alert(
+                        title: Text("Validation Error"),
+                        message: Text(alertMessage ?? "Invalid input."),
+                        dismissButton: .default(Text("OK"))
                     )
                 case .none:
                     return Alert(title: Text("Unknown Alert"))
@@ -241,29 +252,43 @@ struct RemoteView: View {
 
     private func enactTempTarget() {
         isLoading = true
-        sendTempTarget(newHKTarget, duration) { success in
-            self.isLoading = false
-            if success {
-                self.statusMessage = "Command successfully sent to Nightscout."
-            } else {
-                self.statusMessage = "Failed to enact target."
+
+        pushNotificationManager.sendTempTargetPushNotification(target: newHKTarget, duration: duration) { success, errorMessage in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if success {
+                    self.statusMessage = "Temp target command successfully sent."
+                    self.alertType = .statusSuccess
+                } else {
+                    self.statusMessage = errorMessage ?? "Failed to send temp target command."
+                    self.alertType = .statusFailure
+                }
+                self.showAlert = true
             }
-            self.alertType = .status
-            self.showAlert = true
         }
     }
 
     private func cancelTempTarget() {
         isLoading = true
-        onCancelExistingTarget() { success in
-            self.isLoading = false
-            if success {
-                self.statusMessage = "Cancellation request successfully sent to Nightscout."
-            } else {
-                self.statusMessage = "Failed to cancel temp target."
+
+        pushNotificationManager.sendCancelTempTargetPushNotification { success, errorMessage in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if success {
+                    self.statusMessage = "Cancel temp target command successfully sent."
+                    self.alertType = .statusSuccess
+                } else {
+                    self.statusMessage = errorMessage ?? "Failed to send cancel temp target command."
+                    self.alertType = .statusFailure
+                }
+                self.showAlert = true
             }
-            self.alertType = .status
-            self.showAlert = true
         }
+    }
+
+    private func handleValidationError(_ message: String) {
+        alertMessage = message
+        alertType = .validation
+        showAlert = true
     }
 }

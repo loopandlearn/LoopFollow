@@ -49,4 +49,29 @@ struct NSProfile: Decodable {
     let store: [String: Store]
     let defaultProfile: String
     let units: String
+
+    let bundleIdentifier: String?
+    let isAPNSProduction: Bool?
+    let deviceToken: String?
+    let teamID: String?
+
+    struct TrioOverrideEntry: Decodable {
+        let name: String
+        let duration: Double?
+        let percentage: Double?
+        let target: Double?
+    }
+    
+    let trioOverrides: [TrioOverrideEntry]?
+
+    enum CodingKeys: String, CodingKey {
+        case store
+        case defaultProfile
+        case units
+        case bundleIdentifier
+        case isAPNSProduction
+        case deviceToken
+        case trioOverrides = "overridePresets"
+        case teamID
+    }
 }
