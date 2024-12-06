@@ -245,6 +245,16 @@ class SettingsViewController: FormViewController {
                     return alarmVC
                 }), onDismiss: nil)
         }
+        <<< ButtonRow("remoteSettings") {
+            $0.title = "Remote Settings"
+            $0.presentationMode = .show(
+                controllerProvider: .callback(builder: {
+                    self.presentRemoteSettings()
+                    return UIViewController()
+                }),
+                onDismiss: nil
+            )
+        }
 
         +++ Section("Integrations")
         <<< ButtonRow() {
@@ -384,6 +394,19 @@ class SettingsViewController: FormViewController {
         let viewModel = InfoDisplaySettingsViewModel()
         let settingsView = InfoDisplaySettingsView(viewModel: viewModel)
 
+        let hostingController = UIHostingController(rootView: settingsView)
+        hostingController.modalPresentationStyle = .formSheet
+
+        if UserDefaultsRepository.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        }
+
+        present(hostingController, animated: true, completion: nil)
+    }
+
+    func presentRemoteSettings() {
+        let viewModel = RemoteSettingsViewModel()
+        let settingsView = RemoteSettingsView(viewModel: viewModel)
         let hostingController = UIHostingController(rootView: settingsView)
         hostingController.modalPresentationStyle = .formSheet
 

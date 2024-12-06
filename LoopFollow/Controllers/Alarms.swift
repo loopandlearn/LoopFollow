@@ -578,7 +578,63 @@ extension MainViewController {
                 lastOverrideAlarm = now
         }
     }
-    
+
+    func checkTempTargetAlarms() {
+        if UserDefaultsRepository.alertSnoozeAllIsSnoozed.value { return }
+
+        let recentTempTarget = tempTargetGraphData.last
+        let recentStart: TimeInterval = recentTempTarget?.date ?? 0
+        let recentEnd: TimeInterval = recentTempTarget?.endDate ?? 0
+        let now = dateTimeUtils.getNowTimeIntervalUTC()
+
+        var triggerStart = false
+        var triggerEnd = false
+
+        // Trigger newly started temp target
+        if now - recentStart > 0 && now - recentStart <= (15 * 60) && recentStart > lastTempTargetAlarm {
+            triggerStart = true
+        } else if now - recentEnd > 0 && now - recentEnd <= (15 * 60) && recentEnd > lastTempTargetAlarm {
+            triggerEnd = true
+        } else {
+            return
+        }
+
+        var numLoops = 0
+        var playSound = true
+
+        // Check Temp Target Start Alarm
+        if UserDefaultsRepository.alertTempTargetStart.value && !UserDefaultsRepository.alertTempTargetStartIsSnoozed.value && triggerStart {
+            AlarmSound.whichAlarm = "Temp Target Started"
+            // Determine if it is day or night and what should happen
+            if UserDefaultsRepository.nightTime.value {
+                if UserDefaultsRepository.alertTempTargetStartNightTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertTempTargetStartNightTimeAudible.value { playSound = false }
+            } else {
+                if UserDefaultsRepository.alertTempTargetStartDayTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertTempTargetStartDayTimeAudible.value { playSound = false }
+            }
+            triggerOneTimeAlarm(sound: UserDefaultsRepository.alertTempTargetStartSound.value, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, audio: playSound)
+            lastTempTargetStartTime = recentStart
+            lastTempTargetAlarm = now
+        }
+
+        // Check Temp Target End Alarm
+        else if UserDefaultsRepository.alertTempTargetEnd.value && !UserDefaultsRepository.alertTempTargetEndIsSnoozed.value && triggerEnd {
+            AlarmSound.whichAlarm = "Temp Target Ended"
+            // Determine if it is day or night and what should happen
+            if UserDefaultsRepository.nightTime.value {
+                if UserDefaultsRepository.alertTempTargetEndNightTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertTempTargetEndNightTimeAudible.value { playSound = false }
+            } else {
+                if UserDefaultsRepository.alertTempTargetEndDayTime.value { numLoops = -1 }
+                if !UserDefaultsRepository.alertTempTargetEndDayTimeAudible.value { playSound = false }
+            }
+            triggerOneTimeAlarm(sound: UserDefaultsRepository.alertTempTargetEndSound.value, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, audio: playSound)
+            lastTempTargetEndTime = recentEnd
+            lastTempTargetAlarm = now
+        }
+    }
+
     func triggerOneTimeAlarm(sound: String, overrideVolume: Bool, numLoops: Int, audio: Bool = true)
     {
         var audioDuringCall = true
@@ -787,6 +843,18 @@ extension MainViewController {
             UserDefaultsRepository.alertRecBolusIsSnoozed.value = false
             alarms.reloadSnoozeTime(key: "alertRecBolusSnoozedTime", setNil: true)
             alarms.reloadIsSnoozed(key: "alertRecBolusIsSnoozed", value: false)
+        }
+        if date > UserDefaultsRepository.alertTempTargetStartSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertTempTargetStartSnoozedTime.setNil(key: "alertTempTargetStartSnoozedTime")
+            UserDefaultsRepository.alertTempTargetStartIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertTempTargetStartSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertTempTargetStartIsSnoozed", value: false)
+        }
+        if date > UserDefaultsRepository.alertTempTargetEndSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertTempTargetEndSnoozedTime.setNil(key: "alertTempTargetEndSnoozedTime")
+            UserDefaultsRepository.alertTempTargetEndIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertTempTargetEndSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertTempTargetEndIsSnoozed", value: false)
         }
     }
 

@@ -6,17 +6,23 @@
 import Foundation
 import HealthKit
 
-struct ProfileManager {
+final class ProfileManager {
+    // MARK: - Singleton Instance
+    static let shared = ProfileManager()
+
+    // MARK: - Properties
     var isfSchedule: [TimeValue<HKQuantity>]
     var basalSchedule: [TimeValue<Double>]
     var carbRatioSchedule: [TimeValue<Double>]
     var targetLowSchedule: [TimeValue<HKQuantity>]
     var targetHighSchedule: [TimeValue<HKQuantity>]
     var overrides: [Override]
+    var trioOverrides: [TrioOverride]
     var units: HKUnit
     var timezone: TimeZone
     var defaultProfile: String
 
+    // MARK: - Nested Structures
     struct TimeValue<T> {
         let timeAsSeconds: Int
         let value: T
@@ -30,19 +36,29 @@ struct ProfileManager {
         let symbol: String
     }
 
-    init() {
+    struct TrioOverride {
+        let name: String
+        let duration: Double?
+        let percentage: Double?
+        let target: HKQuantity?
+    }
+
+    // MARK: - Initializer
+    private init() {
         self.isfSchedule = []
         self.basalSchedule = []
         self.carbRatioSchedule = []
         self.targetLowSchedule = []
         self.targetHighSchedule = []
         self.overrides = []
+        self.trioOverrides = []
         self.units = .millimolesPerLiter
         self.timezone = TimeZone.current
         self.defaultProfile = ""
     }
 
-    mutating func loadProfile(from profileData: NSProfile) {
+    // MARK: - Methods
+    func loadProfile(from profileData: NSProfile) {
         guard let store = profileData.store[profileData.defaultProfile] else {
             return
         }
@@ -57,11 +73,37 @@ struct ProfileManager {
         self.carbRatioSchedule = store.carbratio.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: $0.value) }
         self.targetLowSchedule = store.target_low?.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) } ?? []
         self.targetHighSchedule = store.target_high?.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) } ?? []
+
         if let overrides = store.overrides {
-            self.overrides = overrides.map { Override(name: $0.name ?? "", targetRange: $0.targetRange?.map { HKQuantity(unit: self.units, doubleValue: $0) } ?? [], duration: $0.duration ?? 0, insulinNeedsScaleFactor: $0.insulinNeedsScaleFactor ?? 1.0, symbol: $0.symbol ?? "") }
+            self.overrides = overrides.map { Override(
+                name: $0.name ?? "",
+                targetRange: $0.targetRange?.map { HKQuantity(unit: self.units, doubleValue: $0) } ?? [],
+                duration: $0.duration ?? 0,
+                insulinNeedsScaleFactor: $0.insulinNeedsScaleFactor ?? 1.0,
+                symbol: $0.symbol ?? ""
+            )}
         } else {
             self.overrides = []
         }
+
+        if let trioOverrides = profileData.trioOverrides {
+            self.trioOverrides = trioOverrides.map { entry in
+                let targetQuantity = entry.target != nil ? HKQuantity(unit: .milligramsPerDeciliter, doubleValue: entry.target!) : nil
+                return TrioOverride(
+                    name: entry.name,
+                    duration: entry.duration,
+                    percentage: entry.percentage,
+                    target: targetQuantity
+                )
+            }
+        } else {
+            self.trioOverrides = []
+        }
+
+        Storage.shared.deviceToken.value = profileData.deviceToken ?? ""
+        Storage.shared.bundleId.value = profileData.bundleIdentifier ?? ""
+        Storage.shared.productionEnvironment.value = profileData.isAPNSProduction ?? false
+        Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
     }
 
     func currentISF() -> HKQuantity? {
@@ -136,7 +178,7 @@ struct ProfileManager {
         return TimeZone.current
     }
 
-    mutating func clear() {
+    func clear() {
         self.isfSchedule = []
         self.basalSchedule = []
         self.carbRatioSchedule = []
