@@ -192,6 +192,13 @@ struct RemoteSettingsView: View {
                         Toggle("Meal with Fat/Protein", isOn: $viewModel.mealWithFatProtein)
                             .toggleStyle(SwitchToggleStyle())
                     }
+
+                    Section(header: Text("Debug / Info")) {
+                        Text("Device Token: \(Storage.shared.deviceToken.value)")
+                        Text("Production Env.: \(Storage.shared.productionEnvironment.value ? "True" : "False")")
+                        Text("Team ID: \(Storage.shared.teamId.value ?? "")")
+                        Text("Bundle ID: \(Storage.shared.bundleId.value)")
+                    }
                 }
             }
             .navigationBarTitle("Remote Settings", displayMode: .inline)
