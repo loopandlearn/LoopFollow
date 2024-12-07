@@ -237,9 +237,10 @@ struct MealView: View {
             let calendar = Calendar.current
             let now = Date()
             let selectedDateComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+            let currentSecond = calendar.component(.second, from: now)
             scheduledDate = calendar.date(bySettingHour: selectedDateComponents.hour ?? 0,
                                           minute: selectedDateComponents.minute ?? 0,
-                                          second: 0,
+                                          second: currentSecond,
                                           of: now) ?? now
         }
 
