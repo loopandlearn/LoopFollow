@@ -78,8 +78,8 @@ struct TempTargetView: View {
                                     quantity: $newHKTarget,
                                     maxLength: 4,
                                     unit: UserDefaultsRepository.getPreferredUnit(),
-                                    minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60),
-                                    maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 300),
+                                    minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80),
+                                    maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200),
                                     onValidationError: { message in
                                         handleValidationError(message)
                                     }
