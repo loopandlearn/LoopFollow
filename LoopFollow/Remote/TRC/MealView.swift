@@ -137,9 +137,10 @@ struct MealView: View {
                                         fat.doubleValue(for: .gram()) != 0 else {
                                     return
                                 }
-
-                                alertType = .confirmMeal
-                                showAlert = true
+                                if !showAlert {
+                                    alertType = .confirmMeal
+                                    showAlert = true
+                                }
                             }
                         },
                         isDisabled: isButtonDisabled
