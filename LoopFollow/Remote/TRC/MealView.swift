@@ -8,6 +8,7 @@
 
 import SwiftUI
 import HealthKit
+import LocalAuthentication
 
 struct MealView: View {
     @Environment(\.presentationMode) private var presentationMode
@@ -193,7 +194,15 @@ struct MealView: View {
                         message: Text(message),
                         primaryButton: .default(Text("Confirm"), action: {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                sendMealCommand()
+                                if bolusAmount > 0 {
+                                    authenticateUser { success in
+                                        if success {
+                                            sendMealCommand()
+                                        }
+                                    }
+                                } else {
+                                    sendMealCommand()
+                                }
                             }
                         }),
                         secondaryButton: .cancel()
@@ -280,5 +289,30 @@ struct MealView: View {
         alertMessage = message
         alertType = .validationError
         showAlert = true
+    }
+
+    private func authenticateUser(completion: @escaping (Bool) -> Void) {
+        let context = LAContext()
+        var error: NSError?
+
+        let reason = "Confirm your identity to send bolus."
+
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, _ in
+                DispatchQueue.main.async {
+                    completion(success)
+                }
+            }
+        } else if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
+                DispatchQueue.main.async {
+                    completion(success)
+                }
+            }
+        } else {
+            DispatchQueue.main.async {
+                completion(false)
+            }
+        }
     }
 }
