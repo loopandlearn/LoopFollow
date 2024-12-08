@@ -185,6 +185,7 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
                             message += "Maximum: \(self.format(quantity: maxValue, for: self.unit))"
                         }
                         self.onValidationError(message)
+                        self.parent.quantity = HKQuantity(unit: self.unit, doubleValue: 0)
                     }
                 } else {
                     self.onValidationError("Invalid number format")
