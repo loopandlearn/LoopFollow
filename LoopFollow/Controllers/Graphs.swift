@@ -1803,8 +1803,26 @@ extension MainViewController {
             if word.count > maxLineLength {
                 var wordToProcess = word
                 while !wordToProcess.isEmpty {
-                    let availableSpace = maxLineLength - (currentLine.isEmpty ? 0 : currentLine.count + 1)
+                    let spaceCount = currentLine.isEmpty ? 0 : 1
+                    let availableSpace = maxLineLength - (currentLine.count + spaceCount)
+
+                    if availableSpace <= 0 {
+                        if !currentLine.isEmpty {
+                            lines.append(currentLine)
+                            currentLine = ""
+                        }
+                        continue
+                    }
+
                     let takeCount = min(wordToProcess.count, availableSpace)
+                    if takeCount <= 0 {
+                        if !currentLine.isEmpty {
+                            lines.append(currentLine)
+                            currentLine = ""
+                        }
+                        continue
+                    }
+
                     let index = wordToProcess.index(wordToProcess.startIndex, offsetBy: takeCount)
                     let substring = wordToProcess[..<index]
 
