@@ -10,33 +10,45 @@ import Foundation
 import Combine
 
 class ContactSettingsViewModel: ObservableObject {
-    @Published var contactEnabled: Bool
+    @Published var contactEnabled: Bool {
+        didSet {
+            storage.contactEnabled.value = contactEnabled
+        }
+    }
 
-    private var storage = ObservableUserDefaults.shared
+    @Published var contactTrend: Bool {
+        didSet {
+            if contactTrend {
+                contactDelta = false
+            }
+            storage.contactTrend.value = contactTrend
+        }
+    }
+
+    @Published var contactDelta: Bool {
+        didSet {
+            if contactDelta {
+                contactTrend = false
+            }
+            storage.contactDelta.value = contactDelta
+        }
+    }
+
+    private let storage = ObservableUserDefaults.shared
     private var cancellables = Set<AnyCancellable>()
-    private var isUpdatingFromStorage = false // Prevent recursive updates
 
     init() {
         self.contactEnabled = storage.contactEnabled.value
+        self.contactTrend = storage.contactTrend.value
+        self.contactDelta = storage.contactDelta.value
 
-        // Observe changes in UserDefaults
         storage.contactEnabled.$value
-            .sink { [weak self] newValue in
-                guard let self = self else { return }
-                self.isUpdatingFromStorage = true
-                self.contactEnabled = newValue
-                self.isUpdatingFromStorage = false
-            }
-            .store(in: &cancellables)
+            .assign(to: &$contactEnabled)
 
-        // Update UserDefaults when local property changes
-        $contactEnabled
-            .sink { [weak self] newValue in
-                guard let self = self else { return }
-                // Prevent updating UserDefaults during storage sync
-                guard !self.isUpdatingFromStorage else { return }
-                self.storage.contactEnabled.value = newValue
-            }
-            .store(in: &cancellables)
+        storage.contactTrend.$value
+            .assign(to: &$contactTrend)
+
+        storage.contactDelta.$value
+            .assign(to: &$contactDelta)
     }
 }

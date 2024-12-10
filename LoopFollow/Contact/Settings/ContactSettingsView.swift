@@ -34,6 +34,26 @@ struct ContactSettingsView: View {
                             }
                         }
                 }
+
+                if viewModel.contactEnabled {
+                    Section(header: Text("Additional Information")) {
+                        Toggle("Show Trend", isOn: $viewModel.contactTrend)
+                            .toggleStyle(SwitchToggleStyle())
+                            .onChange(of: viewModel.contactTrend) { isTrendEnabled in
+                                if isTrendEnabled {
+                                    viewModel.contactDelta = false
+                                }
+                            }
+
+                        Toggle("Show Delta", isOn: $viewModel.contactDelta)
+                            .toggleStyle(SwitchToggleStyle())
+                            .onChange(of: viewModel.contactDelta) { isDeltaEnabled in
+                                if isDeltaEnabled {
+                                    viewModel.contactTrend = false
+                                }
+                            }
+                    }
+                }
             }
             .navigationBarTitle("Contact Settings", displayMode: .inline)
             .toolbar {
