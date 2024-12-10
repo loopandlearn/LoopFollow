@@ -286,6 +286,11 @@ extension MainViewController {
             snoozer.BGLabel.text = snoozerBG
             snoozer.DirectionLabel.text = snoozerDirection
             snoozer.DeltaLabel.text = snoozerDelta
+
+            // Update contact
+            if ObservableUserDefaults.shared.contactEnabled.value {
+                self.contactImageUpdater.updateContactImage(bgValue: bgTextStr, extra: snoozerDelta, stale: deltaTime >= 12)
+            }
         }
     }
 }

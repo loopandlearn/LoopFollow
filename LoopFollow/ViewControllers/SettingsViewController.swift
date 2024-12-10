@@ -258,7 +258,7 @@ class SettingsViewController: FormViewController {
 
         +++ Section("Integrations")
         <<< ButtonRow() {
-            $0.title = "Apple Watch and Carplay"
+            $0.title = "Calendar"
             $0.presentationMode = .show(
                 controllerProvider: .callback(builder: {
                     let controller = WatchSettingsViewController()
@@ -268,7 +268,15 @@ class SettingsViewController: FormViewController {
                                              ), onDismiss: nil)
 
         }
-
+        <<< ButtonRow("contact") {
+            $0.title = "Contact"
+            $0.presentationMode = .show(
+                controllerProvider: .callback(builder: {
+                    self.presentContactSettings()
+                    return UIViewController()
+                }
+                                             ), onDismiss: nil)
+        }
         +++ Section("Advanced Settings")
         <<< ButtonRow() {
             $0.title = "Advanced Settings"
@@ -408,6 +416,20 @@ class SettingsViewController: FormViewController {
         let viewModel = RemoteSettingsViewModel()
         let settingsView = RemoteSettingsView(viewModel: viewModel)
         let hostingController = UIHostingController(rootView: settingsView)
+        hostingController.modalPresentationStyle = .formSheet
+
+        if UserDefaultsRepository.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        }
+
+        present(hostingController, animated: true, completion: nil)
+    }
+
+
+    func presentContactSettings() {
+        let viewModel = ContactSettingsViewModel()
+        let contactSettingsView = ContactSettingsView(viewModel: viewModel)
+        let hostingController = UIHostingController(rootView: contactSettingsView)
         hostingController.modalPresentationStyle = .formSheet
 
         if UserDefaultsRepository.forceDarkMode.value {

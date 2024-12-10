@@ -152,6 +152,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     var IsNotLooping = false
 
+    let contactImageUpdater = ContactImageUpdater()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -553,7 +555,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.processCalendarUpdates()
         }
     }
-    
+
     func processCalendarUpdates() {
         if UserDefaultsRepository.calendarIdentifier.value == "" { return }
         
