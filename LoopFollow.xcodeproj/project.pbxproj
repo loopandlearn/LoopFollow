@@ -612,6 +612,7 @@
 			isa = PBXGroup;
 			children = (
 				DD50C7512D0828B40057AE6F /* Settings */,
+				DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */,
 			);
 			path = Contact;
 			sourceTree = "<group>";
@@ -716,7 +717,6 @@
 				FCA2DDE52501095000254A8C /* Timers.swift */,
 				DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */,
 				DDF699932C555B310058A8D9 /* ViewControllerManager.swift */,
-				DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";

@@ -9,7 +9,19 @@
 import Foundation
 import Combine
 
+import Foundation
+
+extension Bundle {
+    var displayName: String {
+        return object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "LoopFollow"
+    }
+}
+
 class ContactSettingsViewModel: ObservableObject {
+    var contactName: String {
+        "'\(Bundle.main.displayName) - BG'"
+    }
+
     @Published var contactEnabled: Bool {
         didSet {
             storage.contactEnabled.value = contactEnabled
