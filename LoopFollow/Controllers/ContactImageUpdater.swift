@@ -58,17 +58,18 @@ class ContactImageUpdater {
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
 
-        UIColor.systemBackground.setFill()
+        UIColor.black.setFill()
         context.fill(CGRect(origin: .zero, size: size))
 
-        let bgText = bgValue
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
 
-        // Attributes for bgValue
+        let maxFontSize: CGFloat = extra.isEmpty ? 200 : 160
+        let fontSize = maxFontSize - CGFloat(bgValue.count * 10)
+
         var bgAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.boldSystemFont(ofSize: extra.isEmpty ? 140 : 100), // Larger font if no extra text
-            .foregroundColor: UIColor.label,
+            .font: UIFont.boldSystemFont(ofSize: fontSize),
+            .foregroundColor: stale ? UIColor.gray : UIColor.white,
             .paragraphStyle: paragraphStyle
         ]
 
@@ -76,21 +77,21 @@ class ContactImageUpdater {
             bgAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
 
+        let extraAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 90),
+            .foregroundColor: UIColor.white,
+            .paragraphStyle: paragraphStyle
+        ]
+
         let bgRect = extra.isEmpty
-        ? CGRect(x: 0, y: 80, width: size.width, height: 140) // Center bgValue vertically if no extra
-        : CGRect(x: 0, y: 60, width: size.width, height: 100)
+        ? CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
+        : CGRect(x: 0, y: 26, width: size.width, height: size.height / 2)
 
-        bgText.draw(in: bgRect, withAttributes: bgAttributes)
+        bgValue.draw(in: bgRect, withAttributes: bgAttributes)
 
-        // Draw extra text if not empty
         if !extra.isEmpty {
-            let trendAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 50),
-                .foregroundColor: UIColor.secondaryLabel,
-                .paragraphStyle: paragraphStyle
-            ]
-            let extraRect = CGRect(x: 0, y: 170, width: size.width, height: 50)
-            extra.draw(in: extraRect, withAttributes: trendAttributes)
+            let extraRect = CGRect(x: 0, y: size.height / 2 + 6, width: size.width, height: size.height / 2 - 20)
+            extra.draw(in: extraRect, withAttributes: extraAttributes)
         }
 
         let image = UIGraphicsGetImageFromCurrentImageContext()
