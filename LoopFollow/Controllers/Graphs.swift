@@ -1795,6 +1795,7 @@ extension MainViewController {
     }
 
     func wrapText(_ text: String, maxLineLength: Int) -> String {
+        return text
         var lines: [String] = []
         var currentLine = ""
 
