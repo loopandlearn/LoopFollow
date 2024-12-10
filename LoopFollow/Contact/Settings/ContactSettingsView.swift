@@ -71,11 +71,11 @@ struct ContactSettingsView: View {
 
     private func requestContactAccess() {
         let contactStore = CNContactStore()
+        let status = CNContactStore.authorizationStatus(for: .contacts)
 
-        switch CNContactStore.authorizationStatus(for: .contacts) {
-        case .authorized:
-            break
-        case .notDetermined:
+        if status == .authorized {
+            // Already authorized, do nothing
+        } else if status == .notDetermined {
             contactStore.requestAccess(for: .contacts) { granted, error in
                 DispatchQueue.main.async {
                     if !granted {
@@ -84,16 +84,13 @@ struct ContactSettingsView: View {
                     }
                 }
             }
-        case .denied:
+        } else if status == .denied {
             viewModel.contactEnabled = false
             showAlert(title: "Access Denied", message: "Access to Contacts is denied. Please go to Settings and enable Contacts access.")
-        case .restricted:
+        } else if status == .restricted {
             viewModel.contactEnabled = false
             showAlert(title: "Access Restricted", message: "Access to Contacts is restricted.")
-        case .limited:
-            viewModel.contactEnabled = false
-            showAlert(title: "Access Limited", message: "Access to Contacts is limited.")
-        @unknown default:
+        } else {
             viewModel.contactEnabled = false
             showAlert(title: "Error", message: "An unknown error occurred while checking Contacts access.")
         }
