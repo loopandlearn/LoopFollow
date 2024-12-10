@@ -26,7 +26,9 @@ class ContactImageUpdater {
                 return
             }
 
-            let predicate = CNContact.predicateForContacts(matchingName: "LoopFollowBG")
+            let bundleDisplayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "LoopFollow"
+            let contactName = "\(bundleDisplayName) - BG"
+            let predicate = CNContact.predicateForContacts(matchingName: contactName)
             let keysToFetch = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactImageDataKey] as [CNKeyDescriptor]
 
             do {
@@ -40,7 +42,7 @@ class ContactImageUpdater {
                     print("Contact image updated successfully.")
                 } else {
                     let newContact = CNMutableContact()
-                    newContact.givenName = "LoopFollowBG"
+                    newContact.givenName = contactName
                     newContact.imageData = imageData
                     let saveRequest = CNSaveRequest()
                     saveRequest.add(newContact, toContainerWithIdentifier: nil)

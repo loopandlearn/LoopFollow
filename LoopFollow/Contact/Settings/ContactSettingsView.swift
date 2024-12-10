@@ -21,7 +21,7 @@ struct ContactSettingsView: View {
         NavigationView {
             Form {
                 Section(header: Text("Contact Integration")) {
-                    Text("Add the contact named LoopFollowBG to your watch face to show the current BG value in real time.")
+                    Text("Add the contact named \(viewModel.contactName) to your watch face to show the current BG value in real time. Make sure to give the app full access to Contacts when prompted.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                         .padding(.vertical, 4)
