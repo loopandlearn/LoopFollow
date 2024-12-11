@@ -67,7 +67,7 @@ class ContactImageUpdater {
         paragraphStyle.alignment = .center
 
         let maxFontSize: CGFloat = extra.isEmpty ? 200 : 160
-        let fontSize = maxFontSize - CGFloat(bgValue.count * 10)
+        let fontSize = maxFontSize - CGFloat(bgValue.count * 15)
 
         var bgAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.boldSystemFont(ofSize: fontSize),
