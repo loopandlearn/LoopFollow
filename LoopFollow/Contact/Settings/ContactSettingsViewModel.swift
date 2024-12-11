@@ -9,8 +9,6 @@
 import Foundation
 import Combine
 
-import Foundation
-
 extension Bundle {
     var displayName: String {
         return object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "LoopFollow"
@@ -19,12 +17,13 @@ extension Bundle {
 
 class ContactSettingsViewModel: ObservableObject {
     var contactName: String {
-        "'\(Bundle.main.displayName) - BG'"
+        "\(Bundle.main.displayName) - BG"
     }
 
     @Published var contactEnabled: Bool {
         didSet {
             storage.contactEnabled.value = contactEnabled
+            triggerRefresh()
         }
     }
 
@@ -34,6 +33,7 @@ class ContactSettingsViewModel: ObservableObject {
                 contactDelta = false
             }
             storage.contactTrend.value = contactTrend
+            triggerRefresh()
         }
     }
 
@@ -43,6 +43,7 @@ class ContactSettingsViewModel: ObservableObject {
                 contactTrend = false
             }
             storage.contactDelta.value = contactDelta
+            triggerRefresh()
         }
     }
 
@@ -62,5 +63,9 @@ class ContactSettingsViewModel: ObservableObject {
 
         storage.contactDelta.$value
             .assign(to: &$contactDelta)
+    }
+
+    private func triggerRefresh() {
+        NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
     }
 }
