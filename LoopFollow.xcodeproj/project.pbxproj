@@ -48,6 +48,9 @@
 		DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE42ACF2383009A6922 /* Treatments.swift */; };
 		DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */; };
 		DD493AE92ACF2445009A6922 /* BGData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE82ACF2445009A6922 /* BGData.swift */; };
+		DD50C7502D0828800057AE6F /* ContactSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */; };
+		DD50C7532D0828D10057AE6F /* ContactSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */; };
+		DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */; };
 		DD5334212C60EBEE00062F9D /* InsulinCartridgeChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334202C60EBEE00062F9D /* InsulinCartridgeChange.swift */; };
 		DD5334232C60ED3600062F9D /* IAge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334222C60ED3600062F9D /* IAge.swift */; };
 		DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334262C61668700062F9D /* InfoDisplaySettingsViewModel.swift */; };
@@ -286,6 +289,9 @@
 		DD493AE42ACF2383009A6922 /* Treatments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Treatments.swift; sourceTree = "<group>"; };
 		DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatus.swift; sourceTree = "<group>"; };
 		DD493AE82ACF2445009A6922 /* BGData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGData.swift; sourceTree = "<group>"; };
+		DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSettingsViewModel.swift; sourceTree = "<group>"; };
+		DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSettingsView.swift; sourceTree = "<group>"; };
+		DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImageUpdater.swift; sourceTree = "<group>"; };
 		DD5334202C60EBEE00062F9D /* InsulinCartridgeChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinCartridgeChange.swift; sourceTree = "<group>"; };
 		DD5334222C60ED3600062F9D /* IAge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAge.swift; sourceTree = "<group>"; };
 		DD5334262C61668700062F9D /* InfoDisplaySettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsViewModel.swift; sourceTree = "<group>"; };
@@ -602,6 +608,24 @@
 			path = Treatments;
 			sourceTree = "<group>";
 		};
+		DD50C74D2D0828250057AE6F /* Contact */ = {
+			isa = PBXGroup;
+			children = (
+				DD50C7512D0828B40057AE6F /* Settings */,
+				DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */,
+			);
+			path = Contact;
+			sourceTree = "<group>";
+		};
+		DD50C7512D0828B40057AE6F /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */,
+				DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		DD5334252C61667700062F9D /* InfoDisplaySettings */ = {
 			isa = PBXGroup;
 			children = (
@@ -832,6 +856,7 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				DD50C74D2D0828250057AE6F /* Contact */,
 				DD5334252C61667700062F9D /* InfoDisplaySettings */,
 				DD0C0C6E2C4AFFB800DBADDF /* Remote */,
 				DD0C0C692C4852A100DBADDF /* Metric */,
@@ -1257,6 +1282,7 @@
 				DD13BC752C3FD6210062313B /* InfoType.swift in Sources */,
 				DDCF979C24C14EFB002C9752 /* AdvancedSettingsViewController.swift in Sources */,
 				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
+				DD50C7502D0828800057AE6F /* ContactSettingsViewModel.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
 				DD6A935E2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift in Sources */,
 				DD493AD52ACF2109009A6922 /* ResumePump.swift in Sources */,
@@ -1266,6 +1292,7 @@
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				DDD10F072C529DE800D76A8E /* Observable.swift in Sources */,
 				DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */,
+				DD50C7532D0828D10057AE6F /* ContactSettingsView.swift in Sources */,
 				DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */,
 				DD0C0C6B2C48562000DBADDF /* InsulinMetric.swift in Sources */,
 				DD493AD92ACF2171009A6922 /* Carbs.swift in Sources */,
@@ -1295,6 +1322,7 @@
 				DD0C0C642C45A59400DBADDF /* HKUnit+Extensions.swift in Sources */,
 				DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */,
 				DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */,
+				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
 				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
 				FCA2DDE62501095000254A8C /* Timers.swift in Sources */,
