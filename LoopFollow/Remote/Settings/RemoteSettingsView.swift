@@ -45,7 +45,8 @@ struct RemoteSettingsView: View {
                         Text("Nightscout").tag(RemoteType.nightscout)
                         if BuildDetails.default.branch?.lowercased() != "main" {
                             Text("Trio Remote Control").tag(RemoteType.trc)
-                        }                    }
+                        }
+                    }
                     .pickerStyle(MenuPickerStyle())
 
                     Text("Nightscout is the only option available for the released version of Trio.")
