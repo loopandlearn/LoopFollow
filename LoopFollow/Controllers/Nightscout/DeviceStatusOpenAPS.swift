@@ -17,17 +17,22 @@ extension MainViewController {
                 LoopStatusLabel.text = "X"
                 latestLoopStatusString = "X"
             } else {
-                guard let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] else {
+                guard let enactedOrSuggested = lastLoopRecord["enacted"] as? [String: AnyObject] ?? lastLoopRecord["suggested"] as? [String: AnyObject] else {
                     LoopStatusLabel.text = "↻"
                     latestLoopStatusString = "↻"
                     evaluateNotLooping(lastLoopTime: lastLoopTime)
                     return
                 }
-                let wasEnacted = true
 
-                // Updated
-                if let enactedTimestamp = enacted["timestamp"] as? String,
-                   let enactedTime = formatter.date(from: enactedTimestamp)?.timeIntervalSince1970 {
+                var wasEnacted : Bool
+                if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] {
+                    wasEnacted = NSDictionary(dictionary: enacted).isEqual(to: enactedOrSuggested)
+                } else {
+                    wasEnacted = false
+                }
+
+                if let timestamp = enactedOrSuggested["timestamp"] as? String,
+                   let enactedTime = formatter.date(from: timestamp)?.timeIntervalSince1970 {
                     let formattedTime = Localizer.formatTimestampToLocalString(enactedTime)
                     infoManager.updateInfoData(type: .updated, value: formattedTime)
                 }
@@ -35,7 +40,7 @@ extension MainViewController {
                 // ISF
                 let profileISF = profileManager.currentISF()
                 var enactedISF: HKQuantity?
-                if let enactedISFValue = enacted["ISF"] as? Double {
+                if let enactedISFValue = enactedOrSuggested["ISF"] as? Double {
                     var determinedISFUnit: HKUnit = .milligramsPerDeciliter
                     if enactedISFValue < 15 {
                         determinedISFUnit = .millimolesPerLiter
@@ -51,7 +56,7 @@ extension MainViewController {
                 // Carb Ratio (CR)
                 let profileCR = profileManager.currentCarbRatio()
                 var enactedCR: Double?
-                if let reasonString = enacted["reason"] as? String {
+                if let reasonString = enactedOrSuggested["reason"] as? String {
                     let pattern = "CR: (\\d+(?:\\.\\d+)?)"
                     if let regex = try? NSRegularExpression(pattern: pattern) {
                         let nsString = reasonString as NSString
@@ -75,10 +80,10 @@ extension MainViewController {
                 }
 
                 // COB
-                if let cobMetric = CarbMetric(from: enacted, key: "COB") {
+                if let cobMetric = CarbMetric(from: enactedOrSuggested, key: "COB") {
                     infoManager.updateInfoData(type: .cob, value: cobMetric)
                     latestCOB = cobMetric
-                } else if let reasonString = enacted["reason"] as? String {
+                } else if let reasonString = enactedOrSuggested["reason"] as? String {
                     // Fallback: Extract COB from reason string
                     let cobPattern = "COB: (\\d+(?:\\.\\d+)?)"
                     if let cobRegex = try? NSRegularExpression(pattern: cobPattern),
@@ -101,7 +106,7 @@ extension MainViewController {
                 }
 
                 // Insulin Required
-                if let insulinReqMetric = InsulinMetric(from: enacted, key: "insulinReq") {
+                if let insulinReqMetric = InsulinMetric(from: enactedOrSuggested, key: "insulinReq") {
                     infoManager.updateInfoData(type: .recBolus, value: insulinReqMetric)
                     UserDefaultsRepository.deviceRecBolus.value = insulinReqMetric.value
                 } else {
@@ -109,13 +114,13 @@ extension MainViewController {
                 }
 
                 // Autosens
-                if let sens = enacted["sensitivityRatio"] as? Double {
+                if let sens = enactedOrSuggested["sensitivityRatio"] as? Double {
                     let formattedSens = String(format: "%.0f", sens * 100.0) + "%"
                     infoManager.updateInfoData(type: .autosens, value: formattedSens)
                 }
 
                 // Eventual BG
-                if let eventualBGValue = enacted["eventualBG"] as? Double {
+                if let eventualBGValue = enactedOrSuggested["eventualBG"] as? Double {
                     let eventualBGQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: eventualBGValue)
                     PredictionLabel.text = Localizer.formatQuantity(eventualBGQuantity)
                 }
@@ -123,7 +128,7 @@ extension MainViewController {
                 // Target
                 let profileTargetHigh = profileManager.currentTargetHigh()
                 var enactedTarget: HKQuantity?
-                if let enactedTargetValue = enacted["current_target"] as? Double {
+                if let enactedTargetValue = enactedOrSuggested["current_target"] as? Double {
                     var targetUnit = HKUnit.milligramsPerDeciliter
                     if enactedTargetValue < 40 {
                         targetUnit = .millimolesPerLiter
@@ -145,14 +150,14 @@ extension MainViewController {
                 }
 
                 // TDD
-                if let tddMetric = InsulinMetric(from: enacted, key: "TDD") {
+                if let tddMetric = InsulinMetric(from: enactedOrSuggested, key: "TDD") {
                     infoManager.updateInfoData(type: .tdd, value: tddMetric)
                 }
 
                 let predictioncolor = UIColor.systemGray
                 PredictionLabel.textColor = predictioncolor
                 topPredictionBG = UserDefaultsRepository.minBGScale.value
-                if let predbgdata = enacted["predBGs"] as? [String: AnyObject] {
+                if let predbgdata = enactedOrSuggested["predBGs"] as? [String: AnyObject] {
                     let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
                         ("ZT", "ZT", 12),
                         ("IOB", "Insulin", 13),
