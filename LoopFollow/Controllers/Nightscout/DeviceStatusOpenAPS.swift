@@ -11,16 +11,16 @@ extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
         if let createdAtString = lastDeviceStatus?["created_at"] as? String,
            let lastLoopTime = formatter.date(from: createdAtString)?.timeIntervalSince1970 {
-            UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
             ObservableUserDefaults.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
             if lastLoopRecord["failureReason"] != nil {
                 LoopStatusLabel.text = "X"
                 latestLoopStatusString = "X"
+                evaluateNotLooping(lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value)
             } else {
                 guard let enactedOrSuggested = lastLoopRecord["enacted"] as? [String: AnyObject] ?? lastLoopRecord["suggested"] as? [String: AnyObject] else {
                     LoopStatusLabel.text = "↻"
                     latestLoopStatusString = "↻"
-                    evaluateNotLooping(lastLoopTime: lastLoopTime)
+                    evaluateNotLooping(lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value)
                     return
                 }
 
@@ -29,6 +29,11 @@ extension MainViewController {
                     wasEnacted = NSDictionary(dictionary: enacted).isEqual(to: enactedOrSuggested)
                 } else {
                     wasEnacted = false
+                }
+
+                if wasEnacted {
+                    UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+                    evaluateNotLooping(lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value)
                 }
 
                 if let timestamp = enactedOrSuggested["timestamp"] as? String,
@@ -223,7 +228,6 @@ extension MainViewController {
                     latestLoopStatusString = "↻"
                 }
             }
-            evaluateNotLooping(lastLoopTime: lastLoopTime)
         }
     }
 }
