@@ -46,12 +46,12 @@ extension MainViewController {
             let midnightTime = dateTimeUtils.getTimeIntervalMidnightToday()
             // Setting end dots
             var duration = 0.0
-            do {
-                duration = try currentEntry?["duration"] as! Double
-            } catch {
+            if let durationValue = currentEntry?["duration"] as? Double {
+                duration = durationValue
+            } else {
                 print("No Duration Found")
             }
-            
+
             // This adds scheduled basal wherever there is a break between temps. can't check the prior ending on the first item. it is 24 hours old, so it isn't important for display anyway
             if i > 0 {
                 let priorEntry = tempArray[i - 1] as [String : AnyObject]?
