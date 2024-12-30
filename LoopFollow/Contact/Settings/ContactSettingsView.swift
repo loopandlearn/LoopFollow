@@ -1,4 +1,4 @@
-//
+    //
 //  ContactSettingsView.swift
 //  LoopFollow
 //
@@ -16,6 +16,7 @@ struct ContactSettingsView: View {
     @State private var showAlert: Bool = false
     @State private var alertTitle: String = ""
     @State private var alertMessage: String = ""
+    @State private var selectedColor: UIColor = .white  // Default color
 
     var body: some View {
         NavigationView {
@@ -33,6 +34,17 @@ struct ContactSettingsView: View {
                                 requestContactAccess()
                             }
                         }
+                    Picker("Select Color", selection: $selectedColor) {
+                        Text("Red").tag(UIColor.red)
+                        Text("Blue").tag(UIColor.blue)
+                        Text("Green").tag(UIColor.green)
+                        Text("Yellow").tag(UIColor.yellow)
+                        Text("Orange").tag(UIColor.orange)
+                        Text("Purple").tag(UIColor.purple)
+                        Text("Black").tag(UIColor.black)
+                        Text("White").tag(UIColor.white)
+                        Text("Gray").tag(UIColor.gray)
+                    }
                 }
 
                 if viewModel.contactEnabled {
