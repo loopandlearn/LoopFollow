@@ -34,17 +34,7 @@ struct ContactSettingsView: View {
                                 requestContactAccess()
                             }
                         }
-                    Picker("Select Color", selection: $selectedColor) {
-                        Text("Red").tag(UIColor.red)
-                        Text("Blue").tag(UIColor.blue)
-                        Text("Green").tag(UIColor.green)
-                        Text("Yellow").tag(UIColor.yellow)
-                        Text("Orange").tag(UIColor.orange)
-                        Text("Purple").tag(UIColor.purple)
-                        Text("Black").tag(UIColor.black)
-                        Text("White").tag(UIColor.white)
-                        Text("Gray").tag(UIColor.gray)
-                    }
+                    
                 }
 
                 if viewModel.contactEnabled {
@@ -64,6 +54,16 @@ struct ContactSettingsView: View {
                                     viewModel.contactTrend = false
                                 }
                             }
+                        Picker("Select Color", selection: $selectedColor) {
+                            Text("Red").tag(UIColor.red)
+                            Text("Blue").tag(UIColor.blue)
+                            Text("Green").tag(UIColor.green)
+                            Text("Yellow").tag(UIColor.yellow)
+                            Text("Orange").tag(UIColor.orange)
+                            Text("Purple").tag(UIColor.purple)
+                            Text("Black").tag(UIColor.black)
+                            Text("White").tag(UIColor.white)
+                        }
                     }
                 }
             }
