@@ -155,6 +155,9 @@ class UserDefaultsRepository {
     static let writeCalendarEvent = UserDefaultsValue<Bool>(key: "writeCalendarEvent", default: false)
     static let watchLine1 = UserDefaultsValue<String>(key: "watchLine1", default: "%BG% %DIRECTION% %DELTA% %MINAGO%")
     static let watchLine2 = UserDefaultsValue<String>(key: "watchLine2", default: "C:%COB% I:%IOB% B:%BASAL%")
+
+    // Watch Calendar Settings
+    static let watchColorSelection = UserDefaultsValue<String>(key: "watchColorIdentifier", default: "") //new - find me here
     
     // Alarm Settings
     static let systemOutputVolume = UserDefaultsValue<Float>(key: "systemOutputVolume", default: 0.5)
