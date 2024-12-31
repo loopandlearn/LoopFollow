@@ -54,7 +54,7 @@ struct ContactSettingsView: View {
                                     viewModel.contactTrend = false
                                 }
                             }
-                        Picker("Select Color", selection: $selectedColor) {
+                        Picker("Select Color", selection: $viewModel.contactColor) {
                             Text("Red").tag(red)
                             Text("Blue").tag(blue)
                             Text("Cyan").tag(cyan)
