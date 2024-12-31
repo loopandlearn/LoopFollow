@@ -55,14 +55,14 @@ struct ContactSettingsView: View {
                                 }
                             }
                         Picker("Select Color", selection: $selectedColor) {
-                            Text("Red").tag(UIColor.red)
-                            Text("Blue").tag(UIColor.blue)
-                            Text("Green").tag(UIColor.green)
-                            Text("Yellow").tag(UIColor.yellow)
-                            Text("Orange").tag(UIColor.orange)
-                            Text("Purple").tag(UIColor.purple)
-                            Text("Black").tag(UIColor.black)
-                            Text("White").tag(UIColor.white)
+                            Text("Red").tag(red)
+                            Text("Blue").tag(blue)
+                            Text("Cyan").tag(cyan)
+                            Text("Green").tag(green)
+                            Text("Yellow").tag(yellow)
+                            Text("Orange").tag(orange)
+                            Text("Purple").tag(purple)
+                            Text("White").tag(white)
                         }
                     }
                 }
