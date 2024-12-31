@@ -71,7 +71,7 @@ class ContactImageUpdater {
 
         //convert the saved string to UI Color
         private var savedUIColor: UIColor {
-            switch watchColorSelection {
+            switch contactsColor {
             case "red": return .red
             case "blue": return .blue
             case "cyan": return .cyan
@@ -87,7 +87,7 @@ class ContactImageUpdater {
         
         var bgAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.boldSystemFont(ofSize: fontSize),
-            .foregroundColor: stale ? UIColor.gray : UIColor.cyan,
+            .foregroundColor: stale ? UIColor.gray : savedUIColor,
             .paragraphStyle: paragraphStyle
         ]
 
@@ -97,7 +97,7 @@ class ContactImageUpdater {
 
         let extraAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 90),
-            .foregroundColor: UIColor.cyan,
+            .foregroundColor: savedUIColor,
             .paragraphStyle: paragraphStyle
         ]
 
