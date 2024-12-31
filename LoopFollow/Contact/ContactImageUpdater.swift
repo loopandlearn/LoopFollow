@@ -71,7 +71,7 @@ class ContactImageUpdater {
 
         //convert the saved string to UI Color
         private var savedUIColor: UIColor {
-            switch colorString {
+            switch watchColorSelection {
             case "red": return .red
             case "blue": return .blue
             case "cyan": return .cyan
