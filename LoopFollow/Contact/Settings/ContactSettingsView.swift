@@ -55,14 +55,14 @@ struct ContactSettingsView: View {
                                 }
                             }
                         Picker("Select Color", selection: $viewModel.contactColor) {
-                            Text("Red").tag(red)
-                            Text("Blue").tag(blue)
-                            Text("Cyan").tag(cyan)
-                            Text("Green").tag(green)
-                            Text("Yellow").tag(yellow)
-                            Text("Orange").tag(orange)
-                            Text("Purple").tag(purple)
-                            Text("White").tag(white)
+                            Text("Red").tag("red")
+                            Text("Blue").tag("blue")
+                            Text("Cyan").tag("cyan")
+                            Text("Green").tag("green")
+                            Text("Yellow").tag("yellow")
+                            Text("Orange").tag("orange")
+                            Text("Purple").tag("purple")
+                            Text("White").tag("white")
                         }
                     }
                 }
