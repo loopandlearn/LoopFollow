@@ -14,6 +14,21 @@ class ContactImageUpdater {
     private let contactStore = CNContactStore()
     private let queue = DispatchQueue(label: "ContactImageUpdaterQueue")
 
+    //convert the saved string to UI Color
+        private var savedUIColor: UIColor {
+            switch ObservableUserDefaults.shared.contactColor.value {
+            case "red": return .red
+            case "blue": return .blue
+            case "cyan": return .cyan
+            case "green": return .green
+            case "yellow": return .yellow
+            case "orange": return .orange
+            case "purple": return .purple
+            case "white": return .white
+            default: return .white
+            }
+        }
+
     func updateContactImage(bgValue: String, extra: String, stale: Bool) {
         queue.async {
             guard CNContactStore.authorizationStatus(for: .contacts) == .authorized else {
@@ -68,22 +83,6 @@ class ContactImageUpdater {
 
         let maxFontSize: CGFloat = extra.isEmpty ? 200 : 160
         let fontSize = maxFontSize - CGFloat(bgValue.count * 15)
-
-        //convert the saved string to UI Color
-        private var savedUIColor: UIColor {
-            switch ObservableUserDefaults.shared.contactColor.value {
-            case "red": return .red
-            case "blue": return .blue
-            case "cyan": return .cyan
-            case "green": return .green
-            case "yellow": return .yellow
-            case "orange": return .orange
-            case "purple": return .purple
-            case "white": return .white
-            default: return .white
-            }
-        }
-
         
         var bgAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.boldSystemFont(ofSize: fontSize),
