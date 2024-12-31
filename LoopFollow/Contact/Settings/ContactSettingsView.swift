@@ -16,7 +16,6 @@ struct ContactSettingsView: View {
     @State private var showAlert: Bool = false
     @State private var alertTitle: String = ""
     @State private var alertMessage: String = ""
-    @State private var selectedColor: UIColor = .white  // Default color
 
     var body: some View {
         NavigationView {
