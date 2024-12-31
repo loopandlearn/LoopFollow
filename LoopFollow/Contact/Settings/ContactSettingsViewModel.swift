@@ -47,6 +47,13 @@ class ContactSettingsViewModel: ObservableObject {
         }
     }
 
+    @Published var contactColor: String {
+        didSet {
+            storage.contactColor.value = contactColor
+            triggerRefresh()
+        }
+    }
+
     private let storage = ObservableUserDefaults.shared
     private var cancellables = Set<AnyCancellable>()
 
@@ -54,6 +61,7 @@ class ContactSettingsViewModel: ObservableObject {
         self.contactEnabled = storage.contactEnabled.value
         self.contactTrend = storage.contactTrend.value
         self.contactDelta = storage.contactDelta.value
+        self.contactColor = storage.contactColor.value
 
         storage.contactEnabled.$value
             .assign(to: &$contactEnabled)
@@ -63,6 +71,9 @@ class ContactSettingsViewModel: ObservableObject {
 
         storage.contactDelta.$value
             .assign(to: &$contactDelta)
+
+        storage.contactColor.$value
+            .assign(to: &$contactColor)
     }
 
     private func triggerRefresh() {
