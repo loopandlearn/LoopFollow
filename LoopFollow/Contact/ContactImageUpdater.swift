@@ -69,6 +69,22 @@ class ContactImageUpdater {
         let maxFontSize: CGFloat = extra.isEmpty ? 200 : 160
         let fontSize = maxFontSize - CGFloat(bgValue.count * 15)
 
+        //convert the saved string to UI Color
+        private var savedUIColor: UIColor {
+            switch colorString {
+            case "red": return .red
+            case "blue": return .blue
+            case "cyan": return .cyan
+            case "green": return .green
+            case "yellow": return .yellow
+            case "orange": return .orange
+            case "purple": return .purple
+            case "white": return .white
+            default: return .white
+            }
+        }
+
+        
         var bgAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.boldSystemFont(ofSize: fontSize),
             .foregroundColor: stale ? UIColor.gray : UIColor.cyan,
