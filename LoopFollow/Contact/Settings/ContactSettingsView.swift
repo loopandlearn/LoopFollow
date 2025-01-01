@@ -32,8 +32,7 @@ struct ContactSettingsView: View {
                             if isEnabled {
                                 requestContactAccess()
                             }
-                        }
-                    
+                        }  
                 }
 
                 if viewModel.contactEnabled {
