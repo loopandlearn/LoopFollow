@@ -234,24 +234,33 @@ class NightscoutUtils {
         task.resume()
     }
 
-    static func parseDate(_ dateString: String) -> Date? {
-        let dateFormatterWithMilliseconds = DateFormatter()
-        dateFormatterWithMilliseconds.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        dateFormatterWithMilliseconds.timeZone = TimeZone(abbreviation: "UTC")
-        dateFormatterWithMilliseconds.locale = Locale(identifier: "en_US_POSIX")
+    static func parseDate(_ rawString: String) -> Date? {
+        var mutableDate = rawString
 
-        let dateFormatterWithoutMilliseconds = DateFormatter()
-        dateFormatterWithoutMilliseconds.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
-        dateFormatterWithoutMilliseconds.timeZone = TimeZone(abbreviation: "UTC")
-        dateFormatterWithoutMilliseconds.locale = Locale(identifier: "en_US_POSIX")
-
-        if let date = dateFormatterWithMilliseconds.date(from: dateString) {
-            return date
-        } else if let date = dateFormatterWithoutMilliseconds.date(from: dateString) {
-            return date
+        if mutableDate.hasSuffix("Z") {
+            mutableDate = String(mutableDate.dropLast())
+        }
+        else if let offsetRange = mutableDate.range(of: "[\\+\\-]\\d{2}:\\d{2}$",
+                                                    options: .regularExpression) {
+            mutableDate.removeSubrange(offsetRange)
         }
 
-        return nil
+        mutableDate = mutableDate.replacingOccurrences(
+            of: "\\.\\d+",
+            with: "",
+            options: .regularExpression
+        )
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.locale = Locale(identifier: "en_US")
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+
+        let result = dateFormatter.date(from: mutableDate)
+        if result == nil {
+            print("Unable to parse string: '\(mutableDate)'")
+        }
+        return result
     }
 
     static func retrieveJWTToken() async throws -> String {
