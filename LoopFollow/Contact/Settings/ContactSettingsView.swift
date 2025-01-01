@@ -1,4 +1,4 @@
-    //
+//
 //  ContactSettingsView.swift
 //  LoopFollow
 //
