@@ -10,31 +10,6 @@ import Foundation
 
 extension MainViewController {
 
-    private func parseDate(_ rawString: String) -> Date? {
-        var mutableDate = rawString
-
-        if mutableDate.hasSuffix("Z") {
-            mutableDate = String(mutableDate.dropLast())
-        }
-        else if let offsetRange = mutableDate.range(of: "[\\+\\-]\\d{2}:\\d{2}$",
-                                                    options: .regularExpression) {
-            mutableDate.removeSubrange(offsetRange)
-        }
-
-        mutableDate = mutableDate.replacingOccurrences(
-            of: "\\.\\d+",
-            with: "",
-            options: .regularExpression
-        )
-
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        dateFormatter.locale = Locale(identifier: "en_US")
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-
-        return dateFormatter.date(from: mutableDate)
-    }
-
     // NS Temp Basal Response Processor
     func processNSBasals(entries: [[String:AnyObject]]) {
         infoManager.clearInfoData(type: .basal)
@@ -53,7 +28,7 @@ extension MainViewController {
             let dateString = currentEntry["timestamp"] as? String
             ?? currentEntry["created_at"] as? String
             guard let rawDateStr = dateString,
-                  let dateParsed = parseDate(rawDateStr) else {
+                  let dateParsed = NightscoutUtils.parseDate(rawDateStr) else {
                 continue
             }
 
@@ -70,7 +45,7 @@ extension MainViewController {
                 let priorDateStr = priorEntry?["timestamp"] as? String
                 ?? priorEntry?["created_at"] as? String
                 if let rawPrior = priorDateStr,
-                   let priorDateParsed = parseDate(rawPrior) {
+                   let priorDateParsed = NightscoutUtils.parseDate(rawPrior) {
 
                     let priorDateTimeStamp = priorDateParsed.timeIntervalSince1970
                     let priorDuration = priorEntry?["duration"] as? Double ?? 0.0
@@ -131,7 +106,7 @@ extension MainViewController {
                 let nextDateStr = nextEntry?["timestamp"] as? String
                 ?? nextEntry?["created_at"] as? String
                 if let rawNext = nextDateStr,
-                   let nextDateParsed = parseDate(rawNext) {
+                   let nextDateParsed = NightscoutUtils.parseDate(rawNext) {
 
                     let nextDateTimeStamp = nextDateParsed.timeIntervalSince1970
                     if nextDateTimeStamp < (dateTimeStamp + (duration * 60)) {
