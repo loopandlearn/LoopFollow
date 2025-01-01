@@ -74,7 +74,6 @@ extension MainViewController {
             }
             
             guard let date = NightscoutUtils.parseDate(carbDate) else {
-                print("Unable to parse date from: \(carbDate)")
                 continue
             }
             
