@@ -83,7 +83,6 @@ class ContactImageUpdater {
 
         let maxFontSize: CGFloat = extra.isEmpty ? 200 : 160
         let fontSize = maxFontSize - CGFloat(bgValue.count * 15)
-        
         var bgAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.boldSystemFont(ofSize: fontSize),
             .foregroundColor: stale ? UIColor.gray : savedUIColor,
