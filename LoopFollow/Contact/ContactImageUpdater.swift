@@ -75,7 +75,8 @@ class ContactImageUpdater {
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
 
-        UIColor.black.setFill()
+        //UIColor.black.setFill()
+        UIColor.cyan.setFill()
         context.fill(CGRect(origin: .zero, size: size))
 
         let paragraphStyle = NSMutableParagraphStyle()
