@@ -52,7 +52,8 @@ struct ContactSettingsView: View {
                                     viewModel.contactTrend = false
                                 }
                             }
-                        Picker("Select Color", selection: $viewModel.contactColor) {
+                        
+                        Picker("Select Background Color", selection: $viewModel.contactBackgroundColor) {
                             Text("Red").tag("red")
                             Text("Blue").tag("blue")
                             Text("Cyan").tag("cyan")
@@ -61,6 +62,19 @@ struct ContactSettingsView: View {
                             Text("Orange").tag("orange")
                             Text("Purple").tag("purple")
                             Text("White").tag("white")
+                            Text("Black").tag("black")
+                        }
+                        
+                        Picker("Select Text Color", selection: $viewModel.contactTextColor) {
+                            Text("Red").tag("red")
+                            Text("Blue").tag("blue")
+                            Text("Cyan").tag("cyan")
+                            Text("Green").tag("green")
+                            Text("Yellow").tag("yellow")
+                            Text("Orange").tag("orange")
+                            Text("Purple").tag("purple")
+                            Text("White").tag("white")
+                            Text("Black").tag("black")
                         }
                     }
                 }
