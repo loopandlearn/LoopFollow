@@ -14,9 +14,9 @@ class ContactImageUpdater {
     private let contactStore = CNContactStore()
     private let queue = DispatchQueue(label: "ContactImageUpdaterQueue")
 
-    //convert the saved string to UI Color
-        private var savedUIColor: UIColor {
-            switch ObservableUserDefaults.shared.contactColor.value {
+    //convert the saved strings to UI Color
+        private var savedBackgroundUIColor: UIColor {
+            switch ObservableUserDefaults.shared.contactBackgroundColor.value {
             case "red": return .red
             case "blue": return .blue
             case "cyan": return .cyan
@@ -25,6 +25,22 @@ class ContactImageUpdater {
             case "orange": return .orange
             case "purple": return .purple
             case "white": return .white
+            case "black": return .black    
+            default: return .black
+            }
+        }
+    
+        private var savedTextUIColor: UIColor {
+            switch ObservableUserDefaults.shared.contactTextColor.value {
+            case "red": return .red
+            case "blue": return .blue
+            case "cyan": return .cyan
+            case "green": return .green
+            case "yellow": return .yellow
+            case "orange": return .orange
+            case "purple": return .purple
+            case "white": return .white
+            case "black": return .black
             default: return .white
             }
         }
@@ -75,7 +91,7 @@ class ContactImageUpdater {
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
 
-        UIColor.black.setFill()
+        savedBackgroundUIColor.setFill()
         context.fill(CGRect(origin: .zero, size: size))
 
         let paragraphStyle = NSMutableParagraphStyle()
@@ -85,17 +101,21 @@ class ContactImageUpdater {
         let fontSize = maxFontSize - CGFloat(bgValue.count * 15)
         var bgAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.boldSystemFont(ofSize: fontSize),
-            .foregroundColor: stale ? UIColor.gray : savedUIColor,
+            .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
             .paragraphStyle: paragraphStyle
         ]
 
         if stale {
+            //force background color back to black if stale
+            UIColor.black.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            
             bgAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
 
         let extraAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 90),
-            .foregroundColor: savedUIColor,
+            .foregroundColor: savedTextUIColor,
             .paragraphStyle: paragraphStyle
         ]
 
