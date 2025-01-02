@@ -19,7 +19,8 @@ class ObservableUserDefaults {
     var contactEnabled = ObservableUserDefaultsValue<Bool>(key: "contactEnabled", default: false)
     var contactTrend = ObservableUserDefaultsValue<Bool>(key: "contactTrend", default: false)
     var contactDelta = ObservableUserDefaultsValue<Bool>(key: "contactDelta", default: false)
-    var contactColor = ObservableUserDefaultsValue<String>(key: "contactColor", default: "white")
+    var contactBackgroundColor = ObservableUserDefaultsValue<String>(key: "contactBackgroundColor", default: "black")
+    var contactTextColor = ObservableUserDefaultsValue<String>(key: "contactTextColor", default: "white")
     
 
     private init() {}
