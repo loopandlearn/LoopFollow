@@ -25,15 +25,6 @@ extension MainViewController {
                 }
                 let wasEnacted = true
 
-                var determinedUnit: HKUnit = .milligramsPerDeciliter
-
-                // Determine the unit based on the threshold value since no unit is provided
-                if let enactedTargetValue = enacted["threshold"] as? Double {
-                    if enactedTargetValue < 40 {
-                        determinedUnit = .millimolesPerLiter
-                    }
-                }
-
                 // Updated
                 if let enactedTimestamp = enacted["timestamp"] as? String,
                    let enactedTime = formatter.date(from: enactedTimestamp)?.timeIntervalSince1970 {
@@ -45,7 +36,11 @@ extension MainViewController {
                 let profileISF = profileManager.currentISF()
                 var enactedISF: HKQuantity?
                 if let enactedISFValue = enacted["ISF"] as? Double {
-                    enactedISF = HKQuantity(unit: determinedUnit, doubleValue: enactedISFValue)
+                    var determinedISFUnit: HKUnit = .milligramsPerDeciliter
+                    if enactedISFValue < 15 {
+                        determinedISFUnit = .millimolesPerLiter
+                    }
+                    enactedISF = HKQuantity(unit: determinedISFUnit, doubleValue: enactedISFValue)
                 }
                 if let profileISF = profileISF, let enactedISF = enactedISF, profileISF != enactedISF {
                     infoManager.updateInfoData(type: .isf, firstValue: profileISF, secondValue: enactedISF, separator: .arrow)
@@ -83,6 +78,26 @@ extension MainViewController {
                 if let cobMetric = CarbMetric(from: enacted, key: "COB") {
                     infoManager.updateInfoData(type: .cob, value: cobMetric)
                     latestCOB = cobMetric
+                } else if let reasonString = enacted["reason"] as? String {
+                    // Fallback: Extract COB from reason string
+                    let cobPattern = "COB: (\\d+(?:\\.\\d+)?)"
+                    if let cobRegex = try? NSRegularExpression(pattern: cobPattern),
+                       let cobMatch = cobRegex.firstMatch(in: reasonString, range: NSRange(location: 0, length: reasonString.utf16.count)) {
+                        let cobValueString = (reasonString as NSString).substring(with: cobMatch.range(at: 1))
+                        if let cobValue = Double(cobValueString) {
+                            let tempDict: [String: AnyObject] = ["COB": cobValue as AnyObject]
+                            if let fallbackCobMetric = CarbMetric(from: tempDict, key: "COB") {
+                                infoManager.updateInfoData(type: .cob, value: fallbackCobMetric)
+                                latestCOB = fallbackCobMetric
+                            } else {
+                                print("Failed to create CarbMetric from extracted COB value: \(cobValue)")
+                            }
+                        } else {
+                            print("Invalid COB value extracted from reason string: \(cobValueString)")
+                        }
+                    } else {
+                        print("COB pattern not found in reason string.")
+                    }
                 }
 
                 // Insulin Required
@@ -109,7 +124,11 @@ extension MainViewController {
                 let profileTargetHigh = profileManager.currentTargetHigh()
                 var enactedTarget: HKQuantity?
                 if let enactedTargetValue = enacted["current_target"] as? Double {
-                    enactedTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: enactedTargetValue)
+                    var targetUnit = HKUnit.milligramsPerDeciliter
+                    if enactedTargetValue < 40 {
+                        targetUnit = .millimolesPerLiter
+                    }
+                    enactedTarget = HKQuantity(unit: targetUnit, doubleValue: enactedTargetValue)
                 }
 
                 if let profileTargetHigh = profileTargetHigh, let enactedTarget = enactedTarget {

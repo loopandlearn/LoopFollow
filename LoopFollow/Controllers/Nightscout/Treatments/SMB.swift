@@ -39,6 +39,7 @@ extension MainViewController {
         
         if UserDefaultsRepository.graphBolus.value {
             updateSmbGraph()
+            updateChartRenderers()
         }
     }
 }

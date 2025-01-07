@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDisplayName</key>
-	<string>$(display_name)</string>
 	<key>AppGroupIdentifier</key>
 	<string>group.com.$(unique_id).LoopFollow$(app_suffix)</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
@@ -12,6 +10,8 @@
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>$(display_name)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,14 +24,31 @@
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(LOOP_FOLLOW_MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>loopfollow</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.medical</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Loop Follow would like to access your calendar to update BG readings</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Loop Follow would like to access your calendar to save BG readings</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>This app requires Face ID for secure authentication.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -78,6 +95,8 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSContactsUsageDescription</key>
+	<string>This app requires access to contacts to update a contact image with real-time blood glucose information.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -85,20 +104,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Loop Follow would like to access your calendar to update BG readings</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>loopfollow</string>
-			</array>
-		</dict>
-	</array>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>LSMinimumSystemVersion</key>
-	<string>13.0</string>
 </dict>
 </plist>

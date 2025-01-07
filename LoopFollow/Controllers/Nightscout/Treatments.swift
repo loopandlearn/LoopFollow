@@ -74,13 +74,12 @@ extension MainViewController {
                 bolus.append(entry)
             case "Carb Correction":
                 carbs.append(entry)
-            case "Temporary Override":
+            case "Temporary Override", "Exercise":
                 temporaryOverride.append(entry)
             case "Temporary Target":
                 temporaryTarget.append(entry)
             case "Note":
                 note.append(entry)
-                print("Note: \(String(describing: entry))")
             case "BG Check":
                 bgCheck.append(entry)
             case "Suspend Pump":
@@ -143,11 +142,15 @@ extension MainViewController {
                 clearOldBGCheck()
             }
         }
-        if temporaryOverride.count == 0 && temporaryTarget.count == 0 && overrideGraphData.count > 0 {
+        if temporaryOverride.count == 0 && overrideGraphData.count > 0 {
             clearOldOverride()
         }
         if temporaryOverride.count > 0 {
             processNSOverrides(entries: temporaryOverride)
+        }
+
+        if temporaryTarget.count == 0 && tempTargetGraphData.count > 0 {
+            clearOldTempTarget()
         }
         if temporaryTarget.count > 0 {
             processNSTemporaryTarget(entries: temporaryTarget)
