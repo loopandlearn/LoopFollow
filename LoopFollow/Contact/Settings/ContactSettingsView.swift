@@ -16,6 +16,10 @@ struct ContactSettingsView: View {
     @State private var showAlert: Bool = false
     @State private var alertTitle: String = ""
     @State private var alertMessage: String = ""
+    @State private var contactTrendSelection = 0
+    @State private var contactDeltaSelection = 0
+
+    let options = ["Off", "Include", "Separate Card"]
 
     var body: some View {
         NavigationView {
@@ -68,22 +72,30 @@ struct ContactSettingsView: View {
                     
                 if viewModel.contactEnabled {
                     Section(header: Text("Additional Information")) {
-                        Toggle("Show Trend", isOn: $viewModel.contactTrend)
-                            .toggleStyle(SwitchToggleStyle())
-                            .onChange(of: viewModel.contactTrend) { isTrendEnabled in
-                                if isTrendEnabled {
-                                    viewModel.contactDelta = false
-                                }
+                        Picker("Show Trend", selection: $contactTrendSelection) {
+                            ForEach(0..<options.count, id: \.self) { index in
+                                Text(self.options[index]).tag(index)
                             }
-
-                        Toggle("Show Delta", isOn: $viewModel.contactDelta)
-                            .toggleStyle(SwitchToggleStyle())
-                            .onChange(of: viewModel.contactDelta) { isDeltaEnabled in
-                                if isDeltaEnabled {
-                                    viewModel.contactTrend = false
-                                }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                
+                        Picker("Show Delta", selection: $contactDeltaSelection) {
+                            ForEach(0..<options.count, id: \.self) { index in
+                                Text(self.options[index]).tag(index)
                             }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
                     }
+                }
+            }
+            .onChange(of: contactTrendSelection) { newValue in
+                if newValue == 1 && contactDeltaSelection == 1 {
+                    contactDeltaSelection = 0
+                }
+            }
+            .onChange(of: contactDeltaSelection) { newValue in
+                if newValue == 1 && contactTrendSelection == 1 {
+                    contactTrendSelection = 0
                 }
             }
             
