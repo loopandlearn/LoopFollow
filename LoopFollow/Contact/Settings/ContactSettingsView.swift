@@ -35,6 +35,37 @@ struct ContactSettingsView: View {
                         }  
                 }
 
+                Section(header: Text("Color Options")) {
+                    Text("Select the colors for your BG values.  Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .padding(.vertical, 4)
+                    
+                    Picker("Select Background Color", selection: $viewModel.contactBackgroundColor) {
+                            Text("Red").tag("red")
+                            Text("Blue").tag("blue")
+                            Text("Cyan").tag("cyan")
+                            Text("Green").tag("green")
+                            Text("Yellow").tag("yellow")
+                            Text("Orange").tag("orange")
+                            Text("Purple").tag("purple")
+                            Text("White").tag("white")
+                            Text("Black").tag("black")
+                        }
+                        
+                    Picker("Select Text Color", selection: $viewModel.contactTextColor) {
+                        Text("Red").tag("red")
+                        Text("Blue").tag("blue")
+                        Text("Cyan").tag("cyan")
+                        Text("Green").tag("green")
+                        Text("Yellow").tag("yellow")
+                        Text("Orange").tag("orange")
+                        Text("Purple").tag("purple")
+                        Text("White").tag("white")
+                        Text("Black").tag("black")
+                    }
+                }
+                    
                 if viewModel.contactEnabled {
                     Section(header: Text("Additional Information")) {
                         Toggle("Show Trend", isOn: $viewModel.contactTrend)
@@ -52,33 +83,10 @@ struct ContactSettingsView: View {
                                     viewModel.contactTrend = false
                                 }
                             }
-                        
-                        Picker("Select Background Color", selection: $viewModel.contactBackgroundColor) {
-                            Text("Red").tag("red")
-                            Text("Blue").tag("blue")
-                            Text("Cyan").tag("cyan")
-                            Text("Green").tag("green")
-                            Text("Yellow").tag("yellow")
-                            Text("Orange").tag("orange")
-                            Text("Purple").tag("purple")
-                            Text("White").tag("white")
-                            Text("Black").tag("black")
-                        }
-                        
-                        Picker("Select Text Color", selection: $viewModel.contactTextColor) {
-                            Text("Red").tag("red")
-                            Text("Blue").tag("blue")
-                            Text("Cyan").tag("cyan")
-                            Text("Green").tag("green")
-                            Text("Yellow").tag("yellow")
-                            Text("Orange").tag("orange")
-                            Text("Purple").tag("purple")
-                            Text("White").tag("white")
-                            Text("Black").tag("black")
-                        }
                     }
                 }
             }
+            
             .navigationBarTitle("Contact Settings", displayMode: .inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
