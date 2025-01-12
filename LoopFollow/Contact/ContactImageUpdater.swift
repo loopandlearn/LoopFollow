@@ -115,7 +115,7 @@ class ContactImageUpdater {
 
         let extraAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 90),
-            .foregroundColor: savedTextUIColor,
+            .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
             .paragraphStyle: paragraphStyle
         ]
 
