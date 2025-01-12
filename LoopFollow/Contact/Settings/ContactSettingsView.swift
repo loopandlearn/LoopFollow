@@ -73,7 +73,7 @@ struct ContactSettingsView: View {
                 if viewModel.contactEnabled {
                     Section(header: Text("Additional Information")) {
                         Text("Show Trend")
-                            .font(.headline)
+                            .font(.subheadline)
                         Picker("Show Trend", selection: $contactTrendSelection) {
                             ForEach(0..<options.count, id: \.self) { index in
                                 Text(self.options[index]).tag(index)
@@ -82,7 +82,7 @@ struct ContactSettingsView: View {
                         .pickerStyle(SegmentedPickerStyle())
                 
                         Text("Show Delta")
-                            .font(.headline)
+                            .font(.subheadline)
                         Picker("Show Delta", selection: $contactDeltaSelection) {
                             ForEach(0..<options.count, id: \.self) { index in
                                 Text(self.options[index]).tag(index)
