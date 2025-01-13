@@ -31,6 +31,11 @@ class Storage {
     var cachedJWT = StorageValue<String?>(key: "cachedJWT", defaultValue: nil)
     var jwtExpirationDate = StorageValue<Date?>(key: "jwtExpirationDate", defaultValue: nil)
 
+    var backgroundRefreshType = StorageValue<BackgroundRefreshType>(key: "backgroundRefreshType", defaultValue: .silentTune)
+
+    var selectedBLEDevice = StorageValue<BLEDevice?>(key: "selectedBLEDevice", defaultValue: nil)
+
+
     static let shared = Storage()
 
     private init() { }

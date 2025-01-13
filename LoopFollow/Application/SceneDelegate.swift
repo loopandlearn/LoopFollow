@@ -127,4 +127,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         updateQuickActions()
     }
 }
-

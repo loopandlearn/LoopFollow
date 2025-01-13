@@ -206,6 +206,17 @@ class SettingsViewController: FormViewController {
 
         +++ Section("App Settings")
 
+        <<< ButtonRow("backgroundRefreshSettings") {
+            $0.title = "Background Refresh Settings"
+            $0.presentationMode = .show(
+                controllerProvider: .callback(builder: {
+                    self.presentBackgroundRefreshSettings()
+                    return UIViewController()
+                }),
+                onDismiss: nil
+            )
+        }
+
         <<< ButtonRow() {
             $0.title = "General Settings"
             $0.presentationMode = .show(
@@ -288,6 +299,26 @@ class SettingsViewController: FormViewController {
                 }
                                              ), onDismiss: nil)
 
+        }
+
+        +++ Section("Logging")
+        <<< ButtonRow("viewlog") {
+            $0.title = "View Log"
+            $0.presentationMode = .show(
+                controllerProvider: .callback(builder: {
+                    self.presentLogView()
+                    return UIViewController()
+                }
+                                             ), onDismiss: nil)
+        }
+        <<< ButtonRow("shareLogs") {
+            $0.title = "Share Logs"
+            $0.cellSetup { cell, row in
+                cell.accessibilityIdentifier = "ShareLogsButton"
+            }
+            $0.onCellSelection { [weak self] _, _ in
+                self?.shareLogs()
+            }
         }
 
         +++ Section("Build Information")
@@ -425,7 +456,6 @@ class SettingsViewController: FormViewController {
         present(hostingController, animated: true, completion: nil)
     }
 
-
     func presentContactSettings() {
         let viewModel = ContactSettingsViewModel()
         let contactSettingsView = ContactSettingsView(viewModel: viewModel)
@@ -437,5 +467,46 @@ class SettingsViewController: FormViewController {
         }
 
         present(hostingController, animated: true, completion: nil)
+    }
+
+    func presentBackgroundRefreshSettings() {
+        let viewModel = BackgroundRefreshSettingsViewModel()
+        let settingsView = BackgroundRefreshSettingsView(viewModel: viewModel)
+        let hostingController = UIHostingController(rootView: settingsView)
+        hostingController.modalPresentationStyle = .formSheet
+
+        if UserDefaultsRepository.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        }
+
+        present(hostingController, animated: true, completion: nil)
+    }
+
+    func presentLogView() {
+        let viewModel = LogViewModel()
+        let logView = LogView(viewModel: viewModel)
+        let hostingController = UIHostingController(rootView: logView)
+        hostingController.modalPresentationStyle = .formSheet
+
+        if UserDefaultsRepository.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        }
+
+        present(hostingController, animated: true, completion: nil)
+    }
+
+    private func shareLogs() {
+        let logManager = LogManager.shared
+        let logFileURL = logManager.currentLogFileURL
+
+        if FileManager.default.fileExists(atPath: logFileURL.path) {
+            let activityViewController = UIActivityViewController(activityItems: [logFileURL], applicationActivities: nil)
+            activityViewController.popoverPresentationController?.sourceView = self.view
+            present(activityViewController, animated: true, completion: nil)
+        } else {
+            let alert = UIAlertController(title: "No Logs Available", message: "There are no logs to share.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true, completion: nil)
+        }
     }
 }

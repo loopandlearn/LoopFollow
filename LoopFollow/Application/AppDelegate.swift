@@ -18,8 +18,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let notificationCenter = UNUserNotificationCenter.current()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        
+        LogManager.shared.log(category: .general, message: "App started")
+        LogManager.shared.cleanupOldLogs()
+
         let options: UNAuthorizationOptions = [.alert, .sound, .badge]
         notificationCenter.requestAuthorization(options: options) {
             (didAllow, error) in
@@ -27,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("User has declined notifications")
             }
         }
-        
+
         let store = EKEventStore()
         store.requestCalendarAccess { (granted, error) in
             if !granted {
@@ -35,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 return
             }
         }
-        
+
         let action = UNNotificationAction(identifier: "OPEN_APP_ACTION", title: "Open App", options: .foreground)
         let category = UNNotificationCategory(identifier: "loopfollow.background.alert", actions: [action], intentIdentifiers: [], options: [])
         UNUserNotificationCenter.current().setNotificationCategories([category])
@@ -44,7 +45,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Ensure ViewControllerManager is initialized
         _ = ViewControllerManager.shared
-        
+
+        _ = BLEManager.shared
+
         return true
     }
 
@@ -56,23 +59,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // MARK: UISceneSession Lifecycle
-    
+
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        // This application should be called in background every X Minutes
-        UIApplication.shared.setMinimumBackgroundFetchInterval(
-            TimeInterval(UserDefaultsRepository.backgroundRefreshFrequency.value * 60)
-        )
-        
         // set "prevent screen lock" to ON when the app is started for the first time
         if !UserDefaultsRepository.screenlockSwitchState.exists {
             UserDefaultsRepository.screenlockSwitchState.value = true
         }
-        
+
         // set the "prevent screen lock" option when the app is started
         // This method doesn't seem to be working anymore. Added to view controllers as solution offered on SO
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value
-        
+
         return true
     }
 

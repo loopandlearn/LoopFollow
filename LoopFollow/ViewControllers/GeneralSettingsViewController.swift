@@ -48,14 +48,6 @@ class GeneralSettingsViewController: FormViewController {
            }
            
         }
-        <<< SwitchRow("backgroundRefresh"){ row in
-            row.title = "Background Refresh"
-            row.tag = "backgroundRefresh"
-            row.value = UserDefaultsRepository.backgroundRefresh.value
-        }.onChange { [weak self] row in
-                    guard let value = row.value else { return }
-                    UserDefaultsRepository.backgroundRefresh.value = value
-            }
         <<< SwitchRow("persistentNotification") { row in
         row.title = "Persistent Notification"
         row.value = UserDefaultsRepository.persistentNotification.value
