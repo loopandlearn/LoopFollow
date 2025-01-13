@@ -13,10 +13,6 @@ import Charts
 extension MainViewController {
     // NS Device Status Web Call
     func webLoadNSDeviceStatus() {
-        if UserDefaultsRepository.debugLog.value {
-            self.writeDebugLog(value: "Download: device status")
-        }
-        
         let parameters: [String: String] = ["count": "1"]
         NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
             switch result {
@@ -37,10 +33,10 @@ extension MainViewController {
     
     private func handleDeviceStatusError() {
         DispatchQueue.main.async {
-            if self.deviceStatusTimer.isValid {
-                self.deviceStatusTimer.invalidate()
-            }
-            self.startDeviceStatusTimer(time: 10)
+            TaskScheduler.shared.rescheduleTask(
+                id: .deviceStatus,
+                to: Date().addingTimeInterval(10)
+            )
         }
     }
     
@@ -85,7 +81,6 @@ extension MainViewController {
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
         infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
 
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
             return
         }
@@ -156,31 +151,35 @@ extension MainViewController {
         let secondsAgo = now - latestLoopTime
         
         DispatchQueue.main.async {
-            // if Loop is overdue over: 20:00, re-attempt every 5 minutes
             if secondsAgo >= (20 * 60) {
-                self.startDeviceStatusTimer(time: (5 * 60))
-                print("started 5 minute device status timer")
-                
-                // if the Loop is overdue: 10:00-19:59, re-attempt every minute
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(5 * 60)
+                )
+
             } else if secondsAgo >= (10 * 60) {
-                self.startDeviceStatusTimer(time: 60)
-                print("started 1 minute device status timer")
-                
-                // if the Loop is overdue: 7:00-9:59, re-attempt every 30 seconds
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(60)
+                )
+
             } else if secondsAgo >= (7 * 60) {
-                self.startDeviceStatusTimer(time: 30)
-                print("started 30 second device status timer")
-                
-                // if the Loop is overdue: 5:00-6:59 re-attempt every 10 seconds
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(30)
+                )
+
             } else if secondsAgo >= (5 * 60) {
-                self.startDeviceStatusTimer(time: 10)
-                print("started 10 second device status timer")
-                
-                // We have a current Loop. Set timer to 5:10 from last reading
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(10)
+                )
             } else {
-                self.startDeviceStatusTimer(time: 310 - secondsAgo)
-                let timerVal = 310 - secondsAgo
-                print("started 5:10 device status timer: \(timerVal)")
+                let interval = (310 - secondsAgo)
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(interval)
+                )
             }
         }
     }

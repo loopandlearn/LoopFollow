@@ -12,6 +12,7 @@ import EventKit
 import ShareClient
 import UserNotifications
 import AVFAudio
+import CoreBluetooth
 
 func IsNightscoutEnabled() -> Bool {
     return !ObservableUserDefaults.shared.url.value.isEmpty
@@ -73,24 +74,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // check every 30 Seconds whether new bgvalues should be retrieved
     let timeInterval: TimeInterval = 30.0
     
-    // Min Ago Timer
-    var minAgoTimer = Timer()
-    var minAgoTimeInterval: TimeInterval = 1.0
-    
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
     var checkAlarmTimer = Timer()
     var checkAlarmInterval: TimeInterval = 60.0
-    
-    var calTimer = Timer()
-    
-    var bgTimer = Timer()
-    var profileTimer = Timer()
-    var deviceStatusTimer = Timer()
-    var treatmentsTimer = Timer()
-    var alarmTimer = Timer()
-    var calendarTimer = Timer()
     var graphNowTimer = Timer()
+
+    var lastCalendarWriteAttemptTime: TimeInterval = 0
 
     // Info Table Setup
     var infoManager: InfoManager!
@@ -157,6 +147,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        //Migration of UserDefaultsRepository -> Storage handling
+        if !UserDefaultsRepository.backgroundRefresh.value {
+            Storage.shared.backgroundRefreshType.value = .none
+            UserDefaultsRepository.backgroundRefresh.value = true
+        }
+
         // Synchronize info types to ensure arrays are the correct size
         UserDefaultsRepository.synchronizeInfoTypes()
 
@@ -209,9 +205,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // setup display for NS vs Dex
         showHideNSDetails()
         
-        // Load Startup Data
-        restartAllTimers()
-        
+        scheduleAllTasks()
+
         // Set up refreshScrollView for BGText
         refreshScrollView = UIScrollView()
         refreshScrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -233,7 +228,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         refreshScrollView.alwaysBounceVertical = true
         
         refreshScrollView.delegate = self
-        
         NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
     }
     
@@ -243,7 +237,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // Clean all timers and start new ones when refreshing
     @objc func refresh() {
-        print("Refreshing")
+        LogManager.shared.log(category: .general, message: "Refreshing")
 
         // Clear prediction for both Loop or OpenAPS
 
@@ -269,8 +263,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
         MinAgoText.text = "Refreshing"
-        invalidateTimers()
-        restartAllTimers()
+        scheduleAllTasks()
+
         currentCage = nil
         currentSage = nil
         currentIage = nil
@@ -387,26 +381,29 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // We want to always come back to the home screen
         tabBarController?.selectedIndex = 0
         
-        // Cancel the current timer and start a fresh background timer using the settings value only if background task is enabled
-        
-        if UserDefaultsRepository.backgroundRefresh.value {
-            BackgroundAlertManager.shared.startBackgroundAlert()
+        if Storage.shared.backgroundRefreshType.value == .silentTune {
             backgroundTask.startBackgroundTask()
         }
-        
+
+        if Storage.shared.backgroundRefreshType.value != .none {
+            BackgroundAlertManager.shared.startBackgroundAlert()
+        }
     }
     
     @objc func appCameToForeground() {
         // reset screenlock state if needed
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
         
-        // Cancel the background tasks, start a fresh timer
-        if UserDefaultsRepository.backgroundRefresh.value {
+        if Storage.shared.backgroundRefreshType.value == .silentTune {
             backgroundTask.stopBackgroundTask()
-            BackgroundAlertManager.shared.stopBackgroundAlert()
         }
         
-        restartAllTimers()
+        if Storage.shared.backgroundRefreshType.value != .none {
+            BackgroundAlertManager.shared.stopBackgroundAlert()
+        }
+
+        TaskScheduler.shared.checkTasksNow()
+        
         checkAndNotifyVersionStatus()
         checkAppExpirationStatus()
     }
@@ -558,15 +555,19 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     func processCalendarUpdates() {
         if UserDefaultsRepository.calendarIdentifier.value == "" { return }
-        
+
         if self.bgData.count < 1 { return }
-        
+
         // This lets us fire the method to write Min Ago entries only once a minute starting after 6 minutes but allows new readings through
-        if self.lastCalDate == self.bgData[self.bgData.count - 1].date
-            && (self.calTimer.isValid || (dateTimeUtils.getNowTimeIntervalUTC() - self.lastCalDate) < 360) {
-            return
+        let now = dateTimeUtils.getNowTimeIntervalUTC()
+        let newestBGDate = bgData[bgData.count - 1].date
+
+        if lastCalDate == newestBGDate {
+            if (now - lastCalendarWriteAttemptTime) < 60 || (now - newestBGDate) < 360 {
+                return
+            }
         }
-        
+
         // Create Event info
         var deltaBG = 0 // protect index out of bounds
         if self.bgData.count > 1 {
@@ -644,9 +645,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
         do {
             try self.store.save(event, span: .thisEvent, commit: true)
-            self.calTimer.invalidate()
-            self.startCalTimer(time: (60 * 1))
-            
+            self.lastCalendarWriteAttemptTime = now
+
             self.lastCalDate = self.bgData[self.bgData.count - 1].date
             //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Write: " + eventTitle) }
             //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
@@ -665,7 +665,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             snoozer.sendNotification(self, bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString, deltaVal: Localizer.toDisplayUnits(String(latestDeltaString)), minAgoVal: latestMinAgoString, alertLabelVal: "Latest BG")
         }
     }
-    
+
+    @available(*, deprecated, message: "Use LogManager instead.")
     func writeDebugLog(value: String) {
         DispatchQueue.main.async {
             var logText = "\n" + dateTimeUtils.printNow() + " - " + value
