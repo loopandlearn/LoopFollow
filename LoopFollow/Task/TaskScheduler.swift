@@ -52,8 +52,6 @@ class TaskScheduler {
             guard var existingTask = self.tasks[id] else {
                 return
             }
-            //let timeString = self.formatTime(newRunDate)
-            //LogManager.shared.log(category: .taskScheduler, message: "Reschedule Task \(id), nextRun = \(timeString)")
             existingTask.nextRun = newRunDate
             self.tasks[id] = existingTask
             self.rescheduleTimer()
@@ -62,7 +60,6 @@ class TaskScheduler {
 
     func checkTasksNow() {
         queue.async {
-            LogManager.shared.log(category: .taskScheduler, message: "CheckTasksNow, Forcing immediate check.")
             self.fireOverdueTasks()
             self.rescheduleTimer()
         }
@@ -102,12 +99,6 @@ class TaskScheduler {
         let now = Date()
         for (id, task) in tasks {
             if task.nextRun <= now {
-
-//                let scheduledTimeString = formatTime(task.nextRun)
-//                let diffSeconds = Int(now.timeIntervalSince(task.nextRun))
-//                let diffInfo = diffSeconds > 0 ? "\(diffSeconds)s late" : "\(abs(diffSeconds))s early"
-//                LogManager.shared.log(category: .taskScheduler, message: "Executing \(id) scheduled for \(scheduledTimeString) (\(diffInfo))")
-
                 var updatedTask = task
                 updatedTask.nextRun = .distantFuture
                 tasks[id] = updatedTask
