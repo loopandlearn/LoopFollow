@@ -263,6 +263,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
         MinAgoText.text = "Refreshing"
+        latestMinAgoString = "Refreshing"
         scheduleAllTasks()
 
         currentCage = nil

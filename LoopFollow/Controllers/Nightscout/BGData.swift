@@ -210,9 +210,9 @@ extension MainViewController {
     
     // NS BG Data Front end updater
     func viewUpdateNSBG(sourceName: String) {
-        TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date())
-        
         DispatchQueue.main.async {
+            TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date())
+
             let entries = self.bgData
             if entries.count < 2 { return } // Protect index out of bounds
             
