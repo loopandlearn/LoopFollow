@@ -26,7 +26,6 @@ class LogViewModel: ObservableObject {
 
         loadLogEntries()
 
-        // Optional: Set up a timer to refresh logs periodically
         Timer.publish(every: 5.0, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
