@@ -42,4 +42,8 @@ class DexcomG7HeartbeatBluetoothDevice: BluetoothDevice {
         super.centralManager(central, didDisconnectPeripheral: peripheral, error: error)
         self.bluetoothDeviceDelegate?.heartBeat()
     }
+
+    override func expectedHeartbeatInterval() -> TimeInterval? {
+        return 5 * 60 // 5 minutes in seconds
+    }
 }
