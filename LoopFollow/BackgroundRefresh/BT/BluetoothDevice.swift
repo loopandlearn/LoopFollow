@@ -24,8 +24,10 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     private var receiveCharacteristic:CBCharacteristic?
     private let maxTimeToWaitForPeripheralResponse = 5.0
     private var connectTimeOutTimer: Timer?
+    var lastHeartbeatTime: Date?
 
     init(address:String, name:String?, CBUUID_Advertisement:String?, servicesCBUUIDs:[CBUUID]?, CBUUID_ReceiveCharacteristic:String, bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
+        self.lastHeartbeatTime = nil
         self.deviceAddress = address
         self.deviceName = name
 
@@ -319,5 +321,9 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 return "nfcScanNeeded"
             }
         }
+    }
+
+    func expectedHeartbeatInterval() -> TimeInterval? {
+        return nil
     }
 }

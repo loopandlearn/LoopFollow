@@ -47,4 +47,8 @@ class RileyLinkHeartbeatBluetoothDevice: BluetoothDevice {
 
         self.bluetoothDeviceDelegate?.heartBeat()
     }
+
+    override func expectedHeartbeatInterval() -> TimeInterval? {
+        return 60
+    }
 }

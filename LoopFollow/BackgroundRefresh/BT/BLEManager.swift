@@ -41,6 +41,7 @@ class BLEManager: NSObject, ObservableObject {
         if let device = activeDevice {
             device.disconnect()
             activeDevice = nil
+            device.lastHeartbeatTime = nil
         }
         Storage.shared.selectedBLEDevice.value = nil
     }
@@ -142,7 +143,34 @@ extension BLEManager: BluetoothDeviceDelegate {
     }
 
     func heartBeat() {
-        LogManager.shared.log(category: .bluetooth, message: "Heartbeat triggered")
+        guard let device = activeDevice else {
+            return
+        }
+
+        let now = Date()
+        guard let expectedInterval = device.expectedHeartbeatInterval() else {
+            LogManager.shared.log(category: .bluetooth, message: "Heartbeat triggered")
+            device.lastHeartbeatTime = now
+            TaskScheduler.shared.checkTasksNow()
+            return
+        }
+
+        let marginPercentage: Double = 0.15 // 15% margin
+        let margin = expectedInterval * marginPercentage
+        let threshold = expectedInterval + margin
+
+        if let last = device.lastHeartbeatTime {
+            let elapsedTime = now.timeIntervalSince(last)
+            if elapsedTime > threshold {
+                let delay = elapsedTime - expectedInterval
+                LogManager.shared.log(category: .bluetooth, message: "Heartbeat triggered (Delayed by \(String(format: "%.1f", delay)) seconds)")
+            }
+        } else {
+            LogManager.shared.log(category: .bluetooth, message: "Heartbeat triggered (First heartbeat)")
+        }
+
+        device.lastHeartbeatTime = now
+
         TaskScheduler.shared.checkTasksNow()
     }
 }
