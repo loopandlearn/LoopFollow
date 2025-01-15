@@ -43,16 +43,19 @@ class BackgroundAlertManager {
     /// Stop all scheduled background alerts.
     func stopBackgroundAlert() {
         isAlertScheduled = false
+        removeDeliveredNotifications()
         cancelBackgroundAlerts()
     }
 
-    /// Schedule all background alerts based on predefined durations.
+    /// (Re)schedule all background alerts based on predefined durations.
     func scheduleBackgroundAlert() {
+        removeDeliveredNotifications()
+
         guard isAlertScheduled, Storage.shared.backgroundRefreshType.value != .none else { return }
 
         let isBluetoothActive = Storage.shared.backgroundRefreshType.value.isBluetooth
 
-        // Define all alerts in an array for scalability.
+        // Define alerts
         let alerts: [BackgroundAlert] = [
             BackgroundAlert(
                 identifier: BackgroundAlertIdentifier.sixMin.rawValue,
@@ -109,6 +112,12 @@ class BackgroundAlertManager {
     private func cancelBackgroundAlerts() {
         let identifiers = BackgroundAlertIdentifier.allCases.map { $0.rawValue }
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+    }
+
+    /// Remove all delivered notifications
+    private func removeDeliveredNotifications() {
+        let identifiers = BackgroundAlertIdentifier.allCases.map { $0.rawValue }
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: identifiers)
     }
 }
 
