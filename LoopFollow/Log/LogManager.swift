@@ -71,7 +71,7 @@ class LogManager {
 
     var currentLogFileURL: URL {
         let today = dateFormatter.string(from: Date())
-        return logDirectory.appendingPathComponent("\(today).log")
+        return logDirectory.appendingPathComponent("LoopFollow \(today).log")
     }
 
     private func append(_ message: String, to fileURL: URL) {
