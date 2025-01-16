@@ -79,12 +79,15 @@ extension MainViewController {
         // Determine the next run interval based on the current state
         let nextUpdateInterval: TimeInterval
         if shouldDisplaySeconds {
-            nextUpdateInterval = 1.0 // Update every second when showing seconds
-        } else if secondsAgo >= 720 {
-            nextUpdateInterval = 60.0 // Update every minute when showing minutes only
-        } else {
+            // Update every second when showing seconds
+            nextUpdateInterval = 1.0
+        } else if secondsAgo >= 240 && secondsAgo < 720 {
             // Schedule exactly at the transition point to start showing seconds
             nextUpdateInterval = 270.0 - secondsAgo
+        } else {
+            // Schedule exactly at the transition point to next minute
+            let secondsToNextMinute = 60.0 - (secondsAgo.truncatingRemainder(dividingBy: 60.0))
+            nextUpdateInterval = secondsToNextMinute
         }
 
         // Ensure the nextUpdateInterval is not negative or too small
