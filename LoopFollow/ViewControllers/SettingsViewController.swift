@@ -382,16 +382,24 @@ class SettingsViewController: FormViewController {
                 statusLabelRow.value = "Address Empty"
             }
         } else {
-            statusLabelRow.value = "OK (Read\(ObservableUserDefaults.shared.nsWriteAuth.value ? " & Write" : ""))"
+            let authStatus: String
+            if ObservableUserDefaults.shared.nsAdminAuth.value {
+                authStatus = "Admin"
+            } else {
+                authStatus = "Read" + (ObservableUserDefaults.shared.nsWriteAuth.value ? " & Write" : "")
+            }
+
+            statusLabelRow.value = "OK (\(authStatus))"
             NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
         }
         statusLabelRow.updateCell()
     }
 
     func checkNightscoutStatus() {
-        NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth in
+        NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth, nsAdminAuth in
             DispatchQueue.main.async {
                 ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
+                ObservableUserDefaults.shared.nsAdminAuth.value = nsAdminAuth
 
                 self.updateStatusLabel(error: error)
             }

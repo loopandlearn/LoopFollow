@@ -33,7 +33,7 @@
 		DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878122C7B750D0048F05C /* TempTargetView.swift */; };
 		DD4878152C7B75230048F05C /* MealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878142C7B75230048F05C /* MealView.swift */; };
 		DD4878172C7B75350048F05C /* BolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878162C7B75350048F05C /* BolusView.swift */; };
-		DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift */; };
+		DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift */; };
 		DD48781C2C7DAF140048F05C /* SwiftJWT in Frameworks */ = {isa = PBXBuildFile; productRef = DD48781B2C7DAF140048F05C /* SwiftJWT */; };
 		DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */; };
 		DD4878202C7DAF890048F05C /* PushMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48781F2C7DAF890048F05C /* PushMessage.swift */; };
@@ -58,6 +58,7 @@
 		DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */; };
 		DD608A0A2C23593900F91132 /* SMB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A092C23593900F91132 /* SMB.swift */; };
 		DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */; };
+		DD61BA1C2D384BD900041097 /* LoopOverrideViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD61BA1B2D384BD800041097 /* LoopOverrideViewModel.swift */; };
 		DD6A935E2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6A935D2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift */; };
 		DD7E19842ACDA50C00DBD158 /* Overrides.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7E19832ACDA50C00DBD158 /* Overrides.swift */; };
 		DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7E19852ACDA59700DBD158 /* BGCheck.swift */; };
@@ -66,6 +67,9 @@
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
 		DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */; };
+		DD9ED0D12D363F86000D2A63 /* NoRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0D02D363F82000D2A63 /* NoRemoteView.swift */; };
+		DD9ED0D32D36434A000D2A63 /* LoopNightscoutRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0D22D364346000D2A63 /* LoopNightscoutRemoteView.swift */; };
+		DD9ED0D52D3649F4000D2A63 /* LoopOverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0D42D3649F0000D2A63 /* LoopOverrideView.swift */; };
 		DDB0AF522BB1A8BE00AFA48B /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */; };
 		DDB0AF552BB1B24A00AFA48B /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */; };
 		DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */; };
@@ -275,7 +279,7 @@
 		DD4878122C7B750D0048F05C /* TempTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetView.swift; sourceTree = "<group>"; };
 		DD4878142C7B75230048F05C /* MealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealView.swift; sourceTree = "<group>"; };
 		DD4878162C7B75350048F05C /* BolusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusView.swift; sourceTree = "<group>"; };
-		DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioNightscoutRemoteController.swift.swift; sourceTree = "<group>"; };
+		DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioNightscoutRemoteController.swift; sourceTree = "<group>"; };
 		DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
 		DD48781F2C7DAF890048F05C /* PushMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessage.swift; sourceTree = "<group>"; };
 		DD493AD42ACF2109009A6922 /* ResumePump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumePump.swift; sourceTree = "<group>"; };
@@ -299,6 +303,7 @@
 		DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusLoop.swift; sourceTree = "<group>"; };
 		DD608A092C23593900F91132 /* SMB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMB.swift; sourceTree = "<group>"; };
 		DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundAlertManager.swift; sourceTree = "<group>"; };
+		DD61BA1B2D384BD800041097 /* LoopOverrideViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideViewModel.swift; sourceTree = "<group>"; };
 		DD6A935D2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusOpenAPS.swift; sourceTree = "<group>"; };
 		DD7E19832ACDA50C00DBD158 /* Overrides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Overrides.swift; sourceTree = "<group>"; };
 		DD7E19852ACDA59700DBD158 /* BGCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGCheck.swift; sourceTree = "<group>"; };
@@ -307,6 +312,9 @@
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
 		DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareClientExtension.swift; sourceTree = "<group>"; };
+		DD9ED0D02D363F82000D2A63 /* NoRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoRemoteView.swift; sourceTree = "<group>"; };
+		DD9ED0D22D364346000D2A63 /* LoopNightscoutRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopNightscoutRemoteView.swift; sourceTree = "<group>"; };
+		DD9ED0D42D3649F0000D2A63 /* LoopOverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideView.swift; sourceTree = "<group>"; };
 		DDB0AF502BB1A84500AFA48B /* capture-build-details.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "capture-build-details.sh"; sourceTree = "<group>"; };
 		DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
 		DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = BuildDetails.plist; sourceTree = "<group>"; };
@@ -540,18 +548,14 @@
 		DD0C0C6E2C4AFFB800DBADDF /* Remote */ = {
 			isa = PBXGroup;
 			children = (
+				DD9ED0D62D36ECA0000D2A63 /* TrioNightscout */,
+				DD9ED0CF2D359D6C000D2A63 /* Loop */,
 				DD4878112C7B74F90048F05C /* TRC */,
 				DD4878062C7B2E9E0048F05C /* Settings */,
 				DDF699972C5AA2E50058A8D9 /* TempTargetPreset */,
 				DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */,
-				DD0C0C712C4B000800DBADDF /* TrioNightscoutRemoteView.swift */,
-				DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */,
 				DDE69ED12C7256260013EAEC /* RemoteType.swift */,
-				DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */,
-				DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */,
-				DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift */,
-				DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */,
-				DD48781F2C7DAF890048F05C /* PushMessage.swift */,
+				DD9ED0D02D363F82000D2A63 /* NoRemoteView.swift */,
 			);
 			path = Remote;
 			sourceTree = "<group>";
@@ -584,6 +588,10 @@
 				DD4878162C7B75350048F05C /* BolusView.swift */,
 				DDFD5C522CB167DA00D3FD68 /* TRCCommandType.swift */,
 				DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */,
+				DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */,
+				DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */,
+				DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */,
+				DD48781F2C7DAF890048F05C /* PushMessage.swift */,
 			);
 			path = TRC;
 			sourceTree = "<group>";
@@ -663,6 +671,26 @@
 				DD0C0C632C45A59400DBADDF /* HKUnit+Extensions.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		DD9ED0CF2D359D6C000D2A63 /* Loop */ = {
+			isa = PBXGroup;
+			children = (
+				DD61BA1B2D384BD800041097 /* LoopOverrideViewModel.swift */,
+				DD9ED0D42D3649F0000D2A63 /* LoopOverrideView.swift */,
+				DD9ED0D22D364346000D2A63 /* LoopNightscoutRemoteView.swift */,
+			);
+			path = Loop;
+			sourceTree = "<group>";
+		};
+		DD9ED0D62D36ECA0000D2A63 /* TrioNightscout */ = {
+			isa = PBXGroup;
+			children = (
+				DD0C0C712C4B000800DBADDF /* TrioNightscoutRemoteView.swift */,
+				DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */,
+				DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift */,
+			);
+			path = TrioNightscout;
 			sourceTree = "<group>";
 		};
 		DDB0AF4F2BB1A81F00AFA48B /* Scripts */ = {
@@ -1226,6 +1254,7 @@
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
+				DD9ED0D52D3649F4000D2A63 /* LoopOverrideView.swift in Sources */,
 				DDF699942C555B310058A8D9 /* ViewControllerManager.swift in Sources */,
 				DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */,
 				DD5334212C60EBEE00062F9D /* InsulinCartridgeChange.swift in Sources */,
@@ -1277,6 +1306,7 @@
 				DDF699992C5AA3060058A8D9 /* TempTargetPresetManager.swift in Sources */,
 				DD0C0C722C4B000800DBADDF /* TrioNightscoutRemoteView.swift in Sources */,
 				DD493ADB2ACF21A3009A6922 /* Bolus.swift in Sources */,
+				DD61BA1C2D384BD900041097 /* LoopOverrideViewModel.swift in Sources */,
 				DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */,
 				DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */,
 				DD13BC752C3FD6210062313B /* InfoType.swift in Sources */,
@@ -1311,11 +1341,12 @@
 				DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */,
 				FCD49B6C24AA536E007879DC /* DebugViewController.swift in Sources */,
 				DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */,
-				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift in Sources */,
+				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */,
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,
 				FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */,
 				DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */,
+				DD9ED0D12D363F86000D2A63 /* NoRemoteView.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
 				DD5334232C60ED3600062F9D /* IAge.swift in Sources */,
 				FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */,
@@ -1329,6 +1360,7 @@
 				DD493AE32ACF2358009A6922 /* CAge.swift in Sources */,
 				DD493ADD2ACF21E0009A6922 /* Basals.swift in Sources */,
 				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,
+				DD9ED0D32D36434A000D2A63 /* LoopNightscoutRemoteView.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

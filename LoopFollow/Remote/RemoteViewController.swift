@@ -40,8 +40,18 @@ class RemoteViewController: UIViewController {
         }
 
         if remoteType == .nightscout {
-            let remoteView = TrioNightscoutRemoteView()
-            hostingController = UIHostingController(rootView: AnyView(remoteView))
+            var remoteView: AnyView
+
+            switch ObservableUserDefaults.shared.device.value {
+            case "Trio":
+                remoteView = AnyView(TrioNightscoutRemoteView())
+            case "Loop":
+                remoteView = AnyView(LoopNightscoutRemoteView())
+            default:
+                remoteView = AnyView(NoRemoteView())
+            }
+
+            hostingController = UIHostingController(rootView: remoteView)
         } else if remoteType == .trc {
             let trioRemoteControlViewModel = TrioRemoteControlViewModel()
             let trioRemoteControlView = TrioRemoteControlView(viewModel: trioRemoteControlViewModel)
@@ -66,9 +76,10 @@ class RemoteViewController: UIViewController {
         }
 
         if remoteType == .nightscout, !ObservableUserDefaults.shared.nsWriteAuth.value {
-            NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth in
+            NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth, nsAdminAuth in
                 DispatchQueue.main.async {
                     ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
+                    ObservableUserDefaults.shared.nsAdminAuth.value = nsAdminAuth
                 }
             }
         }
