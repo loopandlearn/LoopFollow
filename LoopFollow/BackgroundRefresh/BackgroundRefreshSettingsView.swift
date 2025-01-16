@@ -10,6 +10,7 @@ struct BackgroundRefreshSettingsView: View {
     @Environment(\.presentationMode) var presentationMode
 
     @ObservedObject var bleManager = BLEManager.shared
+    @ObservedObject var selectedBLEDevice = Storage.shared.selectedBLEDevice
 
     var body: some View {
         NavigationView {
@@ -51,7 +52,7 @@ struct BackgroundRefreshSettingsView: View {
 
     @ViewBuilder
     private var selectedDeviceSection: some View {
-        if let storedDevice = Storage.shared.selectedBLEDevice.value {
+        if let storedDevice = selectedBLEDevice.value {
             Section(header: Text("Selected Device")) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(storedDevice.name ?? "Unknown Device")
