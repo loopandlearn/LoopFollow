@@ -132,7 +132,6 @@ extension MainViewController {
         if data.count == 0 {
             return
         }
-        let pullDate = data[data.count - 1].date
         let latestDate = data[0].date
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         
@@ -175,6 +174,10 @@ extension MainViewController {
                     to: Date().addingTimeInterval(delay)
                 )
                 print("##### scheduled BG task in \(delay) seconds")
+
+                if data.count > 1 {
+                    self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
+                }
             }
         }
         
