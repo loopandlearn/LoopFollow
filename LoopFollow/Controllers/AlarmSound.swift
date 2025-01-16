@@ -135,7 +135,9 @@ class AlarmSound {
         guard !self.isPlaying else {
             return
         }
-        
+
+        enableAudio()
+
         do {
             self.audioPlayer = try AVAudioPlayer(contentsOf: self.soundURL)
             self.audioPlayer!.delegate = self.audioPlayerDelegate
@@ -243,6 +245,15 @@ class AlarmSound {
         }
         
         self.systemOutputVolumeBeforeOverride = nil
+    }
+
+    fileprivate static func enableAudio() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: .mixWithOthers)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print(error)
+        }
     }
 }
 
