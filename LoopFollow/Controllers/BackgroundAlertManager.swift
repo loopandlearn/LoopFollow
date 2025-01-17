@@ -84,7 +84,6 @@ class BackgroundAlertManager {
         for alert in alerts {
             // Skip if the expected heartbeat interval matches or exceeds 1.2x the alert time interval
             if let heartbeat = expectedHeartbeat, heartbeat >= alert.timeInterval * 1.2 {
-                LogManager.shared.log(category: .general, message: "Skipping \(alert.timeInterval / 60)-minute notification due to expected heartbeat interval (\(heartbeat) seconds).")
                 continue
             }
 
