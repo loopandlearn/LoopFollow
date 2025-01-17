@@ -72,6 +72,14 @@ class BLEManager: NSObject, ObservableObject {
         centralManager.stopScan()
     }
 
+    func expectedHeartbeatInterval() -> TimeInterval? {
+        guard let device = activeDevice else {
+            return nil
+        }
+
+        return device.expectedHeartbeatInterval()
+    }
+
     private func addOrUpdateDevice(_ device: BLEDevice) {
         if let idx = devices.firstIndex(where: { $0.id == device.id }) {
             devices[idx] = device.updateLastSeen()

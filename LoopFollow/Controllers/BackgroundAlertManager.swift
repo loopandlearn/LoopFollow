@@ -54,6 +54,7 @@ class BackgroundAlertManager {
         guard isAlertScheduled, Storage.shared.backgroundRefreshType.value != .none else { return }
 
         let isBluetoothActive = Storage.shared.backgroundRefreshType.value.isBluetooth
+        let expectedHeartbeat = BLEManager.shared.expectedHeartbeatInterval()
 
         // Define alerts
         let alerts: [BackgroundAlert] = [
@@ -80,8 +81,13 @@ class BackgroundAlertManager {
             )
         ]
 
-        // Schedule each alert.
         for alert in alerts {
+            // Skip if the expected heartbeat interval matches or exceeds 1.2x the alert time interval
+            if let heartbeat = expectedHeartbeat, heartbeat >= alert.timeInterval * 1.2 {
+                LogManager.shared.log(category: .general, message: "Skipping \(alert.timeInterval / 60)-minute notification due to expected heartbeat interval (\(heartbeat) seconds).")
+                continue
+            }
+
             let content = createNotificationContent(for: notificationTitlePrefix, body: alert.body)
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: alert.timeInterval, repeats: false)
             let request = UNNotificationRequest(identifier: alert.identifier, content: content, trigger: trigger)
