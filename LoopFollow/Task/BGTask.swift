@@ -18,9 +18,6 @@ extension MainViewController {
     }
 
     func bgTaskAction() {
-        //This pushes forward the warning notification about the app is not active
-        BackgroundAlertManager.shared.scheduleBackgroundAlert()
-
         // If anything goes wrong, try again in 60 seconds.
         TaskScheduler.shared.rescheduleTask(
             id: .fetchBG,
