@@ -143,7 +143,6 @@ extension BLEManager: BluetoothDeviceDelegate {
     }
 
     func heartBeat() {
-        LogManager.shared.log(category: .bluetooth, message: "PING")
         guard let device = activeDevice else {
             return
         }
