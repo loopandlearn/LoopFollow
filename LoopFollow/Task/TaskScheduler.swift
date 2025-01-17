@@ -96,6 +96,8 @@ class TaskScheduler {
     }
 
     private func fireOverdueTasks() {
+        BackgroundAlertManager.shared.scheduleBackgroundAlert()
+
         let now = Date()
         for (id, task) in tasks {
             if task.nextRun <= now {
