@@ -1063,7 +1063,7 @@ extension MainViewController {
             try audioSession.setCategory(.playback, mode: .default)
             try audioSession.setActive(true)
         } catch {
-            print("Failed to set up audio session: \(error)")
+            LogManager.shared.log(category: .alarm, message: "speakBG, Failed to set up audio session: \(error)")
         }
         
         // Get the current time

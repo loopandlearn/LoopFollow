@@ -35,7 +35,7 @@ class BackgroundRefreshSettingsViewModel: ObservableObject {
     }
 
     private func handleBackgroundRefreshTypeChange(_ newValue: BackgroundRefreshType) {
-        print("Background refresh type changed to: \(newValue.rawValue)")
+        LogManager.shared.log(category: .general, message: "Background refresh type changed to: \(newValue.rawValue)")
 
         BLEManager.shared.disconnect()
     }

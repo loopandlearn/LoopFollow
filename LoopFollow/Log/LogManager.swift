@@ -24,6 +24,8 @@ class LogManager {
         case contact = "Contact"
         case taskScheduler = "Task Scheduler"
         case dexcom = "Dexcom"
+        case alarm = "Alarm"
+        case calendar = "Calendar"
     }
 
     init() {

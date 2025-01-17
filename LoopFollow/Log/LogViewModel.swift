@@ -77,10 +77,17 @@ class LogViewModel: ObservableObject {
             guard let self = self else { return }
             var filtered = self.allLogEntries
 
-            // Filter by category
+            // Filter by category and remove category tag
             if let category = category {
-                let categoryTag = "[\(category.rawValue)]"
+                let categoryTag = "[\(category.rawValue)] "
                 filtered = filtered.filter { $0.text.contains(categoryTag) }
+                    .map { logEntry in
+                        var text = logEntry.text
+                        if let range = text.range(of: categoryTag) {
+                            text.removeSubrange(range)
+                        }
+                        return LogEntry(id: logEntry.id, text: text.trimmingCharacters(in: .whitespaces))
+                    }
             }
 
             // Filter by search text

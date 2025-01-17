@@ -28,10 +28,10 @@ extension MainViewController {
                         self.updateTreatments(entries: entries)
                     }
                 } else {
-                    print("Error: Unexpected data structure")
+                    LogManager.shared.log(category: .nightscout, message: "WebLoadNSTreatments, Unexpected data structure")
                 }
             case .failure(let error):
-                print("Error: \(error.localizedDescription)")
+                LogManager.shared.log(category: .nightscout, message: "WebLoadNSTreatments, error \(error.localizedDescription)")
             }
         }
     }

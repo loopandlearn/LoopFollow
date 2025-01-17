@@ -25,14 +25,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         notificationCenter.requestAuthorization(options: options) {
             (didAllow, error) in
             if !didAllow {
-                print("User has declined notifications")
+                LogManager.shared.log(category: .general, message: "User has declined notifications")
             }
         }
 
         let store = EKEventStore()
         store.requestCalendarAccess { (granted, error) in
             if !granted {
-                print("Failed to get calendar access: \(String(describing: error))")
+                LogManager.shared.log(category: .calendar, message: "Failed to get calendar access: \(String(describing: error))")
                 return
             }
         }
