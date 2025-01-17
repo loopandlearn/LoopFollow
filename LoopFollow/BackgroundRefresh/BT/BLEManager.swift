@@ -127,7 +127,8 @@ extension BLEManager: CBCentralManagerDelegate {
 
 extension BLEManager: BluetoothDeviceDelegate {
     func didConnectTo(bluetoothDevice: BluetoothDevice) {
-        LogManager.shared.log(category: .bluetooth, message: "Connected to: \(String(describing: bluetoothDevice.deviceName))")
+        LogManager.shared.log(category: .bluetooth, message: "Connected to: \(bluetoothDevice.deviceName ?? "Unknown")")
+
         if var device = Storage.shared.selectedBLEDevice.value {
             device.isConnected = true
             Storage.shared.selectedBLEDevice.value = device.updateLastConnected()
@@ -135,7 +136,7 @@ extension BLEManager: BluetoothDeviceDelegate {
     }
 
     func didDisconnectFrom(bluetoothDevice: BluetoothDevice) {
-        LogManager.shared.log(category: .bluetooth, message: "Disconnect from: \(String(describing: bluetoothDevice.deviceName))")
+        LogManager.shared.log(category: .bluetooth, message: "Disconnect from: \(bluetoothDevice.deviceName ?? "Unknown")")
         if var device = Storage.shared.selectedBLEDevice.value {
             device.isConnected = false
             Storage.shared.selectedBLEDevice.value = device
