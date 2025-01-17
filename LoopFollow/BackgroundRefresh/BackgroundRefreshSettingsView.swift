@@ -44,9 +44,33 @@ struct BackgroundRefreshSettingsView: View {
             }
             .pickerStyle(MenuPickerStyle())
 
-            Text("Adjust the background refresh type.")
-                .font(.footnote)
-                .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Adjust the background refresh type.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+
+                switch viewModel.backgroundRefreshType {
+                case .none:
+                    Text("No background refresh. Alarms and updates will not work unless the app is open in the foreground.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+
+                case .silentTune:
+                    Text("A silent tune will play in the background, keeping the app active. May be interrupted by other apps. Allows continuous updates but consumes more battery.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+
+                case .rileyLink:
+                    Text("Requires a RileyLink-compatible device within Bluetooth range. Provides updates once per minute and uses less battery than the silent tune method.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+
+                case .dexcom:
+                    Text("Requires a Dexcom G6/ONE/G7/ONE+ transmitter within Bluetooth range. Provides updates every 5 minutes and uses less battery than the silent tune method.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+            }
         }
     }
 

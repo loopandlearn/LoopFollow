@@ -54,8 +54,8 @@ class BLEManager: NSObject, ObservableObject {
             Storage.shared.selectedBLEDevice.value = device
 
             switch matchedType {
-            case .dexcomG7:
-                activeDevice = DexcomG7HeartbeatBluetoothDevice(bluetoothDeviceDelegate: self)
+            case .dexcom:
+                activeDevice = DexcomHeartbeatBluetoothDevice(bluetoothDeviceDelegate: self)
                 activeDevice?.connect()
             case .rileyLink:
                 activeDevice = RileyLinkHeartbeatBluetoothDevice(bluetoothDeviceDelegate: self)
@@ -143,6 +143,7 @@ extension BLEManager: BluetoothDeviceDelegate {
     }
 
     func heartBeat() {
+        LogManager.shared.log(category: .bluetooth, message: "PING")
         guard let device = activeDevice else {
             return
         }

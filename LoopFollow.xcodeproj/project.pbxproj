@@ -57,7 +57,7 @@
 		DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334282C6166A500062F9D /* InfoDisplaySettingsView.swift */; };
 		DD5334B02D1447C500CDD6EA /* BLEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334AF2D1447C500CDD6EA /* BLEManager.swift */; };
 		DD5817172D2710E90041FB98 /* BLEDeviceSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5817162D2710E50041FB98 /* BLEDeviceSelectionView.swift */; };
-		DD58171A2D299EF80041FB98 /* DexcomG7HeartbeatBluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5817192D299EF40041FB98 /* DexcomG7HeartbeatBluetoothDevice.swift */; };
+		DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5817192D299EF40041FB98 /* DexcomHeartbeatBluetoothDevice.swift */; };
 		DD58171C2D299F940041FB98 /* BluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD58171B2D299F8D0041FB98 /* BluetoothDevice.swift */; };
 		DD58171E2D299FCA0041FB98 /* BluetoothDeviceDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD58171D2D299FC50041FB98 /* BluetoothDeviceDelegate.swift */; };
 		DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */; };
@@ -322,7 +322,7 @@
 		DD5334282C6166A500062F9D /* InfoDisplaySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsView.swift; sourceTree = "<group>"; };
 		DD5334AF2D1447C500CDD6EA /* BLEManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEManager.swift; sourceTree = "<group>"; };
 		DD5817162D2710E50041FB98 /* BLEDeviceSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEDeviceSelectionView.swift; sourceTree = "<group>"; };
-		DD5817192D299EF40041FB98 /* DexcomG7HeartbeatBluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomG7HeartbeatBluetoothDevice.swift; sourceTree = "<group>"; };
+		DD5817192D299EF40041FB98 /* DexcomHeartbeatBluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomHeartbeatBluetoothDevice.swift; sourceTree = "<group>"; };
 		DD58171B2D299F8D0041FB98 /* BluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDevice.swift; sourceTree = "<group>"; };
 		DD58171D2D299FC50041FB98 /* BluetoothDeviceDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDeviceDelegate.swift; sourceTree = "<group>"; };
 		DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusLoop.swift; sourceTree = "<group>"; };
@@ -729,7 +729,7 @@
 			isa = PBXGroup;
 			children = (
 				DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */,
-				DD5817192D299EF40041FB98 /* DexcomG7HeartbeatBluetoothDevice.swift */,
+				DD5817192D299EF40041FB98 /* DexcomHeartbeatBluetoothDevice.swift */,
 			);
 			path = Devices;
 			sourceTree = "<group>";
@@ -1407,7 +1407,7 @@
 				DDCF979C24C14EFB002C9752 /* AdvancedSettingsViewController.swift in Sources */,
 				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
 				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
-				DD58171A2D299EF80041FB98 /* DexcomG7HeartbeatBluetoothDevice.swift in Sources */,
+				DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */,
 				DDFF3D872D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift in Sources */,
 				DD50C7502D0828800057AE6F /* ContactSettingsViewModel.swift in Sources */,
 				DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */,

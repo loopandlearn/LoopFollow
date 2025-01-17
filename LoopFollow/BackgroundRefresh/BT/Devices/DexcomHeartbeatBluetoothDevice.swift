@@ -1,5 +1,5 @@
 //
-//  DexcomG7HeartbeatBluetoothDevice.swift
+//  DexcomHeartbeatBluetoothDevice.swift
 //  LoopFollow
 //
 //  Created by Jonas Björkert on 2025-01-04.
@@ -11,7 +11,7 @@ import os
 import CoreBluetooth
 import AVFoundation
 
-class DexcomG7HeartbeatBluetoothDevice: BluetoothDevice {
+class DexcomHeartbeatBluetoothDevice: BluetoothDevice {
     private let CBUUID_Service_G7 = "F8083532-849E-531C-C594-30F1F86A4EA5"
     private let CBUUID_Advertisement_G7 = "FEBC"
     private let CBUUID_ReceiveCharacteristic_G7 = "F8083535-849E-531C-C594-30F1F86A4EA5"
