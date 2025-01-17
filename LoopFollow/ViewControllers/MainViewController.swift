@@ -541,13 +541,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
     
     func writeCalendar() {
-        if UserDefaultsRepository.debugLog.value {
-            self.writeDebugLog(value: "Write calendar start")
-        }
-        
         self.store.requestCalendarAccess { (granted, error) in
             if !granted {
-                print("Failed to get calendar access: \(String(describing: error))")
+                LogManager.shared.log(category: .calendar, message: "Failed to get calendar access: \(String(describing: error))")
                 return
             }
             self.processCalendarUpdates()
@@ -652,9 +648,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Calendar Write: " + eventTitle) }
             //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
         } catch {
-            print("*** Error storing to the calendar")
-            // Display error to user
-            //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Error: Calendar Write") }
+            LogManager.shared.log(category: .calendar, message: "Error storing to the calendar")
         }
     }
     

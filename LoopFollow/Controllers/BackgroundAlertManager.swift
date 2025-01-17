@@ -88,7 +88,7 @@ class BackgroundAlertManager {
 
             UNUserNotificationCenter.current().add(request) { error in
                 if let error = error {
-                    print("Error scheduling \(alert.timeInterval / 60)-minute background alert: \(error)")
+                    LogManager.shared.log(category: .general, message: "Error scheduling \(alert.timeInterval / 60)-minute background alert: \(error)")
                 }
             }
         }

@@ -109,7 +109,7 @@ extension MainViewController {
                     self.ProcessDexBGData(data: nsData2, sourceName: sourceName)
                 }
             case .failure(let error):
-                print("Failed to fetch data: \(error)")
+                LogManager.shared.log(category: .nightscout, message: "Failed to fetch data: \(error)")
                 DispatchQueue.main.async {
                     TaskScheduler.shared.rescheduleTask(
                         id: .fetchBG,
@@ -144,36 +144,27 @@ extension MainViewController {
                     id: .fetchBG,
                     to: Date().addingTimeInterval(5 * 60)
                 )
-                print("##### scheduled BG task in 5 minutes")
-
             } else if secondsAgo >= (10 * 60) {
                 TaskScheduler.shared.rescheduleTask(
                     id: .fetchBG,
                     to: Date().addingTimeInterval(60)
                 )
-                print("##### scheduled BG task in 1 minute")
-
             } else if secondsAgo >= (7 * 60) {
                 TaskScheduler.shared.rescheduleTask(
                     id: .fetchBG,
                     to: Date().addingTimeInterval(30)
                 )
-                print("##### scheduled BG task in 30 seconds")
-
             } else if secondsAgo >= (5 * 60) {
                 TaskScheduler.shared.rescheduleTask(
                     id: .fetchBG,
                     to: Date().addingTimeInterval(10)
                 )
-                print("##### scheduled BG task in 10 seconds")
-
             } else {
                 let delay = (300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
                 TaskScheduler.shared.rescheduleTask(
                     id: .fetchBG,
                     to: Date().addingTimeInterval(delay)
                 )
-                print("##### scheduled BG task in \(delay) seconds")
 
                 if data.count > 1 {
                     self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)

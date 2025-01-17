@@ -234,8 +234,6 @@ extension MainViewController {
     }
     
     func chartScaled(_ chartView: ChartViewBase, scaleX: CGFloat, scaleY: CGFloat) {
-        print("Chart Scaled: \(BGChart.scaleX), \(BGChart.scaleY)")
-      
         // dont store huge values
         var scale: Float = Float(BGChart.scaleX)
         if(scale > ScaleXMax ) {
@@ -868,7 +866,6 @@ extension MainViewController {
         
         if firstGraphLoad {
             var scaleX = CGFloat(UserDefaultsRepository.chartScaleX.value)
-            print("Scale: \(scaleX)")
             if( scaleX > CGFloat(ScaleXMax) ) {
                 scaleX = CGFloat(ScaleXMax)
                 UserDefaultsRepository.chartScaleX.value = ScaleXMax

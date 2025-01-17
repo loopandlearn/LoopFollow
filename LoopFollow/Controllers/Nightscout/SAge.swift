@@ -27,7 +27,7 @@ extension MainViewController {
                     self.updateSage(data: data)
                 }
             case .failure(let error):
-                print("Failed to fetch data: \(error.localizedDescription)")
+                LogManager.shared.log(category: .nightscout, message: "webLoadNSSage, failed to fetch data: \(error.localizedDescription)")
             }
         }
     }
@@ -62,7 +62,6 @@ extension MainViewController {
         if let sageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
             let now = dateTimeUtils.getNowTimeIntervalUTC()
             let secondsAgo = now - sageTime
-            let days = 24 * 60 * 60
             
             let formatter = DateComponentsFormatter()
             formatter.unitsStyle = .positional // Use the appropriate positioning for the current locale
