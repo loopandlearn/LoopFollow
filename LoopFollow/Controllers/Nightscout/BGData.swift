@@ -291,9 +291,9 @@ extension MainViewController {
             if ObservableUserDefaults.shared.contactEnabled.value {
                 var extra: String = ""
 
-                if ObservableUserDefaults.shared.contactTrend.value {
+                if ObservableUserDefaults.shared.contactTrend.value != "Off" {
                     extra = snoozerDirection
-                } else if ObservableUserDefaults.shared.contactDelta.value {
+                } else if ObservableUserDefaults.shared.contactDelta.value != "Off" {
                     extra = snoozerDelta
                 }
 
