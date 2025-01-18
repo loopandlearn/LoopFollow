@@ -83,7 +83,7 @@ class BackgroundAlertManager {
 
         for alert in alerts {
             // Skip if the expected heartbeat interval matches or exceeds 1.2x the alert time interval
-            if let heartbeat = expectedHeartbeat, heartbeat >= alert.timeInterval * 1.2 {
+            if let heartbeat = expectedHeartbeat, heartbeat * 1.2 >= alert.timeInterval {
                 continue
             }
 
