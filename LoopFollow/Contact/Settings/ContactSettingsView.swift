@@ -73,31 +73,31 @@ struct ContactSettingsView: View {
                         Text("Show Trend")
                             .font(.subheadline)
                         Picker("Show Trend", selection: $viewModel.contactTrend) {
-                            ForEach(0..<viewModel.options.count, id: \.self) { index in
-                                Text(viewModel.options[index]).tag(index)
+                            ForEach(viewModel.options, id: \.self) { option in
+                                Text(option).tag(option)
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
                 
                         Text("Show Delta")
                             .font(.subheadline)
-                        Picker("Show Delta", selection: $viewMoel.contactDelta) {
-                            ForEach(0..<viewModel.options.count, id: \.self) { index in
-                                Text(viewModel.options[index]).tag(index)
+                        Picker("Show Delta", selection: $viewModel.contactDelta) {
+                            ForEach(viewModel.options, id: \.self) { option in
+                                Text(option).tag(option)
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
                     }
                 }
             }
-            .onChange(of: contactTrend) { newValue in
-                if newValue == 1 && contactDelta == 1 {
-                    contactDelta = 0
+            .onChange(of: viewModel.contactTrend) { newValue in
+                if newValue == "Include" && viewModel.contactDelta == "Include" {
+                    viewModel.contactDelta = "Off"
                 }
             }
-            .onChange(of: contactDelta) { newValue in
-                if newValue == 1 && contactTrend == 1 {
-                    contactTrend = 0
+            .onChange(of: viewModel.contactDelta) { newValue in
+                if newValue == "Include" && viewModel.contactTrend == "Include" {
+                    viewModel.contactTrend = "Off"
                 }
             }
             
