@@ -17,8 +17,8 @@ class ObservableUserDefaults {
     var nsWriteAuth = ObservableUserDefaultsValue<Bool>(key: "nsWriteAuth", default: false)
 
     var contactEnabled = ObservableUserDefaultsValue<Bool>(key: "contactEnabled", default: false)
-    var contactTrend = ObservableUserDefaultsValue<Bool>(key: "contactTrend", default: false)
-    var contactDelta = ObservableUserDefaultsValue<Bool>(key: "contactDelta", default: false)
+    var contactTrend = ObservableUserDefaultsValue<String>(key: "contactTrend", default: "Off")
+    var contactDelta = ObservableUserDefaultsValue<String>(key: "contactDelta", default: "Off")
     var contactBackgroundColor = ObservableUserDefaultsValue<String>(key: "contactBackgroundColor", default: "black")
     var contactTextColor = ObservableUserDefaultsValue<String>(key: "contactTextColor", default: "white")
     
