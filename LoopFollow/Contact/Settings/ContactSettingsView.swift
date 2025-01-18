@@ -16,8 +16,6 @@ struct ContactSettingsView: View {
     @State private var showAlert: Bool = false
     @State private var alertTitle: String = ""
     @State private var alertMessage: String = ""
-    @State private var contactTrendSelection = 0
-    @State private var contactDeltaSelection = 0
 
     let options = ["Off", "Include", "Separate Card"]
 
@@ -74,32 +72,32 @@ struct ContactSettingsView: View {
                     Section(header: Text("Additional Information")) {
                         Text("Show Trend")
                             .font(.subheadline)
-                        Picker("Show Trend", selection: $contactTrendSelection) {
-                            ForEach(0..<options.count, id: \.self) { index in
-                                Text(self.options[index]).tag(index)
+                        Picker("Show Trend", selection: $viewModel.contactTrend) {
+                            ForEach(0..<viewModel.options.count, id: \.self) { index in
+                                Text(viewModel.options[index]).tag(index)
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
                 
                         Text("Show Delta")
                             .font(.subheadline)
-                        Picker("Show Delta", selection: $contactDeltaSelection) {
-                            ForEach(0..<options.count, id: \.self) { index in
-                                Text(self.options[index]).tag(index)
+                        Picker("Show Delta", selection: $viewMoel.contactDelta) {
+                            ForEach(0..<viewModel.options.count, id: \.self) { index in
+                                Text(viewModel.options[index]).tag(index)
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
                     }
                 }
             }
-            .onChange(of: contactTrendSelection) { newValue in
-                if newValue == 1 && contactDeltaSelection == 1 {
-                    contactDeltaSelection = 0
+            .onChange(of: contactTrend) { newValue in
+                if newValue == 1 && contactDelta == 1 {
+                    contactDelta = 0
                 }
             }
-            .onChange(of: contactDeltaSelection) { newValue in
-                if newValue == 1 && contactTrendSelection == 1 {
-                    contactTrendSelection = 0
+            .onChange(of: contactDelta) { newValue in
+                if newValue == 1 && contactTrend == 1 {
+                    contactTrend = 0
                 }
             }
             
