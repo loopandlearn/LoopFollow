@@ -73,7 +73,7 @@ struct ContactSettingsView: View {
                         Text("Show Trend")
                             .font(.subheadline)
                         Picker("Show Trend", selection: $viewModel.contactTrend) {
-                            ForEach(viewModel.options, id: \.self) { option in
+                            ForEach(options, id: \.self) { option in
                                 Text(option).tag(option)
                             }
                         }
@@ -82,7 +82,7 @@ struct ContactSettingsView: View {
                         Text("Show Delta")
                             .font(.subheadline)
                         Picker("Show Delta", selection: $viewModel.contactDelta) {
-                            ForEach(viewModel.options, id: \.self) { option in
+                            ForEach(options, id: \.self) { option in
                                 Text(option).tag(option)
                             }
                         }
