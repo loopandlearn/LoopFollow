@@ -29,6 +29,9 @@ class ContactSettingsViewModel: ObservableObject {
 
     @Published var contactTrend: String {
         didSet {
+            if contactTrend == "Include" {
+                contactDelta = "Off"
+            }
             storage.contactTrend.value = contactTrend
             triggerRefresh()
         }
@@ -36,6 +39,9 @@ class ContactSettingsViewModel: ObservableObject {
 
     @Published var contactDelta: String {
         didSet {
+            if contactDelta == "Include" {
+                contactTrend = "Off"
+            }
             storage.contactDelta.value = contactDelta
             triggerRefresh()
         }
