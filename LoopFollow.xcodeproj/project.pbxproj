@@ -24,6 +24,10 @@
 		DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF0C2C98485400FB655A /* SecureStorageValue.swift */; };
 		DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */; };
 		DD16AF112C997B4600FB655A /* LoadingButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF102C997B4600FB655A /* LoadingButtonView.swift */; };
+		DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */; };
+		DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */; };
+		DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */; };
+		DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */; };
 		DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878022C7B297E0048F05C /* StorageValue.swift */; };
 		DD4878052C7B2C970048F05C /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878042C7B2C970048F05C /* Storage.swift */; };
 		DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */; };
@@ -290,6 +294,10 @@
 		DD16AF0C2C98485400FB655A /* SecureStorageValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureStorageValue.swift; sourceTree = "<group>"; };
 		DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HKQuantityInputView.swift; sourceTree = "<group>"; };
 		DD16AF102C997B4600FB655A /* LoadingButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingButtonView.swift; sourceTree = "<group>"; };
+		DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsView.swift; sourceTree = "<group>"; };
+		DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsViewModel.swift; sourceTree = "<group>"; };
+		DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsViewModel.swift; sourceTree = "<group>"; };
+		DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsView.swift; sourceTree = "<group>"; };
 		DD4878022C7B297E0048F05C /* StorageValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageValue.swift; sourceTree = "<group>"; };
 		DD4878042C7B2C970048F05C /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsView.swift; sourceTree = "<group>"; };
@@ -613,6 +621,24 @@
 				DD0C0C652C46E54C00DBADDF /* InfoDataSeparator.swift */,
 			);
 			path = InfoTable;
+			sourceTree = "<group>";
+		};
+		DD2C2E4D2D3B8ACF006413A5 /* Nightscout */ = {
+			isa = PBXGroup;
+			children = (
+				DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */,
+				DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */,
+			);
+			path = Nightscout;
+			sourceTree = "<group>";
+		};
+		DD2C2E522D3C36A8006413A5 /* Dexcom */ = {
+			isa = PBXGroup;
+			children = (
+				DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */,
+				DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */,
+			);
+			path = Dexcom;
 			sourceTree = "<group>";
 		};
 		DD4878062C7B2E9E0048F05C /* Settings */ = {
@@ -965,6 +991,8 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				DD2C2E522D3C36A8006413A5 /* Dexcom */,
+				DD2C2E4D2D3B8ACF006413A5 /* Nightscout */,
 				DD9ED0C62D355225000D2A63 /* Log */,
 				DDEF503D2D32753A00999A5D /* Task */,
 				DDFF3D792D140F1800BF9D9E /* BackgroundRefresh */,
@@ -1333,6 +1361,7 @@
 				DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */,
 				FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */,
 				DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */,
+				DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */,
 				DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */,
 				DD9ACA082D32F68B00415D8A /* BGTask.swift in Sources */,
 				DD9ACA102D34129200415D8A /* Task.swift in Sources */,
@@ -1450,6 +1479,7 @@
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,
 				FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */,
 				DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */,
+				DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
 				DD5334232C60ED3600062F9D /* IAge.swift in Sources */,
 				FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */,
@@ -1459,7 +1489,9 @@
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
 				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
+				DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */,
 				FCA2DDE62501095000254A8C /* Timers.swift in Sources */,
+				DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */,
 				DD9ED0C82D355244000D2A63 /* LogViewModel.swift in Sources */,
 				DDFF3D892D1429AB00BF9D9E /* BackgroundRefreshType.swift in Sources */,
 				DD493AE32ACF2358009A6922 /* CAge.swift in Sources */,
