@@ -27,21 +27,15 @@ class ContactSettingsViewModel: ObservableObject {
         }
     }
 
-    @Published var contactTrend: Bool {
+    @Published var contactTrend: String {
         didSet {
-            if contactTrend {
-                contactDelta = false
-            }
             storage.contactTrend.value = contactTrend
             triggerRefresh()
         }
     }
 
-    @Published var contactDelta: Bool {
+    @Published var contactDelta: String {
         didSet {
-            if contactDelta {
-                contactTrend = false
-            }
             storage.contactDelta.value = contactDelta
             triggerRefresh()
         }
