@@ -290,14 +290,23 @@ extension MainViewController {
             // Update contact
             if ObservableUserDefaults.shared.contactEnabled.value {
                 var extra: String = ""
+                var extraTrend: String? = nil
+                var extraDelta: String? = nil
 
-                if ObservableUserDefaults.shared.contactTrend.value = "Include" {
+                if ObservableUserDefaults.shared.contactTrend.value == "Include" {
                     extra = snoozerDirection
-                } else if ObservableUserDefaults.shared.contactDelta.value = "Include" {
+                } else if ObservableUserDefaults.shared.contactDelta.value == "Include" {
                     extra = snoozerDelta
                 }
 
-                self.contactImageUpdater.updateContactImage(bgValue: bgTextStr, extra: extra, stale: deltaTime >= 12)
+                if ObservableUserDefaults.shared.contactTrend.value == "Separate" {
+                    extraTrend = snoozerDirection
+                }
+                if ObservableUserDefaults.shared.contactDelta.value == "Separate" {
+                    extraDelta = snoozerDelta
+                }
+
+                self.contactImageUpdater.updateContactImage(bgValue: bgTextStr, extra: extra, extraTrend: extraTrend, extraDelta: extraDelta, stale: deltaTime >= 12)
             }
         }
     }
