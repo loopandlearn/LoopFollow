@@ -8,9 +8,10 @@ import SwiftUI
 struct BackgroundRefreshSettingsView: View {
     @ObservedObject var viewModel: BackgroundRefreshSettingsViewModel
     @Environment(\.presentationMode) var presentationMode
+    @State private var forceRefresh = false
+    @State private var timer: Timer?
 
     @ObservedObject var bleManager = BLEManager.shared
-    @ObservedObject var selectedBLEDevice = Storage.shared.selectedBLEDevice
 
     var body: some View {
         NavigationView {
@@ -29,6 +30,12 @@ struct BackgroundRefreshSettingsView: View {
                         presentationMode.wrappedValue.dismiss()
                     }
                 }
+            }
+            .onAppear {
+                startTimer()
+            }
+            .onDisappear {
+                stopTimer()
             }
         }
     }
@@ -76,13 +83,20 @@ struct BackgroundRefreshSettingsView: View {
 
     @ViewBuilder
     private var selectedDeviceSection: some View {
-        if let storedDevice = selectedBLEDevice.value {
+        if let storedDevice = bleManager.getSelectedDevice() {
             Section(header: Text("Selected Device")) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(storedDevice.name ?? "Unknown Device")
                         .font(.headline)
 
                     deviceConnectionStatus(for: storedDevice)
+
+                    if(storedDevice.rssi != 0)
+                    {
+                        Text("RSSI: \(storedDevice.rssi) dBm")
+                            .foregroundColor(.secondary)
+                            .font(.footnote)
+                    }
 
                     HStack {
                         Spacer()
@@ -98,11 +112,22 @@ struct BackgroundRefreshSettingsView: View {
                 }
                 .padding(.vertical, 8)
             }
+            .id(forceRefresh)
+        }
+    }
+
+    private func formattedTimeString(from seconds: TimeInterval) -> String {
+        if seconds < 60 {
+            return "\(Int(seconds)) seconds"
+        } else {
+            let minutes = Int(seconds / 60)
+            let seconds = Int(seconds.truncatingRemainder(dividingBy: 60))
+            return "\(minutes):\(String(format: "%02d", seconds)) minutes"
         }
     }
 
     private var availableDevicesSection: some View {
-        Section(header: Text("Available Devices")) {
+        Section(header: scanningStatusHeader) {
             BLEDeviceSelectionView(
                 bleManager: bleManager,
                 selectedFilter: viewModel.backgroundRefreshType,
@@ -113,21 +138,52 @@ struct BackgroundRefreshSettingsView: View {
         }
     }
 
+    private var scanningStatusHeader: some View {
+        Text("Scanning for \(viewModel.backgroundRefreshType.rawValue)...")
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+    }
+
     private func deviceConnectionStatus(for device: BLEDevice) -> some View {
+        let expectedConnectionTime: TimeInterval = bleManager.expectedHeartbeatInterval() ?? 300
+        let now = Date()
+        let timeSinceLastConnection = device.isConnected ? 0 : now.timeIntervalSince(device.lastConnected ?? now)
+
         if device.isConnected {
             return Text("Connected")
                 .foregroundColor(.green)
         } else if let lastConnected = device.lastConnected {
-            let date = dateTimeUtils.formattedDate(from: lastConnected)
-            return Text("Last connection: \(date)")
-                .foregroundColor(.orange)
-        } else if let item = bleManager.devices.first(where: { $0.id == device.id }) {
-            let date = dateTimeUtils.formattedDate(from: item.lastSeen)
-            return Text("Last seen: \(date)")
-                .foregroundColor(.orange)
+            let timeRatio = timeSinceLastConnection / expectedConnectionTime
+            let timeString = formattedTimeString(from: timeSinceLastConnection)
+
+            if timeRatio < 1.0 {
+                return Text("Disconnected for \(timeString)")
+                    .foregroundColor(.green)
+            } else if timeRatio <= 1.15 {
+                return Text("Disconnected for \(timeString)")
+                    .foregroundColor(.orange)
+            } else if timeRatio <= 3.0 {
+                return Text("Disconnected for \(timeString)")
+                    .foregroundColor(.red)
+            } else {
+                let date = dateTimeUtils.formattedDate(from: lastConnected)
+                return Text("Last connection: \(date)")
+                    .foregroundColor(.red)
+            }
         } else {
-            return Text("Not found")
-                .foregroundColor(.red)
+            return Text("Reconnecting...")
+                .foregroundColor(.orange)
         }
+    }
+
+    private func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            self.forceRefresh.toggle()
+        }
+    }
+
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
     }
 }

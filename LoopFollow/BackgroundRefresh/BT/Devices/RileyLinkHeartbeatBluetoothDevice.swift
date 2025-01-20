@@ -14,17 +14,10 @@ class RileyLinkHeartbeatBluetoothDevice: BluetoothDevice {
     private let CBUUID_ReceiveCharacteristic_TimerTick: String = "6E6C7910-B89E-43A5-78AF-50C5E2B86F7E"
     private let CBUUID_ReceiveCharacteristic_Data: String = "C842E849-5028-42E2-867C-016ADADA9155"
 
-    init(bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
-        guard let selectedDevice = Storage.shared.selectedBLEDevice.value else {
-            fatalError("No selected BLE device found in storage.")
-        }
-
-        let address = selectedDevice.id.uuidString
-        let deviceName = selectedDevice.name
-
+    init(address:String, name:String?, bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
         super.init(
             address: address,
-            name: deviceName,
+            name: name,
             CBUUID_Advertisement: nil,
             servicesCBUUIDs: [CBUUID(string: CBUUID_Service_RileyLink)],
             CBUUID_ReceiveCharacteristic: CBUUID_ReceiveCharacteristic_TimerTick,

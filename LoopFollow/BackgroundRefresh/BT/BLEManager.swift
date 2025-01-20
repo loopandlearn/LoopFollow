@@ -23,8 +23,16 @@ class BLEManager: NSObject, ObservableObject {
             queue: .main
         )
         if let device = Storage.shared.selectedBLEDevice.value {
+            devices.append(device)
+            findAndUpdateDevice(with: device.id.uuidString) { device in
+                device.rssi = 0
+            }
             connect(device: device)
         }
+    }
+
+    func getSelectedDevice() -> BLEDevice? {
+        return devices.first { $0.id == Storage.shared.selectedBLEDevice.value?.id }
     }
 
     func startScanning() {
@@ -53,12 +61,17 @@ class BLEManager: NSObject, ObservableObject {
             Storage.shared.backgroundRefreshType.value = matchedType
             Storage.shared.selectedBLEDevice.value = device
 
+            findAndUpdateDevice(with: device.id.uuidString) { device in
+                device.isConnected = false
+                device.lastConnected = nil
+            }
+
             switch matchedType {
             case .dexcom:
-                activeDevice = DexcomHeartbeatBluetoothDevice(bluetoothDeviceDelegate: self)
+                activeDevice = DexcomHeartbeatBluetoothDevice(address: device.id.uuidString, name: device.name, bluetoothDeviceDelegate: self)
                 activeDevice?.connect()
             case .rileyLink:
-                activeDevice = RileyLinkHeartbeatBluetoothDevice(bluetoothDeviceDelegate: self)
+                activeDevice = RileyLinkHeartbeatBluetoothDevice(address: device.id.uuidString, name: device.name, bluetoothDeviceDelegate: self)
                 activeDevice?.connect()
             case .silentTune, .none:
                 return
@@ -82,12 +95,16 @@ class BLEManager: NSObject, ObservableObject {
 
     private func addOrUpdateDevice(_ device: BLEDevice) {
         if let idx = devices.firstIndex(where: { $0.id == device.id }) {
-            devices[idx] = device.updateLastSeen()
+            var updatedDevice = devices[idx]
+            updatedDevice.rssi = device.rssi
+            updatedDevice.lastSeen = Date()
+            devices[idx] = updatedDevice
         } else {
             var newDevice = device
             newDevice.lastSeen = Date()
             devices.append(newDevice)
         }
+
         devices = devices
     }
 
@@ -131,23 +148,36 @@ extension BLEManager: CBCentralManagerDelegate {
 
         addOrUpdateDevice(device)
     }
+
+    func findAndUpdateDevice(with deviceAddress: String, update: (inout BLEDevice) -> Void) {
+        if let idx = devices.firstIndex(where: { $0.id.uuidString == deviceAddress }) {
+            var device = devices[idx]
+            update(&device)
+            devices[idx] = device
+
+            devices = devices
+        } else {
+            print("Device not found in devices array for update")
+        }
+    }
 }
 
 extension BLEManager: BluetoothDeviceDelegate {
     func didConnectTo(bluetoothDevice: BluetoothDevice) {
         LogManager.shared.log(category: .bluetooth, message: "Connected to: \(bluetoothDevice.deviceName ?? "Unknown")")
 
-        if var device = Storage.shared.selectedBLEDevice.value {
+        findAndUpdateDevice(with: bluetoothDevice.deviceAddress) { device in
             device.isConnected = true
-            Storage.shared.selectedBLEDevice.value = device.updateLastConnected()
+            device.lastConnected = Date()
         }
     }
 
     func didDisconnectFrom(bluetoothDevice: BluetoothDevice) {
         LogManager.shared.log(category: .bluetooth, message: "Disconnect from: \(bluetoothDevice.deviceName ?? "Unknown")")
-        if var device = Storage.shared.selectedBLEDevice.value {
+
+        findAndUpdateDevice(with: bluetoothDevice.deviceAddress) { device in
             device.isConnected = false
-            Storage.shared.selectedBLEDevice.value = device
+            device.lastConnected = Date()
         }
     }
 

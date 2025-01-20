@@ -16,18 +16,7 @@ class DexcomHeartbeatBluetoothDevice: BluetoothDevice {
     private let CBUUID_Advertisement_G7 = "FEBC"
     private let CBUUID_ReceiveCharacteristic_G7 = "F8083535-849E-531C-C594-30F1F86A4EA5"
 
-    private var timeStampOfLastHeartBeat: Date
-
-    init(bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
-        guard let selectedDevice = Storage.shared.selectedBLEDevice.value else {
-            fatalError("No selected BLE device found in storage.")
-        }
-
-        let address = selectedDevice.id.uuidString
-        let name = selectedDevice.name
-
-        self.timeStampOfLastHeartBeat = Date(timeIntervalSince1970: 0)
-
+    init(address:String, name:String?, bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
         super.init(
             address: address,
             name: name,

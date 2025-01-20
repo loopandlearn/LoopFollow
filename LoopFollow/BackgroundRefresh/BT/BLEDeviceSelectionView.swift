@@ -12,23 +12,28 @@ struct BLEDeviceSelectionView: View {
 
     var body: some View {
         VStack {
-            Text("Scanning for \(selectedFilter.rawValue)")
-                .font(.headline)
-
             List {
-                ForEach(bleManager.devices.filter { selectedFilter.matches($0) && !isSelected($0) }, id: \.id) { device in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(device.name ?? "Unknown")
-                            Text("\(device.rssi) dBm")
-                                .foregroundColor(.secondary)
-                                .font(.footnote)
+                if bleManager.devices.filter({ selectedFilter.matches($0) && !isSelected($0) }).isEmpty {
+                    Text("No devices found yet. They'll appear here when discovered.")
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                } else {
+                    ForEach(bleManager.devices.filter { selectedFilter.matches($0) && !isSelected($0) }, id: \.id) { device in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(device.name ?? "Unknown")
+
+                                Text("RSSI: \(device.rssi) dBm")
+                                    .foregroundColor(.secondary)
+                                    .font(.footnote)
+                            }
+                            Spacer()
                         }
-                        Spacer()
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        onSelectDevice(device)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            onSelectDevice(device)
+                        }
                     }
                 }
             }
