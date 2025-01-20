@@ -290,8 +290,8 @@ extension MainViewController {
             // Update contact
             if ObservableUserDefaults.shared.contactEnabled.value {
                 var extra: String = ""
-                var extraTrend: String? = nil
-                var extraDelta: String? = nil
+                var extraTrend: String = ""
+                var extraDelta: String = ""
 
                 if ObservableUserDefaults.shared.contactTrend.value == "Include" {
                     extra = snoozerDirection
