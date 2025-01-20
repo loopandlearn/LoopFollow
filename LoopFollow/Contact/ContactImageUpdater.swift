@@ -45,83 +45,97 @@ class ContactImageUpdater {
             }
         }
 
-    func updateContactImage(bgValue: String, extra: String, stale: Bool) {
+        func updateContactImage(bgValue: String, extra: String, extraTrend: String, extraDelta: String, stale: Bool) {
+        let contactSuffixes = ["- BG", "- Trend", "- Delta"]
         queue.async {
             guard CNContactStore.authorizationStatus(for: .contacts) == .authorized else {
                 print("Access to contacts is not authorized.")
                 return
             }
-
-            guard let imageData = self.generateContactImage(bgValue: bgValue, extra: extra, stale: stale)?.pngData() else {
-                print("Failed to generate contact image.")
-                return
-            }
-
+    
             let bundleDisplayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "LoopFollow"
-            let contactName = "\(bundleDisplayName) - BG"
-            let predicate = CNContact.predicateForContacts(matchingName: contactName)
-            let keysToFetch = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactImageDataKey] as [CNKeyDescriptor]
-
-            do {
-                let contacts = try self.contactStore.unifiedContacts(matching: predicate, keysToFetch: keysToFetch)
-
-                if let contact = contacts.first, let mutableContact = contact.mutableCopy() as? CNMutableContact {
-                    mutableContact.imageData = imageData
-                    let saveRequest = CNSaveRequest()
-                    saveRequest.update(mutableContact)
-                    try self.contactStore.execute(saveRequest)
-                    print("Contact image updated successfully.")
-                } else {
-                    let newContact = CNMutableContact()
-                    newContact.givenName = contactName
-                    newContact.imageData = imageData
-                    let saveRequest = CNSaveRequest()
-                    saveRequest.add(newContact, toContainerWithIdentifier: nil)
-                    try self.contactStore.execute(saveRequest)
-                    print("New contact created with updated image.")
+    
+            for suffix in contactSuffixes {
+                let contactName = "\(bundleDisplayName) \(suffix)"
+                let contactType = suffix.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "-", with: "")
+                guard let imageData = self.generateContactImage(bgValue: bgValue, extra: extra, extraTrend: extraTrend, extraDelta: extraDelta, stale: stale, contactType: contactType)?.pngData() else {
+                    print("Failed to generate contact image for \(contactName).")
+                    continue
                 }
-            } catch {
-                print("Failed to update or create contact: \(error)")
+    
+                let predicate = CNContact.predicateForContacts(matchingName: contactName)
+                let keysToFetch = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactImageDataKey] as [CNKeyDescriptor]
+    
+                do {
+                    let contacts = try self.contactStore.unifiedContacts(matching: predicate, keysToFetch: keysToFetch)
+    
+                    if let contact = contacts.first, let mutableContact = contact.mutableCopy() as? CNMutableContact {
+                        mutableContact.imageData = imageData
+                        let saveRequest = CNSaveRequest()
+                        saveRequest.update(mutableContact)
+                        try self.contactStore.execute(saveRequest)
+                        print("Contact image updated successfully for \(contactName).")
+                    } else {
+                        let newContact = CNMutableContact()
+                        newContact.givenName = contactName
+                        newContact.imageData = imageData
+                        let saveRequest = CNSaveRequest()
+                        saveRequest.add(newContact, toContainerWithIdentifier: nil)
+                        try self.contactStore.execute(saveRequest)
+                        print("New contact created with updated image for \(contactName).")
+                    }
+                } catch {
+                    print("Failed to update or create contact for \(contactName): \(error)")
+                }
             }
         }
     }
 
-    private func generateContactImage(bgValue: String, extra: String, stale: Bool) -> UIImage? {
-        let size = CGSize(width: 300, height: 300)
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+    private func generateContactImage(bgValue: String, extra: String, extraTrend: String, extraDelta: String, stale: Bool, contactType: String) -> UIImage? {
+    let size = CGSize(width: 300, height: 300)
+    UIGraphicsBeginImageContextWithOptions(size, false, 0)
+    guard let context = UIGraphicsGetCurrentContext() else { return nil }
 
-        savedBackgroundUIColor.setFill()
+    savedBackgroundUIColor.setFill()
+    context.fill(CGRect(origin: .zero, size: size))
+
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.alignment = .center
+
+    let maxFontSize: CGFloat = extra.isEmpty ? 200 : 160
+    let fontSize = maxFontSize - CGFloat(bgValue.count * 15)
+    var bgAttributes: [NSAttributedString.Key: Any] = [
+        .font: UIFont.boldSystemFont(ofSize: fontSize),
+        .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
+        .paragraphStyle: paragraphStyle
+    ]
+
+    if stale {
+        // Force background color back to black if stale
+        UIColor.black.setFill()
         context.fill(CGRect(origin: .zero, size: size))
+        bgAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+    }
 
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = .center
+    let extraAttributes: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 90),
+        .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
+        .paragraphStyle: paragraphStyle
+    ]
 
-        let maxFontSize: CGFloat = extra.isEmpty ? 200 : 160
-        let fontSize = maxFontSize - CGFloat(bgValue.count * 15)
-        var bgAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.boldSystemFont(ofSize: fontSize),
-            .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-            .paragraphStyle: paragraphStyle
-        ]
-
-        if stale {
-            //force background color back to black if stale
-            UIColor.black.setFill()
-            context.fill(CGRect(origin: .zero, size: size))
-            
-            bgAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
-        }
-
-        let extraAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 90),
-            .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-            .paragraphStyle: paragraphStyle
-        ]
-
+    if contactType == "Trend" && ObservableUserDefaults.shared.contactTrend.value == "Separate" {
+        // Customizing image for Trend contact when value is Separate
+        let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
+        extraTrend.draw(in: trendRect, withAttributes: extraAttributes)
+    } else if contactType == "Delta" && ObservableUserDefaults.shared.contactDelta.value == "Separate" {
+        // Customizing image for Delta contact when value is Separate
+        let deltaRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
+        extraDelta.draw(in: deltaRect, withAttributes: extraAttributes)
+    } else {
+        // Customizing image for BG contact
         let bgRect = extra.isEmpty
-        ? CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-        : CGRect(x: 0, y: 26, width: size.width, height: size.height / 2)
+            ? CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
+            : CGRect(x: 0, y: 26, width: size.width, height: size.height / 2)
 
         bgValue.draw(in: bgRect, withAttributes: bgAttributes)
 
@@ -129,9 +143,10 @@ class ContactImageUpdater {
             let extraRect = CGRect(x: 0, y: size.height / 2 + 6, width: size.width, height: size.height / 2 - 20)
             extra.draw(in: extraRect, withAttributes: extraAttributes)
         }
-
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image
     }
+
+    let image = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+    return image
+}
 }
