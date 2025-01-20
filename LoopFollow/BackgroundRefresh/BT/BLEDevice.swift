@@ -32,17 +32,4 @@ struct BLEDevice: Identifiable, Codable, Equatable {
         self.lastSeen = lastSeen
         self.lastConnected = lastConnected
     }
-
-    func updateLastSeen() -> BLEDevice {
-        var updatedDevice = self
-        updatedDevice.lastSeen = Date()
-        return updatedDevice
-    }
-
-    func updateLastConnected() -> BLEDevice {
-        var updatedDevice = self
-        updatedDevice.lastConnected = Date()
-        updatedDevice.isConnected = true
-        return updatedDevice
-    }
 }
