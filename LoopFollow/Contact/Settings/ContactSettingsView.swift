@@ -17,7 +17,7 @@ struct ContactSettingsView: View {
     @State private var alertTitle: String = ""
     @State private var alertMessage: String = ""
 
-    let options = ["Off", "Include", "Separate Card"]
+    let options = ["Off", "Include", "Separate"]
 
     var body: some View {
         NavigationView {
