@@ -29,7 +29,7 @@ class ContactSettingsViewModel: ObservableObject {
 
     @Published var contactTrend: String {
         didSet {
-            if contactTrend == "Include" {
+            if contactTrend == "Include" && contactDelta == "Include" {
                 contactDelta = "Off"
             }
             storage.contactTrend.value = contactTrend
@@ -39,7 +39,7 @@ class ContactSettingsViewModel: ObservableObject {
 
     @Published var contactDelta: String {
         didSet {
-            if contactDelta == "Include" {
+            if contactDelta == "Include" && contactTrend == "Include" {
                 contactTrend = "Off"
             }
             storage.contactDelta.value = contactDelta
