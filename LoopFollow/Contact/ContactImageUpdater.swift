@@ -46,7 +46,7 @@ class ContactImageUpdater {
         }
 
         func updateContactImage(bgValue: String, extra: String, extraTrend: String, extraDelta: String, stale: Bool) {
-        let contactSuffixes = ["- BG", "- Trend", "- Delta"]
+        let contactSuffixes = ["BG", "Trend", "Delta"]
         queue.async {
             guard CNContactStore.authorizationStatus(for: .contacts) == .authorized else {
                 print("Access to contacts is not authorized.")
@@ -56,8 +56,8 @@ class ContactImageUpdater {
             let bundleDisplayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "LoopFollow"
     
             for suffix in contactSuffixes {
-                let contactName = "\(bundleDisplayName) \(suffix)"
-                let contactType = suffix.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "-", with: "")
+                let contactName = "\(bundleDisplayName) - \(suffix)"
+                let contactType = suffix
                 guard let imageData = self.generateContactImage(bgValue: bgValue, extra: extra, extraTrend: extraTrend, extraDelta: extraDelta, stale: stale, contactType: contactType)?.pngData() else {
                     print("Failed to generate contact image for \(contactName).")
                     continue
@@ -123,14 +123,14 @@ class ContactImageUpdater {
         .paragraphStyle: paragraphStyle
     ]
 
-    if contactType == "Trend" { //&& ObservableUserDefaults.shared.contactTrend.value == "Separate" {
+    if contactType == "Trend" && ObservableUserDefaults.shared.contactTrend.value == "Separate" {
         // Customizing image for Trend contact when value is Separate
         let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-        extraTrend.draw(in: trendRect, withAttributes: extraAttributes)
-    } else if contactType == "Delta" { //&& ObservableUserDefaults.shared.contactDelta.value == "Separate" {
+        extraTrend.draw(in: trendRect, withAttributes: bgAttributes)
+    } else if contactType == "Delta" && ObservableUserDefaults.shared.contactDelta.value == "Separate" {
         // Customizing image for Delta contact when value is Separate
         let deltaRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-        extraDelta.draw(in: deltaRect, withAttributes: extraAttributes)
+        extraDelta.draw(in: deltaRect, withAttributes: bgAttributes)
     } else if contactType == "BG" {
         // Customizing image for BG contact
         let bgRect = extra.isEmpty
