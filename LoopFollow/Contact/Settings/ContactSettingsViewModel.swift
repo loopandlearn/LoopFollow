@@ -27,22 +27,36 @@ class ContactSettingsViewModel: ObservableObject {
         }
     }
 
-    @Published var contactTrend: Bool {
+    @Published var contactTrend: String {
         didSet {
-            if contactTrend {
-                contactDelta = false
+            if contactTrend == "Include" && contactDelta == "Include" {
+                contactDelta = "Off"
             }
             storage.contactTrend.value = contactTrend
             triggerRefresh()
         }
     }
 
-    @Published var contactDelta: Bool {
+    @Published var contactDelta: String {
         didSet {
-            if contactDelta {
-                contactTrend = false
+            if contactDelta == "Include" && contactTrend == "Include" {
+                contactTrend = "Off"
             }
             storage.contactDelta.value = contactDelta
+            triggerRefresh()
+        }
+    }
+
+    @Published var contactBackgroundColor: String {
+        didSet {
+            storage.contactBackgroundColor.value = contactBackgroundColor
+            triggerRefresh()
+        }
+    }
+    
+    @Published var contactTextColor: String {
+        didSet {
+            storage.contactTextColor.value = contactTextColor
             triggerRefresh()
         }
     }
@@ -54,6 +68,8 @@ class ContactSettingsViewModel: ObservableObject {
         self.contactEnabled = storage.contactEnabled.value
         self.contactTrend = storage.contactTrend.value
         self.contactDelta = storage.contactDelta.value
+        self.contactBackgroundColor = storage.contactBackgroundColor.value
+        self.contactTextColor = storage.contactTextColor.value
 
         storage.contactEnabled.$value
             .assign(to: &$contactEnabled)
@@ -63,6 +79,12 @@ class ContactSettingsViewModel: ObservableObject {
 
         storage.contactDelta.$value
             .assign(to: &$contactDelta)
+
+        storage.contactBackgroundColor.$value
+            .assign(to: &$contactBackgroundColor)
+        
+        storage.contactTextColor.$value
+            .assign(to: &$contactTextColor)
     }
 
     private func triggerRefresh() {
