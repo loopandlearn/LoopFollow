@@ -131,7 +131,7 @@ class ContactImageUpdater {
         // Customizing image for Delta contact when value is Separate
         let deltaRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
         extraDelta.draw(in: deltaRect, withAttributes: extraAttributes)
-    } else {
+    } else if contactType == "BG" {
         // Customizing image for BG contact
         let bgRect = extra.isEmpty
             ? CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
