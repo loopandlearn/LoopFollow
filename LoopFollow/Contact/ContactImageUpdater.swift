@@ -123,11 +123,11 @@ class ContactImageUpdater {
         .paragraphStyle: paragraphStyle
     ]
 
-    if contactType == "Trend" && ObservableUserDefaults.shared.contactTrend.value == "Separate" {
+    if contactType == "Trend" { //&& ObservableUserDefaults.shared.contactTrend.value == "Separate" {
         // Customizing image for Trend contact when value is Separate
         let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
         extraTrend.draw(in: trendRect, withAttributes: extraAttributes)
-    } else if contactType == "Delta" && ObservableUserDefaults.shared.contactDelta.value == "Separate" {
+    } else if contactType == "Delta" { //&& ObservableUserDefaults.shared.contactDelta.value == "Separate" {
         // Customizing image for Delta contact when value is Separate
         let deltaRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
         extraDelta.draw(in: deltaRect, withAttributes: extraAttributes)
