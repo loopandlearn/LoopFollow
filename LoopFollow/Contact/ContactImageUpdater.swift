@@ -123,14 +123,20 @@ class ContactImageUpdater {
         .paragraphStyle: paragraphStyle
     ]
 
+    var separateAttributes: [NSAttributedString.Key: Any] = [
+        .font: UIFont.boldSystemFont(ofSize: 160),
+        .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
+        .paragraphStyle: paragraphStyle
+    ]
+
     if contactType == "Trend" && ObservableUserDefaults.shared.contactTrend.value == "Separate" {
         // Customizing image for Trend contact when value is Separate
         let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-        extraTrend.draw(in: trendRect, withAttributes: bgAttributes)
+        extraTrend.draw(in: trendRect, withAttributes: separateAttributes)
     } else if contactType == "Delta" && ObservableUserDefaults.shared.contactDelta.value == "Separate" {
         // Customizing image for Delta contact when value is Separate
         let deltaRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-        extraDelta.draw(in: deltaRect, withAttributes: bgAttributes)
+        extraDelta.draw(in: deltaRect, withAttributes: separateAttributes)
     } else if contactType == "BG" {
         // Customizing image for BG contact
         let bgRect = extra.isEmpty
