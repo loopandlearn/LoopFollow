@@ -33,7 +33,11 @@ extension MainViewController {
 
                 if wasEnacted {
                     UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+//                    LogManager.shared.log(category: .alarm, message: "New LastLoopTime: \(lastLoopTime)")
+
                     evaluateNotLooping(lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value)
+                } else {
+                    LogManager.shared.log(category: .alarm, message: "Last devicestatus was not enacted")
                 }
 
                 if let timestamp = enactedOrSuggested["timestamp"] as? String,
