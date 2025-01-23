@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-enum TaskID {
+enum TaskID: CaseIterable {
     case profile
     case deviceStatus
     case treatments
@@ -39,8 +39,8 @@ class TaskScheduler {
 
     func scheduleTask(id: TaskID, nextRun: Date, action: @escaping () -> Void) {
         queue.async {
-            let timeString = self.formatTime(nextRun)
-            LogManager.shared.log(category: .taskScheduler, message: "scheduleTask(\(id)): nextRun = \(timeString)")
+//            let timeString = self.formatTime(nextRun)
+//            LogManager.shared.log(category: .taskScheduler, message: "scheduleTask(\(id)): nextRun = \(timeString)")
             
             self.tasks[id] = ScheduledTask(nextRun: nextRun, action: action)
             self.rescheduleTimer()
@@ -48,13 +48,16 @@ class TaskScheduler {
     }
 
     func rescheduleTask(id: TaskID, to newRunDate: Date) {
+//        let timeString = self.formatTime(newRunDate)
+//        LogManager.shared.log(category: .taskScheduler, message: "rescheduleTask(\(id)): nextRun = \(timeString)")
+
         queue.async {
             guard var existingTask = self.tasks[id] else {
                 return
             }
             existingTask.nextRun = newRunDate
             self.tasks[id] = existingTask
-            self.rescheduleTimer()
+            self.checkTasksNow()
         }
     }
 
@@ -84,6 +87,7 @@ class TaskScheduler {
         let interval = earliestTask.nextRun.timeIntervalSinceNow
         let safeInterval = max(interval, 0)
 
+        // Comment out this block to simulate heartbeat execution only
         DispatchQueue.main.async {
             self.currentTimer = Timer.scheduledTimer(withTimeInterval: safeInterval, repeats: false) { [weak self] _ in
                 guard let self = self else { return }
@@ -99,15 +103,34 @@ class TaskScheduler {
         BackgroundAlertManager.shared.scheduleBackgroundAlert()
 
         let now = Date()
-        for (id, task) in tasks {
-            if task.nextRun <= now {
-                var updatedTask = task
-                updatedTask.nextRun = .distantFuture
-                tasks[id] = updatedTask
+        let tasksToSkipAlarmCheck: Set<TaskID> = [.deviceStatus, .treatments, .fetchBG]
 
-                DispatchQueue.main.async {
-                    task.action()
+        for taskID in TaskID.allCases {
+            guard let task = tasks[taskID], task.nextRun <= now else {
+                continue
+            }
+
+            // Check if we should skip alarmCheck
+            if taskID == .alarmCheck {
+                let shouldSkip = tasksToSkipAlarmCheck.contains {
+                    guard let checkTask = tasks[$0] else { return false }
+                    return checkTask.nextRun <= now || checkTask.nextRun == .distantFuture
                 }
+
+                if shouldSkip {
+//                    LogManager.shared.log(category: .taskScheduler, message: "Skipping alarmCheck because one of the specified tasks is due or set to distant future.")
+                    continue
+                }
+            }
+
+            var updatedTask = task
+            updatedTask.nextRun = .distantFuture
+            tasks[taskID] = updatedTask
+
+//            LogManager.shared.log(category: .taskScheduler, message: "Executing task \(taskID.description) at \(formatTime(now)).")
+
+            DispatchQueue.main.async {
+                task.action()
             }
         }
     }
@@ -117,19 +140,5 @@ class TaskScheduler {
         formatter.dateStyle = .none
         formatter.timeStyle = .medium
         return formatter.string(from: date)
-    }
-}
-
-private extension TaskID {
-    var description: String {
-        switch self {
-        case .profile: return "profile"
-        case .deviceStatus: return "deviceStatus"
-        case .fetchBG: return "fetchBG"
-        case .treatments: return "treatments"
-        case .calendarWrite: return "calendarWrite"
-        case .minAgoUpdate: return "minAgoUpdate"
-        case .alarmCheck: return "alarmCheck"
-        }
     }
 }
