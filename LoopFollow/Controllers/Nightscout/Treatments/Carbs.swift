@@ -10,7 +10,7 @@ import Foundation
 extension MainViewController {
     // NS Carb Bolus Response Processor
     func processNSCarbs(entries: [[String:AnyObject]]) {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Carbs") }
+        //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Carbs") }
         // Because it's a small array, we're going to destroy and reload every time.
         carbData.removeAll()
         var lastFoundIndex = 0

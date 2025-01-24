@@ -156,9 +156,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Synchronize info types to ensure arrays are the correct size
         UserDefaultsRepository.synchronizeInfoTypes()
 
-        // Reset deprecated settings
-        UserDefaultsRepository.debugLog.value = false;
-        
         infoTable.rowHeight = 21
         infoTable.dataSource = self
         infoTable.tableFooterView = UIView(frame: .zero)
@@ -658,19 +655,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if UserDefaultsRepository.persistentNotification.value && bgTime > UserDefaultsRepository.persistentNotificationLastBGTime.value && bgData.count > 0 {
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             snoozer.sendNotification(self, bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString, deltaVal: Localizer.toDisplayUnits(String(latestDeltaString)), minAgoVal: latestMinAgoString, alertLabelVal: "Latest BG")
-        }
-    }
-
-    @available(*, deprecated, message: "Use LogManager instead.")
-    func writeDebugLog(value: String) {
-        DispatchQueue.main.async {
-            var logText = "\n" + dateTimeUtils.printNow() + " - " + value
-            print(logText)
-            guard let debug = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-            if debug.debugTextView.text.lengthOfBytes(using: .utf8) > 20000 {
-                debug.debugTextView.text = ""
-            }
-            debug.debugTextView.text += logText
         }
     }
 

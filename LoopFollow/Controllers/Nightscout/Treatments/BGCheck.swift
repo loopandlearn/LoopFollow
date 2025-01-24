@@ -12,7 +12,7 @@ import UIKit
 extension MainViewController {
     // NS BG Check Response Processor
     func processNSBGCheck(entries: [[String:AnyObject]]) {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG Check") }
+        //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG Check") }
         bgCheckData.removeAll()
         
         entries.reversed().forEach { currentEntry in
@@ -20,7 +20,7 @@ extension MainViewController {
             
             guard let parsedDate = NightscoutUtils.parseDate(dateStr),
                   let glucose = currentEntry["glucose"] as? Double else {
-                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Non-Double Glucose entry") }
+                //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "ERROR: Non-Double Glucose entry") }
                 return
             }
             

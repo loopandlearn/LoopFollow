@@ -36,7 +36,7 @@ extension MainViewController {
     func updateSage(data: [sageData]) {
         infoManager.clearInfoData(type: .sage)
 
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process/Display: SAGE") }
+        //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process/Display: SAGE") }
         if data.count == 0 {
             return
         }

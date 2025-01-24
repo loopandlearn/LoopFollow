@@ -10,7 +10,7 @@ import Foundation
 extension MainViewController {
     // NS Suspend Pump Response Processor
     func processSuspendPump(entries: [[String:AnyObject]]) {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Suspend Pump") }
+        //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Suspend Pump") }
         suspendGraphData.removeAll()
         
         var lastFoundIndex = 0
