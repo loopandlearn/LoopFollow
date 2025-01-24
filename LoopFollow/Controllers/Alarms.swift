@@ -1089,7 +1089,7 @@ extension MainViewController {
 
         let texts = AnnouncementTexts.forLanguage(preferredLanguage)
         
-        let negligibleThreshold = 3
+        let negligibleThreshold = 0
         let localizedCurrentValue = Localizer.toDisplayUnits(String(currentValue)).replacingOccurrences(of: ",", with: ".")
         let announcementText: String
         
