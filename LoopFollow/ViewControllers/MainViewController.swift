@@ -153,6 +153,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             UserDefaultsRepository.backgroundRefresh.value = true
         }
 
+        // Ensure alertNotLooping has a minimum value of 15.
+        if UserDefaultsRepository.alertNotLooping.value < 15 {
+            UserDefaultsRepository.alertNotLooping.value = 15
+        }
+
         // Synchronize info types to ensure arrays are the correct size
         UserDefaultsRepository.synchronizeInfoTypes()
 
