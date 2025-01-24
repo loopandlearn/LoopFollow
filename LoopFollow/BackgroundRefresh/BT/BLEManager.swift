@@ -164,7 +164,7 @@ extension BLEManager: CBCentralManagerDelegate {
 
 extension BLEManager: BluetoothDeviceDelegate {
     func didConnectTo(bluetoothDevice: BluetoothDevice) {
-        LogManager.shared.log(category: .bluetooth, message: "Connected to: \(bluetoothDevice.deviceName ?? "Unknown")")
+        LogManager.shared.log(category: .bluetooth, message: "Connected to: \(bluetoothDevice.deviceName ?? "Unknown")", isDebug: true)
 
         findAndUpdateDevice(with: bluetoothDevice.deviceAddress) { device in
             device.isConnected = true
@@ -173,7 +173,7 @@ extension BLEManager: BluetoothDeviceDelegate {
     }
 
     func didDisconnectFrom(bluetoothDevice: BluetoothDevice) {
-        LogManager.shared.log(category: .bluetooth, message: "Disconnect from: \(bluetoothDevice.deviceName ?? "Unknown")")
+        LogManager.shared.log(category: .bluetooth, message: "Disconnect from: \(bluetoothDevice.deviceName ?? "Unknown")", isDebug: true)
 
         findAndUpdateDevice(with: bluetoothDevice.deviceAddress) { device in
             device.isConnected = false

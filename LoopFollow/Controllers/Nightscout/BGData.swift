@@ -33,8 +33,8 @@ extension MainViewController {
             let latestDate = data[0].date
             let now = dateTimeUtils.getNowTimeIntervalUTC()
             if (latestDate + 330) < now && IsNightscoutEnabled() {
+                LogManager.shared.log(category: .dexcom, message: "Dexcom data is old, loading from NS instead")
                 self.webLoadNSBGData()
-                print("Dex data is old, loading from NS instead")
                 return
             }
             

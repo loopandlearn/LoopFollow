@@ -172,12 +172,9 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
             $0.title = "Advanced Settings"
             $0.presentationMode = .show(
                 controllerProvider: .callback(builder: {
-                    let controller = AdvancedSettingsViewController()
-                    controller.appStateController = self.appStateController
-                    return controller
-                }
-                                             ), onDismiss: nil)
-
+                    self.presentAdvancedSettingsView()
+                    return UIViewController()
+                }), onDismiss: nil)
         }
 
         +++ Section("Logging")
@@ -187,8 +184,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
                 controllerProvider: .callback(builder: {
                     self.presentLogView()
                     return UIViewController()
-                }
-                                             ), onDismiss: nil)
+                }), onDismiss: nil)
         }
         <<< ButtonRow("shareLogs") {
             $0.title = "Share Logs"
@@ -360,6 +356,19 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let viewModel = DexcomSettingsViewModel()
         let settingsView = DexcomSettingsView(viewModel: viewModel)
         let hostingController = UIHostingController(rootView: settingsView)
+        hostingController.modalPresentationStyle = .formSheet
+
+        if UserDefaultsRepository.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        }
+
+        present(hostingController, animated: true, completion: nil)
+    }
+
+    func presentAdvancedSettingsView() {
+        let viewModel = AdvancedSettingsViewModel()
+        let view = AdvancedSettingsView(viewModel: viewModel)
+        let hostingController = UIHostingController(rootView: view)
         hostingController.modalPresentationStyle = .formSheet
 
         if UserDefaultsRepository.forceDarkMode.value {

@@ -35,6 +35,8 @@ class Storage {
 
     var selectedBLEDevice = StorageValue<BLEDevice?>(key: "selectedBLEDevice", defaultValue: nil)
 
+    var debugLogLevel = StorageValue<Bool>(key: "debugLogLevel", defaultValue: false)
+
 
     static let shared = Storage()
 

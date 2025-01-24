@@ -223,9 +223,7 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         timeStampLastStatusUpdate = Date()
 
         if central.state == .poweredOn {
-            if (deviceAddress != nil) {
-                _ = retrievePeripherals(central)
-            }
+            _ = retrievePeripherals(central)
         }
     }
 
