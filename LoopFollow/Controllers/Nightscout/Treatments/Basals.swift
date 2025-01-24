@@ -34,7 +34,6 @@ extension MainViewController {
 
             let dateTimeStamp = dateParsed.timeIntervalSince1970
             guard let basalRate = currentEntry["absolute"] as? Double else {
-                self.writeDebugLog(value: "ERROR: Null Basal entry")
                 continue
             }
 
