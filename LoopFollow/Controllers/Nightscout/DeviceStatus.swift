@@ -32,11 +32,9 @@ extension MainViewController {
     }
     
     private func handleDeviceStatusError() {
+        LogManager.shared.log(category: .alarm, message: "Device status fetch failed!")
         DispatchQueue.main.async {
-            TaskScheduler.shared.rescheduleTask(
-                id: .deviceStatus,
-                to: Date().addingTimeInterval(10)
-            )
+            TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(10))
         }
     }
     
@@ -182,7 +180,7 @@ extension MainViewController {
                 )
             }
         }
-//        LogManager.shared.log(category: .alarm, message: "updateDeviceStatusDisplay done")
+        LogManager.shared.log(category: .alarm, message: "updateDeviceStatusDisplay done", isDebug: true)
 
     }
 }

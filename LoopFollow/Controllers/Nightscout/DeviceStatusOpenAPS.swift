@@ -33,7 +33,7 @@ extension MainViewController {
 
                 if wasEnacted {
                     UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
-//                    LogManager.shared.log(category: .alarm, message: "New LastLoopTime: \(lastLoopTime)")
+                    LogManager.shared.log(category: .alarm, message: "New LastLoopTime: \(lastLoopTime)", isDebug: true)
 
                     evaluateNotLooping(lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value)
                 } else {

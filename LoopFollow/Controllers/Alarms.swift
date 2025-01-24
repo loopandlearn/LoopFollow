@@ -337,7 +337,7 @@ extension MainViewController {
         
         //check for not looping alert
         if IsNightscoutEnabled() {
-//            LogManager.shared.log(category: .alarm, message: "Checking NotLooping LastLoopTime was \(UserDefaultsRepository.alertLastLoopTime.value) that gives a diff of: \(Double(dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertLastLoopTime.value))")
+            LogManager.shared.log(category: .alarm, message: "Checking NotLooping LastLoopTime was \(UserDefaultsRepository.alertLastLoopTime.value) that gives a diff of: \(Double(dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertLastLoopTime.value))", isDebug: true)
             if UserDefaultsRepository.alertNotLoopingActive.value
                 && !UserDefaultsRepository.alertNotLoopingIsSnoozed.value
                 && (Double(dateTimeUtils.getNowTimeIntervalUTC() - UserDefaultsRepository.alertLastLoopTime.value) >= Double(UserDefaultsRepository.alertNotLooping.value * 60))

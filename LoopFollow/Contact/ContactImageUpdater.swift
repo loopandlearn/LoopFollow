@@ -39,7 +39,7 @@ class ContactImageUpdater {
                     let saveRequest = CNSaveRequest()
                     saveRequest.update(mutableContact)
                     try self.contactStore.execute(saveRequest)
-                    LogManager.shared.log(category: .contact, message: "Contact image updated")
+                    LogManager.shared.log(category: .contact, message: "Contact image updated", isDebug: true)
                 } else {
                     let newContact = CNMutableContact()
                     newContact.givenName = contactName

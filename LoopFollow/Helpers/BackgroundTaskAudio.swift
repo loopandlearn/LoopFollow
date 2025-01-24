@@ -22,7 +22,7 @@ class BackgroundTask {
     func stopBackgroundTask() {
         NotificationCenter.default.removeObserver(self, name: AVAudioSession.interruptionNotification, object: nil)
         player.stop()
-        LogManager.shared.log(category: .general, message: "Silent audio stopped")
+        LogManager.shared.log(category: .general, message: "Silent audio stopped", isDebug: true)
     }
     
     @objc fileprivate func interruptedAudio(_ notification: Notification) {
@@ -48,7 +48,7 @@ class BackgroundTask {
             self.player.volume = 0.01
             self.player.prepareToPlay()
             self.player.play()
-            LogManager.shared.log(category: .general, message: "Silent audio playing")
+            LogManager.shared.log(category: .general, message: "Silent audio playing", isDebug: true)
         } catch {
             LogManager.shared.log(category: .general, message: "playAudio, error: \(error)")
         }

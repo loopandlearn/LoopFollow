@@ -39,17 +39,17 @@ class TaskScheduler {
 
     func scheduleTask(id: TaskID, nextRun: Date, action: @escaping () -> Void) {
         queue.async {
-//            let timeString = self.formatTime(nextRun)
-//            LogManager.shared.log(category: .taskScheduler, message: "scheduleTask(\(id)): nextRun = \(timeString)")
-            
+            let timeString = self.formatTime(nextRun)
+            LogManager.shared.log(category: .taskScheduler, message: "scheduleTask(\(id)): next run = \(timeString)", isDebug: true)
+
             self.tasks[id] = ScheduledTask(nextRun: nextRun, action: action)
             self.rescheduleTimer()
         }
     }
 
     func rescheduleTask(id: TaskID, to newRunDate: Date) {
-//        let timeString = self.formatTime(newRunDate)
-//        LogManager.shared.log(category: .taskScheduler, message: "rescheduleTask(\(id)): nextRun = \(timeString)")
+        let timeString = self.formatTime(newRunDate)
+        LogManager.shared.log(category: .taskScheduler, message: "Reschedule Task \(id): next run = \(timeString)", isDebug: true)
 
         queue.async {
             guard var existingTask = self.tasks[id] else {
@@ -77,10 +77,7 @@ class TaskScheduler {
         currentTimer = nil
 
         guard let (_, earliestTask) = tasks.min(by: { $0.value.nextRun < $1.value.nextRun }) else {
-            LogManager.shared.log(
-                category: .taskScheduler,
-                message: "No tasks, no timer scheduled."
-            )
+            LogManager.shared.log(category: .taskScheduler, message: "No tasks, no timer scheduled.")
             return
         }
 
@@ -118,7 +115,7 @@ class TaskScheduler {
                 }
 
                 if shouldSkip {
-//                    LogManager.shared.log(category: .taskScheduler, message: "Skipping alarmCheck because one of the specified tasks is due or set to distant future.")
+                    //LogManager.shared.log(category: .taskScheduler, message: "Skipping alarmCheck because one of the specified tasks is due or set to distant future.")
                     continue
                 }
             }
@@ -127,7 +124,7 @@ class TaskScheduler {
             updatedTask.nextRun = .distantFuture
             tasks[taskID] = updatedTask
 
-//            LogManager.shared.log(category: .taskScheduler, message: "Executing task \(taskID.description) at \(formatTime(now)).")
+            LogManager.shared.log(category: .taskScheduler, message: "Executing task \(taskID)", isDebug: true)
 
             DispatchQueue.main.async {
                 task.action()
