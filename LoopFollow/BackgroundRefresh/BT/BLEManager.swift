@@ -124,9 +124,9 @@ extension BLEManager: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
-            print("[BLE] Central poweredOn.")
+            LogManager.shared.log(category: .bluetooth, message: "Central poweredOn", isDebug: true)
         default:
-            print("[BLE] Central state = \(central.state.rawValue), not powered on.")
+            LogManager.shared.log(category: .bluetooth, message: "Central state = \(central.state.rawValue), not powered on.", isDebug: true)
         }
     }
 
@@ -157,7 +157,7 @@ extension BLEManager: CBCentralManagerDelegate {
 
             devices = devices
         } else {
-            print("Device not found in devices array for update")
+            LogManager.shared.log(category: .bluetooth, message: "Device not found in devices array for update")
         }
     }
 }

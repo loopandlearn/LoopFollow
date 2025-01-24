@@ -252,7 +252,7 @@ class AlarmSound {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: .mixWithOthers)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
-            print(error)
+            LogManager.shared.log(category: .general, message: "Enable audio error: \(error)")
         }
     }
 }
@@ -261,15 +261,15 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
 
     /* audioPlayerDidFinishPlaying:successfully: is called when a sound has finished playing. This method is NOT called if the player is stopped due to an interruption. */
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        NSLog("AlarmRule - audioPlayerDidFinishPlaying (\(flag))")
+        LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerDidFinishPlaying (\(flag))", isDebug: true)
     }
     
     /* if an error occurs while decoding it will be reported to the delegate. */
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
         if let error = error {
-            NSLog("AlarmRule - audioPlayerDecodeErrorDidOccur: \(error)")
+            LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerDecodeErrorDidOccur: \(error)")
         } else {
-            NSLog("AlarmRule - audioPlayerDecodeErrorDidOccur")
+            LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerDecodeErrorDidOccur")
         }
     }
     
@@ -277,14 +277,14 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
     
     /* audioPlayerBeginInterruption: is called when the audio session has been interrupted while the player was playing. The player will have been paused. */
     func audioPlayerBeginInterruption(_ player: AVAudioPlayer) {
-        NSLog("AlarmRule - audioPlayerBeginInterruption")
+        LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerBeginInterruption")
     }
     
     
     /* audioPlayerEndInterruption:withOptions: is called when the audio session interruption has ended and this player had been interrupted while playing. */
     /* Currently the only flag is AVAudioSessionInterruptionFlags_ShouldResume. */
     func audioPlayerEndInterruption(_ player: AVAudioPlayer, withOptions flags: Int) {
-        NSLog("AlarmRule - audioPlayerEndInterruption withOptions: \(flags)")
+        LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerEndInterruption withOptions: \(flags)")
     }
 }
 
