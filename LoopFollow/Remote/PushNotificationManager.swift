@@ -207,7 +207,7 @@ class PushNotificationManager {
 
         if !missingFields.isEmpty {
             let errorMessage = "Missing required fields, check your remote settings: \(missingFields.joined(separator: ", "))"
-            print(errorMessage)
+            LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
@@ -218,28 +218,28 @@ class PushNotificationManager {
 
         if !missingFields.isEmpty {
             let errorMessage = "Missing required data, verify that you are using the latest version of Trio: \(missingFields.joined(separator: ", "))"
-            print(errorMessage)
+            LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
 
         if let validationErrors = validateCredentials() {
             let errorMessage = "Credential validation failed: \(validationErrors.joined(separator: ", "))"
-            print(errorMessage)
+            LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
 
         guard let url = constructAPNsURL() else {
             let errorMessage = "Failed to construct APNs URL"
-            print(errorMessage)
+            LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
 
         guard let jwt = getOrGenerateJWT() else {
             let errorMessage = "Failed to generate JWT, please check that the token is correct."
-            print(errorMessage)
+            LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
@@ -260,7 +260,7 @@ class PushNotificationManager {
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 if let error = error {
                     let errorMessage = "Failed to send push notification: \(error.localizedDescription)"
-                    print(errorMessage)
+                    LogManager.shared.log(category: .apns, message: errorMessage)
                     completion(false, errorMessage)
                     return
                 }

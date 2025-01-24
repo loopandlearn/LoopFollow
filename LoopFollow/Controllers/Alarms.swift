@@ -960,7 +960,8 @@ extension MainViewController {
         // Speak always
         if always {
             speakBG(currentValue: currentValue, previousValue: previousValue)
-            print("Speaking because 'Always' is enabled.")
+            LogManager.shared.log(category: .general, message: "Speaking because 'Always' is enabled.", isDebug: true)
+
             return
         }
         
@@ -968,7 +969,7 @@ extension MainViewController {
         if speakLowBG {
             if currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) {
                 speakBG(currentValue: currentValue, previousValue: previousValue)
-                print("Speaking because of 'Low' condition.")
+                LogManager.shared.log(category: .general, message: "Speaking because of 'Low' condition.", isDebug: true)
                 return
             }
         }
@@ -984,7 +985,7 @@ extension MainViewController {
                 currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) ||
                 ((currentValue <= Int(highThreshold) && (previousValue - currentValue) >= Int(fastDropDelta))) {
                 speakBG(currentValue: currentValue, previousValue: previousValue)
-                print("Speaking because of 'Proactive Low' condition. Predictive trigger: \(predictiveTrigger)")
+                LogManager.shared.log(category: .general, message: "Speaking because of 'Proactive Low' condition. Predictive trigger: \(predictiveTrigger)", isDebug: true)
                 return
             }
         }
@@ -993,12 +994,12 @@ extension MainViewController {
         if speakHighBG {
             if currentValue >= Int(highThreshold) || previousValue >= Int(highThreshold) {
                 speakBG(currentValue: currentValue, previousValue: previousValue)
-                print("Speaking because of 'High' condition.")
+                LogManager.shared.log(category: .general, message: "Speaking because of 'High' condition.", isDebug: true)
                 return
             }
         }
-        
-        print("No condition met for speaking.")
+
+        LogManager.shared.log(category: .general, message: "No condition met for speaking.", isDebug: true)
     }
     
     struct AnnouncementTexts {
@@ -1074,7 +1075,7 @@ extension MainViewController {
         // If `lastSpeechTime` is `nil` (i.e., this is the first time `speakBG` is being called), use `Date.distantPast` as the default
         // value to ensure that the `guard` statement passes and the announcement is made.
         guard currentTime.timeIntervalSince(lastSpeechTime ?? .distantPast) >= 30 else {
-            print("Repeated calls to speakBG detected!")
+            LogManager.shared.log(category: .general, message: "Repeated calls to speakBG detected!", isDebug: true)
             return
         }
 

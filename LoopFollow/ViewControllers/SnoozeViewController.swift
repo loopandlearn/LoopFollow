@@ -246,7 +246,7 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
             alarms.reloadSnoozeTime(key: "alertTempTargetEndSnoozedTime", setNil: false, value: currentDate.addingTimeInterval(snoozeDuration))
 
         default:
-            print("Unhandled alarm: \(AlarmSound.whichAlarm)")
+            LogManager.shared.log(category: .alarm, message: "Unhandled alarm: \(AlarmSound.whichAlarm)")
         }
     }
 
