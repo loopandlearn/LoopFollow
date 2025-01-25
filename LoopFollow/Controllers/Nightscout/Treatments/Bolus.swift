@@ -10,7 +10,6 @@ import Foundation
 extension MainViewController {
     // NS Meal Bolus Response Processor
     func processNSBolus(entries: [[String:AnyObject]]) {
-        //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Bolus") }
         // because it's a small array, we're going to destroy and reload every time.
         bolusData.removeAll()
         var lastFoundIndex = 0
