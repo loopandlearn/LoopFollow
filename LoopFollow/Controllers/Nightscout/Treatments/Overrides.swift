@@ -12,7 +12,6 @@ import UIKit
 extension MainViewController {
     // NS Override Response Processor
     func processNSOverrides(entries: [[String:AnyObject]]) {
-        //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Overrides") }
         overrideGraphData.removeAll()
         var activeOverrideNote: String? = nil
 

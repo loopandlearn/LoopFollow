@@ -10,7 +10,6 @@ import Foundation
 extension MainViewController {
     // NS Resume Pump Response Processor
     func processResumePump(entries: [[String:AnyObject]]) {
-        //if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: Resume Pump") }
         resumeGraphData.removeAll()
         
         var lastFoundIndex = 0
