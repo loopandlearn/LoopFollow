@@ -379,11 +379,10 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
     }
 
     private func shareLogs() {
-        let logManager = LogManager.shared
-        let logFileURL = logManager.currentLogFileURL
+        let logFilesToShare = LogManager.shared.logFilesForTodayAndYesterday()
 
-        if FileManager.default.fileExists(atPath: logFileURL.path) {
-            let activityViewController = UIActivityViewController(activityItems: [logFileURL], applicationActivities: nil)
+        if !logFilesToShare.isEmpty {
+            let activityViewController = UIActivityViewController(activityItems: logFilesToShare, applicationActivities: nil)
             activityViewController.popoverPresentationController?.sourceView = self.view
             present(activityViewController, animated: true, completion: nil)
         } else {

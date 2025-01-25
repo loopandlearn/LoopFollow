@@ -73,11 +73,21 @@ class LogManager {
         }
     }
 
-    var currentLogFileURL: URL {
-        let today = dateFormatter.string(from: Date())
-        return logDirectory.appendingPathComponent("LoopFollow \(today).log")
+    func logFileURL(for date: Date) -> URL {
+        let dateString = dateFormatter.string(from: date)
+        return logDirectory.appendingPathComponent("LoopFollow \(dateString).log")
     }
 
+    func logFilesForTodayAndYesterday() -> [URL] {
+        let today = logFileURL(for: Date())
+        let yesterday = logFileURL(for: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
+        return [today, yesterday].filter { fileManager.fileExists(atPath: $0.path) }
+    }
+
+    var currentLogFileURL: URL {
+        return logFileURL(for: Date())
+    }
+    
     private func append(_ message: String, to fileURL: URL) {
         if !fileManager.fileExists(atPath: fileURL.path) {
             fileManager.createFile(atPath: fileURL.path, contents: nil, attributes: nil)
