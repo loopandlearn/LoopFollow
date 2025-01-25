@@ -26,6 +26,7 @@ class LogManager {
         case dexcom = "Dexcom"
         case alarm = "Alarm"
         case calendar = "Calendar"
+        case deviceStatus = "Device Status"
     }
 
     init() {
