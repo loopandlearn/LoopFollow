@@ -31,6 +31,8 @@ extension MainViewController {
                     wasEnacted = false
                 }
 
+                Observable.shared.isLastDeviceStatusSuggested.value = !wasEnacted
+
                 if wasEnacted {
                     UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
                     LogManager.shared.log(category: .deviceStatus, message: "New LastLoopTime: \(lastLoopTime)", isDebug: true)

@@ -13,8 +13,10 @@ import Charts
 extension MainViewController {
     // NS Device Status Web Call
     func webLoadNSDeviceStatus() {
-        let count = ObservableUserDefaults.shared.device.value == "Trio" ? "5" : "1"
-        LogManager.shared.log(category: .deviceStatus, message: "Fetching \(count) device status records", isDebug: true)
+        let count = ObservableUserDefaults.shared.device.value == "Trio" && Observable.shared.isLastDeviceStatusSuggested.value ? "5" : "1"
+        if count != "1" {
+            LogManager.shared.log(category: .deviceStatus, message: "Fetching \(count) device status records")
+        }
 
         let parameters: [String: String] = ["count": count]
         NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
