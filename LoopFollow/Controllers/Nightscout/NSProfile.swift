@@ -22,13 +22,6 @@ struct NSProfile: Decodable {
             let time: String
             let timeAsSeconds: Double
         }
-        struct OverrideEntry: Decodable {
-            let name: String?
-            let targetRange: [Double]?
-            let duration: Int?
-            let insulinNeedsScaleFactor: Double?
-            let symbol: String?
-        }
         struct TargetEntry: Decodable {
             let value: Double
             let time: String
@@ -38,7 +31,6 @@ struct NSProfile: Decodable {
         let basal: [BasalEntry]
         let sens: [SensEntry]
         let carbratio: [CarbRatioEntry]
-        let overrides: [OverrideEntry]?
         let target_high: [TargetEntry]?
         let target_low: [TargetEntry]?
         let timezone: String
@@ -61,8 +53,36 @@ struct NSProfile: Decodable {
         let percentage: Double?
         let target: Double?
     }
-    
+
+    struct LoopSettings: Decodable {
+        struct LoopOverridePreset: Decodable {
+            let name: String
+            let duration: Int?
+            let targetRange: [Double]?
+            let insulinNeedsScaleFactor: Double?
+            let symbol: String?
+        }
+
+        let deviceToken: String?
+        let bundleIdentifier: String?
+        let minimumBGGuard: Double?
+        let maximumBolus: Double?
+        let maximumBasalRatePerHour: Double?
+        let scheduleOverride: ScheduleOverride?
+        let dosingStrategy: String?
+        let overridePresets: [LoopOverridePreset]?
+        let dosingEnabled: Bool?
+
+        struct ScheduleOverride: Decodable {
+            let symbol: String?
+            let duration: Int?
+            let insulinNeedsScaleFactor: Double?
+            let name: String?
+        }
+    }
+
     let trioOverrides: [TrioOverrideEntry]?
+    let loopSettings: LoopSettings?
 
     enum CodingKeys: String, CodingKey {
         case store
@@ -72,6 +92,7 @@ struct NSProfile: Decodable {
         case isAPNSProduction
         case deviceToken
         case trioOverrides = "overridePresets"
+        case loopSettings = "loopSettings"
         case teamID
     }
 }
