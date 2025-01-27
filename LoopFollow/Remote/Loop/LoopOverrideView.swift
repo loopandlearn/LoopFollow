@@ -14,6 +14,7 @@ struct LoopOverrideView: View {
 
     @ObservedObject var device = ObservableUserDefaults.shared.device
     @ObservedObject var overrideNote = Observable.shared.override
+    @ObservedObject var nsAdmin = ObservableUserDefaults.shared.nsWriteAuth
 
     @StateObject private var viewModel = LoopOverrideViewModel()
 
@@ -46,7 +47,12 @@ struct LoopOverrideView: View {
                     ErrorMessageView(
                         message: "Remote commands are currently only available for Loop."
                     )
+                } else if !nsAdmin.value {
+                    ErrorMessageView(
+                        message: "Please update your token to include the 'admin' role in order to do remote commands."
+                    )
                 } else {
+
                     Form {
                         if let activeNote = overrideNote.value {
                             Section(header: Text("Active Override")) {

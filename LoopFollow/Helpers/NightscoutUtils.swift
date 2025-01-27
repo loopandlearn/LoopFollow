@@ -373,12 +373,26 @@ class NightscoutUtils {
         return responseString
     }
 
-    static func extractTitle(from response: String) -> String? {
-        guard let startRange = response.range(of: "<title>"),
-              let endRange = response.range(of: "</title>") else {
-            return nil
+    static func extractErrorReason(from responseString: String) -> String {
+        // 1) Try to parse the entire string as JSON and return the "message"
+        if let data = responseString.data(using: .utf8) {
+            if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+               let message = json["message"] as? String {
+                return message
+            }
         }
-        let titleRange = startRange.upperBound..<endRange.lowerBound
-        return String(response[titleRange]).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // 2) If not valid JSON (or no "message"), try to parse it as HTML <title>
+        if let startRange = responseString.range(of: "<title>"),
+           let endRange = responseString.range(of: "</title>") {
+            let titleRange = startRange.upperBound..<endRange.lowerBound
+            let titleContent = responseString[titleRange].trimmingCharacters(in: .whitespacesAndNewlines)
+            if !titleContent.isEmpty {
+                return titleContent
+            }
+        }
+
+        // 3) Fallback: just return the entire raw string
+        return responseString
     }
 }
