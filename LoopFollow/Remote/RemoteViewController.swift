@@ -20,12 +20,15 @@ class RemoteViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        cancellable = Storage.shared.remoteType.objectWillChange
-            .sink { [weak self] _ in
-                DispatchQueue.main.async {
-                    self?.updateView()
-                }
+        cancellable = Publishers.CombineLatest(
+            Storage.shared.remoteType.objectWillChange,
+            ObservableUserDefaults.shared.device.objectWillChange
+        )
+        .sink { [weak self] _, _ in
+            DispatchQueue.main.async {
+                self?.updateView()
             }
+        }
 
         updateView()
     }
@@ -53,9 +56,17 @@ class RemoteViewController: UIViewController {
 
             hostingController = UIHostingController(rootView: remoteView)
         } else if remoteType == .trc {
-            let trioRemoteControlViewModel = TrioRemoteControlViewModel()
-            let trioRemoteControlView = TrioRemoteControlView(viewModel: trioRemoteControlViewModel)
-            hostingController = UIHostingController(rootView: AnyView(trioRemoteControlView))
+            if ObservableUserDefaults.shared.device.value != "Trio" {
+                hostingController = UIHostingController(
+                    rootView: AnyView(
+                        Text("Trio Remote Control is only supported for 'Trio'")
+                    )
+                )
+            } else {
+                let trioRemoteControlViewModel = TrioRemoteControlViewModel()
+                let trioRemoteControlView = TrioRemoteControlView(viewModel: trioRemoteControlViewModel)
+                hostingController = UIHostingController(rootView: AnyView(trioRemoteControlView))
+            }
         } else {
             hostingController = UIHostingController(rootView: AnyView(Text("Please select a Remote Type in Settings.")))
         }
