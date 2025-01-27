@@ -63,7 +63,7 @@ extension MainViewController {
             }
 */
             if dateTimeStamp <= now && now < endDate {
-                activeOverrideNote = currentEntry["notes"] as? String
+                activeOverrideNote = currentEntry["notes"] as? String ?? currentEntry["reason"] as? String
             }
 
             let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: multiplier, date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: range, enteredBy: enteredBy, reason: reason, sgv: -20)
