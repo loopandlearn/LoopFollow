@@ -23,7 +23,7 @@ extension MainViewController {
             case .success(let data):
                 self.updateCage(data: data)
             case .failure(let error):
-                print("Error: \(error.localizedDescription)")
+                LogManager.shared.log(category: .nightscout, message: "webLoadNSCage, error: \(error.localizedDescription)")
             }
         }
     }
@@ -31,7 +31,6 @@ extension MainViewController {
     // NS Cage Response Processor
     func updateCage(data: [cageData]) {
         infoManager.clearInfoData(type: .cage)
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: CAGE") }
         if data.count == 0 {
             return
         }

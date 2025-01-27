@@ -24,6 +24,12 @@
 		DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF0C2C98485400FB655A /* SecureStorageValue.swift */; };
 		DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */; };
 		DD16AF112C997B4600FB655A /* LoadingButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF102C997B4600FB655A /* LoadingButtonView.swift */; };
+		DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */; };
+		DD1A97162D4294B3000DDC11 /* AdvancedSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */; };
+		DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */; };
+		DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */; };
+		DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */; };
+		DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */; };
 		DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878022C7B297E0048F05C /* StorageValue.swift */; };
 		DD4878052C7B2C970048F05C /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878042C7B2C970048F05C /* Storage.swift */; };
 		DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */; };
@@ -55,6 +61,11 @@
 		DD5334232C60ED3600062F9D /* IAge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334222C60ED3600062F9D /* IAge.swift */; };
 		DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334262C61668700062F9D /* InfoDisplaySettingsViewModel.swift */; };
 		DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334282C6166A500062F9D /* InfoDisplaySettingsView.swift */; };
+		DD5334B02D1447C500CDD6EA /* BLEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334AF2D1447C500CDD6EA /* BLEManager.swift */; };
+		DD5817172D2710E90041FB98 /* BLEDeviceSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5817162D2710E50041FB98 /* BLEDeviceSelectionView.swift */; };
+		DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5817192D299EF40041FB98 /* DexcomHeartbeatBluetoothDevice.swift */; };
+		DD58171C2D299F940041FB98 /* BluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD58171B2D299F8D0041FB98 /* BluetoothDevice.swift */; };
+		DD58171E2D299FCA0041FB98 /* BluetoothDeviceDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD58171D2D299FC50041FB98 /* BluetoothDeviceDelegate.swift */; };
 		DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */; };
 		DD608A0A2C23593900F91132 /* SMB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A092C23593900F91132 /* SMB.swift */; };
 		DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */; };
@@ -66,6 +77,18 @@
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
 		DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */; };
+		DD9ACA042D32821400415D8A /* DeviceStatusTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ACA032D32821200415D8A /* DeviceStatusTask.swift */; };
+		DD9ACA062D32AF7900415D8A /* TreatmentsTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ACA052D32AF6E00415D8A /* TreatmentsTask.swift */; };
+		DD9ACA082D32F68B00415D8A /* BGTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ACA072D32F68900415D8A /* BGTask.swift */; };
+		DD9ACA0A2D33095600415D8A /* MinAgoTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ACA092D33095500415D8A /* MinAgoTask.swift */; };
+		DD9ACA0C2D33BB8600415D8A /* CalendarTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ACA0B2D33BB8400415D8A /* CalendarTask.swift */; };
+		DD9ACA0E2D340BFF00415D8A /* AlarmTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ACA0D2D340BFE00415D8A /* AlarmTask.swift */; };
+		DD9ACA102D34129200415D8A /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ACA0F2D34128600415D8A /* Task.swift */; };
+		DD9ED0C82D355244000D2A63 /* LogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0C72D35523F000D2A63 /* LogViewModel.swift */; };
+		DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0C92D355256000D2A63 /* LogView.swift */; };
+		DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0CB2D35526E000D2A63 /* SearchBar.swift */; };
+		DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0CD2D355879000D2A63 /* LogEntry.swift */; };
+		DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */; };
 		DDB0AF522BB1A8BE00AFA48B /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */; };
 		DDB0AF552BB1B24A00AFA48B /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */; };
 		DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */; };
@@ -73,7 +96,6 @@
 		DDCF979624C1443C002C9752 /* GeneralSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */; };
 		DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */; };
 		DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */; };
-		DDCF979C24C14EFB002C9752 /* AdvancedSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979B24C14EFB002C9752 /* AdvancedSettingsViewController.swift */; };
 		DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979D24C2382A002C9752 /* AppStateController.swift */; };
 		DDCFCAF22B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */; };
 		DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */; };
@@ -83,6 +105,9 @@
 		DDD10F072C529DE800D76A8E /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F062C529DE800D76A8E /* Observable.swift */; };
 		DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */; };
 		DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE69ED12C7256260013EAEC /* RemoteType.swift */; };
+		DDEF503A2D31615000999A5D /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50392D31614200999A5D /* LogManager.swift */; };
+		DDEF503C2D31BE2D00999A5D /* TaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */; };
+		DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503E2D32754A00999A5D /* ProfileTask.swift */; };
 		DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */; };
 		DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */; };
 		DDF2C0142BEFD468007A20E6 /* blacklisted-versions.json in Resources */ = {isa = PBXBuildFile; fileRef = DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */; };
@@ -93,6 +118,10 @@
 		DDF6999E2C5AAA640058A8D9 /* ErrorMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */; };
 		DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF9676D2AD08C6E00C5EB95 /* SiteChange.swift */; };
 		DDFD5C532CB167DA00D3FD68 /* TRCCommandType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFD5C522CB167DA00D3FD68 /* TRCCommandType.swift */; };
+		DDFF3D7F2D1414A200BF9D9E /* BLEDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D7E2D1414A200BF9D9E /* BLEDevice.swift */; };
+		DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D842D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift */; };
+		DDFF3D872D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D862D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift */; };
+		DDFF3D892D1429AB00BF9D9E /* BackgroundRefreshType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D882D1429AB00BF9D9E /* BackgroundRefreshType.swift */; };
 		FC16A97A24996673003D6245 /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97924996673003D6245 /* NightScout.swift */; };
 		FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
 		FC16A97D24996747003D6245 /* Alarms.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97C24996747003D6245 /* Alarms.swift */; };
@@ -266,6 +295,12 @@
 		DD16AF0C2C98485400FB655A /* SecureStorageValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureStorageValue.swift; sourceTree = "<group>"; };
 		DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HKQuantityInputView.swift; sourceTree = "<group>"; };
 		DD16AF102C997B4600FB655A /* LoadingButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingButtonView.swift; sourceTree = "<group>"; };
+		DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
+		DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsViewModel.swift; sourceTree = "<group>"; };
+		DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsView.swift; sourceTree = "<group>"; };
+		DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsViewModel.swift; sourceTree = "<group>"; };
+		DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsViewModel.swift; sourceTree = "<group>"; };
+		DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsView.swift; sourceTree = "<group>"; };
 		DD4878022C7B297E0048F05C /* StorageValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageValue.swift; sourceTree = "<group>"; };
 		DD4878042C7B2C970048F05C /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsView.swift; sourceTree = "<group>"; };
@@ -296,6 +331,11 @@
 		DD5334222C60ED3600062F9D /* IAge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAge.swift; sourceTree = "<group>"; };
 		DD5334262C61668700062F9D /* InfoDisplaySettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsViewModel.swift; sourceTree = "<group>"; };
 		DD5334282C6166A500062F9D /* InfoDisplaySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDisplaySettingsView.swift; sourceTree = "<group>"; };
+		DD5334AF2D1447C500CDD6EA /* BLEManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEManager.swift; sourceTree = "<group>"; };
+		DD5817162D2710E50041FB98 /* BLEDeviceSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEDeviceSelectionView.swift; sourceTree = "<group>"; };
+		DD5817192D299EF40041FB98 /* DexcomHeartbeatBluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomHeartbeatBluetoothDevice.swift; sourceTree = "<group>"; };
+		DD58171B2D299F8D0041FB98 /* BluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDevice.swift; sourceTree = "<group>"; };
+		DD58171D2D299FC50041FB98 /* BluetoothDeviceDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDeviceDelegate.swift; sourceTree = "<group>"; };
 		DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusLoop.swift; sourceTree = "<group>"; };
 		DD608A092C23593900F91132 /* SMB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMB.swift; sourceTree = "<group>"; };
 		DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundAlertManager.swift; sourceTree = "<group>"; };
@@ -307,6 +347,18 @@
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
 		DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareClientExtension.swift; sourceTree = "<group>"; };
+		DD9ACA032D32821200415D8A /* DeviceStatusTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusTask.swift; sourceTree = "<group>"; };
+		DD9ACA052D32AF6E00415D8A /* TreatmentsTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreatmentsTask.swift; sourceTree = "<group>"; };
+		DD9ACA072D32F68900415D8A /* BGTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGTask.swift; sourceTree = "<group>"; };
+		DD9ACA092D33095500415D8A /* MinAgoTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinAgoTask.swift; sourceTree = "<group>"; };
+		DD9ACA0B2D33BB8400415D8A /* CalendarTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTask.swift; sourceTree = "<group>"; };
+		DD9ACA0D2D340BFE00415D8A /* AlarmTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmTask.swift; sourceTree = "<group>"; };
+		DD9ACA0F2D34128600415D8A /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
+		DD9ED0C72D35523F000D2A63 /* LogViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogViewModel.swift; sourceTree = "<group>"; };
+		DD9ED0C92D355256000D2A63 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
+		DD9ED0CB2D35526E000D2A63 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
+		DD9ED0CD2D355879000D2A63 /* LogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntry.swift; sourceTree = "<group>"; };
+		DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RileyLinkHeartbeatBluetoothDevice.swift; sourceTree = "<group>"; };
 		DDB0AF502BB1A84500AFA48B /* capture-build-details.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "capture-build-details.sh"; sourceTree = "<group>"; };
 		DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
 		DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = BuildDetails.plist; sourceTree = "<group>"; };
@@ -315,7 +367,6 @@
 		DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettingsViewController.swift; sourceTree = "<group>"; };
-		DDCF979B24C14EFB002C9752 /* AdvancedSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979D24C2382A002C9752 /* AppStateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateController.swift; sourceTree = "<group>"; };
 		DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = LoopFollowDisplayNameConfig.xcconfig; sourceTree = "<group>"; };
 		DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableUserDefaultsValue.swift; sourceTree = "<group>"; };
@@ -325,6 +376,9 @@
 		DDD10F062C529DE800D76A8E /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTarget.swift; sourceTree = "<group>"; };
 		DDE69ED12C7256260013EAEC /* RemoteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteType.swift; sourceTree = "<group>"; };
+		DDEF50392D31614200999A5D /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
+		DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskScheduler.swift; sourceTree = "<group>"; };
+		DDEF503E2D32754A00999A5D /* ProfileTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTask.swift; sourceTree = "<group>"; };
 		DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubService.swift; sourceTree = "<group>"; };
 		DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionManager.swift; sourceTree = "<group>"; };
 		DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "blacklisted-versions.json"; sourceTree = "<group>"; };
@@ -335,6 +389,10 @@
 		DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorMessageView.swift; sourceTree = "<group>"; };
 		DDF9676D2AD08C6E00C5EB95 /* SiteChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteChange.swift; sourceTree = "<group>"; };
 		DDFD5C522CB167DA00D3FD68 /* TRCCommandType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TRCCommandType.swift; sourceTree = "<group>"; };
+		DDFF3D7E2D1414A200BF9D9E /* BLEDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEDevice.swift; sourceTree = "<group>"; };
+		DDFF3D842D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshSettingsView.swift; sourceTree = "<group>"; };
+		DDFF3D862D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshSettingsViewModel.swift; sourceTree = "<group>"; };
+		DDFF3D882D1429AB00BF9D9E /* BackgroundRefreshType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshType.swift; sourceTree = "<group>"; };
 		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
 		FC16A97924996673003D6245 /* NightScout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScout.swift; sourceTree = "<group>"; };
 		FC16A97C24996747003D6245 /* Alarms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarms.swift; sourceTree = "<group>"; };
@@ -567,6 +625,33 @@
 			path = InfoTable;
 			sourceTree = "<group>";
 		};
+		DD1A97122D429495000DDC11 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */,
+				DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		DD2C2E4D2D3B8ACF006413A5 /* Nightscout */ = {
+			isa = PBXGroup;
+			children = (
+				DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */,
+				DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */,
+			);
+			path = Nightscout;
+			sourceTree = "<group>";
+		};
+		DD2C2E522D3C36A8006413A5 /* Dexcom */ = {
+			isa = PBXGroup;
+			children = (
+				DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */,
+				DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */,
+			);
+			path = Dexcom;
+			sourceTree = "<group>";
+		};
 		DD4878062C7B2E9E0048F05C /* Settings */ = {
 			isa = PBXGroup;
 			children = (
@@ -665,12 +750,49 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		DD9ED0C62D355225000D2A63 /* Log */ = {
+			isa = PBXGroup;
+			children = (
+				DD9ED0CD2D355879000D2A63 /* LogEntry.swift */,
+				DD9ED0CB2D35526E000D2A63 /* SearchBar.swift */,
+				DD9ED0C92D355256000D2A63 /* LogView.swift */,
+				DD9ED0C72D35523F000D2A63 /* LogViewModel.swift */,
+				DDEF50392D31614200999A5D /* LogManager.swift */,
+			);
+			path = Log;
+			sourceTree = "<group>";
+		};
+		DDAD16302D2EF98C0084BE10 /* Devices */ = {
+			isa = PBXGroup;
+			children = (
+				DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */,
+				DD5817192D299EF40041FB98 /* DexcomHeartbeatBluetoothDevice.swift */,
+			);
+			path = Devices;
+			sourceTree = "<group>";
+		};
 		DDB0AF4F2BB1A81F00AFA48B /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
 				DDB0AF502BB1A84500AFA48B /* capture-build-details.sh */,
 			);
 			path = Scripts;
+			sourceTree = "<group>";
+		};
+		DDEF503D2D32753A00999A5D /* Task */ = {
+			isa = PBXGroup;
+			children = (
+				DD9ACA0F2D34128600415D8A /* Task.swift */,
+				DD9ACA0D2D340BFE00415D8A /* AlarmTask.swift */,
+				DD9ACA0B2D33BB8400415D8A /* CalendarTask.swift */,
+				DD9ACA092D33095500415D8A /* MinAgoTask.swift */,
+				DD9ACA072D32F68900415D8A /* BGTask.swift */,
+				DD9ACA052D32AF6E00415D8A /* TreatmentsTask.swift */,
+				DD9ACA032D32821200415D8A /* DeviceStatusTask.swift */,
+				DDEF503E2D32754A00999A5D /* ProfileTask.swift */,
+				DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */,
+			);
+			path = Task;
 			sourceTree = "<group>";
 		};
 		DDF699972C5AA2E50058A8D9 /* TempTargetPreset */ = {
@@ -690,6 +812,30 @@
 				DD16AF102C997B4600FB655A /* LoadingButtonView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		DDFF3D792D140F1800BF9D9E /* BackgroundRefresh */ = {
+			isa = PBXGroup;
+			children = (
+				DDFF3D7A2D140F4200BF9D9E /* BT */,
+				DDFF3D842D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift */,
+				DDFF3D862D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift */,
+				DDFF3D882D1429AB00BF9D9E /* BackgroundRefreshType.swift */,
+			);
+			path = BackgroundRefresh;
+			sourceTree = "<group>";
+		};
+		DDFF3D7A2D140F4200BF9D9E /* BT */ = {
+			isa = PBXGroup;
+			children = (
+				DDAD16302D2EF98C0084BE10 /* Devices */,
+				DD58171D2D299FC50041FB98 /* BluetoothDeviceDelegate.swift */,
+				DD58171B2D299F8D0041FB98 /* BluetoothDevice.swift */,
+				DD5817162D2710E50041FB98 /* BLEDeviceSelectionView.swift */,
+				DDFF3D7E2D1414A200BF9D9E /* BLEDevice.swift */,
+				DD5334AF2D1447C500CDD6EA /* BLEManager.swift */,
+			);
+			path = BT;
 			sourceTree = "<group>";
 		};
 		FC16A97624995FEE003D6245 /* Application */ = {
@@ -856,6 +1002,12 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				DD1A97122D429495000DDC11 /* Settings */,
+				DD2C2E522D3C36A8006413A5 /* Dexcom */,
+				DD2C2E4D2D3B8ACF006413A5 /* Nightscout */,
+				DD9ED0C62D355225000D2A63 /* Log */,
+				DDEF503D2D32753A00999A5D /* Task */,
+				DDFF3D792D140F1800BF9D9E /* BackgroundRefresh */,
 				DD50C74D2D0828250057AE6F /* Contact */,
 				DD5334252C61667700062F9D /* InfoDisplaySettings */,
 				DD0C0C6E2C4AFFB800DBADDF /* Remote */,
@@ -953,7 +1105,6 @@
 				DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */,
 				DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */,
 				DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */,
-				DDCF979B24C14EFB002C9752 /* AdvancedSettingsViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -1221,13 +1372,19 @@
 				DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */,
 				FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */,
 				DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */,
+				DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */,
+				DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */,
+				DD9ACA082D32F68B00415D8A /* BGTask.swift in Sources */,
+				DD9ACA102D34129200415D8A /* Task.swift in Sources */,
 				DD4878202C7DAF890048F05C /* PushMessage.swift in Sources */,
 				FC7CE59F248D8D23001F83B8 /* SnoozeViewController.swift in Sources */,
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
+				DD9ACA0E2D340BFF00415D8A /* AlarmTask.swift in Sources */,
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				DDF699942C555B310058A8D9 /* ViewControllerManager.swift in Sources */,
 				DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */,
+				DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */,
 				DD5334212C60EBEE00062F9D /* InsulinCartridgeChange.swift in Sources */,
 				FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */,
 				DD608A0A2C23593900F91132 /* SMB.swift in Sources */,
@@ -1242,21 +1399,27 @@
 				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
 				DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */,
+				DDFF3D7F2D1414A200BF9D9E /* BLEDevice.swift in Sources */,
+				DD9ACA042D32821400415D8A /* DeviceStatusTask.swift in Sources */,
 				FC16A97D24996747003D6245 /* Alarms.swift in Sources */,
 				DDFD5C532CB167DA00D3FD68 /* TRCCommandType.swift in Sources */,
 				DD16AF112C997B4600FB655A /* LoadingButtonView.swift in Sources */,
+				DD5817172D2710E90041FB98 /* BLEDeviceSelectionView.swift in Sources */,
 				FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */,
 				DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */,
 				DDB0AF522BB1A8BE00AFA48B /* BuildDetails.swift in Sources */,
 				DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */,
+				DD58171E2D299FCA0041FB98 /* BluetoothDeviceDelegate.swift in Sources */,
 				DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */,
 				DDD10F032C518A6500D76A8E /* TreatmentResponse.swift in Sources */,
 				DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */,
 				DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */,
 				DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */,
+				DDEF503A2D31615000999A5D /* LogManager.swift in Sources */,
 				DD4878172C7B75350048F05C /* BolusView.swift in Sources */,
 				DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
+				DD9ACA0C2D33BB8600415D8A /* CalendarTask.swift in Sources */,
 				DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */,
 				DD0C0C702C4AFFE800DBADDF /* RemoteViewController.swift in Sources */,
 				DD48780A2C7B30D40048F05C /* RemoteSettingsViewModel.swift in Sources */,
@@ -1280,9 +1443,14 @@
 				DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */,
 				DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */,
 				DD13BC752C3FD6210062313B /* InfoType.swift in Sources */,
-				DDCF979C24C14EFB002C9752 /* AdvancedSettingsViewController.swift in Sources */,
+				DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */,
+				DD9ACA0A2D33095600415D8A /* MinAgoTask.swift in Sources */,
+				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
 				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
+				DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */,
+				DDFF3D872D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift in Sources */,
 				DD50C7502D0828800057AE6F /* ContactSettingsViewModel.swift in Sources */,
+				DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
 				DD6A935E2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift in Sources */,
 				DD493AD52ACF2109009A6922 /* ResumePump.swift in Sources */,
@@ -1291,15 +1459,19 @@
 				DD493AD72ACF2139009A6922 /* SuspendPump.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				DDD10F072C529DE800D76A8E /* Observable.swift in Sources */,
+				DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */,
 				DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */,
 				DD50C7532D0828D10057AE6F /* ContactSettingsView.swift in Sources */,
 				DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */,
+				DDEF503C2D31BE2D00999A5D /* TaskScheduler.swift in Sources */,
 				DD0C0C6B2C48562000DBADDF /* InsulinMetric.swift in Sources */,
 				DD493AD92ACF2171009A6922 /* Carbs.swift in Sources */,
 				DD493AE92ACF2445009A6922 /* BGData.swift in Sources */,
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */,
+				DD9ACA062D32AF7900415D8A /* TreatmentsTask.swift in Sources */,
 				DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */,
+				DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */,
 				DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */,
 				DDF699962C5582290058A8D9 /* TextFieldWithToolBar.swift in Sources */,
 				DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
@@ -1308,14 +1480,17 @@
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
 				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
+				DD58171C2D299F940041FB98 /* BluetoothDevice.swift in Sources */,
 				DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */,
 				FCD49B6C24AA536E007879DC /* DebugViewController.swift in Sources */,
+				DD5334B02D1447C500CDD6EA /* BLEManager.swift in Sources */,
 				DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */,
 				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift in Sources */,
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,
 				FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */,
 				DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */,
+				DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
 				DD5334232C60ED3600062F9D /* IAge.swift in Sources */,
 				FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */,
@@ -1325,7 +1500,12 @@
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
 				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
+				DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */,
+				DD1A97162D4294B3000DDC11 /* AdvancedSettingsViewModel.swift in Sources */,
 				FCA2DDE62501095000254A8C /* Timers.swift in Sources */,
+				DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */,
+				DD9ED0C82D355244000D2A63 /* LogViewModel.swift in Sources */,
+				DDFF3D892D1429AB00BF9D9E /* BackgroundRefreshType.swift in Sources */,
 				DD493AE32ACF2358009A6922 /* CAge.swift in Sources */,
 				DD493ADD2ACF21E0009A6922 /* Basals.swift in Sources */,
 				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,

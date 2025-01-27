@@ -57,8 +57,6 @@ class UserDefaultsRepository {
     static let hideInfoTable = UserDefaultsValue<Bool>(key: "hideInfoTable", default: false)
 
     // Nightscout Settings
-    static let showNS = UserDefaultsValue<Bool>(key: "showNS", default: false)
-    //static let url = UserDefaultsValue<String>(key: "url", default: "")
     static let token = UserDefaultsValue<String>(key: "token", default: "")
     static let units = UserDefaultsValue<String>(key: "units", default: "mg/dL")
 
@@ -81,7 +79,6 @@ class UserDefaultsRepository {
     }
 
     // Dexcom Share Settings
-    static let showDex = UserDefaultsValue<Bool>(key: "showDex", default: false)
     static let shareUserName = UserDefaultsValue<String>(key: "shareUserName", default: "")
     static let sharePassword = UserDefaultsValue<String>(key: "sharePassword", default: "")
     static let shareServer = UserDefaultsValue<String>(key: "shareServer", default: "US")
@@ -121,8 +118,10 @@ class UserDefaultsRepository {
     static let speakHighBG = UserDefaultsValue<Bool>(key: "speakHighBG", default: false)
     static let speakLanguage = UserDefaultsValue<String>(key: "speakLanguage", default: "en")
     static let showDisplayName = UserDefaultsValue<Bool>(key: "showDisplayName", default: false)
-    static let backgroundRefreshFrequency = UserDefaultsValue<Double>(key: "backgroundRefreshFrequency", default: 1)
+
+    // Deprecated, used to detect if backgroundRefresh was set to off. TODO: Remove in the beginning of 2026
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
+
     static let appBadge = UserDefaultsValue<Bool>(key: "appBadge", default: true)
     static let dimScreenWhenIdle = UserDefaultsValue<Int>(key: "dimScreenWhenIdle", default: 0)
     static let forceDarkMode = UserDefaultsValue<Bool>(key: "forceDarkMode", default: true)
@@ -143,7 +142,6 @@ class UserDefaultsRepository {
     static let graphBasal = UserDefaultsValue<Bool>(key: "graphBasal", default: true)
     static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
     static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
-    static let debugLog = UserDefaultsValue<Bool>(key: "debugLog", default: false)
     static let bgUpdateDelay = UserDefaultsValue<Int>(key: "bgUpdateDelay", default: 10)
     static let downloadDays = UserDefaultsValue<Int>(key: "downloadDays", default: 1)
     
