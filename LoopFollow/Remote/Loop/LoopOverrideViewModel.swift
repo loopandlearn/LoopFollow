@@ -8,7 +8,7 @@
 
 import Foundation
 
-class LoopOverrideViewModel: ObservableObject {
+final class LoopOverrideViewModel: ObservableObject, Sendable {
     func sendActivateOverrideRequest(
         override: ProfileManager.LoopOverride,
         completion: @escaping (Bool, String?) -> Void
@@ -29,8 +29,9 @@ class LoopOverrideViewModel: ObservableObject {
                         NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
                         completion(true, response)
                     } else {
-                        let errorTitle = NightscoutUtils.extractTitle(from: response) ?? response
-                        completion(false, errorTitle)
+                        let errorTitle = NightscoutUtils.extractErrorReason(from: response)
+                        let formattedError = self.formatErrorMessage(errorTitle)
+                        completion(false, formattedError)
                     }
                 }
             } catch {
@@ -55,8 +56,9 @@ class LoopOverrideViewModel: ObservableObject {
                         NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
                         completion(true, response)
                     } else {
-                        let errorTitle = NightscoutUtils.extractTitle(from: response) ?? response
-                        completion(false, errorTitle)
+                        let errorTitle = NightscoutUtils.extractErrorReason(from: response)
+                        let formattedError = self.formatErrorMessage(errorTitle)
+                        completion(false, formattedError)
                     }
                 }
             } catch {
@@ -64,6 +66,15 @@ class LoopOverrideViewModel: ObservableObject {
                     completion(false, nil)
                 }
             }
+        }
+    }
+
+    func formatErrorMessage(_ errorTitle: String) -> String {
+        switch errorTitle {
+        case "Unauthorized":
+            return "Unauthorized, verify that your token is correct and has admin auth"
+        default:
+            return errorTitle
         }
     }
 }
