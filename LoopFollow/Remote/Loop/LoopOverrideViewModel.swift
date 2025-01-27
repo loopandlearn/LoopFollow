@@ -73,6 +73,8 @@ final class LoopOverrideViewModel: ObservableObject, Sendable {
         switch errorTitle {
         case "Unauthorized":
             return "Unauthorized, verify that your token is correct and has admin auth"
+        case "APNs delivery failed: BadDeviceToken":
+            return "APNs delivery failed: BadDeviceToken, verify that the production setting or Browser/XCode build setting is correct in your Nightscout setup."
         default:
             return errorTitle
         }
