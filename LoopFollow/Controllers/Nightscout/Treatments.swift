@@ -11,7 +11,6 @@ extension MainViewController {
     // NS Treatments Web Call
     // Downloads Basal, Bolus, Carbs, BG Check, Notes, Overrides
     func WebLoadNSTreatments() {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: Treatments") }
         if !UserDefaultsRepository.downloadTreatments.value { return }
         
         let startTimeString = dateTimeUtils.getDateTimeString(addingDays: -1 * UserDefaultsRepository.downloadDays.value)
@@ -28,10 +27,10 @@ extension MainViewController {
                         self.updateTreatments(entries: entries)
                     }
                 } else {
-                    print("Error: Unexpected data structure")
+                    LogManager.shared.log(category: .nightscout, message: "WebLoadNSTreatments, Unexpected data structure")
                 }
             case .failure(let error):
-                print("Error: \(error.localizedDescription)")
+                LogManager.shared.log(category: .nightscout, message: "WebLoadNSTreatments, error \(error.localizedDescription)")
             }
         }
     }

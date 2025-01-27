@@ -234,8 +234,6 @@ extension MainViewController {
     }
     
     func chartScaled(_ chartView: ChartViewBase, scaleX: CGFloat, scaleY: CGFloat) {
-        print("Chart Scaled: \(BGChart.scaleX), \(BGChart.scaleY)")
-      
         // dont store huge values
         var scale: Float = Float(BGChart.scaleX)
         if(scale > ScaleXMax ) {
@@ -801,7 +799,6 @@ extension MainViewController {
     }
     
     func updateBGGraph() {
-        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "##### Start BG Graph #####") }
         let dataIndex = 0
         let entries = bgData
         guard !entries.isEmpty else {
@@ -821,7 +818,6 @@ extension MainViewController {
                 topBG = Float(entries[i].sgv) + maxBGOffset
             }
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillText(line1: Localizer.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
-            if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "BG: " + value.description) }
             mainChart.append(value)
             smallChart.append(value)
             
@@ -834,8 +830,7 @@ extension MainViewController {
             }
         }
         
-        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Graph BGs: " + mainChart.entries.count.description) }        
-        
+
         // Set Colors
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
 
@@ -854,7 +849,6 @@ extension MainViewController {
             }
         }
         
-        if UserDefaultsRepository.debugLog.value { writeDebugLog(value: "Total Colors: " + mainChart.colors.count.description) }
         
         BGChart.rightAxis.axisMaximum = Double(calculateMaxBgGraphValue())
         BGChart.setVisibleXRangeMinimum(600)
@@ -868,7 +862,6 @@ extension MainViewController {
         
         if firstGraphLoad {
             var scaleX = CGFloat(UserDefaultsRepository.chartScaleX.value)
-            print("Scale: \(scaleX)")
             if( scaleX > CGFloat(ScaleXMax) ) {
                 scaleX = CGFloat(ScaleXMax)
                 UserDefaultsRepository.chartScaleX.value = ScaleXMax
@@ -1717,7 +1710,7 @@ extension MainViewController {
               index.rawValue < chart.dataSets.count,
               let smallChartData = BGChartFull.lineData,
               index.rawValue < smallChartData.dataSets.count else {
-            print("Warning: Invalid GraphDataIndex \(index.description) or lineData is nil.")
+            //print("Warning: Invalid GraphDataIndex \(index.description) or lineData is nil.")
             return (nil, nil)
         }
 

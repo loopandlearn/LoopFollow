@@ -17,12 +17,12 @@ class ContactImageUpdater {
     func updateContactImage(bgValue: String, extra: String, stale: Bool) {
         queue.async {
             guard CNContactStore.authorizationStatus(for: .contacts) == .authorized else {
-                print("Access to contacts is not authorized.")
+                LogManager.shared.log(category: .contact, message: "Access to contacts is not authorized.")
                 return
             }
 
             guard let imageData = self.generateContactImage(bgValue: bgValue, extra: extra, stale: stale)?.pngData() else {
-                print("Failed to generate contact image.")
+                LogManager.shared.log(category: .contact, message: "Failed to generate contact image.")
                 return
             }
 
@@ -39,7 +39,7 @@ class ContactImageUpdater {
                     let saveRequest = CNSaveRequest()
                     saveRequest.update(mutableContact)
                     try self.contactStore.execute(saveRequest)
-                    print("Contact image updated successfully.")
+                    LogManager.shared.log(category: .contact, message: "Contact image updated", isDebug: true)
                 } else {
                     let newContact = CNMutableContact()
                     newContact.givenName = contactName
@@ -47,10 +47,10 @@ class ContactImageUpdater {
                     let saveRequest = CNSaveRequest()
                     saveRequest.add(newContact, toContainerWithIdentifier: nil)
                     try self.contactStore.execute(saveRequest)
-                    print("New contact created with updated image.")
+                    LogManager.shared.log(category: .contact, message: "New contact created")
                 }
             } catch {
-                print("Failed to update or create contact: \(error)")
+                LogManager.shared.log(category: .contact, message: "Failed to update or create contact: \(error)")
             }
         }
     }
