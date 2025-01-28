@@ -640,7 +640,7 @@ extension MainViewController {
         if !UserDefaultsRepository.alertAudioDuringPhone.value && isOnPhoneCall() { audioDuringCall = false }
         
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.updateDisplayWhenTriggered(bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: Localizer.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        snoozer.updateDisplayWhenTriggered(bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: latestDeltaString, minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         if audio && !UserDefaultsRepository.alertMuteAllIsMuted.value && audioDuringCall{
             AlarmSound.setSoundFile(str: sound)
             AlarmSound.play(overrideVolume: overrideVolume, numLoops: numLoops)
@@ -654,7 +654,7 @@ extension MainViewController {
         if !UserDefaultsRepository.alertAudioDuringPhone.value && isOnPhoneCall() { audioDuringCall = false }
         
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.updateDisplayWhenTriggered(bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: Localizer.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        snoozer.updateDisplayWhenTriggered(bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: latestDeltaString, minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozer.SnoozeButton.isHidden = false
         snoozer.AlertLabel.isHidden = false
         snoozer.clockLabel.isHidden = true
@@ -687,7 +687,7 @@ extension MainViewController {
         
         AlarmSound.whichAlarm = "none"
         guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.updateDisplayWhenTriggered(bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: Localizer.toDisplayUnits(latestDeltaString) ?? "", minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
+        snoozer.updateDisplayWhenTriggered(bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString ?? "", deltaVal: latestDeltaString, minAgoVal: latestMinAgoString ?? "", alertLabelVal: AlarmSound.whichAlarm)
         snoozer.SnoozeButton.isHidden = true
         snoozer.AlertLabel.isHidden = true
         if AlarmSound.isPlaying {
@@ -697,7 +697,6 @@ extension MainViewController {
     
     func clearOldSnoozes(){
         let date = Date()
-        let now = date.timeIntervalSince1970
         guard let alarms = ViewControllerManager.shared.alarmViewController else { return }
 
         if date > UserDefaultsRepository.alertSnoozeAllTime.value ?? date {
