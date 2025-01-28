@@ -48,7 +48,7 @@ class TaskScheduler {
     }
 
     func rescheduleTask(id: TaskID, to newRunDate: Date) {
-        let timeString = self.formatTime(newRunDate)
+        //let timeString = self.formatTime(newRunDate)
         //LogManager.shared.log(category: .taskScheduler, message: "Reschedule Task \(id): next run = \(timeString)", isDebug: true)
 
         queue.async {
