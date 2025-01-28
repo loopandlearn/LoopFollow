@@ -507,16 +507,37 @@ extension MainViewController {
             }
         }
 
-        if UserDefaultsRepository.alertRecBolusActive.value && !UserDefaultsRepository.alertRecBolusIsSnoozed.value {
+        UserDefaultsRepository.deviceRecBolus.value = 3
+
+        if UserDefaultsRepository.alertRecBolusActive.value,
+           !UserDefaultsRepository.alertRecBolusIsSnoozed.value
+        {
             let currentRecBolus = UserDefaultsRepository.deviceRecBolus.value
-            let alertAtRecBolus = Double(UserDefaultsRepository.alertRecBolusLevel.value)
+            let alertAtRecBolus = UserDefaultsRepository.alertRecBolusLevel.value
 
             if currentRecBolus >= alertAtRecBolus {
-                AlarmSound.whichAlarm = "Rec. Bolus"
+                if Observable.shared.lastRecBolusTriggered.value != currentRecBolus {
+                    AlarmSound.whichAlarm = "Rec. Bolus"
 
-                if UserDefaultsRepository.alertRecBolusRepeat.value { numLoops = -1 }
-                triggerAlarm(sound: UserDefaultsRepository.alertRecBolusSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertRecBolusSnooze.value, snoozeIncrement: 5, audio: true)
-                return
+                    if UserDefaultsRepository.alertRecBolusRepeat.value {
+                        numLoops = -1
+                    }
+
+                    triggerAlarm(
+                        sound: UserDefaultsRepository.alertRecBolusSound.value,
+                        snooozedBGReadingTime: nil,
+                        overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value,
+                        numLoops: numLoops,
+                        snoozeTime: UserDefaultsRepository.alertRecBolusSnooze.value,
+                        snoozeIncrement: 5,
+                        audio: true
+                    )
+
+                    Observable.shared.lastRecBolusTriggered.value = currentRecBolus
+                    return
+                }
+            } else {
+                Observable.shared.lastRecBolusTriggered.value = nil
             }
         }
 
