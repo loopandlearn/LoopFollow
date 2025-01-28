@@ -25,7 +25,7 @@ extension MainViewController {
             var wasEnacted : Bool
             if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] {
                 wasEnacted = true
-                if let timestampString = lastDeviceStatus?["timestamp"] as? String,
+                if let timestampString = enacted["timestamp"] as? String,
                    let lastLoopTime = formatter.date(from: timestampString)?.timeIntervalSince1970 {
                     UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
                     LogManager.shared.log(category: .deviceStatus, message: "New LastLoopTime: \(lastLoopTime)", isDebug: true)
