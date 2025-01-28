@@ -507,8 +507,6 @@ extension MainViewController {
             }
         }
 
-        UserDefaultsRepository.deviceRecBolus.value = 3
-
         if UserDefaultsRepository.alertRecBolusActive.value,
            !UserDefaultsRepository.alertRecBolusIsSnoozed.value
         {
