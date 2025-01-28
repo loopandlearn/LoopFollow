@@ -1660,7 +1660,7 @@ class AlarmViewController: FormViewController {
 
         <<< StepperRow("alertMissedReading") { row in
             row.title = "Time"
-            row.cell.stepper.stepValue = 5
+            row.cell.stepper.stepValue = 1
             row.cell.stepper.minimumValue = 10
             row.cell.stepper.maximumValue = 120
             row.value = Double(UserDefaultsRepository.alertMissedReading.value)
