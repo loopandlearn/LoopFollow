@@ -514,7 +514,7 @@ extension MainViewController {
             let alertAtRecBolus = UserDefaultsRepository.alertRecBolusLevel.value
 
             if currentRecBolus >= alertAtRecBolus {
-                if Observable.shared.lastRecBolusTriggered.value != currentRecBolus {
+                if currentRecBolus > (Observable.shared.lastRecBolusTriggered.value ?? 0) {
                     AlarmSound.whichAlarm = "Rec. Bolus"
 
                     if UserDefaultsRepository.alertRecBolusRepeat.value {
