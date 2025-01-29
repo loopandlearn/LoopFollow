@@ -291,7 +291,7 @@ class UserDefaultsRepository {
     
     
     static let alertMissedReadingActive = UserDefaultsValue<Bool>(key: "alertMissedReadingActive", default: false)
-    static let alertMissedReading = UserDefaultsValue<Int>(key: "alertMissedReading", default: 30)
+    static let alertMissedReading = UserDefaultsValue<Int>(key: "alertMissedReading", default: 31)
     static let alertMissedReadingSnooze = UserDefaultsValue<Int>(key: "alertMissedReadingSnooze", default: 30)
     static let alertMissedReadingSnoozedTime = UserDefaultsValue<Date?>(key: "alertMissedReadingSnoozedTime", default: nil)
     static let alertMissedReadingIsSnoozed = UserDefaultsValue<Bool>(key: "alertMissedReadingIsSnoozed", default: false)
@@ -308,7 +308,7 @@ class UserDefaultsRepository {
     
     
     static let alertNotLoopingActive = UserDefaultsValue<Bool>(key: "alertNotLoopingActive", default: false)
-    static let alertNotLooping = UserDefaultsValue<Int>(key: "alertNotLooping", default: 30)
+    static let alertNotLooping = UserDefaultsValue<Int>(key: "alertNotLooping", default: 31)
     static let alertNotLoopingSnooze = UserDefaultsValue<Int>(key: "alertNotLoopingSnooze", default: 30)
     static let alertNotLoopingUseLimits = UserDefaultsValue<Bool>(key: "alertNotLoopingUseLimits", default: false)
     static let alertNotLoopingLowerLimit = UserDefaultsValue<Float>(key: "alertNotLoopingBelowBG", default: 100.0)
