@@ -74,7 +74,7 @@ final class LoopOverrideViewModel: ObservableObject, Sendable {
         case "Unauthorized":
             return "Unauthorized, verify that your token is correct and has admin auth"
         case "APNs delivery failed: BadDeviceToken":
-            return "APNs delivery failed: BadDeviceToken, verify that the production setting or Browser/XCode build setting is correct in your Nightscout setup."
+            return "APNs delivery failed: BadDeviceToken, verify that the LOOP_PUSH_SERVER_ENVIRONMENT parameter in your Nightscout setup matches the build method used for Loop"
         default:
             return errorTitle
         }
