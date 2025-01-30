@@ -244,15 +244,14 @@ extension MainViewController {
             
             // Delta handling
             if deltaBG < 0 {
-                self.DeltaText.text = Localizer.toDisplayUnits(String(deltaBG))
-                snoozerDelta = Localizer.toDisplayUnits(String(deltaBG))
-                self.latestDeltaString = String(deltaBG)
+                self.latestDeltaString = Localizer.toDisplayUnits(String(deltaBG))
+
             } else {
-                self.DeltaText.text = "+" + Localizer.toDisplayUnits(String(deltaBG))
-                snoozerDelta = "+" + Localizer.toDisplayUnits(String(deltaBG))
-                self.latestDeltaString = "+" + String(deltaBG)
+                self.latestDeltaString = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
-            
+            self.DeltaText.text = self.latestDeltaString
+            snoozerDelta = self.latestDeltaString
+
             // Apply strikethrough to BGText based on the staleness of the data
             let bgTextStr = self.BGText.text ?? ""
             let attributeString = NSMutableAttributedString(string: bgTextStr)
