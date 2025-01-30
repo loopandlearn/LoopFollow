@@ -77,12 +77,14 @@ extension MainViewController {
 
                     var nsData2: [ShareGlucoseData] = []
                     var lastAddedTime = Double.infinity
-                    let minInterval: Double = 4 * 60
+                    var lastAddedSGV: Int? = nil
+                    let minInterval: Double = 30
 
                     for reading in nsData {
-                        if lastAddedTime - reading.date >= minInterval {
+                        if (lastAddedSGV == nil || lastAddedSGV != reading.sgv) || (lastAddedTime - reading.date >= minInterval) {
                             nsData2.append(reading)
                             lastAddedTime = reading.date
+                            lastAddedSGV = reading.sgv
                         }
                     }
 
