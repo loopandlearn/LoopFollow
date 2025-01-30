@@ -74,25 +74,20 @@ extension MainViewController {
                         nsData[i].date /= 1000
                         nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
                     }
-                    print(nsData.count)
-                    
-                    //Avoid duplicate entries messing up the graph, only use one reading per 5 minutes.
-                    let graphHours = 24 * UserDefaultsRepository.downloadDays.value
-                    let points = graphHours * 12 + 1
-                    var nsData2 = [ShareGlucoseData]()
-                    let timestamp = Date().timeIntervalSince1970
-                    for i in 0..<points {
-                        //Starting with "now" and then step 5 minutes back in time
-                        let target = timestamp - Double(i) * 60 * 5
-                        //Find the reading closest to the target, but not too far away
-                        let closest = nsData.filter{ abs($0.date - target) < 3 * 60 }.min { abs($0.date - target) < abs($1.date - target) }
-                        //If a reading is found, add it to the new array
-                        if let item = closest {
-                            nsData2.append(item)
+
+                    var nsData2: [ShareGlucoseData] = []
+                    var lastAddedTime = Double.infinity
+                    var lastAddedSGV: Int? = nil
+                    let minInterval: Double = 30
+
+                    for reading in nsData {
+                        if (lastAddedSGV == nil || lastAddedSGV != reading.sgv) || (lastAddedTime - reading.date >= minInterval) {
+                            nsData2.append(reading)
+                            lastAddedTime = reading.date
+                            lastAddedSGV = reading.sgv
                         }
                     }
-                    print(nsData2.count)
-                    
+
                     // merge NS and Dex data if needed; use recent Dex data and older NS data
                     var sourceName = "Nightscout"
                     if !dexData.isEmpty {
