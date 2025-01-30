@@ -75,6 +75,10 @@ struct LoopOverrideView: View {
                                 }
                                 .tint(.red)
                             }
+                            Section {
+                                Text("Setting a new override while one is active will cancel the active override and set the new one.")
+                                    .foregroundColor(.secondary)
+                            }
                         }
 
                         Section(header: Text("Available Overrides")) {
