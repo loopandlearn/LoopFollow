@@ -49,7 +49,7 @@ struct LoopOverrideView: View {
                     )
                 } else if !nsAdmin.value {
                     ErrorMessageView(
-                        message: "Please update your token to include the 'admin' role in order to do remote commands."
+                        message: "Please update your token to include the 'admin' role in order to do remote commands with Loop."
                     )
                 } else {
 
