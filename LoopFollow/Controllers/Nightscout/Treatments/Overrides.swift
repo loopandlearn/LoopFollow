@@ -56,12 +56,14 @@ extension MainViewController {
                 if (low == nil && high != nil) || (low != nil && high == nil) { return }
                 range = [low ?? 0, high ?? 0]
             }
-            
+
+            // Limit displayed override duration to 'Hours of Prediction' after current time
             var endDate = dateTimeStamp + duration
-/*            if endDate > maxEndDate {
+            if endDate > maxEndDate {
                 endDate = maxEndDate
+                duration = endDate - dateTimeStamp
             }
-*/
+
             if dateTimeStamp <= now && now < endDate {
                 activeOverrideNote = currentEntry["notes"] as? String
             }
