@@ -98,9 +98,10 @@ class NightscoutSettingsViewModel: ObservableObject {
     }
 
     func checkNightscoutStatus() {
-        NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth in
+        NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth, nsAdminAuth in
             DispatchQueue.main.async {
                 ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
+                ObservableUserDefaults.shared.nsAdminAuth.value = nsAdminAuth
 
                 self.updateStatusLabel(error: error)
             }
@@ -126,7 +127,14 @@ class NightscoutSettingsViewModel: ObservableObject {
                 nightscoutStatus = "Address Empty"
             }
         } else {
-            nightscoutStatus = "OK (Read\(ObservableUserDefaults.shared.nsWriteAuth.value ? " & Write" : ""))"
+            let authStatus: String
+            if ObservableUserDefaults.shared.nsAdminAuth.value {
+                authStatus = "Admin"
+            } else {
+                authStatus = "Read" + (ObservableUserDefaults.shared.nsWriteAuth.value ? " & Write" : "")
+            }
+
+            nightscoutStatus = "OK (\(authStatus))"
 
             if (nightscoutURL != initialURL || nightscoutToken != initialToken) {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)

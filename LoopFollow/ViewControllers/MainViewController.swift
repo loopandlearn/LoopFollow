@@ -147,6 +147,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if ObservableUserDefaults.shared.device.value != "Trio" && Storage.shared.remoteType.value == .trc {
+            Storage.shared.remoteType.value = .none
+        }
+
         //Migration of UserDefaultsRepository -> Storage handling
         if !UserDefaultsRepository.backgroundRefresh.value {
             Storage.shared.backgroundRefreshType.value = .none

@@ -39,7 +39,7 @@
 		DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878122C7B750D0048F05C /* TempTargetView.swift */; };
 		DD4878152C7B75230048F05C /* MealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878142C7B75230048F05C /* MealView.swift */; };
 		DD4878172C7B75350048F05C /* BolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878162C7B75350048F05C /* BolusView.swift */; };
-		DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift */; };
+		DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift */; };
 		DD48781C2C7DAF140048F05C /* SwiftJWT in Frameworks */ = {isa = PBXBuildFile; productRef = DD48781B2C7DAF140048F05C /* SwiftJWT */; };
 		DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */; };
 		DD4878202C7DAF890048F05C /* PushMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48781F2C7DAF890048F05C /* PushMessage.swift */; };
@@ -104,6 +104,10 @@
 		DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F042C529DA200D76A8E /* ObservableValue.swift */; };
 		DDD10F072C529DE800D76A8E /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F062C529DE800D76A8E /* Observable.swift */; };
 		DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */; };
+		DDDF6F432D479A9900884336 /* LoopNightscoutRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */; };
+		DDDF6F452D479AB100884336 /* LoopOverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F442D479AB000884336 /* LoopOverrideView.swift */; };
+		DDDF6F472D479AD200884336 /* LoopOverrideViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */; };
+		DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F482D479AEF00884336 /* NoRemoteView.swift */; };
 		DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE69ED12C7256260013EAEC /* RemoteType.swift */; };
 		DDEF503A2D31615000999A5D /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50392D31614200999A5D /* LogManager.swift */; };
 		DDEF503C2D31BE2D00999A5D /* TaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */; };
@@ -310,7 +314,7 @@
 		DD4878122C7B750D0048F05C /* TempTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetView.swift; sourceTree = "<group>"; };
 		DD4878142C7B75230048F05C /* MealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealView.swift; sourceTree = "<group>"; };
 		DD4878162C7B75350048F05C /* BolusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusView.swift; sourceTree = "<group>"; };
-		DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioNightscoutRemoteController.swift.swift; sourceTree = "<group>"; };
+		DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioNightscoutRemoteController.swift; sourceTree = "<group>"; };
 		DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
 		DD48781F2C7DAF890048F05C /* PushMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessage.swift; sourceTree = "<group>"; };
 		DD493AD42ACF2109009A6922 /* ResumePump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumePump.swift; sourceTree = "<group>"; };
@@ -375,6 +379,10 @@
 		DDD10F042C529DA200D76A8E /* ObservableValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableValue.swift; sourceTree = "<group>"; };
 		DDD10F062C529DE800D76A8E /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTarget.swift; sourceTree = "<group>"; };
+		DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopNightscoutRemoteView.swift; sourceTree = "<group>"; };
+		DDDF6F442D479AB000884336 /* LoopOverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideView.swift; sourceTree = "<group>"; };
+		DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideViewModel.swift; sourceTree = "<group>"; };
+		DDDF6F482D479AEF00884336 /* NoRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoRemoteView.swift; sourceTree = "<group>"; };
 		DDE69ED12C7256260013EAEC /* RemoteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteType.swift; sourceTree = "<group>"; };
 		DDEF50392D31614200999A5D /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskScheduler.swift; sourceTree = "<group>"; };
@@ -598,18 +606,14 @@
 		DD0C0C6E2C4AFFB800DBADDF /* Remote */ = {
 			isa = PBXGroup;
 			children = (
+				DDDF6F4A2D479B6A00884336 /* Nightscout */,
+				DDDF6F482D479AEF00884336 /* NoRemoteView.swift */,
+				DDDF6F412D479A8E00884336 /* Loop */,
 				DD4878112C7B74F90048F05C /* TRC */,
 				DD4878062C7B2E9E0048F05C /* Settings */,
 				DDF699972C5AA2E50058A8D9 /* TempTargetPreset */,
 				DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */,
-				DD0C0C712C4B000800DBADDF /* TrioNightscoutRemoteView.swift */,
-				DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */,
 				DDE69ED12C7256260013EAEC /* RemoteType.swift */,
-				DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */,
-				DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */,
-				DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift */,
-				DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */,
-				DD48781F2C7DAF890048F05C /* PushMessage.swift */,
 			);
 			path = Remote;
 			sourceTree = "<group>";
@@ -664,9 +668,15 @@
 		DD4878112C7B74F90048F05C /* TRC */ = {
 			isa = PBXGroup;
 			children = (
+				DD48781F2C7DAF890048F05C /* PushMessage.swift */,
 				DD4878122C7B750D0048F05C /* TempTargetView.swift */,
+				DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */,
 				DD4878142C7B75230048F05C /* MealView.swift */,
+				DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */,
+				DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */,
 				DD4878162C7B75350048F05C /* BolusView.swift */,
+				DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */,
+				DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift */,
 				DDFD5C522CB167DA00D3FD68 /* TRCCommandType.swift */,
 				DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */,
 			);
@@ -777,6 +787,24 @@
 				DDB0AF502BB1A84500AFA48B /* capture-build-details.sh */,
 			);
 			path = Scripts;
+			sourceTree = "<group>";
+		};
+		DDDF6F412D479A8E00884336 /* Loop */ = {
+			isa = PBXGroup;
+			children = (
+				DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */,
+				DDDF6F442D479AB000884336 /* LoopOverrideView.swift */,
+				DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */,
+			);
+			path = Loop;
+			sourceTree = "<group>";
+		};
+		DDDF6F4A2D479B6A00884336 /* Nightscout */ = {
+			isa = PBXGroup;
+			children = (
+				DD0C0C712C4B000800DBADDF /* TrioNightscoutRemoteView.swift */,
+			);
+			path = Nightscout;
 			sourceTree = "<group>";
 		};
 		DDEF503D2D32753A00999A5D /* Task */ = {
@@ -1390,6 +1418,7 @@
 				DD608A0A2C23593900F91132 /* SMB.swift in Sources */,
 				DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */,
 				FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */,
+				DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */,
 				FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */,
 				DD7E19842ACDA50C00DBD158 /* Overrides.swift in Sources */,
 				DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */,
@@ -1413,6 +1442,7 @@
 				DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */,
 				DDD10F032C518A6500D76A8E /* TreatmentResponse.swift in Sources */,
 				DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */,
+				DDDF6F472D479AD200884336 /* LoopOverrideViewModel.swift in Sources */,
 				DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */,
 				DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */,
 				DDEF503A2D31615000999A5D /* LogManager.swift in Sources */,
@@ -1475,6 +1505,7 @@
 				DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */,
 				DDF699962C5582290058A8D9 /* TextFieldWithToolBar.swift in Sources */,
 				DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
+				DDDF6F452D479AB100884336 /* LoopOverrideView.swift in Sources */,
 				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
@@ -1485,8 +1516,9 @@
 				FCD49B6C24AA536E007879DC /* DebugViewController.swift in Sources */,
 				DD5334B02D1447C500CDD6EA /* BLEManager.swift in Sources */,
 				DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */,
-				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift.swift in Sources */,
+				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */,
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
+				DDDF6F432D479A9900884336 /* LoopNightscoutRemoteView.swift in Sources */,
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,
 				FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */,
 				DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */,

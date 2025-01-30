@@ -1,5 +1,5 @@
 //
-//  TrioNightscoutRemoteController.swift.swift
+//  TrioNightscoutRemoteController.swift
 //  LoopFollow
 //
 //  Created by Jonas Björkert on 2024-08-26.

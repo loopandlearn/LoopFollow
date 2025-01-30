@@ -20,12 +20,15 @@ class RemoteViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        cancellable = Storage.shared.remoteType.objectWillChange
-            .sink { [weak self] _ in
-                DispatchQueue.main.async {
-                    self?.updateView()
-                }
+        cancellable = Publishers.CombineLatest(
+            Storage.shared.remoteType.$value,
+            ObservableUserDefaults.shared.device.$value
+        )
+        .sink { [weak self] newRemoteType, newDevice in
+            DispatchQueue.main.async {
+                self?.updateView()
             }
+        }
 
         updateView()
     }
@@ -40,12 +43,30 @@ class RemoteViewController: UIViewController {
         }
 
         if remoteType == .nightscout {
-            let remoteView = TrioNightscoutRemoteView()
-            hostingController = UIHostingController(rootView: AnyView(remoteView))
+            var remoteView: AnyView
+
+            switch ObservableUserDefaults.shared.device.value {
+            case "Trio":
+                remoteView = AnyView(TrioNightscoutRemoteView())
+            case "Loop":
+                remoteView = AnyView(LoopNightscoutRemoteView())
+            default:
+                remoteView = AnyView(NoRemoteView())
+            }
+
+            hostingController = UIHostingController(rootView: remoteView)
         } else if remoteType == .trc {
-            let trioRemoteControlViewModel = TrioRemoteControlViewModel()
-            let trioRemoteControlView = TrioRemoteControlView(viewModel: trioRemoteControlViewModel)
-            hostingController = UIHostingController(rootView: AnyView(trioRemoteControlView))
+            if ObservableUserDefaults.shared.device.value != "Trio" {
+                hostingController = UIHostingController(
+                    rootView: AnyView(
+                        Text("Trio Remote Control is only supported for 'Trio'")
+                    )
+                )
+            } else {
+                let trioRemoteControlViewModel = TrioRemoteControlViewModel()
+                let trioRemoteControlView = TrioRemoteControlView(viewModel: trioRemoteControlViewModel)
+                hostingController = UIHostingController(rootView: AnyView(trioRemoteControlView))
+            }
         } else {
             hostingController = UIHostingController(rootView: AnyView(Text("Please select a Remote Type in Settings.")))
         }
@@ -66,9 +87,10 @@ class RemoteViewController: UIViewController {
         }
 
         if remoteType == .nightscout, !ObservableUserDefaults.shared.nsWriteAuth.value {
-            NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth in
+            NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth, nsAdminAuth in
                 DispatchQueue.main.async {
                     ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
+                    ObservableUserDefaults.shared.nsAdminAuth.value = nsAdminAuth
                 }
             }
         }
