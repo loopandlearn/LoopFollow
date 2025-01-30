@@ -13,22 +13,10 @@ import HealthKit
 struct RemoteSettingsView: View {
     @ObservedObject var viewModel: RemoteSettingsViewModel
     @Environment(\.presentationMode) var presentationMode
-    @FocusState private var focusedField: Field?
 
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
     @State private var alertMessage: String? = nil
-
-    enum Field: Hashable {
-        case user
-        case deviceToken
-        case sharedSecret
-        case apnsKey
-        case teamId
-        case keyId
-        case bundleId
-        case maxBolus
-    }
 
     enum AlertType {
         case validation
@@ -37,27 +25,32 @@ struct RemoteSettingsView: View {
     var body: some View {
         NavigationView {
             Form {
-                // Remote Type Section
-                // Instructions for Remote Type options
-                Section {
-                    Picker("Remote Type", selection: $viewModel.remoteType) {
-                        Text("None").tag(RemoteType.none)
-                        Text("Nightscout").tag(RemoteType.nightscout)
-                        if BuildDetails.default.branch?.lowercased() != "main" {
-                            Text("Trio Remote Control").tag(RemoteType.trc)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
+                // MARK: - Remote Type Section (Custom Rows)
+                Section(header: Text("Remote Type")) {
+                    remoteTypeRow(type: .none, label: "None", isEnabled: true)
 
-                    Text("Nightscout is the only option available for the released version of Trio.")
+                    remoteTypeRow(type: .nightscout, label: "Nightscout", isEnabled: true)
+
+                    if BuildDetails.default.branch?.lowercased() != "main" {
+                        remoteTypeRow(
+                            type: .trc,
+                            label: "Trio Remote Control",
+                            isEnabled: viewModel.isTrioDevice
+                        )
+                    }
+
+                    Text("Nightscout is the only option for the released version of Trio and Loop.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
-                    Text("Trio Remote Control requires a special version of Trio, which is under development in a private repository until sufficient testing is completed.")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
+
+                    if BuildDetails.default.branch?.lowercased() != "main" {
+                        Text("Trio Remote Control requires a special version of Trio, which is under development in a private repository until sufficient testing is completed.")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
                 }
 
-                // User Information Section
+                // MARK: - User Information Section
                 if viewModel.remoteType != .none {
                     Section(header: Text("User Information")) {
                         HStack {
@@ -65,13 +58,12 @@ struct RemoteSettingsView: View {
                             TextField("Enter User", text: $viewModel.user)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
-                                .focused($focusedField, equals: .user)
                                 .multilineTextAlignment(.trailing)
                         }
                     }
                 }
 
-                // Trio Remote Control Settings Section
+                // MARK: - Trio Remote Control Settings
                 if viewModel.remoteType == .trc {
                     Section(header: Text("Trio Remote Control Settings")) {
                         HStack {
@@ -79,7 +71,6 @@ struct RemoteSettingsView: View {
                             TextField("Enter Shared Secret", text: $viewModel.sharedSecret)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
-                                .focused($focusedField, equals: .sharedSecret)
                                 .multilineTextAlignment(.trailing)
                         }
 
@@ -88,7 +79,6 @@ struct RemoteSettingsView: View {
                             TextField("Enter APNS Key ID", text: $viewModel.keyId)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
-                                .focused($focusedField, equals: .keyId)
                                 .multilineTextAlignment(.trailing)
                         }
 
@@ -102,12 +92,10 @@ struct RemoteSettingsView: View {
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.gray.opacity(0.5), lineWidth: 1)
                                 )
-                                .focused($focusedField, equals: .apnsKey)
                         }
-
                     }
 
-                    // Guardrails Section
+                    // MARK: - Guardrails
                     Section(header: Text("Guardrails")) {
                         HStack {
                             Text("Max Bolus")
@@ -186,7 +174,7 @@ struct RemoteSettingsView: View {
                         }
                     }
 
-                    // Meal Section
+                    // MARK: - Meal Section
                     Section(header: Text("Meal Settings")) {
                         Toggle("Meal with Bolus", isOn: $viewModel.mealWithBolus)
                             .toggleStyle(SwitchToggleStyle())
@@ -195,6 +183,7 @@ struct RemoteSettingsView: View {
                             .toggleStyle(SwitchToggleStyle())
                     }
 
+                    // MARK: - Debug / Info
                     Section(header: Text("Debug / Info")) {
                         Text("Device Token: \(Storage.shared.deviceToken.value)")
                         Text("Production Env.: \(Storage.shared.productionEnvironment.value ? "True" : "False")")
@@ -211,9 +200,6 @@ struct RemoteSettingsView: View {
                     }
                 }
             }
-            .onTapGesture {
-                focusedField = nil
-            }
             .alert(isPresented: $showAlert) {
                 switch alertType {
                 case .validation:
@@ -229,6 +215,28 @@ struct RemoteSettingsView: View {
         }
     }
 
+    // MARK: - Custom Row for Remote Type Selection
+    private func remoteTypeRow(type: RemoteType, label: String, isEnabled: Bool) -> some View {
+        Button(action: {
+            if isEnabled {
+                viewModel.remoteType = type
+            }
+        }) {
+            HStack {
+                Text(label)
+                Spacer()
+                if viewModel.remoteType == type {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.accentColor)
+                }
+            }
+        }
+        // If isEnabled is false, user can see the row but not tap it.
+        .disabled(!isEnabled)
+        .foregroundColor(isEnabled ? .primary : .gray)
+    }
+
+    // MARK: - Validation Error Handler
     private func handleValidationError(_ message: String) {
         alertMessage = message
         alertType = .validation
