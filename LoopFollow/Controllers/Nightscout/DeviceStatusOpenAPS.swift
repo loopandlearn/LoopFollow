@@ -13,12 +13,10 @@ extension MainViewController {
         if lastLoopRecord["failureReason"] != nil {
             LoopStatusLabel.text = "X"
             latestLoopStatusString = "X"
-            evaluateNotLooping(lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value)
         } else {
             guard let enactedOrSuggested = lastLoopRecord["suggested"] as? [String: AnyObject] ?? lastLoopRecord["enacted"] as? [String: AnyObject] else {
                 LoopStatusLabel.text = "↻"
                 latestLoopStatusString = "↻"
-                evaluateNotLooping(lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value)
                 return
             }
 
@@ -34,8 +32,6 @@ extension MainViewController {
                 wasEnacted = false
                 LogManager.shared.log(category: .deviceStatus, message: "Last devicestatus is missing enacted")
             }
-            evaluateNotLooping(lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value)
-
 
             var updatedTime: TimeInterval?
 
