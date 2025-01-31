@@ -34,11 +34,13 @@ extension MainViewController {
         DispatchQueue.main.async {
             TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(10))
         }
+
+        evaluateNotLooping()
     }
     
-    func evaluateNotLooping(lastLoopTime: TimeInterval) {
+    func evaluateNotLooping() {
         if let statusStackView = LoopStatusLabel.superview as? UIStackView {
-            if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
+            if ((TimeInterval(Date().timeIntervalSince1970) - UserDefaultsRepository.alertLastLoopTime.value) / 60) > 15 {
                 IsNotLooping = true
                 // Change the distribution to 'fill' to allow manual resizing of arranged subviews
                 statusStackView.distribution = .fill
@@ -70,7 +72,6 @@ extension MainViewController {
                 }
             }
         }
-        latestLoopTime = lastLoopTime
     }
         
     // NS Device Status Response Processor
@@ -145,7 +146,7 @@ extension MainViewController {
 
         // Start the timer based on the timestamp
         let now = dateTimeUtils.getNowTimeIntervalUTC()
-        let secondsAgo = now - latestLoopTime
+        let secondsAgo = now - UserDefaultsRepository.alertLastLoopTime.value
         
         DispatchQueue.main.async {
             if secondsAgo >= (20 * 60) {
@@ -179,6 +180,8 @@ extension MainViewController {
                 )
             }
         }
+
+        evaluateNotLooping()
         LogManager.shared.log(category: .deviceStatus, message: "Update Device Status done", isDebug: true)
     }
 }

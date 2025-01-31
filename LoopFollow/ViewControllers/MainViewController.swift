@@ -108,7 +108,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var latestMinAgoString = ""
     var latestDeltaString = ""
     var latestLoopStatusString = ""
-    var latestLoopTime: Double = 0
     var latestCOB: CarbMetric?
     var latestBasal = ""
     var latestPumpVolume: Double = 50.0
