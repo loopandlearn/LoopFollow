@@ -11,14 +11,8 @@ import UIKit
 import Charts
 
 extension MainViewController {
-    // NS Device Status Web Call
     func webLoadNSDeviceStatus() {
-        let count = ObservableUserDefaults.shared.device.value == "Trio" && Observable.shared.isLastDeviceStatusSuggested.value ? "5" : "1"
-        if count != "1" {
-            LogManager.shared.log(category: .deviceStatus, message: "Fetching \(count) device status records")
-        }
-
-        let parameters: [String: String] = ["count": count]
+        let parameters: [String: String] = ["count": "1"]
         NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
             switch result {
             case .success(let json):
@@ -40,45 +34,52 @@ extension MainViewController {
         DispatchQueue.main.async {
             TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(10))
         }
+
+        evaluateNotLooping()
     }
     
-    func evaluateNotLooping(lastLoopTime: TimeInterval) {
-        if let statusStackView = LoopStatusLabel.superview as? UIStackView {
-            if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
-                IsNotLooping = true
-                // Change the distribution to 'fill' to allow manual resizing of arranged subviews
-                statusStackView.distribution = .fill
-                
-                // Hide PredictionLabel and expand LoopStatusLabel to fill the entire stack view
-                PredictionLabel.isHidden = true
-                LoopStatusLabel.frame = CGRect(x: 0, y: 0, width: statusStackView.frame.width, height: statusStackView.frame.height)
-                
-                // Update LoopStatusLabel's properties to display Not Looping
-                LoopStatusLabel.textAlignment = .center
-                LoopStatusLabel.text = "⚠️ Not Looping!"
-                LoopStatusLabel.textColor = UIColor.systemYellow
-                LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
-                
-            } else {
-                IsNotLooping = false
-                // Restore the original distribution and visibility of labels
-                statusStackView.distribution = .fillEqually
-                PredictionLabel.isHidden = false
-                
-                // Reset LoopStatusLabel's properties
-                LoopStatusLabel.textAlignment = .right
-                LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
+    func evaluateNotLooping() {
+        guard let statusStackView = LoopStatusLabel.superview as? UIStackView else { return }
 
-                if UserDefaultsRepository.forceDarkMode.value {
-                    LoopStatusLabel.textColor = UIColor.white
-                } else {
-                    LoopStatusLabel.textColor = UIColor.black
-                }
+        let now = TimeInterval(Date().timeIntervalSince1970)
+        let lastLoopTime = UserDefaultsRepository.alertLastLoopTime.value
+        let isAlarmEnabled = UserDefaultsRepository.alertNotLoopingActive.value
+        let nonLoopingTimeThreshold: TimeInterval
+
+        if isAlarmEnabled {
+            nonLoopingTimeThreshold = Double(UserDefaultsRepository.alertNotLooping.value * 60)
+        } else {
+            nonLoopingTimeThreshold = 15 * 60
+        }
+
+        if IsNightscoutEnabled(), (now - lastLoopTime) >= nonLoopingTimeThreshold, lastLoopTime > 0 {
+            IsNotLooping = true
+            statusStackView.distribution = .fill
+
+            PredictionLabel.isHidden = true
+            LoopStatusLabel.frame = CGRect(x: 0, y: 0, width: statusStackView.frame.width, height: statusStackView.frame.height)
+
+            LoopStatusLabel.textAlignment = .center
+            LoopStatusLabel.text = "⚠️ Not Looping!"
+            LoopStatusLabel.textColor = UIColor.systemYellow
+            LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
+
+        } else {
+            IsNotLooping = false
+            statusStackView.distribution = .fillEqually
+            PredictionLabel.isHidden = false
+
+            LoopStatusLabel.textAlignment = .right
+            LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
+
+            if UserDefaultsRepository.forceDarkMode.value {
+                LoopStatusLabel.textColor = UIColor.white
+            } else {
+                LoopStatusLabel.textColor = UIColor.black
             }
         }
-        latestLoopTime = lastLoopTime
     }
-        
+
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
         infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
@@ -146,12 +147,12 @@ extension MainViewController {
 
         // OpenAPS - handle new data
         if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String : AnyObject]? {
-            DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord, jsonDeviceStatus: jsonDeviceStatus)
+            DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
         }
 
         // Start the timer based on the timestamp
         let now = dateTimeUtils.getNowTimeIntervalUTC()
-        let secondsAgo = now - latestLoopTime
+        let secondsAgo = now - UserDefaultsRepository.alertLastLoopTime.value
         
         DispatchQueue.main.async {
             if secondsAgo >= (20 * 60) {
@@ -185,6 +186,8 @@ extension MainViewController {
                 )
             }
         }
+
+        evaluateNotLooping()
         LogManager.shared.log(category: .deviceStatus, message: "Update Device Status done", isDebug: true)
     }
 }
