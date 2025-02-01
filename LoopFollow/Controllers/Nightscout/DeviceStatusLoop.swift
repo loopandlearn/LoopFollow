@@ -20,6 +20,7 @@ extension MainViewController {
         }
 
         if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
+            let previousLastLoopTime = UserDefaultsRepository.alertLastLoopTime.value
             UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
             if let failure = lastLoopRecord["failureReason"] {
                 LoopStatusLabel.text = "X"
@@ -71,7 +72,7 @@ extension MainViewController {
                     let prediction = predictdata["values"] as! [Double]
                     PredictionLabel.text = Localizer.toDisplayUnits(String(Int(prediction.last!)))
                     PredictionLabel.textColor = UIColor.systemPurple
-                    if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
+                    if UserDefaultsRepository.downloadPrediction.value && previousLastLoopTime < lastLoopTime {
                         predictionData.removeAll()
                         var predictionTime = lastLoopTime
                         let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
@@ -128,8 +129,6 @@ extension MainViewController {
                 }
                 
             }
-            
-            evaluateNotLooping(lastLoopTime: lastLoopTime)
         }
     }
 }
