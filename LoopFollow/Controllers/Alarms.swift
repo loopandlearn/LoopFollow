@@ -518,12 +518,15 @@ extension MainViewController {
             if let previousBatteryLevel = deviceBatteryData.min(by: {
                 abs($0.timestamp.timeIntervalSince(targetDate)) < abs($1.timestamp.timeIntervalSince(targetDate))
             }) {
-                if (previousBatteryLevel.batteryLevel - currentBatteryLevel) >= dropPercentage {
-                    AlarmSound.whichAlarm = "Battery Drop"
+                // ignore a drop with a previous level of 100 as it will trigger a false alarm
+                if (previousBatteryLevel.batteryLevel < 100) {
+                    if (previousBatteryLevel.batteryLevel - currentBatteryLevel) >= dropPercentage {
+                        AlarmSound.whichAlarm = "Battery Drop"
 
-                    if UserDefaultsRepository.alertBatteryDropRepeat.value { numLoops = -1 }
-                    triggerAlarm(sound: UserDefaultsRepository.alertBatteryDropSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertBatteryDropSnoozeHours.value, snoozeIncrement: 1, audio: true)
-                    return
+                        if UserDefaultsRepository.alertBatteryDropRepeat.value { numLoops = -1 }
+                        triggerAlarm(sound: UserDefaultsRepository.alertBatteryDropSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertBatteryDropSnoozeHours.value, snoozeIncrement: 1, audio: true)
+                        return
+                    }
                 }
             }
         }
