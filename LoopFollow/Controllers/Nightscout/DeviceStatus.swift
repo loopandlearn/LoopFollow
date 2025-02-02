@@ -112,10 +112,19 @@ extension MainViewController {
                    let upbat = uploader["battery"] as? Double {
                     infoManager.updateInfoData(type: .battery, value: String(format: "%.0f", upbat) + "%")
                     UserDefaultsRepository.deviceBatteryLevel.value = upbat
+                    let timestamp = uploader["timestamp"] as? Date ?? Date()
+
+                    let currentBattery = DataStructs.batteryStruct(batteryLevel: upbat, timestamp: timestamp)
+                    deviceBatteryData.append(currentBattery)
+
+                    // store only the last 30 battery readings
+                    if deviceBatteryData.count > 30 {
+                        deviceBatteryData.removeFirst()
+                    }
                 }
             }
         }
-        
+
         // Loop - handle new data
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             DeviceStatusLoop(formatter: formatter, lastLoopRecord: lastLoopRecord)
