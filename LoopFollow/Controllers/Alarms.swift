@@ -507,6 +507,27 @@ extension MainViewController {
             }
         }
 
+        // Check for rapid battery drop
+        if UserDefaultsRepository.alertBatteryDropActive.value && !UserDefaultsRepository.alertBatteryDropIsSnoozed.value {
+            let targetDate = Calendar.current.date(byAdding: .minute, value: Int(-UserDefaultsRepository.alertBatteryDropPeriod.value), to: Date())!
+            let currentBatteryLevel = UserDefaultsRepository.deviceBatteryLevel.value as Double
+            let dropPercentage = Double(UserDefaultsRepository.alertBatteryDropPercentage.value)
+
+            // find the closest matching entry to the user defined timeframe
+            // this allows flexibility for ingress data matching as it can come at different intervals
+            if let previousBatteryLevel = deviceBatteryData.min(by: {
+                abs($0.timestamp.timeIntervalSince(targetDate)) < abs($1.timestamp.timeIntervalSince(targetDate))
+            }) {
+                if (previousBatteryLevel.batteryLevel - currentBatteryLevel) >= dropPercentage {
+                    AlarmSound.whichAlarm = "Battery Drop"
+
+                    if UserDefaultsRepository.alertBatteryDropRepeat.value { numLoops = -1 }
+                    triggerAlarm(sound: UserDefaultsRepository.alertBatteryDropSound.value, snooozedBGReadingTime: nil, overrideVolume: UserDefaultsRepository.overrideSystemOutputVolume.value, numLoops: numLoops, snoozeTime: UserDefaultsRepository.alertBatteryDropSnoozeHours.value, snoozeIncrement: 1, audio: true)
+                    return
+                }
+            }
+        }
+
         if UserDefaultsRepository.alertRecBolusActive.value,
            !UserDefaultsRepository.alertRecBolusIsSnoozed.value
         {
@@ -853,6 +874,13 @@ extension MainViewController {
             UserDefaultsRepository.alertBatteryIsSnoozed.value = false
             alarms.reloadSnoozeTime(key: "alertBatterySnoozedTime", setNil: true)
             alarms.reloadIsSnoozed(key: "alertBatteryIsSnoozed", value: false)
+        }
+
+        if date > UserDefaultsRepository.alertBatteryDropSnoozedTime.value ?? date {
+            UserDefaultsRepository.alertBatteryDropSnoozedTime.setNil(key: "alertBatteryDropSnoozedTime")
+            UserDefaultsRepository.alertBatteryDropIsSnoozed.value = false
+            alarms.reloadSnoozeTime(key: "alertBatteryDropSnoozedTime", setNil: true)
+            alarms.reloadIsSnoozed(key: "alertBatteryDropIsSnoozed", value: false)
         }
 
         if date > UserDefaultsRepository.alertRecBolusSnoozedTime.value ?? date {
