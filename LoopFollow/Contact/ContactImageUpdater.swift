@@ -123,8 +123,8 @@ class ContactImageUpdater {
         .paragraphStyle: paragraphStyle
     ]
 
-    let trendFontSize = max(40, 200 - CGFloat(extraTrend.count * 10))
-    let deltaFontSize = max(40, 200 - CGFloat(extraDelta.count * 10))
+    let trendFontSize = max(40, 200 - CGFloat(extraTrend.count * 15))
+    let deltaFontSize = max(40, 200 - CGFloat(extraDelta.count * 15))
     
     let trendAttributes: [NSAttributedString.Key: Any] = [
         .font: UIFont.boldSystemFont(ofSize: trendFontSize),
