@@ -123,8 +123,17 @@ class ContactImageUpdater {
         .paragraphStyle: paragraphStyle
     ]
 
-    var separateAttributes: [NSAttributedString.Key: Any] = [
-        .font: UIFont.boldSystemFont(ofSize: 140),
+    let trendFontSize = max(40, 200 - CGFloat(extraTrend.count * 10))
+    let deltaFontSize = max(40, 200 - CGFloat(extraDelta.count * 10))
+    
+    let trendAttributes: [NSAttributedString.Key: Any] = [
+        .font: UIFont.boldSystemFont(ofSize: trendFontSize),
+        .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
+        .paragraphStyle: paragraphStyle
+    ]
+    
+    let deltaAttributes: [NSAttributedString.Key: Any] = [
+        .font: UIFont.boldSystemFont(ofSize: deltaFontSize),
         .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
         .paragraphStyle: paragraphStyle
     ]
@@ -141,11 +150,11 @@ class ContactImageUpdater {
     if contactType == "Trend" && ObservableUserDefaults.shared.contactTrend.value == "Separate" {
         // Customizing image for Trend contact when value is Separate
         let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-        extraTrend.draw(in: trendRect, withAttributes: separateAttributes)
+        extraTrend.draw(in: trendRect, withAttributes: trendAttributes)
     } else if contactType == "Delta" && ObservableUserDefaults.shared.contactDelta.value == "Separate" {
         // Customizing image for Delta contact when value is Separate
         let deltaRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-        formattedExtraDelta.draw(in: deltaRect, withAttributes: separateAttributes)
+        formattedExtraDelta.draw(in: deltaRect, withAttributes: deltaAttributes)
     } else if contactType == "BG" {
         // Customizing image for BG contact
         let bgRect = extra.isEmpty
