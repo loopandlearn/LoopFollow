@@ -124,11 +124,20 @@ class ContactImageUpdater {
     ]
 
     var separateAttributes: [NSAttributedString.Key: Any] = [
-        .font: UIFont.boldSystemFont(ofSize: 160),
+        .font: UIFont.boldSystemFont(ofSize: 140),
         .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
         .paragraphStyle: paragraphStyle
     ]
-
+    
+    // Format extraDelta based on the user's unit preference
+    let unitPreference = UserDefaultsRepository.units.value
+    let formattedExtraDelta: String
+    if unitPreference == "mg/dL" {
+        formattedExtraDelta = String(format: "%.0f", (extraDelta as NSString).doubleValue)
+    } else {
+        formattedExtraDelta = String(format: "%.1f", (extraDelta as NSString).doubleValue)
+    }
+    
     if contactType == "Trend" && ObservableUserDefaults.shared.contactTrend.value == "Separate" {
         // Customizing image for Trend contact when value is Separate
         let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
@@ -136,7 +145,7 @@ class ContactImageUpdater {
     } else if contactType == "Delta" && ObservableUserDefaults.shared.contactDelta.value == "Separate" {
         // Customizing image for Delta contact when value is Separate
         let deltaRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-        extraDelta.draw(in: deltaRect, withAttributes: separateAttributes)
+        formattedExtraDelta.draw(in: deltaRect, withAttributes: separateAttributes)
     } else if contactType == "BG" {
         // Customizing image for BG contact
         let bgRect = extra.isEmpty
