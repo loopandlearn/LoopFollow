@@ -70,6 +70,11 @@ struct ContactSettingsView: View {
                     
                 if viewModel.contactEnabled {
                     Section(header: Text("Additional Information")) {
+                        Text("To see your trend or delta, include one in the original '\(viewModel.contactName)' contact, or create separate contacts ending in '- Trend' and '- Delta' for up to three contacts on your watch face.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .padding(.vertical, 4)
+                        
                         Text("Show Trend")
                             .font(.subheadline)
                         Picker("Show Trend", selection: $viewModel.contactTrend) {
