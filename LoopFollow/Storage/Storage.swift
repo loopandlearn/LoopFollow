@@ -37,6 +37,8 @@ class Storage {
 
     var debugLogLevel = StorageValue<Bool>(key: "debugLogLevel", defaultValue: false)
 
+    var bgDelayDynamicEnabled = StorageValue<Bool>(key: "bgDelayDynamicEnabled", defaultValue: false)
+    var bgDelayDynamicDelay = StorageValue<Double>(key: "bgDelayDynamicDelay", defaultValue: 10)
 
     static let shared = Storage()
 

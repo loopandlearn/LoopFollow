@@ -120,75 +120,180 @@ extension MainViewController {
         }
     }
     
-    // Dexcom BG Data Response processor
-    func ProcessDexBGData(data: [ShareGlucoseData], sourceName: String){
+    /// Processes incoming BG data.
+    func ProcessDexBGData(data: [ShareGlucoseData], sourceName: String) {
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
-        
-        if data.count == 0 {
+
+        guard !data.isEmpty else {
+            LogManager.shared.log(category: .nightscout, message: "No bg data received. Skipping processing.")
             return
         }
-        let latestDate = data[0].date
-        let now = dateTimeUtils.getNowTimeIntervalUTC()
-        
-        // Start the BG timer based on the reading
-        let secondsAgo = now - latestDate
-        
-        DispatchQueue.main.async {
-            if secondsAgo >= (20 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(5 * 60)
-                )
-            } else if secondsAgo >= (10 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(60)
-                )
-            } else if secondsAgo >= (7 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(30)
-                )
-            } else if secondsAgo >= (5 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(10)
-                )
-            } else {
-                let delay = (300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(delay)
-                )
 
-                if data.count > 1 {
-                    self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
+        let latestReading = data[0]
+        let sensorTimestamp = latestReading.date
+        let now = dateTimeUtils.getNowTimeIntervalUTC()
+        // secondsAgo is how old the newest reading is
+        let secondsAgo = now - sensorTimestamp
+
+        LogManager.shared.log(category: .nightscout,
+                              message: "Processing BG Data. Latest sensor reading: \(sensorTimestamp), now: \(now), secondsAgo: \(secondsAgo).",
+                              isDebug: true)
+
+        // Check if we have a new reading (i.e. sensor timestamp is greater than what we last saw).
+        if let lastTS = lastProcessedTimestamp {
+            if sensorTimestamp > lastTS {
+                let observedDelay = now - sensorTimestamp
+                addObservedDelay(observedDelay: observedDelay)
+                lastProcessedTimestamp = sensorTimestamp
+                LogManager.shared.log(category: .nightscout,
+                                      message: "New reading detected. Sensor time: \(sensorTimestamp) updated (was \(lastTS)). Observed delay: \(observedDelay) seconds.",
+                                      isDebug: true)
+            } else {
+                LogManager.shared.log(category: .nightscout,
+                                      message: "No new reading. Last processed sensor timestamp remains \(lastTS).",
+                                      isDebug: true)
+            }
+        } else {
+            lastProcessedTimestamp = sensorTimestamp
+            LogManager.shared.log(category: .nightscout,
+                                  message: "First reading processed. Sensor time: \(sensorTimestamp)",
+                                  isDebug: true)
+        }
+
+        // Compute a typical delay from our historical data.
+        let typicalDelay = computeOptimalDelay()
+
+        // Determine the next polling delay.
+        var delayToSchedule: Double = 0
+
+        DispatchQueue.main.async {
+            // Fallback scheduling for older readings.
+            if secondsAgo >= (20 * 60) {
+                delayToSchedule = 5 * 60
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Reading is very old (\(secondsAgo) sec). Scheduling next fetch in 5 minutes.",
+                                      isDebug: true)
+            } else if secondsAgo >= (10 * 60) {
+                delayToSchedule = 60
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Reading is moderately old (\(secondsAgo) sec). Scheduling next fetch in 60 seconds.",
+                                      isDebug: true)
+            } else if secondsAgo >= (7 * 60) {
+                delayToSchedule = 30
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Reading is a bit old (\(secondsAgo) sec). Scheduling next fetch in 30 seconds.",
+                                      isDebug: true)
+            } else if secondsAgo >= (5 * 60) {
+                delayToSchedule = 5
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Reading is clost to 5 minutes old (\(secondsAgo) sec). Scheduling next fetch in 10 seconds.",
+                                      isDebug: true)
+            } else {
+                // For fresh readings, predict when the next reading should appear.
+                // The sensor is scheduled to take a measurement every 300 seconds.
+                // Our base delay is: time remaining until 5 minutes from sensor timestamp + typical delay.
+                let baseDelay = 300 - secondsAgo + typicalDelay
+                delayToSchedule = baseDelay
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Fresh reading. Base delay computed as: 300 - \(secondsAgo) + \(typicalDelay) = \(baseDelay) seconds.",
+                                      isDebug: true)
+
+                // Exploration: occasionally try polling earlier than expected.
+                let explorationRoll = Double.random(in: 0..<1)
+                // Chance (0.0–1.0) to try an earlier poll than predicted.
+                let explorationProbability: Double = 0.2
+
+                if explorationRoll < explorationProbability {
+                    // The absolute minimum delay we allow.
+                    let minDelay: Double = 3.0
+
+                    // How many seconds to subtract when doing an exploratory poll.
+                    let explorationOffset: Double = 1
+
+                    let exploredDelay = max(minDelay, baseDelay - explorationOffset)
+                    LogManager.shared.log(category: .nightscout,
+                                          message: "Exploration triggered. Adjusting delay from \(baseDelay) to \(exploredDelay) seconds.",
+                                          isDebug: true)
+                    delayToSchedule = exploredDelay
                 }
             }
+
+            // Log and schedule the next fetch.
+            LogManager.shared.log(category: .nightscout,
+                                  message: "Scheduling next BG fetch in \(delayToSchedule) seconds (at \(Date().addingTimeInterval(delayToSchedule))).",
+                                  isDebug: true)
+            TaskScheduler.shared.rescheduleTask(id: .fetchBG, to: Date().addingTimeInterval(delayToSchedule))
+
+            // Evaluate speak conditions if there is a previous value.
+            if data.count > 1 {
+                self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
+            }
         }
-        
+
+        // Process data for graph display.
         bgData.removeAll()
-        
-        // loop through the data so we can reverse the order to oldest first for the graph
         for i in 0..<data.count {
-            let dateString = data[data.count - 1 - i].date
-            if dateString >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
+            let readingTimestamp = data[data.count - 1 - i].date
+            if readingTimestamp >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 let sgvValue = data[data.count - 1 - i].sgv
-                
-                // Skip the current iteration if the sgv value is over 600
-                // First time a user starts a G7, they get a value of 4000
+
+                // Skip outlier values (e.g. first reading of a new sensor might be abnormally high).
                 if sgvValue > 600 {
+                    LogManager.shared.log(category: .nightscout,
+                                          message: "Skipping reading with sgv \(sgvValue) as it exceeds threshold.",
+                                          isDebug: true)
                     continue
                 }
-                
-                let reading = ShareGlucoseData(sgv: sgvValue, date: dateString, direction: data[data.count - 1 - i].direction)
+
+                let reading = ShareGlucoseData(sgv: sgvValue, date: readingTimestamp, direction: data[data.count - 1 - i].direction)
                 bgData.append(reading)
             }
         }
-        
+
+        LogManager.shared.log(category: .nightscout,
+                              message: "Graph data updated with \(bgData.count) entries.",
+                              isDebug: true)
         viewUpdateNSBG(sourceName: sourceName)
     }
-    
+
+    private func computeOptimalDelay() -> Double {
+        if Storage.shared.bgDelayDynamicEnabled.value {
+
+            guard let optimal = observedDelays.min() else {
+                LogManager.shared.log(category: .nightscout,
+                                      message: "No previous observed delays, starting with 10 seconds.",
+                                      isDebug: true)
+                return 10
+            }
+
+            LogManager.shared.log(category: .nightscout,
+                                  message: "Computed optimal delay from observations \(observedDelays) is \(optimal) seconds.",
+                                  isDebug: true)
+            return optimal
+        } else {
+            LogManager.shared.log(category: .nightscout,
+                                  message: "Dynamic bg delay is disabled, using user set value of \(UserDefaultsRepository.bgUpdateDelay.value) seconds.",
+                                  isDebug: true)
+            return Double(UserDefaultsRepository.bgUpdateDelay.value)
+        }
+    }
+
+    private func addObservedDelay(observedDelay : Double) {
+        guard observedDelay > 3, observedDelay < 45 else {
+            LogManager.shared.log(category: .nightscout,
+                                  message: "Observed delay of \(observedDelay) seconds is out of range, ignored.",
+                                  isDebug: true)
+            return
+        }
+
+        observedDelays.append(observedDelay)
+        
+        // Keep delays for the last hour
+        if observedDelays.count > 12 {
+            observedDelays.removeFirst()
+        }
+    }
+
     func updateServerText(with serverText: String? = nil) {
         if UserDefaultsRepository.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
             self.serverText.text = displayName

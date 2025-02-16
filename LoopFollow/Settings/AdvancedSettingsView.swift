@@ -22,9 +22,21 @@ struct AdvancedSettingsView: View {
                     Toggle("Graph Bolus", isOn: $viewModel.graphBolus)
                     Toggle("Graph Carbs", isOn: $viewModel.graphCarbs)
                     Toggle("Graph Other Treatments", isOn: $viewModel.graphOtherTreatments)
+                }
 
-                    Stepper(value: $viewModel.bgUpdateDelay, in: 1...30, step: 1) {
-                        Text("BG Update Delay (Sec): \(viewModel.bgUpdateDelay)")
+                Section(header: Text("BG Delay Settings")) {
+                    Toggle("Dynamic BG Delay", isOn: $viewModel.bgDelayDynamicEnabled)
+                    if viewModel.bgDelayDynamicEnabled {
+                        HStack {
+                            Text("Dynamic BG Delay (Sec)")
+                            Spacer()
+                            Text("\(viewModel.bgDelayDynamicDelay, specifier: "%.0f")")
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        Stepper(value: $viewModel.bgUpdateDelay, in: 1...30, step: 1) {
+                            Text("BG Update Delay (Sec): \(viewModel.bgUpdateDelay)")
+                        }
                     }
                 }
 
