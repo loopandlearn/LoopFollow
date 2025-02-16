@@ -258,14 +258,14 @@ extension MainViewController {
 
     private func computeOptimalDelay() -> Double {
         if Storage.shared.bgDelayDynamicEnabled.value {
-
             guard let optimal = observedDelays.min() else {
                 LogManager.shared.log(category: .nightscout,
-                                      message: "No previous observed delays, starting with 10 seconds.",
+                                      message: "No previous observed delays, starting with \(Storage.shared.bgDelayDynamicDelay.value) seconds.",
                                       isDebug: true)
-                return 10
+                return Storage.shared.bgDelayDynamicDelay.value
             }
-
+            Storage.shared.bgDelayDynamicDelay.value = optimal
+            
             LogManager.shared.log(category: .nightscout,
                                   message: "Computed optimal delay from observations \(observedDelays) is \(optimal) seconds.",
                                   isDebug: true)
