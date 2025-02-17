@@ -141,6 +141,7 @@ class ContactImageUpdater {
     // Format extraDelta based on the user's unit preference
     let unitPreference = UserDefaultsRepository.units.value
     let formattedExtraDelta: String
+    let yOffset: CGFloat = unitPreference == "mg/dL" ? 46 : 61 // Add 15 if mmol is selected
     if unitPreference == "mg/dL" {
         formattedExtraDelta = String(format: "%.0f", (extraDelta as NSString).doubleValue)
     } else {
@@ -149,17 +150,17 @@ class ContactImageUpdater {
     
     if contactType == "Trend" && ObservableUserDefaults.shared.contactTrend.value == "Separate" {
         // Customizing image for Trend contact when value is Separate
-        let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
+        let trendRect = CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
         extraTrend.draw(in: trendRect, withAttributes: trendAttributes)
     } else if contactType == "Delta" && ObservableUserDefaults.shared.contactDelta.value == "Separate" {
         // Customizing image for Delta contact when value is Separate
-        let deltaRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
+        let deltaRect = CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
         formattedExtraDelta.draw(in: deltaRect, withAttributes: deltaAttributes)
     } else if contactType == "BG" {
         // Customizing image for BG contact
         let bgRect = extra.isEmpty
-            ? CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-            : CGRect(x: 0, y: 26, width: size.width, height: size.height / 2)
+            ? CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
+            : CGRect(x: 0, y: yOffset - 20, width: size.width, height: size.height / 2)
 
         bgValue.draw(in: bgRect, withAttributes: bgAttributes)
 
