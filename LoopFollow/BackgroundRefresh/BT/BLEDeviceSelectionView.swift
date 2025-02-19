@@ -13,13 +13,14 @@ struct BLEDeviceSelectionView: View {
     var body: some View {
         VStack {
             List {
-                if bleManager.devices.filter({ selectedFilter.matches($0) && !isSelected($0) }).isEmpty {
+                let filteredDevices = bleManager.devices.filter { selectedFilter.matches($0) && !isSelected($0) }
+                if filteredDevices.isEmpty {
                     Text("No devices found yet. They'll appear here when discovered.")
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .padding()
                 } else {
-                    ForEach(bleManager.devices.filter { selectedFilter.matches($0) && !isSelected($0) }, id: \.id) { device in
+                    ForEach(filteredDevices, id: \.id) { device in
                         HStack {
                             VStack(alignment: .leading) {
                                 Text(device.name ?? "Unknown")
@@ -27,6 +28,12 @@ struct BLEDeviceSelectionView: View {
                                 Text("RSSI: \(device.rssi) dBm")
                                     .foregroundColor(.secondary)
                                     .font(.footnote)
+
+                                if let offset = BLEManager.shared.expectedSensorFetchOffsetString(for: device) {
+                                    Text("Expected fetch offset: \(offset)")
+                                        .foregroundColor(.secondary)
+                                        .font(.footnote)
+                                }
                             }
                             Spacer()
                         }

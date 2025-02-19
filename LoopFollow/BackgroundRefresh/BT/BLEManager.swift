@@ -213,3 +213,48 @@ extension BLEManager: BluetoothDeviceDelegate {
         TaskScheduler.shared.checkTasksNow()
     }
 }
+
+extension BLEManager {
+    /// Returns the expected sensor fetch offset as a formatted string ("mm:ss (fetch delay: XX sec)")
+    /// for Dexcom devices. The expected offset is computed as the sensor's schedule offset plus the polling delay.
+    /// The device’s lastSeen time is used (mod 300) to calculate the effective delay between when the sensor value
+    /// becomes available and when the fetch is actually triggered.
+    func expectedSensorFetchOffsetString(for device: BLEDevice) -> String? {
+        // Determine the device type using your BackgroundRefreshType matching.
+        guard let matchedType = BackgroundRefreshType.allCases.first(where: { $0.matches(device) }) else {
+            return nil
+        }
+
+        // We only calculate this for Dexcom (G7) devices.
+        if matchedType == .dexcom {
+            // Return nil if the sensor schedule offset hasn't been set.
+            guard let sensorOffset = Storage.shared.sensorScheduleOffset.value else {
+                return nil
+            }
+
+            // Polling delay: use dynamic setting if enabled, otherwise the default.
+            let pollingDelay: TimeInterval = Storage.shared.bgDelayDynamicEnabled.value
+            ? Storage.shared.bgDelayDynamicDelay.value
+            : Double(UserDefaultsRepository.bgUpdateDelay.value)
+
+            // T_expected: the time (in seconds) after the sensor reading when the value is available.
+            let expectedOffset = sensorOffset + pollingDelay
+
+            // Compute the device’s heartbeat offset within the 5-minute (300 sec) cycle.
+            let calendar = Calendar(identifier: .gregorian)
+            let startOfDay = calendar.startOfDay(for: device.lastSeen)
+            let heartbeatOffset = device.lastSeen.timeIntervalSince(startOfDay).truncatingRemainder(dividingBy: 300)
+
+            // Calculate effective delay:
+            // If the heartbeat happens after the sensor value is available, delay = heartbeatOffset - expectedOffset.
+            // Otherwise, the fetch will occur on the next cycle:
+            // delay = (heartbeatOffset + 300) - expectedOffset.
+            let effectiveDelay: TimeInterval = (heartbeatOffset >= expectedOffset)
+            ? (heartbeatOffset - expectedOffset)
+            : (heartbeatOffset + 300 - expectedOffset)
+
+            return "\(Int(effectiveDelay)) sec"
+        }
+        return nil
+    }
+}

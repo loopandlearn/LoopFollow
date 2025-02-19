@@ -40,6 +40,8 @@ class Storage {
     var bgDelayDynamicEnabled = StorageValue<Bool>(key: "bgDelayDynamicEnabled", defaultValue: false)
     var bgDelayDynamicDelay = StorageValue<Double>(key: "bgDelayDynamicDelay", defaultValue: 10)
 
+    var sensorScheduleOffset = StorageValue<Double?>(key: "sensorScheduleOffset", defaultValue: nil)
+
     static let shared = Storage()
 
     private init() { }

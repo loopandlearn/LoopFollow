@@ -97,6 +97,11 @@ struct BackgroundRefreshSettingsView: View {
                             .foregroundColor(.secondary)
                             .font(.footnote)
                     }
+                    if let offset = BLEManager.shared.expectedSensorFetchOffsetString(for: storedDevice) {
+                        Text("Expected fetch offset: \(offset)")
+                            .foregroundColor(.secondary)
+                            .font(.footnote)
+                    }
 
                     HStack {
                         Spacer()

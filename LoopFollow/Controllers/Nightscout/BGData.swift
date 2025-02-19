@@ -135,6 +135,16 @@ extension MainViewController {
         // secondsAgo is how old the newest reading is
         let secondsAgo = now - sensorTimestamp
 
+        // Compute the current sensor schedule offset.
+        let currentOffset = sensorScheduleOffset(for: sensorTimestamp)
+
+        if Storage.shared.sensorScheduleOffset.value != currentOffset {
+            Storage.shared.sensorScheduleOffset.value = currentOffset
+            LogManager.shared.log(category: .nightscout,
+                                  message: "Sensor schedule offset: \(currentOffset) seconds.",
+                                  isDebug: true)
+        }
+
         LogManager.shared.log(category: .nightscout,
                               message: "Processing BG Data. Latest sensor reading: \(sensorTimestamp), now: \(now), secondsAgo: \(secondsAgo).",
                               isDebug: true)
@@ -142,13 +152,20 @@ extension MainViewController {
         // Check if we have a new reading (i.e. sensor timestamp is greater than what we last saw).
         if let lastTS = lastProcessedTimestamp {
             if sensorTimestamp > lastTS {
-                let observedDelay = now - sensorTimestamp
-                addObservedDelay(observedDelay: observedDelay)
+                if lastBgFetchMiss, let delay = lastBgFetchDelay {
+                    addObservedDelay(observedDelay: delay)
+                    LogManager.shared.log(category: .nightscout,
+                                          message: "Last attempt did not get any new data, storing the delay of \(delay) seconds.",
+                                          isDebug: true)
+                }
+
+                lastBgFetchMiss = false
                 lastProcessedTimestamp = sensorTimestamp
                 LogManager.shared.log(category: .nightscout,
-                                      message: "New reading detected. Sensor time: \(sensorTimestamp) updated (was \(lastTS)). Observed delay: \(observedDelay) seconds.",
+                                      message: "New reading detected. Sensor time: \(sensorTimestamp) updated (was \(lastTS)). Observed delay: \(secondsAgo) seconds.",
                                       isDebug: true)
             } else {
+                lastBgFetchMiss = true
                 LogManager.shared.log(category: .nightscout,
                                       message: "No new reading. Last processed sensor timestamp remains \(lastTS).",
                                       isDebug: true)
@@ -217,6 +234,7 @@ extension MainViewController {
                     delayToSchedule = exploredDelay
                 }
             }
+            self.lastBgFetchDelay = secondsAgo - delayToSchedule
 
             // Log and schedule the next fetch.
             LogManager.shared.log(category: .nightscout,
@@ -256,6 +274,20 @@ extension MainViewController {
         viewUpdateNSBG(sourceName: sourceName)
     }
 
+    /// Computes the sensor schedule offset (in seconds) for a given time interval.
+    /// The offset is the remainder (in seconds) of the time elapsed since midnight (UTC) divided by 300 seconds.
+    /// For example, if the sensor reports a time that corresponds to 13:06:30, the offset is 90 seconds.
+    func sensorScheduleOffset(for timeInterval: TimeInterval) -> TimeInterval {
+        var calendar = Calendar(identifier: .gregorian)
+        // Use UTC to be consistent with our sensor timestamps.
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+
+        let date = Date(timeIntervalSince1970: timeInterval)
+        let startOfDay = calendar.startOfDay(for: date)
+        let secondsSinceStartOfDay = date.timeIntervalSince(startOfDay)
+        return secondsSinceStartOfDay.truncatingRemainder(dividingBy: 300)
+    }
+
     private func computeOptimalDelay() -> Double {
         if Storage.shared.bgDelayDynamicEnabled.value {
             guard let optimal = observedDelays.min() else {
@@ -265,7 +297,7 @@ extension MainViewController {
                 return Storage.shared.bgDelayDynamicDelay.value
             }
             Storage.shared.bgDelayDynamicDelay.value = optimal
-            
+
             LogManager.shared.log(category: .nightscout,
                                   message: "Computed optimal delay from observations \(observedDelays) is \(optimal) seconds.",
                                   isDebug: true)
