@@ -98,7 +98,7 @@ struct BackgroundRefreshSettingsView: View {
                             .font(.footnote)
                     }
                     if let offset = BLEManager.shared.expectedSensorFetchOffsetString(for: storedDevice) {
-                        Text("Expected fetch offset: \(offset)")
+                        Text("Expected bg delay: \(offset)")
                             .foregroundColor(.secondary)
                             .font(.footnote)
                     }
