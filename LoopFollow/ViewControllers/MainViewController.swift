@@ -143,18 +143,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     let contactImageUpdater = ContactImageUpdater()
 
-    /// The timestamp (seconds since reference) of the last processed sensor reading.
-    var lastProcessedTimestamp: TimeInterval?
-
-    /// Historical delays observed (in seconds) between sensor measurement and our fetch.
-    var observedDelays: [Double] = []
-
-    /// If last fetch did not generate new bg data, we regard it an too early fetch
-    var lastBgFetchMiss: Bool = false
-
-    /// If last fetch did not generate new bg data, we regard it an too early fetch
-    var lastBgFetchDelay: Double?
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
