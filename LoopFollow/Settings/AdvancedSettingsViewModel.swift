@@ -44,24 +44,11 @@ class AdvancedSettingsViewModel: ObservableObject {
             UserDefaultsRepository.bgUpdateDelay.value = bgUpdateDelay
         }
     }
-
-    @Published var bgDelayDynamicEnabled: Bool {
-        didSet {
-            Storage.shared.bgDelayDynamicEnabled.value = bgDelayDynamicEnabled
-        }
-    }
-    @Published var bgDelayDynamicDelay: Double {
-        didSet {
-            Storage.shared.bgDelayDynamicDelay.value = bgDelayDynamicDelay
-        }
-    }
-
     @Published var debugLogLevel: Bool {
         didSet {
             Storage.shared.debugLogLevel.value = debugLogLevel
         }
     }
-
     init() {
         self.downloadTreatments = UserDefaultsRepository.downloadTreatments.value
         self.downloadPrediction = UserDefaultsRepository.downloadPrediction.value
@@ -70,8 +57,6 @@ class AdvancedSettingsViewModel: ObservableObject {
         self.graphCarbs = UserDefaultsRepository.graphCarbs.value
         self.graphOtherTreatments = UserDefaultsRepository.graphOtherTreatments.value
         self.bgUpdateDelay = UserDefaultsRepository.bgUpdateDelay.value
-        self.bgDelayDynamicEnabled = Storage.shared.bgDelayDynamicEnabled.value
-        self.bgDelayDynamicDelay = Storage.shared.bgDelayDynamicDelay.value
         self.debugLogLevel = Storage.shared.debugLogLevel.value
     }
 }

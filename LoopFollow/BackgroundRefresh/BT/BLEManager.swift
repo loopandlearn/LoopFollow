@@ -233,9 +233,7 @@ extension BLEManager {
             }
 
             // Polling delay: use dynamic setting if enabled, otherwise the default.
-            let pollingDelay: TimeInterval = Storage.shared.bgDelayDynamicEnabled.value
-            ? Storage.shared.bgDelayDynamicDelay.value
-            : Double(UserDefaultsRepository.bgUpdateDelay.value)
+            let pollingDelay: TimeInterval = Double(UserDefaultsRepository.bgUpdateDelay.value)
 
             // T_expected: the time (in seconds) after the sensor reading when the value is available.
             let expectedOffset = sensorOffset + pollingDelay
