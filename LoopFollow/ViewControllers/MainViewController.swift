@@ -102,6 +102,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
     var noteGraphData: [DataStructs.noteStruct] = []
     var chartData = LineChartData()
+    var deviceBatteryData: [DataStructs.batteryStruct] = []
     var newBGPulled = false
     var lastCalDate: Double = 0
     var latestDirectionString = ""
