@@ -38,8 +38,6 @@ enum ChartSettingsChangeEnum: Int {
 enum GeneralSettingsChangeEnum: Int { 
     case colorBGTextChange = 1
     case speakBGChange = 2
-    case backgroundRefreshFrequencyChange = 4
-    case backgroundRefreshChange = 8
     case appBadgeChange = 16
     case dimScreenWhenIdleChange = 32
     case forceDarkModeChang = 64

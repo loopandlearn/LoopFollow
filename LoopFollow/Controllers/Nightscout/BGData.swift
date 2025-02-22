@@ -18,17 +18,14 @@ extension MainViewController {
         dexShare?.fetchData(count) { (err, result) -> () in
             
             if let error = err {
-                print("Error fetching Dexcom data: \(error.localizedDescription)")
-                
-                // If we get an error, immediately try to pull NS BG Data
-                if IsNightscoutEnabled() {
-                    self.webLoadNSBGData()
-                }
+                LogManager.shared.log(category: .dexcom, message: "Error fetching Dexcom data: \(error.localizedDescription)")
+                self.webLoadNSBGData()
                 return
             }
             
             guard let data = result else {
-                print("Received nil data from Dexcom")
+                LogManager.shared.log(category: .dexcom, message: "Received nil data from Dexcom")
+                self.webLoadNSBGData()
                 return
             }
             
@@ -36,8 +33,8 @@ extension MainViewController {
             let latestDate = data[0].date
             let now = dateTimeUtils.getNowTimeIntervalUTC()
             if (latestDate + 330) < now && IsNightscoutEnabled() {
+                LogManager.shared.log(category: .dexcom, message: "Dexcom data is old, loading from NS instead")
                 self.webLoadNSBGData()
-                print("Dex data is old, loading from NS instead")
                 return
             }
             
@@ -52,14 +49,11 @@ extension MainViewController {
 
     // NS BG Data Web call
     func webLoadNSBGData(dexData: [ShareGlucoseData] = []) {
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Download: BG") }
-        
         // This kicks it out in the instance where dexcom fails but they aren't using NS &&
         if !IsNightscoutEnabled() {
-            self.startBGTimer(time: 10)
             return
         }
-        
+
         var parameters: [String: String] = [:]
         let utcISODateFormatter = ISO8601DateFormatter()
         let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
@@ -80,25 +74,20 @@ extension MainViewController {
                         nsData[i].date /= 1000
                         nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
                     }
-                    print(nsData.count)
-                    
-                    //Avoid duplicate entries messing up the graph, only use one reading per 5 minutes.
-                    let graphHours = 24 * UserDefaultsRepository.downloadDays.value
-                    let points = graphHours * 12 + 1
-                    var nsData2 = [ShareGlucoseData]()
-                    let timestamp = Date().timeIntervalSince1970
-                    for i in 0..<points {
-                        //Starting with "now" and then step 5 minutes back in time
-                        let target = timestamp - Double(i) * 60 * 5
-                        //Find the reading closest to the target, but not too far away
-                        let closest = nsData.filter{ abs($0.date - target) < 3 * 60 }.min { abs($0.date - target) < abs($1.date - target) }
-                        //If a reading is found, add it to the new array
-                        if let item = closest {
-                            nsData2.append(item)
+
+                    var nsData2: [ShareGlucoseData] = []
+                    var lastAddedTime = Double.infinity
+                    var lastAddedSGV: Int? = nil
+                    let minInterval: Double = 30
+
+                    for reading in nsData {
+                        if (lastAddedSGV == nil || lastAddedSGV != reading.sgv) || (lastAddedTime - reading.date >= minInterval) {
+                            nsData2.append(reading)
+                            lastAddedTime = reading.date
+                            lastAddedSGV = reading.sgv
                         }
                     }
-                    print(nsData2.count)
-                    
+
                     // merge NS and Dex data if needed; use recent Dex data and older NS data
                     var sourceName = "Nightscout"
                     if !dexData.isEmpty {
@@ -115,12 +104,12 @@ extension MainViewController {
                     self.ProcessDexBGData(data: nsData2, sourceName: sourceName)
                 }
             case .failure(let error):
-                print("Failed to fetch data: \(error)")
+                LogManager.shared.log(category: .nightscout, message: "Failed to fetch data: \(error)")
                 DispatchQueue.main.async {
-                    if self.bgTimer.isValid {
-                        self.bgTimer.invalidate()
-                    }
-                    self.startBGTimer(time: 10)
+                    TaskScheduler.shared.rescheduleTask(
+                        id: .fetchBG,
+                        to: Date().addingTimeInterval(10)
+                    )
                 }
                 // if we have Dex data, use it
                 if !dexData.isEmpty {
@@ -133,14 +122,11 @@ extension MainViewController {
     
     // Dexcom BG Data Response processor
     func ProcessDexBGData(data: [ShareGlucoseData], sourceName: String){
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: BG") }
-        
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         
         if data.count == 0 {
             return
         }
-        let pullDate = data[data.count - 1].date
         let latestDate = data[0].date
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         
@@ -148,31 +134,33 @@ extension MainViewController {
         let secondsAgo = now - latestDate
         
         DispatchQueue.main.async {
-            // if reading is overdue over: 20:00, re-attempt every 5 minutes
             if secondsAgo >= (20 * 60) {
-                self.startBGTimer(time: (5 * 60))
-                print("##### started 5 minute bg timer")
-                
-                // if the reading is overdue: 10:00-19:59, re-attempt every minute
+                TaskScheduler.shared.rescheduleTask(
+                    id: .fetchBG,
+                    to: Date().addingTimeInterval(5 * 60)
+                )
             } else if secondsAgo >= (10 * 60) {
-                self.startBGTimer(time: 60)
-                print("##### started 1 minute bg timer")
-                
-                // if the reading is overdue: 7:00-9:59, re-attempt every 30 seconds
+                TaskScheduler.shared.rescheduleTask(
+                    id: .fetchBG,
+                    to: Date().addingTimeInterval(60)
+                )
             } else if secondsAgo >= (7 * 60) {
-                self.startBGTimer(time: 30)
-                print("##### started 30 second bg timer")
-                
-                // if the reading is overdue: 5:00-6:59 re-attempt every 10 seconds
+                TaskScheduler.shared.rescheduleTask(
+                    id: .fetchBG,
+                    to: Date().addingTimeInterval(30)
+                )
             } else if secondsAgo >= (5 * 60) {
-                self.startBGTimer(time: 10)
-                print("##### started 10 second bg timer")
-                
-                // We have a current reading. Set timer to 5:10 from last reading
+                TaskScheduler.shared.rescheduleTask(
+                    id: .fetchBG,
+                    to: Date().addingTimeInterval(10)
+                )
             } else {
-                self.startBGTimer(time: 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
-                let timerVal = 310 - secondsAgo
-                print("##### started 5:10 bg timer: \(timerVal)")
+                let delay = (300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
+                TaskScheduler.shared.rescheduleTask(
+                    id: .fetchBG,
+                    to: Date().addingTimeInterval(delay)
+                )
+
                 if data.count > 1 {
                     self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
                 }
@@ -212,11 +200,8 @@ extension MainViewController {
     // NS BG Data Front end updater
     func viewUpdateNSBG(sourceName: String) {
         DispatchQueue.main.async {
-            if UserDefaultsRepository.debugLog.value {
-                self.writeDebugLog(value: "Display: BG")
-                self.writeDebugLog(value: "Num BG: " + self.bgData.count.description)
-            }
-            
+            TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date())
+
             let entries = self.bgData
             if entries.count < 2 { return } // Protect index out of bounds
             
@@ -229,12 +214,7 @@ extension MainViewController {
             let deltaBG = latestBG - priorBG
             let lastBGTime = entries[latestEntryIndex].date
             
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
-            var userUnit = " mg/dL"
-            if self.mmol {
-                userUnit = " mmol/L"
-            }
-            
+            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60            
             self.updateServerText(with: sourceName)
             
             var snoozerBG = ""
@@ -259,15 +239,14 @@ extension MainViewController {
             
             // Delta handling
             if deltaBG < 0 {
-                self.DeltaText.text = Localizer.toDisplayUnits(String(deltaBG))
-                snoozerDelta = Localizer.toDisplayUnits(String(deltaBG))
-                self.latestDeltaString = String(deltaBG)
+                self.latestDeltaString = Localizer.toDisplayUnits(String(deltaBG))
+
             } else {
-                self.DeltaText.text = "+" + Localizer.toDisplayUnits(String(deltaBG))
-                snoozerDelta = "+" + Localizer.toDisplayUnits(String(deltaBG))
-                self.latestDeltaString = "+" + String(deltaBG)
+                self.latestDeltaString = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
-            
+            self.DeltaText.text = self.latestDeltaString
+            snoozerDelta = self.latestDeltaString
+
             // Apply strikethrough to BGText based on the staleness of the data
             let bgTextStr = self.BGText.text ?? ""
             let attributeString = NSMutableAttributedString(string: bgTextStr)

@@ -14,17 +14,20 @@ import HealthKit
 extension MainViewController {
     func DeviceStatusLoop(formatter: ISO8601DateFormatter, lastLoopRecord: [String: AnyObject]) {
         ObservableUserDefaults.shared.device.value = "Loop"
+
+        if Storage.shared.remoteType.value == .trc {
+            Storage.shared.remoteType.value = .none
+        }
+
         if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
+            let previousLastLoopTime = UserDefaultsRepository.alertLastLoopTime.value
             UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
-            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastLoopTime: " + String(lastLoopTime)) }
             if let failure = lastLoopRecord["failureReason"] {
                 LoopStatusLabel.text = "X"
                 latestLoopStatusString = "X"
-                if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop Failure: X") }
             } else {
                 var wasEnacted = false
                 if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
-                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Loop: Was Enacted") }
                     wasEnacted = true
                     if let lastTempBasal = enacted["rate"] as? Double {
                         
@@ -69,7 +72,7 @@ extension MainViewController {
                     let prediction = predictdata["values"] as! [Double]
                     PredictionLabel.text = Localizer.toDisplayUnits(String(Int(prediction.last!)))
                     PredictionLabel.textColor = UIColor.systemPurple
-                    if UserDefaultsRepository.downloadPrediction.value && latestLoopTime < lastLoopTime {
+                    if UserDefaultsRepository.downloadPrediction.value && previousLastLoopTime < lastLoopTime {
                         predictionData.removeAll()
                         var predictionTime = lastLoopTime
                         let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
@@ -112,28 +115,20 @@ extension MainViewController {
                         if bgData.count > 0 {
                             lastBGTime = bgData[bgData.count - 1].date
                         }
-                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "tempBasalTime: " + String(tempBasalTime)) }
-                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "lastBGTime: " + String(lastBGTime)) }
-                        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "wasEnacted: " + String(wasEnacted)) }
                         if tempBasalTime > lastBGTime && !wasEnacted {
                             LoopStatusLabel.text = "⏀"
                             latestLoopStatusString = "⏀"
-                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Open Loop: recommended temp. temp time > bg time, was not enacted") }
                         } else {
                             LoopStatusLabel.text = "↻"
                             latestLoopStatusString = "↻"
-                            if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: recommended temp, but temp time is < bg time and/or was enacted") }
                         }
                     }
                 } else {
                     LoopStatusLabel.text = "↻"
                     latestLoopStatusString = "↻"
-                    if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Looping: no recommended temp") }
                 }
                 
             }
-            
-            evaluateNotLooping(lastLoopTime: lastLoopTime)
         }
     }
 }

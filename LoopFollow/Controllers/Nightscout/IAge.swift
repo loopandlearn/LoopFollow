@@ -27,7 +27,7 @@ extension MainViewController {
                     self.updateIage(data: data)
                 }
             case .failure(let error):
-                print("Failed to fetch data: \(error.localizedDescription)")
+                LogManager.shared.log(category: .nightscout, message: "webLoadNSIage, failed to fetch data: \(error.localizedDescription)")
             }
         }
     }
