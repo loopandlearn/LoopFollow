@@ -52,7 +52,7 @@ struct TrioNightscoutRemoteView: View {
                     )
                 } else if !nsWriteAuth.value {
                     ErrorMessageView(
-                        message: "Please update your token to include the 'careportal' and 'readable' roles in order to do remote commands."
+                        message: "Please update your token to include the 'careportal' and 'readable' roles in order to do remote commands with Trio."
                     )
                 } else {
                     Form {
