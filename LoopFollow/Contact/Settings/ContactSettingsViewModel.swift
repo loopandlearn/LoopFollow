@@ -22,27 +22,41 @@ class ContactSettingsViewModel: ObservableObject {
 
     @Published var contactEnabled: Bool {
         didSet {
-            storage.contactEnabled.value = contactEnabled
+            Storage.shared.contactEnabled.value = contactEnabled
             triggerRefresh()
         }
     }
 
-    @Published var contactTrend: Bool {
+    @Published var contactTrend: ContactIncludeOption {
         didSet {
-            if contactTrend {
-                contactDelta = false
+            if contactTrend == .include && contactDelta == .include {
+                contactDelta = .off
             }
-            storage.contactTrend.value = contactTrend
+            Storage.shared.contactTrend.value = contactTrend
             triggerRefresh()
         }
     }
 
-    @Published var contactDelta: Bool {
+    @Published var contactDelta: ContactIncludeOption {
         didSet {
-            if contactDelta {
-                contactTrend = false
+            if contactDelta == .include && contactTrend == .include {
+                contactTrend = .off
             }
-            storage.contactDelta.value = contactDelta
+            Storage.shared.contactDelta.value = contactDelta
+            triggerRefresh()
+        }
+    }
+
+    @Published var contactBackgroundColor: String {
+        didSet {
+            Storage.shared.contactBackgroundColor.value = contactBackgroundColor
+            triggerRefresh()
+        }
+    }
+    
+    @Published var contactTextColor: String {
+        didSet {
+            Storage.shared.contactTextColor.value = contactTextColor
             triggerRefresh()
         }
     }
@@ -51,18 +65,26 @@ class ContactSettingsViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        self.contactEnabled = storage.contactEnabled.value
-        self.contactTrend = storage.contactTrend.value
-        self.contactDelta = storage.contactDelta.value
+        self.contactEnabled = Storage.shared.contactEnabled.value
+        self.contactTrend = Storage.shared.contactTrend.value
+        self.contactDelta = Storage.shared.contactDelta.value
+        self.contactBackgroundColor = Storage.shared.contactBackgroundColor.value
+        self.contactTextColor = Storage.shared.contactTextColor.value
 
-        storage.contactEnabled.$value
+        Storage.shared.contactEnabled.$value
             .assign(to: &$contactEnabled)
 
-        storage.contactTrend.$value
+        Storage.shared.contactTrend.$value
             .assign(to: &$contactTrend)
 
-        storage.contactDelta.$value
+        Storage.shared.contactDelta.$value
             .assign(to: &$contactDelta)
+
+        Storage.shared.contactBackgroundColor.$value
+            .assign(to: &$contactBackgroundColor)
+        
+        Storage.shared.contactTextColor.$value
+            .assign(to: &$contactTextColor)
     }
 
     private func triggerRefresh() {
