@@ -17,8 +17,6 @@ struct ContactSettingsView: View {
     @State private var alertTitle: String = ""
     @State private var alertMessage: String = ""
 
-    let options = ["Off", "Include", "Separate"]
-
     var body: some View {
         NavigationView {
             Form {
@@ -34,78 +32,55 @@ struct ContactSettingsView: View {
                             if isEnabled {
                                 requestContactAccess()
                             }
-                        }  
+                        }
                 }
 
-                Section(header: Text("Color Options")) {
-                    Text("Select the colors for your BG values.  Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                        .padding(.vertical, 4)
-                    
-                    Picker("Select Background Color", selection: $viewModel.contactBackgroundColor) {
-                            Text("Red").tag("red")
-                            Text("Blue").tag("blue")
-                            Text("Cyan").tag("cyan")
-                            Text("Green").tag("green")
-                            Text("Yellow").tag("yellow")
-                            Text("Orange").tag("orange")
-                            Text("Purple").tag("purple")
-                            Text("White").tag("white")
-                            Text("Black").tag("black")
-                        }
-                        
-                    Picker("Select Text Color", selection: $viewModel.contactTextColor) {
-                        Text("Red").tag("red")
-                        Text("Blue").tag("blue")
-                        Text("Cyan").tag("cyan")
-                        Text("Green").tag("green")
-                        Text("Yellow").tag("yellow")
-                        Text("Orange").tag("orange")
-                        Text("Purple").tag("purple")
-                        Text("White").tag("white")
-                        Text("Black").tag("black")
-                    }
-                }
-                    
                 if viewModel.contactEnabled {
+                    Section(header: Text("Color Options")) {
+                        Text("Select the colors for your BG values.  Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                            .padding(.vertical, 4)
+
+                        Picker("Select Background Color", selection: $viewModel.contactBackgroundColor) {
+                            ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
+                                Text(option.rawValue.capitalized).tag(option.rawValue)
+                            }
+                        }
+
+                        Picker("Select Text Color", selection: $viewModel.contactTextColor) {
+                            ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
+                                Text(option.rawValue.capitalized).tag(option.rawValue)
+                            }
+                        }
+                    }
+
                     Section(header: Text("Additional Information")) {
                         Text("To see your trend or delta, include one in the original '\(viewModel.contactName)' contact, or create separate contacts ending in '- Trend' and '- Delta' for up to three contacts on your watch face.")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                        .padding(.vertical, 4)
-                        
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                            .padding(.vertical, 4)
+
                         Text("Show Trend")
                             .font(.subheadline)
                         Picker("Show Trend", selection: $viewModel.contactTrend) {
-                            ForEach(options, id: \.self) { option in
-                                Text(option).tag(option)
+                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                                Text(option.rawValue).tag(option)
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
-                
+
                         Text("Show Delta")
                             .font(.subheadline)
                         Picker("Show Delta", selection: $viewModel.contactDelta) {
-                            ForEach(options, id: \.self) { option in
-                                Text(option).tag(option)
+                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                                Text(option.rawValue).tag(option)
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
                     }
                 }
             }
-            .onChange(of: viewModel.contactTrend) { newValue in
-                if newValue == "Include" && viewModel.contactDelta == "Include" {
-                    viewModel.contactDelta = "Off"
-                }
-            }
-            .onChange(of: viewModel.contactDelta) { newValue in
-                if newValue == "Include" && viewModel.contactTrend == "Include" {
-                    viewModel.contactTrend = "Off"
-                }
-            }
-            
             .navigationBarTitle("Contact Settings", displayMode: .inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
