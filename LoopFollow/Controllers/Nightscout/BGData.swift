@@ -267,25 +267,8 @@ extension MainViewController {
             snoozer.DeltaLabel.text = snoozerDelta
 
             // Update contact
-            if ObservableUserDefaults.shared.contactEnabled.value {
-                var extra: String = ""
-                var extraTrend: String = ""
-                var extraDelta: String = ""
-
-                if ObservableUserDefaults.shared.contactTrend.value == "Include" {
-                    extra = snoozerDirection
-                } else if ObservableUserDefaults.shared.contactDelta.value == "Include" {
-                    extra = snoozerDelta
-                }
-
-                if ObservableUserDefaults.shared.contactTrend.value == "Separate" {
-                    extraTrend = snoozerDirection
-                }
-                if ObservableUserDefaults.shared.contactDelta.value == "Separate" {
-                    extraDelta = snoozerDelta
-                }
-
-                self.contactImageUpdater.updateContactImage(bgValue: bgTextStr, extra: extra, extraTrend: extraTrend, extraDelta: extraDelta, stale: deltaTime >= 12)
+            if Storage.shared.contactEnabled.value {
+                self.contactImageUpdater.updateContactImage(bgValue: bgTextStr, trend: snoozerDirection, delta: snoozerDelta, stale: deltaTime >= 12)
             }
         }
     }
