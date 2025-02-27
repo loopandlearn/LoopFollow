@@ -36,6 +36,12 @@ class DataStructs {
         var note: String
     }
 
+    //NS Battery Data  Struct
+    struct batteryStruct: Codable {
+        var batteryLevel: Double
+        var timestamp: Date
+    }
+
     //NS Override Data  Struct
     struct overrideStruct: Codable {
         var insulNeedsScaleFactor: Double
