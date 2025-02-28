@@ -218,7 +218,7 @@ extension MainViewController {
         var calendar = Calendar(identifier: .gregorian)
         // Use UTC to be consistent with our sensor timestamps.
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-        
+
         let date = Date(timeIntervalSince1970: timeInterval)
         let startOfDay = calendar.startOfDay(for: date)
         let secondsSinceStartOfDay = date.timeIntervalSince(startOfDay)
