@@ -135,8 +135,11 @@ extension MainViewController {
         // secondsAgo is how old the newest reading is
         let secondsAgo = now - sensorTimestamp
 
-        // Compute the current sensor schedule offset.
-        let currentOffset = sensorScheduleOffset(for: sensorTimestamp)
+        // Determine the cycle duration based on device type.
+        let cycleDuration: TimeInterval = (Storage.shared.backgroundRefreshType.value == .rileyLink) ? 60 : 300
+
+        // Compute the current sensor schedule offset using the appropriate cycle.
+        let currentOffset = sensorScheduleOffset(for: sensorTimestamp, cycle: cycleDuration)
 
         if Storage.shared.sensorScheduleOffset.value != currentOffset {
             Storage.shared.sensorScheduleOffset.value = currentOffset
