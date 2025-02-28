@@ -36,22 +36,48 @@ struct ContactSettingsView: View {
                 }
 
                 if viewModel.contactEnabled {
-                    Section(header: Text("Additional Information")) {
-                        Toggle("Show Trend", isOn: $viewModel.contactTrend)
-                            .toggleStyle(SwitchToggleStyle())
-                            .onChange(of: viewModel.contactTrend) { isTrendEnabled in
-                                if isTrendEnabled {
-                                    viewModel.contactDelta = false
-                                }
-                            }
+                    Section(header: Text("Color Options")) {
+                        Text("Select the colors for your BG values.  Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                            .padding(.vertical, 4)
 
-                        Toggle("Show Delta", isOn: $viewModel.contactDelta)
-                            .toggleStyle(SwitchToggleStyle())
-                            .onChange(of: viewModel.contactDelta) { isDeltaEnabled in
-                                if isDeltaEnabled {
-                                    viewModel.contactTrend = false
-                                }
+                        Picker("Select Background Color", selection: $viewModel.contactBackgroundColor) {
+                            ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
+                                Text(option.rawValue.capitalized).tag(option.rawValue)
                             }
+                        }
+
+                        Picker("Select Text Color", selection: $viewModel.contactTextColor) {
+                            ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
+                                Text(option.rawValue.capitalized).tag(option.rawValue)
+                            }
+                        }
+                    }
+
+                    Section(header: Text("Additional Information")) {
+                        Text("To see your trend or delta, include one in the original '\(viewModel.contactName)' contact, or create separate contacts ending in '- Trend' and '- Delta' for up to three contacts on your watch face.")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                            .padding(.vertical, 4)
+
+                        Text("Show Trend")
+                            .font(.subheadline)
+                        Picker("Show Trend", selection: $viewModel.contactTrend) {
+                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                                Text(option.rawValue).tag(option)
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+
+                        Text("Show Delta")
+                            .font(.subheadline)
+                        Picker("Show Delta", selection: $viewModel.contactDelta) {
+                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                                Text(option.rawValue).tag(option)
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
                     }
                 }
             }
