@@ -251,8 +251,8 @@ extension BLEManager {
             // Otherwise, the fetch will occur on the next cycle:
             // delay = (heartbeatOffset + cycleDuration) - expectedOffset.
             let effectiveDelay: TimeInterval = (heartbeatOffset >= expectedOffset)
-                ? (heartbeatOffset - expectedOffset)
-                : (heartbeatOffset + cycleDuration - expectedOffset)
+            ? (heartbeatOffset - expectedOffset)
+            : (heartbeatOffset + cycleDuration - expectedOffset)
 
             return "\(Int(effectiveDelay)) sec"
         }
