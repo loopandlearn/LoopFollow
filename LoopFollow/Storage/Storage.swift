@@ -37,7 +37,11 @@ class Storage {
 
     var debugLogLevel = StorageValue<Bool>(key: "debugLogLevel", defaultValue: false)
 
-
+    var contactTrend = StorageValue<ContactIncludeOption>(key: "contactTrend", defaultValue: .off)
+    var contactDelta = StorageValue<ContactIncludeOption>(key: "contactDelta", defaultValue: .off)
+    var contactEnabled = StorageValue<Bool>(key: "contactEnabled", defaultValue: false)
+    var contactBackgroundColor = StorageValue<String>(key: "contactBackgroundColor", defaultValue: ContactColorOption.black.rawValue)
+    var contactTextColor = StorageValue<String>(key: "contactTextColor", defaultValue: ContactColorOption.white.rawValue)
     static let shared = Storage()
 
     private init() { }
