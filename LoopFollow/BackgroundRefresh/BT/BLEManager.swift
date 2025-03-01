@@ -228,11 +228,26 @@ extension BLEManager {
             return nil
         }
 
+        let heartbeatLast: Date? = {
+            if matchedType.estimatedDelayBasedOnHeartbeat {
+                guard device.isConnected, let lastHeartbeat = activeDevice?.lastHeartbeatTime else {
+                    return nil
+                }
+                return lastHeartbeat
+            } else {
+                return device.lastSeen
+            }
+        }()
+
+        guard let heartbeatLast = heartbeatLast else {
+            return nil
+        }
+
         let pollingDelay: TimeInterval = Double(UserDefaultsRepository.bgUpdateDelay.value)
 
         let expectedOffset = sensorOffset + pollingDelay
 
-        let effectiveDelay = CycleHelper.computeDelay(sensorOffset: expectedOffset, heartbeatLast: device.lastSeen, heartbeatInterval: heartBeatInterval)
+        let effectiveDelay = CycleHelper.computeDelay(sensorOffset: expectedOffset, heartbeatLast: heartbeatLast, heartbeatInterval: heartBeatInterval)
 
         return "\(Int(effectiveDelay)) sec"
     }
