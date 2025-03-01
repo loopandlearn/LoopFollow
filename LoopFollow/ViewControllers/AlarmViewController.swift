@@ -351,7 +351,7 @@ class AlarmViewController: FormViewController {
 
         <<< SegmentedRow<String>("otherAlerts3"){ row in
             row.title = ""
-            row.options = ["IOB", "COB", "Battery"]
+            row.options = ["IOB", "COB", "Battery", "Battery Drop"]
             if !IsNightscoutEnabled() {
                 row.hidden = true
             }
@@ -428,6 +428,7 @@ class AlarmViewController: FormViewController {
         buildIOB()
         buildCOB()
         buildBatteryAlarm()
+        buildBatteryDropAlarm()
         buildRecBolus()
         buildTempTargetStart()
         buildTempTargetEnd()
@@ -3280,6 +3281,84 @@ class AlarmViewController: FormViewController {
         }.onChange { [weak self] row in
             guard let value = row.value else { return }
             UserDefaultsRepository.alertBatteryRepeat.value = value
+        }
+    }
+
+    func buildBatteryDropAlarm(){
+        form
+        +++ Section(header: "Battery Drop Alarm", footer: "Activates a notification alert whenever the battery level drops quickly based on a user-defined percentage and time interval, allowing for proactive device charging and power management.") { row in
+            row.hidden = "$otherAlerts3 != 'Battery Drop'"
+        }
+        <<< SwitchRow("alertBatteryDropActive"){ row in
+            row.title = "Active"
+            row.value = UserDefaultsRepository.alertBatteryDropActive.value
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertBatteryDropActive.value = value
+        }
+        <<< StepperRow("alertBatteryDropPercentage") { row in
+            row.title = "Battery Drop"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 100
+            row.value = Double(UserDefaultsRepository.alertBatteryDropPercentage.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))%"
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertBatteryDropPercentage.value = Int(value)
+        }
+        <<< StepperRow("alertBatteryDropPeriod") { row in
+            row.title = "Period (minutes)"
+            row.cell.stepper.stepValue = 5
+            row.cell.stepper.minimumValue = 5
+            row.cell.stepper.maximumValue = 30
+            row.value = Double(UserDefaultsRepository.alertBatteryDropPeriod.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertBatteryDropPeriod.value = Int(value)
+        }
+        <<< StepperRow("alertBatteryDropSnoozeHours") { row in
+            row.title = "Snooze Hours"
+            row.cell.stepper.stepValue = 1
+            row.cell.stepper.minimumValue = 1
+            row.cell.stepper.maximumValue = 24
+            row.value = Double(UserDefaultsRepository.alertBatterySnoozeHours.value)
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(Int(value))"
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertBatteryDropSnoozeHours.value = Int(value)
+        }
+        <<< PickerInputRow<String>("alertBatteryDropSound") { row in
+            row.title = "Sound"
+            row.options = soundFiles
+            row.value = UserDefaultsRepository.alertBatteryDropSound.value
+            row.displayValueFor = { value in
+                guard let value = value else { return nil }
+                return "\(String(value.replacingOccurrences(of: "_", with: " ")))"
+            }
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertBatteryDropSound.value = value
+            AlarmSound.setSoundFile(str: value)
+            AlarmSound.stop()
+            AlarmSound.playTest()
+        }
+        <<< SwitchRow("alertBatteryDropRepeat"){ row in
+            row.title = "Repeat Sound"
+            row.value = UserDefaultsRepository.alertBatteryDropRepeat.value
+        }.onChange { [weak self] row in
+            guard let value = row.value else { return }
+            UserDefaultsRepository.alertBatteryDropRepeat.value = value
         }
     }
 
