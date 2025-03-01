@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+
 extension MainViewController {
     // Dex Share Web Call
     func webLoadDexShare() {
@@ -16,19 +17,19 @@ extension MainViewController {
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         let count = graphHours * 12
         dexShare?.fetchData(count) { (err, result) -> () in
-            
+
             if let error = err {
                 LogManager.shared.log(category: .dexcom, message: "Error fetching Dexcom data: \(error.localizedDescription)")
                 self.webLoadNSBGData()
                 return
             }
-            
+
             guard let data = result else {
                 LogManager.shared.log(category: .dexcom, message: "Received nil data from Dexcom")
                 self.webLoadNSBGData()
                 return
             }
-            
+
             // If Dex data is old, load from NS instead
             let latestDate = data[0].date
             let now = dateTimeUtils.getNowTimeIntervalUTC()
@@ -37,7 +38,7 @@ extension MainViewController {
                 self.webLoadNSBGData()
                 return
             }
-            
+
             // Dexcom only returns 24 hrs of data. If we need more, call NS.
             if graphHours > 24 && IsNightscoutEnabled() {
                 self.webLoadNSBGData(dexData: data)
@@ -62,7 +63,7 @@ extension MainViewController {
 
         // Exclude 'cal' entries
         parameters["find[type][$ne]"] = "cal"
-        
+
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
             switch result {
             case .success(let entriesResponse):
@@ -119,7 +120,7 @@ extension MainViewController {
             }
         }
     }
-    
+
     /// Processes incoming BG data.
     func ProcessDexBGData(data: [ShareGlucoseData], sourceName: String) {
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
@@ -135,11 +136,8 @@ extension MainViewController {
         // secondsAgo is how old the newest reading is
         let secondsAgo = now - sensorTimestamp
 
-        // Determine the cycle duration based on device type.
-        let cycleDuration: TimeInterval = (Storage.shared.backgroundRefreshType.value == .rileyLink) ? 60 : 300
-
-        // Compute the current sensor schedule offset using the appropriate cycle.
-        let currentOffset = sensorScheduleOffset(for: sensorTimestamp, cycle: cycleDuration)
+        // Compute the current sensor schedule offset
+        let currentOffset = CycleHelper.cycleOffset(for: sensorTimestamp, interval: 5 * 60)
 
         if Storage.shared.sensorScheduleOffset.value != currentOffset {
             Storage.shared.sensorScheduleOffset.value = currentOffset
@@ -214,20 +212,6 @@ extension MainViewController {
         viewUpdateNSBG(sourceName: sourceName)
     }
 
-    /// Computes the sensor schedule offset (in seconds) for a given time interval.
-    /// The offset is the remainder (in seconds) of the time elapsed since midnight (UTC)
-    /// divided by the given cycle length (default 300 seconds).
-    func sensorScheduleOffset(for timeInterval: TimeInterval, cycle: TimeInterval = 300) -> TimeInterval {
-        var calendar = Calendar(identifier: .gregorian)
-        // Use UTC to be consistent with our sensor timestamps.
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-
-        let date = Date(timeIntervalSince1970: timeInterval)
-        let startOfDay = calendar.startOfDay(for: date)
-        let secondsSinceStartOfDay = date.timeIntervalSince(startOfDay)
-        return secondsSinceStartOfDay.truncatingRemainder(dividingBy: cycle)
-    }
-
     func updateServerText(with serverText: String? = nil) {
         if UserDefaultsRepository.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
             self.serverText.text = displayName
@@ -235,7 +219,7 @@ extension MainViewController {
             self.serverText.text = serverText
         }
     }
-    
+
     // NS BG Data Front end updater
     func viewUpdateNSBG(sourceName: String) {
         DispatchQueue.main.async {
@@ -243,28 +227,28 @@ extension MainViewController {
 
             let entries = self.bgData
             if entries.count < 2 { return } // Protect index out of bounds
-            
+
             self.updateBGGraph()
             self.updateStats()
-            
+
             let latestEntryIndex = entries.count - 1
             let latestBG = entries[latestEntryIndex].sgv
             let priorBG = entries[latestEntryIndex - 1].sgv
             let deltaBG = latestBG - priorBG
             let lastBGTime = entries[latestEntryIndex].date
-            
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60            
+
+            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
             self.updateServerText(with: sourceName)
-            
+
             var snoozerBG = ""
             var snoozerDirection = ""
             var snoozerDelta = ""
-            
+
             // Set BGText with the latest BG value
             self.BGText.text = Localizer.toDisplayUnits(String(latestBG))
             snoozerBG = Localizer.toDisplayUnits(String(latestBG))
             self.setBGTextColor()
-            
+
             // Direction handling
             if let directionBG = entries[latestEntryIndex].direction {
                 self.DirectionText.text = self.bgDirectionGraphic(directionBG)
@@ -275,7 +259,7 @@ extension MainViewController {
                 snoozerDirection = ""
                 self.latestDirectionString = ""
             }
-            
+
             // Delta handling
             if deltaBG < 0 {
                 self.latestDeltaString = Localizer.toDisplayUnits(String(deltaBG))
@@ -298,7 +282,7 @@ extension MainViewController {
                 self.updateBadge(val: latestBG)
             }
             self.BGText.attributedText = attributeString
-            
+
             // Snoozer Display
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             snoozer.BGLabel.text = snoozerBG

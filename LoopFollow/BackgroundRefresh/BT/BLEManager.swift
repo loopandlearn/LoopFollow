@@ -220,43 +220,20 @@ extension BLEManager {
     /// The device’s lastSeen time is used (mod cycleDuration) to calculate the effective delay between when the sensor value
     /// becomes available and when the fetch is actually triggered.
     func expectedSensorFetchOffsetString(for device: BLEDevice) -> String? {
-        // Determine the device type using your BackgroundRefreshType matching.
-        guard let matchedType = BackgroundRefreshType.allCases.first(where: { $0.matches(device) }) else {
+        guard
+            let matchedType = BackgroundRefreshType.allCases.first(where: { $0.matches(device) }),
+            let heartBeatInterval = matchedType.heartBeatInterval,
+            let sensorOffset = Storage.shared.sensorScheduleOffset.value
+        else {
             return nil
         }
 
-        // We calculate this for Dexcom and RileyLink devices.
-        if matchedType == .dexcom || matchedType == .rileyLink {
-            // Return nil if the sensor schedule offset hasn't been set.
-            guard let sensorOffset = Storage.shared.sensorScheduleOffset.value else {
-                return nil
-            }
+        let pollingDelay: TimeInterval = Double(UserDefaultsRepository.bgUpdateDelay.value)
 
-            // Polling delay: use dynamic setting if enabled, otherwise the default.
-            let pollingDelay: TimeInterval = Double(UserDefaultsRepository.bgUpdateDelay.value)
+        let expectedOffset = sensorOffset + pollingDelay
 
-            // T_expected: the time (in seconds) after the sensor reading when the value is available.
-            let expectedOffset = sensorOffset + pollingDelay
+        let effectiveDelay = CycleHelper.computeDelay(sensorOffset: expectedOffset, heartbeatLast: device.lastSeen, heartbeatInterval: heartBeatInterval)
 
-            // Determine the cycle duration based on the device type.
-            let cycleDuration: TimeInterval = (matchedType == .rileyLink) ? 60 : 300
-
-            // Compute the device’s heartbeat offset within the appropriate cycle.
-            let calendar = Calendar(identifier: .gregorian)
-            let startOfDay = calendar.startOfDay(for: device.lastSeen)
-            let heartbeatOffset = device.lastSeen.timeIntervalSince(startOfDay).truncatingRemainder(dividingBy: cycleDuration)
-
-            // Calculate effective delay:
-            // If the heartbeat happens after the sensor value is available, delay = heartbeatOffset - expectedOffset.
-            // Otherwise, the fetch will occur on the next cycle:
-            // delay = (heartbeatOffset + cycleDuration) - expectedOffset.
-            let effectiveDelay: TimeInterval = (heartbeatOffset >= expectedOffset)
-            ? (heartbeatOffset - expectedOffset)
-            : (heartbeatOffset + cycleDuration - expectedOffset)
-
-            return "\(Int(effectiveDelay)) sec"
-        }
-        return nil
+        return "\(Int(effectiveDelay)) sec"
     }
 }
-
