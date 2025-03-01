@@ -135,8 +135,11 @@ extension MainViewController {
         // secondsAgo is how old the newest reading is
         let secondsAgo = now - sensorTimestamp
 
-        // Compute the current sensor schedule offset.
-        let currentOffset = sensorScheduleOffset(for: sensorTimestamp)
+        // Determine the cycle duration based on device type.
+        let cycleDuration: TimeInterval = (Storage.shared.backgroundRefreshType.value == .rileyLink) ? 60 : 300
+
+        // Compute the current sensor schedule offset using the appropriate cycle.
+        let currentOffset = sensorScheduleOffset(for: sensorTimestamp, cycle: cycleDuration)
 
         if Storage.shared.sensorScheduleOffset.value != currentOffset {
             Storage.shared.sensorScheduleOffset.value = currentOffset
@@ -212,9 +215,9 @@ extension MainViewController {
     }
 
     /// Computes the sensor schedule offset (in seconds) for a given time interval.
-    /// The offset is the remainder (in seconds) of the time elapsed since midnight (UTC) divided by 300 seconds.
-    /// For example, if the sensor reports a time that corresponds to 13:06:30, the offset is 90 seconds.
-    func sensorScheduleOffset(for timeInterval: TimeInterval) -> TimeInterval {
+    /// The offset is the remainder (in seconds) of the time elapsed since midnight (UTC)
+    /// divided by the given cycle length (default 300 seconds).
+    func sensorScheduleOffset(for timeInterval: TimeInterval, cycle: TimeInterval = 300) -> TimeInterval {
         var calendar = Calendar(identifier: .gregorian)
         // Use UTC to be consistent with our sensor timestamps.
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
@@ -222,7 +225,7 @@ extension MainViewController {
         let date = Date(timeIntervalSince1970: timeInterval)
         let startOfDay = calendar.startOfDay(for: date)
         let secondsSinceStartOfDay = date.timeIntervalSince(startOfDay)
-        return secondsSinceStartOfDay.truncatingRemainder(dividingBy: 300)
+        return secondsSinceStartOfDay.truncatingRemainder(dividingBy: cycle)
     }
 
     func updateServerText(with serverText: String? = nil) {
