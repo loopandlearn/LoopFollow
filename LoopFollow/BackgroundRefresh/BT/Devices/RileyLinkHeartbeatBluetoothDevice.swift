@@ -27,8 +27,6 @@ class RileyLinkHeartbeatBluetoothDevice: BluetoothDevice {
 
     override func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         super.centralManager(central, didConnect: peripheral)
-
-        self.bluetoothDeviceDelegate?.heartBeat()
     }
 
     override func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
