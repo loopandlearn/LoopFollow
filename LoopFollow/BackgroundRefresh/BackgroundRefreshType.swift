@@ -12,11 +12,12 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
     case silentTune = "Silent Tune"
     case rileyLink = "RileyLink"
     case dexcom = "Dexcom"
+    case omnipodDash = "Omnipod Dash"
 
     /// Indicates if the device type uses Bluetooth
     var isBluetooth: Bool {
         switch self {
-        case .rileyLink, .dexcom:
+        case .rileyLink, .dexcom, .omnipodDash:
             return true
         case .silentTune, .none:
             return false
@@ -27,6 +28,8 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
         switch self {
         case .rileyLink:
             return 60
+        case .omnipodDash:
+            return 3 * 60
         case .dexcom:
             return 5 * 60
         case .silentTune, .none:
@@ -38,7 +41,7 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
         switch self {
         case .rileyLink:
             return true
-        case .dexcom, .silentTune, .none:
+        case .dexcom, .omnipodDash, .silentTune, .none:
             return false
         }
     }
@@ -57,6 +60,12 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
         case .dexcom:
             if let name = device.name {
                 return name.hasPrefix("DXCM") || name.hasPrefix("DX02") || name.hasPrefix("Dexcom")
+            }
+            return false
+
+        case .omnipodDash:
+            if let name = device.name {
+                return name == "TWI BOARD"
             }
             return false
 
