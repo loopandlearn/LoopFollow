@@ -11,7 +11,7 @@ import UserNotifications
 
 /// Enum representing different background alert durations.
 enum BackgroundAlertDuration: TimeInterval, CaseIterable {
-    case sixMinutes = 360    // 6 minutes in seconds
+    case sixMinutes = 360 // 6 minutes in seconds
     case twelveMinutes = 720 // 12 minutes in seconds
     case eighteenMinutes = 1080 // 18 minutes in seconds
 }
@@ -34,10 +34,14 @@ class BackgroundAlertManager {
     /// Title prefix for all background refresh notifications.
     private let notificationTitlePrefix = "LoopFollow Background Refresh"
 
+    /// Timestamp of the last scheduled background alert.
+    private var lastScheduleDate: Date?
+
     /// Start scheduling background alerts.
     func startBackgroundAlert() {
         isAlertScheduled = true
-        scheduleBackgroundAlert()
+        // Force execution to bypass throttle when starting
+        scheduleBackgroundAlert(force: true)
     }
 
     /// Stop all scheduled background alerts.
@@ -48,10 +52,20 @@ class BackgroundAlertManager {
     }
 
     /// (Re)schedule all background alerts based on predefined durations.
-    func scheduleBackgroundAlert() {
-        removeDeliveredNotifications()
-
+    /// - Parameter force: When true, the scheduling is executed regardless of throttle constraints.
+    func scheduleBackgroundAlert(force: Bool = false) {
         guard isAlertScheduled, Storage.shared.backgroundRefreshType.value != .none else { return }
+
+        // Throttle execution if not forced: only run once every 10 seconds.
+        if !force {
+            let now = Date()
+            if let lastDate = lastScheduleDate, now.timeIntervalSince(lastDate) < 10 {
+                return
+            }
+            lastScheduleDate = now
+        }
+
+        removeDeliveredNotifications()
 
         let isBluetoothActive = Storage.shared.backgroundRefreshType.value.isBluetooth
         let expectedHeartbeat = BLEManager.shared.expectedHeartbeatInterval()
@@ -62,22 +76,22 @@ class BackgroundAlertManager {
                 identifier: BackgroundAlertIdentifier.sixMin.rawValue,
                 timeInterval: BackgroundAlertDuration.sixMinutes.rawValue,
                 body: isBluetoothActive
-                ? "App inactive for 6 minutes. Verify Bluetooth connectivity."
-                : "App inactive for 6 minutes. Open to resume."
+                    ? "App inactive for 6 minutes. Verify Bluetooth connectivity."
+                    : "App inactive for 6 minutes. Open to resume."
             ),
             BackgroundAlert(
                 identifier: BackgroundAlertIdentifier.twelveMin.rawValue,
                 timeInterval: BackgroundAlertDuration.twelveMinutes.rawValue,
                 body: isBluetoothActive
-                ? "App inactive for 12 minutes. Verify Bluetooth connectivity."
-                : "App inactive for 12 minutes. Open to resume."
+                    ? "App inactive for 12 minutes. Verify Bluetooth connectivity."
+                    : "App inactive for 12 minutes. Open to resume."
             ),
             BackgroundAlert(
                 identifier: BackgroundAlertIdentifier.eighteenMin.rawValue,
                 timeInterval: BackgroundAlertDuration.eighteenMinutes.rawValue,
                 body: isBluetoothActive
-                ? "App inactive for 18 minutes. Verify Bluetooth connectivity."
-                : "App inactive for 18 minutes. Open to resume."
+                    ? "App inactive for 18 minutes. Verify Bluetooth connectivity."
+                    : "App inactive for 18 minutes. Open to resume."
             )
         ]
 
@@ -119,7 +133,7 @@ class BackgroundAlertManager {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
     }
 
-    /// Remove all delivered notifications
+    /// Remove all delivered notifications.
     private func removeDeliveredNotifications() {
         let identifiers = BackgroundAlertIdentifier.allCases.map { $0.rawValue }
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: identifiers)
