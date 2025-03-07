@@ -213,3 +213,42 @@ extension BLEManager: BluetoothDeviceDelegate {
         TaskScheduler.shared.checkTasksNow()
     }
 }
+
+extension BLEManager {
+    /// Returns the expected sensor fetch offset as a formatted string ("mm:ss (fetch delay: XX sec)")
+    /// for Dexcom and RileyLink devices. The expected offset is computed as the sensor's schedule offset plus the polling delay.
+    /// The device’s lastSeen time is used (mod cycleDuration) to calculate the effective delay between when the sensor value
+    /// becomes available and when the fetch is actually triggered.
+    func expectedSensorFetchOffsetString(for device: BLEDevice) -> String? {
+        guard
+            let matchedType = BackgroundRefreshType.allCases.first(where: { $0.matches(device) }),
+            let heartBeatInterval = matchedType.heartBeatInterval,
+            let sensorOffset = Storage.shared.sensorScheduleOffset.value
+        else {
+            return nil
+        }
+
+        let heartbeatLast: Date? = {
+            if matchedType.estimatedDelayBasedOnHeartbeat {
+                guard device.isConnected, let lastHeartbeat = activeDevice?.lastHeartbeatTime else {
+                    return nil
+                }
+                return lastHeartbeat
+            } else {
+                return device.lastSeen
+            }
+        }()
+
+        guard let heartbeatLast = heartbeatLast else {
+            return nil
+        }
+
+        let pollingDelay: TimeInterval = Double(UserDefaultsRepository.bgUpdateDelay.value)
+
+        let expectedOffset = sensorOffset + pollingDelay
+
+        let effectiveDelay = CycleHelper.computeDelay(sensorOffset: expectedOffset, heartbeatLast: heartbeatLast, heartbeatInterval: heartBeatInterval)
+
+        return "\(Int(effectiveDelay)) sec"
+    }
+}

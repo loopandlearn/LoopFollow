@@ -23,6 +23,26 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
         }
     }
 
+    var heartBeatInterval: TimeInterval? {
+        switch self {
+        case .rileyLink:
+            return 60
+        case .dexcom:
+            return 5 * 60
+        case .silentTune, .none:
+            return nil
+        }
+    }
+
+    var estimatedDelayBasedOnHeartbeat: Bool {
+        switch self {
+        case .rileyLink:
+            return true
+        case .dexcom, .silentTune, .none:
+            return false
+        }
+    }
+
     /// Determines if a BLEDevice matches the specific device type
     func matches(_ device: BLEDevice) -> Bool {
         switch self {
