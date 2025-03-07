@@ -73,7 +73,7 @@ struct BackgroundRefreshSettingsView: View {
                         .foregroundColor(.secondary)
 
                 case .dexcom:
-                    Text("Requires a Dexcom G6/ONE/G7/ONE+ transmitter within Bluetooth range. Provides updates every 5 minutes and uses less battery than the silent tune method.")
+                    Text("Requires a Dexcom G6/ONE/G7/ONE+ transmitter within Bluetooth range. Provides updates every 5 minutes and uses less battery than the silent tune method. If you have more than one device to choose from, select the one with the smallest expected bg delay.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
