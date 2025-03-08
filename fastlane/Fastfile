@@ -199,4 +199,60 @@ platform :ios do
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}")
     )
   end
+
+  #####################################################################
+  # Additional lanes to support scheduled building and certificate nuking
+  #####################################################################
+
+  desc "Check Certificates and Trigger Workflow for Expired or Missing Certificates"
+  lane :check_and_renew_certificates do
+    setup_ci if ENV['CI']
+    ENV["MATCH_READONLY"] = false.to_s
+  
+    api_key = app_store_connect_api_key(
+      key_id: ENV["FASTLANE_KEY_ID"],
+      issuer_id: ENV["FASTLANE_ISSUER_ID"],
+      key_content: ENV["FASTLANE_KEY"] # Ensure valid key content
+    )
+  
+    new_certificate_needed = false
+  
+    require 'time'
+    certificates = Spaceship::ConnectAPI::Certificate.all
+  
+    distribution_certs = certificates.select { |cert| cert.certificate_type == "DISTRIBUTION" }
+  
+    if distribution_certs.empty?
+      puts "No Distribution certificates found! Triggering action to create certificate."
+      new_certificate_needed = true
+    else
+      distribution_certs.each do |cert|
+        expiration_date = Time.parse(cert.expiration_date)
+  
+        puts "Current Distribution Certificate: #{cert.id}, Expiration date: #{expiration_date}"
+  
+        if expiration_date < Time.now
+          puts "Distribution Certificate #{cert.id} is expired! Triggering action to renew certificate."
+          new_certificate_needed = true
+        else
+          puts "Distribution certificate #{cert.id} is valid. No action required."
+        end
+      end
+    end
+  
+    file_path = File.expand_path('new_certificate_needed.txt')
+    File.write(file_path, new_certificate_needed ? 'true' : 'false')  
+  
+    puts ""
+    puts "Absolute path of new_certificate_needed.txt: #{file_path}"
+    new_certificate_needed_content = File.read(file_path)
+    puts "Certificate creation or renewal needed: #{new_certificate_needed_content}"
+  end
+
+  desc "Keep Alive: Create an empty commit to keep the branch active"
+  lane :keep_alive do
+    sh "git checkout -B alive-main"
+    sh "git commit --allow-empty -m 'Keep alive commit'"
+    sh "git push origin alive-main"
+  end
 end

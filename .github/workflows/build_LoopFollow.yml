@@ -2,14 +2,10 @@ name: 4. Build Loop Follow
 run-name: Build Loop Follow (${{ github.ref_name }})
 on:
   workflow_dispatch:
-
-  ## Remove the "#" sign from the beginning of the line below to get automated builds on push (code changes in your repository)
-  #push:
-
-  ## Remove the "#" sign from the beginning of the two lines below to get automated builds every two months
-  #schedule:
-    #- cron: '0 17 1 */2 *' # Runs at 17:00 UTC on the 1st in Jan, Mar, May, Jul, Sep and Nov.
-
+  push:
+  schedule:
+    - cron: "0 9 * * 3"   # Weekly trigger: every Wednesday at 09:00 UTC
+    - cron: "0 7 1 * *"   # Monthly trigger: on the 1st of every month at 07:00 UTC
 
 jobs:
   validate:
@@ -22,25 +18,20 @@ jobs:
     needs: validate
     runs-on: macos-15
     steps:
-      # Uncomment to manually select latest Xcode if needed
       - name: Select Latest Xcode
         run: "sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer"
-
-      # Checks-out the repo
+      
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
           submodules: recursive
       
-      # Patch Fastlane Match to not print tables
       - name: Patch Match Tables
         run: find /usr/local/lib/ruby/gems -name table_printer.rb | xargs sed -i "" "/puts(Terminal::Table.new(params))/d"
-
-      # Sync the GitHub runner clock with the Windows time server (workaround as suggested in https://github.com/actions/runner/issues/2996)
+      
       - name: Sync clock
         run: sudo sntp -sS time.windows.com
       
-      # Build signed Loop Follow IPA file
       - name: Fastlane Build & Archive
         run: fastlane build_LoopFollow
         env:
@@ -51,7 +42,6 @@ jobs:
           FASTLANE_KEY: ${{ secrets.FASTLANE_KEY }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       
-      # Upload to TestFlight
       - name: Fastlane upload to TestFlight
         run: fastlane release
         env:
@@ -61,8 +51,7 @@ jobs:
           FASTLANE_ISSUER_ID: ${{ secrets.FASTLANE_ISSUER_ID }}
           FASTLANE_KEY: ${{ secrets.FASTLANE_KEY }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-
-      # Upload IPA and Symbols
+      
       - name: Upload IPA and Symbol artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -70,3 +59,54 @@ jobs:
           path: |
             artifacts
             buildlog
+
+  check_certs:
+    name: Check Certificates
+    uses: ./.github/workflows/create_certs.yml
+    secrets: inherit
+
+  nuke_certs:
+    name: Nuke Certificates
+    needs: [validate, check_certs]
+    runs-on: macos-14
+    if: ${{ (needs.check_certs.outputs.new_certificate_needed == 'true' && vars.ENABLE_NUKE_CERTS == 'true') || vars.FORCE_NUKE_CERTS == 'true' }}
+    steps:
+      - name: Show certificate check output
+        run: echo "new_certificate_needed=${{ needs.check_certs.outputs.new_certificate_needed }}"
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Run Fastlane nuke_certs
+        run: |
+          set -e
+          bundle exec fastlane nuke_certs
+      
+      - name: Recreate Distribution certificate after nuking
+        run: |
+          set -e
+          bundle exec fastlane certs
+      
+      - name: Add success annotations
+        if: ${{ success() }}
+        run: |
+          echo "::warning::⚠️ All Distribution certificates and TestFlight profiles have been revoked and recreated."
+          echo "::warning::❗️ If you have other apps that do not auto-renew certificates, run their 'Create Certificates' workflow."
+          echo "::warning::✅ Your existing TestFlight builds will keep working!"
+
+  keep_alive:
+    name: Keep Alive
+    needs: [validate]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Keep alive branch
+        run: |
+          git checkout -B alive-main
+          git commit --allow-empty -m 'Keep alive commit'
+          git push origin alive-main
