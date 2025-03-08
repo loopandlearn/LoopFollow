@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+
 extension MainViewController {
     // Dex Share Web Call
     func webLoadDexShare() {
@@ -16,19 +17,19 @@ extension MainViewController {
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         let count = graphHours * 12
         dexShare?.fetchData(count) { (err, result) -> () in
-            
+
             if let error = err {
                 LogManager.shared.log(category: .dexcom, message: "Error fetching Dexcom data: \(error.localizedDescription)", limitIdentifier: "Error fetching Dexcom data")
                 self.webLoadNSBGData()
                 return
             }
-            
+
             guard let data = result else {
                 LogManager.shared.log(category: .dexcom, message: "Received nil data from Dexcom", limitIdentifier: "Received nil data from Dexcom")
                 self.webLoadNSBGData()
                 return
             }
-            
+
             // If Dex data is old, load from NS instead
             let latestDate = data[0].date
             let now = dateTimeUtils.getNowTimeIntervalUTC()
@@ -37,7 +38,7 @@ extension MainViewController {
                 self.webLoadNSBGData()
                 return
             }
-            
+
             // Dexcom only returns 24 hrs of data. If we need more, call NS.
             if graphHours > 24 && IsNightscoutEnabled() {
                 self.webLoadNSBGData(dexData: data)
@@ -62,7 +63,7 @@ extension MainViewController {
 
         // Exclude 'cal' entries
         parameters["find[type][$ne]"] = "cal"
-        
+
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
             switch result {
             case .success(let entriesResponse):
@@ -119,77 +120,98 @@ extension MainViewController {
             }
         }
     }
-    
-    // Dexcom BG Data Response processor
-    func ProcessDexBGData(data: [ShareGlucoseData], sourceName: String){
+
+    /// Processes incoming BG data.
+    func ProcessDexBGData(data: [ShareGlucoseData], sourceName: String) {
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
 
         guard !data.isEmpty else {
             LogManager.shared.log(category: .nightscout, message: "No bg data received. Skipping processing.", limitIdentifier: "No bg data received. Skipping processing.")
             return
         }
-        let latestDate = data[0].date
-        let now = dateTimeUtils.getNowTimeIntervalUTC()
-        
-        // Start the BG timer based on the reading
-        let secondsAgo = now - latestDate
-        
-        DispatchQueue.main.async {
-            if secondsAgo >= (20 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(5 * 60)
-                )
-            } else if secondsAgo >= (10 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(60)
-                )
-            } else if secondsAgo >= (7 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(30)
-                )
-            } else if secondsAgo >= (5 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(10)
-                )
-            } else {
-                let delay = (300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value))
-                TaskScheduler.shared.rescheduleTask(
-                    id: .fetchBG,
-                    to: Date().addingTimeInterval(delay)
-                )
 
-                if data.count > 1 {
-                    self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
-                }
+        let latestReading = data[0]
+        let sensorTimestamp = latestReading.date
+        let now = dateTimeUtils.getNowTimeIntervalUTC()
+        // secondsAgo is how old the newest reading is
+        let secondsAgo = now - sensorTimestamp
+
+        // Compute the current sensor schedule offset
+        let currentOffset = CycleHelper.cycleOffset(for: sensorTimestamp, interval: 5 * 60)
+
+        if Storage.shared.sensorScheduleOffset.value != currentOffset {
+            Storage.shared.sensorScheduleOffset.value = currentOffset
+            LogManager.shared.log(category: .nightscout,
+                                  message: "Sensor schedule offset: \(currentOffset) seconds.",
+                                  isDebug: true)
+        }
+
+        // Determine the next polling delay.
+        var delayToSchedule: Double = 0
+
+        DispatchQueue.main.async {
+            // Fallback scheduling for older readings.
+            if secondsAgo >= (20 * 60) {
+                delayToSchedule = 5 * 60
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Reading is very old (\(secondsAgo) sec). Scheduling next fetch in 5 minutes.",
+                                      isDebug: true)
+            } else if secondsAgo >= (10 * 60) {
+                delayToSchedule = 60
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Reading is moderately old (\(secondsAgo) sec). Scheduling next fetch in 60 seconds.",
+                                      isDebug: true)
+            } else if secondsAgo >= (7 * 60) {
+                delayToSchedule = 30
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Reading is a bit old (\(secondsAgo) sec). Scheduling next fetch in 30 seconds.",
+                                      isDebug: true)
+            } else if secondsAgo >= (5 * 60) {
+                delayToSchedule = 5
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Reading is close to 5 minutes old (\(secondsAgo) sec). Scheduling next fetch in 5 seconds.",
+                                      isDebug: true)
+            } else {
+                delayToSchedule = 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value)
+                LogManager.shared.log(category: .nightscout,
+                                      message: "Fresh reading. Scheduling next fetch in \(delayToSchedule) seconds.",
+                                      isDebug: true)
+            }
+
+            TaskScheduler.shared.rescheduleTask(id: .fetchBG, to: Date().addingTimeInterval(delayToSchedule))
+
+            // Evaluate speak conditions if there is a previous value.
+            if data.count > 1 {
+                self.evaluateSpeakConditions(currentValue: data[0].sgv, previousValue: data[1].sgv)
             }
         }
-        
+
+        // Process data for graph display.
         bgData.removeAll()
-        
-        // loop through the data so we can reverse the order to oldest first for the graph
         for i in 0..<data.count {
-            let dateString = data[data.count - 1 - i].date
-            if dateString >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
+            let readingTimestamp = data[data.count - 1 - i].date
+            if readingTimestamp >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 let sgvValue = data[data.count - 1 - i].sgv
-                
-                // Skip the current iteration if the sgv value is over 600
-                // First time a user starts a G7, they get a value of 4000
+
+                // Skip outlier values (e.g. first reading of a new sensor might be abnormally high).
                 if sgvValue > 600 {
+                    LogManager.shared.log(category: .nightscout,
+                                          message: "Skipping reading with sgv \(sgvValue) as it exceeds threshold.",
+                                          isDebug: true)
                     continue
                 }
-                
-                let reading = ShareGlucoseData(sgv: sgvValue, date: dateString, direction: data[data.count - 1 - i].direction)
+
+                let reading = ShareGlucoseData(sgv: sgvValue, date: readingTimestamp, direction: data[data.count - 1 - i].direction)
                 bgData.append(reading)
             }
         }
-        
+
+        LogManager.shared.log(category: .nightscout,
+                              message: "Graph data updated with \(bgData.count) entries.",
+                              isDebug: true)
         viewUpdateNSBG(sourceName: sourceName)
     }
-    
+
     func updateServerText(with serverText: String? = nil) {
         if UserDefaultsRepository.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
             self.serverText.text = displayName
@@ -197,7 +219,7 @@ extension MainViewController {
             self.serverText.text = serverText
         }
     }
-    
+
     // NS BG Data Front end updater
     func viewUpdateNSBG(sourceName: String) {
         DispatchQueue.main.async {
@@ -205,28 +227,28 @@ extension MainViewController {
 
             let entries = self.bgData
             if entries.count < 2 { return } // Protect index out of bounds
-            
+
             self.updateBGGraph()
             self.updateStats()
-            
+
             let latestEntryIndex = entries.count - 1
             let latestBG = entries[latestEntryIndex].sgv
             let priorBG = entries[latestEntryIndex - 1].sgv
             let deltaBG = latestBG - priorBG
             let lastBGTime = entries[latestEntryIndex].date
-            
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60            
+
+            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
             self.updateServerText(with: sourceName)
-            
+
             var snoozerBG = ""
             var snoozerDirection = ""
             var snoozerDelta = ""
-            
+
             // Set BGText with the latest BG value
             self.BGText.text = Localizer.toDisplayUnits(String(latestBG))
             snoozerBG = Localizer.toDisplayUnits(String(latestBG))
             self.setBGTextColor()
-            
+
             // Direction handling
             if let directionBG = entries[latestEntryIndex].direction {
                 self.DirectionText.text = self.bgDirectionGraphic(directionBG)
@@ -237,7 +259,7 @@ extension MainViewController {
                 snoozerDirection = ""
                 self.latestDirectionString = ""
             }
-            
+
             // Delta handling
             if deltaBG < 0 {
                 self.latestDeltaString = Localizer.toDisplayUnits(String(deltaBG))
@@ -260,7 +282,7 @@ extension MainViewController {
                 self.updateBadge(val: latestBG)
             }
             self.BGText.attributedText = attributeString
-            
+
             // Snoozer Display
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             snoozer.BGLabel.text = snoozerBG

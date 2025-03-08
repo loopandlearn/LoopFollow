@@ -42,6 +42,9 @@ class Storage {
     var contactEnabled = StorageValue<Bool>(key: "contactEnabled", defaultValue: false)
     var contactBackgroundColor = StorageValue<String>(key: "contactBackgroundColor", defaultValue: ContactColorOption.black.rawValue)
     var contactTextColor = StorageValue<String>(key: "contactTextColor", defaultValue: ContactColorOption.white.rawValue)
+    
+    var sensorScheduleOffset = StorageValue<Double?>(key: "sensorScheduleOffset", defaultValue: nil)
+
     static let shared = Storage()
 
     private init() { }
