@@ -15,6 +15,9 @@ class LogManager {
     private let logDirectory: URL
     private let dateFormatter: DateFormatter
     private let consoleQueue = DispatchQueue(label: "com.loopfollow.log.console", qos: .background)
+    
+    private let rateLimitQueue = DispatchQueue(label: "com.loopfollow.log.ratelimit")
+    private var lastLoggedTimestamps: [String: Date] = [:]
 
     enum Category: String, CaseIterable {
         case bluetooth = "Bluetooth"
@@ -30,25 +33,45 @@ class LogManager {
     }
 
     init() {
-        // Create log directory in the app's Documents folder
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         logDirectory = documentsDirectory.appendingPathComponent("Logs")
-
-        // Ensure the directory exists
         if !fileManager.fileExists(atPath: logDirectory.path) {
             try? fileManager.createDirectory(at: logDirectory, withIntermediateDirectories: true, attributes: nil)
         }
-
         dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
     }
-
-    func log(category: Category, message: String, isDebug: Bool = false) {
+    
+    /// Logs a message with an optional rate limit.
+    ///
+    /// - Parameters:
+    ///   - category: The log category.
+    ///   - message: The message to log.
+    ///   - isDebug: Indicates if this is a debug log.
+    ///   - limitIdentifier: Optional key to rate-limit similar log messages.
+    ///   - limitInterval: Time interval (in seconds) to wait before logging the same type again.
+    func log(category: Category, message: String, isDebug: Bool = false, limitIdentifier: String? = nil, limitInterval: TimeInterval = 300) {
         let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .medium)
         let logMessage = "[\(timestamp)] [\(category.rawValue)] \(message)"
 
         consoleQueue.async {
             print(logMessage)
+        }
+        
+        if let key = limitIdentifier, !Storage.shared.debugLogLevel.value {
+            let shouldLog: Bool = rateLimitQueue.sync {
+                if let lastLogged = lastLoggedTimestamps[key] {
+                    let interval = Date().timeIntervalSince(lastLogged)
+                    if interval < limitInterval {
+                        return false
+                    }
+                }
+                lastLoggedTimestamps[key] = Date()
+                return true
+            }
+            if !shouldLog {
+                return
+            }
         }
 
         if !isDebug || Storage.shared.debugLogLevel.value {
@@ -60,7 +83,6 @@ class LogManager {
     func cleanupOldLogs() {
         let today = dateFormatter.string(from: Date())
         let yesterday = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
-
         do {
             let logFiles = try fileManager.contentsOfDirectory(at: logDirectory, includingPropertiesForKeys: nil)
             for logFile in logFiles {
@@ -93,7 +115,6 @@ class LogManager {
         if !fileManager.fileExists(atPath: fileURL.path) {
             fileManager.createFile(atPath: fileURL.path, contents: nil, attributes: nil)
         }
-
         if let fileHandle = try? FileHandle(forWritingTo: fileURL) {
             defer { fileHandle.closeFile() }
             fileHandle.seekToEndOfFile()
