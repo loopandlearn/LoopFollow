@@ -107,7 +107,7 @@ class TaskScheduler {
                 continue
             }
 
-            // Check if we should skip alarmCheck
+            // Check if we should re-schedule alarmCheck till after other tasks are done
             if taskID == .alarmCheck {
                 let shouldSkip = tasksToSkipAlarmCheck.contains {
                     guard let checkTask = tasks[$0] else { return false }
@@ -115,7 +115,14 @@ class TaskScheduler {
                 }
 
                 if shouldSkip {
-                    //LogManager.shared.log(category: .taskScheduler, message: "Skipping alarmCheck because one of the specified tasks is due or set to distant future.")
+                    //LogManager.shared.log(category: .taskScheduler, message: "Skipping alarmCheck because one of the specified tasks is due or set to distant future.", isDebug: true)
+
+                    guard var existingTask = self.tasks[taskID] else {
+                        continue
+                    }
+                    existingTask.nextRun = Date().addingTimeInterval(5)
+                    self.tasks[taskID] = existingTask
+
                     continue
                 }
             }
