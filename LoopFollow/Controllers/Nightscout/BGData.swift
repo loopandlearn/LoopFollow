@@ -19,13 +19,13 @@ extension MainViewController {
         dexShare?.fetchData(count) { (err, result) -> () in
 
             if let error = err {
-                LogManager.shared.log(category: .dexcom, message: "Error fetching Dexcom data: \(error.localizedDescription)")
+                LogManager.shared.log(category: .dexcom, message: "Error fetching Dexcom data: \(error.localizedDescription)", limitIdentifier: "Error fetching Dexcom data")
                 self.webLoadNSBGData()
                 return
             }
 
             guard let data = result else {
-                LogManager.shared.log(category: .dexcom, message: "Received nil data from Dexcom")
+                LogManager.shared.log(category: .dexcom, message: "Received nil data from Dexcom", limitIdentifier: "Received nil data from Dexcom")
                 self.webLoadNSBGData()
                 return
             }
@@ -34,7 +34,7 @@ extension MainViewController {
             let latestDate = data[0].date
             let now = dateTimeUtils.getNowTimeIntervalUTC()
             if (latestDate + 330) < now && IsNightscoutEnabled() {
-                LogManager.shared.log(category: .dexcom, message: "Dexcom data is old, loading from NS instead")
+                LogManager.shared.log(category: .dexcom, message: "Dexcom data is old, loading from NS instead", limitIdentifier: "Dexcom data is old, loading from NS instead")
                 self.webLoadNSBGData()
                 return
             }
@@ -105,7 +105,7 @@ extension MainViewController {
                     self.ProcessDexBGData(data: nsData2, sourceName: sourceName)
                 }
             case .failure(let error):
-                LogManager.shared.log(category: .nightscout, message: "Failed to fetch data: \(error)")
+                LogManager.shared.log(category: .nightscout, message: "Failed to fetch bg data: \(error)", limitIdentifier: "Failed to fetch bg data")
                 DispatchQueue.main.async {
                     TaskScheduler.shared.rescheduleTask(
                         id: .fetchBG,
@@ -126,7 +126,7 @@ extension MainViewController {
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
 
         guard !data.isEmpty else {
-            LogManager.shared.log(category: .nightscout, message: "No bg data received. Skipping processing.")
+            LogManager.shared.log(category: .nightscout, message: "No bg data received. Skipping processing.", limitIdentifier: "No bg data received. Skipping processing.")
             return
         }
 
