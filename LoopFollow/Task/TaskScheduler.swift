@@ -27,11 +27,10 @@ struct ScheduledTask {
 class TaskScheduler {
     static let shared = TaskScheduler()
 
-    // Thread-safety: a serial queue so we don’t manipulate tasks from multiple threads at once
     private let queue = DispatchQueue(label: "com.LoopFollow.TaskSchedulerQueue")
 
     private var tasks: [TaskID: ScheduledTask] = [:]
-    private var currentTimer: Timer?
+    private var currentTimer: DispatchSourceTimer?
 
     private init() {}
 
@@ -52,9 +51,7 @@ class TaskScheduler {
         LogManager.shared.log(category: .taskScheduler, message: "Reschedule Task \(id): next run = \(timeString)", isDebug: true)
 
         queue.async {
-            guard var existingTask = self.tasks[id] else {
-                return
-            }
+            guard var existingTask = self.tasks[id] else { return }
             existingTask.nextRun = newRunDate
             self.tasks[id] = existingTask
             self.checkTasksNow()
@@ -70,10 +67,8 @@ class TaskScheduler {
 
     // MARK: - Private
 
-    /// Updated signature to include info about who called us, and which task triggered it (if any).
     private func rescheduleTimer() {
-        // Invalidate any existing timer
-        currentTimer?.invalidate()
+        currentTimer?.cancel()
         currentTimer = nil
 
         guard let (_, earliestTask) = tasks.min(by: { $0.value.nextRun < $1.value.nextRun }) else {
@@ -84,16 +79,15 @@ class TaskScheduler {
         let interval = earliestTask.nextRun.timeIntervalSinceNow
         let safeInterval = max(interval, 0)
 
-        // Comment out this block to simulate heartbeat execution only
-        DispatchQueue.main.async {
-            self.currentTimer = Timer.scheduledTimer(withTimeInterval: safeInterval, repeats: false) { [weak self] _ in
-                guard let self = self else { return }
-                self.queue.async {
-                    self.fireOverdueTasks()
-                    self.rescheduleTimer()
-                }
-            }
+        let timer = DispatchSource.makeTimerSource(queue: self.queue)
+        timer.schedule(deadline: .now() + safeInterval)
+        timer.setEventHandler { [weak self] in
+            guard let self = self else { return }
+            self.fireOverdueTasks()
+            self.rescheduleTimer()
         }
+        currentTimer = timer
+        timer.resume()
     }
 
     private func fireOverdueTasks() {
@@ -107,22 +101,15 @@ class TaskScheduler {
                 continue
             }
 
-            // Check if we should re-schedule alarmCheck till after other tasks are done
             if taskID == .alarmCheck {
                 let shouldSkip = tasksToSkipAlarmCheck.contains {
                     guard let checkTask = tasks[$0] else { return false }
                     return checkTask.nextRun <= now || checkTask.nextRun == .distantFuture
                 }
-
                 if shouldSkip {
-                    //LogManager.shared.log(category: .taskScheduler, message: "Skipping alarmCheck because one of the specified tasks is due or set to distant future.", isDebug: true)
-
-                    guard var existingTask = self.tasks[taskID] else {
-                        continue
-                    }
+                    guard var existingTask = self.tasks[taskID] else { continue }
                     existingTask.nextRun = Date().addingTimeInterval(5)
                     self.tasks[taskID] = existingTask
-
                     continue
                 }
             }
