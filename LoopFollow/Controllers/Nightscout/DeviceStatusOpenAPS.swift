@@ -47,7 +47,7 @@ extension MainViewController {
             var enactedISF: HKQuantity?
             if let enactedISFValue = enactedOrSuggested["ISF"] as? Double {
                 var determinedISFUnit: HKUnit = .milligramsPerDeciliter
-                if enactedISFValue < 15 {
+                if enactedISFValue < 16 {
                     determinedISFUnit = .millimolesPerLiter
                 }
                 enactedISF = HKQuantity(unit: determinedISFUnit, doubleValue: enactedISFValue)
