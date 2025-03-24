@@ -15,10 +15,7 @@ class ObservableUserDefaults {
     var url = ObservableUserDefaultsValue<String>(key: "url", default: "")
     var device = ObservableUserDefaultsValue<String>(key: "device", default: "")
     var nsWriteAuth = ObservableUserDefaultsValue<Bool>(key: "nsWriteAuth", default: false)
-
-    var contactEnabled = ObservableUserDefaultsValue<Bool>(key: "contactEnabled", default: false)
-    var contactTrend = ObservableUserDefaultsValue<Bool>(key: "contactTrend", default: false)
-    var contactDelta = ObservableUserDefaultsValue<Bool>(key: "contactDelta", default: false)
+    var nsAdminAuth = ObservableUserDefaultsValue<Bool>(key: "nsAdminAuth", default: false)
 
     private init() {}
 }

@@ -47,6 +47,8 @@ class NightscoutUtils {
         case treatments
         case deviceStatus
         case iage = "Insulin Change"
+        case temporaryOverride = "Temporary Override"
+        case temporaryOverrideCancel = "Temporary Override Cancel"
 
         var endpoint: String {
             switch self {
@@ -58,6 +60,8 @@ class NightscoutUtils {
                 return "/api/v1/profile/current.json"
             case .deviceStatus:
                 return "/api/v1/devicestatus.json"
+            case .temporaryOverride, .temporaryOverrideCancel:
+                return "/api/v2/notifications/loop"
             }
         }
     }
@@ -167,27 +171,28 @@ class NightscoutUtils {
         return components?.url
     }
 
-    static func verifyURLAndToken(completion: @escaping (NightscoutError?, String?, Bool) -> Void) {
+    static func verifyURLAndToken(completion: @escaping (NightscoutError?, String?, Bool, Bool) -> Void) {
         let urlUser = ObservableUserDefaults.shared.url.value
         let token = UserDefaultsRepository.token.value
 
         if urlUser.isEmpty {
-            completion(.emptyAddress, nil, false)
+            completion(.emptyAddress, nil, false, false)
             return
         }
 
         guard let _ = URL(string: urlUser), urlUser.hasPrefix("http://") || urlUser.hasPrefix("https://") else {
-            completion(.invalidURL, nil, false)
+            completion(.invalidURL, nil, false, false)
             return
         }
 
         guard let request = createURLRequest(url: urlUser, token: token, path: "/api/v1/status.json") else {
-            completion(.invalidURL, nil, false)
+            completion(.invalidURL, nil, false, false)
             return
         }
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             var nsWriteAuth = false
+            var nsAdminAuth = false
 
             if let httpResponse = response as? HTTPURLResponse {
                 switch httpResponse.statusCode {
@@ -201,57 +206,67 @@ class NightscoutUtils {
 
                                 if permissionGroups.contains(where: { $0.contains("*") }) {
                                     nsWriteAuth = true
+                                    nsAdminAuth = true
                                 } else if permissionGroups.contains(where: { $0.contains("api:treatments:create") }) {
                                     nsWriteAuth = true
                                 }
-                                completion(nil, token, nsWriteAuth)
+                                completion(nil, token, nsWriteAuth, nsAdminAuth)
                             } else {
-                                completion(nil, nil, false)
+                                completion(nil, nil, false, false)
                             }
                         } catch {
-                            completion(nil, nil, false)
+                            completion(nil, nil, false, false)
                         }
                     } else {
-                        completion(nil, nil, false)
+                        completion(nil, nil, false, false)
                     }
                 case 401:
                     if token.isEmpty {
-                        completion(.tokenRequired, nil, false)
+                        completion(.tokenRequired, nil, false, false)
                     } else {
-                        completion(.invalidToken, nil, false)
+                        completion(.invalidToken, nil, false, false)
                     }
                 default:
-                    completion(.unknown, nil, false)
+                    completion(.unknown, nil, false, false)
                 }
             } else {
                 if let _ = error {
-                    completion(.siteNotFound, nil, false)
+                    completion(.siteNotFound, nil, false, false)
                 } else {
-                    completion(.networkError, nil, false)
+                    completion(.networkError, nil, false, false)
                 }
             }
         }
         task.resume()
     }
 
-    static func parseDate(_ dateString: String) -> Date? {
-        let dateFormatterWithMilliseconds = DateFormatter()
-        dateFormatterWithMilliseconds.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        dateFormatterWithMilliseconds.timeZone = TimeZone(abbreviation: "UTC")
-        dateFormatterWithMilliseconds.locale = Locale(identifier: "en_US_POSIX")
+    static func parseDate(_ rawString: String) -> Date? {
+        var mutableDate = rawString
 
-        let dateFormatterWithoutMilliseconds = DateFormatter()
-        dateFormatterWithoutMilliseconds.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
-        dateFormatterWithoutMilliseconds.timeZone = TimeZone(abbreviation: "UTC")
-        dateFormatterWithoutMilliseconds.locale = Locale(identifier: "en_US_POSIX")
-
-        if let date = dateFormatterWithMilliseconds.date(from: dateString) {
-            return date
-        } else if let date = dateFormatterWithoutMilliseconds.date(from: dateString) {
-            return date
+        if mutableDate.hasSuffix("Z") {
+            mutableDate = String(mutableDate.dropLast())
+        }
+        else if let offsetRange = mutableDate.range(of: "[\\+\\-]\\d{2}:\\d{2}$",
+                                                    options: .regularExpression) {
+            mutableDate.removeSubrange(offsetRange)
         }
 
-        return nil
+        mutableDate = mutableDate.replacingOccurrences(
+            of: "\\.\\d+",
+            with: "",
+            options: .regularExpression
+        )
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.locale = Locale(identifier: "en_US")
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+
+        let result = dateFormatter.date(from: mutableDate)
+        if result == nil {
+            print("Unable to parse string: '\(mutableDate)'")
+        }
+        return result
     }
 
     static func retrieveJWTToken() async throws -> String {
@@ -322,5 +337,62 @@ class NightscoutUtils {
 
         let decoder = JSONDecoder()
         return try decoder.decode(T.self, from: data)
+    }
+
+    static func executePostRequest(eventType: EventType, body: [String: Any]) async throws -> String {
+        let jwtToken = try await retrieveJWTToken()
+        let baseURL = ObservableUserDefaults.shared.url.value
+
+        guard let url = URL(string: "\(baseURL)\(eventType.endpoint)") else {
+            throw NightscoutError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.waitsForConnectivity = true
+        sessionConfig.networkServiceType = .responsiveData
+        let session = URLSession(configuration: sessionConfig)
+
+        let (data, response) = try await session.data(for: request)
+
+        var responseString : String
+        responseString = String(data: data, encoding: .utf8) ?? ""
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            if responseString != "" {
+                return responseString
+            } else {
+                throw NightscoutError.networkError
+            }
+        }
+
+        return responseString
+    }
+
+    static func extractErrorReason(from responseString: String) -> String {
+        // 1) Try to parse the entire string as JSON and return the "message"
+        if let data = responseString.data(using: .utf8) {
+            if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+               let message = json["message"] as? String {
+                return message
+            }
+        }
+
+        // 2) If not valid JSON (or no "message"), try to parse it as HTML <title>
+        if let startRange = responseString.range(of: "<title>"),
+           let endRange = responseString.range(of: "</title>") {
+            let titleRange = startRange.upperBound..<endRange.lowerBound
+            let titleContent = responseString[titleRange].trimmingCharacters(in: .whitespacesAndNewlines)
+            if !titleContent.isEmpty {
+                return titleContent
+            }
+        }
+
+        // 3) Fallback: just return the entire raw string
+        return responseString
     }
 }

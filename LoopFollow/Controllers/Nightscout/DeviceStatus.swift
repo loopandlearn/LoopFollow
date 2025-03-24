@@ -11,12 +11,7 @@ import UIKit
 import Charts
 
 extension MainViewController {
-    // NS Device Status Web Call
     func webLoadNSDeviceStatus() {
-        if UserDefaultsRepository.debugLog.value {
-            self.writeDebugLog(value: "Download: device status")
-        }
-        
         let parameters: [String: String] = ["count": "1"]
         NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
             switch result {
@@ -28,65 +23,69 @@ extension MainViewController {
                 } else {
                     self.handleDeviceStatusError()
                 }
-                
             case .failure:
                 self.handleDeviceStatusError()
             }
         }
     }
-    
-    private func handleDeviceStatusError() {
-        DispatchQueue.main.async {
-            if self.deviceStatusTimer.isValid {
-                self.deviceStatusTimer.invalidate()
-            }
-            self.startDeviceStatusTimer(time: 10)
-        }
-    }
-    
-    func evaluateNotLooping(lastLoopTime: TimeInterval) {
-        if let statusStackView = LoopStatusLabel.superview as? UIStackView {
-            if ((TimeInterval(Date().timeIntervalSince1970) - lastLoopTime) / 60) > 15 {
-                IsNotLooping = true
-                // Change the distribution to 'fill' to allow manual resizing of arranged subviews
-                statusStackView.distribution = .fill
-                
-                // Hide PredictionLabel and expand LoopStatusLabel to fill the entire stack view
-                PredictionLabel.isHidden = true
-                LoopStatusLabel.frame = CGRect(x: 0, y: 0, width: statusStackView.frame.width, height: statusStackView.frame.height)
-                
-                // Update LoopStatusLabel's properties to display Not Looping
-                LoopStatusLabel.textAlignment = .center
-                LoopStatusLabel.text = "⚠️ Not Looping!"
-                LoopStatusLabel.textColor = UIColor.systemYellow
-                LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
-                
-            } else {
-                IsNotLooping = false
-                // Restore the original distribution and visibility of labels
-                statusStackView.distribution = .fillEqually
-                PredictionLabel.isHidden = false
-                
-                // Reset LoopStatusLabel's properties
-                LoopStatusLabel.textAlignment = .right
-                LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
 
-                if UserDefaultsRepository.forceDarkMode.value {
-                    LoopStatusLabel.textColor = UIColor.white
-                } else {
-                    LoopStatusLabel.textColor = UIColor.black
-                }
+    private func handleDeviceStatusError() {
+        LogManager.shared.log(category: .deviceStatus, message: "Device status fetch failed!", limitIdentifier: "Device status fetch failed!")
+        DispatchQueue.main.async {
+            TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(10))
+            self.evaluateNotLooping()
+        }
+    }
+    
+    func evaluateNotLooping() {
+        guard let statusStackView = LoopStatusLabel.superview as? UIStackView else { return }
+
+        let now = TimeInterval(Date().timeIntervalSince1970)
+        let lastLoopTime = UserDefaultsRepository.alertLastLoopTime.value
+        let isAlarmEnabled = UserDefaultsRepository.alertNotLoopingActive.value
+        let nonLoopingTimeThreshold: TimeInterval
+
+        if isAlarmEnabled {
+            nonLoopingTimeThreshold = Double(UserDefaultsRepository.alertNotLooping.value * 60)
+        } else {
+            nonLoopingTimeThreshold = 15 * 60
+        }
+
+        if IsNightscoutEnabled(), (now - lastLoopTime) >= nonLoopingTimeThreshold, lastLoopTime > 0 {
+            IsNotLooping = true
+            statusStackView.distribution = .fill
+
+            PredictionLabel.isHidden = true
+            LoopStatusLabel.frame = CGRect(x: 0, y: 0, width: statusStackView.frame.width, height: statusStackView.frame.height)
+
+            LoopStatusLabel.textAlignment = .center
+            LoopStatusLabel.text = "⚠️ Not Looping!"
+            LoopStatusLabel.textColor = UIColor.systemYellow
+            LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
+
+        } else {
+            IsNotLooping = false
+            statusStackView.distribution = .fillEqually
+            PredictionLabel.isHidden = false
+
+            LoopStatusLabel.textAlignment = .right
+            LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
+
+            if UserDefaultsRepository.forceDarkMode.value {
+                LoopStatusLabel.textColor = UIColor.white
+            } else {
+                LoopStatusLabel.textColor = UIColor.black
             }
         }
-        latestLoopTime = lastLoopTime
     }
-        
+
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
         infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
 
-        if UserDefaultsRepository.debugLog.value { self.writeDebugLog(value: "Process: device status") }
         if jsonDeviceStatus.count == 0 {
+            LogManager.shared.log(category: .deviceStatus, message: "Device status is empty")
+            TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(5 * 60))
             return
         }
         
@@ -113,10 +112,19 @@ extension MainViewController {
                    let upbat = uploader["battery"] as? Double {
                     infoManager.updateInfoData(type: .battery, value: String(format: "%.0f", upbat) + "%")
                     UserDefaultsRepository.deviceBatteryLevel.value = upbat
+                    let timestamp = uploader["timestamp"] as? Date ?? Date()
+
+                    let currentBattery = DataStructs.batteryStruct(batteryLevel: upbat, timestamp: timestamp)
+                    deviceBatteryData.append(currentBattery)
+
+                    // store only the last 30 battery readings
+                    if deviceBatteryData.count > 30 {
+                        deviceBatteryData.removeFirst()
+                    }
                 }
             }
         }
-        
+
         // Loop - handle new data
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
             DeviceStatusLoop(formatter: formatter, lastLoopRecord: lastLoopRecord)
@@ -153,35 +161,42 @@ extension MainViewController {
 
         // Start the timer based on the timestamp
         let now = dateTimeUtils.getNowTimeIntervalUTC()
-        let secondsAgo = now - latestLoopTime
+        let secondsAgo = now - UserDefaultsRepository.alertLastLoopTime.value
         
         DispatchQueue.main.async {
-            // if Loop is overdue over: 20:00, re-attempt every 5 minutes
             if secondsAgo >= (20 * 60) {
-                self.startDeviceStatusTimer(time: (5 * 60))
-                print("started 5 minute device status timer")
-                
-                // if the Loop is overdue: 10:00-19:59, re-attempt every minute
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(5 * 60)
+                )
+
             } else if secondsAgo >= (10 * 60) {
-                self.startDeviceStatusTimer(time: 60)
-                print("started 1 minute device status timer")
-                
-                // if the Loop is overdue: 7:00-9:59, re-attempt every 30 seconds
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(60)
+                )
+
             } else if secondsAgo >= (7 * 60) {
-                self.startDeviceStatusTimer(time: 30)
-                print("started 30 second device status timer")
-                
-                // if the Loop is overdue: 5:00-6:59 re-attempt every 10 seconds
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(30)
+                )
+
             } else if secondsAgo >= (5 * 60) {
-                self.startDeviceStatusTimer(time: 10)
-                print("started 10 second device status timer")
-                
-                // We have a current Loop. Set timer to 5:10 from last reading
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(10)
+                )
             } else {
-                self.startDeviceStatusTimer(time: 310 - secondsAgo)
-                let timerVal = 310 - secondsAgo
-                print("started 5:10 device status timer: \(timerVal)")
+                let interval = (310 - secondsAgo)
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(interval)
+                )
             }
         }
+
+        evaluateNotLooping()
+        LogManager.shared.log(category: .deviceStatus, message: "Update Device Status done", isDebug: true)
     }
 }

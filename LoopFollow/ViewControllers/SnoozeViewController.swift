@@ -227,6 +227,12 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
             alarms.reloadIsSnoozed(key: "alertBatteryIsSnoozed", value: true)
             alarms.reloadSnoozeTime(key: "alertBatterySnoozedTime", setNil: false, value: currentDate.addingTimeInterval(longSnoozeDuration))
 
+        case "Battery Drop":
+            UserDefaultsRepository.alertBatteryDropIsSnoozed.value = true
+            UserDefaultsRepository.alertBatteryDropSnoozedTime.value = currentDate.addingTimeInterval(longSnoozeDuration)
+            alarms.reloadIsSnoozed(key: "alertBatteryDropIsSnoozed", value: true)
+            alarms.reloadSnoozeTime(key: "alertBatteryDropSnoozedTime", setNil: false, value: currentDate.addingTimeInterval(longSnoozeDuration))
+
         case "Rec. Bolus":
             UserDefaultsRepository.alertRecBolusIsSnoozed.value = true
             UserDefaultsRepository.alertRecBolusSnoozedTime.value = currentDate.addingTimeInterval(snoozeDuration)
@@ -246,7 +252,7 @@ class SnoozeViewController: UIViewController, UNUserNotificationCenterDelegate {
             alarms.reloadSnoozeTime(key: "alertTempTargetEndSnoozedTime", setNil: false, value: currentDate.addingTimeInterval(snoozeDuration))
 
         default:
-            print("Unhandled alarm: \(AlarmSound.whichAlarm)")
+            LogManager.shared.log(category: .alarm, message: "Unhandled alarm: \(AlarmSound.whichAlarm)")
         }
     }
 
