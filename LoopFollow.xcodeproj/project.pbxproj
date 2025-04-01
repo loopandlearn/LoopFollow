@@ -76,6 +76,7 @@
 		DD7E19882ACDA5DA00DBD158 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7E19872ACDA5DA00DBD158 /* Notes.swift */; };
 		DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7E19892ACDA62600DBD158 /* SensorStart.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
+		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
 		DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */; };
 		DD9ACA042D32821400415D8A /* DeviceStatusTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ACA032D32821200415D8A /* DeviceStatusTask.swift */; };
@@ -354,6 +355,7 @@
 		DD7E19872ACDA5DA00DBD158 /* Notes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notes.swift; sourceTree = "<group>"; };
 		DD7E19892ACDA62600DBD158 /* SensorStart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorStart.swift; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
+		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
 		DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareClientExtension.swift; sourceTree = "<group>"; };
 		DD9ACA032D32821200415D8A /* DeviceStatusTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusTask.swift; sourceTree = "<group>"; };
@@ -786,6 +788,7 @@
 		DDAD16302D2EF98C0084BE10 /* Devices */ = {
 			isa = PBXGroup;
 			children = (
+				DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */,
 				DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */,
 				DD5817192D299EF40041FB98 /* DexcomHeartbeatBluetoothDevice.swift */,
 			);
@@ -1499,6 +1502,7 @@
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
 				DD6A935E2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift in Sources */,
 				DD493AD52ACF2109009A6922 /* ResumePump.swift in Sources */,
+				DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */,
 				DDCF979624C1443C002C9752 /* GeneralSettingsViewController.swift in Sources */,
 				FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */,
 				DD493AD72ACF2139009A6922 /* SuspendPump.swift in Sources */,

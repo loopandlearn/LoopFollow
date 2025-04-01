@@ -76,6 +76,11 @@ struct BackgroundRefreshSettingsView: View {
                     Text("Requires a Dexcom G6/ONE/G7/ONE+ transmitter within Bluetooth range. Provides updates every 5 minutes and uses less battery than the silent tune method. If you have more than one device to choose from, select the one with the smallest expected bg delay.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
+
+                case .omnipodDash:
+                    Text("Requires an OmniPod DASH pod paired with this device within Bluetooth range. Provides updates once every 3 minutes and uses less battery than the silent tune method.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                 }
             }
         }
