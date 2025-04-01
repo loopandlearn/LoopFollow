@@ -73,6 +73,9 @@ class BLEManager: NSObject, ObservableObject {
             case .rileyLink:
                 activeDevice = RileyLinkHeartbeatBluetoothDevice(address: device.id.uuidString, name: device.name, bluetoothDeviceDelegate: self)
                 activeDevice?.connect()
+            case .omnipodDash:
+                activeDevice = OmnipodDashHeartbeatBluetoothTransmitter(address: device.id.uuidString, name: device.name, bluetoothDeviceDelegate: self)
+                activeDevice?.connect()
             case .silentTune, .none:
                 return
             }
@@ -94,6 +97,7 @@ class BLEManager: NSObject, ObservableObject {
     }
 
     private func addOrUpdateDevice(_ device: BLEDevice) {
+        LogManager.shared.log(category: .bluetooth, message: "Adding or updating BLE device: \(device)", isDebug: true)
         if let idx = devices.firstIndex(where: { $0.id == device.id }) {
             var updatedDevice = devices[idx]
             updatedDevice.rssi = device.rssi
@@ -247,6 +251,12 @@ extension BLEManager {
 
         let expectedOffset = sensorOffset + pollingDelay
 
+        // If the heartbeat interval isn't a typical 60 or 300 seconds,
+        // we simply return a string indicating that the delay is "up to" the heartbeat interval.
+        if heartBeatInterval != 60 && heartBeatInterval != 300 {
+            return "up to \(Int(heartBeatInterval)) sec"
+        }
+        
         let effectiveDelay = CycleHelper.computeDelay(sensorOffset: expectedOffset, heartbeatLast: heartbeatLast, heartbeatInterval: heartBeatInterval)
 
         return "\(Int(effectiveDelay)) sec"
