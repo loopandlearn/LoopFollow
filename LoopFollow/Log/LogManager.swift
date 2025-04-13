@@ -15,9 +15,11 @@ class LogManager {
     private let logDirectory: URL
     private let dateFormatter: DateFormatter
     private let consoleQueue = DispatchQueue(label: "com.loopfollow.log.console", qos: .background)
-    
+
     private let rateLimitQueue = DispatchQueue(label: "com.loopfollow.log.ratelimit")
     private var lastLoggedTimestamps: [String: Date] = [:]
+
+    private var shouldLogVersionHeader: Bool = true
 
     enum Category: String, CaseIterable {
         case bluetooth = "Bluetooth"
@@ -41,7 +43,12 @@ class LogManager {
         dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
     }
-    
+
+    private func formattedLogMessage(for category: Category, message: String) -> String {
+        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .medium)
+        return "[\(timestamp)] [\(category.rawValue)] \(message)"
+    }
+
     /// Logs a message with an optional rate limit.
     ///
     /// - Parameters:
@@ -51,13 +58,12 @@ class LogManager {
     ///   - limitIdentifier: Optional key to rate-limit similar log messages.
     ///   - limitInterval: Time interval (in seconds) to wait before logging the same type again.
     func log(category: Category, message: String, isDebug: Bool = false, limitIdentifier: String? = nil, limitInterval: TimeInterval = 300) {
-        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .medium)
-        let logMessage = "[\(timestamp)] [\(category.rawValue)] \(message)"
+        let logMessage = formattedLogMessage(for: category, message: message)
 
         consoleQueue.async {
             print(logMessage)
         }
-        
+
         if let key = limitIdentifier, !Storage.shared.debugLogLevel.value {
             let shouldLog: Bool = rateLimitQueue.sync {
                 if let lastLogged = lastLoggedTimestamps[key] {
@@ -76,7 +82,50 @@ class LogManager {
 
         if !isDebug || Storage.shared.debugLogLevel.value {
             let logFileURL = self.currentLogFileURL
+            self.writeVersionHeaderIfNeeded(for: logFileURL)
             self.append(logMessage + "\n", to: logFileURL)
+        }
+    }
+
+    /// Helper method: checks if the log file is empty.
+    private func isLogFileEmpty(at fileURL: URL) -> Bool {
+        if !fileManager.fileExists(atPath: fileURL.path) { return true }
+        if let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
+           let fileSize = attributes[.size] as? UInt64 {
+            return fileSize == 0
+        }
+        return false
+    }
+
+    /// Helper method: writes the version header if needed.
+    private func writeVersionHeaderIfNeeded(for fileURL: URL) {
+        if shouldLogVersionHeader || isLogFileEmpty(at: fileURL) {
+            let versionManager = AppVersionManager()
+            let version = versionManager.version()
+
+            // Retrieve build details
+            let buildDetails = BuildDetails.default
+            let formattedBuildDate = dateTimeUtils.formattedDate(from: buildDetails.buildDate())
+            let branchAndSha = buildDetails.branchAndSha
+            let expiration = dateTimeUtils.formattedDate(from: buildDetails.calculateExpirationDate())
+            let expirationHeaderString = buildDetails.expirationHeaderString
+            let isMacApp = buildDetails.isMacApp()
+            let isSimulatorBuild = buildDetails.isSimulatorBuild()
+
+            // Assemble header information
+            var headerLines = [String]()
+            headerLines.append("LoopFollow Version: \(version)")
+            if !isMacApp && !isSimulatorBuild {
+                headerLines.append("\(expirationHeaderString): \(expiration)")
+            }
+            headerLines.append("Built: \(formattedBuildDate)")
+            headerLines.append("Branch: \(branchAndSha)")
+
+            let headerMessage = headerLines.joined(separator: ", ") + "\n"
+            let logMessage = formattedLogMessage(for: .general, message: headerMessage)
+
+            self.append(logMessage, to: fileURL)
+            shouldLogVersionHeader = false
         }
     }
 
@@ -110,7 +159,7 @@ class LogManager {
     var currentLogFileURL: URL {
         return logFileURL(for: Date())
     }
-    
+
     private func append(_ message: String, to fileURL: URL) {
         if !fileManager.fileExists(atPath: fileURL.path) {
             fileManager.createFile(atPath: fileURL.path, contents: nil, attributes: nil)
