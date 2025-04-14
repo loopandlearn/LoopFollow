@@ -63,6 +63,10 @@ class LogManager {
         consoleQueue.async {
             print(logMessage)
         }
+        
+        if category == .taskScheduler && isDebug {
+            return
+        }
 
         if let key = limitIdentifier, !Storage.shared.debugLogLevel.value {
             let shouldLog: Bool = rateLimitQueue.sync {
