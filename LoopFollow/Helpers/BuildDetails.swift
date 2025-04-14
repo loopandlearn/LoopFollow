@@ -51,7 +51,25 @@ class BuildDetails {
         return "sandboxReceipt".caseInsensitiveCompare(receiptName) == .orderedSame
 #endif
     }
-        
+
+    // Determine if the build is for Simulator
+    func isSimulatorBuild() -> Bool {
+#if targetEnvironment(simulator)
+        return true
+#else
+        return false
+#endif
+    }
+
+    // Determine if the build is for Mac
+    func isMacApp() -> Bool {
+#if targetEnvironment(macCatalyst)
+        return true
+#else
+        return false
+#endif
+    }
+
     // Parse the build date string into a Date object
     func buildDate() -> Date? {
         guard let dateString = dict["com-LoopFollow-build-date"] as? String else {

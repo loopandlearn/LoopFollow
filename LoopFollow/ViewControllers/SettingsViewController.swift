@@ -53,6 +53,8 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let expirationHeaderString = buildDetails.expirationHeaderString
         let versionManager = AppVersionManager()
         let version = versionManager.version()
+        let isMacApp = buildDetails.isMacApp()
+        let isSimulatorBuild = buildDetails.isSimulatorBuild()
 
         form
         +++ Section(header: "Data Settings", footer: "")
@@ -210,7 +212,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         <<< LabelRow() {
             $0.title = expirationHeaderString
             $0.value = expiration
-            $0.hidden = Condition(booleanLiteral: isMacApp())
+            $0.hidden = Condition(booleanLiteral: isMacApp || isSimulatorBuild)
         }
         <<< LabelRow() {
             $0.title = "Built"
@@ -257,14 +259,6 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         } else {
             return .secondaryLabel
         }
-    }
-
-    func isMacApp() -> Bool {
-#if targetEnvironment(macCatalyst)
-        return true
-#else
-        return false
-#endif
     }
 
     func presentInfoDisplaySettings() {
