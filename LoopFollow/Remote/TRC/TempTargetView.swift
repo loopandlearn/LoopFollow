@@ -259,9 +259,11 @@ struct TempTargetView: View {
                 if success {
                     self.statusMessage = "Temp target command successfully sent."
                     self.alertType = .statusSuccess
+                    LogManager.shared.log(category: .apns, message: "sendTempTargetPushNotification succeeded with target: \(newHKTarget), duration: \(duration)")
                 } else {
                     self.statusMessage = errorMessage ?? "Failed to send temp target command."
                     self.alertType = .statusFailure
+                    LogManager.shared.log(category: .apns, message: "sendTempTargetPushNotification failed with target: \(newHKTarget), duration: \(duration), error: \(errorMessage ?? "unknown error")")
                 }
                 self.showAlert = true
             }
@@ -277,9 +279,11 @@ struct TempTargetView: View {
                 if success {
                     self.statusMessage = "Cancel temp target command successfully sent."
                     self.alertType = .statusSuccess
+                    LogManager.shared.log(category: .apns, message: "sendCancelTempTargetPushNotification succeeded")
                 } else {
                     self.statusMessage = errorMessage ?? "Failed to send cancel temp target command."
                     self.alertType = .statusFailure
+                    LogManager.shared.log(category: .apns, message: "sendCancelTempTargetPushNotification failed with error: \(errorMessage ?? "unknown error")")
                 }
                 self.showAlert = true
             }

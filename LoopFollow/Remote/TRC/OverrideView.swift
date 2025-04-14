@@ -179,9 +179,11 @@ struct OverrideView: View {
                 if success {
                     self.statusMessage = "Override command sent successfully."
                     self.alertType = .statusSuccess
+                    LogManager.shared.log(category: .apns, message: "sendOverridePushNotification succeeded for override: \(override.name)")
                 } else {
                     self.statusMessage = errorMessage ?? "Failed to send override command."
                     self.alertType = .statusFailure
+                    LogManager.shared.log(category: .apns, message: "sendOverridePushNotification failed for override: \(override.name). Error: \(errorMessage ?? "unknown error")")
                 }
                 self.showAlert = true
             }
@@ -197,9 +199,11 @@ struct OverrideView: View {
                 if success {
                     self.statusMessage = "Cancel override command sent successfully."
                     self.alertType = .statusSuccess
+                    LogManager.shared.log(category: .apns, message: "sendCancelOverridePushNotification succeeded")
                 } else {
                     self.statusMessage = errorMessage ?? "Failed to send cancel override command."
                     self.alertType = .statusFailure
+                    LogManager.shared.log(category: .apns, message: "sendCancelOverridePushNotification failed. Error: \(errorMessage ?? "unknown error")")
                 }
                 self.showAlert = true
             }
