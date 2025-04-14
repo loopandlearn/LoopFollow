@@ -269,6 +269,12 @@ struct MealView: View {
                 isLoading = false
                 if success {
                     statusMessage = "Meal command sent successfully."
+                    LogManager.shared.log(
+                        category: .apns,
+                        message: "sendMealPushNotification succeeded - Carbs: \(carbs.doubleValue(for: .gram())) g, Protein: \(protein.doubleValue(for: .gram())) g, Fat: \(fat.doubleValue(for: .gram())) g, Bolus: \(bolusAmount.doubleValue(for: .internationalUnit())) U, Scheduled: \(scheduledDate != nil ? formatDate(scheduledDate!) : "now")"
+                    )
+
+                    // Reset meal values and scheduled data after success
                     carbs = HKQuantity(unit: .gram(), doubleValue: 0.0)
                     protein = HKQuantity(unit: .gram(), doubleValue: 0.0)
                     fat = HKQuantity(unit: .gram(), doubleValue: 0.0)
@@ -277,6 +283,10 @@ struct MealView: View {
                     alertType = .statusSuccess
                 } else {
                     statusMessage = errorMessage ?? "Failed to send meal command."
+                    LogManager.shared.log(
+                        category: .apns,
+                        message: "sendMealPushNotification failed with error: \(errorMessage ?? "unknown error")"
+                    )
                     alertType = .statusFailure
                 }
                 showAlert = true
