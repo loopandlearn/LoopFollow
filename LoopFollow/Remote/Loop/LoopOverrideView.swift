@@ -226,4 +226,5 @@ struct LoopOverrideView: View {
             }
             self.showAlert = true
         }
-    }}
+    }
+}
