@@ -37,7 +37,7 @@ struct RemoteSettingsView: View {
                         isEnabled: viewModel.isTrioDevice
                     )
 
-                    Text("Nightscout is the only option for the released version of Trio and Loop.")
+                    Text("Nightscout is the only option for Loop.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
