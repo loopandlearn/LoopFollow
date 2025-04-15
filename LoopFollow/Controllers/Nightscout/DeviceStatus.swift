@@ -36,7 +36,7 @@ extension MainViewController {
             self.evaluateNotLooping()
         }
     }
-    
+
     func evaluateNotLooping() {
         guard let statusStackView = LoopStatusLabel.superview as? UIStackView else { return }
 
@@ -88,10 +88,10 @@ extension MainViewController {
             TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(5 * 60))
             return
         }
-        
+
         //Process the current data first
         let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
-        
+
         //pump and uploader
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate,
@@ -110,10 +110,16 @@ extension MainViewController {
 
                 if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
                    let upbat = uploader["battery"] as? Double {
-                    infoManager.updateInfoData(type: .battery, value: String(format: "%.0f", upbat) + "%")
+                    let batteryText: String
+                    if let isCharging = uploader["isCharging"] as? Bool, isCharging {
+                        batteryText = "⚡️ " + String(format: "%.0f", upbat) + "%"
+                    } else {
+                        batteryText = String(format: "%.0f", upbat) + "%"
+                    }
+                    infoManager.updateInfoData(type: .battery, value: batteryText)
                     UserDefaultsRepository.deviceBatteryLevel.value = upbat
-                    let timestamp = uploader["timestamp"] as? Date ?? Date()
 
+                    let timestamp = uploader["timestamp"] as? Date ?? Date()
                     let currentBattery = DataStructs.batteryStruct(batteryLevel: upbat, timestamp: timestamp)
                     deviceBatteryData.append(currentBattery)
 
@@ -162,7 +168,7 @@ extension MainViewController {
         // Start the timer based on the timestamp
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         let secondsAgo = now - UserDefaultsRepository.alertLastLoopTime.value
-        
+
         DispatchQueue.main.async {
             if secondsAgo >= (20 * 60) {
                 TaskScheduler.shared.rescheduleTask(
