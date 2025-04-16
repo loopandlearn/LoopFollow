@@ -201,9 +201,11 @@ struct LoopOverrideView: View {
             if success {
                 self.statusMessage = "Override command sent successfully."
                 self.alertType = .statusSuccess
+                LogManager.shared.log(category: .nightscout, message: "LoopOverrideView: sendActivateOverrideRequest succeeded for override: \(override.name)")
             } else {
                 self.statusMessage = message ?? "Failed to send override command."
                 self.alertType = .statusFailure
+                LogManager.shared.log(category: .nightscout, message: "LoopOverrideView: sendActivateOverrideRequest failed for override: \(override.name) with error: \(message ?? "unknown error")")
             }
             self.showAlert = true
         }
@@ -216,9 +218,11 @@ struct LoopOverrideView: View {
             if success {
                 self.statusMessage = "Cancellation request successfully sent to Nightscout."
                 self.alertType = .statusSuccess
+                LogManager.shared.log(category: .nightscout, message: "LoopOverrideView: sendCancelOverrideRequest succeeded")
             } else {
-                self.statusMessage = message ?? "Failed to cancel temp target."
+                self.statusMessage = message ?? "Failed to cancel override."
                 self.alertType = .statusFailure
+                LogManager.shared.log(category: .nightscout, message: "LoopOverrideView: sendCancelOverrideRequest failed with error: \(message ?? "unknown error")")
             }
             self.showAlert = true
         }
