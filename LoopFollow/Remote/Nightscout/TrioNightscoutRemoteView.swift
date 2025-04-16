@@ -255,28 +255,48 @@ struct TrioNightscoutRemoteView: View {
     private func enactTempTarget() {
         isLoading = true
         remoteController.sendTempTarget(newTarget: newHKTarget, duration: duration) { success in
-            self.isLoading = false
-            if success {
-                self.statusMessage = "Command successfully sent to Nightscout."
-            } else {
-                self.statusMessage = "Failed to enact target."
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if success {
+                    self.statusMessage = "Command successfully sent to Nightscout."
+                    LogManager.shared.log(
+                        category: .nightscout,
+                        message: "sendTempTarget succeeded - New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
+                    )
+                } else {
+                    self.statusMessage = "Failed to enact target."
+                    LogManager.shared.log(
+                        category: .nightscout,
+                        message: "sendTempTarget failed - New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
+                    )
+                }
+                self.alertType = .status
+                self.showAlert = true
             }
-            self.alertType = .status
-            self.showAlert = true
         }
     }
 
     private func cancelTempTarget() {
         isLoading = true
         remoteController.cancelExistingTarget { success in
-            self.isLoading = false
-            if success {
-                self.statusMessage = "Cancellation request successfully sent to Nightscout."
-            } else {
-                self.statusMessage = "Failed to cancel temp target."
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if success {
+                    self.statusMessage = "Cancellation request successfully sent to Nightscout."
+                    LogManager.shared.log(
+                        category: .nightscout,
+                        message: "cancelExistingTarget succeeded"
+                    )
+                } else {
+                    self.statusMessage = "Failed to cancel temp target."
+                    LogManager.shared.log(
+                        category: .nightscout,
+                        message: "cancelExistingTarget failed"
+                    )
+                }
+                self.alertType = .status
+                self.showAlert = true
             }
-            self.alertType = .status
-            self.showAlert = true
         }
     }
 
