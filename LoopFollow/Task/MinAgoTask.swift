@@ -23,12 +23,13 @@ extension MainViewController {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.MinAgoText.text = ""
-                self.latestMinAgoString = ""
+                Observable.shared.minAgoText.value = ""
+                Observable.shared.bgText.value = ""
+                /*TODO
                 if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
-                    snoozer.MinAgoLabel.text = ""
-                    snoozer.BGLabel.text = ""
                     snoozer.BGLabel.attributedText = NSAttributedString(string: "")
                 }
+                 */
             }
             TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date().addingTimeInterval(1))
             return
@@ -54,15 +55,14 @@ extension MainViewController {
         let minAgoDisplayText = formattedDuration + " min ago"
 
         // Update UI only if the display text has changed
-        if minAgoDisplayText != latestMinAgoString {
+        if minAgoDisplayText != Observable.shared.minAgoText.value {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.MinAgoText.text = minAgoDisplayText
-                self.latestMinAgoString = minAgoDisplayText
+                Observable.shared.minAgoText.value = minAgoDisplayText
 
+                /*TODO
                 if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
-                    snoozer.MinAgoLabel.text = minAgoDisplayText
-
                     let bgLabelText = snoozer.BGLabel.text ?? ""
                     let attributeString = NSMutableAttributedString(string: bgLabelText)
                     attributeString.addAttribute(.strikethroughStyle,
@@ -73,6 +73,7 @@ extension MainViewController {
                                                  range: NSRange(location: 0, length: attributeString.length))
                     snoozer.BGLabel.attributedText = attributeString
                 }
+                 */
             }
         }
 

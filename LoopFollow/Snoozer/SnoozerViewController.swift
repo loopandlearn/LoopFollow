@@ -14,30 +14,17 @@ import Combine
 class SnoozerViewController: UIViewController {
     private var hostingController: UIHostingController<SnoozerView>?
 
-    private var bgValue = ObservableValue<String>(default: "8,9")
-    private var deltaValue = ObservableValue<String>(default: "-0,7")
-    private var direction = ObservableValue<String>(default: "→")
-    private var age = ObservableValue<String>(default: "4 min")
-    private var time = ObservableValue<String>(default: "10:28")
-    private var alarmText = ObservableValue<String?>(default: "High Alert")
     @State private var snoozeMinutes = 15
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
 
-        let snoozerView = SnoozerView(
-            bgValue: bgValue,
-            deltaValue: deltaValue,
-            direction: direction,
-            age: age,
-            time: time,
-            alarmText: alarmText,
-            snoozeMinutes: Binding(get: { self.snoozeMinutes }, set: { self.snoozeMinutes = $0 }),
+        let snoozerView = SnoozerView(snoozeMinutes: $snoozeMinutes,
             onSnooze: {
                 // Trigger snooze logic here (e.g., update UserDefaultsRepository, stop alarm, etc.)
                 print("Snoozed for \(self.snoozeMinutes) minutes")
-            }
+            },
         )
 
         let hosting = UIHostingController(rootView: snoozerView)
@@ -54,14 +41,5 @@ class SnoozerViewController: UIViewController {
         ])
 
         hosting.didMove(toParent: self)
-    }
-
-    // ✅ Only this screen supports landscape
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return [.portrait, .landscapeLeft, .landscapeRight]
-    }
-
-    override var shouldAutorotate: Bool {
-        return true
     }
 }

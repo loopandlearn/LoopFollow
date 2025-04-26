@@ -240,24 +240,19 @@ extension MainViewController {
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
             self.updateServerText(with: sourceName)
 
-            var snoozerBG = ""
-            var snoozerDirection = ""
             var snoozerDelta = ""
 
             // Set BGText with the latest BG value
-            self.BGText.text = Localizer.toDisplayUnits(String(latestBG))
-            snoozerBG = Localizer.toDisplayUnits(String(latestBG))
             self.setBGTextColor()
+
+            Observable.shared.bgText.value = Localizer
+                .toDisplayUnits(String(latestBG))
 
             // Direction handling
             if let directionBG = entries[latestEntryIndex].direction {
-                self.DirectionText.text = self.bgDirectionGraphic(directionBG)
-                snoozerDirection = self.bgDirectionGraphic(directionBG)
-                self.latestDirectionString = self.bgDirectionGraphic(directionBG)
+                Observable.shared.directionText.value = self.bgDirectionGraphic(directionBG)
             } else {
-                self.DirectionText.text = ""
-                snoozerDirection = ""
-                self.latestDirectionString = ""
+                Observable.shared.directionText.value = ""
             }
 
             // Delta handling
@@ -284,14 +279,21 @@ extension MainViewController {
             self.BGText.attributedText = attributeString
 
             // Snoozer Display
+            /*
+             TODO
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-            snoozer.BGLabel.text = snoozerBG
             snoozer.DirectionLabel.text = snoozerDirection
             snoozer.DeltaLabel.text = snoozerDelta
-
+*/
             // Update contact
             if Storage.shared.contactEnabled.value {
-                self.contactImageUpdater.updateContactImage(bgValue: bgTextStr, trend: snoozerDirection, delta: snoozerDelta, stale: deltaTime >= 12)
+                self.contactImageUpdater
+                    .updateContactImage(
+                        bgValue: bgTextStr,
+                        trend: Observable.shared.directionText.value,
+                        delta: snoozerDelta,
+                        stale: deltaTime >= 12
+                    )
             }
         }
     }

@@ -13,6 +13,8 @@ import ShareClient
 import UserNotifications
 import AVFAudio
 import CoreBluetooth
+import Combine
+import SwiftUI
 
 func IsNightscoutEnabled() -> Bool {
     return !ObservableUserDefaults.shared.url.value.isEmpty
@@ -105,8 +107,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var deviceBatteryData: [DataStructs.batteryStruct] = []
     var newBGPulled = false
     var lastCalDate: Double = 0
-    var latestDirectionString = ""
-    var latestMinAgoString = ""
     var latestDeltaString = ""
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
@@ -143,6 +143,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var IsNotLooping = false
 
     let contactImageUpdater = ContactImageUpdater()
+
+    private var cancellables = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -194,8 +196,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
         // Load the snoozer tab
-        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.loadViewIfNeeded()
+        //TODO:
+        //guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
+        //snoozer.loadViewIfNeeded()
 
         // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
@@ -235,8 +238,23 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         
         refreshScrollView.delegate = self
         NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
+
+        Observable.shared.bgText.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.BGText.text = newValue
+            }
+            .store(in: &cancellables)
+
+        Observable.shared.directionText
+            .$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.DirectionText.text = newValue
+            }
+            .store(in: &cancellables)
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("refresh"), object: nil)
     }
@@ -269,7 +287,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
         MinAgoText.text = "Refreshing"
-        latestMinAgoString = "Refreshing"
+        Observable.shared.minAgoText.value = "Refreshing"
         scheduleAllTasks()
 
         currentCage = nil
@@ -520,27 +538,27 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     func setBGTextColor() {
         if bgData.count > 0 {
-            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             let latestBG = bgData[bgData.count - 1].sgv
             var color: NSUIColor = NSUIColor.label
             if UserDefaultsRepository.colorBGText.value {
                 if Float(latestBG) >= UserDefaultsRepository.highLine.value {
                     color = NSUIColor.systemYellow
+                    Observable.shared.bgTextColor.value = .yellow
                 } else if Float(latestBG) <= UserDefaultsRepository.lowLine.value {
                     color = NSUIColor.systemRed
+                    Observable.shared.bgTextColor.value = .red
                 } else {
                     color = NSUIColor.systemGreen
+                    Observable.shared.bgTextColor.value = .green
                 }
             }
             
             BGText.textColor = color
-            snoozer.BGLabel.textColor = color
         }
     }
     
     func bgDirectionGraphic(_ value:String)->String
     {
-        if value == nil { return "-" }
         let //graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
     graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NONE":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
         return graphics[value]!
@@ -658,8 +676,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     func persistentNotification(bgTime: TimeInterval)
     {
         if UserDefaultsRepository.persistentNotification.value && bgTime > UserDefaultsRepository.persistentNotificationLastBGTime.value && bgData.count > 0 {
+/*TODO
             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-            snoozer.sendNotification(self, bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString, deltaVal: latestDeltaString, minAgoVal: latestMinAgoString, alertLabelVal: "Latest BG")
+            snoozer.sendNotification(self, bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: Observable.shared.directionText.value, deltaVal: latestDeltaString, minAgoVal: Observable.shared.minAgoText.value, alertLabelVal: "Latest BG")*/
         }
     }
 
