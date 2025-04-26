@@ -51,21 +51,6 @@ extension MainViewController {
         var absorptionTime: Int
     }
     
-    func isStaleData() -> Bool {
-        if bgData.count > 0 {
-            let now = dateTimeUtils.getNowTimeIntervalUTC()
-            let lastReadingTime = bgData.last!.date
-            let secondsAgo = now - lastReadingTime
-            if secondsAgo >= 20*60 {
-                return true
-            } else {
-                return false
-            }
-        } else {
-            return false
-        }
-    }
-        
     func clearOldTempBasal()
     {
         basalData.removeAll()
