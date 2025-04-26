@@ -414,6 +414,8 @@
 		DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
 		DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = BuildDetails.plist; sourceTree = "<group>"; };
 		DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideView.swift; sourceTree = "<group>"; };
+		DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerView.swift; sourceTree = "<group>"; };
+		DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewController.swift; sourceTree = "<group>"; };
 		DDCF979324C0D380002C9752 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
 		DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsViewController.swift; sourceTree = "<group>"; };
@@ -613,7 +615,6 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DD4AFB4A2DB684A200BB593F /* AlarmEditing */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AlarmEditing; sourceTree = "<group>"; };
-		DD4AFB6C2DBCDA6B00BB593F /* Snoozer */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Snoozer; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -876,6 +877,15 @@
 			path = Scripts;
 			sourceTree = "<group>";
 		};
+		DDC7E5142DBCE1B900EB1127 /* Snoozer */ = {
+			isa = PBXGroup;
+			children = (
+				DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */,
+				DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */,
+			);
+			path = Snoozer;
+			sourceTree = "<group>";
+		};
 		DDCF9A7E2D85FCE6004DF4DD /* Alarm */ = {
 			isa = PBXGroup;
 			children = (
@@ -1134,7 +1144,7 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
-				DD4AFB6C2DBCDA6B00BB593F /* Snoozer */,
+				DDC7E5142DBCE1B900EB1127 /* Snoozer */,
 				DDCF9A7E2D85FCE6004DF4DD /* Alarm */,
 				DD1A97122D429495000DDC11 /* Settings */,
 				DD2C2E522D3C36A8006413A5 /* Dexcom */,

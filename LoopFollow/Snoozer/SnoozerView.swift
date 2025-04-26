@@ -8,77 +8,59 @@
 
 
 import SwiftUI
-import Combine
 
 struct SnoozerView: View {
-    @ObservedObject var bg = Observable.shared.bgValue
-    @ObservedObject var trend = Observable.shared.trendArrow
-    @ObservedObject var delta = Observable.shared.delta
-    @ObservedObject var minutesAgo = Observable.shared.minutesAgo
-    @ObservedObject var alarmTitle = Observable.shared.alarmTitle
+    @ObservedObject var bgValue: ObservableValue<String>
+    @ObservedObject var deltaValue: ObservableValue<String>
+    @ObservedObject var direction: ObservableValue<String>
+    @ObservedObject var age: ObservableValue<String>
+    @ObservedObject var time: ObservableValue<String>
+    @ObservedObject var alarmText: ObservableValue<String?>
 
-    @State private var snoozeMinutes = 10
-    @State private var currentTime = Date()
-
-    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
-    var bgColor: Color {
-        switch bg.value {
-        case ..<4.0:
-            return .red
-        case 4.0..<10:
-            return .yellow
-        default:
-            return .blue
-        }
-    }
+    @Binding var snoozeMinutes: Int
+    var onSnooze: () -> Void
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text(String(format: "%.1f", bg.value).replacingOccurrences(of: ".", with: ","))
-                .font(.system(size: 100, weight: .bold))
-                .foregroundColor(bgColor)
+        VStack(spacing: 12) {
+            Text(bgValue.value)
+                .font(.system(size: 72, weight: .bold))
+                .foregroundColor(.yellow)
 
-            Text(trend.value)
-                .font(.system(size: 40))
-
-            Text(String(format: "%+.1f", delta.value))
-                .font(.title2)
-
-            Text("\(minutesAgo.value) min ago")
-                .font(.subheadline)
-
-            Text(currentTimeFormatted)
-                .font(.largeTitle)
-                .onReceive(timer) { _ in currentTime = Date() }
-
-            if let alarm = alarmTitle.value {
+            if let alarm = alarmText.value, !alarm.isEmpty {
                 Text(alarm)
                     .font(.title2)
                     .foregroundColor(.red)
-                    .padding(.top)
-
-                Stepper("Snooze for \(snoozeMinutes) min", value: $snoozeMinutes, in: 5...60, step: 5)
-                    .padding(.horizontal)
-
-                Button("Snooze") {
-                    // Call snooze logic
-                    print("Snoozing \(alarm) for \(snoozeMinutes) minutes")
-                }
-                .padding()
-                .background(Color.gray.opacity(0.3))
-                .cornerRadius(10)
             }
+
+            Text(direction.value)
+                .font(.title)
+
+            Text(deltaValue.value)
+                .font(.title2)
+                .foregroundColor(.white.opacity(0.8))
+
+            Text(age.value + " ago")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.6))
+
+            Text(time.value)
+                .font(.title3)
+
+            HStack {
+                Text("Snooze for \(snoozeMinutes) min")
+                Stepper("", value: $snoozeMinutes, in: 1...60)
+                    .labelsHidden()
+            }
+            .padding(.top)
+
+            Button("Snooze", action: onSnooze)
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
         }
         .padding()
         .background(Color.black)
-        .foregroundColor(.white)
-        .ignoresSafeArea()
-    }
-
-    private var currentTimeFormatted: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: currentTime)
+        .edgesIgnoringSafeArea(.all)
     }
 }
