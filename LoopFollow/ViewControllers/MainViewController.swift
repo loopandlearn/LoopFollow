@@ -107,7 +107,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var deviceBatteryData: [DataStructs.batteryStruct] = []
     var newBGPulled = false
     var lastCalDate: Double = 0
-    var latestDeltaString = ""
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
     var latestBasal = ""
@@ -246,11 +245,17 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
-        Observable.shared.directionText
-            .$value
+        Observable.shared.directionText.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] newValue in
                 self?.DirectionText.text = newValue
+            }
+            .store(in: &cancellables)
+
+        Observable.shared.deltaText.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.DeltaText.text = newValue
             }
             .store(in: &cancellables)
     }

@@ -240,8 +240,6 @@ extension MainViewController {
             let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
             self.updateServerText(with: sourceName)
 
-            var snoozerDelta = ""
-
             // Set BGText with the latest BG value
             self.setBGTextColor()
 
@@ -257,13 +255,10 @@ extension MainViewController {
 
             // Delta handling
             if deltaBG < 0 {
-                self.latestDeltaString = Localizer.toDisplayUnits(String(deltaBG))
-
+                Observable.shared.deltaText.value = Localizer.toDisplayUnits(String(deltaBG))
             } else {
-                self.latestDeltaString = "+" + Localizer.toDisplayUnits(String(deltaBG))
+                Observable.shared.deltaText.value = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
-            self.DeltaText.text = self.latestDeltaString
-            snoozerDelta = self.latestDeltaString
 
             // Apply strikethrough to BGText based on the staleness of the data
             let bgTextStr = self.BGText.text ?? ""
@@ -278,20 +273,13 @@ extension MainViewController {
             }
             self.BGText.attributedText = attributeString
 
-            // Snoozer Display
-            /*
-             TODO
-            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-            snoozer.DirectionLabel.text = snoozerDirection
-            snoozer.DeltaLabel.text = snoozerDelta
-*/
             // Update contact
             if Storage.shared.contactEnabled.value {
                 self.contactImageUpdater
                     .updateContactImage(
                         bgValue: bgTextStr,
                         trend: Observable.shared.directionText.value,
-                        delta: snoozerDelta,
+                        delta: Observable.shared.deltaText.value,
                         stale: deltaTime >= 12
                     )
             }

@@ -19,8 +19,7 @@ class Observable {
 
     var minAgoText = ObservableValue<String>(default: "?? min ago")
     var bgText = ObservableValue<String>(default: "BG")
-    //TODO
-    var bgTextStale = ObservableValue<Bool>(default: true)
+    var bgStale = ObservableValue<Bool>(default: true)
     var bgTextColor = ObservableValue<Color>(default: .yellow)
     var directionText = ObservableValue<String>(default: "-")
     var deltaText = ObservableValue<String>(default: "+0")

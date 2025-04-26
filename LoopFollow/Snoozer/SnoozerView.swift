@@ -11,8 +11,10 @@ import SwiftUI
 struct SnoozerView: View {
     @ObservedObject var minAgoText = Observable.shared.minAgoText
     @ObservedObject var bgText = Observable.shared.bgText
-    @ObservedObject var bgTextcolor = Observable.shared.bgTextColor
+    @ObservedObject var bgTextColor = Observable.shared.bgTextColor
     @ObservedObject var directionText = Observable.shared.directionText
+    @ObservedObject var deltaText = Observable.shared.deltaText
+    @ObservedObject var bgStale = Observable.shared.bgStale
 
     @Binding var snoozeMinutes: Int
     var onSnooze: () -> Void
@@ -23,12 +25,16 @@ struct SnoozerView: View {
                 .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 0) {
-                // MARK: Main numbers block
                 VStack(spacing: 0) {
                     Text(bgText.value)
                         .font(.system(size: 220, weight: .black))
                         .minimumScaleFactor(0.5)
-                        .foregroundColor(Observable.shared.bgTextColor.value)
+                        .foregroundColor(bgTextColor.value)
+                        .strikethrough(
+                            bgStale.value,
+                            pattern: .solid,
+                            color: bgStale.value ? .red : .clear
+                        )
                         .frame(maxWidth: .infinity, maxHeight: 167)
 
                     Text(directionText.value)
@@ -37,7 +43,7 @@ struct SnoozerView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, maxHeight: 96)
 
-                    Text(""/*deltaValue.value*/)
+                    Text(deltaText.value)
                         .font(.system(size: 70))
                         .minimumScaleFactor(0.5)
                         .foregroundColor(.white.opacity(0.8))
