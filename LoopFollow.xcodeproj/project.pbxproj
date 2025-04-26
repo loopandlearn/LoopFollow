@@ -1948,6 +1948,7 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = LoopFollow/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1970,6 +1971,7 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = LoopFollow/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
