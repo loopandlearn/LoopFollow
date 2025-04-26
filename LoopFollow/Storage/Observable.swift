@@ -24,10 +24,5 @@ class Observable {
     var directionText = ObservableValue<String>(default: "-")
     var deltaText = ObservableValue<String>(default: "+0")
 
-
-    // Work in progress here..
-    var trendArrow = ObservableValue<String>(default: "→")
-    var alarmTitle = ObservableValue<String?>(default: nil)
-
     private init() {}
 }

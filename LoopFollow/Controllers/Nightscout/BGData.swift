@@ -260,11 +260,15 @@ extension MainViewController {
                 Observable.shared.deltaText.value = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
 
+            // Stale
+            Observable.shared.bgStale.value = deltaTime >= 12
+
             // Apply strikethrough to BGText based on the staleness of the data
+            // Also clear badge if bgvalue is stale
             let bgTextStr = self.BGText.text ?? ""
             let attributeString = NSMutableAttributedString(string: bgTextStr)
             attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
-            if deltaTime >= 12 { // Data is stale
+            if Observable.shared.bgStale.value { // Data is stale
                 attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
                 self.updateBadge(val: 0)
             } else { // Data is fresh
@@ -280,7 +284,7 @@ extension MainViewController {
                         bgValue: bgTextStr,
                         trend: Observable.shared.directionText.value,
                         delta: Observable.shared.deltaText.value,
-                        stale: deltaTime >= 12
+                        stale: Observable.shared.bgStale.value
                     )
             }
         }
