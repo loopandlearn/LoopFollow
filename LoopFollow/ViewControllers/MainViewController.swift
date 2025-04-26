@@ -51,31 +51,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var appStateController: AppStateController?
 
     // Variables for BG Charts
-    public var numPoints: Int = 13
-    public var linePlotData: [Double] = []
-    public var linePlotDataTime: [Double] = []
     var firstGraphLoad: Bool = true
-    var firstBasalGraphLoad: Bool = true
-    var minAgoBG: Double = 0.0
     var currentOverride = 1.0
     
-    // Vars for NS Pull
-    var mmol = false as Bool
-    var apnsKey = UserDefaultsRepository.token.value as String
-    var defaults : UserDefaults?
-    let consoleLogging = true
-    var timeofLastBGUpdate = 0 as TimeInterval
     var currentSage : sageData?
     var currentCage : cageData?
     var currentIage : iageData?
 
     var backgroundTask = BackgroundTask()
-    
-    // Refresh NS Data
-    var timer = Timer()
-    // check every 30 Seconds whether new bgvalues should be retrieved
-    let timeInterval: TimeInterval = 30.0
-    
+
     // Check Alarms Timer
     // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
     var checkAlarmTimer = Timer()
@@ -105,7 +89,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var noteGraphData: [DataStructs.noteStruct] = []
     var chartData = LineChartData()
     var deviceBatteryData: [DataStructs.batteryStruct] = []
-    var newBGPulled = false
     var lastCalDate: Double = 0
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
@@ -130,8 +113,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     
     // calendar setup
     let store = EKEventStore()
-    
-    var snoozeTabItem: UITabBarItem = UITabBarItem()
     
     // Stores the time of the last speech announcement to prevent repeated announcements.
     // This is a temporary safeguard until the issue with multiple calls to speakBG is fixed.
