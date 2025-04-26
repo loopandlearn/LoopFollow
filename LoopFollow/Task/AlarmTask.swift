@@ -19,6 +19,14 @@ extension MainViewController {
 
     func alarmTaskAction() {
         DispatchQueue.main.async {
+            let alarmData = AlarmData(
+                expireDate: Storage.shared.expirationDate.value
+            )
+
+            LogManager.shared.log(category: .alarm, message: "Checking alarms based on \(alarmData)", isDebug: true)
+
+            AlarmManager.shared.checkAlarms(data: alarmData)
+            /*
             if self.bgData.count > 0 {
                 self.checkAlarms(bgs: self.bgData)
             }
@@ -27,7 +35,7 @@ extension MainViewController {
             }
             if self.tempTargetGraphData.count > 0 {
                 self.checkTempTargetAlarms()
-            }
+            }*/
 
             TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(30))
         }

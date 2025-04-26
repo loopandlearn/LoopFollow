@@ -3,11 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
+		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
+		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
 		DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */; };
 		DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */; };
 		DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C612C4175FD00DBADDF /* NSProfile.swift */; };
@@ -54,6 +56,15 @@
 		DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE42ACF2383009A6922 /* Treatments.swift */; };
 		DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */; };
 		DD493AE92ACF2445009A6922 /* BGData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE82ACF2445009A6922 /* BGData.swift */; };
+		DD4AFB3B2DB55CB600BB593F /* TimeOfDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */; };
+		DD4AFB3D2DB55D2900BB593F /* AlarmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB3C2DB55D2900BB593F /* AlarmConfiguration.swift */; };
+		DD4AFB3F2DB55EA700BB593F /* AlarmContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB3E2DB55EA700BB593F /* AlarmContext.swift */; };
+		DD4AFB422DB5655700BB593F /* BuildExpireConditionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB412DB5652400BB593F /* BuildExpireConditionTests.swift */; };
+		DD4AFB432DB5655D00BB593F /* AlwaysTrueCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB402DB5651500BB593F /* AlwaysTrueCondition.swift */; };
+		DD4AFB492DB576C200BB593F /* AlarmSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB482DB576C200BB593F /* AlarmSettingsView.swift */; };
+		DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */; };
+		DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB662DB68C5500BB593F /* UUID+Identifiable.swift */; };
+		DD4AFB6B2DB6BF2A00BB593F /* Binding+Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB6A2DB6BF2A00BB593F /* Binding+Optional.swift */; };
 		DD50C7502D0828800057AE6F /* ContactSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */; };
 		DD50C7532D0828D10057AE6F /* ContactSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */; };
 		DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */; };
@@ -102,6 +113,10 @@
 		DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */; };
 		DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */; };
 		DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979D24C2382A002C9752 /* AppStateController.swift */; };
+		DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A7F2D85FD09004DF4DD /* Alarm.swift */; };
+		DDCF9A822D85FD15004DF4DD /* AlarmType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A812D85FD14004DF4DD /* AlarmType.swift */; };
+		DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A872D85FD33004DF4DD /* AlarmData.swift */; };
+		DDCF9A8C2D86005E004DF4DD /* AlarmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A8B2D86005E004DF4DD /* AlarmManager.swift */; };
 		DDCFCAF22B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */; };
 		DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */; };
 		DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */; };
@@ -285,9 +300,22 @@
 		FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEECA1248857A600402A7F /* SettingsViewController.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		DD0247652DB2EB9A00FCADF6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FC97880C2485969B00A7906C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FC9788132485969B00A7906C;
+			remoteInfo = LoopFollow;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
+		DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireCondition.swift; sourceTree = "<group>"; };
+		DD0247612DB2EB9A00FCADF6 /* LoopFollowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoopFollowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutUtils.swift; sourceTree = "<group>"; };
 		DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
 		DD0C0C612C4175FD00DBADDF /* NSProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSProfile.swift; sourceTree = "<group>"; };
@@ -333,6 +361,15 @@
 		DD493AE42ACF2383009A6922 /* Treatments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Treatments.swift; sourceTree = "<group>"; };
 		DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatus.swift; sourceTree = "<group>"; };
 		DD493AE82ACF2445009A6922 /* BGData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGData.swift; sourceTree = "<group>"; };
+		DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeOfDay.swift; sourceTree = "<group>"; };
+		DD4AFB3C2DB55D2900BB593F /* AlarmConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmConfiguration.swift; sourceTree = "<group>"; };
+		DD4AFB3E2DB55EA700BB593F /* AlarmContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmContext.swift; sourceTree = "<group>"; };
+		DD4AFB402DB5651500BB593F /* AlwaysTrueCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlwaysTrueCondition.swift; sourceTree = "<group>"; };
+		DD4AFB412DB5652400BB593F /* BuildExpireConditionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireConditionTests.swift; sourceTree = "<group>"; };
+		DD4AFB482DB576C200BB593F /* AlarmSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSettingsView.swift; sourceTree = "<group>"; };
+		DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmListView.swift; sourceTree = "<group>"; };
+		DD4AFB662DB68C5500BB593F /* UUID+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UUID+Identifiable.swift"; sourceTree = "<group>"; };
+		DD4AFB6A2DB6BF2A00BB593F /* Binding+Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Binding+Optional.swift"; sourceTree = "<group>"; };
 		DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSettingsViewModel.swift; sourceTree = "<group>"; };
 		DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSettingsView.swift; sourceTree = "<group>"; };
 		DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImageUpdater.swift; sourceTree = "<group>"; };
@@ -382,6 +419,10 @@
 		DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979D24C2382A002C9752 /* AppStateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateController.swift; sourceTree = "<group>"; };
+		DDCF9A7F2D85FD09004DF4DD /* Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
+		DDCF9A812D85FD14004DF4DD /* AlarmType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmType.swift; sourceTree = "<group>"; };
+		DDCF9A872D85FD33004DF4DD /* AlarmData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmData.swift; sourceTree = "<group>"; };
+		DDCF9A8B2D86005E004DF4DD /* AlarmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmManager.swift; sourceTree = "<group>"; };
 		DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = LoopFollowDisplayNameConfig.xcconfig; sourceTree = "<group>"; };
 		DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableUserDefaultsValue.swift; sourceTree = "<group>"; };
 		DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableUserDefaults.swift; sourceTree = "<group>"; };
@@ -570,7 +611,19 @@
 		FCFEECA1248857A600402A7F /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		DD4AFB4A2DB684A200BB593F /* AlarmEditing */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AlarmEditing; sourceTree = "<group>"; };
+		DD4AFB6C2DBCDA6B00BB593F /* Snoozer */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Snoozer; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		DD02475E2DB2EB9A00FCADF6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FC9788112485969B00A7906C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -601,6 +654,24 @@
 				059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
+			isa = PBXGroup;
+			children = (
+				DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */,
+				DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */,
+			);
+			path = AlarmCondition;
+			sourceTree = "<group>";
+		};
+		DD02476E2DB4321000FCADF6 /* LoopFollowTests */ = {
+			isa = PBXGroup;
+			children = (
+				DD4AFB412DB5652400BB593F /* BuildExpireConditionTests.swift */,
+				DD4AFB402DB5651500BB593F /* AlwaysTrueCondition.swift */,
+			);
+			path = LoopFollowTests;
 			sourceTree = "<group>";
 		};
 		DD0C0C692C4852A100DBADDF /* Metric */ = {
@@ -769,6 +840,8 @@
 				DDCF979324C0D380002C9752 /* UIViewExtension.swift */,
 				DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */,
 				DD0C0C632C45A59400DBADDF /* HKUnit+Extensions.swift */,
+				DD4AFB662DB68C5500BB593F /* UUID+Identifiable.swift */,
+				DD4AFB6A2DB6BF2A00BB593F /* Binding+Optional.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -801,6 +874,23 @@
 				DDB0AF502BB1A84500AFA48B /* capture-build-details.sh */,
 			);
 			path = Scripts;
+			sourceTree = "<group>";
+		};
+		DDCF9A7E2D85FCE6004DF4DD /* Alarm */ = {
+			isa = PBXGroup;
+			children = (
+				DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */,
+				DD4AFB4A2DB684A200BB593F /* AlarmEditing */,
+				DD4AFB482DB576C200BB593F /* AlarmSettingsView.swift */,
+				DD4AFB3E2DB55EA700BB593F /* AlarmContext.swift */,
+				DD4AFB3C2DB55D2900BB593F /* AlarmConfiguration.swift */,
+				DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */,
+				DDCF9A8B2D86005E004DF4DD /* AlarmManager.swift */,
+				DDCF9A872D85FD33004DF4DD /* AlarmData.swift */,
+				DDCF9A812D85FD14004DF4DD /* AlarmType.swift */,
+				DDCF9A7F2D85FD09004DF4DD /* Alarm.swift */,
+			);
+			path = Alarm;
 			sourceTree = "<group>";
 		};
 		DDDF6F412D479A8E00884336 /* Loop */ = {
@@ -1044,6 +1134,8 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				DD4AFB6C2DBCDA6B00BB593F /* Snoozer */,
+				DDCF9A7E2D85FCE6004DF4DD /* Alarm */,
 				DD1A97122D429495000DDC11 /* Settings */,
 				DD2C2E522D3C36A8006413A5 /* Dexcom */,
 				DD2C2E4D2D3B8ACF006413A5 /* Nightscout */,
@@ -1078,6 +1170,7 @@
 				FC3AE7B3249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld */,
 				FC5A5C3C2497B229009C550E /* Config.xcconfig */,
 				FC8DEEE32485D1680075863F /* LoopFollow */,
+				DD02476E2DB4321000FCADF6 /* LoopFollowTests */,
 				FC9788152485969B00A7906C /* Products */,
 				8E32230C453C93FDCE59C2B9 /* Pods */,
 				6A5880E0B811AF443B05AB02 /* Frameworks */,
@@ -1088,6 +1181,7 @@
 			isa = PBXGroup;
 			children = (
 				FC9788142485969B00A7906C /* Loop Follow.app */,
+				DD0247612DB2EB9A00FCADF6 /* LoopFollowTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1112,6 +1206,7 @@
 		FCC688542489367300A0279D /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */,
 				DD7B0D432D730A320063DCB6 /* CycleHelper.swift */,
 				DDF6999C2C5AAA4C0058A8D9 /* Views */,
 				FCC6886E2489A53800A0279D /* AppConstants.swift */,
@@ -1155,6 +1250,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		DD0247602DB2EB9A00FCADF6 /* LoopFollowTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DD0247672DB2EB9A00FCADF6 /* Build configuration list for PBXNativeTarget "LoopFollowTests" */;
+			buildPhases = (
+				DD02475D2DB2EB9A00FCADF6 /* Sources */,
+				DD02475E2DB2EB9A00FCADF6 /* Frameworks */,
+				DD02475F2DB2EB9A00FCADF6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DD0247662DB2EB9A00FCADF6 /* PBXTargetDependency */,
+			);
+			name = LoopFollowTests;
+			packageProductDependencies = (
+			);
+			productName = LoopFollowTests;
+			productReference = DD0247612DB2EB9A00FCADF6 /* LoopFollowTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		FC9788132485969B00A7906C /* LoopFollow */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FC97882D2485969C00A7906C /* Build configuration list for PBXNativeTarget "LoopFollow" */;
@@ -1170,6 +1285,9 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				DD4AFB4A2DB684A200BB593F /* AlarmEditing */,
+			);
 			name = LoopFollow;
 			packageProductDependencies = (
 				DD48781B2C7DAF140048F05C /* SwiftJWT */,
@@ -1184,10 +1302,14 @@
 		FC97880C2485969B00A7906C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1150;
+				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1140;
 				ORGANIZATIONNAME = "Jon Fawcett";
 				TargetAttributes = {
+					DD0247602DB2EB9A00FCADF6 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = FC9788132485969B00A7906C;
+					};
 					FC9788132485969B00A7906C = {
 						CreatedOnToolsVersion = 11.4.1;
 					};
@@ -1210,11 +1332,19 @@
 			projectRoot = "";
 			targets = (
 				FC9788132485969B00A7906C /* LoopFollow */,
+				DD0247602DB2EB9A00FCADF6 /* LoopFollowTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		DD02475F2DB2EB9A00FCADF6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FC9788122485969B00A7906C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1356,9 +1486,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-LoopFollow/Pods-LoopFollow-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-LoopFollow/Pods-LoopFollow-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1408,6 +1542,15 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		DD02475D2DB2EB9A00FCADF6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD4AFB432DB5655D00BB593F /* AlwaysTrueCondition.swift in Sources */,
+				DD4AFB422DB5655700BB593F /* BuildExpireConditionTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FC9788102485969B00A7906C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1416,13 +1559,17 @@
 				FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */,
 				DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */,
 				DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */,
+				DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */,
 				DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */,
 				DD9ACA082D32F68B00415D8A /* BGTask.swift in Sources */,
 				DD9ACA102D34129200415D8A /* Task.swift in Sources */,
+				DD4AFB492DB576C200BB593F /* AlarmSettingsView.swift in Sources */,
 				DD4878202C7DAF890048F05C /* PushMessage.swift in Sources */,
 				FC7CE59F248D8D23001F83B8 /* SnoozeViewController.swift in Sources */,
+				DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */,
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
 				DD9ACA0E2D340BFF00415D8A /* AlarmTask.swift in Sources */,
+				DDCF9A822D85FD15004DF4DD /* AlarmType.swift in Sources */,
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				DDF699942C555B310058A8D9 /* ViewControllerManager.swift in Sources */,
@@ -1439,6 +1586,7 @@
 				DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */,
 				FC16A97A24996673003D6245 /* NightScout.swift in Sources */,
 				DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */,
+				DDCF9A8C2D86005E004DF4DD /* AlarmManager.swift in Sources */,
 				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,
 				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
@@ -1460,11 +1608,13 @@
 				DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */,
 				DDDF6F472D479AD200884336 /* LoopOverrideViewModel.swift in Sources */,
 				DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */,
+				DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */,
 				DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */,
 				DDEF503A2D31615000999A5D /* LogManager.swift in Sources */,
 				DD4878172C7B75350048F05C /* BolusView.swift in Sources */,
 				DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
+				DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */,
 				DD7B0D442D730A3B0063DCB6 /* CycleHelper.swift in Sources */,
 				DD9ACA0C2D33BB8600415D8A /* CalendarTask.swift in Sources */,
 				DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */,
@@ -1494,6 +1644,7 @@
 				DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */,
 				DD9ACA0A2D33095600415D8A /* MinAgoTask.swift in Sources */,
 				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
+				DD4AFB3F2DB55EA700BB593F /* AlarmContext.swift in Sources */,
 				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
 				DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */,
 				DDFF3D872D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift in Sources */,
@@ -1509,19 +1660,23 @@
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				DDD10F072C529DE800D76A8E /* Observable.swift in Sources */,
 				DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */,
+				DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */,
 				DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */,
 				DD50C7532D0828D10057AE6F /* ContactSettingsView.swift in Sources */,
 				DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */,
+				DD4AFB3B2DB55CB600BB593F /* TimeOfDay.swift in Sources */,
 				DDEF503C2D31BE2D00999A5D /* TaskScheduler.swift in Sources */,
 				DD0C0C6B2C48562000DBADDF /* InsulinMetric.swift in Sources */,
 				DD493AD92ACF2171009A6922 /* Carbs.swift in Sources */,
 				DD493AE92ACF2445009A6922 /* BGData.swift in Sources */,
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
+				DD4AFB6B2DB6BF2A00BB593F /* Binding+Optional.swift in Sources */,
 				DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */,
 				DD9ACA062D32AF7900415D8A /* TreatmentsTask.swift in Sources */,
 				DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */,
 				DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */,
 				DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */,
+				DD4AFB3D2DB55D2900BB593F /* AlarmConfiguration.swift in Sources */,
 				DDF699962C5582290058A8D9 /* TextFieldWithToolBar.swift in Sources */,
 				DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
 				DDDF6F452D479AB100884336 /* LoopOverrideView.swift in Sources */,
@@ -1550,6 +1705,7 @@
 				DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */,
 				DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */,
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
+				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
 				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
 				DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */,
@@ -1566,6 +1722,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DD0247662DB2EB9A00FCADF6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FC9788132485969B00A7906C /* LoopFollow */;
+			targetProxy = DD0247652DB2EB9A00FCADF6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		FC97881F2485969B00A7906C /* Main.storyboard */ = {
@@ -1587,6 +1751,59 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		DD0247682DB2EB9A00FCADF6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.--unique-id-.LoopFollowTests--app-suffix-.LoopFollowTests";
+				PRODUCT_MODULE_NAME = LoopFollowTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop Follow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Loop Follow";
+			};
+			name = Debug;
+		};
+		DD0247692DB2EB9A00FCADF6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.--unique-id-.LoopFollowTests--app-suffix-.LoopFollowTests";
+				PRODUCT_MODULE_NAME = LoopFollowTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop Follow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Loop Follow";
+			};
+			name = Release;
+		};
 		FC97882B2485969C00A7906C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = FC5A5C3C2497B229009C550E /* Config.xcconfig */;
@@ -1622,6 +1839,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1642,6 +1860,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_MODULE_NAME = LoopFollow;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1683,6 +1902,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1696,6 +1916,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				PRODUCT_MODULE_NAME = LoopFollow;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -1707,10 +1928,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1729,10 +1950,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1750,6 +1971,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		DD0247672DB2EB9A00FCADF6 /* Build configuration list for PBXNativeTarget "LoopFollowTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DD0247682DB2EB9A00FCADF6 /* Debug */,
+				DD0247692DB2EB9A00FCADF6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FC97880F2485969B00A7906C /* Build configuration list for PBXProject "LoopFollow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

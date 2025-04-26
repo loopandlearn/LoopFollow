@@ -16,5 +16,12 @@ class Observable {
     var override = ObservableValue<String?>(default: nil)
     var lastRecBolusTriggered = ObservableValue<Double?>(default: nil)
 
+    // Work in progress here.. 
+    var bgValue = ObservableValue<Double>(default: 0.0)
+    var trendArrow = ObservableValue<String>(default: "→")
+    var delta = ObservableValue<Double>(default: 0.0)
+    var minutesAgo = ObservableValue<Int>(default: 0)
+    var alarmTitle = ObservableValue<String?>(default: nil)
+
     private init() {}
 }

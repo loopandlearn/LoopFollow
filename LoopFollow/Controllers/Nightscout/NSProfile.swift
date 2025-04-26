@@ -46,6 +46,7 @@ struct NSProfile: Decodable {
     let isAPNSProduction: Bool?
     let deviceToken: String?
     let teamID: String?
+    let expirationDate: String?
 
     struct TrioOverrideEntry: Decodable {
         let name: String
@@ -94,5 +95,6 @@ struct NSProfile: Decodable {
         case trioOverrides = "overridePresets"
         case loopSettings = "loopSettings"
         case teamID
+        case expirationDate
     }
 }
