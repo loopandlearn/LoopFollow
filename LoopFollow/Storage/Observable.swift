@@ -8,6 +8,7 @@
 
 import Foundation
 import HealthKit
+import SwiftUI
 
 class Observable {
     static let shared = Observable()
@@ -16,11 +17,17 @@ class Observable {
     var override = ObservableValue<String?>(default: nil)
     var lastRecBolusTriggered = ObservableValue<Double?>(default: nil)
 
-    // Work in progress here.. 
-    var bgValue = ObservableValue<Double>(default: 0.0)
+    var minAgoText = ObservableValue<String>(default: "?? min ago")
+    var bgText = ObservableValue<String>(default: "BG")
+    //TODO
+    var bgTextStale = ObservableValue<Bool>(default: true)
+    var bgTextColor = ObservableValue<Color>(default: .yellow)
+    var directionText = ObservableValue<String>(default: "-")
+    var deltaText = ObservableValue<String>(default: "+0")
+
+
+    // Work in progress here..
     var trendArrow = ObservableValue<String>(default: "→")
-    var delta = ObservableValue<Double>(default: 0.0)
-    var minutesAgo = ObservableValue<Int>(default: 0)
     var alarmTitle = ObservableValue<String?>(default: nil)
 
     private init() {}
