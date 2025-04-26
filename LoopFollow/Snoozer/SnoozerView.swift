@@ -86,13 +86,16 @@ struct SnoozerView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Clock and (optional) alert
             VStack(spacing: 8) {
-                Text("19:59" /* replace with time.value */)
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    Text(context.date, format:
+                        Date.FormatStyle(date: .omitted, time: .shortened)
+                    )
                     .font(.system(size: 70))
                     .minimumScaleFactor(0.5)
                     .foregroundColor(.white)
                     .frame(height: 78)
+                }
 
                 /*
                 if let alarm = alarmText.value, !alarm.isEmpty {
