@@ -37,7 +37,7 @@ extension MainViewController {
         
         currentCage = data[0]
         let lastCageString = data[0].created_at
-        
+
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate,
                                    .withTime,

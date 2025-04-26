@@ -90,7 +90,27 @@ class NightscoutUtils {
                 DispatchQueue.main.async {
                     completion(.success(decodedObject))
                 }
+            }
+            catch let decodingError as DecodingError {
+                print("[ERROR] Failed to decode \(T.self):")
+                switch decodingError {
+                case .typeMismatch(let type, let context):
+                    print("Type mismatch for type \(type), context: \(context.debugDescription)")
+                    print("Coding path:", context.codingPath)
+                case .valueNotFound(let type, let context):
+                    print("Value not found for type \(type), context: \(context.debugDescription)")
+                    print("Coding path:", context.codingPath)
+                case .keyNotFound(let key, let context):
+                    print("Key '\(key.stringValue)' not found, context: \(context.debugDescription)")
+                    print("Coding path:", context.codingPath)
+                case .dataCorrupted(let context):
+                    print("Data corrupted, context: \(context.debugDescription)")
+                @unknown default:
+                    print("Unknown decoding error")
+                }
+                completion(.failure(decodingError))
             } catch {
+                print("[ERROR] General error:", error)
                 completion(.failure(error))
             }
         }

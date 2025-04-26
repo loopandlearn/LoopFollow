@@ -127,7 +127,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
                 }
                                              ), onDismiss: nil)
         }
-        <<< ButtonRow("alarmsSettings") {
+        <<< ButtonRow("alarmsSettingstobedeleted") {
             $0.title = "Alarms"
             $0.presentationMode = .show(
                 controllerProvider: .callback(builder: {
@@ -137,6 +137,30 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
                     return alarmVC
                 }), onDismiss: nil)
         }
+
+
+        <<< ButtonRow("alarmsList") {
+            $0.title = "Alarms"
+            $0.presentationMode = .show(
+                controllerProvider: .callback(builder: {
+                    self.presentAlarmList()
+                    return UIViewController()
+                }),
+                onDismiss: nil
+            )
+        }
+
+        <<< ButtonRow("alarmsSettings") {
+            $0.title = "Alarm Settings"
+            $0.presentationMode = .show(
+                controllerProvider: .callback(builder: {
+                    self.presentAlarmSettings()
+                    return UIViewController()
+                }),
+                onDismiss: nil
+            )
+        }
+
         <<< ButtonRow("remoteSettings") {
             $0.title = "Remote Settings"
             $0.presentationMode = .show(
@@ -278,6 +302,30 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
     func presentRemoteSettings() {
         let viewModel = RemoteSettingsViewModel()
         let settingsView = RemoteSettingsView(viewModel: viewModel)
+        let hostingController = UIHostingController(rootView: settingsView)
+        hostingController.modalPresentationStyle = .formSheet
+
+        if UserDefaultsRepository.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        }
+
+        present(hostingController, animated: true, completion: nil)
+    }
+
+    func presentAlarmSettings() {
+        let settingsView = AlarmSettingsView()
+        let hostingController = UIHostingController(rootView: settingsView)
+        hostingController.modalPresentationStyle = .formSheet
+
+        if UserDefaultsRepository.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        }
+
+        present(hostingController, animated: true, completion: nil)
+    }
+
+    func presentAlarmList() {
+        let settingsView = AlarmListView()
         let hostingController = UIHostingController(rootView: settingsView)
         hostingController.modalPresentationStyle = .formSheet
 
