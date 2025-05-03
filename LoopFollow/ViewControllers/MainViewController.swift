@@ -235,6 +235,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 self?.DeltaText.text = newValue
             }
             .store(in: &cancellables)
+
+        /// When an alarm is triggered, go to the snoozer tab
+        Observable.shared.currentAlarm.$value
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 } /// Ignore nil
+            .sink { [weak self] _ in
+                self?.tabBarController?.selectedIndex = 2
+            }
+            .store(in: &cancellables)
     }
 
     deinit {
