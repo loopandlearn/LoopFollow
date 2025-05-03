@@ -43,9 +43,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         UNUserNotificationCenter.current().delegate = self
 
-        // Ensure ViewControllerManager is initialized
-        _ = ViewControllerManager.shared
-
         _ = BLEManager.shared
 
         return true
