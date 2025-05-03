@@ -9,6 +9,10 @@
 import Foundation
 import HealthKit
 
+/*
+ Observable persistant storage
+ */
+
 class Storage {
     var remoteType = StorageValue<RemoteType>(key: "remoteType", defaultValue: .nightscout)
     var deviceToken = StorageValue<String>(key: "deviceToken", defaultValue: "")
@@ -51,8 +55,8 @@ class Storage {
         key: "alarmConfiguration",
         defaultValue: .default
     )
+    var currentAlarm = StorageValue<UUID?>(key: "currentAlarm", defaultValue: nil)
 
     static let shared = Storage()
-
     private init() { }
 }

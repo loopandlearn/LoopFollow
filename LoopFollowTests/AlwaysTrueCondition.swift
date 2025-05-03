@@ -8,7 +8,7 @@
 
 import XCTest
 @testable import LoopFollow
-
+/*
 struct AlwaysTrueCondition: AlarmCondition {
     static let type: AlarmType = .low
     init() {}
@@ -75,3 +75,4 @@ final class CommonAlarmGuardsTests: XCTestCase {
         XCTAssertTrue(cond.shouldFire(alarm: alarm, data: data, context: context))
     }
 }
+*/

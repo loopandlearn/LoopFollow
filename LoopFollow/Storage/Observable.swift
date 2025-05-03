@@ -10,6 +10,10 @@ import Foundation
 import HealthKit
 import SwiftUI
 
+/*
+ Observable in memory storage
+ */
+
 class Observable {
     static let shared = Observable()
 

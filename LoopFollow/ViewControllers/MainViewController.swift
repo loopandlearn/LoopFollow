@@ -60,10 +60,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     var backgroundTask = BackgroundTask()
 
-    // Check Alarms Timer
-    // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
-    var checkAlarmTimer = Timer()
-    var checkAlarmInterval: TimeInterval = 60.0
     var graphNowTimer = Timer()
 
     var lastCalendarWriteAttemptTime: TimeInterval = 0
@@ -671,9 +667,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // General Notifications
     
     func sendGeneralNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
-        
-        UNUserNotificationCenter.current().delegate = self
-        
         let content = UNMutableNotificationContent()
         content.title = title
         content.subtitle = subtitle

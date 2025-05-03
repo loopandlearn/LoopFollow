@@ -17,19 +17,17 @@ protocol AlarmCondition {
 
 extension AlarmCondition {
     /// applies every global & per-alarm guard exactly once
-    func shouldFire(alarm: Alarm, data: AlarmData, context: AlarmContext) -> Bool {
+    func shouldFire(alarm: Alarm, data: AlarmData, now: Date, config: AlarmConfiguration) -> Bool {
         // master on/off
         guard alarm.isEnabled else { return false }
-        // global mute
-        if let until = context.config.muteUntil, until > context.now { return false }
         // per-alarm snooze
-        if let snooze = alarm.snoozedUntil, snooze > context.now { return false }
+        if let snooze = alarm.snoozedUntil, snooze > now { return false }
 
         // time-of-day guard
-        let comps   = Calendar.current.dateComponents([.hour, .minute], from: context.now)
+        let comps   = Calendar.current.dateComponents([.hour, .minute], from: now)
         let nowMin  = (comps.hour! * 60) + comps.minute!
-        let dStart  = context.config.dayStart.minutesSinceMidnight
-        let nStart  = context.config.nightStart.minutesSinceMidnight
+        let dStart  = config.dayStart.minutesSinceMidnight
+        let nStart  = config.nightStart.minutesSinceMidnight
         let isNight = (nowMin < dStart) || (nowMin >= nStart)
 
         switch alarm.activeOption {

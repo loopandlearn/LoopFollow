@@ -8,6 +8,7 @@
 
 import Foundation
 import HealthKit
+import UserNotifications
 
 enum PlaySoundOption: String, CaseIterable, Codable {
   case always, day, night, never
@@ -93,9 +94,95 @@ struct Alarm: Identifiable, Codable, Equatable {
         return false
     }
 
-    func trigger() {
-        // TODO: play sound / update UI / schedule snooze etc.
-        print("🔔 Alarm “\(name)” triggered! Playing \(soundFile.displayName)")
+    /// Function for when the alarm is triggered.
+    /// If this alarm, all alarms is disabled or snoozed, then should not be called. This or all alarmd could be muted, then this function will just generate a notification.
+    func trigger(config : AlarmConfiguration, now: Date) {
+        LogManager.shared.log(category: .alarm, message: "Alarm triggered: \(type.rawValue)")
+
+        var playSound: Bool = true
+
+        // Global mute
+        if let until = config.muteUntil, until > now {
+            playSound = false
+        }
+
+        // Mute during calls
+        if !config.audioDuringCalls && isOnPhoneCall() {
+            playSound = false
+        }
+
+        // Mute this alarm day or night or always
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: now)
+        let dayStart = cal.date(bySettingHour: config.dayStart.hour,
+                                minute: config.dayStart.minute,
+                                second: 0,
+                                of: today)!
+        let nightStart = cal.date(bySettingHour: config.nightStart.hour,
+                                  minute: config.nightStart.minute,
+                                  second: 0,
+                                  of: today)!
+
+        let isNight: Bool
+        if nightStart >= dayStart {
+          isNight = (now >= nightStart) || (now < dayStart)
+        } else {
+          isNight = (now >= nightStart) && (now < dayStart)
+        }
+        let isDay = !isNight
+
+        switch playSoundOption {
+        case .always:
+            break
+        case .never:
+            playSound = false
+        case .day where !isDay:
+            playSound = false
+        case .night where !isNight:
+            playSound = false
+        default:
+            break
+        }
+
+        let shouldRepeat: Bool = {
+            switch repeatSoundOption {
+            case .always: return true
+            case .never:  return false
+            case .day:    return isDay
+            case .night:  return isNight
+            }
+        }()
+
+        let content = UNMutableNotificationContent()
+        content.title = type.rawValue
+        content.subtitle += Observable.shared.bgText.value + " "
+        content.subtitle += Observable.shared.directionText.value + " "
+        content.subtitle += Observable.shared.deltaText.value
+        content.categoryIdentifier = "category"
+            // This is needed to trigger vibrate on watch and phone
+            // TODO:
+            // See if we can use .Critcal
+            // See if we should use this method instead of direct sound player
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+
+        let action = UNNotificationAction(identifier: "snooze", title: "Snooze", options: [])
+        let category = UNNotificationCategory(identifier: "category", actions: [action], intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+
+        /* TODO när vi gör bg alarm sätt timestamp/datum för denna readings tid så vi inte larmar på samma igen, se isBGBased
+            if snooozedBGReadingTime != nil {
+                UserDefaultsRepository.snoozedBGReadingTime.value = snooozedBGReadingTime
+            }
+        */
+
+        if playSound {
+            AlarmSound.setSoundFile(str: self.soundFile.rawValue)
+            AlarmSound.play(repeating: shouldRepeat)
+        }
     }
 
     init(type: AlarmType) {

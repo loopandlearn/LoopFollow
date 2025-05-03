@@ -9,6 +9,10 @@
 import Foundation
 import Combine
 
+/*
+ Legacy storage, we are moving away from this
+ */
+
 class ObservableUserDefaults {
     static let shared = ObservableUserDefaults()
 
