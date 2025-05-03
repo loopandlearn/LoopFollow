@@ -41,9 +41,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             if let vc = viewControllers[i] as? SettingsViewController {
                vc.appStateController = appStateController
             }
-            if let vc = viewControllers[i] as? debugViewController {
-               vc.appStateController = appStateController
-            }
          }
 
         // Register the SceneDelegate as an observer for the "toggleSpeakBG" notification, which will be triggered when the user toggles the "Speak BG" feature in General Settings. This helps ensure that the Quick Action is updated according to the current setting.
