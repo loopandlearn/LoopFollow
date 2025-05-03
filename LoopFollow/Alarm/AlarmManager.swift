@@ -12,16 +12,13 @@ class AlarmManager {
     static let shared = AlarmManager()
 
     private let evaluators: [AlarmType: AlarmCondition]
-    private let config: AlarmConfiguration
 
     private init(
-        config: AlarmConfiguration = .default,
         conditionTypes: [AlarmCondition.Type] = [
             BuildExpireCondition.self
-            // …add your other condition types here
+            // TODO: add other condition types here
         ]
     ) {
-        self.config = config
         var dict = [AlarmType: AlarmCondition]()
         conditionTypes.forEach { dict[$0.type] = $0.init() }
         evaluators = dict
@@ -62,18 +59,21 @@ class AlarmManager {
 
             // Evaluate the alarm condition.
             guard let checker = evaluators[alarm.type],
-                  checker.shouldFire(alarm: alarm, data: data, now: now, config: config)
+                  checker
+                .shouldFire(
+                    alarm: alarm,
+                    data: data,
+                    now: now,
+                    config: Storage.shared.alarmConfiguration.value
+                )
             else {
                 continue
             }
 
             // Fire the alarm and break the loop; we only allow one alarm per evaluation tick.
+            Observable.shared.currentAlarm.value = alarm.id
 
-            //TODO: a few things affecting the snoozed screen
-            Storage.shared.currentAlarm.value = alarm.id
-            //tabBarController?.selectedIndex = 2
-
-            alarm.trigger(config: config, now: now)
+            alarm.trigger(config: Storage.shared.alarmConfiguration.value, now: now)
             break
         }
     }

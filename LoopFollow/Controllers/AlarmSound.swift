@@ -112,21 +112,21 @@ class AlarmSound {
             //self.audioPlayer!.volume = (self.muted || (UserDefaultsRepository.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
             
             if !self.audioPlayer!.prepareToPlay() {
-                LogManager.shared.log(category: .general, message: "AlarmSound - audio player failed preparing to play")
+                LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed preparing to play")
             }
             
             if self.audioPlayer!.play() {
                 if !self.isPlaying {
-                    LogManager.shared.log(category: .general, message: "AlarmSound - not playing after calling play")
-                    LogManager.shared.log(category: .general, message: "AlarmSound - rate value: \(self.audioPlayer!.rate)")
+                    LogManager.shared.log(category: .alarm, message: "AlarmSound - not playing after calling play")
+                    LogManager.shared.log(category: .alarm, message: "AlarmSound - rate value: \(self.audioPlayer!.rate)")
                 }
             } else {
-                LogManager.shared.log(category: .general, message: "AlarmSound - audio player failed to play")
+                LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed to play")
             }
             
             
         } catch let error {
-            LogManager.shared.log(category: .general, message: "AlarmSound - unable to play sound; error: \(error)")
+            LogManager.shared.log(category: .alarm, message: "AlarmSound - unable to play sound; error: \(error)")
         }
     }
     
@@ -156,16 +156,16 @@ class AlarmSound {
             //self.audioPlayer!.volume = (self.muted || (UserDefaultsRepository.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
             
             if !self.audioPlayer!.prepareToPlay() {
-                LogManager.shared.log(category: .general, message: "AlarmSound - audio player failed preparing to play")
+                LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed preparing to play")
             }
             
             if self.audioPlayer!.play() {
                 if !self.isPlaying {
-                    LogManager.shared.log(category: .general, message: "AlarmSound - not playing after calling play")
-                    LogManager.shared.log(category: .general, message: "AlarmSound - rate value: \(self.audioPlayer!.rate)")
+                    LogManager.shared.log(category: .alarm, message: "AlarmSound - not playing after calling play")
+                    LogManager.shared.log(category: .alarm, message: "AlarmSound - rate value: \(self.audioPlayer!.rate)")
                 }
             } else {
-                LogManager.shared.log(category: .general, message: "AlarmSound - audio player failed to play")
+                LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed to play")
             }
             
             
@@ -178,7 +178,7 @@ class AlarmSound {
                 MPVolumeView.setVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
             }
         } catch let error {
-            LogManager.shared.log(category: .general, message: "AlarmSound - unable to play sound; error: \(error)")
+            LogManager.shared.log(category: .alarm, message: "AlarmSound - unable to play sound; error: \(error)")
         }
     }
     
@@ -205,16 +205,16 @@ class AlarmSound {
             
             
             if !self.audioPlayer!.prepareToPlay() {
-                LogManager.shared.log(category: .general, message: "Terminate AlarmSound - audio player failed preparing to play")
+                LogManager.shared.log(category: .alarm, message: "Terminate AlarmSound - audio player failed preparing to play")
             }
             
             if self.audioPlayer!.play() {
                 if !self.isPlaying {
-                    LogManager.shared.log(category: .general, message: "Terminate AlarmSound - not playing after calling play")
-                    LogManager.shared.log(category: .general, message: "Terminate AlarmSound - rate value: \(self.audioPlayer!.rate)")
+                    LogManager.shared.log(category: .alarm, message: "Terminate AlarmSound - not playing after calling play")
+                    LogManager.shared.log(category: .alarm, message: "Terminate AlarmSound - rate value: \(self.audioPlayer!.rate)")
                 }
             } else {
-                LogManager.shared.log(category: .general, message: "Terminate AlarmSound - audio player failed to play")
+                LogManager.shared.log(category: .alarm, message: "Terminate AlarmSound - audio player failed to play")
             }
             
             
@@ -222,7 +222,7 @@ class AlarmSound {
            
             
         } catch let error {
-            LogManager.shared.log(category: .general, message: "Terminate AlarmSound - unable to play sound; error: \(error)")
+            LogManager.shared.log(category: .alarm, message: "Terminate AlarmSound - unable to play sound; error: \(error)")
         }
     }
 
@@ -249,7 +249,7 @@ class AlarmSound {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: .mixWithOthers)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
-            LogManager.shared.log(category: .general, message: "Enable audio error: \(error)")
+            LogManager.shared.log(category: .alarm, message: "Enable audio error: \(error)")
         }
     }
 }
@@ -258,15 +258,15 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
 
     /* audioPlayerDidFinishPlaying:successfully: is called when a sound has finished playing. This method is NOT called if the player is stopped due to an interruption. */
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerDidFinishPlaying (\(flag))", isDebug: true)
+        LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerDidFinishPlaying (\(flag))", isDebug: true)
     }
     
     /* if an error occurs while decoding it will be reported to the delegate. */
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
         if let error = error {
-            LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerDecodeErrorDidOccur: \(error)")
+            LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerDecodeErrorDidOccur: \(error)")
         } else {
-            LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerDecodeErrorDidOccur")
+            LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerDecodeErrorDidOccur")
         }
     }
     
@@ -274,14 +274,14 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
     
     /* audioPlayerBeginInterruption: is called when the audio session has been interrupted while the player was playing. The player will have been paused. */
     func audioPlayerBeginInterruption(_ player: AVAudioPlayer) {
-        LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerBeginInterruption")
+        LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerBeginInterruption")
     }
     
     
     /* audioPlayerEndInterruption:withOptions: is called when the audio session interruption has ended and this player had been interrupted while playing. */
     /* Currently the only flag is AVAudioSessionInterruptionFlags_ShouldResume. */
     func audioPlayerEndInterruption(_ player: AVAudioPlayer, withOptions flags: Int) {
-        LogManager.shared.log(category: .general, message: "AlarmRule - audioPlayerEndInterruption withOptions: \(flags)")
+        LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerEndInterruption withOptions: \(flags)")
     }
 }
 

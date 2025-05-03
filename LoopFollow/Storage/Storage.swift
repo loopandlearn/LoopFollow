@@ -55,7 +55,6 @@ class Storage {
         key: "alarmConfiguration",
         defaultValue: .default
     )
-    var currentAlarm = StorageValue<UUID?>(key: "currentAlarm", defaultValue: nil)
 
     static let shared = Storage()
     private init() { }

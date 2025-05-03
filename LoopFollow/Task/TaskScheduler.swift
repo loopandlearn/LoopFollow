@@ -48,7 +48,7 @@ class TaskScheduler {
 
     func rescheduleTask(id: TaskID, to newRunDate: Date) {
         let timeString = self.formatTime(newRunDate)
-        LogManager.shared.log(category: .taskScheduler, message: "Reschedule Task \(id): next run = \(timeString)", isDebug: true)
+        //LogManager.shared.log(category: .taskScheduler, message: "Reschedule Task \(id): next run = \(timeString)", isDebug: true)
 
         queue.async {
             guard var existingTask = self.tasks[id] else { return }
@@ -118,7 +118,7 @@ class TaskScheduler {
             updatedTask.nextRun = .distantFuture
             tasks[taskID] = updatedTask
 
-            LogManager.shared.log(category: .taskScheduler, message: "Executing task \(taskID)", isDebug: true)
+            //LogManager.shared.log(category: .taskScheduler, message: "Executing Task \(taskID)", isDebug: true)
 
             DispatchQueue.main.async {
                 task.action()

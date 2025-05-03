@@ -23,7 +23,7 @@ extension MainViewController {
             //TODO: Fyll på med mer alarmData
             //TODO: gör det möjligt att köra med fejkad data.
             let alarmData = AlarmData(
-                expireDate: Storage.shared.expirationDate.value
+                expireDate: .distantPast // Storage.shared.expirationDate.value
             )
 
             LogManager.shared.log(category: .alarm, message: "Checking alarms based on \(alarmData)", isDebug: true)
