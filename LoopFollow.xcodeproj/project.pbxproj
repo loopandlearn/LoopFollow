@@ -143,7 +143,6 @@
 		DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */; };
 		DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */; };
 		DDF2C0142BEFD468007A20E6 /* blacklisted-versions.json in Resources */ = {isa = PBXBuildFile; fileRef = DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */; };
-		DDF699942C555B310058A8D9 /* ViewControllerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF699932C555B310058A8D9 /* ViewControllerManager.swift */; };
 		DDF699962C5582290058A8D9 /* TextFieldWithToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF699952C5582290058A8D9 /* TextFieldWithToolBar.swift */; };
 		DDF699992C5AA3060058A8D9 /* TempTargetPresetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF699982C5AA3060058A8D9 /* TempTargetPresetManager.swift */; };
 		DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF6999A2C5AA32E0058A8D9 /* TempTargetPreset.swift */; };
@@ -289,7 +288,6 @@
 		FC9788292485969C00A7906C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC9788272485969C00A7906C /* LaunchScreen.storyboard */; };
 		FCA2DDE62501095000254A8C /* Timers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCA2DDE52501095000254A8C /* Timers.swift */; };
 		FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */; };
-		FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6884F248935D800A0279D /* AlarmViewController.swift */; };
 		FCC6885C2489559400A0279D /* blank.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885B2489559400A0279D /* blank.wav */; };
 		FCC6885E24896A6C00A0279D /* silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885D24896A6C00A0279D /* silence.mp3 */; };
 		FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886424898EEE00A0279D /* UserDefaults.swift */; };
@@ -456,7 +454,6 @@
 		DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubService.swift; sourceTree = "<group>"; };
 		DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionManager.swift; sourceTree = "<group>"; };
 		DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "blacklisted-versions.json"; sourceTree = "<group>"; };
-		DDF699932C555B310058A8D9 /* ViewControllerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerManager.swift; sourceTree = "<group>"; };
 		DDF699952C5582290058A8D9 /* TextFieldWithToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldWithToolBar.swift; sourceTree = "<group>"; };
 		DDF699982C5AA3060058A8D9 /* TempTargetPresetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetPresetManager.swift; sourceTree = "<group>"; };
 		DDF6999A2C5AA32E0058A8D9 /* TempTargetPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetPreset.swift; sourceTree = "<group>"; };
@@ -604,7 +601,6 @@
 		FC9788282485969C00A7906C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FCA2DDE52501095000254A8C /* Timers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timers.swift; sourceTree = "<group>"; };
 		FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryKeyPath.swift; sourceTree = "<group>"; };
-		FCC6884F248935D800A0279D /* AlarmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmViewController.swift; sourceTree = "<group>"; };
 		FCC688592489554800A0279D /* BackgroundTaskAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskAudio.swift; sourceTree = "<group>"; };
 		FCC6885B2489559400A0279D /* blank.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blank.wav; sourceTree = "<group>"; };
 		FCC6885D24896A6C00A0279D /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
@@ -1052,7 +1048,6 @@
 				FC1BDD2C24A23204001B652C /* StatsView.swift */,
 				FCA2DDE52501095000254A8C /* Timers.swift */,
 				DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */,
-				DDF699932C555B310058A8D9 /* ViewControllerManager.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -1293,7 +1288,6 @@
 				FC97881D2485969B00A7906C /* NightScoutViewController.swift */,
 				FCD49B6B24AA536E007879DC /* DebugViewController.swift */,
 				FCFEECA1248857A600402A7F /* SettingsViewController.swift */,
-				FCC6884F248935D800A0279D /* AlarmViewController.swift */,
 				DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */,
 				DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */,
 				DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */,
@@ -1607,7 +1601,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */,
-				FCC68850248935D800A0279D /* AlarmViewController.swift in Sources */,
 				DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */,
 				DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */,
 				DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */,
@@ -1622,7 +1615,6 @@
 				DDCF9A822D85FD15004DF4DD /* AlarmType.swift in Sources */,
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
-				DDF699942C555B310058A8D9 /* ViewControllerManager.swift in Sources */,
 				DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */,
 				DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */,
 				DD5334212C60EBEE00062F9D /* InsulinCartridgeChange.swift in Sources */,

@@ -127,17 +127,6 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
                 }
                                              ), onDismiss: nil)
         }
-        <<< ButtonRow("alarmsSettingstobedeleted") {
-            $0.title = "Alarms"
-            $0.presentationMode = .show(
-                controllerProvider: .callback(builder: {
-                    guard let alarmVC = ViewControllerManager.shared.alarmViewController else {
-                        fatalError("AlarmViewController should be pre-instantiated and available")
-                    }
-                    return alarmVC
-                }), onDismiss: nil)
-        }
-
 
         <<< ButtonRow("alarmsList") {
             $0.title = "Alarms"

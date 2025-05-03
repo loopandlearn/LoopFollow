@@ -53,9 +53,6 @@ extension MainViewController {
             let snoozeTime = Date(timeIntervalSince1970: UserDefaultsRepository.alertSageInsertTime.value + 7200)
             UserDefaultsRepository.alertSnoozeAllTime.value = snoozeTime
             UserDefaultsRepository.alertSnoozeAllIsSnoozed.value = true
-            guard let alarms = ViewControllerManager.shared.alarmViewController else { return }
-            alarms.reloadIsSnoozed(key: "alertSnoozeAllIsSnoozed", value: true)
-            alarms.reloadSnoozeTime(key: "alertSnoozeAllTime", setNil: false, value: snoozeTime)
         }
 
         if let sageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
