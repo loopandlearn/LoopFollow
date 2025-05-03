@@ -23,7 +23,7 @@ enum AlarmType: String, CaseIterable, Codable {
     case missedBolus = "Missed Bolus Alert"
     case sensorChange = "Sensor Change Alert"
     case pumpChange = "Pump Change Alert"
-    case pump = "Low Insulin Alert"
+    case pump = "Pump Insulin Alert"
     case battery = "Low Battery"
     case batteryDrop = "Battery Drop"
     case recBolus = "Rec. Bolus"
@@ -93,4 +93,17 @@ enum TimeUnit {
     case .day:    return "days"
     }
   }
+}
+
+extension AlarmType {
+    /// `true` for alarms whose primary trigger is a blood-glucose value
+    /// or its rate of change.
+    var isBGBased: Bool {
+        switch self {
+        case .low, .high, .fastDrop, .fastRise, .missedReading:
+            return true
+        default:
+            return false
+        }
+    }
 }

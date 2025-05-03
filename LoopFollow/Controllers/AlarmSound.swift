@@ -112,26 +112,26 @@ class AlarmSound {
             //self.audioPlayer!.volume = (self.muted || (UserDefaultsRepository.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
             
             if !self.audioPlayer!.prepareToPlay() {
-                NSLog("AlarmSound - audio player failed preparing to play")
+                LogManager.shared.log(category: .general, message: "AlarmSound - audio player failed preparing to play")
             }
             
             if self.audioPlayer!.play() {
                 if !self.isPlaying {
-                    NSLog("AlarmSound - not playing after calling play")
-                    NSLog("AlarmSound - rate value: \(self.audioPlayer!.rate)")
+                    LogManager.shared.log(category: .general, message: "AlarmSound - not playing after calling play")
+                    LogManager.shared.log(category: .general, message: "AlarmSound - rate value: \(self.audioPlayer!.rate)")
                 }
             } else {
-                NSLog("AlarmSound - audio player failed to play")
+                LogManager.shared.log(category: .general, message: "AlarmSound - audio player failed to play")
             }
             
             
         } catch let error {
-            NSLog("AlarmSound - unable to play sound; error: \(error)")
+            LogManager.shared.log(category: .general, message: "AlarmSound - unable to play sound; error: \(error)")
         }
     }
     
     
-    static func play(overrideVolume: Bool, numLoops: Int) {
+    static func play(repeating: Bool) {
         guard !self.isPlaying else {
             return
         }
@@ -145,9 +145,8 @@ class AlarmSound {
             try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playback)))
             try AVAudioSession.sharedInstance().setActive(true)
             
-            // Play endless loops
-            self.audioPlayer!.numberOfLoops = numLoops
-            
+            self.audioPlayer!.numberOfLoops = repeating ? -1 : 0
+
             // Store existing volume
             if self.systemOutputVolumeBeforeOverride == nil {
                 self.systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
@@ -157,16 +156,16 @@ class AlarmSound {
             //self.audioPlayer!.volume = (self.muted || (UserDefaultsRepository.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
             
             if !self.audioPlayer!.prepareToPlay() {
-                NSLog("AlarmSound - audio player failed preparing to play")
+                LogManager.shared.log(category: .general, message: "AlarmSound - audio player failed preparing to play")
             }
             
             if self.audioPlayer!.play() {
                 if !self.isPlaying {
-                    NSLog("AlarmSound - not playing after calling play")
-                    NSLog("AlarmSound - rate value: \(self.audioPlayer!.rate)")
+                    LogManager.shared.log(category: .general, message: "AlarmSound - not playing after calling play")
+                    LogManager.shared.log(category: .general, message: "AlarmSound - rate value: \(self.audioPlayer!.rate)")
                 }
             } else {
-                NSLog("AlarmSound - audio player failed to play")
+                LogManager.shared.log(category: .general, message: "AlarmSound - audio player failed to play")
             }
             
             
@@ -175,13 +174,11 @@ class AlarmSound {
             //    self.audioPlayer!.setVolume(1.0, fadeDuration: UserDefaultsRepository.fadeInTimeInterval.value)
             //}
             
-            if overrideVolume {
-                MPVolumeView.setVolume(UserDefaultsRepository.forcedOutputVolume.value)
+            if Storage.shared.alarmConfiguration.value.overrideSystemOutputVolume {
+                MPVolumeView.setVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
             }
-            
-            
         } catch let error {
-            NSLog("AlarmSound - unable to play sound; error: \(error)")
+            LogManager.shared.log(category: .general, message: "AlarmSound - unable to play sound; error: \(error)")
         }
     }
     
@@ -208,16 +205,16 @@ class AlarmSound {
             
             
             if !self.audioPlayer!.prepareToPlay() {
-                NSLog("Terminate AlarmSound - audio player failed preparing to play")
+                LogManager.shared.log(category: .general, message: "Terminate AlarmSound - audio player failed preparing to play")
             }
             
             if self.audioPlayer!.play() {
                 if !self.isPlaying {
-                    NSLog("Terminate AlarmSound - not playing after calling play")
-                    NSLog("Terminate AlarmSound - rate value: \(self.audioPlayer!.rate)")
+                    LogManager.shared.log(category: .general, message: "Terminate AlarmSound - not playing after calling play")
+                    LogManager.shared.log(category: .general, message: "Terminate AlarmSound - rate value: \(self.audioPlayer!.rate)")
                 }
             } else {
-                NSLog("Terminate AlarmSound - audio player failed to play")
+                LogManager.shared.log(category: .general, message: "Terminate AlarmSound - audio player failed to play")
             }
             
             
@@ -225,7 +222,7 @@ class AlarmSound {
            
             
         } catch let error {
-            NSLog("Terminate AlarmSound - unable to play sound; error: \(error)")
+            LogManager.shared.log(category: .general, message: "Terminate AlarmSound - unable to play sound; error: \(error)")
         }
     }
 

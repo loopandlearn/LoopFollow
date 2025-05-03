@@ -14,6 +14,10 @@ import Foundation
 import UIKit
 import HealthKit
 
+/*
+ Legacy storage, we are moving away from this
+ */
+
 class UserDefaultsRepository {
     static let infoSort = UserDefaultsValue<[Int]>(key: "infoSort", default: InfoType.allCases.map { $0.sortOrder })
     static let infoVisible = UserDefaultsValue<[Bool]>(key: "infoVisible", default: InfoType.allCases.map { $0.defaultVisible })

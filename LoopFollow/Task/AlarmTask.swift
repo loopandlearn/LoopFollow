@@ -7,9 +7,10 @@
 //
 
 import Foundation
-
+//TODO: Nu körs ju alarm var 60 sekund... men man vill nog ha det direkt efter bg-värdet kommer in etc.
+//TODO: Men ändå kanske inte för nära ett tidigare alarm, men det kanske vi inte hanterar här....
 extension MainViewController {
-    func scheduleAlarmTask(initialDelay: TimeInterval = 30) {
+    func scheduleAlarmTask(initialDelay: TimeInterval = 60) {
         let firstRun = Date().addingTimeInterval(initialDelay)
         TaskScheduler.shared.scheduleTask(id: .alarmCheck, nextRun: firstRun) { [weak self] in
             guard let self = self else { return }
@@ -19,6 +20,8 @@ extension MainViewController {
 
     func alarmTaskAction() {
         DispatchQueue.main.async {
+            //TODO: Fyll på med mer alarmData
+            //TODO: gör det möjligt att köra med fejkad data.
             let alarmData = AlarmData(
                 expireDate: Storage.shared.expirationDate.value
             )
@@ -26,18 +29,8 @@ extension MainViewController {
             LogManager.shared.log(category: .alarm, message: "Checking alarms based on \(alarmData)", isDebug: true)
 
             AlarmManager.shared.checkAlarms(data: alarmData)
-            /*
-            if self.bgData.count > 0 {
-                self.checkAlarms(bgs: self.bgData)
-            }
-            if self.overrideGraphData.count > 0 {
-                self.checkOverrideAlarms()
-            }
-            if self.tempTargetGraphData.count > 0 {
-                self.checkTempTargetAlarms()
-            }*/
 
-            TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(30))
+            TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(60))
         }
     }
 }
