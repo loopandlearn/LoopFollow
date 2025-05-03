@@ -297,7 +297,6 @@
 		FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886C2489909D00A0279D /* AnyConvertible.swift */; };
 		FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886E2489A53800A0279D /* AppConstants.swift */; };
 		FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD2A27C24C9D044009F7B7B /* Globals.swift */; };
-		FCD49B6C24AA536E007879DC /* DebugViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD49B6B24AA536E007879DC /* DebugViewController.swift */; };
 		FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */; };
 		FCEF87AC24A141A700AE6FA0 /* Localizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCEF87AA24A1417900AE6FA0 /* Localizer.swift */; };
 		FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCFEEC9D2486E68E00402A7F /* WebKit.framework */; };
@@ -612,7 +611,6 @@
 		FCC6886E2489A53800A0279D /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		FCC688702489A57C00A0279D /* Loop Follow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Follow.entitlements"; sourceTree = "<group>"; };
 		FCD2A27C24C9D044009F7B7B /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
-		FCD49B6B24AA536E007879DC /* DebugViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugViewController.swift; sourceTree = "<group>"; };
 		FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = carbBolusArrays.swift; sourceTree = "<group>"; };
 		FCE537C2249AAB2600F80BF8 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
 		FCEF87AA24A1417900AE6FA0 /* Localizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localizer.swift; sourceTree = "<group>"; };
@@ -1286,7 +1284,6 @@
 			children = (
 				FC97881B2485969B00A7906C /* MainViewController.swift */,
 				FC97881D2485969B00A7906C /* NightScoutViewController.swift */,
-				FCD49B6B24AA536E007879DC /* DebugViewController.swift */,
 				FCFEECA1248857A600402A7F /* SettingsViewController.swift */,
 				DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */,
 				DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */,
@@ -1737,7 +1734,6 @@
 				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
 				DD58171C2D299F940041FB98 /* BluetoothDevice.swift in Sources */,
 				DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */,
-				FCD49B6C24AA536E007879DC /* DebugViewController.swift in Sources */,
 				DD5334B02D1447C500CDD6EA /* BLEManager.swift in Sources */,
 				DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */,
 				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */,
