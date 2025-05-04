@@ -11,7 +11,7 @@ import Combine
 
 final class SnoozerViewModel: ObservableObject {
     @Published var activeAlarm: Alarm?
-    @Published var snoozeMins: Int = 5
+    @Published var snoozeUnits: Int = 5
     @Published var timeUnitLabel: String = "minutes"
 
     private var cancellables = Set<AnyCancellable>()
@@ -26,7 +26,7 @@ final class SnoozerViewModel: ObservableObject {
             .sink { [weak self] alarm in
                 self?.activeAlarm = alarm
                 if let a = alarm {
-                    self?.snoozeMins = a.snoozeDuration
+                    self?.snoozeUnits = a.snoozeDuration
                     self?.timeUnitLabel = a.type.timeUnit.label
                 }
             }
@@ -34,9 +34,6 @@ final class SnoozerViewModel: ObservableObject {
     }
 
     func snoozeTapped() {
-        guard let alarm = activeAlarm else { return }
-        AlarmManager.shared.performSnooze(
-            snoozeMins * Int(alarm.type.timeUnit.seconds) / 60
-        )
+        AlarmManager.shared.performSnooze(snoozeUnits)
     }
 }
