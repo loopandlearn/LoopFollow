@@ -134,6 +134,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 window.rootViewController?.present(MainViewController(), animated: true, completion: nil)
             }
         }
+
+        if response.actionIdentifier == "snooze" {
+            AlarmManager.shared.performSnooze()
+        }
+
         completionHandler()
     }
 }

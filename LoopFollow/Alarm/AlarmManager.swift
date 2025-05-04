@@ -78,16 +78,19 @@ class AlarmManager {
         }
     }
 
-    func snoozeCurrentAlarm(by minutes: Int) {
-        //guard var alarm = currentAlarm else { return }
-        //alarm.snoozedUntil = Date().addingTimeInterval(TimeInterval(minutes * 60))
+    //TODO: Handle default snooze for notofication snoze
+    //TODO: Check interval type handling
+    func performSnooze(_ minutes: Int? = nil) {
+        if let alarmID = Observable.shared.currentAlarm.value {
+            var alarms = Storage.shared.alarms.value
+            if let idx = alarms.firstIndex(where: { $0.id == alarmID }) {
+                alarms[idx].snoozedUntil = Date().addingTimeInterval(
+                    TimeInterval((minutes ?? 5) * 60)) // fix default value
+            }
+            Storage.shared.alarms.value = alarms
 
-        // write it back to your Storage
-        /*
-        Storage.shared.alarms.value = Storage.shared.alarms.value
-            .map { $0.id == alarm.id ? alarm : $0 }
-*/
-        // clear so you can’t snooze twice
-        //currentAlarm = nil
+            AlarmSound.stop()
+            Observable.shared.currentAlarm.value = nil
+        }
     }
 }

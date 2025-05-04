@@ -20,12 +20,7 @@ class SnoozerViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .black
 
-        let snoozerView = SnoozerView(snoozeMinutes: $snoozeMinutes,
-            onSnooze: {
-                // Trigger snooze logic here (e.g., update UserDefaultsRepository, stop alarm, etc.)
-                print("Snoozed for \(self.snoozeMinutes) minutes")
-            },
-        )
+        let snoozerView = SnoozerView()
 
         let hosting = UIHostingController(rootView: snoozerView)
         self.hostingController = hosting

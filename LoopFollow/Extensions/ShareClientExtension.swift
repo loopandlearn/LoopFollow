@@ -61,7 +61,6 @@ private var TrendTable: [String] = [
    "RATE OUT OF RANGE" // 9
 ]
 
-// TODO: probably better to make this an inherited class rather than an extension
 extension ShareClient {
 
     public func fetchData(_ entries: Int, callback: @escaping (ShareError?, [ShareGlucoseData]?) -> Void) {

@@ -116,6 +116,7 @@
 		DDC7E5452DBD8A1600EB1127 /* HighBgAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E53D2DBD8A1600EB1127 /* HighBgAlarmEditor.swift */; };
 		DDC7E5462DBD8A1600EB1127 /* LowBgAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */; };
 		DDC7E5472DBD8A1600EB1127 /* AlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5402DBD8A1600EB1127 /* AlarmEditor.swift */; };
+		DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5CE2DC77C2000EB1127 /* SnoozerViewModel.swift */; };
 		DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979324C0D380002C9752 /* UIViewExtension.swift */; };
 		DDCF979624C1443C002C9752 /* GeneralSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */; };
 		DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */; };
@@ -426,6 +427,7 @@
 		DDC7E53D2DBD8A1600EB1127 /* HighBgAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighBgAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowBgAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E5402DBD8A1600EB1127 /* AlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmEditor.swift; sourceTree = "<group>"; };
+		DDC7E5CE2DC77C2000EB1127 /* SnoozerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewModel.swift; sourceTree = "<group>"; };
 		DDCF979324C0D380002C9752 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
 		DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsViewController.swift; sourceTree = "<group>"; };
@@ -882,6 +884,7 @@
 		DDC7E5142DBCE1B900EB1127 /* Snoozer */ = {
 			isa = PBXGroup;
 			children = (
+				DDC7E5CE2DC77C2000EB1127 /* SnoozerViewModel.swift */,
 				DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */,
 				DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */,
 			);
@@ -1754,6 +1757,7 @@
 				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
 				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
+				DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */,
 				DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */,
 				DD1A97162D4294B3000DDC11 /* AdvancedSettingsViewModel.swift in Sources */,
 				FCA2DDE62501095000254A8C /* Timers.swift in Sources */,

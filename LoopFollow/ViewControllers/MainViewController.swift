@@ -171,11 +171,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.tabBarController?.overrideUserInterfaceStyle = .dark
         }
 
-        // Load the snoozer tab
-        //TODO:
-        //guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        //snoozer.loadViewIfNeeded()
-
         // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -305,7 +300,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
         
         // check the app state
-        // TODO: move to a function ?
         if let appState = self.appStateController {
             
             if appState.chartSettingsChanged {
