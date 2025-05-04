@@ -99,7 +99,6 @@ extension MobileProvision {
             let provision = try decoder.decode(MobileProvision.self, from: plist)
             return provision
         } catch {
-            // TODO: log / handle error
             return nil
         }
     }
