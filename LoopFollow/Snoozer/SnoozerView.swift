@@ -100,12 +100,11 @@ struct SnoozerView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Snooze for")
                                 .font(.headline)
-                            Text("\(vm.snoozeMins) \(vm.timeUnitLabel)")
+                            Text("\(vm.snoozeUnits) \(vm.timeUnitLabel)")
                                 .font(.title3).bold()
                         }
                         Spacer()
-                        // stepper or wheel picker style for days/hours/minutes
-                        Stepper("", value: $vm.snoozeMins,
+                        Stepper("", value: $vm.snoozeUnits,
                                 in: 1...(alarm.type.timeUnit == .day ? 30 :
                                             alarm.type.timeUnit == .hour ? 24 : 60),
                                 step: alarm.type.timeUnit == .minute ? 5 : 1)
