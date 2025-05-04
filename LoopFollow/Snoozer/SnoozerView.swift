@@ -20,24 +20,32 @@ struct SnoozerView: View {
 
     var body: some View {
         GeometryReader { geo in
-            Color.black.ignoresSafeArea()
-                .overlay(contentColumn(size: geo.size))
-                .animation(.easeInOut, value: vm.activeAlarm != nil)
-        }
-    }
+            ZStack {
+                Color.black
+                    .edgesIgnoringSafeArea(.all)
 
-
-    // MARK: – Layout helper
-    @ViewBuilder private func contentColumn(size: CGSize) -> some View {
-        if size.width > size.height {   // landscape
-            HStack(spacing: 0) { leftPanel ; rightPanel }
-        } else {                        // portrait
-            VStack(spacing: 0) { leftPanel ; rightPanel }
+                Group {
+                    if geo.size.width > geo.size.height {
+                        // Landscape: two columns
+                        HStack(spacing: 0) {
+                            leftColumn
+                            rightColumn
+                        }
+                    } else {
+                        // Portrait: single column
+                        VStack(spacing: 0) {
+                            leftColumn
+                            rightColumn
+                        }
+                    }
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
+            }
         }
     }
 
     // MARK: - Left Column (BG / Direction / Delta / Age)
-    private var leftPanel: some View  {
+    private var leftColumn: some View {
         VStack(spacing: 0) {
             Text(bgText.value)
                 .font(.system(size: 220, weight: .black))
@@ -72,58 +80,85 @@ struct SnoozerView: View {
         .padding(.horizontal, 16)
     }
 
-    // MARK: – Right (Clock + Snooze)
-    private var rightPanel: some View {
+    // MARK: - Right Column (Clock/Alert + Snooze Controls)
+    private var rightColumn: some View {
         VStack(spacing: 0) {
             Spacer()
 
-            TimelineView(.periodic(from: .now, by: 1)) { ctx in
-                Text(ctx.date, style: .time)
-                    .font(.system(size: 70, weight: .regular))
-                    .foregroundColor(.white)
-            }
-            .frame(height: 80)
-
             if let alarm = vm.activeAlarm {
-                Text(alarm.name)
-                    .font(.system(size: 40, weight: .semibold))
-                    .foregroundColor(.red)
+                VStack(spacing: 16) {
+                    Text(alarm.name)
+                        .font(.system(size: 30, weight: .semibold))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .padding(.top, 20)
+                    Divider()
+
+                    // snooze controls
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Snooze for")
+                                .font(.headline)
+                            Text("\(vm.snoozeMins) \(vm.timeUnitLabel)")
+                                .font(.title3).bold()
+                        }
+                        Spacer()
+                        // stepper or wheel picker style for days/hours/minutes
+                        Stepper("", value: $vm.snoozeMins,
+                                in: 1...(alarm.type.timeUnit == .day ? 30 :
+                                            alarm.type.timeUnit == .hour ? 24 : 60),
+                                step: alarm.type.timeUnit == .minute ? 5 : 1)
+                        .labelsHidden()
+                    }
+                    .padding(.horizontal, 24)
+
+                    Button(action: vm.snoozeTapped) {
+                        Text("Snooze")
+                            .font(.title2).bold()
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
+                }
+                .background(.ultraThinMaterial)
+                .cornerRadius(20, corners: [.topLeft, .topRight])
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .animation(.spring(), value: vm.activeAlarm != nil)
+            } else {
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    Text(context.date, format:
+                            Date.FormatStyle(date: .omitted, time: .shortened)
+                    )
+                    .font(.system(size: 70))
                     .minimumScaleFactor(0.5)
-                    .padding(.top, 4)
-
-                Spacer(minLength: 32)
-
-                snoozeControls(alarm: alarm)
-            }
-
-            Spacer()
-        }
-        .padding(.horizontal, 24)
-    }
-
-    // MARK: – Snooze UI
-    @ViewBuilder private func snoozeControls(alarm: Alarm) -> some View {
-        VStack(spacing: 16) {
-            HStack {
-                Text("Snooze for")
+                    .foregroundColor(.white)
+                    .frame(height: 78)
+                }
                 Spacer()
-                Text("\(vm.snoozeMins) \(vm.timeUnitLabel)")
-            }
-            .font(.title3)
-            .foregroundColor(.white)
-
-            Stepper("", value: $vm.snoozeMins,
-                    in: 1...120,
-                    step: alarm.type.timeUnit == .minute ? 5 : 1)
-            .labelsHidden()
-
-            Button(action: vm.snoozeTapped) {
-                Text("Snooze")
-                    .bold()
-                    .frame(maxWidth: .infinity, minHeight: 50)
-                    .background(Color.white.opacity(0.15))
-                    .cornerRadius(10)
             }
         }
+    }
+}
+
+fileprivate extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape( RoundedCorner(radius: radius, corners: corners) )
+    }
+}
+
+fileprivate struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
     }
 }

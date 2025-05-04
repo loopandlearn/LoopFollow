@@ -10,7 +10,7 @@ import Foundation
 //TODO: Nu körs ju alarm var 60 sekund... men man vill nog ha det direkt efter bg-värdet kommer in etc.
 //TODO: Men ändå kanske inte för nära ett tidigare alarm, men det kanske vi inte hanterar här....
 extension MainViewController {
-    func scheduleAlarmTask(initialDelay: TimeInterval = 60) {
+    func scheduleAlarmTask(initialDelay: TimeInterval = 1) {
         let firstRun = Date().addingTimeInterval(initialDelay)
         TaskScheduler.shared.scheduleTask(id: .alarmCheck, nextRun: firstRun) { [weak self] in
             guard let self = self else { return }
