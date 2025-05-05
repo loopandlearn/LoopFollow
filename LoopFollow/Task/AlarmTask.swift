@@ -7,8 +7,7 @@
 //
 
 import Foundation
-//TODO: Nu körs ju alarm var 60 sekund... men man vill nog ha det direkt efter bg-värdet kommer in etc.
-//TODO: Men ändå kanske inte för nära ett tidigare alarm, men det kanske vi inte hanterar här....
+
 extension MainViewController {
     func scheduleAlarmTask(initialDelay: TimeInterval = 1) {
         let firstRun = Date().addingTimeInterval(initialDelay)
@@ -20,11 +19,13 @@ extension MainViewController {
 
     func alarmTaskAction() {
         DispatchQueue.main.async {
-            //TODO: Fyll på med mer alarmData
-            //TODO: gör det möjligt att köra med fejkad data.
-            let alarmData = AlarmData(
+            var alarmData = AlarmData(
                 expireDate: .distantPast // Storage.shared.expirationDate.value
             )
+
+            self.saveLatestAlarmDataToFile(alarmData)
+
+            alarmData = self.loadTestAlarmData() ?? alarmData
 
             LogManager.shared.log(category: .alarm, message: "Checking alarms based on \(alarmData)", isDebug: true)
 
@@ -32,5 +33,36 @@ extension MainViewController {
 
             TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(60))
         }
+    }
+
+    func saveLatestAlarmDataToFile(_ alarmData: AlarmData) {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        do {
+            let data = try encoder.encode(alarmData)
+            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("latestAlarmData.json")
+            try data.write(to: url)
+        } catch {
+            LogManager.shared.log(category: .alarm, message: "Failed to save latest AlarmData: \(error)", isDebug: true)
+        }
+    }
+
+    func loadTestAlarmData() -> AlarmData? {
+        let fileManager = FileManager.default
+        let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("testAlarmData.json")
+
+        if fileManager.fileExists(atPath: url.path) {
+            do {
+                let data = try Data(contentsOf: url)
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let alarmData = try decoder.decode(AlarmData.self, from: data)
+                LogManager.shared.log(category: .alarm, message: "Loaded test AlarmData from \(url.path)", isDebug: true)
+                return alarmData
+            } catch {
+                LogManager.shared.log(category: .alarm, message: "Failed to load test AlarmData: \(error)", isDebug: true)
+            }
+        }
+        return nil
     }
 }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct AlarmData {
+struct AlarmData : Encodable, Decodable{
 //    let bgReadings: [ShareGlucoseData]
 //    let iob: Double?
 //    let cob: Double?
