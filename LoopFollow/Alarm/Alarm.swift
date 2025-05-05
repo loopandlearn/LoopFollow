@@ -162,7 +162,6 @@ struct Alarm: Identifiable, Codable, Equatable {
         content.subtitle += Observable.shared.deltaText.value
         content.categoryIdentifier = "category"
             // This is needed to trigger vibrate on watch and phone
-            // TODO:
             // See if we can use .Critcal
             // See if we should use this method instead of direct sound player
         content.sound = .default

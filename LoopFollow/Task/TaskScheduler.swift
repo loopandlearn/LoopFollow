@@ -101,6 +101,9 @@ class TaskScheduler {
                 continue
             }
 
+            // Skip alarm checks if data-fetching tasks (deviceStatus, treatments, fetchBG) are currently due or just executed.
+            // This ensures alarms are evaluated with the latest data, avoiding premature or incorrect triggers.
+            // If skipped, reschedule alarmCheck 5 seconds later to retry after data updates.
             if taskID == .alarmCheck {
                 let shouldSkip = tasksToSkipAlarmCheck.contains {
                     guard let checkTask = tasks[$0] else { return false }
