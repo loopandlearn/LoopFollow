@@ -153,6 +153,8 @@ struct Alarm: Identifiable, Codable, Equatable {
             }
         }()
 
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+
         let content = UNMutableNotificationContent()
         content.title = type.rawValue
         content.subtitle += Observable.shared.bgText.value + " "

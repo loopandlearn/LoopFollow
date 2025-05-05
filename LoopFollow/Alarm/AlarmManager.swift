@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UserNotifications
 
 class AlarmManager {
     static let shared = AlarmManager()
@@ -24,7 +25,6 @@ class AlarmManager {
         evaluators = dict
     }
 
-    //TODO: Somehow we need to silent the current alarm if the current one is no longer active.
     func checkAlarms(data: AlarmData) {
         let now = Date()
         let alarms = Storage.shared.alarms.value
@@ -51,7 +51,8 @@ class AlarmManager {
                 continue
             }
 
-            // If the alarm itself is snoozed, skip lower‑priority alarms of the same type.
+            // If the alarm itself is snoozed skip it, and skip lower‑priority alarms of the same type.
+            // We still want other types af alarm to go off, so we continue here without breaking
             if let until = alarm.snoozedUntil, until > now {
                 skipType = alarm.type
                 continue
@@ -67,7 +68,19 @@ class AlarmManager {
                     config: Storage.shared.alarmConfiguration.value
                 )
             else {
+                // If this alarm is active, but no longer fulfill the requirements, stop it.
+                // Continue evaluating other alarams
+                if Observable.shared.currentAlarm.value == alarm.id {
+                    stopAlarm()
+                }
+
                 continue
+            }
+
+            // If this alarm is active, and still fulfill the requirements, let it be active
+            // Break the loop, nothing else to do
+            if Observable.shared.currentAlarm.value == alarm.id {
+                break
             }
 
             // Fire the alarm and break the loop; we only allow one alarm per evaluation tick.
@@ -87,8 +100,13 @@ class AlarmManager {
             let snoozeSeconds = Double(units) * alarm.type.timeUnit.seconds
             alarms[idx].snoozedUntil = Date().addingTimeInterval(snoozeSeconds)
             Storage.shared.alarms.value = alarms
-            AlarmSound.stop()
-            Observable.shared.currentAlarm.value = nil
+            stopAlarm()
         }
+    }
+
+    func stopAlarm() {
+        AlarmSound.stop()
+        Observable.shared.currentAlarm.value = nil
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
 }
