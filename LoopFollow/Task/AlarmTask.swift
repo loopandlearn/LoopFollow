@@ -22,10 +22,10 @@ extension MainViewController {
             let alarmData = AlarmData(
                 bgReadings: self.bgData
                     .suffix(5)
-                    .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) },
+                    .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) }, /// These are oldest .. newest
                 predictionData: self.predictionData
                     .prefix(5)
-                    .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) },
+                    .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) }, /// These are oldest .. newest, Predictions not currently available for Trio
                 expireDate: Storage.shared.expirationDate.value
             )
 

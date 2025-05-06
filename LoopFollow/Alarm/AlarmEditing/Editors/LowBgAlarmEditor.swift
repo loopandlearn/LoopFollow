@@ -13,23 +13,19 @@ struct LowBgAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {/*
-            AlarmNameField(alarm: $alarm)
-            EnabledToggle(alarm: $alarm)
-            ValueStepper(
-                title: "BG Below",
+        Form {
+            AlarmGeneralSection(alarm: $alarm)
+
+            AlarmThresholdRow(
+                title: "BG",
+                range: 40...150,
+                step: UserDefaultsRepository.getPreferredUnit() == .millimolesPerLiter ? 18.0 * 0.1 : 1.0,
                 value: Binding(
-                    get: { Double(alarm.threshold ?? 0) },
+                    get: { Double(alarm.threshold ?? 80) },
                     set: { alarm.threshold = Float($0) }
-                ),
-                range: 0...500, step: 1,
-                formatter: { "\(Int($0))" }
+                )
             )
-            DayNightToggle(alarm: $alarm)
-            SoundPicker(alarm: $alarm)
-            SnoozeDatePicker(alarm: $alarm)
-            SnoozeDurationStepper(alarm: $alarm)*/
         }
-        .navigationTitle("Low BG Alert")
+        .navigationTitle(alarm.type.rawValue)
     }
 }
