@@ -19,17 +19,27 @@ extension MainViewController {
 
     func alarmTaskAction() {
         DispatchQueue.main.async {
-            var alarmData = AlarmData(
-                expireDate: .distantPast // Storage.shared.expirationDate.value
+            let alarmData = AlarmData(
+                bgReadings: self.bgData
+                    .suffix(5)
+                    .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) },
+                predictionData: self.predictionData
+                    .prefix(5)
+                    .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) },
+                expireDate: Storage.shared.expirationDate.value
             )
 
-            self.saveLatestAlarmDataToFile(alarmData)
+            let finalAlarmData: AlarmData
+            if Observable.shared.debug.value {
+                self.saveLatestAlarmDataToFile(alarmData)
+                finalAlarmData = self.loadTestAlarmData() ?? alarmData
+            } else {
+                finalAlarmData = alarmData
+            }
 
-            alarmData = self.loadTestAlarmData() ?? alarmData
+            LogManager.shared.log(category: .alarm, message: "Checking alarms based on \(finalAlarmData)", isDebug: true)
 
-            LogManager.shared.log(category: .alarm, message: "Checking alarms based on \(alarmData)", isDebug: true)
-
-            AlarmManager.shared.checkAlarms(data: alarmData)
+            AlarmManager.shared.checkAlarms(data: finalAlarmData)
 
             TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(60))
         }

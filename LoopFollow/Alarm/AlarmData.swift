@@ -8,11 +8,18 @@
 
 import Foundation
 
+struct AlarmData: Codable {
+    let bgReadings: [GlucoseValue]
+    let predictionData: [GlucoseValue]
+    let expireDate: Date?
+}
+
+/*
 struct AlarmData : Encodable, Decodable{
-//    let bgReadings: [ShareGlucoseData]
+    let bgReadings: [ShareGlucoseData]
 //    let iob: Double?
 //    let cob: Double?
-//    let predictionData: [ShareGlucoseData]
+    let predictionData: [ShareGlucoseData]
 //    let latestBoluses: [BolusEntry]
 //    let batteryLevel: Double?
 //    let latestCarbs: [CarbEntry]
@@ -21,3 +28,4 @@ struct AlarmData : Encodable, Decodable{
 //    let pumpVolume: Double?
     let expireDate: Date?
 }
+*/
