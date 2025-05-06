@@ -107,7 +107,6 @@ final class ProfileManager {
         Storage.shared.deviceToken.value = profileData.deviceToken ?? ""
         if let expirationDate = profileData.expirationDate {
             Storage.shared.expirationDate.value = NightscoutUtils.parseDate(expirationDate)
-            Storage.shared.expirationDate.value = NightscoutUtils.parseDate("2025-04-25T17:54:56.000Z")
         } else {
             Storage.shared.expirationDate.value = nil
         }

@@ -125,6 +125,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        loadDebugData()
+
         if ObservableUserDefaults.shared.device.value != "Trio" && Storage.shared.remoteType.value == .trc {
             Storage.shared.remoteType.value = .none
         }
@@ -700,5 +702,41 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     func calculateMaxBgGraphValue() -> Float {
         return max(topBG, topPredictionBG)
+    }
+
+    func loadDebugData() {
+        struct DebugData: Codable {
+            let debug: Bool?
+            let url: String?
+            let token: String?
+        }
+
+        let fileManager = FileManager.default
+        let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("debugData.json")
+
+        if fileManager.fileExists(atPath: url.path) {
+            do {
+                let data = try Data(contentsOf: url)
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+
+                let debugData = try decoder.decode(DebugData.self, from: data)
+                LogManager.shared.log(category: .alarm, message: "Loaded DebugData from \(url.path)", isDebug: true)
+
+                if let debug = debugData.debug {
+                    Observable.shared.debug.value = debug
+                }
+
+                if let url = debugData.url {
+                    ObservableUserDefaults.shared.url.value = url
+                }
+
+                if let token = debugData.token {
+                    UserDefaultsRepository.token.value = token
+                }
+            } catch {
+                LogManager.shared.log(category: .alarm, message: "Failed to load DebugData: \(error)", isDebug: true)
+            }
+        }
     }
 }

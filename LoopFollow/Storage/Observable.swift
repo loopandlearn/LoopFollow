@@ -30,5 +30,7 @@ class Observable {
 
     var currentAlarm = ObservableValue<UUID?>(default: nil)
 
+    var debug = ObservableValue<Bool>(default: false)
+
     private init() {}
 }

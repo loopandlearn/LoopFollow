@@ -76,6 +76,7 @@
 		DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5817192D299EF40041FB98 /* DexcomHeartbeatBluetoothDevice.swift */; };
 		DD58171C2D299F940041FB98 /* BluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD58171B2D299F8D0041FB98 /* BluetoothDevice.swift */; };
 		DD58171E2D299FCA0041FB98 /* BluetoothDeviceDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD58171D2D299FC50041FB98 /* BluetoothDeviceDelegate.swift */; };
+		DD5DA27C2DC930D6003D44FC /* GlucoseValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5DA27B2DC930D6003D44FC /* GlucoseValue.swift */; };
 		DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */; };
 		DD608A0A2C23593900F91132 /* SMB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A092C23593900F91132 /* SMB.swift */; };
 		DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */; };
@@ -386,6 +387,7 @@
 		DD5817192D299EF40041FB98 /* DexcomHeartbeatBluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomHeartbeatBluetoothDevice.swift; sourceTree = "<group>"; };
 		DD58171B2D299F8D0041FB98 /* BluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDevice.swift; sourceTree = "<group>"; };
 		DD58171D2D299FC50041FB98 /* BluetoothDeviceDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDeviceDelegate.swift; sourceTree = "<group>"; };
+		DD5DA27B2DC930D6003D44FC /* GlucoseValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValue.swift; sourceTree = "<group>"; };
 		DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusLoop.swift; sourceTree = "<group>"; };
 		DD608A092C23593900F91132 /* SMB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMB.swift; sourceTree = "<group>"; };
 		DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundAlertManager.swift; sourceTree = "<group>"; };
@@ -935,6 +937,7 @@
 		DDCF9A7E2D85FCE6004DF4DD /* Alarm */ = {
 			isa = PBXGroup;
 			children = (
+				DD5DA27B2DC930D6003D44FC /* GlucoseValue.swift */,
 				DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */,
 				DDC7E5412DBD8A1600EB1127 /* AlarmEditing */,
 				DD4AFB482DB576C200BB593F /* AlarmSettingsView.swift */,
@@ -1722,6 +1725,7 @@
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				DD4AFB6B2DB6BF2A00BB593F /* Binding+Optional.swift in Sources */,
 				DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */,
+				DD5DA27C2DC930D6003D44FC /* GlucoseValue.swift in Sources */,
 				DD9ACA062D32AF7900415D8A /* TreatmentsTask.swift in Sources */,
 				DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */,
 				DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */,
