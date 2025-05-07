@@ -24,7 +24,7 @@ struct AlarmGeneralSection: View {
     }
 }
 
-struct AlarmThresholdSection: View {
+struct AlarmStepperSection: View {
     let title: String
     let range: ClosedRange<Double>
     let step: Double

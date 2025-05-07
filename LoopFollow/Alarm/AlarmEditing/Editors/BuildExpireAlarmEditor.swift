@@ -15,7 +15,7 @@ struct BuildExpireAlarmEditor: View {
         Form {
           AlarmGeneralSection(alarm: $alarm)
 
-          AlarmThresholdSection(
+          AlarmStepperSection(
             title: "Expires In",
             range: 1...14,
             step: 1,
