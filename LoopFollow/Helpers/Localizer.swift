@@ -22,15 +22,14 @@ class Localizer {
     }
 
     static func formatQuantity(_ quantity: HKQuantity) -> String {
-        let unitPreference = UserDefaultsRepository.units.value
+        let unit: HKUnit = UserDefaultsRepository.getPreferredUnit()
+        let value = quantity.doubleValue(for: unit)
 
-        if unitPreference == "mg/dL" {
-            let valueInMgdL = quantity.doubleValue(for: .milligramsPerDeciliter)
-            return formatToLocalizedString(valueInMgdL, maxFractionDigits: 0, minFractionDigits: 0)
-        } else {
-            let valueInMmolL = quantity.doubleValue(for: .millimolesPerLiter)
-            return formatToLocalizedString(valueInMmolL, maxFractionDigits: 1, minFractionDigits: 1)
-        }
+        return formatToLocalizedString(value, maxFractionDigits: unit.preferredFractionDigits, minFractionDigits: unit.preferredFractionDigits)
+    }
+
+    static func formatQuantity(_ value: Double) -> String {
+        formatQuantity(HKQuantity(unit: .milligramsPerDeciliter, doubleValue: value))
     }
 
     static func formatTimestampToLocalString(_ timestamp: TimeInterval) -> String {

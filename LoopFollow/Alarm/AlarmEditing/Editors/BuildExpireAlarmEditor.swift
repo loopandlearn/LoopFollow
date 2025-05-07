@@ -21,8 +21,8 @@ struct BuildExpireAlarmEditor: View {
             step: 1,
             unitLabel: alarm.type.timeUnit.label,
             value: Binding(
-              get: { Double(alarm.threshold ?? 1) },
-              set: { alarm.threshold = Float($0) }
+              get: { alarm.threshold ?? 1 },
+              set: { alarm.threshold = $0 }
             )
           )
 

@@ -9,12 +9,11 @@
 import SwiftUI
 import HealthKit
 
-struct AlarmThresholdRow: View {
+struct AlarmBGSection: View {
     // ── Public API ──────────────────────────────────────────────────────────────
     let title: String
     let range: ClosedRange<Double>
-    let step: Double          // 1 for mg/dL, 0.1 for mmol/L
-    @Binding var value: Double   // **stored in mg/dL**
+    @Binding var value: Double
 
     // ── Private state ──────────────────────────────────────────────────────────
     @State private var showPicker = false
@@ -23,12 +22,14 @@ struct AlarmThresholdRow: View {
     private var unit: HKUnit { UserDefaultsRepository.getPreferredUnit() }
 
     private var displayValue: String {
-        format(value, in: unit)
+        Localizer.formatQuantity(value)
     }
 
     // Generate all selectable display values for the picker
     private var pickerValues: [Double] {
-        stride(from: range.lowerBound, through: range.upperBound, by: step)
+        let step : Double = unit == .millimolesPerLiter ? 18.0 * 0.1 : 1.0
+
+        return stride(from: range.lowerBound, through: range.upperBound, by: step)
             .map { $0 }
     }
 
@@ -45,12 +46,11 @@ struct AlarmThresholdRow: View {
             .onTapGesture { showPicker = true }
         }
         .sheet(isPresented: $showPicker) {
-            // Expanded wheel picker
             NavigationStack {
                 VStack {
                     Picker("", selection: bindingForPicker) {
                         ForEach(pickerValues, id: \.self) { v in
-                            Text(format(v, in: unit))
+                            Text(Localizer.formatQuantity(v))
                                 .tag(v)
                         }
                     }
@@ -62,22 +62,12 @@ struct AlarmThresholdRow: View {
                         Button("Done") { showPicker = false }
                     }
                 }
-            }   .presentationDetents([.fraction(0.35), .medium])   // 35 % or medium height
-                .presentationDragIndicator(.visible)               // the little grab-bar
+            }
+            .presentationDetents([.fraction(0.35), .medium])
+            .presentationDragIndicator(.visible)
         }
     }
 
-    // MARK: – Helpers
-    private func format(_ mgdl: Double, in unit: HKUnit) -> String {
-        if unit == .millimolesPerLiter {
-            let mmol = mgdl / 18.0
-            return String(format: "%.1f mmol/L", mmol)
-        } else {
-            return String(format: "%.0f mg/dL", mgdl)
-        }
-    }
-
-    // Bind the picker directly to `value`, snapping to the closest choice
     private var bindingForPicker: Binding<Double> {
         Binding(
             get: {
@@ -85,7 +75,7 @@ struct AlarmThresholdRow: View {
                 pickerValues.min(by: { abs($0 - value) < abs($1 - value) }) ?? value
             },
             set: { newVal in
-                value = newVal    // stored in mg/dL
+                value = newVal // stored in mg/dL
             }
         )
     }
