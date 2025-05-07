@@ -36,8 +36,8 @@ struct Alarm: Identifiable, Codable, Equatable {
     /// Also used as bg limit for drop alarms for example
     var threshold: Double?
 
-    /// If the alarm looks at predictions, this is how many predictions to include
-    var predictiveReadings: Int?
+    /// If the alarm looks at predictions, this is how long into the future to look
+    var predictiveMinutes: Int?
 
     /// If the alarm acts on delta, the delta is stored here, it can be a delta bgvalue (in mg/Dl)
     /// If a delta alarm is only active below a bg, that bg is stored in threshold

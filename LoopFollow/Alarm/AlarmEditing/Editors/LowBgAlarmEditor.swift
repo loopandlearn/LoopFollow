@@ -17,6 +17,7 @@ struct LowBgAlarmEditor: View {
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmBGSection(
+                header: "Threshold",
                 title: "BG",
                 range: 40...150,
                 value: Binding(
@@ -24,6 +25,33 @@ struct LowBgAlarmEditor: View {
                     set: { alarm.threshold = $0 }
                 )
             )
+
+            AlarmStepperSection(
+                title: "Predictive",
+                range: 0...60,
+                step: 5,
+                unitLabel: alarm.type.timeUnit.label,
+                value: Binding(
+                    get: { Double(alarm.predictiveMinutes ?? 0) },
+                    set: { alarm.predictiveMinutes = Int($0) }
+                )
+            )
+
+            AlarmStepperSection(
+                title: "Default Snooze",
+                range: 5...30,
+                step: 5,
+                unitLabel: alarm.type.timeUnit.label,
+                value: Binding(
+                    get: { Double(alarm.snoozeDuration) },
+                    set: { alarm.snoozeDuration = Int($0) }
+                )
+            )
+
+            AlarmAudioSection(alarm: $alarm)
+            AlarmActiveSection(alarm: $alarm)
+            AlarmSnoozedUntilSection(alarm: $alarm)
+
         }
         .navigationTitle(alarm.type.rawValue)
     }
