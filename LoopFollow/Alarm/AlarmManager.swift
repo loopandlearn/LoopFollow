@@ -36,8 +36,8 @@ class AlarmManager {
             }
             // Secondary: threshold ordering if applicable
             if let asc = lhs.type.thresholdSortAscending {
-                let leftVal = lhs.threshold ?? (asc ? Float.infinity : -Float.infinity)
-                let rightVal = rhs.threshold ?? (asc ? Float.infinity : -Float.infinity)
+                let leftVal = lhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
+                let rightVal = rhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
                 return asc ? leftVal < rightVal : leftVal > rightVal
             }
             // Tertiary: fallback to insertion order

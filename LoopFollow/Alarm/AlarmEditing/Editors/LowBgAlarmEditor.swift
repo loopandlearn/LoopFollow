@@ -16,13 +16,12 @@ struct LowBgAlarmEditor: View {
         Form {
             AlarmGeneralSection(alarm: $alarm)
 
-            AlarmThresholdRow(
+            AlarmBGSection(
                 title: "BG",
                 range: 40...150,
-                step: UserDefaultsRepository.getPreferredUnit() == .millimolesPerLiter ? 18.0 * 0.1 : 1.0,
                 value: Binding(
-                    get: { Double(alarm.threshold ?? 80) },
-                    set: { alarm.threshold = Float($0) }
+                    get: { alarm.threshold ?? 80 },
+                    set: { alarm.threshold = $0 }
                 )
             )
         }

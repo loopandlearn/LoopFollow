@@ -34,14 +34,14 @@ struct Alarm: Identifiable, Codable, Equatable {
 
     /// Alarm threashold, it can be a bgvalue (in mg/Dl), or day for example
     /// Also used as bg limit for drop alarms for example
-    var threshold: Float?
+    var threshold: Double?
 
     /// If the alarm looks at predictions, this is how many predictions to include
     var predictiveReadings: Int?
 
     /// If the alarm acts on delta, the delta is stored here, it can be a delta bgvalue (in mg/Dl)
     /// If a delta alarm is only active below a bg, that bg is stored in threshold
-    var delta: Float?
+    var delta: Double?
 
     /// Number of consecutive 5‑min readings that must satisfy the alarm criteria
     var consecutiveReadings: Int?
@@ -74,13 +74,13 @@ struct Alarm: Identifiable, Codable, Equatable {
     var missedBolusPrebolusWindow: Int?
 
     /// “Ignore Bolus <= X units” (don’t count any bolus smaller than or equal to this)
-    var missedBolusIgnoreSmallBolusUnits: Float?
+    var missedBolusIgnoreSmallBolusUnits: Double?
 
     /// “Ignore Under Grams” (if carb entry is under this many grams, skip the alert)
-    var missedBolusIgnoreUnderGrams: Float?
+    var missedBolusIgnoreUnderGrams: Double?
 
     /// “Ignore Under BG” (if current BG is below this, skip the alert)
-    var missedBolusIgnoreUnderBG: Float?
+    var missedBolusIgnoreUnderBG: Double?
 
     // ─────────────────────────────────────────────────────────────
     // Bolus‑Count fields ─
