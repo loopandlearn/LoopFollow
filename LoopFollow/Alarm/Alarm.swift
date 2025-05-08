@@ -43,8 +43,8 @@ struct Alarm: Identifiable, Codable, Equatable {
     /// If a delta alarm is only active below a bg, that bg is stored in threshold
     var delta: Double?
 
-    /// Number of consecutive 5‑min readings that must satisfy the alarm criteria
-    var consecutiveReadings: Int?
+    /// Number of minutes that must satisfy the alarm criteria
+    var persistentMinutes: Int?
 
     /// Size of window to observe values, for example battery drop of x within this number of minutes,
     var monitoringWindow: Int?

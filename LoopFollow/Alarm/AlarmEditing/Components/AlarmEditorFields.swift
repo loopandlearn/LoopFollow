@@ -34,7 +34,7 @@ struct AlarmStepperSection: View {
     var body: some View {
         Section(
           header: Text(title),
-          footer: Text("\(title) in \(Int(range.lowerBound))–\(Int(range.upperBound)) \(unitLabel)")
+          footer: Text("Set \(title), \(Int(range.lowerBound))–\(Int(range.upperBound)) \(unitLabel)")
         ) {
             Stepper(
                 "\(title): \(Int(value)) \(unitLabel)",
