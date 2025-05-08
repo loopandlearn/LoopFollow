@@ -21,10 +21,10 @@ extension MainViewController {
         DispatchQueue.main.async {
             let alarmData = AlarmData(
                 bgReadings: self.bgData
-                    .suffix(5)
+                    .suffix(24)
                     .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) }, /// These are oldest .. newest
                 predictionData: self.predictionData
-                    .prefix(5)
+                    .prefix(12)
                     .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) }, /// These are oldest .. newest, Predictions not currently available for Trio
                 expireDate: Storage.shared.expirationDate.value
             )

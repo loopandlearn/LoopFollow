@@ -27,7 +27,19 @@ struct LowBgAlarmEditor: View {
             )
 
             AlarmStepperSection(
+                title: "Persistent",
+                range: 0...120,
+                step: 5,
+                unitLabel: alarm.type.timeUnit.label,
+                value: Binding(
+                    get: { Double(alarm.persistentMinutes ?? 0) },
+                    set: { alarm.persistentMinutes = Int($0) }
+                )
+            )
+
+            AlarmStepperSection(
                 title: "Predictive",
+                //footer: include this manu minutes of prediction
                 range: 0...60,
                 step: 5,
                 unitLabel: alarm.type.timeUnit.label,
