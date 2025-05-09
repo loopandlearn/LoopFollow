@@ -12,6 +12,8 @@
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
 		DD0650A92DCA8A10004D3B41 /* AlarmBGSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */; };
 		DD0650EB2DCE8385004D3B41 /* LowBGCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650EA2DCE8385004D3B41 /* LowBGCondition.swift */; };
+		DD0650ED2DCE9371004D3B41 /* HighBgAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650EC2DCE9371004D3B41 /* HighBgAlarmEditor.swift */; };
+		DD0650EF2DCE96FF004D3B41 /* HighBGCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650EE2DCE96FF004D3B41 /* HighBGCondition.swift */; };
 		DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */; };
 		DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */; };
 		DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C612C4175FD00DBADDF /* NSProfile.swift */; };
@@ -116,7 +118,6 @@
 		DDC7E5422DBD8A1600EB1127 /* AlarmEditorFields.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5392DBD8A1600EB1127 /* AlarmEditorFields.swift */; };
 		DDC7E5432DBD8A1600EB1127 /* SoundFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E53A2DBD8A1600EB1127 /* SoundFile.swift */; };
 		DDC7E5442DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E53C2DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift */; };
-		DDC7E5452DBD8A1600EB1127 /* HighBgAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E53D2DBD8A1600EB1127 /* HighBgAlarmEditor.swift */; };
 		DDC7E5462DBD8A1600EB1127 /* LowBgAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */; };
 		DDC7E5472DBD8A1600EB1127 /* AlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5402DBD8A1600EB1127 /* AlarmEditor.swift */; };
 		DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5CE2DC77C2000EB1127 /* SnoozerViewModel.swift */; };
@@ -326,6 +327,8 @@
 		DD0247612DB2EB9A00FCADF6 /* LoopFollowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoopFollowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmBGSection.swift; sourceTree = "<group>"; };
 		DD0650EA2DCE8385004D3B41 /* LowBGCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowBGCondition.swift; sourceTree = "<group>"; };
+		DD0650EC2DCE9371004D3B41 /* HighBgAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighBgAlarmEditor.swift; sourceTree = "<group>"; };
+		DD0650EE2DCE96FF004D3B41 /* HighBGCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighBGCondition.swift; sourceTree = "<group>"; };
 		DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutUtils.swift; sourceTree = "<group>"; };
 		DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
 		DD0C0C612C4175FD00DBADDF /* NSProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSProfile.swift; sourceTree = "<group>"; };
@@ -430,7 +433,6 @@
 		DDC7E5392DBD8A1600EB1127 /* AlarmEditorFields.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmEditorFields.swift; sourceTree = "<group>"; };
 		DDC7E53A2DBD8A1600EB1127 /* SoundFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundFile.swift; sourceTree = "<group>"; };
 		DDC7E53C2DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireAlarmEditor.swift; sourceTree = "<group>"; };
-		DDC7E53D2DBD8A1600EB1127 /* HighBgAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighBgAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowBgAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E5402DBD8A1600EB1127 /* AlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E5CE2DC77C2000EB1127 /* SnoozerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewModel.swift; sourceTree = "<group>"; };
@@ -673,6 +675,7 @@
 				DD0650EA2DCE8385004D3B41 /* LowBGCondition.swift */,
 				DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */,
 				DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */,
+				DD0650EE2DCE96FF004D3B41 /* HighBGCondition.swift */,
 			);
 			path = AlarmCondition;
 			sourceTree = "<group>";
@@ -911,8 +914,8 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DD0650EC2DCE9371004D3B41 /* HighBgAlarmEditor.swift */,
 				DDC7E53C2DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift */,
-				DDC7E53D2DBD8A1600EB1127 /* HighBgAlarmEditor.swift */,
 				DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */,
 			);
 			path = Editors;
@@ -1633,6 +1636,7 @@
 				FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */,
 				DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */,
 				DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */,
+				DD0650ED2DCE9371004D3B41 /* HighBgAlarmEditor.swift in Sources */,
 				FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */,
 				DD7E19842ACDA50C00DBD158 /* Overrides.swift in Sources */,
 				DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */,
@@ -1679,7 +1683,6 @@
 				DDC7E5422DBD8A1600EB1127 /* AlarmEditorFields.swift in Sources */,
 				DDC7E5432DBD8A1600EB1127 /* SoundFile.swift in Sources */,
 				DDC7E5442DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift in Sources */,
-				DDC7E5452DBD8A1600EB1127 /* HighBgAlarmEditor.swift in Sources */,
 				DDC7E5462DBD8A1600EB1127 /* LowBgAlarmEditor.swift in Sources */,
 				DDC7E5472DBD8A1600EB1127 /* AlarmEditor.swift in Sources */,
 				DDA9ACA82D6A66E200E6F1A9 /* ContactColorOption.swift in Sources */,
@@ -1741,6 +1744,7 @@
 				DD4AFB3D2DB55D2900BB593F /* AlarmConfiguration.swift in Sources */,
 				DDF699962C5582290058A8D9 /* TextFieldWithToolBar.swift in Sources */,
 				DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
+				DD0650EF2DCE96FF004D3B41 /* HighBGCondition.swift in Sources */,
 				DDDF6F452D479AB100884336 /* LoopOverrideView.swift in Sources */,
 				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,

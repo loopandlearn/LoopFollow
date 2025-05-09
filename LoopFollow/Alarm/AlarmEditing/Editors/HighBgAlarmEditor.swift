@@ -2,10 +2,9 @@
 //  HighBgAlarmEditor.swift
 //  LoopFollow
 //
-//  Created by Jonas Björkert on 2025-04-21.
+//  Created by Jonas Björkert on 2025-05-09.
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
-
 
 import SwiftUI
 
@@ -13,23 +12,46 @@ struct HighBgAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {/*
-            AlarmNameField(alarm: $alarm)
-            EnabledToggle(alarm: $alarm)
-            ValueStepper(
-                title: "BG Above",
+        Form {
+            AlarmGeneralSection(alarm: $alarm)
+
+            AlarmBGSection(
+                header: "Threshold",
+                title: "BG",
+                range: 120...350,
                 value: Binding(
-                    get: { Double(alarm.threshold ?? 0) },
-                    set: { alarm.threshold = Float($0) }
-                ),
-                range: 0...500, step: 1,
-                formatter: { "\(Int($0))" }
+                    get: { alarm.threshold ?? 120 },
+                    set: { alarm.threshold = $0 }
+                )
             )
-            DayNightToggle(alarm: $alarm)
-            SoundPicker(alarm: $alarm)
-            SnoozeDatePicker(alarm: $alarm)
-            SnoozeDurationStepper(alarm: $alarm)*/
+
+            AlarmStepperSection(
+                title: "Persistent",
+                range: 0...120,
+                step: 5,
+                unitLabel: alarm.type.timeUnit.label,
+                value: Binding(
+                    get: { Double(alarm.persistentMinutes ?? 0) },
+                    set: { alarm.persistentMinutes = Int($0) }
+                )
+            )
+
+            AlarmStepperSection(
+                title: "Default Snooze",
+                range: 10...120,
+                step: 5,
+                unitLabel: alarm.type.timeUnit.label,
+                value: Binding(
+                    get: { Double(alarm.snoozeDuration) },
+                    set: { alarm.snoozeDuration = Int($0) }
+                )
+            )
+
+            AlarmAudioSection(alarm: $alarm)
+            AlarmActiveSection(alarm: $alarm)
+            AlarmSnoozedUntilSection(alarm: $alarm)
+
         }
-        .navigationTitle("High BG Alert")
+        .navigationTitle(alarm.type.rawValue)
     }
 }
