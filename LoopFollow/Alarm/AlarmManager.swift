@@ -17,7 +17,8 @@ class AlarmManager {
 
     private init(
         conditionTypes: [AlarmCondition.Type] = [
-            BuildExpireCondition.self
+            BuildExpireCondition.self,
+            LowBGCondition.self
             // TODO: add other condition types here
         ]
     ) {
