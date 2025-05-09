@@ -13,6 +13,7 @@ class AlarmManager {
     static let shared = AlarmManager()
 
     private let evaluators: [AlarmType: AlarmCondition]
+    private var lastBGAlarmTime : Date?
 
     private init(
         conditionTypes: [AlarmCondition.Type] = [
@@ -45,9 +46,28 @@ class AlarmManager {
         }
         var skipType: AlarmType? = nil
 
+        let isLatestReadingRecent: Bool = {
+            guard let last = data.bgReadings.last else { return false }
+            return now.timeIntervalSince(last.date) <= 5 * 60
+        }()
+
         for alarm in sorted {
             // If there is already an active (snoozed) alarm of this type, skip to next [type]
             if alarm.type == skipType {
+                continue
+            }
+
+            // If the alarm is based on bg values, and the value isnt recent, skip to next
+            if alarm.type.isBGBased && !isLatestReadingRecent {
+                continue
+            }
+
+            // If this is a bg-based alarm and we've already handled that same BG reading,
+            // skip until we see a newer one.
+            if alarm.type.isBGBased,
+               let lastHandled = lastBGAlarmTime,
+               let latestDate = data.bgReadings.last?.date,
+               !(latestDate > lastHandled) {
                 continue
             }
 
@@ -87,6 +107,12 @@ class AlarmManager {
             Observable.shared.currentAlarm.value = alarm.id
 
             alarm.trigger(config: Storage.shared.alarmConfiguration.value, now: now)
+
+            // Store the latest bg time so we don't use it again
+            if alarm.type.isBGBased,
+               let latestDate = data.bgReadings.last?.date {
+                lastBGAlarmTime = latestDate
+            }
             break
         }
     }

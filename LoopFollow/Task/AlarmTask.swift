@@ -9,7 +9,7 @@
 import Foundation
 
 extension MainViewController {
-    func scheduleAlarmTask(initialDelay: TimeInterval = 1) {
+    func scheduleAlarmTask(initialDelay: TimeInterval = 30) {
         let firstRun = Date().addingTimeInterval(initialDelay)
         TaskScheduler.shared.scheduleTask(id: .alarmCheck, nextRun: firstRun) { [weak self] in
             guard let self = self else { return }
