@@ -14,6 +14,10 @@ struct LowBgAlarmEditor: View {
 
     var body: some View {
         Form {
+            InfoBanner(text: "Alerts when your current CGM value — "
+                       + "or any predicted value within the look-ahead window — "
+                       + "falls at or below the threshold you set.")
+
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmBGSection(
@@ -27,6 +31,8 @@ struct LowBgAlarmEditor: View {
             )
 
             AlarmStepperSection(
+                footer: "Glucose must stay below the threshold for this many minutes "
+                + "before the alert sounds. Set 0 to alert immediately.",
                 title: "Persistent",
                 range: 0...120,
                 step: 5,
@@ -38,8 +44,10 @@ struct LowBgAlarmEditor: View {
             )
 
             AlarmStepperSection(
+                footer: "Look ahead this many minutes in Loop’s prediction; "
+                + "if any future value is at or below the threshold, "
+                + "you’ll be warned early. Set 0 to disable.",
                 title: "Predictive",
-                //footer: include this manu minutes of prediction
                 range: 0...60,
                 step: 5,
                 unitLabel: alarm.type.timeUnit.label,
@@ -63,7 +71,6 @@ struct LowBgAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmActiveSection(alarm: $alarm)
             AlarmSnoozedUntilSection(alarm: $alarm)
-
         }
         .navigationTitle(alarm.type.rawValue)
     }

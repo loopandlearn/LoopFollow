@@ -24,28 +24,6 @@ struct AlarmGeneralSection: View {
     }
 }
 
-struct AlarmStepperSection: View {
-    let title: String
-    let range: ClosedRange<Double>
-    let step: Double
-    let unitLabel: String
-    @Binding var value: Double
-
-    var body: some View {
-        Section(
-          header: Text(title),
-          footer: Text("Set \(title), \(Int(range.lowerBound))–\(Int(range.upperBound)) \(unitLabel)")
-        ) {
-            Stepper(
-                "\(title): \(Int(value)) \(unitLabel)",
-                value: $value,
-                in: range,
-                step: step
-            )
-        }
-    }
-}
-
 struct AlarmSnoozeSection: View {
     let title: String
     let range: ClosedRange<Double>

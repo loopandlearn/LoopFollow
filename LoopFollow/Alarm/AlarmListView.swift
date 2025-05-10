@@ -19,6 +19,7 @@ struct AlarmListView: View {
     var body: some View {
         NavigationView {
             List {
+                // TODO: sort these in the alarm prio order, as they are evaluated
                 ForEach(store.value) { alarm in
                     NavigationLink(alarm.name) {
                         AlarmEditor(alarm: binding(for: alarm))
@@ -44,6 +45,7 @@ struct AlarmListView: View {
                 }
             }
             // Step 1: pick a type for the new alarm
+            // TODO: Sort these in the type order
             .actionSheet(isPresented: $showingTypePicker) {
                 ActionSheet(
                     title: Text("Select Alarm Type"),

@@ -1,40 +1,38 @@
 //
-//  BuildExpireAlarmEditor.swift
+//  MissedReadingEditor.swift
 //  LoopFollow
 //
-//  Created by Jonas Björkert on 2025-04-21.
+//  Created by Jonas Björkert on 2025-05-09.
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
 import SwiftUI
 
-struct BuildExpireAlarmEditor: View {
+struct MissedReadingEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
         Form {
-            InfoBanner(
-                text: "Sends a reminder before the looping-app build you’re following reaches its "
-                + "TestFlight or Xcode expiry date. Currently only works for Trio 0.4 and later."
-            )
+            InfoBanner(text: "The app notifies you when no CGM reading has been received for the time you choose below.")
+
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmStepperSection(
-                footer: "Choose how many days of notice you’d like before the build becomes unusable.",
-                title: "Expires In",
-                range: 1...14,
-                step: 1,
+                footer: "Choose how long the app should wait before alerting.",
+                title: "No reading for",
+                range: 11...121,
+                step: 5,
                 unitLabel: alarm.type.timeUnit.label,
                 value: Binding(
-                    get: { alarm.threshold ?? 1 },
+                    get: { alarm.threshold ?? 16 },
                     set: { alarm.threshold = $0 }
                 )
             )
 
             AlarmStepperSection(
                 title: "Default Snooze",
-                range: 1...14,
-                step: 1,
+                range: 10...180,
+                step: 5,
                 unitLabel: alarm.type.timeUnit.label,
                 value: Binding(
                     get: { Double(alarm.snoozeDuration) },
@@ -45,6 +43,7 @@ struct BuildExpireAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmActiveSection(alarm: $alarm)
             AlarmSnoozedUntilSection(alarm: $alarm)
+
         }
         .navigationTitle(alarm.type.rawValue)
     }
