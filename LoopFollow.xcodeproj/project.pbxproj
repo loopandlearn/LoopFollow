@@ -14,6 +14,10 @@
 		DD0650EB2DCE8385004D3B41 /* LowBGCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650EA2DCE8385004D3B41 /* LowBGCondition.swift */; };
 		DD0650ED2DCE9371004D3B41 /* HighBgAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650EC2DCE9371004D3B41 /* HighBgAlarmEditor.swift */; };
 		DD0650EF2DCE96FF004D3B41 /* HighBGCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650EE2DCE96FF004D3B41 /* HighBGCondition.swift */; };
+		DD0650F12DCE9A9E004D3B41 /* MissedReadingCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F02DCE9A9E004D3B41 /* MissedReadingCondition.swift */; };
+		DD0650F32DCE9B3D004D3B41 /* MissedReadingEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F22DCE9B3D004D3B41 /* MissedReadingEditor.swift */; };
+		DD0650F52DCF303F004D3B41 /* AlarmStepperSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F42DCF303F004D3B41 /* AlarmStepperSection.swift */; };
+		DD0650F72DCFDA26004D3B41 /* InfoBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F62DCFDA26004D3B41 /* InfoBanner.swift */; };
 		DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */; };
 		DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */; };
 		DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C612C4175FD00DBADDF /* NSProfile.swift */; };
@@ -329,6 +333,10 @@
 		DD0650EA2DCE8385004D3B41 /* LowBGCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowBGCondition.swift; sourceTree = "<group>"; };
 		DD0650EC2DCE9371004D3B41 /* HighBgAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighBgAlarmEditor.swift; sourceTree = "<group>"; };
 		DD0650EE2DCE96FF004D3B41 /* HighBGCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighBGCondition.swift; sourceTree = "<group>"; };
+		DD0650F02DCE9A9E004D3B41 /* MissedReadingCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissedReadingCondition.swift; sourceTree = "<group>"; };
+		DD0650F22DCE9B3D004D3B41 /* MissedReadingEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissedReadingEditor.swift; sourceTree = "<group>"; };
+		DD0650F42DCF303F004D3B41 /* AlarmStepperSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmStepperSection.swift; sourceTree = "<group>"; };
+		DD0650F62DCFDA26004D3B41 /* InfoBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoBanner.swift; sourceTree = "<group>"; };
 		DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutUtils.swift; sourceTree = "<group>"; };
 		DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
 		DD0C0C612C4175FD00DBADDF /* NSProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSProfile.swift; sourceTree = "<group>"; };
@@ -676,6 +684,7 @@
 				DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */,
 				DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */,
 				DD0650EE2DCE96FF004D3B41 /* HighBGCondition.swift */,
+				DD0650F02DCE9A9E004D3B41 /* MissedReadingCondition.swift */,
 			);
 			path = AlarmCondition;
 			sourceTree = "<group>";
@@ -904,6 +913,8 @@
 		DDC7E53B2DBD8A1600EB1127 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				DD0650F62DCFDA26004D3B41 /* InfoBanner.swift */,
+				DD0650F42DCF303F004D3B41 /* AlarmStepperSection.swift */,
 				DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */,
 				DDC7E5392DBD8A1600EB1127 /* AlarmEditorFields.swift */,
 				DDC7E53A2DBD8A1600EB1127 /* SoundFile.swift */,
@@ -917,6 +928,7 @@
 				DD0650EC2DCE9371004D3B41 /* HighBgAlarmEditor.swift */,
 				DDC7E53C2DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift */,
 				DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */,
+				DD0650F22DCE9B3D004D3B41 /* MissedReadingEditor.swift */,
 			);
 			path = Editors;
 			sourceTree = "<group>";
@@ -1646,6 +1658,7 @@
 				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,
 				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
+				DD0650F12DCE9A9E004D3B41 /* MissedReadingCondition.swift in Sources */,
 				DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */,
 				DDFF3D7F2D1414A200BF9D9E /* BLEDevice.swift in Sources */,
 				DD9ACA042D32821400415D8A /* DeviceStatusTask.swift in Sources */,
@@ -1665,12 +1678,14 @@
 				DDDF6F472D479AD200884336 /* LoopOverrideViewModel.swift in Sources */,
 				DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */,
 				DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */,
+				DD0650F32DCE9B3D004D3B41 /* MissedReadingEditor.swift in Sources */,
 				DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */,
 				DDEF503A2D31615000999A5D /* LogManager.swift in Sources */,
 				DD4878172C7B75350048F05C /* BolusView.swift in Sources */,
 				DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */,
 				DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
+				DD0650F72DCFDA26004D3B41 /* InfoBanner.swift in Sources */,
 				DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */,
 				DD7B0D442D730A3B0063DCB6 /* CycleHelper.swift in Sources */,
 				DD9ACA0C2D33BB8600415D8A /* CalendarTask.swift in Sources */,
@@ -1770,6 +1785,7 @@
 				DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */,
 				DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */,
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
+				DD0650F52DCF303F004D3B41 /* AlarmStepperSection.swift in Sources */,
 				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
 				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,

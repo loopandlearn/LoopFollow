@@ -20,6 +20,11 @@ struct AlarmEditor: View {
             HighBgAlarmEditor(alarm: $alarm)
         case .low:
             LowBgAlarmEditor(alarm: $alarm)
+        case .missedReading:
+            MissedReadingEditor(alarm: $alarm)
+
+            // TODO: add other condition types here
+
         default:
             Text("No editor for \(alarm.type.rawValue)")
                 .padding()
