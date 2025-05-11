@@ -22,6 +22,7 @@ struct LowBgAlarmEditor: View {
 
             AlarmBGSection(
                 header: "Threshold",
+                footer: "bla bla",
                 title: "BG",
                 range: 40...150,
                 value: Binding(

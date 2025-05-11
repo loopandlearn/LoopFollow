@@ -14,7 +14,7 @@ struct AlarmStepperSection: View {
     let title: String
     let range: ClosedRange<Double>
     let step: Double
-    let unitLabel: String
+    let unitLabel: String?
     @Binding var value: Double
 
     init(
@@ -23,7 +23,7 @@ struct AlarmStepperSection: View {
         title: String,
         range: ClosedRange<Double>,
         step: Double,
-        unitLabel: String,
+        unitLabel: String? = nil,
         value: Binding<Double>
     ) {
         self.header = header
@@ -35,18 +35,13 @@ struct AlarmStepperSection: View {
         self._value = value
     }
 
-/**
- header: Text(title),
- footer: Text("Set \(title), \(Int(range.lowerBound))–\(Int(range.upperBound)) \(unitLabel)")
- **/
-
     var body: some View {
         Section(
             header: header.map(Text.init),
             footer: footer.map(Text.init)
         ) {
             Stepper(
-                "\(title): \(Int(value)) \(unitLabel)",
+                "\(title): \(Int(value))\(unitLabel.map { " \($0)" } ?? "")",
                 value: $value,
                 in: range,
                 step: step

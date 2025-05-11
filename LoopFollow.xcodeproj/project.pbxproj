@@ -18,6 +18,7 @@
 		DD0650F32DCE9B3D004D3B41 /* MissedReadingEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F22DCE9B3D004D3B41 /* MissedReadingEditor.swift */; };
 		DD0650F52DCF303F004D3B41 /* AlarmStepperSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F42DCF303F004D3B41 /* AlarmStepperSection.swift */; };
 		DD0650F72DCFDA26004D3B41 /* InfoBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F62DCFDA26004D3B41 /* InfoBanner.swift */; };
+		DD0650F92DCFE7BE004D3B41 /* FastDropAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F82DCFE7BE004D3B41 /* FastDropAlarmEditor.swift */; };
 		DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */; };
 		DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */; };
 		DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C612C4175FD00DBADDF /* NSProfile.swift */; };
@@ -337,6 +338,7 @@
 		DD0650F22DCE9B3D004D3B41 /* MissedReadingEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissedReadingEditor.swift; sourceTree = "<group>"; };
 		DD0650F42DCF303F004D3B41 /* AlarmStepperSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmStepperSection.swift; sourceTree = "<group>"; };
 		DD0650F62DCFDA26004D3B41 /* InfoBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoBanner.swift; sourceTree = "<group>"; };
+		DD0650F82DCFE7BE004D3B41 /* FastDropAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastDropAlarmEditor.swift; sourceTree = "<group>"; };
 		DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutUtils.swift; sourceTree = "<group>"; };
 		DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
 		DD0C0C612C4175FD00DBADDF /* NSProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSProfile.swift; sourceTree = "<group>"; };
@@ -929,6 +931,7 @@
 				DDC7E53C2DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift */,
 				DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */,
 				DD0650F22DCE9B3D004D3B41 /* MissedReadingEditor.swift */,
+				DD0650F82DCFE7BE004D3B41 /* FastDropAlarmEditor.swift */,
 			);
 			path = Editors;
 			sourceTree = "<group>";
@@ -1665,6 +1668,7 @@
 				FC16A97D24996747003D6245 /* SpeakBG.swift in Sources */,
 				DDFD5C532CB167DA00D3FD68 /* TRCCommandType.swift in Sources */,
 				DD16AF112C997B4600FB655A /* LoadingButtonView.swift in Sources */,
+				DD0650F92DCFE7BE004D3B41 /* FastDropAlarmEditor.swift in Sources */,
 				DD5817172D2710E90041FB98 /* BLEDeviceSelectionView.swift in Sources */,
 				FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */,
 				DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */,
