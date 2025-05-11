@@ -22,6 +22,8 @@ struct AlarmEditor: View {
             LowBgAlarmEditor(alarm: $alarm)
         case .missedReading:
             MissedReadingEditor(alarm: $alarm)
+        case .fastDrop:
+            FastDropAlarmEditor(alarm: $alarm)
 
             // TODO: add other condition types here
 

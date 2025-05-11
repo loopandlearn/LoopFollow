@@ -102,17 +102,17 @@ struct AlarmAudioSection: View {
             }
 
             // ——— Play / Repeat Toggles ———
-            VStack(alignment: .leading, spacing: 8) {
+            HStack() {
                 Text("Play")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-
+                Spacer()
                 Picker("", selection: $alarm.playSoundOption) {
                     ForEach(PlaySoundOption.allCases, id: \.self) { opt in
                         Text(opt.rawValue.capitalized).tag(opt)
                     }
                 }
-                .pickerStyle(.segmented)
+                .pickerStyle(.menu)
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -125,7 +125,7 @@ struct AlarmAudioSection: View {
                         Text(opt.rawValue.capitalized).tag(opt)
                     }
                 }
-                .pickerStyle(.segmented)
+                .pickerStyle(.menu)
             }
         }
     }
