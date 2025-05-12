@@ -32,20 +32,20 @@ extension AlarmType {
 
     var icon: String {
         switch self {
-        case .low       : return "arrow.down"
-        case .high      : return "arrow.up"
-        case .fastDrop  : return "arrow.down.to.line"
-        case .fastRise  : return "arrow.up.to.line"
+        case .low : return "arrow.down.to.line"
+        case .high : return "arrow.up.to.line"
+        case .fastDrop : return "chevron.down.2"
+        case .fastRise : return "chevron.up.2"
         case .missedReading: return "wifi.slash"
 
         case .iob, .bolus: return "syringe"
-        case .cob       : return "fork.knife"
+        case .cob : return "fork.knife"
         case .missedBolus: return "exclamationmark.arrow.triangle.2.circlepath"
-        case .recBolus  : return "bolt.horizontal"
+        case .recBolus : return "bolt.horizontal"
 
-        case .battery   : return "battery.25"
+        case .battery: return "battery.25"
         case .batteryDrop: return "battery.100.bolt"
-        case .pump      : return "drop"
+        case .pump: return "drop"
         case .pumpChange: return "arrow.triangle.2.circlepath"
         case .sensorChange: return "sensor.tag.radiowaves.forward"
 
@@ -53,9 +53,9 @@ extension AlarmType {
         case .buildExpire: return "calendar.badge.exclamationmark"
 
         case .overrideStart: return "play.circle"
-        case .overrideEnd  : return "stop.circle"
+        case .overrideEnd: return "stop.circle"
         case .tempTargetStart: return "flag"
-        case .tempTargetEnd  : return "flag.slash"
+        case .tempTargetEnd: return "flag.slash"
         }
     }
 
@@ -73,13 +73,13 @@ extension AlarmType {
         case .missedBolus:    return "Carbs without bolus."
         case .recBolus:       return "Recommended bolus issued."
 
-        case .battery:        return "Pump / phone battery low."
+        case .battery:        return "Phone battery low."
         case .batteryDrop:    return "Battery drops quickly."
         case .pump:           return "Reservoir level low."
-        case .pumpChange:     return "Infusion-set change due."
+        case .pumpChange:     return "Pump change due."
         case .sensorChange:   return "Sensor change due."
         case .notLooping:     return "Loop hasn’t completed."
-        case .buildExpire:    return "Follow-app build expiring."
+        case .buildExpire:    return "Looping-app build expiring."
 
         case .overrideStart:  return "Override just started."
         case .overrideEnd:    return "Override ended."
