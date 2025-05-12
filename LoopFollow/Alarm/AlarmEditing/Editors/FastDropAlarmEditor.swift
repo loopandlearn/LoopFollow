@@ -68,24 +68,15 @@ struct FastDropAlarmEditor: View {
                 .opacity(useLimit ? 1 : 0.35)
             }   // Section
 */
-            // ────────── SNOOZE  ────────────
-            AlarmStepperSection(
-                header: "Default Snooze",
-                footer: "How long to silence this alert after you press Snooze.",
-                title: "Default Snooze",
-                range: 5...60,
-                step: 5,
-                unitLabel: alarm.type.timeUnit.label,
-                value: Binding(
-                    get: { Double(alarm.snoozeDuration) },
-                    set: { alarm.snoozeDuration = Int($0) }
-                )
-            )
-
-            // ────── SOUND / ACTIVE / UNTIL ──────
             AlarmAudioSection(alarm: $alarm)
+
             AlarmActiveSection(alarm: $alarm)
-            AlarmSnoozedUntilSection(alarm: $alarm)
+
+            AlarmSnoozeSection(
+                alarm: $alarm,
+                range: 5...60,
+                step: 5
+            )
         }
         .navigationTitle(alarm.type.rawValue)
     }

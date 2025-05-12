@@ -31,20 +31,13 @@ struct BuildExpireAlarmEditor: View {
                 )
             )
 
-            AlarmStepperSection(
-                title: "Default Snooze",
-                range: 1...14,
-                step: 1,
-                unitLabel: alarm.type.timeUnit.label,
-                value: Binding(
-                    get: { Double(alarm.snoozeDuration) },
-                    set: { alarm.snoozeDuration = Int($0) }
-                )
-            )
-
             AlarmAudioSection(alarm: $alarm)
             AlarmActiveSection(alarm: $alarm)
-            AlarmSnoozedUntilSection(alarm: $alarm)
+            AlarmSnoozeSection(
+                alarm: $alarm,
+                range: 1...14,
+                step: 1
+            )
         }
         .navigationTitle(alarm.type.rawValue)
     }
