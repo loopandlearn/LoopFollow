@@ -95,6 +95,8 @@
 		DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7E19852ACDA59700DBD158 /* BGCheck.swift */; };
 		DD7E19882ACDA5DA00DBD158 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7E19872ACDA5DA00DBD158 /* Notes.swift */; };
 		DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7E19892ACDA62600DBD158 /* SensorStart.swift */; };
+		DD7F4B9D2DD1EAE500D449E9 /* AlarmAudioSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */; };
+		DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
@@ -414,6 +416,8 @@
 		DD7E19852ACDA59700DBD158 /* BGCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGCheck.swift; sourceTree = "<group>"; };
 		DD7E19872ACDA5DA00DBD158 /* Notes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notes.swift; sourceTree = "<group>"; };
 		DD7E19892ACDA62600DBD158 /* SensorStart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorStart.swift; sourceTree = "<group>"; };
+		DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmAudioSection.swift; sourceTree = "<group>"; };
+		DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmActiveSection.swift; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
@@ -915,6 +919,8 @@
 		DDC7E53B2DBD8A1600EB1127 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */,
+				DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */,
 				DD0650F62DCFDA26004D3B41 /* InfoBanner.swift */,
 				DD0650F42DCF303F004D3B41 /* AlarmStepperSection.swift */,
 				DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */,
@@ -1630,6 +1636,7 @@
 				DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */,
 				DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */,
 				DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */,
+				DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */,
 				DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */,
 				DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */,
 				DD9ACA082D32F68B00415D8A /* BGTask.swift in Sources */,
@@ -1645,6 +1652,7 @@
 				DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */,
 				DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */,
 				DD5334212C60EBEE00062F9D /* InsulinCartridgeChange.swift in Sources */,
+				DD7F4B9D2DD1EAE500D449E9 /* AlarmAudioSection.swift in Sources */,
 				FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */,
 				DD608A0A2C23593900F91132 /* SMB.swift in Sources */,
 				DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */,

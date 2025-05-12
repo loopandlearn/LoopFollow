@@ -16,6 +16,20 @@ struct AlarmBGSection: View {
     let range:   ClosedRange<Double>
     @Binding var value: Double
 
+    init(
+        header: String? = nil,
+        footer: String? = nil,
+        title: String,
+        range: ClosedRange<Double>,
+        value: Binding<Double>
+    ) {
+        self.header = header
+        self.footer = footer
+        self.title = title
+        self.range = range
+        self._value = value
+    }
+
     private var unit: HKUnit { UserDefaultsRepository.getPreferredUnit() }
 
     private var displayValue: String {

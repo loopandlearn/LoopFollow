@@ -10,14 +10,26 @@ import Foundation
 import HealthKit
 import UserNotifications
 
-enum PlaySoundOption: String, CaseIterable, Codable {
-  case always, day, night, never
+protocol DayNightDisplayable {
+    var displayName: String { get }
 }
-enum RepeatSoundOption: String, CaseIterable, Codable {
-  case always, day, night, never
+
+extension DayNightDisplayable where Self: RawRepresentable, Self.RawValue == String {
+    var displayName: String {
+        rawValue == "always" ? "Day & Night" : rawValue.capitalized
+    }
 }
-enum ActiveOption: String, CaseIterable, Codable {
-  case always, day, night
+
+enum PlaySoundOption: String, CaseIterable, Codable, DayNightDisplayable {
+    case always, day, night, never
+}
+
+enum RepeatSoundOption: String, CaseIterable, Codable, DayNightDisplayable {
+    case always, day, night, never
+}
+
+enum ActiveOption: String, CaseIterable, Codable, DayNightDisplayable {
+    case always, day, night
 }
 
 struct Alarm: Identifiable, Codable, Equatable {
