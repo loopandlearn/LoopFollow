@@ -37,8 +37,15 @@ struct AlarmBGSection: View {
     }
 
     private var allValues: [Double] {
-        let step = unit == .millimolesPerLiter ? 18.0 * 0.1 : 1
-        return Array(stride(from: range.lowerBound, through: range.upperBound, by: step))
+        if unit == .millimolesPerLiter {
+            let stepMMOL = 0.1
+            let lower = ceil((range.lowerBound / 18) / stepMMOL) * stepMMOL
+            let upper = floor((range.upperBound / 18) / stepMMOL) * stepMMOL
+
+            return stride(from: lower, through: upper, by: stepMMOL).map { $0 * 18 }
+        } else {
+            return Array(stride(from: range.lowerBound, through: range.upperBound, by: 1))
+        }
     }
 
     var body: some View {

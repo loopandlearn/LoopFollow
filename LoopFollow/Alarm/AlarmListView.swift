@@ -113,7 +113,7 @@ struct AddAlarmSheet: View {
                                         id: \.self) { type in
                                     AlarmTile(type: type) {
                                         onSelect(type)
-                                        dismiss()
+//                                        dismiss()
                                     }
                                 }
                             }
@@ -160,12 +160,26 @@ private struct AlarmTile: View {
     }
 }
 
+private enum SheetInfo: Identifiable {
+    case picker
+    case editor(id: UUID, isNew: Bool)
+
+    var id: UUID {
+        switch self {
+        case .picker:
+            return UUID(uuidString:"00000000-0000-0000-0000-000000000000")!
+        case .editor(let id, _):
+            return id
+        }
+    }
+}
+
 struct AlarmListView: View {
     @ObservedObject private var store = Storage.shared.alarms
     @Environment(\.dismiss) private var dismiss
 
-    @State private var showAddSheet = false
-    @State private var editingAlarmID: UUID?
+    @State private var sheetInfo: SheetInfo?
+    @State private var deleteAfterDismiss: UUID?
 
     var body: some View {
         NavigationStack {
@@ -183,20 +197,48 @@ struct AlarmListView: View {
                     Button("Done") { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { showAddSheet = true } label: { Image(systemName: "plus") }
+                    Button { sheetInfo = .picker } label: { Image(systemName:"plus") }
                 }
             }
-            .sheet(isPresented: $showAddSheet) {
-                AddAlarmSheet { type in
-                    let new = Alarm(type: type)
-                    store.value.append(new)
-                    editingAlarmID = new.id
-                }
+            .sheet(item: $sheetInfo,
+                   onDismiss: handleSheetDismiss) { info in
+                sheetContent(for: info)
             }
-            .sheet(item: $editingAlarmID) { id in
-                if let idx = store.value.firstIndex(where: { $0.id == id }) {
-                    AlarmEditor(alarm: $store.value[idx])
-                }
+        }
+    }
+
+    private func handleSheetDismiss() {
+        if let id = deleteAfterDismiss,
+           let idx = store.value.firstIndex(where: { $0.id == id }) {
+            store.value.remove(at: idx)
+        }
+        deleteAfterDismiss = nil
+    }
+
+    @ViewBuilder
+    private func sheetContent(for info: SheetInfo) -> some View {
+        switch info {
+
+        case .picker:
+            AddAlarmSheet { type in
+                let new = Alarm(type: type)
+                store.value.append(new)
+                sheetInfo = .editor(id: new.id, isNew: true)
+            }
+
+        case .editor(let id, let isNew):
+            if let idx = store.value.firstIndex(where: { $0.id == id }) {
+                AlarmEditor(
+                    alarm: $store.value[idx],
+                    isNew:  isNew,
+                    onDone: { sheetInfo = nil },
+                    onCancel: {
+                        deleteAfterDismiss = id
+                        sheetInfo = nil
+                    }
+                )
+            } else {
+                Text("Alarm not found").padding()
             }
         }
     }
