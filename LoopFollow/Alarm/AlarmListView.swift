@@ -31,14 +31,14 @@ struct AlarmListView: View {
             }
             .navigationTitle("Alarms")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingTypePicker = true
                     } label: {
                         Image(systemName: "plus")
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") {
                         presentationMode.wrappedValue.dismiss()
                     }
