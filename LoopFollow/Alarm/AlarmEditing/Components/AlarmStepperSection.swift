@@ -40,12 +40,14 @@ struct AlarmStepperSection: View {
             header: header.map(Text.init),
             footer: footer.map(Text.init)
         ) {
-            Stepper(
-                "\(title): \(Int(value))\(unitLabel.map { " \($0)" } ?? "")",
-                value: $value,
-                in: range,
-                step: step
-            )
+            Stepper(value: $value, in: range, step: step) {
+                HStack {
+                    Text(title)
+                    Spacer()
+                    Text("\(Int(value))\(unitLabel.map { " \($0)" } ?? "")")
+                        .foregroundColor(.secondary)
+                }
+            }
         }
     }
 }
