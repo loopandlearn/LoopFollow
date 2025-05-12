@@ -97,6 +97,7 @@
 		DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7E19892ACDA62600DBD158 /* SensorStart.swift */; };
 		DD7F4B9D2DD1EAE500D449E9 /* AlarmAudioSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */; };
 		DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */; };
+		DD7F4BA12DD2193F00D449E9 /* AlarmSnoozeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
@@ -122,7 +123,7 @@
 		DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */; };
 		DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */; };
 		DDC7E5382DBD887400EB1127 /* isOnPhoneCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */; };
-		DDC7E5422DBD8A1600EB1127 /* AlarmEditorFields.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5392DBD8A1600EB1127 /* AlarmEditorFields.swift */; };
+		DDC7E5422DBD8A1600EB1127 /* AlarmGeneralSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5392DBD8A1600EB1127 /* AlarmGeneralSection.swift */; };
 		DDC7E5432DBD8A1600EB1127 /* SoundFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E53A2DBD8A1600EB1127 /* SoundFile.swift */; };
 		DDC7E5442DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E53C2DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift */; };
 		DDC7E5462DBD8A1600EB1127 /* LowBgAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */; };
@@ -418,6 +419,7 @@
 		DD7E19892ACDA62600DBD158 /* SensorStart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorStart.swift; sourceTree = "<group>"; };
 		DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmAudioSection.swift; sourceTree = "<group>"; };
 		DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmActiveSection.swift; sourceTree = "<group>"; };
+		DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSnoozeSection.swift; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
@@ -444,7 +446,7 @@
 		DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerView.swift; sourceTree = "<group>"; };
 		DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewController.swift; sourceTree = "<group>"; };
 		DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isOnPhoneCall.swift; sourceTree = "<group>"; };
-		DDC7E5392DBD8A1600EB1127 /* AlarmEditorFields.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmEditorFields.swift; sourceTree = "<group>"; };
+		DDC7E5392DBD8A1600EB1127 /* AlarmGeneralSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmGeneralSection.swift; sourceTree = "<group>"; };
 		DDC7E53A2DBD8A1600EB1127 /* SoundFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundFile.swift; sourceTree = "<group>"; };
 		DDC7E53C2DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowBgAlarmEditor.swift; sourceTree = "<group>"; };
@@ -919,12 +921,13 @@
 		DDC7E53B2DBD8A1600EB1127 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */,
 				DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */,
 				DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */,
 				DD0650F62DCFDA26004D3B41 /* InfoBanner.swift */,
 				DD0650F42DCF303F004D3B41 /* AlarmStepperSection.swift */,
 				DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */,
-				DDC7E5392DBD8A1600EB1127 /* AlarmEditorFields.swift */,
+				DDC7E5392DBD8A1600EB1127 /* AlarmGeneralSection.swift */,
 				DDC7E53A2DBD8A1600EB1127 /* SoundFile.swift */,
 			);
 			path = Components;
@@ -1700,6 +1703,7 @@
 				DD0650F72DCFDA26004D3B41 /* InfoBanner.swift in Sources */,
 				DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */,
 				DD7B0D442D730A3B0063DCB6 /* CycleHelper.swift in Sources */,
+				DD7F4BA12DD2193F00D449E9 /* AlarmSnoozeSection.swift in Sources */,
 				DD9ACA0C2D33BB8600415D8A /* CalendarTask.swift in Sources */,
 				DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */,
 				DD0C0C702C4AFFE800DBADDF /* RemoteViewController.swift in Sources */,
@@ -1707,7 +1711,7 @@
 				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
 				DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */,
 				DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */,
-				DDC7E5422DBD8A1600EB1127 /* AlarmEditorFields.swift in Sources */,
+				DDC7E5422DBD8A1600EB1127 /* AlarmGeneralSection.swift in Sources */,
 				DDC7E5432DBD8A1600EB1127 /* SoundFile.swift in Sources */,
 				DDC7E5442DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift in Sources */,
 				DDC7E5462DBD8A1600EB1127 /* LowBgAlarmEditor.swift in Sources */,

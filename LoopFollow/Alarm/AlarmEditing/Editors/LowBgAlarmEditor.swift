@@ -31,6 +31,7 @@ struct LowBgAlarmEditor: View {
             )
 
             AlarmStepperSection(
+                header: "PERSISTENCE",
                 footer: "Glucose must stay below the threshold for this many minutes "
                 + "before the alert sounds. Set 0 to alert immediately.",
                 title: "Persistent",
@@ -44,6 +45,7 @@ struct LowBgAlarmEditor: View {
             )
 
             AlarmStepperSection(
+                header: "PREDICTION",
                 footer: "Look ahead this many minutes in Loop’s prediction; "
                 + "if any future value is at or below the threshold, "
                 + "you’ll be warned early. Set 0 to disable.",
@@ -57,20 +59,15 @@ struct LowBgAlarmEditor: View {
                 )
             )
 
-            AlarmStepperSection(
-                title: "Default Snooze",
-                range: 5...30,
-                step: 5,
-                unitLabel: alarm.type.timeUnit.label,
-                value: Binding(
-                    get: { Double(alarm.snoozeDuration) },
-                    set: { alarm.snoozeDuration = Int($0) }
-                )
-            )
-
             AlarmAudioSection(alarm: $alarm)
+
             AlarmActiveSection(alarm: $alarm)
-            AlarmSnoozedUntilSection(alarm: $alarm)
+
+            AlarmSnoozeSection(
+                alarm: $alarm,
+                range: 5...30,
+                step: 5
+            )
         }
         .navigationTitle(alarm.type.rawValue)
     }
