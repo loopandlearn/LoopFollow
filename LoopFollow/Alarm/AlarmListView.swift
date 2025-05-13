@@ -108,25 +108,24 @@ struct AlarmListView: View {
                             ZStack {
                                 Image(systemName: alarm.type.icon)
                                     .font(.title3)
-                                    .foregroundColor(alarm.isEnabled ? .accentColor : .secondary)
+                                    .foregroundStyle(alarm.isEnabled ? Color.accentColor : Color.secondary)
                                     .opacity(iconOpacity(for: alarm))
                                     .frame(maxWidth: .infinity, maxHeight: .infinity,
                                            alignment: .center)
 
-                                ZStack(alignment: .topTrailing) {
+                                ZStack(alignment: .bottomTrailing) {
                                     if let until = alarm.snoozedUntil, until > Date() {
-                                        Image(systemName: "speaker.zzz.fill")
-                                            .font(.caption2.bold())
-                                            .foregroundColor(.accentColor)
-                                    }
-
-                                    if !alarm.isEnabled {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .font(.caption2)
-                                            .foregroundColor(.accentColor)
+                                        Image(systemName: "zzz")
+                                            .font(.system(size: 11, weight: .bold))
+                                            .foregroundStyle(Color(uiColor: .systemBackground))
+                                            .padding(3)
+                                            .background(
+                                                Circle().fill(Color.accentColor)
+                                            )
+                                            .offset(x: 6, y: 6)
                                     }
                                 }
-                                .offset(x: 6, y: -6)
+                                .frame(width: 26, height: 26)
                             }
                             .frame(width: 26, height: 26)
 
