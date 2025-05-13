@@ -32,8 +32,13 @@ struct AlarmBGSection: View {
 
     private var unit: HKUnit { UserDefaultsRepository.getPreferredUnit() }
 
-    private var displayValue: String {
-        "\(Localizer.formatQuantity(value)) \(unit.localizedShortUnitString)"
+    private var snappedValue: Binding<Double> {
+        Binding(
+            get: {
+                allValues.min(by: { abs($0 - value) < abs($1 - value) }) ?? value
+            },
+            set: { value = $0 }
+        )
     }
 
     private var allValues: [Double] {
@@ -54,10 +59,8 @@ struct AlarmBGSection: View {
             footer: footer.map(Text.init)
         ) {
             Picker(
-                selection: $value,
-                label: HStack {
-                    Text(title)
-                }
+                selection: snappedValue,
+                label: HStack { Text(title) }
             ) {
                 ForEach(allValues, id: \.self) { v in
                     Text("\(Localizer.formatQuantity(v)) \(unit.localizedShortUnitString)")
