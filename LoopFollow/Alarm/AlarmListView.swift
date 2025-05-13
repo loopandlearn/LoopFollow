@@ -115,15 +115,15 @@ struct AlarmListView: View {
 
                                 ZStack(alignment: .topTrailing) {
                                     if let until = alarm.snoozedUntil, until > Date() {
-                                        Image(systemName: "zzz")
+                                        Image(systemName: "speaker.zzz.fill")
                                             .font(.caption2.bold())
-                                            .foregroundColor(.red)
+                                            .foregroundColor(.accentColor)
                                     }
 
                                     if !alarm.isEnabled {
                                         Image(systemName: "xmark.circle.fill")
                                             .font(.caption2)
-                                            .foregroundColor(.red)
+                                            .foregroundColor(.accentColor)
                                     }
                                 }
                                 .offset(x: 6, y: -6)
