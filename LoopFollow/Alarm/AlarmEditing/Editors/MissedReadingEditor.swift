@@ -13,7 +13,7 @@ struct MissedReadingEditor: View {
 
     var body: some View {
         Form {
-            InfoBanner(text: "The app notifies you when no CGM reading has been received for the time you choose below.")
+            InfoBanner(text: "The app notifies you when no CGM reading has been received for the time you choose below.", alarmType: alarm.type)
 
             AlarmGeneralSection(alarm: $alarm)
 

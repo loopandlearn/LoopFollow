@@ -22,17 +22,14 @@ struct AddAlarmSheet: View {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(AlarmType.Group.allCases, id: \.self) { group in
                         if AlarmType.allCases.contains(where: { $0.group == group }) {
-                            Section(header:
-                                        Text(group.rawValue)
+                            Section(header: Text(group.rawValue)
                                 .font(.headline)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.horizontal, 4)
                             ) {
-                                ForEach(AlarmType.allCases.filter { $0.group == group },
-                                        id: \.self) { type in
+                                ForEach(AlarmType.allCases.filter { $0.group == group }, id: \.self) { type in
                                     AlarmTile(type: type) {
                                         onSelect(type)
-//                                        dismiss()
                                     }
                                 }
                             }
@@ -104,8 +101,38 @@ struct AlarmListView: View {
         NavigationStack {
             List {
                 ForEach(store.value) { alarm in
-                    NavigationLink(alarm.name) {
+                    NavigationLink {
                         AlarmEditor(alarm: binding(for: alarm))
+                    } label: {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Image(systemName: alarm.type.icon)
+                                    .font(.title3)
+                                    .foregroundColor(alarm.isEnabled ? .accentColor : .secondary)
+                                    .opacity(iconOpacity(for: alarm))
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity,
+                                           alignment: .center)
+
+                                ZStack(alignment: .topTrailing) {
+                                    if let until = alarm.snoozedUntil, until > Date() {
+                                        Image(systemName: "zzz")
+                                            .font(.caption2.bold())
+                                            .foregroundColor(.red)
+                                    }
+
+                                    if !alarm.isEnabled {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.caption2)
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                                .offset(x: 6, y: -6)
+                            }
+                            .frame(width: 26, height: 26)
+
+                            Text(alarm.name)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
                     }
                 }
                 .onDelete { store.value.remove(atOffsets: $0) }
@@ -167,5 +194,11 @@ struct AlarmListView: View {
             fatalError("Alarm not found")
         }
         return $store.value[idx]
+    }
+
+    private func iconOpacity(for alarm: Alarm) -> Double {
+        if !alarm.isEnabled { return 0.35 }
+        if let until = alarm.snoozedUntil, until > Date() { return 0.35 }
+        return 1.0
     }
 }
