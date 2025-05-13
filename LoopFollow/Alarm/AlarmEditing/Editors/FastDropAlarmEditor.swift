@@ -26,8 +26,8 @@ struct FastDropAlarmEditor: View {
                 title: "Drop per reading",
                 range: 3...20,
                 value: Binding(
-                    get: { alarm.threshold ?? 4 },
-                    set: { alarm.threshold = $0 }
+                    get: { alarm.delta ?? 18 },
+                    set: { alarm.delta = $0 }
                 )
             )
 
@@ -44,10 +44,6 @@ struct FastDropAlarmEditor: View {
                 )
             )
 
-            //TODO: Vi måste bestämma var denna bglimit lagras.
-            //Kanske införa en bgLimit för tydlighets skull
-/*
-            // ────────── BG LIMIT ───────────
             Section {
                 Toggle("Only alert when below BG limit", isOn: $useLimit)
                     .onAppear {
@@ -69,8 +65,8 @@ struct FastDropAlarmEditor: View {
                 )
                 .disabled(!useLimit)
                 .opacity(useLimit ? 1 : 0.35)
-            }   // Section
-*/
+            }
+
             AlarmAudioSection(alarm: $alarm)
 
             AlarmActiveSection(alarm: $alarm)
