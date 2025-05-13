@@ -9,19 +9,24 @@
 import SwiftUI
 
 struct InfoBanner: View {
+    /// Main explanatory text
     let text: String
 
-    var systemImage: String = "info.circle.fill"
+    /// Optional alarm type whose icon you’d like to show.
+    /// If `nil`, we fall back to the standard “info” symbol.
+    var alarmType: AlarmType? = nil
 
-    var iconColour: Color  = .accentColor
+    /// Colour for the leading symbol
+    var iconColour: Color = .accentColor
 
-    var tint: Color        = Color.blue.opacity(0.20)
+    /// Background + border tints
+    var tint  : Color = Color.blue.opacity(0.20)
+    var border: Color = Color.blue.opacity(0.40)
 
-    var border: Color      = Color.blue.opacity(0.40)
-
+    // ────────── View ──────────
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: systemImage)
+            Image(systemName: alarmType?.icon ?? "info.circle.fill")
                 .font(.title3)
                 .foregroundColor(iconColour)
 
