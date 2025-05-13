@@ -10,9 +10,14 @@ import SwiftUI
 
 struct InfoBanner: View {
     let text: String
+
     var systemImage: String = "info.circle.fill"
-    var iconColour: Color = .accentColor
-    var tint: Color?      = Color.blue.opacity(0.07)
+
+    var iconColour: Color  = .accentColor
+
+    var tint: Color        = Color.blue.opacity(0.20)
+
+    var border: Color      = Color.blue.opacity(0.40)
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -28,8 +33,11 @@ struct InfoBanner: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(tint ?? .clear)
-                .background(.thinMaterial)
+                .fill(tint)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(border, lineWidth: 1)
         )
         .listRowInsets(EdgeInsets())
     }
