@@ -19,7 +19,7 @@ class AlarmManager {
         conditionTypes: [AlarmCondition.Type] = [
             BuildExpireCondition.self,
             LowBGCondition.self,
-            HighBGCondition.self
+            HighBGCondition.self,
             // TODO: add other condition types here
         ]
     ) {
@@ -33,17 +33,33 @@ class AlarmManager {
         let alarms = Storage.shared.alarms.value
 
         let sorted = alarms.sorted { lhs, rhs in
-            // Primary: type priority
+            // 1) by type priority
             if lhs.type.priority != rhs.type.priority {
                 return lhs.type.priority < rhs.type.priority
             }
-            // Secondary: threshold ordering if applicable
+
+            // 2) by “main” value for that type
             if let asc = lhs.type.thresholdSortAscending {
-                let leftVal = lhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
-                let rightVal = rhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
-                return asc ? leftVal < rightVal : leftVal > rightVal
+                // pick the right field:
+                let leftVal: Double
+                let rightVal: Double
+
+                switch lhs.type {
+                case .fastDrop, .fastRise:
+                    // sort on the per-reading delta
+                    leftVal  = lhs.delta ?? (asc ? Double.infinity : -Double.infinity)
+                    rightVal = rhs.delta ?? (asc ? Double.infinity : -Double.infinity)
+
+                default:
+                    // sort on the BG limit threshold
+                    leftVal  = lhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
+                    rightVal = rhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
+                }
+
+                return asc ? (leftVal < rightVal) : (leftVal > rightVal)
             }
-            // Tertiary: fallback to insertion order
+
+            // 3) fallback
             return false
         }
         var skipType: AlarmType? = nil

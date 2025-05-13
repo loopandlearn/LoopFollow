@@ -43,6 +43,9 @@ struct FastDropAlarmEditor: View {
                     set: { alarm.monitoringWindow = Int($0) }
                 )
             )
+
+            //TODO: Vi måste bestämma var denna bglimit lagras.
+            //Kanske införa en bgLimit för tydlighets skull
 /*
             // ────────── BG LIMIT ───────────
             Section {
