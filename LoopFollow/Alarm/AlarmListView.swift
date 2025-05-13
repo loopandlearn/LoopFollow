@@ -108,24 +108,18 @@ struct AlarmListView: View {
                             ZStack {
                                 Image(systemName: alarm.type.icon)
                                     .font(.title3)
+                                    .symbolRenderingMode(.hierarchical)
                                     .foregroundStyle(alarm.isEnabled ? Color.accentColor : Color.secondary)
                                     .opacity(iconOpacity(for: alarm))
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity,
-                                           alignment: .center)
 
-                                ZStack(alignment: .bottomTrailing) {
-                                    if let until = alarm.snoozedUntil, until > Date() {
-                                        Image(systemName: "zzz")
-                                            .font(.system(size: 11, weight: .bold))
-                                            .foregroundStyle(Color(uiColor: .systemBackground))
-                                            .padding(3)
-                                            .background(
-                                                Circle().fill(Color.accentColor)
-                                            )
-                                            .offset(x: 6, y: 6)
-                                    }
+                                if let until = alarm.snoozedUntil, until > Date() {
+                                    Image(systemName: "zzz")
+                                        .font(.title3)
+                                        .foregroundStyle(Color.secondary)
+                                        .shadow(color: .black.opacity(1), radius: 2, x: 0, y: 0)
+                                        .blendMode(.screen)
+                                        .offset(x: 6, y: 6)
                                 }
-                                .frame(width: 26, height: 26)
                             }
                             .frame(width: 26, height: 26)
 
@@ -197,7 +191,7 @@ struct AlarmListView: View {
 
     private func iconOpacity(for alarm: Alarm) -> Double {
         if !alarm.isEnabled { return 0.35 }
-        if let until = alarm.snoozedUntil, until > Date() { return 0.35 }
+        if let until = alarm.snoozedUntil, until > Date() { return 0.55 }
         return 1.0
     }
 }
