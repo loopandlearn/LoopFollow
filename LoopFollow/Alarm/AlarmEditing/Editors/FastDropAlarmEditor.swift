@@ -53,10 +53,8 @@ struct FastDropAlarmEditor: View {
                 value: $alarm.threshold
             )
 
-            AlarmAudioSection(alarm: $alarm)
-
             AlarmActiveSection(alarm: $alarm)
-
+            AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(
                 alarm: $alarm,
                 range: 5 ... 60,

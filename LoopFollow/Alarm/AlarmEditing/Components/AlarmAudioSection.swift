@@ -31,8 +31,26 @@ struct AlarmAudioSection: View {
                 TonePickerSheet(selected: $alarm.soundFile)
             }
 
-            AlarmEnumMenuPicker(title: "Play", selection: $alarm.playSoundOption)
-            AlarmEnumMenuPicker(title: "Repeat", selection: $alarm.repeatSoundOption)
+            AlarmEnumMenuPicker(
+                title: "Play",
+                selection: $alarm.playSoundOption,
+                allowed: PlaySoundOption.allowed(for: alarm.activeOption)
+            )
+            AlarmEnumMenuPicker(
+                title: "Repeat",
+                selection: $alarm.repeatSoundOption,
+                allowed: RepeatSoundOption.allowed(for: alarm.activeOption)
+            )
+        }.onChange(of: alarm.activeOption) { newActive in
+            let playAllowed = PlaySoundOption.allowed(for: newActive)
+            if !playAllowed.contains(alarm.playSoundOption) {
+                alarm.playSoundOption = playAllowed.last!
+            }
+
+            let repeatAllowed = RepeatSoundOption.allowed(for: newActive)
+            if !repeatAllowed.contains(alarm.repeatSoundOption) {
+                alarm.repeatSoundOption = repeatAllowed.last!
+            }
         }
     }
 }
@@ -40,17 +58,35 @@ struct AlarmAudioSection: View {
 struct AlarmEnumMenuPicker<E: CaseIterable & Hashable & DayNightDisplayable>: View {
     let title: String
     @Binding var selection: E
+    var allowed: [E]
 
     var body: some View {
         HStack {
             Text(title)
             Spacer()
             Picker("", selection: $selection) {
-                ForEach(Array(E.allCases), id: \.self) { option in
-                    Text(option.displayName).tag(option)
+                ForEach(allowed, id: \.self) { opt in
+                    Text(opt.displayName).tag(opt)
                 }
             }
+            // if the current selection became invalid, snap to the first allowed
+            .onAppear { validate() }
+            .onChange(of: allowed) { _ in validate() }
         }
+    }
+
+    private func validate() {
+        if !allowed.contains(selection), let first = allowed.first {
+            selection = first
+        }
+    }
+}
+
+extension AlarmEnumMenuPicker where E: CaseIterable {
+    init(title: String, selection: Binding<E>) {
+        self.title = title
+        _selection = selection
+        allowed = Array(E.allCases)
     }
 }
 

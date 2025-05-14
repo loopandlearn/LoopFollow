@@ -31,8 +31,8 @@ struct BuildExpireAlarmEditor: View {
                 )
             )
 
-            AlarmAudioSection(alarm: $alarm)
             AlarmActiveSection(alarm: $alarm)
+            AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(
                 alarm: $alarm,
                 range: 1 ... 14,
