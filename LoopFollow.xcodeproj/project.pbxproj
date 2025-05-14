@@ -105,6 +105,8 @@
 		DD7F4C052DD4BBE200D449E9 /* NotLoopingCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C042DD4BBE200D449E9 /* NotLoopingCondition.swift */; };
 		DD7F4C072DD5042F00D449E9 /* OverrideStartAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C062DD5042F00D449E9 /* OverrideStartAlarmEditor.swift */; };
 		DD7F4C092DD504A700D449E9 /* OverrideStartCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C082DD504A700D449E9 /* OverrideStartCondition.swift */; };
+		DD7F4C0B2DD51C5500D449E9 /* OverrideEndCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C0A2DD51C5500D449E9 /* OverrideEndCondition.swift */; };
+		DD7F4C0D2DD51C8100D449E9 /* OverrideEndAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C0C2DD51C8100D449E9 /* OverrideEndAlarmEditor.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
@@ -434,6 +436,8 @@
 		DD7F4C042DD4BBE200D449E9 /* NotLoopingCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotLoopingCondition.swift; sourceTree = "<group>"; };
 		DD7F4C062DD5042F00D449E9 /* OverrideStartAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideStartAlarmEditor.swift; sourceTree = "<group>"; };
 		DD7F4C082DD504A700D449E9 /* OverrideStartCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideStartCondition.swift; sourceTree = "<group>"; };
+		DD7F4C0A2DD51C5500D449E9 /* OverrideEndCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideEndCondition.swift; sourceTree = "<group>"; };
+		DD7F4C0C2DD51C8100D449E9 /* OverrideEndAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideEndAlarmEditor.swift; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
@@ -702,6 +706,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4C0A2DD51C5500D449E9 /* OverrideEndCondition.swift */,
 				DD7F4C042DD4BBE200D449E9 /* NotLoopingCondition.swift */,
 				DD7F4C082DD504A700D449E9 /* OverrideStartCondition.swift */,
 				DD7F4BC62DD473A600D449E9 /* FastDropCondition.swift */,
@@ -955,6 +960,7 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4C0C2DD51C8100D449E9 /* OverrideEndAlarmEditor.swift */,
 				DD7F4C062DD5042F00D449E9 /* OverrideStartAlarmEditor.swift */,
 				DD7F4C022DD4B92E00D449E9 /* NotLoopingAlarmEditor.swift */,
 				DD0650EC2DCE9371004D3B41 /* HighBgAlarmEditor.swift */,
@@ -1760,6 +1766,7 @@
 				DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */,
 				DDC7E5422DBD8A1600EB1127 /* AlarmGeneralSection.swift in Sources */,
 				DD7F4BC72DD473A600D449E9 /* FastDropCondition.swift in Sources */,
+				DD7F4C0D2DD51C8100D449E9 /* OverrideEndAlarmEditor.swift in Sources */,
 				DDC7E5432DBD8A1600EB1127 /* SoundFile.swift in Sources */,
 				DDC7E5442DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift in Sources */,
 				DDC7E5462DBD8A1600EB1127 /* LowBgAlarmEditor.swift in Sources */,
@@ -1788,6 +1795,7 @@
 				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
 				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
 				DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */,
+				DD7F4C0B2DD51C5500D449E9 /* OverrideEndCondition.swift in Sources */,
 				DDFF3D872D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift in Sources */,
 				DD50C7502D0828800057AE6F /* ContactSettingsViewModel.swift in Sources */,
 				DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */,
