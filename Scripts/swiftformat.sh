@@ -100,4 +100,3 @@ swift run -c release --package-path BuildTools swiftformat "${SRCROOT}" \
 # --typeattributes same-line \
 # --varattributes same-line \
 # --wrapcollections before-first \
---exclude Pods,Generated,R.generated.swift,fastlane/swift,Dependencies, LoopKit, LibreTransmitter,G7SensorKit,OmniKit, dexcom-share-client-swift,CGMBLEKit,RileyLinkKit,OmniBLE,MinimedKit,TidepoolService
