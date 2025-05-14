@@ -259,12 +259,16 @@ struct Alarm: Identifiable, Codable, Equatable {
             soundFile = .dholShuffleloop
         case .overrideStart:
             soundFile = .endingReached
+            repeatSoundOption = .never
         case .overrideEnd:
             soundFile = .alertToneBusy
+            repeatSoundOption = .never
         case .tempTargetStart:
             soundFile = .endingReached
+            repeatSoundOption = .never
         case .tempTargetEnd:
             soundFile = .alertToneBusy
+            repeatSoundOption = .never
         }
     }
 }

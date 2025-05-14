@@ -22,6 +22,7 @@ class AlarmManager {
             HighBGCondition.self,
             FastDropCondition.self,
             NotLoopingCondition.self,
+            OverrideStartCondition.self,
             // TODO: add other condition types here
         ]
     ) {

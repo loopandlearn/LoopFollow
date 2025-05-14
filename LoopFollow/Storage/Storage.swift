@@ -51,10 +51,9 @@ class Storage {
     var sensorScheduleOffset = StorageValue<Double?>(key: "sensorScheduleOffset", defaultValue: nil)
 
     var alarms = StorageValue<[Alarm]>(key: "alarms", defaultValue: [])
-    var alarmConfiguration = StorageValue<AlarmConfiguration>(
-        key: "alarmConfiguration",
-        defaultValue: .default
-    )
+    var alarmConfiguration = StorageValue<AlarmConfiguration>(key: "alarmConfiguration", defaultValue: .default)
+
+    var lastOverrideStartNotified = StorageValue<TimeInterval?>(key: "lastOverrideStartNotified", defaultValue: nil)
 
     static let shared = Storage()
     private init() {}

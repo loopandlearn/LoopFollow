@@ -19,6 +19,8 @@ extension MainViewController {
 
     func alarmTaskAction() {
         DispatchQueue.main.async {
+            let latestOverrideStart = self.overrideGraphData.last?.date
+
             let alarmData = AlarmData(
                 bgReadings: self.bgData
                     .suffix(24)
@@ -27,7 +29,8 @@ extension MainViewController {
                     .prefix(12)
                     .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) }, /// These are oldest .. newest, Predictions not currently available for Trio
                 expireDate: Storage.shared.expirationDate.value,
-                lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value
+                lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value,
+                latestOverrideStart: latestOverrideStart
             )
 
             let finalAlarmData: AlarmData
