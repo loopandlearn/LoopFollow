@@ -54,84 +54,79 @@ struct AlarmSettingsView: View {
         NavigationView {
             Form {
                 Section(
-                    header: Text("Snooze & Mute Options"),
+                    header: Text("Snooze & Mute Options"),
                     footer: Text("""
-                    Snooze All turns everything off, \
-                    Mute All turns off phone sounds but leaves vibration \
-                    and iOS notifications on
+                    “Snooze All” disables every alarm. \
+                    “Mute All” silences phone sounds but still vibrates \
+                    and shows iOS notifications.
                     """)
                 ) {
-                    // Snooze All Until
-                    DatePicker(
-                        "Snooze All Until",
-                        selection: optDateBinding(
-                            Binding(
-                                get: { cfgStore.value.snoozeUntil },
-                                set: { cfgStore.value.snoozeUntil = $0 }
-                            )
-                        ),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-
-                    Toggle(
-                        "All Alerts Snoozed",
-                        isOn: Binding(
-                            get: {
-                                if let until = cfgStore.value.snoozeUntil {
-                                    return until > Date()
+                    Toggle("All Alerts Snoozed", isOn: Binding(
+                        get: {
+                            if let until = cfgStore.value.snoozeUntil { return until > Date() }
+                            return false
+                        },
+                        set: { on in
+                            if on {
+                                let target = cfgStore.value.snoozeUntil ?? Date()
+                                if target <= Date() {
+                                    cfgStore.value.snoozeUntil = Date().addingTimeInterval(3600)
                                 }
-                                return false
-                            },
-                            set: { newOn in
-                                if newOn {
-                                    // if turning on, set a default 1h snooze if none or expired
-                                    if cfgStore.value.snoozeUntil == nil || cfgStore.value.snoozeUntil! <= Date() {
-                                        cfgStore.value.snoozeUntil = Date().addingTimeInterval(3600)
-                                    }
-                                } else {
-                                    cfgStore.value.snoozeUntil = nil
-                                }
+                            } else {
+                                cfgStore.value.snoozeUntil = nil
                             }
+                        }
+                    ))
+
+                    if let until = cfgStore.value.snoozeUntil, until > Date() {
+                        DatePicker(
+                            "Until",
+                            selection: optDateBinding(
+                                Binding(
+                                    get: { cfgStore.value.snoozeUntil },
+                                    set: { cfgStore.value.snoozeUntil = $0 }
+                                )
+                            ),
+                            displayedComponents: [.date, .hourAndMinute]
                         )
-                    )
+                        .datePickerStyle(.compact)
+                    }
 
-                    // Mute All Until
-                    DatePicker(
-                        "Mute All Until",
-                        selection: optDateBinding(
-                            Binding(
-                                get: { cfgStore.value.muteUntil },
-                                set: { cfgStore.value.muteUntil = $0 }
-                            )
-                        ),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-
-                    Toggle(
-                        "All Sounds Muted",
-                        isOn: Binding(
-                            get: {
-                                if let until = cfgStore.value.muteUntil {
-                                    return until > Date()
+                    Toggle("All Sounds Muted", isOn: Binding(
+                        get: {
+                            if let until = cfgStore.value.muteUntil { return until > Date() }
+                            return false
+                        },
+                        set: { on in
+                            if on {
+                                let target = cfgStore.value.muteUntil ?? Date()
+                                if target <= Date() {
+                                    cfgStore.value.muteUntil = Date().addingTimeInterval(3600)
                                 }
-                                return false
-                            },
-                            set: { newOn in
-                                if newOn {
-                                    if cfgStore.value.muteUntil == nil || cfgStore.value.muteUntil! <= Date() {
-                                        cfgStore.value.muteUntil = Date().addingTimeInterval(3600)
-                                    }
-                                } else {
-                                    cfgStore.value.muteUntil = nil
-                                }
+                            } else {
+                                cfgStore.value.muteUntil = nil
                             }
+                        }
+                    ))
+
+                    if let until = cfgStore.value.muteUntil, until > Date() {
+                        DatePicker(
+                            "Until",
+                            selection: optDateBinding(
+                                Binding(
+                                    get: { cfgStore.value.muteUntil },
+                                    set: { cfgStore.value.muteUntil = $0 }
+                                )
+                            ),
+                            displayedComponents: [.date, .hourAndMinute]
                         )
-                    )
+                        .datePickerStyle(.compact)
+                    }
                 }
 
                 Section(
                     header: Text("Day / Night Schedule"),
-                    footer: Text("Pick when your day period begins and when your night period begins." +
+                    footer: Text("Pick when your day period begins and when your night period begins. " +
                         "Any time from your Day-starts time up until your Night-starts time will count as day; " +
                         "from Night-starts until the next Day-starts will count as night.")
                 ) {
