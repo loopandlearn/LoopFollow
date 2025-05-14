@@ -20,6 +20,8 @@ class AlarmManager {
             BuildExpireCondition.self,
             LowBGCondition.self,
             HighBGCondition.self,
+            FastDropCondition.self,
+            NotLoopingCondition.self,
             // TODO: add other condition types here
         ]
     ) {
@@ -45,6 +47,7 @@ class AlarmManager {
                 let rightVal: Double
 
                 switch lhs.type {
+                // TODO: Make a alarm type setting of this, sortedBy or something like that
                 case .fastDrop, .fastRise:
                     // sort on the per-reading delta
                     leftVal = lhs.delta ?? (asc ? Double.infinity : -Double.infinity)
