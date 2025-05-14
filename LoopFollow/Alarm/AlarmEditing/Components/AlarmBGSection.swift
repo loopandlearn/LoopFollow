@@ -6,14 +6,14 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct AlarmBGSection: View {
-    let header:  String?
-    let footer:  String?
-    let title:   String
-    let range:   ClosedRange<Double>
+    let header: String?
+    let footer: String?
+    let title: String
+    let range: ClosedRange<Double>
     @Binding var value: Double
 
     init(
@@ -27,7 +27,7 @@ struct AlarmBGSection: View {
         self.footer = footer
         self.title = title
         self.range = range
-        self._value = value
+        _value = value
     }
 
     var body: some View {

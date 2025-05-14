@@ -13,7 +13,7 @@ struct AddAlarmSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     private let columns = [
-        GridItem(.adaptive(minimum: 110), spacing: 16)
+        GridItem(.adaptive(minimum: 110), spacing: 16),
     ]
 
     var body: some View {
@@ -83,8 +83,8 @@ private enum SheetInfo: Identifiable {
     var id: UUID {
         switch self {
         case .picker:
-            return UUID(uuidString:"00000000-0000-0000-0000-000000000000")!
-        case .editor(let id, _):
+            return UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
+        case let .editor(id, _):
             return id
         }
     }
@@ -136,11 +136,12 @@ struct AlarmListView: View {
                     Button("Done") { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { sheetInfo = .picker } label: { Image(systemName:"plus") }
+                    Button { sheetInfo = .picker } label: { Image(systemName: "plus") }
                 }
             }
             .sheet(item: $sheetInfo,
-                   onDismiss: handleSheetDismiss) { info in
+                   onDismiss: handleSheetDismiss)
+            { info in
                 sheetContent(for: info)
             }
         }
@@ -148,7 +149,8 @@ struct AlarmListView: View {
 
     private func handleSheetDismiss() {
         if let id = deleteAfterDismiss,
-           let idx = store.value.firstIndex(where: { $0.id == id }) {
+           let idx = store.value.firstIndex(where: { $0.id == id })
+        {
             store.value.remove(at: idx)
         }
         deleteAfterDismiss = nil
@@ -157,7 +159,6 @@ struct AlarmListView: View {
     @ViewBuilder
     private func sheetContent(for info: SheetInfo) -> some View {
         switch info {
-
         case .picker:
             AddAlarmSheet { type in
                 let new = Alarm(type: type)
@@ -165,11 +166,11 @@ struct AlarmListView: View {
                 sheetInfo = .editor(id: new.id, isNew: true)
             }
 
-        case .editor(let id, let isNew):
+        case let .editor(id, isNew):
             if let idx = store.value.firstIndex(where: { $0.id == id }) {
                 AlarmEditor(
                     alarm: $store.value[idx],
-                    isNew:  isNew,
+                    isNew: isNew,
                     onDone: { sheetInfo = nil },
                     onCancel: {
                         deleteAfterDismiss = id

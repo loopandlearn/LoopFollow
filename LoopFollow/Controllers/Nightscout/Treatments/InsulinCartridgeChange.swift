@@ -7,6 +7,7 @@
 //
 
 import Foundation
+
 extension MainViewController {
     func processIage(entries: [iageData]) {
         if !entries.isEmpty {

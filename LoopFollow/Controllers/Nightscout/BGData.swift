@@ -16,8 +16,7 @@ extension MainViewController {
         // Requesting more just for consistency with NS
         let graphHours = 24 * UserDefaultsRepository.downloadDays.value
         let count = graphHours * 12
-        dexShare?.fetchData(count) { (err, result) -> () in
-
+        dexShare?.fetchData(count) { err, result in
             if let error = err {
                 LogManager.shared.log(category: .dexcom, message: "Error fetching Dexcom data: \(error.localizedDescription)", limitIdentifier: "Error fetching Dexcom data")
                 self.webLoadNSBGData()
@@ -33,14 +32,14 @@ extension MainViewController {
             // If Dex data is old, load from NS instead
             let latestDate = data[0].date
             let now = dateTimeUtils.getNowTimeIntervalUTC()
-            if (latestDate + 330) < now && IsNightscoutEnabled() {
+            if (latestDate + 330) < now, IsNightscoutEnabled() {
                 LogManager.shared.log(category: .dexcom, message: "Dexcom data is old, loading from NS instead", limitIdentifier: "Dexcom data is old, loading from NS instead")
                 self.webLoadNSBGData()
                 return
             }
 
             // Dexcom only returns 24 hrs of data. If we need more, call NS.
-            if graphHours > 24 && IsNightscoutEnabled() {
+            if graphHours > 24, IsNightscoutEnabled() {
                 self.webLoadNSBGData(dexData: data)
             } else {
                 self.ProcessDexBGData(data: data, sourceName: "Dexcom")
@@ -66,11 +65,11 @@ extension MainViewController {
 
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
             switch result {
-            case .success(let entriesResponse):
+            case let .success(entriesResponse):
                 var nsData = entriesResponse
                 DispatchQueue.main.async {
                     // transform NS data to look like Dex data
-                    for i in 0..<nsData.count {
+                    for i in 0 ..< nsData.count {
                         // convert the NS timestamp to seconds instead of milliseconds
                         nsData[i].date /= 1000
                         nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
@@ -78,7 +77,7 @@ extension MainViewController {
 
                     var nsData2: [ShareGlucoseData] = []
                     var lastAddedTime = Double.infinity
-                    var lastAddedSGV: Int? = nil
+                    var lastAddedSGV: Int?
                     let minInterval: Double = 30
 
                     for reading in nsData {
@@ -94,7 +93,7 @@ extension MainViewController {
                     if !dexData.isEmpty {
                         let oldestDexDate = dexData[dexData.count - 1].date
                         var itemsToRemove = 0
-                        while itemsToRemove < nsData2.count && nsData2[itemsToRemove].date >= oldestDexDate {
+                        while itemsToRemove < nsData2.count, nsData2[itemsToRemove].date >= oldestDexDate {
                             itemsToRemove += 1
                         }
                         nsData2.removeFirst(itemsToRemove)
@@ -104,7 +103,7 @@ extension MainViewController {
                     // trigger the processor for the data after downloading.
                     self.ProcessDexBGData(data: nsData2, sourceName: sourceName)
                 }
-            case .failure(let error):
+            case let .failure(error):
                 LogManager.shared.log(category: .nightscout, message: "Failed to fetch bg data: \(error)", limitIdentifier: "Failed to fetch bg data")
                 DispatchQueue.main.async {
                     TaskScheduler.shared.rescheduleTask(
@@ -188,7 +187,7 @@ extension MainViewController {
 
         // Process data for graph display.
         bgData.removeAll()
-        for i in 0..<data.count {
+        for i in 0 ..< data.count {
             let readingTimestamp = data[data.count - 1 - i].date
             if readingTimestamp >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 let sgvValue = data[data.count - 1 - i].sgv

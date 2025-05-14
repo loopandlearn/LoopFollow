@@ -34,7 +34,7 @@ struct FastDropCondition: AlarmCondition {
         let recent = data.bgReadings.suffix(dropsNeeded + 1)
         let readings = Array(recent)
 
-        for i in 1...dropsNeeded {
+        for i in 1 ... dropsNeeded {
             let delta = Double(readings[i - 1].sgv - readings[i].sgv)
             if delta < dropPerReading { return false }
         }

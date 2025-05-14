@@ -9,9 +9,9 @@ import SwiftUI
 
 struct AlarmEditor: View {
     @Binding var alarm: Alarm
-    var isNew:  Bool = false
-    var onDone: () -> Void = { }
-    var onCancel: () -> Void = { }
+    var isNew: Bool = false
+    var onDone: () -> Void = {}
+    var onCancel: () -> Void = {}
 
     @Environment(\.dismiss) private var dismiss
 
@@ -51,8 +51,7 @@ struct AlarmEditor: View {
             MissedReadingEditor(alarm: $alarm)
         case .fastDrop:
             FastDropAlarmEditor(alarm: $alarm)
-
-            /* TODO: add other condition types here */
+        /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")
                 .padding()

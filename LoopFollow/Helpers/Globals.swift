@@ -8,10 +8,9 @@
 
 import Foundation
 
-
-struct globalVariables {
+enum globalVariables {
     static var debugLog = ""
-    
+
     // Graph Settings
     static let dotBG: Float = 3
     static let dotCarb: Float = 5

@@ -23,7 +23,8 @@ struct BLEDevice: Identifiable, Codable, Equatable {
          isConnected: Bool = false,
          advertisedServices: [String]? = nil,
          lastSeen: Date = Date(),
-         lastConnected: Date? = nil) {
+         lastConnected: Date? = nil)
+    {
         self.id = id
         self.name = name
         self.rssi = rssi

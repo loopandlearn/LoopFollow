@@ -1,13 +1,13 @@
-import Foundation
 import AVFoundation
 import CallKit
+import Foundation
 
 extension MainViewController {
     func evaluateSpeakConditions(currentValue: Int, previousValue: Int) {
         if !UserDefaultsRepository.speakBG.value {
             return
         }
-        
+
         let always = UserDefaultsRepository.speakBGAlways.value
         let lowThreshold = UserDefaultsRepository.speakLowBGLimit.value
         let fastDropDelta = UserDefaultsRepository.speakFastDropDelta.value
@@ -15,7 +15,7 @@ extension MainViewController {
         let speakLowBG = UserDefaultsRepository.speakLowBG.value
         let speakProactiveLowBG = UserDefaultsRepository.speakProactiveLowBG.value
         let speakHighBG = UserDefaultsRepository.speakHighBG.value
-        
+
         // Speak always
         if always {
             speakBG(currentValue: currentValue, previousValue: previousValue)
@@ -23,7 +23,7 @@ extension MainViewController {
 
             return
         }
-        
+
         // Speak if low or last value was low
         if speakLowBG {
             if currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) {
@@ -32,24 +32,25 @@ extension MainViewController {
                 return
             }
         }
-        
+
         // Speak predictive low if...
         // * low or last value was low
         // * next predictive value is low
         // * fast drop occurs below high
         if speakProactiveLowBG {
             let predictiveTrigger = !predictionData.isEmpty && Float(predictionData.first!.sgv) <= lowThreshold
-            
+
             if predictiveTrigger ||
                 currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) ||
-                ((currentValue <= Int(highThreshold) && (previousValue - currentValue) >= Int(fastDropDelta))) {
+                (currentValue <= Int(highThreshold) && (previousValue - currentValue) >= Int(fastDropDelta))
+            {
                 speakBG(currentValue: currentValue, previousValue: previousValue)
                 LogManager.shared.log(category: .general, message: "Speaking because of 'Proactive Low' condition. Predictive trigger: \(predictiveTrigger)", isDebug: true)
                 return
             }
         }
-        
-        //Speak if high or if last value was high
+
+        // Speak if high or if last value was high
         if speakHighBG {
             if currentValue >= Int(highThreshold) || previousValue >= Int(highThreshold) {
                 speakBG(currentValue: currentValue, previousValue: previousValue)
@@ -60,13 +61,13 @@ extension MainViewController {
 
         LogManager.shared.log(category: .general, message: "No condition met for speaking.", isDebug: true)
     }
-    
+
     struct AnnouncementTexts {
         var stable: String
         var increase: String
         var decrease: String
         var currentBGIs: String
-        
+
         static func forLanguage(_ language: String) -> AnnouncementTexts {
             switch language {
             case "it":
@@ -101,20 +102,19 @@ extension MainViewController {
             }
         }
     }
-    
-    struct LanguageVoiceMapping {
+
+    enum LanguageVoiceMapping {
         static let voiceLanguageMap: [String: String] = [
             "en": "en-US",
             "it": "it-IT",
             "sk": "sk-SK",
-            "sv": "sv-SE"
+            "sv": "sv-SE",
         ]
-        
+
         static func voiceLanguageCode(forAppLanguage appLanguage: String) -> String {
             return voiceLanguageMap[appLanguage, default: "en-US"]
         }
     }
-
 
     // Speaks the current blood glucose value and the change from the previous value.
     // Repeated calls to the function within 30 seconds are prevented.
@@ -126,7 +126,7 @@ extension MainViewController {
         } catch {
             LogManager.shared.log(category: .alarm, message: "speakBG, Failed to set up audio session: \(error)")
         }
-        
+
         // Get the current time
         let currentTime = Date()
 
@@ -139,7 +139,7 @@ extension MainViewController {
         }
 
         // Update the last speech time
-        self.lastSpeechTime = currentTime
+        lastSpeechTime = currentTime
 
         let bloodGlucoseDifference = currentValue - previousValue
 
@@ -147,11 +147,11 @@ extension MainViewController {
         let voiceLanguageCode = LanguageVoiceMapping.voiceLanguageCode(forAppLanguage: preferredLanguage)
 
         let texts = AnnouncementTexts.forLanguage(preferredLanguage)
-        
+
         let negligibleThreshold = 3
         let localizedCurrentValue = Localizer.toDisplayUnits(String(currentValue)).replacingOccurrences(of: ",", with: ".")
         let announcementText: String
-        
+
         if abs(bloodGlucoseDifference) <= negligibleThreshold {
             announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(texts.stable)"
         } else {
@@ -159,11 +159,10 @@ extension MainViewController {
             let absoluteDifference = Localizer.toDisplayUnits(String(abs(bloodGlucoseDifference))).replacingOccurrences(of: ",", with: ".")
             announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(directionText) \(absoluteDifference)"
         }
-        
+
         let speechUtterance = AVSpeechUtterance(string: announcementText)
         speechUtterance.voice = AVSpeechSynthesisVoice(language: voiceLanguageCode)
-        
+
         speechSynthesizer.speak(speechUtterance)
     }
-    
 }

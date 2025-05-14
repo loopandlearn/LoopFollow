@@ -96,8 +96,7 @@ struct BackgroundRefreshSettingsView: View {
 
                     deviceConnectionStatus(for: storedDevice)
 
-                    if(storedDevice.rssi != 0)
-                    {
+                    if storedDevice.rssi != 0 {
                         Text("RSSI: \(storedDevice.rssi) dBm")
                             .foregroundColor(.secondary)
                             .font(.footnote)

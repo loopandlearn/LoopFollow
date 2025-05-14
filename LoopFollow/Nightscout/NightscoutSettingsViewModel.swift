@@ -6,8 +6,8 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 protocol NightscoutSettingsViewModelDelegate: AnyObject {
     func nightscoutSettingsDidFinish()
@@ -27,6 +27,7 @@ class NightscoutSettingsViewModel: ObservableObject {
             }
         }
     }
+
     @Published var nightscoutToken: String = UserDefaultsRepository.token.value {
         willSet {
             if newValue != nightscoutToken {
@@ -35,6 +36,7 @@ class NightscoutSettingsViewModel: ObservableObject {
             }
         }
     }
+
     @Published var nightscoutStatus: String = "Checking..."
 
     private var cancellables = Set<AnyCancellable>()
@@ -42,8 +44,8 @@ class NightscoutSettingsViewModel: ObservableObject {
     private var checkStatusWorkItem: DispatchWorkItem?
 
     init() {
-        self.initialURL = ObservableUserDefaults.shared.url.value
-        self.initialToken = UserDefaultsRepository.token.value
+        initialURL = ObservableUserDefaults.shared.url.value
+        initialToken = UserDefaultsRepository.token.value
 
         setupDebounce()
         checkNightscoutStatus()
@@ -98,7 +100,7 @@ class NightscoutSettingsViewModel: ObservableObject {
     }
 
     func checkNightscoutStatus() {
-        NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth, nsAdminAuth in
+        NightscoutUtils.verifyURLAndToken { error, _, nsWriteAuth, nsAdminAuth in
             DispatchQueue.main.async {
                 ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
                 ObservableUserDefaults.shared.nsAdminAuth.value = nsAdminAuth
@@ -136,7 +138,7 @@ class NightscoutSettingsViewModel: ObservableObject {
 
             nightscoutStatus = "OK (\(authStatus))"
 
-            if (nightscoutURL != initialURL || nightscoutToken != initialToken) {
+            if nightscoutURL != initialURL || nightscoutToken != initialToken {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
             }
         }

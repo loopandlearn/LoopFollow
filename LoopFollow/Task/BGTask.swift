@@ -33,12 +33,12 @@ extension MainViewController {
         }
 
         // If Dexcom credentials exist, fetch from DexShare
-        if UserDefaultsRepository.shareUserName.value != "" &&
-            UserDefaultsRepository.sharePassword.value != ""
+        if UserDefaultsRepository.shareUserName.value != "",
+           UserDefaultsRepository.sharePassword.value != ""
         {
-            self.webLoadDexShare()
+            webLoadDexShare()
         } else {
-            self.webLoadNSBGData()
+            webLoadNSBGData()
         }
     }
 }

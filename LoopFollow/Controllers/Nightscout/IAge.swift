@@ -7,6 +7,7 @@
 //
 
 import Foundation
+
 extension MainViewController {
     // NS Iage Web Call
     func webLoadNSIage() {
@@ -17,16 +18,16 @@ extension MainViewController {
             "find[eventType]": NightscoutUtils.EventType.iage.rawValue,
             "find[created_at][$gte]": lastDateString,
             "find[created_at][$lte]": currentTimeString,
-            "count": "1"
+            "count": "1",
         ]
 
         NightscoutUtils.executeRequest(eventType: .iage, parameters: parameters) { (result: Result<[iageData], Error>) in
             switch result {
-            case .success(let data):
+            case let .success(data):
                 DispatchQueue.main.async {
                     self.updateIage(data: data)
                 }
-            case .failure(let error):
+            case let .failure(error):
                 LogManager.shared.log(category: .nightscout, message: "webLoadNSIage, failed to fetch data: \(error.localizedDescription)")
             }
         }
@@ -54,8 +55,8 @@ extension MainViewController {
 
             let formatter = DateComponentsFormatter()
             formatter.unitsStyle = .positional
-            formatter.allowedUnits = [ .day, .hour]
-            formatter.zeroFormattingBehavior = [ .pad ]
+            formatter.allowedUnits = [.day, .hour]
+            formatter.zeroFormattingBehavior = [.pad]
 
             if let formattedDuration = formatter.string(from: secondsAgo) {
                 infoManager.updateInfoData(type: .iage, value: formattedDuration)

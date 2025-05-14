@@ -45,6 +45,6 @@ enum InfoType: Int, CaseIterable {
     }
 
     var sortOrder: Int {
-        return self.rawValue
+        return rawValue
     }
 }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct CycleHelper {
+enum CycleHelper {
     /// Returns a positive modulus value (always between 0 and modulus).
     static func positiveModulo(_ value: TimeInterval, modulus: TimeInterval) -> TimeInterval {
         let remainder = value.truncatingRemainder(dividingBy: modulus)
@@ -36,7 +36,8 @@ struct CycleHelper {
     static func computeDelay(sensorReference: Date,
                              sensorInterval: TimeInterval,
                              heartbeatLast: Date,
-                             heartbeatInterval: TimeInterval) -> TimeInterval {
+                             heartbeatInterval: TimeInterval) -> TimeInterval
+    {
         let sensorOffset = cycleOffset(for: sensorReference, interval: sensorInterval)
         let hbOffset = cycleOffset(for: heartbeatLast, interval: heartbeatInterval)
         return positiveModulo(hbOffset - sensorOffset, modulus: heartbeatInterval)
@@ -45,7 +46,8 @@ struct CycleHelper {
     /// Overloaded version of computeDelay where the sensor cycle offset is already known.
     static func computeDelay(sensorOffset: TimeInterval,
                              heartbeatLast: Date,
-                             heartbeatInterval: TimeInterval) -> TimeInterval {
+                             heartbeatInterval: TimeInterval) -> TimeInterval
+    {
         let hbOffset = cycleOffset(for: heartbeatLast, interval: heartbeatInterval)
         return positiveModulo(hbOffset - sensorOffset, modulus: heartbeatInterval)
     }

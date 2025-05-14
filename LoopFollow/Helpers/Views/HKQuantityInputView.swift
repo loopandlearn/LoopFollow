@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct HKQuantityInputView: View {
     var label: String

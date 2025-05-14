@@ -17,7 +17,7 @@ struct TrioRemoteControlView: View {
             VStack {
                 let columns = [
                     GridItem(.flexible(), spacing: 16),
-                    GridItem(.flexible(), spacing: 16)
+                    GridItem(.flexible(), spacing: 16),
                 ]
 
                 LazyVGrid(columns: columns, spacing: 16) {

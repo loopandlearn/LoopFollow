@@ -12,16 +12,19 @@ struct NSProfile: Decodable {
             let time: String
             let timeAsSeconds: Double
         }
+
         struct SensEntry: Decodable {
             let value: Double
             let time: String
             let timeAsSeconds: Double
         }
+
         struct CarbRatioEntry: Decodable {
             let value: Double
             let time: String
             let timeAsSeconds: Double
         }
+
         struct TargetEntry: Decodable {
             let value: Double
             let time: String
@@ -93,7 +96,7 @@ struct NSProfile: Decodable {
         case isAPNSProduction
         case deviceToken
         case trioOverrides = "overridePresets"
-        case loopSettings = "loopSettings"
+        case loopSettings
         case teamID
         case expirationDate
     }

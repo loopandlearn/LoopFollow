@@ -6,10 +6,10 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
-import UIKit
 import Charts
+import Foundation
 import HealthKit
+import UIKit
 
 extension MainViewController {
     func DeviceStatusLoop(formatter: ISO8601DateFormatter, lastLoopRecord: [String: AnyObject]) {
@@ -19,7 +19,7 @@ extension MainViewController {
             Storage.shared.remoteType.value = .none
         }
 
-        if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970  {
+        if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970 {
             let previousLastLoopTime = UserDefaultsRepository.alertLastLoopTime.value
             UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
             if let failure = lastLoopRecord["failureReason"] {
@@ -27,11 +27,9 @@ extension MainViewController {
                 latestLoopStatusString = "X"
             } else {
                 var wasEnacted = false
-                if let enacted = lastLoopRecord["enacted"] as? [String:AnyObject] {
+                if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] {
                     wasEnacted = true
-                    if let lastTempBasal = enacted["rate"] as? Double {
-                        
-                    }
+                    if let lastTempBasal = enacted["rate"] as? Double {}
                 }
 
                 // ISF
@@ -68,11 +66,11 @@ extension MainViewController {
                     latestCOB = cobMetric
                 }
 
-                if let predictdata = lastLoopRecord["predicted"] as? [String:AnyObject] {
+                if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject] {
                     let prediction = predictdata["values"] as! [Double]
                     PredictionLabel.text = Localizer.toDisplayUnits(String(Int(prediction.last!)))
                     PredictionLabel.textColor = UIColor.systemPurple
-                    if UserDefaultsRepository.downloadPrediction.value && previousLastLoopTime < lastLoopTime {
+                    if UserDefaultsRepository.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
                         predictionData.removeAll()
                         var predictionTime = lastLoopTime
                         let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
@@ -89,7 +87,7 @@ extension MainViewController {
                             }
                             i += 1
                         }
-                        
+
                         if let predMin = prediction.min(), let predMax = prediction.max() {
                             let formattedMin = Localizer.toDisplayUnits(String(predMin))
                             let formattedMax = Localizer.toDisplayUnits(String(predMax))
@@ -109,13 +107,13 @@ extension MainViewController {
                     infoManager.updateInfoData(type: .recBolus, value: formattedRecBolus)
                     UserDefaultsRepository.deviceRecBolus.value = recBolus
                 }
-                if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String:AnyObject] {
+                if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
                     if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
                         var lastBGTime = lastLoopTime
                         if bgData.count > 0 {
                             lastBGTime = bgData[bgData.count - 1].date
                         }
-                        if tempBasalTime > lastBGTime && !wasEnacted {
+                        if tempBasalTime > lastBGTime, !wasEnacted {
                             LoopStatusLabel.text = "⏀"
                             latestLoopStatusString = "⏀"
                         } else {
@@ -127,7 +125,6 @@ extension MainViewController {
                     LoopStatusLabel.text = "↻"
                     latestLoopStatusString = "↻"
                 }
-                
             }
         }
     }

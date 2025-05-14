@@ -12,11 +12,11 @@ struct SnoozerView: View {
     @StateObject private var vm = SnoozerViewModel()
 
     @ObservedObject var minAgoText = Observable.shared.minAgoText
-    @ObservedObject var bgText     = Observable.shared.bgText
+    @ObservedObject var bgText = Observable.shared.bgText
     @ObservedObject var bgTextColor = Observable.shared.bgTextColor
     @ObservedObject var directionText = Observable.shared.directionText
-    @ObservedObject var deltaText   = Observable.shared.deltaText
-    @ObservedObject var bgStale     = Observable.shared.bgStale
+    @ObservedObject var deltaText = Observable.shared.deltaText
+    @ObservedObject var bgStale = Observable.shared.bgStale
 
     var body: some View {
         GeometryReader { geo in
@@ -45,6 +45,7 @@ struct SnoozerView: View {
     }
 
     // MARK: - Left Column (BG / Direction / Delta / Age)
+
     private var leftColumn: some View {
         VStack(spacing: 0) {
             Text(bgText.value)
@@ -81,6 +82,7 @@ struct SnoozerView: View {
     }
 
     // MARK: - Right Column (Clock/Alert + Snooze Controls)
+
     private var rightColumn: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -105,10 +107,10 @@ struct SnoozerView: View {
                         }
                         Spacer()
                         Stepper("", value: $vm.snoozeUnits,
-                                in: 1...(alarm.type.timeUnit == .day ? 30 :
-                                            alarm.type.timeUnit == .hour ? 24 : 60),
+                                in: 1 ... (alarm.type.timeUnit == .day ? 30 :
+                                    alarm.type.timeUnit == .hour ? 24 : 60),
                                 step: alarm.type.timeUnit == .minute ? 5 : 1)
-                        .labelsHidden()
+                            .labelsHidden()
                     }
                     .padding(.horizontal, 24)
 
@@ -130,12 +132,11 @@ struct SnoozerView: View {
             } else {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     Text(context.date, format:
-                            Date.FormatStyle(date: .omitted, time: .shortened)
-                    )
-                    .font(.system(size: 70))
-                    .minimumScaleFactor(0.5)
-                    .foregroundColor(.white)
-                    .frame(height: 78)
+                        Date.FormatStyle(date: .omitted, time: .shortened))
+                        .font(.system(size: 70))
+                        .minimumScaleFactor(0.5)
+                        .foregroundColor(.white)
+                        .frame(height: 78)
                 }
                 Spacer()
             }
@@ -143,13 +144,13 @@ struct SnoozerView: View {
     }
 }
 
-fileprivate extension View {
+private extension View {
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape( RoundedCorner(radius: radius, corners: corners) )
+        clipShape(RoundedCorner(radius: radius, corners: corners))
     }
 }
 
-fileprivate struct RoundedCorner: Shape {
+private struct RoundedCorner: Shape {
     var radius: CGFloat = .infinity
     var corners: UIRectCorner = .allCorners
     func path(in rect: CGRect) -> Path {

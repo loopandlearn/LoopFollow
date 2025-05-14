@@ -32,7 +32,7 @@ struct AlarmStepperSection: View {
         self.range = range
         self.step = step
         self.unitLabel = unitLabel
-        self._value = value
+        _value = value
     }
 
     var body: some View {

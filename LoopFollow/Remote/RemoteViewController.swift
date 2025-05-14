@@ -6,14 +6,13 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
-import UIKit
-import SwiftUI
-import HealthKit
 import Combine
+import Foundation
+import HealthKit
+import SwiftUI
+import UIKit
 
 class RemoteViewController: UIViewController {
-
     private var cancellable: AnyCancellable?
     private var hostingController: UIHostingController<AnyView>?
 
@@ -24,7 +23,7 @@ class RemoteViewController: UIViewController {
             Storage.shared.remoteType.$value,
             ObservableUserDefaults.shared.device.$value
         )
-        .sink { [weak self] newRemoteType, newDevice in
+        .sink { [weak self] _, _ in
             DispatchQueue.main.async {
                 self?.updateView()
             }
@@ -80,14 +79,14 @@ class RemoteViewController: UIViewController {
                 hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
                 hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
-                hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             ])
 
             hostingController.didMove(toParent: self)
         }
 
         if remoteType == .nightscout, !ObservableUserDefaults.shared.nsWriteAuth.value {
-            NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth, nsAdminAuth in
+            NightscoutUtils.verifyURLAndToken { _, _, nsWriteAuth, nsAdminAuth in
                 DispatchQueue.main.async {
                     ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
                     ObservableUserDefaults.shared.nsAdminAuth.value = nsAdminAuth

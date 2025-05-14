@@ -16,26 +16,26 @@ import Foundation
 
 // Graph Setup Flags
 enum ChartSettingsChangeEnum: Int {
-  case chartScaleXChanged = 1
-  case showDotsChanged = 2
-  case showLinesChanged = 4
-  case offsetCarbsBolusChanged = 8
-  case hoursToLoadChanged = 16
-  case predictionToLoadChanged = 32
-  case minBasalScaleChanged = 64
-  case minBGScaleChanged = 128
-  case overrideDisplayLocationChanged = 256
-  case lowLineChanged = 512
-  case highLineChanged = 1024
-  case smallGraphHeight = 2048
-  case showDIALinesChanged = 4096
-  case showMidnightLinesChanged = 8192
-  case show30MinLineChanged = 16384
-  case show90MinLineChanged = 32768
+    case chartScaleXChanged = 1
+    case showDotsChanged = 2
+    case showLinesChanged = 4
+    case offsetCarbsBolusChanged = 8
+    case hoursToLoadChanged = 16
+    case predictionToLoadChanged = 32
+    case minBasalScaleChanged = 64
+    case minBGScaleChanged = 128
+    case overrideDisplayLocationChanged = 256
+    case lowLineChanged = 512
+    case highLineChanged = 1024
+    case smallGraphHeight = 2048
+    case showDIALinesChanged = 4096
+    case showMidnightLinesChanged = 8192
+    case show30MinLineChanged = 16384
+    case show90MinLineChanged = 32768
 }
 
 // General Settings Flags
-enum GeneralSettingsChangeEnum: Int { 
+enum GeneralSettingsChangeEnum: Int {
     case colorBGTextChange = 1
     case speakBGChange = 2
     case appBadgeChange = 16
@@ -51,17 +51,16 @@ enum GeneralSettingsChangeEnum: Int {
 }
 
 class AppStateController {
-   
-   // add app states & methods here
+    // add app states & methods here
 
-   // General Settings States
-   var generalSettingsChanged : Bool = false
-   var generalSettingsChanges : Int = 0
+    // General Settings States
+    var generalSettingsChanged: Bool = false
+    var generalSettingsChanges: Int = 0
 
-   // Chart Settings State
-   var chartSettingsChanged : Bool = false // settings change has ocurred
-   var chartSettingsChanges: Int = 0      // what settings have changed
-   
-   // Info Data Settings State; no need for flags
-   var infoDataSettingsChanged: Bool = false
+    // Chart Settings State
+    var chartSettingsChanged: Bool = false // settings change has ocurred
+    var chartSettingsChanges: Int = 0 // what settings have changed
+
+    // Info Data Settings State; no need for flags
+    var infoDataSettingsChanged: Bool = false
 }

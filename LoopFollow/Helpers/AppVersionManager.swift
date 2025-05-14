@@ -10,7 +10,7 @@ import Foundation
 
 class AppVersionManager {
     private let githubService = GitHubService()
-    
+
     /// Checks for the availability of a new app version and if the current version is blacklisted.
     /// - Parameter completion: Returns latest version, a boolean for newer version existence, and blacklist status.
     /// Usage: `versionManager.checkForNewVersion { latestVersion, isNewer, isBlacklisted in ... }`
@@ -23,16 +23,17 @@ class AppVersionManager {
         let latestVersion = UserDefaultsRepository.latestVersion.value
         let currentVersionBlackListed = UserDefaultsRepository.currentVersionBlackListed.value
         let cachedForVersion = UserDefaultsRepository.cachedForVersion.value
-        
+
         // Reset notifications if version has changed
         if let cachedVersion = cachedForVersion, cachedVersion != currentVersion {
             UserDefaultsRepository.lastBlacklistNotificationShown.value = Date.distantPast
             UserDefaultsRepository.lastVersionUpdateNotificationShown.value = Date.distantPast
         }
-        
+
         // Check if the cache is still valid
         if let cachedVersion = cachedForVersion, cachedVersion == currentVersion,
-           now.timeIntervalSince(latestVersionChecked) < 24 * 3600, let latestVersion = latestVersion {
+           now.timeIntervalSince(latestVersionChecked) < 24 * 3600, let latestVersion = latestVersion
+        {
             let isNewer = isVersion(latestVersion, newerThan: currentVersion)
             completion(latestVersion, isNewer, currentVersionBlackListed)
             return
@@ -49,16 +50,16 @@ class AppVersionManager {
                     let fetchedVersion = versionData.flatMap { String(data: $0, encoding: .utf8) }
                         .flatMap { self.parseVersionFromConfig(contents: $0) }
                     let isNewer = fetchedVersion.map { self.isVersion($0, newerThan: currentVersion) } ?? false
-                    
+
                     let isBlacklisted = (try? blacklistData.flatMap { try JSONDecoder().decode(Blacklist.self, from: $0) })
                         .map { $0.blacklistedVersions.map { $0.version }.contains(currentVersion) } ?? false
-                    
+
                     // Update cache with new data
                     UserDefaultsRepository.latestVersion.value = fetchedVersion
                     UserDefaultsRepository.latestVersionChecked.value = Date()
                     UserDefaultsRepository.currentVersionBlackListed.value = isBlacklisted
                     UserDefaultsRepository.cachedForVersion.value = currentVersion
-                    
+
                     // Call completion with new data
                     completion(fetchedVersion, isNewer, isBlacklisted)
                 }
@@ -82,9 +83,9 @@ class AppVersionManager {
     private func isVersion(_ fetchedVersion: String, newerThan currentVersion: String) -> Bool {
         let fetchedVersionComponents = fetchedVersion.split(separator: ".").map { Int($0) ?? 0 }
         let currentVersionComponents = currentVersion.split(separator: ".").map { Int($0) ?? 0 }
-        
+
         let maxCount = max(fetchedVersionComponents.count, currentVersionComponents.count)
-        for i in 0..<maxCount {
+        for i in 0 ..< maxCount {
             let fetched = i < fetchedVersionComponents.count ? fetchedVersionComponents[i] : 0
             let current = i < currentVersionComponents.count ? currentVersionComponents[i] : 0
             if fetched > current {

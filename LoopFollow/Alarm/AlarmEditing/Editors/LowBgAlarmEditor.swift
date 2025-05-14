@@ -6,7 +6,6 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-
 import SwiftUI
 
 struct LowBgAlarmEditor: View {
@@ -15,15 +14,15 @@ struct LowBgAlarmEditor: View {
     var body: some View {
         Form {
             InfoBanner(text: "Alerts when your current CGM value — "
-                       + "or any predicted value within the look-ahead window — "
-                       + "falls at or below the threshold you set.")
+                + "or any predicted value within the look-ahead window — "
+                + "falls at or below the threshold you set.")
 
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmBGSection(
                 header: "Threshold",
                 title: "BG",
-                range: 40...150,
+                range: 40 ... 150,
                 value: Binding(
                     get: { alarm.threshold ?? 80 },
                     set: { alarm.threshold = $0 }
@@ -33,9 +32,9 @@ struct LowBgAlarmEditor: View {
             AlarmStepperSection(
                 header: "PERSISTENCE",
                 footer: "Glucose must stay below the threshold for this many minutes "
-                + "before the alert sounds. Set 0 to alert immediately.",
+                    + "before the alert sounds. Set 0 to alert immediately.",
                 title: "Persistent",
-                range: 0...120,
+                range: 0 ... 120,
                 step: 5,
                 unitLabel: alarm.type.timeUnit.label,
                 value: Binding(
@@ -47,10 +46,10 @@ struct LowBgAlarmEditor: View {
             AlarmStepperSection(
                 header: "PREDICTION",
                 footer: "Look ahead this many minutes in Loop’s prediction; "
-                + "if any future value is at or below the threshold, "
-                + "you’ll be warned early. Set 0 to disable.",
+                    + "if any future value is at or below the threshold, "
+                    + "you’ll be warned early. Set 0 to disable.",
                 title: "Predictive",
-                range: 0...60,
+                range: 0 ... 60,
                 step: 5,
                 unitLabel: alarm.type.timeUnit.label,
                 value: Binding(
@@ -65,7 +64,7 @@ struct LowBgAlarmEditor: View {
 
             AlarmSnoozeSection(
                 alarm: $alarm,
-                range: 5...30,
+                range: 5 ... 30,
                 step: 5
             )
         }

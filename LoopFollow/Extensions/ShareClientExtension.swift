@@ -15,9 +15,9 @@ public struct ShareGlucoseData: Decodable {
     var direction: String?
 
     enum CodingKeys: String, CodingKey {
-        case sgv  // Sensor Blood Glucose
-        case mbg  // Manual Blood Glucose
-        case glucose  // Other type of entry
+        case sgv // Sensor Blood Glucose
+        case mbg // Manual Blood Glucose
+        case glucose // Other type of entry
         case date
         case direction
     }
@@ -25,7 +25,7 @@ public struct ShareGlucoseData: Decodable {
     // Decoder initializer for handling JSON data
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         if let glucoseValue = try? container.decode(Double.self, forKey: .sgv) {
             sgv = Int(glucoseValue.rounded())
         } else if let mbgValue = try? container.decode(Double.self, forKey: .mbg) {
@@ -35,7 +35,7 @@ public struct ShareGlucoseData: Decodable {
         } else {
             throw DecodingError.dataCorruptedError(forKey: .sgv, in: container, debugDescription: "Expected to decode Double for sgv, mbg or glucose.")
         }
-    
+
         // Decode the date and optional direction
         date = try container.decode(TimeInterval.self, forKey: .date)
         direction = try container.decodeIfPresent(String.self, forKey: .direction)
@@ -49,36 +49,33 @@ public struct ShareGlucoseData: Decodable {
 }
 
 private var TrendTable: [String] = [
-   "NONE",             // 0
-   "DoubleUp",         // 1
-   "SingleUp",         // 2
-   "FortyFiveUp",      // 3
-   "Flat",             // 4
-   "FortyFiveDown",    // 5
-   "SingleDown",       // 6
-   "DoubleDown",       // 7
-   "NOT COMPUTABLE",   // 8
-   "RATE OUT OF RANGE" // 9
+    "NONE", // 0
+    "DoubleUp", // 1
+    "SingleUp", // 2
+    "FortyFiveUp", // 3
+    "Flat", // 4
+    "FortyFiveDown", // 5
+    "SingleDown", // 6
+    "DoubleDown", // 7
+    "NOT COMPUTABLE", // 8
+    "RATE OUT OF RANGE", // 9
 ]
 
-extension ShareClient {
-
-    public func fetchData(_ entries: Int, callback: @escaping (ShareError?, [ShareGlucoseData]?) -> Void) {
-        
-        self.fetchLast(entries) { (error, result) -> () in
+public extension ShareClient {
+    func fetchData(_ entries: Int, callback: @escaping (ShareError?, [ShareGlucoseData]?) -> Void) {
+        fetchLast(entries) { error, result in
             guard error == nil || result != nil else {
                 return callback(error, nil)
             }
-            
+
             // parse data to conanical form
             var shareData = [ShareGlucoseData]()
-            for i in 0..<result!.count {
-                
+            for i in 0 ..< result!.count {
                 var trend = Int(result![i].trend)
-                if(trend < 0 || trend > TrendTable.count-1) {
+                if trend < 0 || trend > TrendTable.count - 1 {
                     trend = 0
                 }
-            
+
                 let newShareData = ShareGlucoseData(
                     sgv: Int(result![i].glucose),
                     date: result![i].timestamp.timeIntervalSince1970,
@@ -86,7 +83,7 @@ extension ShareClient {
                 )
                 shareData.append(newShareData)
             }
-            callback(nil,shareData)
-         }
+            callback(nil, shareData)
+        }
     }
 }

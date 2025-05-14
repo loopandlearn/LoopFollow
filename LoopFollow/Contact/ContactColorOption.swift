@@ -13,15 +13,15 @@ enum ContactColorOption: String, CaseIterable {
 
     var uiColor: UIColor {
         switch self {
-        case .red:    return .red
-        case .blue:   return .blue
-        case .cyan:   return .cyan
-        case .green:  return .green
+        case .red: return .red
+        case .blue: return .blue
+        case .cyan: return .cyan
+        case .green: return .green
         case .yellow: return .yellow
         case .orange: return .orange
         case .purple: return .purple
-        case .white:  return .white
-        case .black:  return .black
+        case .white: return .white
+        case .black: return .black
         }
     }
 }

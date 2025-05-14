@@ -6,8 +6,8 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 class DexcomSettingsViewModel: ObservableObject {
     @Published var userName: String = UserDefaultsRepository.shareUserName.value {
@@ -17,6 +17,7 @@ class DexcomSettingsViewModel: ObservableObject {
             }
         }
     }
+
     @Published var password: String = UserDefaultsRepository.sharePassword.value {
         willSet {
             if newValue != password {
@@ -24,6 +25,7 @@ class DexcomSettingsViewModel: ObservableObject {
             }
         }
     }
+
     @Published var server: String = UserDefaultsRepository.shareServer.value {
         willSet {
             if newValue != server {
@@ -32,6 +34,5 @@ class DexcomSettingsViewModel: ObservableObject {
         }
     }
 
-    init() {
-    }
+    init() {}
 }

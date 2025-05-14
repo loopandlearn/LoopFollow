@@ -24,19 +24,19 @@ struct FastDropAlarmEditor: View {
                 header: "Rate of Fall",
                 footer: "How much the bg must fall to count as a “fast” drop.",
                 title: "Drop per reading",
-                range: 3...20,
+                range: 3 ... 20,
                 value: Binding(
                     get: { alarm.delta ?? 18 },
                     set: { alarm.delta = $0 }
                 )
             )
 
-            //TODO: In the migration script, use 1 value less than stored since we are switching from readings to drops
+            // TODO: In the migration script, use 1 value less than stored since we are switching from readings to drops
             AlarmStepperSection(
                 header: "Consecutive Drops",
                 footer: "Number of back-to-back drops—each meeting the rate above—required before an alert fires.",
                 title: "Drops in a row",
-                range: 1...3,
+                range: 1 ... 3,
                 step: 1,
                 value: Binding(
                     get: { Double(alarm.monitoringWindow ?? 2) },
@@ -49,7 +49,7 @@ struct FastDropAlarmEditor: View {
                 footer: "When enabled, this alert only fires if the glucose is below the limit you set.",
                 toggleText: "Use BG Limit",
                 pickerTitle: "Dropping below",
-                range: 40...300,
+                range: 40 ... 300,
                 value: $alarm.threshold
             )
 
@@ -59,7 +59,7 @@ struct FastDropAlarmEditor: View {
 
             AlarmSnoozeSection(
                 alarm: $alarm,
-                range: 5...60,
+                range: 5 ... 60,
                 step: 5
             )
         }

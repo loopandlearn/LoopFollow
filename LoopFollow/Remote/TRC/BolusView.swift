@@ -6,9 +6,9 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import SwiftUI
 import HealthKit
 import LocalAuthentication
+import SwiftUI
 
 struct BolusView: View {
     @Environment(\.presentationMode) private var presentationMode

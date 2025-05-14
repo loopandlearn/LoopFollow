@@ -6,9 +6,9 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
+import HealthKit
 import SwiftUI
 import UIKit
-import HealthKit
 
 public struct TextFieldWithToolBar: UIViewRepresentable {
     @Binding var quantity: HKQuantity
@@ -247,8 +247,8 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
                 }
                 return true
             } else if let number = Double(sanitizedText) {
-                let quantity = HKQuantity(unit: self.unit, doubleValue: number)
-                if self.isWithinLimits(quantity) {
+                let quantity = HKQuantity(unit: unit, doubleValue: number)
+                if isWithinLimits(quantity) {
                     DispatchQueue.main.async {
                         self.parent.quantity = quantity
                     }

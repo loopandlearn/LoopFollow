@@ -6,8 +6,8 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
 import CoreBluetooth
+import Foundation
 
 class OmnipodDashHeartbeatBluetoothTransmitter: BluetoothDevice {
     private let CBUUID_Service: String = "1A7E4024-E3ED-4464-8B7E-751E03D0DC5F"
@@ -16,7 +16,7 @@ class OmnipodDashHeartbeatBluetoothTransmitter: BluetoothDevice {
 
     private let CBUUID_ReceiveCharacteristic_Data: String = ""
 
-    init(address:String, name:String?, bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
+    init(address: String, name: String?, bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
         super.init(
             address: address,
             name: name,
@@ -34,7 +34,7 @@ class OmnipodDashHeartbeatBluetoothTransmitter: BluetoothDevice {
     override func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         super.peripheral(peripheral, didUpdateValueFor: characteristic, error: error)
 
-        self.bluetoothDeviceDelegate?.heartBeat()
+        bluetoothDeviceDelegate?.heartBeat()
     }
 
     override func expectedHeartbeatInterval() -> TimeInterval? {

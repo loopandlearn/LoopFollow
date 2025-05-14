@@ -25,11 +25,11 @@ extension MainViewController {
                 self.MinAgoText.text = ""
                 Observable.shared.minAgoText.value = ""
                 Observable.shared.bgText.value = ""
-                /*TODO
-                if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
-                    snoozer.BGLabel.attributedText = NSAttributedString(string: "")
-                }
-                 */
+                /* TODO:
+                 if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
+                     snoozer.BGLabel.attributedText = NSAttributedString(string: "")
+                 }
+                  */
             }
             TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date().addingTimeInterval(1))
             return
@@ -61,19 +61,19 @@ extension MainViewController {
                 self.MinAgoText.text = minAgoDisplayText
                 Observable.shared.minAgoText.value = minAgoDisplayText
 
-                /*TODO
-                if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
-                    let bgLabelText = snoozer.BGLabel.text ?? ""
-                    let attributeString = NSMutableAttributedString(string: bgLabelText)
-                    attributeString.addAttribute(.strikethroughStyle,
-                                                 value: NSUnderlineStyle.single.rawValue,
-                                                 range: NSRange(location: 0, length: attributeString.length))
-                    attributeString.addAttribute(.strikethroughColor,
-                                                 value: secondsAgo >= 720 ? UIColor.systemRed : UIColor.clear,
-                                                 range: NSRange(location: 0, length: attributeString.length))
-                    snoozer.BGLabel.attributedText = attributeString
-                }
-                 */
+                /* TODO:
+                 if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
+                     let bgLabelText = snoozer.BGLabel.text ?? ""
+                     let attributeString = NSMutableAttributedString(string: bgLabelText)
+                     attributeString.addAttribute(.strikethroughStyle,
+                                                  value: NSUnderlineStyle.single.rawValue,
+                                                  range: NSRange(location: 0, length: attributeString.length))
+                     attributeString.addAttribute(.strikethroughColor,
+                                                  value: secondsAgo >= 720 ? UIColor.systemRed : UIColor.clear,
+                                                  range: NSRange(location: 0, length: attributeString.length))
+                     snoozer.BGLabel.attributedText = attributeString
+                 }
+                  */
             }
         }
 
@@ -82,7 +82,7 @@ extension MainViewController {
         if shouldDisplaySeconds {
             // Update every second when showing seconds
             nextUpdateInterval = 1.0
-        } else if secondsAgo >= 240 && secondsAgo < 720 {
+        } else if secondsAgo >= 240, secondsAgo < 720 {
             // Schedule exactly at the transition point to start showing seconds
             nextUpdateInterval = 270.0 - secondsAgo
         } else {
