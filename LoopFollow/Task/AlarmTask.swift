@@ -22,6 +22,7 @@ extension MainViewController {
             let latestOverrideStart = self.overrideGraphData.last?.date
             let latestOverrideEnd = self.overrideGraphData.last?.endDate
             let latestTempTargetStart = self.tempTargetGraphData.last?.date
+            let latestTempTargetEnd = self.tempTargetGraphData.last?.endDate
 
             let alarmData = AlarmData(
                 bgReadings: self.bgData
@@ -34,7 +35,8 @@ extension MainViewController {
                 lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value,
                 latestOverrideStart: latestOverrideStart,
                 latestOverrideEnd: latestOverrideEnd,
-                latestTempTargetStart: latestTempTargetStart
+                latestTempTargetStart: latestTempTargetStart,
+                latestTempTargetEnd: latestTempTargetEnd,
             )
 
             let finalAlarmData: AlarmData

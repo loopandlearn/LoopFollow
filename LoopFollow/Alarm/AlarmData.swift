@@ -16,6 +16,7 @@ struct AlarmData: Codable {
     let latestOverrideStart: TimeInterval?
     let latestOverrideEnd: TimeInterval?
     let latestTempTargetStart: TimeInterval?
+    let latestTempTargetEnd: TimeInterval?
 }
 
 /*
