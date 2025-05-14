@@ -44,28 +44,14 @@ struct FastDropAlarmEditor: View {
                 )
             )
 
-            Section {
-                Toggle("Only alert when below BG limit", isOn: $useLimit)
-                    .onAppear {
-                        useLimit = (alarm.threshold != nil)
-                    }
-                    .onChange(of: useLimit) { newValue in
-                        if !newValue { alarm.threshold = nil }
-                    }
-
-                AlarmBGSection(
-                    header: nil,
-                    footer: "Ignored unless the toggle above is enabled.",
-                    title: "Dropping below",
-                    range: 40...300,
-                    value: Binding(
-                        get: { alarm.threshold ?? 70 },
-                        set: { alarm.threshold = $0 }
-                    )
-                )
-                .disabled(!useLimit)
-                .opacity(useLimit ? 1 : 0.35)
-            }
+            AlarmBGLimitSection(
+                header: "BG Limit",
+                footer: "When enabled, this alert only fires if the glucose is below the limit you set.",
+                toggleText: "Use BG Limit",
+                pickerTitle: "Dropping below",
+                range: 40...300,
+                value: $alarm.threshold
+            )
 
             AlarmAudioSection(alarm: $alarm)
 

@@ -30,43 +30,16 @@ struct AlarmBGSection: View {
         self._value = value
     }
 
-    private var unit: HKUnit { UserDefaultsRepository.getPreferredUnit() }
-
-    private var snappedValue: Binding<Double> {
-        Binding(
-            get: {
-                allValues.min(by: { abs($0 - value) < abs($1 - value) }) ?? value
-            },
-            set: { value = $0 }
-        )
-    }
-
-    private var allValues: [Double] {
-        if unit == .millimolesPerLiter {
-            let stepMMOL = 0.1
-            let lower = ceil((range.lowerBound / 18) / stepMMOL) * stepMMOL
-            let upper = floor((range.upperBound / 18) / stepMMOL) * stepMMOL
-
-            return stride(from: lower, through: upper, by: stepMMOL).map { $0 * 18 }
-        } else {
-            return Array(stride(from: range.lowerBound, through: range.upperBound, by: 1))
-        }
-    }
-
     var body: some View {
         Section(
             header: header.map(Text.init),
             footer: footer.map(Text.init)
         ) {
-            Picker(
-                selection: snappedValue,
-                label: HStack { Text(title) }
-            ) {
-                ForEach(allValues, id: \.self) { v in
-                    Text("\(Localizer.formatQuantity(v)) \(unit.localizedShortUnitString)")
-                        .tag(v)
-                }
-            }
+            AlarmBGPicker(
+                title: title,
+                range: range,
+                value: $value
+            )
         }
     }
 }

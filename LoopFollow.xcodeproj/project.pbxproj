@@ -98,6 +98,9 @@
 		DD7F4B9D2DD1EAE500D449E9 /* AlarmAudioSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */; };
 		DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */; };
 		DD7F4BA12DD2193F00D449E9 /* AlarmSnoozeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */; };
+		DD7F4BA32DD3C8A900D449E9 /* AlarmBGPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4BA22DD3C8A900D449E9 /* AlarmBGPicker.swift */; };
+		DD7F4BC52DD3CE0700D449E9 /* AlarmBGLimitSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4BC42DD3CE0700D449E9 /* AlarmBGLimitSection.swift */; };
+		DD7F4BC72DD473A600D449E9 /* FastDropCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4BC62DD473A600D449E9 /* FastDropCondition.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
@@ -420,6 +423,9 @@
 		DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmAudioSection.swift; sourceTree = "<group>"; };
 		DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmActiveSection.swift; sourceTree = "<group>"; };
 		DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSnoozeSection.swift; sourceTree = "<group>"; };
+		DD7F4BA22DD3C8A900D449E9 /* AlarmBGPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmBGPicker.swift; sourceTree = "<group>"; };
+		DD7F4BC42DD3CE0700D449E9 /* AlarmBGLimitSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmBGLimitSection.swift; sourceTree = "<group>"; };
+		DD7F4BC62DD473A600D449E9 /* FastDropCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastDropCondition.swift; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
@@ -688,6 +694,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4BC62DD473A600D449E9 /* FastDropCondition.swift */,
 				DD0650EA2DCE8385004D3B41 /* LowBGCondition.swift */,
 				DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */,
 				DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */,
@@ -921,6 +928,8 @@
 		DDC7E53B2DBD8A1600EB1127 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4BC42DD3CE0700D449E9 /* AlarmBGLimitSection.swift */,
+				DD7F4BA22DD3C8A900D449E9 /* AlarmBGPicker.swift */,
 				DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */,
 				DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */,
 				DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */,
@@ -1636,9 +1645,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD7F4BA32DD3C8A900D449E9 /* AlarmBGPicker.swift in Sources */,
 				DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */,
 				DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */,
 				DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */,
+				DD7F4BC52DD3CE0700D449E9 /* AlarmBGLimitSection.swift in Sources */,
 				DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */,
 				DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */,
 				DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */,
@@ -1712,6 +1723,7 @@
 				DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */,
 				DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */,
 				DDC7E5422DBD8A1600EB1127 /* AlarmGeneralSection.swift in Sources */,
+				DD7F4BC72DD473A600D449E9 /* FastDropCondition.swift in Sources */,
 				DDC7E5432DBD8A1600EB1127 /* SoundFile.swift in Sources */,
 				DDC7E5442DBD8A1600EB1127 /* BuildExpireAlarmEditor.swift in Sources */,
 				DDC7E5462DBD8A1600EB1127 /* LowBgAlarmEditor.swift in Sources */,
