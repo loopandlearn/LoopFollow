@@ -24,6 +24,7 @@ class AlarmManager {
             NotLoopingCondition.self,
             OverrideStartCondition.self,
             OverrideEndCondition.self,
+            TempTargetStartCondition.self,
             // TODO: add other condition types here
         ]
     ) {
