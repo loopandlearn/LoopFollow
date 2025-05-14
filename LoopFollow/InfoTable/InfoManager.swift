@@ -7,15 +7,15 @@
 //
 
 import Foundation
-import UIKit
 import HealthKit
+import UIKit
 
 class InfoManager {
     var tableData: [InfoData]
     weak var tableView: UITableView?
 
     init(tableView: UITableView) {
-        self.tableData = InfoType.allCases.map { InfoData(name: $0.name) }
+        tableData = InfoType.allCases.map { InfoData(name: $0.name) }
         self.tableView = tableView
     }
 
@@ -57,7 +57,7 @@ class InfoManager {
         let formattedValue = value.formattedValue()
         updateInfoData(type: type, value: formattedValue)
     }
-    
+
     func clearInfoData(type: InfoType) {
         tableData[type.rawValue].value = ""
         tableView?.reloadData()

@@ -6,8 +6,8 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct LoopOverrideView: View {
     @Environment(\.presentationMode) private var presentationMode
@@ -52,7 +52,6 @@ struct LoopOverrideView: View {
                         message: "Please update your token to include the 'admin' role in order to do remote commands with Loop."
                     )
                 } else {
-
                     Form {
                         if let activeNote = overrideNote.value {
                             Section(header: Text("Active Override")) {
@@ -177,6 +176,7 @@ struct LoopOverrideView: View {
     }
 
     // MARK: - Functions
+
     private func formattedDuration(from duration: Int?) -> String {
         guard let duration = duration, duration != 0 else {
             return "Indefinitely"

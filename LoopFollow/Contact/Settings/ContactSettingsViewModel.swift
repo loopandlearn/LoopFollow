@@ -6,8 +6,8 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 extension Bundle {
     var displayName: String {
@@ -53,7 +53,7 @@ class ContactSettingsViewModel: ObservableObject {
             triggerRefresh()
         }
     }
-    
+
     @Published var contactTextColor: String {
         didSet {
             Storage.shared.contactTextColor.value = contactTextColor
@@ -65,11 +65,11 @@ class ContactSettingsViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        self.contactEnabled = Storage.shared.contactEnabled.value
-        self.contactTrend = Storage.shared.contactTrend.value
-        self.contactDelta = Storage.shared.contactDelta.value
-        self.contactBackgroundColor = Storage.shared.contactBackgroundColor.value
-        self.contactTextColor = Storage.shared.contactTextColor.value
+        contactEnabled = Storage.shared.contactEnabled.value
+        contactTrend = Storage.shared.contactTrend.value
+        contactDelta = Storage.shared.contactDelta.value
+        contactBackgroundColor = Storage.shared.contactBackgroundColor.value
+        contactTextColor = Storage.shared.contactTextColor.value
 
         Storage.shared.contactEnabled.$value
             .assign(to: &$contactEnabled)
@@ -82,7 +82,7 @@ class ContactSettingsViewModel: ObservableObject {
 
         Storage.shared.contactBackgroundColor.$value
             .assign(to: &$contactBackgroundColor)
-        
+
         Storage.shared.contactTextColor.$value
             .assign(to: &$contactTextColor)
     }

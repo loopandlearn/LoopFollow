@@ -13,7 +13,7 @@ class AlarmManager {
     static let shared = AlarmManager()
 
     private let evaluators: [AlarmType: AlarmCondition]
-    private var lastBGAlarmTime : Date?
+    private var lastBGAlarmTime: Date?
 
     private init(
         conditionTypes: [AlarmCondition.Type] = [
@@ -47,12 +47,12 @@ class AlarmManager {
                 switch lhs.type {
                 case .fastDrop, .fastRise:
                     // sort on the per-reading delta
-                    leftVal  = lhs.delta ?? (asc ? Double.infinity : -Double.infinity)
+                    leftVal = lhs.delta ?? (asc ? Double.infinity : -Double.infinity)
                     rightVal = rhs.delta ?? (asc ? Double.infinity : -Double.infinity)
 
                 default:
                     // sort on the BG limit threshold
-                    leftVal  = lhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
+                    leftVal = lhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
                     rightVal = rhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
                 }
 
@@ -62,7 +62,7 @@ class AlarmManager {
             // 3) fallback
             return false
         }
-        var skipType: AlarmType? = nil
+        var skipType: AlarmType?
 
         let isLatestReadingRecent: Bool = {
             guard let last = data.bgReadings.last else { return false }
@@ -76,7 +76,7 @@ class AlarmManager {
             }
 
             // If the alarm is based on bg values, and the value isnt recent, skip to next
-            if alarm.type.isBGBased && !isLatestReadingRecent {
+            if alarm.type.isBGBased, !isLatestReadingRecent {
                 continue
             }
 
@@ -85,7 +85,8 @@ class AlarmManager {
             if alarm.type.isBGBased,
                let lastHandled = lastBGAlarmTime,
                let latestDate = data.bgReadings.last?.date,
-               !(latestDate > lastHandled) {
+               !(latestDate > lastHandled)
+            {
                 continue
             }
 
@@ -99,12 +100,12 @@ class AlarmManager {
             // Evaluate the alarm condition.
             guard let checker = evaluators[alarm.type],
                   checker
-                .shouldFire(
-                    alarm: alarm,
-                    data: data,
-                    now: now,
-                    config: Storage.shared.alarmConfiguration.value
-                )
+                  .shouldFire(
+                      alarm: alarm,
+                      data: data,
+                      now: now,
+                      config: Storage.shared.alarmConfiguration.value
+                  )
             else {
                 // If this alarm is active, but no longer fulfill the requirements, stop it.
                 // Continue evaluating other alarams
@@ -128,7 +129,8 @@ class AlarmManager {
 
             // Store the latest bg time so we don't use it again
             if alarm.type.isBGBased,
-               let latestDate = data.bgReadings.last?.date {
+               let latestDate = data.bgReadings.last?.date
+            {
                 lastBGAlarmTime = latestDate
             }
             break

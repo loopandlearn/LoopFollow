@@ -6,8 +6,8 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import SwiftUI
 import Contacts
+import SwiftUI
 
 struct ContactSettingsView: View {
     @ObservedObject var viewModel: ContactSettingsViewModel
@@ -102,7 +102,7 @@ struct ContactSettingsView: View {
         if status == .authorized {
             // Already authorized, do nothing
         } else if status == .notDetermined {
-            contactStore.requestAccess(for: .contacts) { granted, error in
+            contactStore.requestAccess(for: .contacts) { granted, _ in
                 DispatchQueue.main.async {
                     if !granted {
                         viewModel.contactEnabled = false

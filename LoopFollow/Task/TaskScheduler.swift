@@ -47,8 +47,8 @@ class TaskScheduler {
     }
 
     func rescheduleTask(id: TaskID, to newRunDate: Date) {
-        let timeString = self.formatTime(newRunDate)
-        //LogManager.shared.log(category: .taskScheduler, message: "Reschedule Task \(id): next run = \(timeString)", isDebug: true)
+        let timeString = formatTime(newRunDate)
+        // LogManager.shared.log(category: .taskScheduler, message: "Reschedule Task \(id): next run = \(timeString)", isDebug: true)
 
         queue.async {
             guard var existingTask = self.tasks[id] else { return }
@@ -79,7 +79,7 @@ class TaskScheduler {
         let interval = earliestTask.nextRun.timeIntervalSinceNow
         let safeInterval = max(interval, 0)
 
-        let timer = DispatchSource.makeTimerSource(queue: self.queue)
+        let timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now() + safeInterval)
         timer.setEventHandler { [weak self] in
             guard let self = self else { return }
@@ -110,9 +110,9 @@ class TaskScheduler {
                     return checkTask.nextRun <= now || checkTask.nextRun == .distantFuture
                 }
                 if shouldSkip {
-                    guard var existingTask = self.tasks[taskID] else { continue }
+                    guard var existingTask = tasks[taskID] else { continue }
                     existingTask.nextRun = Date().addingTimeInterval(5)
-                    self.tasks[taskID] = existingTask
+                    tasks[taskID] = existingTask
                     continue
                 }
             }
@@ -121,7 +121,7 @@ class TaskScheduler {
             updatedTask.nextRun = .distantFuture
             tasks[taskID] = updatedTask
 
-            //LogManager.shared.log(category: .taskScheduler, message: "Executing Task \(taskID)", isDebug: true)
+            // LogManager.shared.log(category: .taskScheduler, message: "Executing Task \(taskID)", isDebug: true)
 
             DispatchQueue.main.async {
                 task.action()

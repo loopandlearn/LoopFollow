@@ -20,7 +20,7 @@ struct InfoBanner: View {
     var iconColour: Color = .accentColor
 
     /// Background + border tints
-    var tint  : Color = Color.blue.opacity(0.20)
+    var tint: Color = Color.blue.opacity(0.20)
     var border: Color = Color.blue.opacity(0.40)
 
     // ────────── View ──────────

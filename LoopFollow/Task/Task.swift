@@ -9,7 +9,6 @@
 import Foundation
 
 extension MainViewController {
-
     func scheduleAllTasks() {
         scheduleBGTask()
         scheduleProfileTask()

@@ -7,21 +7,22 @@
 //
 
 import Foundation
+
 extension MainViewController {
     // NS Treatments Web Call
     // Downloads Basal, Bolus, Carbs, BG Check, Notes, Overrides
     func WebLoadNSTreatments() {
         if !UserDefaultsRepository.downloadTreatments.value { return }
-        
+
         let startTimeString = dateTimeUtils.getDateTimeString(addingDays: -1 * UserDefaultsRepository.downloadDays.value)
         let currentTimeString = dateTimeUtils.getDateTimeString(addingHours: 6)
         let parameters: [String: String] = [
             "find[created_at][$gte]": startTimeString,
-            "find[created_at][$lte]": currentTimeString
+            "find[created_at][$lte]": currentTimeString,
         ]
         NightscoutUtils.executeDynamicRequest(eventType: .treatments, parameters: parameters) { (result: Result<Any, Error>) in
             switch result {
-            case .success(let data):
+            case let .success(data):
                 if let entries = data as? [[String: AnyObject]] {
                     DispatchQueue.main.async {
                         self.updateTreatments(entries: entries)
@@ -29,25 +30,24 @@ extension MainViewController {
                 } else {
                     LogManager.shared.log(category: .nightscout, message: "WebLoadNSTreatments, Unexpected data structure")
                 }
-            case .failure(let error):
+            case let .failure(error):
                 LogManager.shared.log(category: .nightscout, message: "WebLoadNSTreatments, error \(error.localizedDescription)")
             }
         }
     }
-    
+
     // Process and split out treatments to individual tasks
-    func updateTreatments(entries: [[String:AnyObject]]) {
-        
-        var tempBasal: [[String:AnyObject]] = []
-        var bolus: [[String:AnyObject]] = []
-        var smb: [[String:AnyObject]] = []
-        var carbs: [[String:AnyObject]] = []
-        var temporaryOverride: [[String:AnyObject]] = []
-        var temporaryTarget: [[String:AnyObject]] = []
-        var note: [[String:AnyObject]] = []
-        var bgCheck: [[String:AnyObject]] = []
-        var suspendPump: [[String:AnyObject]] = []
-        var resumePump: [[String:AnyObject]] = []
+    func updateTreatments(entries: [[String: AnyObject]]) {
+        var tempBasal: [[String: AnyObject]] = []
+        var bolus: [[String: AnyObject]] = []
+        var smb: [[String: AnyObject]] = []
+        var carbs: [[String: AnyObject]] = []
+        var temporaryOverride: [[String: AnyObject]] = []
+        var temporaryTarget: [[String: AnyObject]] = []
+        var note: [[String: AnyObject]] = []
+        var bgCheck: [[String: AnyObject]] = []
+        var suspendPump: [[String: AnyObject]] = []
+        var resumePump: [[String: AnyObject]] = []
         var pumpSiteChange: [cageData] = []
         var cgmSensorStart: [sageData] = []
         var insulinCartridge: [iageData] = []
@@ -56,7 +56,7 @@ extension MainViewController {
             guard let eventType = entry["eventType"] as? String else {
                 continue
             }
-            
+
             switch eventType {
             case "Temp Basal":
                 tempBasal.append(entry)
@@ -104,7 +104,7 @@ extension MainViewController {
                 print("No Match: \(String(describing: entry))")
             }
         }
-        
+
         if tempBasal.count > 0 {
             processNSBasals(entries: tempBasal)
         } else {
@@ -141,14 +141,14 @@ extension MainViewController {
                 clearOldBGCheck()
             }
         }
-        if temporaryOverride.count == 0 && overrideGraphData.count > 0 {
+        if temporaryOverride.count == 0, overrideGraphData.count > 0 {
             clearOldOverride()
         }
         if temporaryOverride.count > 0 {
             processNSOverrides(entries: temporaryOverride)
         }
 
-        if temporaryTarget.count == 0 && tempTargetGraphData.count > 0 {
+        if temporaryTarget.count == 0, tempTargetGraphData.count > 0 {
             clearOldTempTarget()
         }
         if temporaryTarget.count > 0 {

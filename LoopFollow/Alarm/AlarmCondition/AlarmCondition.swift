@@ -24,10 +24,10 @@ extension AlarmCondition {
         if let snooze = alarm.snoozedUntil, snooze > now { return false }
 
         // time-of-day guard
-        let comps   = Calendar.current.dateComponents([.hour, .minute], from: now)
-        let nowMin  = (comps.hour! * 60) + comps.minute!
-        let dStart  = config.dayStart.minutesSinceMidnight
-        let nStart  = config.nightStart.minutesSinceMidnight
+        let comps = Calendar.current.dateComponents([.hour, .minute], from: now)
+        let nowMin = (comps.hour! * 60) + comps.minute!
+        let dStart = config.dayStart.minutesSinceMidnight
+        let nStart = config.nightStart.minutesSinceMidnight
         let isNight = (nowMin < dStart) || (nowMin >= nStart)
 
         switch alarm.activeOption {

@@ -15,17 +15,17 @@ struct AlarmData: Codable {
 }
 
 /*
-struct AlarmData : Encodable, Decodable{
-    let bgReadings: [ShareGlucoseData]
-//    let iob: Double?
-//    let cob: Double?
-    let predictionData: [ShareGlucoseData]
-//    let latestBoluses: [BolusEntry]
-//    let batteryLevel: Double?
-//    let latestCarbs: [CarbEntry]
-//    let overrideData: [OverrideEntry]
-//    let tempTargetData: [TempTargetEntry]
-//    let pumpVolume: Double?
-    let expireDate: Date?
-}
-*/
+ struct AlarmData : Encodable, Decodable{
+     let bgReadings: [ShareGlucoseData]
+ //    let iob: Double?
+ //    let cob: Double?
+     let predictionData: [ShareGlucoseData]
+ //    let latestBoluses: [BolusEntry]
+ //    let batteryLevel: Double?
+ //    let latestCarbs: [CarbEntry]
+ //    let overrideData: [OverrideEntry]
+ //    let tempTargetData: [TempTargetEntry]
+ //    let pumpVolume: Double?
+     let expireDate: Date?
+ }
+ */

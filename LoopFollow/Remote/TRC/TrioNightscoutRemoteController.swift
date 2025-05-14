@@ -10,7 +10,6 @@ import Foundation
 import HealthKit
 
 class TrioNightscoutRemoteController {
-
     func cancelExistingTarget(completion: @escaping (Bool) -> Void) {
         Task {
             let tempTargetBody: [String: Any] = [
@@ -18,7 +17,7 @@ class TrioNightscoutRemoteController {
                 "eventType": "Temporary Target",
                 "reason": "Manual",
                 "duration": 0,
-                "created_at": ISO8601DateFormatter().string(from: Date())
+                "created_at": ISO8601DateFormatter().string(from: Date()),
             ]
 
             do {
@@ -40,7 +39,7 @@ class TrioNightscoutRemoteController {
             "targetTop": newTarget.doubleValue(for: .milligramsPerDeciliter),
             "targetBottom": newTarget.doubleValue(for: .milligramsPerDeciliter),
             "duration": Int(duration.doubleValue(for: .minute())),
-            "created_at": ISO8601DateFormatter().string(from: Date())
+            "created_at": ISO8601DateFormatter().string(from: Date()),
         ]
 
         Task {

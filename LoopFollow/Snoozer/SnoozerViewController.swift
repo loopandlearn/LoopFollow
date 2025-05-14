@@ -6,10 +6,9 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-
-import UIKit
-import SwiftUI
 import Combine
+import SwiftUI
+import UIKit
 
 class SnoozerViewController: UIViewController {
     private var hostingController: UIHostingController<SnoozerView>?
@@ -23,7 +22,7 @@ class SnoozerViewController: UIViewController {
         let snoozerView = SnoozerView()
 
         let hosting = UIHostingController(rootView: snoozerView)
-        self.hostingController = hosting
+        hostingController = hosting
         addChild(hosting)
         view.addSubview(hosting.view)
         hosting.view.translatesAutoresizingMaskIntoConstraints = false
@@ -32,7 +31,7 @@ class SnoozerViewController: UIViewController {
             hosting.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             hosting.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             hosting.view.topAnchor.constraint(equalTo: view.topAnchor),
-            hosting.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            hosting.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
 
         hosting.didMove(toParent: self)

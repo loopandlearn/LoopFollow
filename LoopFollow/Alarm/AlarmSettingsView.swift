@@ -24,7 +24,7 @@ struct AlarmSettingsView: View {
         Binding(
             get: {
                 var c = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-                c.hour   = cfgStore.value.dayStart.hour
+                c.hour = cfgStore.value.dayStart.hour
                 c.minute = cfgStore.value.dayStart.minute
                 return Calendar.current.date(from: c)!
             },
@@ -39,7 +39,7 @@ struct AlarmSettingsView: View {
         Binding(
             get: {
                 var c = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-                c.hour   = cfgStore.value.nightStart.hour
+                c.hour = cfgStore.value.nightStart.hour
                 c.minute = cfgStore.value.nightStart.minute
                 return Calendar.current.date(from: c)!
             },
@@ -56,10 +56,10 @@ struct AlarmSettingsView: View {
                 Section(
                     header: Text("Snooze & Mute Options"),
                     footer: Text("""
-                        Snooze All turns everything off, \
-                        Mute All turns off phone sounds but leaves vibration \
-                        and iOS notifications on
-                        """)
+                    Snooze All turns everything off, \
+                    Mute All turns off phone sounds but leaves vibration \
+                    and iOS notifications on
+                    """)
                 ) {
                     // Snooze All Until
                     DatePicker(
@@ -145,7 +145,7 @@ struct AlarmSettingsView: View {
                                 get: { Double(cfgStore.value.forcedOutputVolume) },
                                 set: { cfgStore.value.forcedOutputVolume = Float($0) }
                             ),
-                            in: 0...1,
+                            in: 0 ... 1,
                             step: 0.05
                         )
                     }

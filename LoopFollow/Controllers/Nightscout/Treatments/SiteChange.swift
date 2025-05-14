@@ -7,6 +7,7 @@
 //
 
 import Foundation
+
 extension MainViewController {
     func processCage(entries: [cageData]) {
         if !entries.isEmpty {

@@ -6,8 +6,8 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
 import CallKit
+import Foundation
 
 private let callObserver = CXCallObserver()
 

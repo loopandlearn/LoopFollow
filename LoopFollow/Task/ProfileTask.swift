@@ -24,7 +24,7 @@ extension MainViewController {
             return
         }
 
-        self.webLoadNSProfile()
+        webLoadNSProfile()
 
         TaskScheduler.shared.rescheduleTask(id: .profile, to: Date().addingTimeInterval(10 * 60))
     }

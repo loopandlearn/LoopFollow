@@ -23,7 +23,7 @@ struct AdvancedSettingsView: View {
                     Toggle("Graph Carbs", isOn: $viewModel.graphCarbs)
                     Toggle("Graph Other Treatments", isOn: $viewModel.graphOtherTreatments)
 
-                    Stepper(value: $viewModel.bgUpdateDelay, in: 1...30, step: 1) {
+                    Stepper(value: $viewModel.bgUpdateDelay, in: 1 ... 30, step: 1) {
                         Text("BG Update Delay (Sec): \(viewModel.bgUpdateDelay)")
                     }
                 }

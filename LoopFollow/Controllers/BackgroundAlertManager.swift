@@ -92,7 +92,7 @@ class BackgroundAlertManager {
                 body: isBluetoothActive
                     ? "App inactive for 18 minutes. Verify Bluetooth connectivity."
                     : "App inactive for 18 minutes. Open to resume."
-            )
+            ),
         ]
 
         for alert in alerts {

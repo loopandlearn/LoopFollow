@@ -6,9 +6,8 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct AlarmBGPicker: View {
     let title: String
@@ -39,7 +38,8 @@ struct AlarmBGPicker: View {
 
     var body: some View {
         Picker(selection: snappedValue,
-               label: HStack { Text(title) }) {
+               label: HStack { Text(title) })
+        {
             ForEach(allValues, id: \.self) { v in
                 Text("\(Localizer.formatQuantity(v)) \(unit.localizedShortUnitString)")
                     .tag(v)

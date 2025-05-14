@@ -6,8 +6,8 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct TrioNightscoutRemoteView: View {
     private let remoteController = TrioNightscoutRemoteController()
@@ -249,7 +249,7 @@ struct TrioNightscoutRemoteView: View {
 
     private var isButtonDisabled: Bool {
         return newHKTarget.doubleValue(for: UserDefaultsRepository.getPreferredUnit()) == 0 ||
-        duration.doubleValue(for: HKUnit.minute()) == 0 || isLoading
+            duration.doubleValue(for: HKUnit.minute()) == 0 || isLoading
     }
 
     private func enactTempTarget() {

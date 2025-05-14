@@ -6,8 +6,8 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObject, UserDefaultsAnyValue {
     // user defaults key (UserDefaultsAnyValue protocol implementation)
@@ -18,7 +18,7 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
     @Published var value: T {
         didSet {
             // Continue only if the new value is different from the old value
-            guard self.value != oldValue else { return }
+            guard value != oldValue else { return }
 
             if let validation = validation {
                 guard let validatedValue = validation(value) else {
@@ -43,7 +43,7 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
                 // Notify UserDefaultsValueGroups that value has changed
                 UserDefaultsValueGroups.valueChanged(self)
 
-                print("Value for \(self.key) changed to \(self.value)")  // Logging
+                print("Value for \(self.key) changed to \(self.value)") // Logging
             }
         }
     }
@@ -51,7 +51,7 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
     /// Get/set the value from Any value (UserDefaultsAnyValue protocol implementation)
     var anyValue: Any? {
         get {
-            return self.value.toAny()
+            return value.toAny()
         }
         set {
             guard let newValue = T.fromAny(newValue) as T? else {
@@ -69,14 +69,14 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
     }
 
     // On change closure
-    private let onChange: ((T) -> ())?
+    private let onChange: ((T) -> Void)?
 
     // Validate & transform closure : given the new value, validate it; if validation passes, return the new value;
     // if validation fails, transform the value, returning a modified version or return nil and the change will not happen
     private let validation: ((T) -> T?)?
 
     // Value change observers
-    private var observers: [UUID : (T) -> Void] = [:]
+    private var observers: [UUID: (T) -> Void] = [:]
 
     // User defaults used for persistence
     private class var defaults: UserDefaults {
@@ -91,7 +91,7 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
         if let anyValue = ObservableUserDefaultsValue.defaults.object(forKey: key), let value = T.fromAny(anyValue) as T? {
             self.value = validation?(value) ?? value
         } else {
-            self.value = defaultValue
+            value = defaultValue
         }
     }
 

@@ -13,7 +13,6 @@ import Foundation
 /// A simple class to represent the Dexcom G7 Heartbeat.
 /// It wraps around a `BLEPeripheral` to store relevant information.
 public class DexcomG7HeartBeat {
-
     // MARK: - Properties
 
     /// The BLEPeripheral instance associated with this heartbeat.
@@ -27,7 +26,7 @@ public class DexcomG7HeartBeat {
     ///   - name: The name of the BLE device.
     ///   - alias: An optional alias for the device.
     public init(address: String, name: String, alias: String? = nil) {
-        self.blePeripheral = BLEPeripheral(
+        blePeripheral = BLEPeripheral(
             address: address,
             name: name,
             alias: alias,

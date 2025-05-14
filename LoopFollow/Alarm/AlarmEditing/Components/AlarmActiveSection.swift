@@ -14,7 +14,7 @@ struct AlarmActiveSection: View {
     var body: some View {
         Section(header: Text("Active During")) {
             AlarmEnumMenuPicker(title: "Active",
-                           selection: $alarm.activeOption)
+                                selection: $alarm.activeOption)
         }
     }
 }

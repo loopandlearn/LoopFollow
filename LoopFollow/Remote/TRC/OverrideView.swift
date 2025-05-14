@@ -6,8 +6,8 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct OverrideView: View {
     @Environment(\.presentationMode) private var presentationMode

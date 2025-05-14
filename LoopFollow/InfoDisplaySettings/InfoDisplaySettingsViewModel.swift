@@ -14,8 +14,8 @@ class InfoDisplaySettingsViewModel: ObservableObject {
     @Published var infoVisible: [Bool]
 
     init() {
-        self.infoSort = UserDefaultsRepository.infoSort.value
-        self.infoVisible = UserDefaultsRepository.infoVisible.value
+        infoSort = UserDefaultsRepository.infoSort.value
+        infoVisible = UserDefaultsRepository.infoVisible.value
     }
 
     func toggleVisibility(for sortedIndex: Int) {

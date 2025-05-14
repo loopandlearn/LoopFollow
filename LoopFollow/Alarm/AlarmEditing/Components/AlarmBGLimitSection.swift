@@ -15,21 +15,21 @@ struct AlarmBGLimitSection: View {
     let pickerTitle: String
     let range: ClosedRange<Double>
     @Binding var value: Double?
-    
+
     init(
-        header:  String? = nil,
-        footer:  String? = nil,
-        toggleText:  String,
+        header: String? = nil,
+        footer: String? = nil,
+        toggleText: String,
         pickerTitle: String,
         range: ClosedRange<Double>,
         value: Binding<Double?>
     ) {
-        self.header      = header
-        self.footer      = footer
-        self.toggleText  = toggleText
+        self.header = header
+        self.footer = footer
+        self.toggleText = toggleText
         self.pickerTitle = pickerTitle
-        self.range       = range
-        self._value      = value
+        self.range = range
+        _value = value
     }
 
     private var isOn: Binding<Bool> {

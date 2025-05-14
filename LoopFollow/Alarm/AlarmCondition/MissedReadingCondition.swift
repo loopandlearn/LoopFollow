@@ -14,7 +14,6 @@ struct MissedReadingCondition: AlarmCondition {
     init() {}
 
     func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
-
         // ────────────────────────────────
         // 0. sanity checks
         // ────────────────────────────────

@@ -8,5 +8,4 @@
 
 import Foundation
 
-class TrioRemoteControlViewModel: ObservableObject {
-}
+class TrioRemoteControlViewModel: ObservableObject {}

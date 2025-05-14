@@ -32,14 +32,14 @@ struct LowBGCondition: AlarmCondition {
         var predictiveTrigger = false
         if let predictiveMinutes = alarm.predictiveMinutes,
            predictiveMinutes > 0,
-           !data.predictionData.isEmpty {
-
+           !data.predictionData.isEmpty
+        {
             let lookAhead = min(
                 data.predictionData.count,
                 Int(ceil(Double(predictiveMinutes) / 5.0))
             )
 
-            for i in 0..<lookAhead where isLow(data.predictionData[i]) {
+            for i in 0 ..< lookAhead where isLow(data.predictionData[i]) {
                 predictiveTrigger = true
                 break
             }
@@ -50,8 +50,8 @@ struct LowBGCondition: AlarmCondition {
         // ────────────────────────────────
         var persistentOK = true
         if let persistentMinutes = alarm.persistentMinutes,
-           persistentMinutes > 0 {
-
+           persistentMinutes > 0
+        {
             let window = Int(ceil(Double(persistentMinutes) / 5.0))
 
             if data.bgReadings.count >= window {

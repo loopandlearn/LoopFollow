@@ -21,7 +21,7 @@ extension MainViewController {
         if UserDefaultsRepository.writeCalendarEvent.value,
            !UserDefaultsRepository.calendarIdentifier.value.isEmpty
         {
-            self.writeCalendar()
+            writeCalendar()
         }
 
         TaskScheduler.shared.rescheduleTask(id: .calendarWrite, to: Date().addingTimeInterval(30))

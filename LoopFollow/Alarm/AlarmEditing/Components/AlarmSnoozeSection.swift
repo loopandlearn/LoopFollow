@@ -6,13 +6,12 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-
 import SwiftUI
 
 struct AlarmSnoozeSection: View {
     @Binding var alarm: Alarm
     let range: ClosedRange<Int>
-    let step:  Int
+    let step: Int
 
     private var unitLabel: String { alarm.type.timeUnit.label }
 
@@ -48,8 +47,8 @@ struct AlarmSnoozeSection: View {
             header: Text("SNOOZE"),
             footer: Text(
                 "“Default Snooze” controls how long the alert stays quiet after "
-              + "you press Snooze. Toggle “Snoozed” to mute this alarm right now "
-              + "until the time below."
+                    + "you press Snooze. Toggle “Snoozed” to mute this alarm right now "
+                    + "until the time below."
             )
         ) {
             Stepper(

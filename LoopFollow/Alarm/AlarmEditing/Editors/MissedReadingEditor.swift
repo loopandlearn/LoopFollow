@@ -20,7 +20,7 @@ struct MissedReadingEditor: View {
             AlarmStepperSection(
                 footer: "Choose how long the app should wait before alerting.",
                 title: "No reading for",
-                range: 11...121,
+                range: 11 ... 121,
                 step: 5,
                 unitLabel: alarm.type.timeUnit.label,
                 value: Binding(
@@ -35,10 +35,9 @@ struct MissedReadingEditor: View {
 
             AlarmSnoozeSection(
                 alarm: $alarm,
-                range: 10...180,
+                range: 10 ... 180,
                 step: 5
             )
-
         }
         .navigationTitle(alarm.type.rawValue)
     }

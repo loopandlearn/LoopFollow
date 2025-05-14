@@ -6,8 +6,8 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 /*
  Legacy storage, we are moving away from this

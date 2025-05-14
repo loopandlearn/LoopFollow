@@ -7,8 +7,8 @@
 //  Copyright © 2024 Jon Fawcett. All rights reserved.
 //
 
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct RemoteSettingsView: View {
     @ObservedObject var viewModel: RemoteSettingsViewModel
@@ -26,6 +26,7 @@ struct RemoteSettingsView: View {
         NavigationView {
             Form {
                 // MARK: - Remote Type Section (Custom Rows)
+
                 Section(header: Text("Remote Type")) {
                     remoteTypeRow(type: .none, label: "None", isEnabled: true)
 
@@ -51,6 +52,7 @@ struct RemoteSettingsView: View {
                 }
 
                 // MARK: - User Information Section
+
                 if viewModel.remoteType != .none {
                     Section(header: Text("User Information")) {
                         HStack {
@@ -64,6 +66,7 @@ struct RemoteSettingsView: View {
                 }
 
                 // MARK: - Trio Remote Control Settings
+
                 if viewModel.remoteType == .trc {
                     Section(header: Text("Trio Remote Control Settings")) {
                         HStack {
@@ -96,6 +99,7 @@ struct RemoteSettingsView: View {
                     }
 
                     // MARK: - Guardrails
+
                     Section(header: Text("Guardrails")) {
                         HStack {
                             Text("Max Bolus")
@@ -175,6 +179,7 @@ struct RemoteSettingsView: View {
                     }
 
                     // MARK: - Meal Section
+
                     Section(header: Text("Meal Settings")) {
                         Toggle("Meal with Bolus", isOn: $viewModel.mealWithBolus)
                             .toggleStyle(SwitchToggleStyle())
@@ -184,6 +189,7 @@ struct RemoteSettingsView: View {
                     }
 
                     // MARK: - Debug / Info
+
                     Section(header: Text("Debug / Info")) {
                         Text("Device Token: \(Storage.shared.deviceToken.value)")
                         Text("Production Env.: \(Storage.shared.productionEnvironment.value ? "True" : "False")")
@@ -216,6 +222,7 @@ struct RemoteSettingsView: View {
     }
 
     // MARK: - Custom Row for Remote Type Selection
+
     private func remoteTypeRow(type: RemoteType, label: String, isEnabled: Bool) -> some View {
         Button(action: {
             if isEnabled {
@@ -237,6 +244,7 @@ struct RemoteSettingsView: View {
     }
 
     // MARK: - Validation Error Handler
+
     private func handleValidationError(_ message: String) {
         alertMessage = message
         alertType = .validation

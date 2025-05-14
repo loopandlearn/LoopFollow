@@ -5,8 +5,8 @@
 //  Created by Jonas Björkert on 2025-01-02.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 class BackgroundRefreshSettingsViewModel: ObservableObject {
     @Published var backgroundRefreshType: BackgroundRefreshType
@@ -17,7 +17,7 @@ class BackgroundRefreshSettingsViewModel: ObservableObject {
     private var isInitialSetup = true // Tracks whether the value is being set initially
 
     init() {
-        self.backgroundRefreshType = storage.backgroundRefreshType.value
+        backgroundRefreshType = storage.backgroundRefreshType.value
         setupBindings()
     }
 

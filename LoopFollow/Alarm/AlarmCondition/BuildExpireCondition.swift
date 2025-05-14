@@ -1,5 +1,5 @@
 //
-//  ExpireCondition.swift
+//  BuildExpireCondition.swift
 //  LoopFollow
 //
 //  Created by Jonas Björkert on 2025-04-18.

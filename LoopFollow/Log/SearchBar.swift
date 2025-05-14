@@ -19,7 +19,7 @@ struct SearchBar: UIViewRepresentable {
             _text = text
         }
 
-        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        func searchBar(_: UISearchBar, textDidChange searchText: String) {
             text = searchText
         }
 
@@ -41,7 +41,7 @@ struct SearchBar: UIViewRepresentable {
         return searchBar
     }
 
-    func updateUIView(_ uiView: UISearchBar, context: UIViewRepresentableContext<SearchBar>) {
+    func updateUIView(_ uiView: UISearchBar, context _: UIViewRepresentableContext<SearchBar>) {
         uiView.text = text
     }
 }

@@ -16,12 +16,11 @@ struct HighBGCondition: AlarmCondition {
     init() {}
 
     func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
-
         // ────────────────────────────────
         // 0. sanity checks
         // ────────────────────────────────
         guard let threshold = alarm.threshold else { return false }
-        guard let latest   = data.bgReadings.last, latest.sgv > 0 else { return false }
+        guard let latest = data.bgReadings.last, latest.sgv > 0 else { return false }
 
         func isHigh(_ g: GlucoseValue) -> Bool {
             g.sgv > 0 && Double(g.sgv) >= threshold
@@ -32,8 +31,8 @@ struct HighBGCondition: AlarmCondition {
         // ────────────────────────────────
         var persistentOK = true
         if let persistentMinutes = alarm.persistentMinutes,
-           persistentMinutes > 0 {
-
+           persistentMinutes > 0
+        {
             let window = Int(ceil(Double(persistentMinutes) / 5.0))
 
             if data.bgReadings.count >= window {

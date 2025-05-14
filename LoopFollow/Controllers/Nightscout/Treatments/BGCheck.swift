@@ -1,5 +1,5 @@
 //
-//  CarbsToday.swift
+//  BGCheck.swift
 //  LoopFollow
 //
 //  Created by Jonas Björkert on 2023-10-04.
@@ -11,17 +11,18 @@ import UIKit
 
 extension MainViewController {
     // NS BG Check Response Processor
-    func processNSBGCheck(entries: [[String:AnyObject]]) {
+    func processNSBGCheck(entries: [[String: AnyObject]]) {
         bgCheckData.removeAll()
-        
-        entries.reversed().forEach { currentEntry in
-            guard let dateStr = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else { return }
-            
+
+        for currentEntry in entries.reversed() {
+            guard let dateStr = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else { continue }
+
             guard let parsedDate = NightscoutUtils.parseDate(dateStr),
-                  let glucose = currentEntry["glucose"] as? Double else {
-                return
+                  let glucose = currentEntry["glucose"] as? Double
+            else {
+                continue
             }
-            
+
             let units = currentEntry["units"] as? String ?? "mg/dl"
             let convertedGlucose: Double = units == "mmol" ? glucose * GlucoseConversion.mmolToMgDl : glucose
 
@@ -31,10 +32,9 @@ extension MainViewController {
                 bgCheckData.append(dot)
             }
         }
-        
+
         if UserDefaultsRepository.graphOtherTreatments.value {
             updateBGCheckGraph()
         }
     }
 }
-

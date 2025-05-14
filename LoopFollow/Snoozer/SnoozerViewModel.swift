@@ -6,8 +6,8 @@
 //  Copyright © 2025 Jon Fawcett. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 final class SnoozerViewModel: ObservableObject {
     @Published var activeAlarm: Alarm?

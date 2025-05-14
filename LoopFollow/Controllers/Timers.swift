@@ -18,7 +18,7 @@ extension MainViewController {
                                              repeats: true)
     }
 
-    @objc func graphNowTimerDidEnd(_ timer:Timer) {
+    @objc func graphNowTimerDidEnd(_: Timer) {
         createVerticalLines()
     }
 }

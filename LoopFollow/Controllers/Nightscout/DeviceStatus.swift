@@ -6,16 +6,16 @@
 //  Copyright © 2023 Jon Fawcett. All rights reserved.
 //
 
+import Charts
 import Foundation
 import UIKit
-import Charts
 
 extension MainViewController {
     func webLoadNSDeviceStatus() {
-        let parameters: [String: String] = ["count": "1"]
+        let parameters = ["count": "1"]
         NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
             switch result {
-            case .success(let json):
+            case let .success(json):
                 if let jsonDeviceStatus = json as? [[String: AnyObject]] {
                     DispatchQueue.main.async {
                         self.updateDeviceStatusDisplay(jsonDeviceStatus: jsonDeviceStatus)
@@ -80,7 +80,7 @@ extension MainViewController {
     }
 
     // NS Device Status Response Processor
-    func updateDeviceStatusDisplay(jsonDeviceStatus: [[String:AnyObject]]) {
+    func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
         infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
 
         if jsonDeviceStatus.count == 0 {
@@ -89,17 +89,17 @@ extension MainViewController {
             return
         }
 
-        //Process the current data first
-        let lastDeviceStatus = jsonDeviceStatus[0] as [String : AnyObject]?
+        // Process the current data first
+        let lastDeviceStatus = jsonDeviceStatus[0] as [String: AnyObject]?
 
-        //pump and uploader
+        // pump and uploader
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate,
                                    .withTime,
                                    .withDashSeparatorInDate,
                                    .withColonSeparatorInTime]
-        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String : AnyObject]? {
-            if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970  {
+        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String: AnyObject]? {
+            if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970 {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
                     infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U")
@@ -109,7 +109,8 @@ extension MainViewController {
                 }
 
                 if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
-                   let upbat = uploader["battery"] as? Double {
+                   let upbat = uploader["battery"] as? Double
+                {
                     let batteryText: String
                     if let isCharging = uploader["isCharging"] as? Bool, isCharging {
                         batteryText = "⚡️ " + String(format: "%.0f", upbat) + "%"
@@ -132,20 +133,21 @@ extension MainViewController {
         }
 
         // Loop - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String : AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String: AnyObject]? {
             DeviceStatusLoop(formatter: formatter, lastLoopRecord: lastLoopRecord)
 
             var oText = ""
             currentOverride = 1.0
             if let lastOverride = lastDeviceStatus?["override"] as? [String: AnyObject],
-               let isActive = lastOverride["active"] as? Bool, isActive {
+               let isActive = lastOverride["active"] as? Bool, isActive
+            {
                 if let lastCorrection = lastOverride["currentCorrectionRange"] as? [String: AnyObject],
                    let minValue = lastCorrection["minValue"] as? Double,
-                   let maxValue = lastCorrection["maxValue"] as? Double {
-
+                   let maxValue = lastCorrection["maxValue"] as? Double
+                {
                     if let multiplier = lastOverride["multiplier"] as? Double {
                         currentOverride = multiplier
-                        oText += String(format: "%.0f%%", (multiplier * 100))
+                        oText += String(format: "%.0f%%", multiplier * 100)
                     } else {
                         oText += "100%"
                     }
@@ -161,7 +163,7 @@ extension MainViewController {
         }
 
         // OpenAPS - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String : AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String: AnyObject]? {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
         }
 
