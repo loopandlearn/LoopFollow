@@ -29,10 +29,8 @@ struct MissedReadingEditor: View {
                 )
             )
 
-            AlarmAudioSection(alarm: $alarm)
-
             AlarmActiveSection(alarm: $alarm)
-
+            AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(
                 alarm: $alarm,
                 range: 10 ... 180,

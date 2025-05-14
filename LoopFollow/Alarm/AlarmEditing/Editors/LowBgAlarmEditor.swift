@@ -58,10 +58,8 @@ struct LowBgAlarmEditor: View {
                 )
             )
 
-            AlarmAudioSection(alarm: $alarm)
-
             AlarmActiveSection(alarm: $alarm)
-
+            AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(
                 alarm: $alarm,
                 range: 5 ... 30,
