@@ -55,6 +55,8 @@ struct AlarmEditor: View {
             NotLoopingAlarmEditor(alarm: $alarm)
         case .overrideStart:
             OverrideStartAlarmEditor(alarm: $alarm)
+        case .overrideEnd:
+            OverrideEndAlarmEditor(alarm: $alarm)
         /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")

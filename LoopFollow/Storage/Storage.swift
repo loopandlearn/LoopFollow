@@ -54,6 +54,7 @@ class Storage {
     var alarmConfiguration = StorageValue<AlarmConfiguration>(key: "alarmConfiguration", defaultValue: .default)
 
     var lastOverrideStartNotified = StorageValue<TimeInterval?>(key: "lastOverrideStartNotified", defaultValue: nil)
+    var lastOverrideEndNotified = StorageValue<TimeInterval?>(key: "lastOverrideEndNotified", defaultValue: nil)
 
     static let shared = Storage()
     private init() {}

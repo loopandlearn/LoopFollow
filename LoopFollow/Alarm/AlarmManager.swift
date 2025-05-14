@@ -23,6 +23,7 @@ class AlarmManager {
             FastDropCondition.self,
             NotLoopingCondition.self,
             OverrideStartCondition.self,
+            OverrideEndCondition.self,
             // TODO: add other condition types here
         ]
     ) {

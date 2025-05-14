@@ -14,6 +14,7 @@ struct AlarmData: Codable {
     let expireDate: Date?
     let lastLoopTime: TimeInterval?
     let latestOverrideStart: TimeInterval?
+    let latestOverrideEnd: TimeInterval?
 }
 
 /*
