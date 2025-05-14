@@ -35,7 +35,7 @@ enum ActiveOption: String, CaseIterable, Codable, DayNightDisplayable {
 extension PlaySoundOption {
     static func allowed(for active: ActiveOption) -> [PlaySoundOption] {
         switch active {
-        case .always: return [.always, .day, .night, .never]
+        case .always: return PlaySoundOption.allCases
         case .day: return [.day, .never]
         case .night: return [.night, .never]
         }
@@ -45,7 +45,7 @@ extension PlaySoundOption {
 extension RepeatSoundOption {
     static func allowed(for active: ActiveOption) -> [RepeatSoundOption] {
         switch active {
-        case .always: return [.always, .day, .night, .never]
+        case .always: return RepeatSoundOption.allCases
         case .day: return [.day, .never]
         case .night: return [.night, .never]
         }
