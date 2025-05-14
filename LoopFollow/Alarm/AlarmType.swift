@@ -88,7 +88,7 @@ enum TimeUnit {
   /// A user-facing label
   var label: String {
     switch self {
-    case .minute: return "minutes"
+    case .minute: return "min" //Changed from minutes to save ui space
     case .hour:   return "hours"
     case .day:    return "days"
     }
