@@ -21,6 +21,7 @@ extension MainViewController {
         DispatchQueue.main.async {
             let latestOverrideStart = self.overrideGraphData.last?.date
             let latestOverrideEnd = self.overrideGraphData.last?.endDate
+            let latestTempTargetStart = self.tempTargetGraphData.last?.date
 
             let alarmData = AlarmData(
                 bgReadings: self.bgData
@@ -33,6 +34,7 @@ extension MainViewController {
                 lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value,
                 latestOverrideStart: latestOverrideStart,
                 latestOverrideEnd: latestOverrideEnd,
+                latestTempTargetStart: latestTempTargetStart
             )
 
             let finalAlarmData: AlarmData
