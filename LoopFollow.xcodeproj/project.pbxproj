@@ -109,6 +109,8 @@
 		DD7F4C0D2DD51C8100D449E9 /* OverrideEndAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C0C2DD51C8100D449E9 /* OverrideEndAlarmEditor.swift */; };
 		DD7F4C0F2DD51EC200D449E9 /* TempTargetStartCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C0E2DD51EC200D449E9 /* TempTargetStartCondition.swift */; };
 		DD7F4C112DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C102DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift */; };
+		DD7F4C132DD51FD500D449E9 /* TempTargetEndCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C122DD51FD500D449E9 /* TempTargetEndCondition.swift */; };
+		DD7F4C152DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C142DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
@@ -442,6 +444,8 @@
 		DD7F4C0C2DD51C8100D449E9 /* OverrideEndAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideEndAlarmEditor.swift; sourceTree = "<group>"; };
 		DD7F4C0E2DD51EC200D449E9 /* TempTargetStartCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetStartCondition.swift; sourceTree = "<group>"; };
 		DD7F4C102DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetStartAlarmEditor.swift; sourceTree = "<group>"; };
+		DD7F4C122DD51FD500D449E9 /* TempTargetEndCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetEndCondition.swift; sourceTree = "<group>"; };
+		DD7F4C142DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetEndAlarmEditor.swift; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
@@ -710,6 +714,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4C122DD51FD500D449E9 /* TempTargetEndCondition.swift */,
 				DD7F4C0E2DD51EC200D449E9 /* TempTargetStartCondition.swift */,
 				DD7F4C0A2DD51C5500D449E9 /* OverrideEndCondition.swift */,
 				DD7F4C042DD4BBE200D449E9 /* NotLoopingCondition.swift */,
@@ -965,6 +970,7 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4C142DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift */,
 				DD7F4C102DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift */,
 				DD7F4C0C2DD51C8100D449E9 /* OverrideEndAlarmEditor.swift */,
 				DD7F4C062DD5042F00D449E9 /* OverrideStartAlarmEditor.swift */,
@@ -1856,6 +1862,7 @@
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,
 				FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */,
 				DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */,
+				DD7F4C152DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift in Sources */,
 				DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
 				DD5334232C60ED3600062F9D /* IAge.swift in Sources */,
@@ -1867,6 +1874,7 @@
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
 				DD0650F52DCF303F004D3B41 /* AlarmStepperSection.swift in Sources */,
 				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
+				DD7F4C132DD51FD500D449E9 /* TempTargetEndCondition.swift in Sources */,
 				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
 				DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */,

@@ -25,6 +25,7 @@ class AlarmManager {
             OverrideStartCondition.self,
             OverrideEndCondition.self,
             TempTargetStartCondition.self,
+            TempTargetEndCondition.self,
             // TODO: add other condition types here
         ]
     ) {

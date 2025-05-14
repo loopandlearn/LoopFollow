@@ -59,6 +59,8 @@ struct AlarmEditor: View {
             OverrideEndAlarmEditor(alarm: $alarm)
         case .tempTargetStart:
             TempTargetStartAlarmEditor(alarm: $alarm)
+        case .tempTargetEnd:
+            TempTargetEndAlarmEditor(alarm: $alarm)
         /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")
