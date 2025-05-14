@@ -129,6 +129,27 @@ struct AlarmSettingsView: View {
                     )
                 }
 
+                Section(
+                    header: Text("Day / Night Schedule"),
+                    footer: Text("Pick when your day period begins and when your night period begins." +
+                        "Any time from your Day-starts time up until your Night-starts time will count as day; " +
+                        "from Night-starts until the next Day-starts will count as night.")
+                ) {
+                    DatePicker(
+                        "Day starts",
+                        selection: dayBinding,
+                        displayedComponents: [.hourAndMinute]
+                    )
+                    .datePickerStyle(.compact)
+
+                    DatePicker(
+                        "Night starts",
+                        selection: nightBinding,
+                        displayedComponents: [.hourAndMinute]
+                    )
+                    .datePickerStyle(.compact)
+                }
+
                 Section(header: Text("Alarm Settings")) {
                     Toggle(
                         "Override System Volume",
