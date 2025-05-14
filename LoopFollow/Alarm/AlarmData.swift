@@ -13,6 +13,7 @@ struct AlarmData: Codable {
     let predictionData: [GlucoseValue]
     let expireDate: Date?
     let lastLoopTime: TimeInterval?
+    let latestOverrideStart: TimeInterval?
 }
 
 /*

@@ -10,6 +10,7 @@ import SwiftUI
 
 struct AlarmAudioSection: View {
     @Binding var alarm: Alarm
+    var hideRepeat: Bool = false
     @State private var showingTonePicker = false
 
     var body: some View {
@@ -36,11 +37,14 @@ struct AlarmAudioSection: View {
                 selection: $alarm.playSoundOption,
                 allowed: PlaySoundOption.allowed(for: alarm.activeOption)
             )
-            AlarmEnumMenuPicker(
-                title: "Repeat",
-                selection: $alarm.repeatSoundOption,
-                allowed: RepeatSoundOption.allowed(for: alarm.activeOption)
-            )
+
+            if !hideRepeat {
+                AlarmEnumMenuPicker(
+                    title: "Repeat",
+                    selection: $alarm.repeatSoundOption,
+                    allowed: RepeatSoundOption.allowed(for: alarm.activeOption)
+                )
+            }
         }.onChange(of: alarm.activeOption) { newActive in
             let playAllowed = PlaySoundOption.allowed(for: newActive)
             if !playAllowed.contains(alarm.playSoundOption) {
