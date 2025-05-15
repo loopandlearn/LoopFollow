@@ -19,7 +19,6 @@ class Observable {
 
     var tempTarget = ObservableValue<HKQuantity?>(default: nil)
     var override = ObservableValue<String?>(default: nil)
-    var lastRecBolusTriggered = ObservableValue<Double?>(default: nil)
 
     var minAgoText = ObservableValue<String>(default: "?? min ago")
     var bgText = ObservableValue<String>(default: "BG")
