@@ -17,12 +17,12 @@ struct AlarmData: Codable {
     let latestOverrideEnd: TimeInterval?
     let latestTempTargetStart: TimeInterval?
     let latestTempTargetEnd: TimeInterval?
-    let latestRecBolus: Double?
+    let recBolus: Double?
+    let COB: Double?
 }
 
 /*
  //    let iob: Double?
- //    let cob: Double?
  //    let latestBoluses: [BolusEntry]
  //    let batteryLevel: Double?
  //    let latestCarbs: [CarbEntry]

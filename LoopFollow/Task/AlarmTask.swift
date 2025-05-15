@@ -23,7 +23,8 @@ extension MainViewController {
             let latestOverrideEnd = self.overrideGraphData.last?.endDate
             let latestTempTargetStart = self.tempTargetGraphData.last?.date
             let latestTempTargetEnd = self.tempTargetGraphData.last?.endDate
-            let latestRecBolus = UserDefaultsRepository.deviceRecBolus.value
+            let recBolus = UserDefaultsRepository.deviceRecBolus.value
+            let COB = self.latestCOB?.value
 
             let alarmData = AlarmData(
                 bgReadings: self.bgData
@@ -38,7 +39,8 @@ extension MainViewController {
                 latestOverrideEnd: latestOverrideEnd,
                 latestTempTargetStart: latestTempTargetStart,
                 latestTempTargetEnd: latestTempTargetEnd,
-                latestRecBolus: latestRecBolus
+                recBolus: recBolus,
+                COB: COB
             )
 
             let finalAlarmData: AlarmData

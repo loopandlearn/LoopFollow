@@ -113,6 +113,8 @@
 		DD7F4C152DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C142DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift */; };
 		DD7F4C172DD63FA700D449E9 /* RecBolusCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C162DD63FA700D449E9 /* RecBolusCondition.swift */; };
 		DD7F4C192DD63FD500D449E9 /* RecBolusAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C182DD63FD500D449E9 /* RecBolusAlarmEditor.swift */; };
+		DD7F4C1B2DD6501D00D449E9 /* COBCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C1A2DD6501D00D449E9 /* COBCondition.swift */; };
+		DD7F4C1D2DD650D500D449E9 /* COBAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C1C2DD650D500D449E9 /* COBAlarmEditor.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
@@ -450,6 +452,8 @@
 		DD7F4C142DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetEndAlarmEditor.swift; sourceTree = "<group>"; };
 		DD7F4C162DD63FA700D449E9 /* RecBolusCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecBolusCondition.swift; sourceTree = "<group>"; };
 		DD7F4C182DD63FD500D449E9 /* RecBolusAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecBolusAlarmEditor.swift; sourceTree = "<group>"; };
+		DD7F4C1A2DD6501D00D449E9 /* COBCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = COBCondition.swift; sourceTree = "<group>"; };
+		DD7F4C1C2DD650D500D449E9 /* COBAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = COBAlarmEditor.swift; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
@@ -718,6 +722,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4C1A2DD6501D00D449E9 /* COBCondition.swift */,
 				DD7F4C162DD63FA700D449E9 /* RecBolusCondition.swift */,
 				DD7F4C122DD51FD500D449E9 /* TempTargetEndCondition.swift */,
 				DD7F4C0E2DD51EC200D449E9 /* TempTargetStartCondition.swift */,
@@ -975,6 +980,7 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DD7F4C1C2DD650D500D449E9 /* COBAlarmEditor.swift */,
 				DD7F4C182DD63FD500D449E9 /* RecBolusAlarmEditor.swift */,
 				DD7F4C142DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift */,
 				DD7F4C102DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift */,
@@ -1713,6 +1719,7 @@
 				DD9ACA102D34129200415D8A /* Task.swift in Sources */,
 				DD4AFB492DB576C200BB593F /* AlarmSettingsView.swift in Sources */,
 				DD7F4C032DD4B92E00D449E9 /* NotLoopingAlarmEditor.swift in Sources */,
+				DD7F4C1B2DD6501D00D449E9 /* COBCondition.swift in Sources */,
 				DD4878202C7DAF890048F05C /* PushMessage.swift in Sources */,
 				DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */,
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
@@ -1758,6 +1765,7 @@
 				DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */,
 				DDB0AF522BB1A8BE00AFA48B /* BuildDetails.swift in Sources */,
 				DDA9ACAA2D6A6B8300E6F1A9 /* ContactIncludeOption.swift in Sources */,
+				DD7F4C1D2DD650D500D449E9 /* COBAlarmEditor.swift in Sources */,
 				DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */,
 				DD58171E2D299FCA0041FB98 /* BluetoothDeviceDelegate.swift in Sources */,
 				DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */,
