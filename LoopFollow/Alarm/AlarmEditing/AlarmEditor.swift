@@ -61,6 +61,8 @@ struct AlarmEditor: View {
             TempTargetStartAlarmEditor(alarm: $alarm)
         case .tempTargetEnd:
             TempTargetEndAlarmEditor(alarm: $alarm)
+        case .recBolus:
+            RecBolusAlarmEditor(alarm: $alarm)
         /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")
