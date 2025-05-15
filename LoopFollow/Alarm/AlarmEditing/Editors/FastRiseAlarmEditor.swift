@@ -1,0 +1,65 @@
+//
+//  FastRiseAlarmEditor.swift
+//  LoopFollow
+//
+//  Created by Jonas Björkert on 2025-05-15.
+//  Copyright © 2025 Jon Fawcett. All rights reserved.
+//
+
+import SwiftUI
+
+struct FastRiseAlarmEditor: View {
+    @Binding var alarm: Alarm
+
+    var body: some View {
+        Form {
+            InfoBanner(
+                text: "Alerts when glucose readings rise rapidly. For example, "
+                    + "three straight readings each climbing by at least the amount "
+                    + "you set.  Optionally limit alerts to only fire above a certain BG.",
+                alarmType: alarm.type
+            )
+
+            AlarmGeneralSection(alarm: $alarm)
+
+            AlarmBGSection(
+                header: "Rate of Rise",
+                footer: "How much the BG must rise to count as a “fast” rise.",
+                title: "Rise per reading",
+                range: 3 ... 20,
+                value: Binding(
+                    get: { alarm.delta ?? 3 },
+                    set: { alarm.delta = $0 }
+                )
+            )
+
+            AlarmStepperSection(
+                header: "Consecutive Rises",
+                footer: "Number of rises—each meeting the rate above—"
+                    + "required before an alert fires.",
+                title: "Rises in a row",
+                range: 1 ... 3,
+                step: 1,
+                value: Binding(
+                    get: { Double(alarm.monitoringWindow ?? 2) },
+                    set: { alarm.monitoringWindow = Int($0) }
+                )
+            )
+
+            AlarmBGLimitSection(
+                header: "BG Limit",
+                footer: "When enabled, this alert only fires if the glucose is "
+                    + "above the limit you set.",
+                toggleText: "Use BG Limit",
+                pickerTitle: "Rising above",
+                range: 40 ... 300,
+                value: $alarm.threshold
+            )
+
+            AlarmActiveSection(alarm: $alarm)
+            AlarmAudioSection(alarm: $alarm)
+            AlarmSnoozeSection(alarm: $alarm, range: 5 ... 60, step: 5)
+        }
+        .navigationTitle(alarm.type.rawValue)
+    }
+}

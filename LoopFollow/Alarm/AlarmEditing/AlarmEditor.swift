@@ -65,6 +65,8 @@ struct AlarmEditor: View {
             RecBolusAlarmEditor(alarm: $alarm)
         case .cob:
             COBAlarmEditor(alarm: $alarm)
+        case .fastRise:
+            FastRiseAlarmEditor(alarm: $alarm)
         /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")
