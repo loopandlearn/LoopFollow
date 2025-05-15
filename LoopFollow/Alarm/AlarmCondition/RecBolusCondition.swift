@@ -18,7 +18,7 @@ struct RecBolusCondition: AlarmCondition {
         // 0. sanity checks
         // ────────────────────────────────
         guard let threshold = alarm.threshold, threshold > 0 else { return false }
-        guard let rec = data.latestRecBolus, rec >= threshold else {
+        guard let rec = data.recBolus, rec >= threshold else {
             Storage.shared.lastRecBolusNotified.value = nil
             return false
         }

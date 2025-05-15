@@ -27,6 +27,8 @@ class AlarmManager {
             TempTargetStartCondition.self,
             TempTargetEndCondition.self,
             RecBolusCondition.self,
+            COBCondition.self,
+            MissedReadingCondition.self,
             // TODO: add other condition types here
         ]
     ) {
