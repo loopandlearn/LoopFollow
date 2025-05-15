@@ -29,6 +29,7 @@ class AlarmManager {
             RecBolusCondition.self,
             COBCondition.self,
             MissedReadingCondition.self,
+            FastRiseCondition.self,
             // TODO: add other condition types here
         ]
     ) {

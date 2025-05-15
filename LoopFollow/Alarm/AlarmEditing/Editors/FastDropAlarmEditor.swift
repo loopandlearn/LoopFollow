@@ -34,7 +34,7 @@ struct FastDropAlarmEditor: View {
             // TODO: In the migration script, use 1 value less than stored since we are switching from readings to drops
             AlarmStepperSection(
                 header: "Consecutive Drops",
-                footer: "Number of back-to-back drops—each meeting the rate above—required before an alert fires.",
+                footer: "Number of drops—each meeting the rate above—required before an alert fires.",
                 title: "Drops in a row",
                 range: 1 ... 3,
                 step: 1,
