@@ -41,20 +41,6 @@ extension AlarmType {
 }
 
 extension AlarmType {
-    /// Should alarms of this type sort their thresholds ascending (true) or descending (false)
-    var thresholdSortAscending: Bool? {
-        switch self {
-        case .low, .fastDrop, .fastRise, .missedReading, .notLooping, .missedBolus, .buildExpire:
-            return true
-        case .high, .iob, .cob:
-            return false
-        default:
-            return nil
-        }
-    }
-}
-
-extension AlarmType {
     /// What “unit” we use for snoozeDuration for this alarmType.
     var timeUnit: TimeUnit {
         switch self {

@@ -22,14 +22,9 @@ struct FastDropCondition: AlarmCondition {
             data.bgReadings.count >= dropsNeeded + 1
         else { return false }
 
-        // optional BG-limit guard
-        if let limit = alarm.threshold {
-            guard let latest = data.bgReadings.last, latest.sgv > 0 else { return false }
-            guard Double(latest.sgv) < limit else { return false }
-        }
-
         // ────────────────────────────────
         // 1. compute recent deltas
+        //    (BG-limit check is now handled by passesBGLimits)
         // ────────────────────────────────
         let recent = data.bgReadings.suffix(dropsNeeded + 1)
         let readings = Array(recent)
@@ -38,7 +33,6 @@ struct FastDropCondition: AlarmCondition {
             let delta = Double(readings[i - 1].sgv - readings[i].sgv)
             if delta < dropPerReading { return false }
         }
-
         return true
     }
 }

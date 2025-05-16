@@ -7,29 +7,24 @@
 
 import Foundation
 
+/// Fires when N consecutive BG deltas are ≥ `delta` mg/dL.
 struct FastRiseCondition: AlarmCondition {
     static let type: AlarmType = .fastRise
     init() {}
 
     func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
         guard
-            let risePerReading = alarm.delta, risePerReading > 0,
-            let risesNeeded = alarm.monitoringWindow, risesNeeded > 0,
-            data.bgReadings.count >= risesNeeded + 1
+            let rise = alarm.delta, rise > 0,
+            let streak = alarm.monitoringWindow, streak > 0,
+            data.bgReadings.count >= streak + 1
         else { return false }
 
-        if let limit = alarm.threshold {
-            guard let latest = data.bgReadings.last, latest.sgv > 0 else { return false }
-            guard Double(latest.sgv) > limit else { return false }
-        }
+        // grab the last (streak + 1) readings, newest last
+        let recent = data.bgReadings.suffix(streak + 1).map(\.sgv)
 
-        let recent = data.bgReadings.suffix(risesNeeded + 1)
-        let readings = Array(recent)
-
-        for i in 1 ... risesNeeded {
-            let delta = Double(readings[i].sgv - readings[i - 1].sgv)
-            if delta < risePerReading { return false }
+        // every forward delta must hit the threshold
+        return zip(recent.dropFirst(), recent).allSatisfy {
+            Double($0 - $1) >= rise
         }
-        return true
     }
 }

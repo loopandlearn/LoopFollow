@@ -8,27 +8,23 @@
 
 import Foundation
 
-/// Fires when **every** BG in `persistentMinutes` (if set) **and** the latest BG
-/// are ≥ `threshold`.
-/// — No predictive branch for highs.
+/// Fires when the latest BG – and, if requested, every BG in a persistent-window – is **≥ aboveBG**.
 struct HighBGCondition: AlarmCondition {
     static let type: AlarmType = .high
     init() {}
 
     func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
         // ────────────────────────────────
-        // 0. sanity checks
+        // 0. get the limit
         // ────────────────────────────────
-        guard let threshold = alarm.threshold else { return false }
-        guard let latest = data.bgReadings.last, latest.sgv > 0 else { return false }
+        guard let high = alarm.aboveBG else { return false }
 
         func isHigh(_ g: GlucoseValue) -> Bool {
-            g.sgv > 0 && Double(g.sgv) >= threshold
+            g.sgv > 0 && Double(g.sgv) >= high
         }
 
-        // ────────────────────────────────
-        // 1. persistent-window guard
-        // ────────────────────────────────
+        // we already know from `passesBGLimits` that the **latest** reading is ≥ high,
+        // but we still need to honour the “persistent for N minutes” option.
         var persistentOK = true
         if let persistentMinutes = alarm.persistentMinutes,
            persistentMinutes > 0
@@ -44,10 +40,6 @@ struct HighBGCondition: AlarmCondition {
             }
         }
 
-        // ────────────────────────────────
-        // 2. final decision
-        // ────────────────────────────────
-        let currentHigh = isHigh(latest)
-        return currentHigh && persistentOK
+        return persistentOK
     }
 }

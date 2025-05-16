@@ -53,7 +53,7 @@ struct FastRiseAlarmEditor: View {
                 toggleText: "Use BG Limit",
                 pickerTitle: "Rising above",
                 range: 40 ... 300,
-                value: $alarm.threshold
+                value: $alarm.aboveBG
             )
 
             AlarmActiveSection(alarm: $alarm)
