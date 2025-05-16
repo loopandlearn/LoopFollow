@@ -30,6 +30,7 @@ class AlarmManager {
             COBCondition.self,
             MissedReadingCondition.self,
             FastRiseCondition.self,
+            TemporaryCondition.self,
             // TODO: add other condition types here
         ]
     ) {
@@ -136,6 +137,15 @@ class AlarmManager {
                let latestDate = data.bgReadings.last?.date
             {
                 lastBGAlarmTime = latestDate
+            }
+
+            if alarm.type == .temporary {
+                // turn it off and persist
+                var list = Storage.shared.alarms.value
+                if let idx = list.firstIndex(where: { $0.id == alarm.id }) {
+                    list[idx].isEnabled = false
+                    Storage.shared.alarms.value = list
+                }
             }
             break
         }

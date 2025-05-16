@@ -11,6 +11,7 @@ import Foundation
 /// Categorizes alarms into distinct types, prioritized in the order they appear here.
 /// Multiple user-defined alarms may share the same type but differ in configuration.
 enum AlarmType: String, CaseIterable, Codable {
+    case temporary = "Temporary Alert"
     case iob = "IOB Alert"
     case bolus = "Bolus Alert"
     case cob = "COB Alert"
@@ -45,7 +46,7 @@ extension AlarmType {
     /// or its rate of change.
     var isBGBased: Bool {
         switch self {
-        case .low, .high, .fastDrop, .fastRise, .missedReading:
+        case .low, .high, .fastDrop, .fastRise, .missedReading, .temporary:
             return true
         default:
             return false
