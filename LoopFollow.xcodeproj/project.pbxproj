@@ -118,6 +118,7 @@
 		DD7F4C1F2DD6648B00D449E9 /* FastRiseCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C1E2DD6648B00D449E9 /* FastRiseCondition.swift */; };
 		DD7F4C212DD66BB200D449E9 /* FastRiseAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C202DD66BB100D449E9 /* FastRiseAlarmEditor.swift */; };
 		DD7F4C232DD7A62200D449E9 /* AlarmType+SortDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C222DD7A62200D449E9 /* AlarmType+SortDirection.swift */; };
+		DD7F4C252DD7B20700D449E9 /* AlarmType+timeUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C242DD7B20700D449E9 /* AlarmType+timeUnit.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
@@ -460,6 +461,7 @@
 		DD7F4C1E2DD6648B00D449E9 /* FastRiseCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastRiseCondition.swift; sourceTree = "<group>"; };
 		DD7F4C202DD66BB100D449E9 /* FastRiseAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastRiseAlarmEditor.swift; sourceTree = "<group>"; };
 		DD7F4C222DD7A62200D449E9 /* AlarmType+SortDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlarmType+SortDirection.swift"; sourceTree = "<group>"; };
+		DD7F4C242DD7B20700D449E9 /* AlarmType+timeUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlarmType+timeUnit.swift"; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
@@ -1039,6 +1041,7 @@
 				DDCF9A872D85FD33004DF4DD /* AlarmData.swift */,
 				DDCF9A812D85FD14004DF4DD /* AlarmType.swift */,
 				DD7F4C222DD7A62200D449E9 /* AlarmType+SortDirection.swift */,
+				DD7F4C242DD7B20700D449E9 /* AlarmType+timeUnit.swift */,
 				DDCF9A7F2D85FD09004DF4DD /* Alarm.swift */,
 			);
 			path = Alarm;
@@ -1747,6 +1750,7 @@
 				DD608A0A2C23593900F91132 /* SMB.swift in Sources */,
 				DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */,
 				FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */,
+				DD7F4C252DD7B20700D449E9 /* AlarmType+timeUnit.swift in Sources */,
 				DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */,
 				DD7F4C072DD5042F00D449E9 /* OverrideStartAlarmEditor.swift in Sources */,
 				DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */,
