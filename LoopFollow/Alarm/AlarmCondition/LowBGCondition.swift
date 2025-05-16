@@ -19,11 +19,10 @@ struct LowBGCondition: AlarmCondition {
         // ────────────────────────────────
         // 0. sanity checks
         // ────────────────────────────────
-        guard let threshold = alarm.threshold else { return false }
-        guard let latest = data.bgReadings.last, latest.sgv > 0 else { return false }
+        guard let belowBG = alarm.belowBG else { return false }
 
         func isLow(_ g: GlucoseValue) -> Bool {
-            g.sgv > 0 && Double(g.sgv) <= threshold
+            g.sgv > 0 && Double(g.sgv) <= belowBG
         }
 
         // ────────────────────────────────
@@ -66,7 +65,6 @@ struct LowBGCondition: AlarmCondition {
         // ────────────────────────────────
         // 3. final decision
         // ────────────────────────────────
-        let currentLow = isLow(latest)
-        return (currentLow && persistentOK) || predictiveTrigger
+        return persistentOK || predictiveTrigger
     }
 }

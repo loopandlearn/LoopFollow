@@ -43,34 +43,27 @@ class AlarmManager {
         let alarms = Storage.shared.alarms.value
 
         let sorted = alarms.sorted { lhs, rhs in
-            // 1) by type priority
+            // 1) type-level priority (hard-coded table in AlarmType)
             if lhs.type.priority != rhs.type.priority {
                 return lhs.type.priority < rhs.type.priority
             }
 
-            // 2) by “main” value for that type
-            if let asc = lhs.type.thresholdSortAscending {
-                // pick the right field:
-                let leftVal: Double
-                let rightVal: Double
+            // 2) per-type “main value” ordering
+            if lhs.type == rhs.type, // only makes sense within the same type
+               let spec = lhs.type.sortSpec
+            { // (direction, key extractor)
+                let lv = spec.key(lhs)
+                let rv = spec.key(rhs)
 
-                switch lhs.type {
-                // TODO: Make a alarm type setting of this, sortedBy or something like that
-                case .fastDrop, .fastRise:
-                    // sort on the per-reading delta
-                    leftVal = lhs.delta ?? (asc ? Double.infinity : -Double.infinity)
-                    rightVal = rhs.delta ?? (asc ? Double.infinity : -Double.infinity)
-
-                default:
-                    // sort on the BG limit threshold
-                    leftVal = lhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
-                    rightVal = rhs.threshold ?? (asc ? Double.infinity : -Double.infinity)
+                switch spec.direction {
+                case .ascending: // smaller ⇒ more urgent
+                    return (lv ?? Double.infinity) < (rv ?? Double.infinity)
+                case .descending: // bigger  ⇒ more urgent
+                    return (lv ?? -Double.infinity) > (rv ?? -Double.infinity)
                 }
-
-                return asc ? (leftVal < rightVal) : (leftVal > rightVal)
             }
 
-            // 3) fallback
+            // 3) fallback – keep original insertion order
             return false
         }
         var skipType: AlarmType?

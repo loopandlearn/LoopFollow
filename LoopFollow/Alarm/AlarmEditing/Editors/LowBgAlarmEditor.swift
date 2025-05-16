@@ -24,8 +24,8 @@ struct LowBgAlarmEditor: View {
                 title: "BG",
                 range: 40 ... 150,
                 value: Binding(
-                    get: { alarm.threshold ?? 80 },
-                    set: { alarm.threshold = $0 }
+                    get: { alarm.belowBG ?? 80 },
+                    set: { alarm.belowBG = $0 }
                 )
             )
 

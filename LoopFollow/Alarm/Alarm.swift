@@ -64,8 +64,11 @@ struct Alarm: Identifiable, Codable, Equatable {
     /// If the alarm is manually snoozed, we store the end time for the snooze here
     var snoozedUntil: Date?
 
-    /// Alarm threashold, it can be a bgvalue (in mg/Dl), or day for example
-    /// Also used as bg limit for drop alarms for example
+    /// BG alarm threasholds
+    var aboveBG: Double?
+    var belowBG: Double?
+
+    /// Alarm threashold, it can be a day for example
     var threshold: Double?
 
     /// If the alarm looks at predictions, this is how long into the future to look
