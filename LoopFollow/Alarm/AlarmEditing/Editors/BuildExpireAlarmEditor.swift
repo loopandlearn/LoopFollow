@@ -24,7 +24,7 @@ struct BuildExpireAlarmEditor: View {
                 title: "Expires In",
                 range: 1 ... 14,
                 step: 1,
-                unitLabel: alarm.type.timeUnit.label,
+                unitLabel: alarm.type.snoozeTimeUnit.label,
                 value: Binding(
                     get: { alarm.threshold ?? 1 },
                     set: { alarm.threshold = $0 }

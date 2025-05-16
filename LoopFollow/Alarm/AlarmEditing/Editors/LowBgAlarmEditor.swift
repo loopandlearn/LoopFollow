@@ -36,7 +36,7 @@ struct LowBgAlarmEditor: View {
                 title: "Persistent",
                 range: 0 ... 120,
                 step: 5,
-                unitLabel: alarm.type.timeUnit.label,
+                unitLabel: alarm.type.snoozeTimeUnit.label,
                 value: Binding(
                     get: { Double(alarm.persistentMinutes ?? 0) },
                     set: { alarm.persistentMinutes = Int($0) }
@@ -51,7 +51,7 @@ struct LowBgAlarmEditor: View {
                 title: "Predictive",
                 range: 0 ... 60,
                 step: 5,
-                unitLabel: alarm.type.timeUnit.label,
+                unitLabel: alarm.type.snoozeTimeUnit.label,
                 value: Binding(
                     get: { Double(alarm.predictiveMinutes ?? 0) },
                     set: { alarm.predictiveMinutes = Int($0) }

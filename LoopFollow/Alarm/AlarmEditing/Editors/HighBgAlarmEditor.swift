@@ -38,7 +38,7 @@ struct HighBgAlarmEditor: View {
                 title: "Persistent for",
                 range: 0 ... 120,
                 step: 5,
-                unitLabel: alarm.type.timeUnit.label,
+                unitLabel: alarm.type.snoozeTimeUnit.label,
                 value: Binding(
                     get: { Double(alarm.persistentMinutes ?? 0) },
                     set: { alarm.persistentMinutes = Int($0) }

@@ -27,7 +27,7 @@ final class SnoozerViewModel: ObservableObject {
                 self?.activeAlarm = alarm
                 if let a = alarm {
                     self?.snoozeUnits = a.snoozeDuration
-                    self?.timeUnitLabel = a.type.timeUnit.label
+                    self?.timeUnitLabel = a.type.snoozeTimeUnit.label
                 }
             }
             .store(in: &cancellables)
