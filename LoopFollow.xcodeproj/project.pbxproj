@@ -959,6 +959,16 @@
 			path = Scripts;
 			sourceTree = "<group>";
 		};
+		DDC6CA3B2DD7B9050060EE25 /* AlarmType */ = {
+			isa = PBXGroup;
+			children = (
+				DDCF9A812D85FD14004DF4DD /* AlarmType.swift */,
+				DD7F4C222DD7A62200D449E9 /* AlarmType+SortDirection.swift */,
+				DD7F4C242DD7B20700D449E9 /* AlarmType+timeUnit.swift */,
+			);
+			path = AlarmType;
+			sourceTree = "<group>";
+		};
 		DDC7E5142DBCE1B900EB1127 /* Snoozer */ = {
 			isa = PBXGroup;
 			children = (
@@ -1031,6 +1041,7 @@
 		DDCF9A7E2D85FCE6004DF4DD /* Alarm */ = {
 			isa = PBXGroup;
 			children = (
+				DDC6CA3B2DD7B9050060EE25 /* AlarmType */,
 				DD5DA27B2DC930D6003D44FC /* GlucoseValue.swift */,
 				DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */,
 				DDC7E5412DBD8A1600EB1127 /* AlarmEditing */,
@@ -1039,9 +1050,6 @@
 				DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */,
 				DDCF9A8B2D86005E004DF4DD /* AlarmManager.swift */,
 				DDCF9A872D85FD33004DF4DD /* AlarmData.swift */,
-				DDCF9A812D85FD14004DF4DD /* AlarmType.swift */,
-				DD7F4C222DD7A62200D449E9 /* AlarmType+SortDirection.swift */,
-				DD7F4C242DD7B20700D449E9 /* AlarmType+timeUnit.swift */,
 				DDCF9A7F2D85FD09004DF4DD /* Alarm.swift */,
 			);
 			path = Alarm;

@@ -27,7 +27,7 @@ struct NotLoopingAlarmEditor: View {
                 title: "Elapsed time",
                 range: 16 ... 61,
                 step: 5,
-                unitLabel: alarm.type.timeUnit.label,
+                unitLabel: alarm.type.snoozeTimeUnit.label,
                 value: Binding(
                     get: { alarm.threshold ?? 31 },
                     set: { alarm.threshold = $0 }

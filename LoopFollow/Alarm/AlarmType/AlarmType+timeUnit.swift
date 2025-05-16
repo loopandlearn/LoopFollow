@@ -10,7 +10,7 @@ import Foundation
 
 extension AlarmType {
     /// What “unit” we use for snoozeDuration for this alarmType.
-    var timeUnit: TimeUnit {
+    var snoozeTimeUnit: TimeUnit {
         switch self {
         case .buildExpire:
             return .day

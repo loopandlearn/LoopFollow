@@ -13,7 +13,7 @@ struct AlarmSnoozeSection: View {
     let range: ClosedRange<Int>
     let step: Int
 
-    private var unitLabel: String { alarm.type.timeUnit.label }
+    private var unitLabel: String { alarm.type.snoozeTimeUnit.label }
 
     private var defaultSnoozeBinding: Binding<Int> {
         Binding(
@@ -31,7 +31,7 @@ struct AlarmSnoozeSection: View {
             set: { on in
                 if on {
                     if alarm.snoozedUntil == nil || alarm.snoozedUntil! < Date() {
-                        let secs = alarm.type.timeUnit.seconds
+                        let secs = alarm.type.snoozeTimeUnit.seconds
                         alarm.snoozedUntil = Date()
                             .addingTimeInterval(Double(alarm.snoozeDuration) * secs)
                     }

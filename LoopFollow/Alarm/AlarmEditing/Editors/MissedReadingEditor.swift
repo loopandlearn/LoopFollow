@@ -22,7 +22,7 @@ struct MissedReadingEditor: View {
                 title: "No reading for",
                 range: 11 ... 121,
                 step: 5,
-                unitLabel: alarm.type.timeUnit.label,
+                unitLabel: alarm.type.snoozeTimeUnit.label,
                 value: Binding(
                     get: { alarm.threshold ?? 16 },
                     set: { alarm.threshold = $0 }
