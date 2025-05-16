@@ -144,6 +144,7 @@ class AlarmManager {
                 var list = Storage.shared.alarms.value
                 if let idx = list.firstIndex(where: { $0.id == alarm.id }) {
                     list[idx].isEnabled = false
+                    list[idx].snoozedUntil = nil
                     Storage.shared.alarms.value = list
                 }
             }
