@@ -272,6 +272,8 @@ struct Alarm: Identifiable, Codable, Equatable {
         case .tempTargetEnd:
             soundFile = .alertToneBusy
             repeatSoundOption = .never
+        case .temporary:
+            soundFile = .indeed
         }
     }
 }
@@ -286,14 +288,14 @@ extension AlarmType {
 
     var group: Group {
         switch self {
-        case .low, .high, .fastDrop, .fastRise, .missedReading:
+        case .low, .high, .fastDrop, .fastRise, .missedReading, .temporary:
             return .glucose
         case .iob, .bolus, .cob, .missedBolus, .recBolus:
             return .insulin
         case .battery, .batteryDrop, .pump, .pumpChange,
              .sensorChange, .notLooping, .buildExpire:
             return .device
-        default:
+        case .overrideStart, .overrideEnd, .tempTargetStart, .tempTargetEnd:
             return .other
         }
     }
@@ -320,6 +322,7 @@ extension AlarmType {
         case .overrideEnd: return "stop.circle"
         case .tempTargetStart: return "flag"
         case .tempTargetEnd: return "flag.slash"
+        case .temporary: return "bell"
         }
     }
 
@@ -346,6 +349,7 @@ extension AlarmType {
         case .overrideEnd: return "Override ended."
         case .tempTargetStart: return "Temp target started."
         case .tempTargetEnd: return "Temp target ended."
+        case .temporary: return "One-time BG limit alert."
         }
     }
 }

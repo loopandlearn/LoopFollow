@@ -18,7 +18,7 @@ extension AlarmType {
              .missedReading, .notLooping, .missedBolus,
              .bolus, .recBolus,
              .overrideStart, .overrideEnd, .tempTargetStart,
-             .tempTargetEnd:
+             .tempTargetEnd, .temporary:
             return .minute
         case .battery, .batteryDrop, .sensorChange, .pumpChange, .cob, .iob,
              .pump:
@@ -42,7 +42,7 @@ enum TimeUnit {
     /// A user-facing label
     var label: String {
         switch self {
-        case .minute: return "min" // Changed from minutes to save ui space
+        case .minute: return "min"
         case .hour: return "hours"
         case .day: return "days"
         }

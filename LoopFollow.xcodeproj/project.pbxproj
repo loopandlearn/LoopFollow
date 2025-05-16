@@ -141,6 +141,8 @@
 		DDB0AF522BB1A8BE00AFA48B /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */; };
 		DDB0AF552BB1B24A00AFA48B /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */; };
 		DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */; };
+		DDC6CA3D2DD7C6090060EE25 /* TemporaryCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */; };
+		DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */; };
 		DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */; };
 		DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */; };
 		DDC7E5382DBD887400EB1127 /* isOnPhoneCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */; };
@@ -485,6 +487,8 @@
 		DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
 		DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = BuildDetails.plist; sourceTree = "<group>"; };
 		DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideView.swift; sourceTree = "<group>"; };
+		DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryCondition.swift; sourceTree = "<group>"; };
+		DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerView.swift; sourceTree = "<group>"; };
 		DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewController.swift; sourceTree = "<group>"; };
 		DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isOnPhoneCall.swift; sourceTree = "<group>"; };
@@ -730,6 +734,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */,
 				DD7F4C1E2DD6648B00D449E9 /* FastRiseCondition.swift */,
 				DD7F4C1A2DD6501D00D449E9 /* COBCondition.swift */,
 				DD7F4C162DD63FA700D449E9 /* RecBolusCondition.swift */,
@@ -999,6 +1004,7 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */,
 				DD7F4C202DD66BB100D449E9 /* FastRiseAlarmEditor.swift */,
 				DD7F4C1C2DD650D500D449E9 /* COBAlarmEditor.swift */,
 				DD7F4C182DD63FD500D449E9 /* RecBolusAlarmEditor.swift */,
@@ -1744,6 +1750,7 @@
 				DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */,
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
 				DD7F4C0F2DD51EC200D449E9 /* TempTargetStartCondition.swift in Sources */,
+				DDC6CA3D2DD7C6090060EE25 /* TemporaryCondition.swift in Sources */,
 				DD9ACA0E2D340BFF00415D8A /* AlarmTask.swift in Sources */,
 				DDCF9A822D85FD15004DF4DD /* AlarmType.swift in Sources */,
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
@@ -1835,6 +1842,7 @@
 				DD4878052C7B2C970048F05C /* Storage.swift in Sources */,
 				DD493AE12ACF22FE009A6922 /* Profile.swift in Sources */,
 				DD493ADF2ACF22BB009A6922 /* SAge.swift in Sources */,
+				DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */,
 				DDF699992C5AA3060058A8D9 /* TempTargetPresetManager.swift in Sources */,
 				DD0C0C722C4B000800DBADDF /* TrioNightscoutRemoteView.swift in Sources */,
 				DD493ADB2ACF21A3009A6922 /* Bolus.swift in Sources */,
