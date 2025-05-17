@@ -1,10 +1,6 @@
-//
-//  InfoDisplaySettingsView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-05.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// InfoDisplaySettingsView.swift
+// Created by Jonas Björkert on 2024-08-05.
 
 import SwiftUI
 

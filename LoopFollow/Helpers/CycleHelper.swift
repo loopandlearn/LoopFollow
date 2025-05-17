@@ -1,10 +1,6 @@
-//
-//  CycleHelper.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-03-01.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// CycleHelper.swift
+// Created by Jonas Björkert on 2025-03-01.
 
 import Foundation
 

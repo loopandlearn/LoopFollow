@@ -1,10 +1,6 @@
-//
-//  NotLoopingCondition.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-13.
-//  Copyright © 2025 Jon Fawcett.
-//
+// LoopFollow
+// NotLoopingCondition.swift
+// Created by Jonas Björkert on 2025-05-14.
 
 import Foundation
 

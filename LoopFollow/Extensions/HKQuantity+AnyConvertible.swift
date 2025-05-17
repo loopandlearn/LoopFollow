@@ -1,9 +1,6 @@
-//
-//  HKQuantity+AnyConvertible.swift
-//  nightguard
-//
-//  Created by Jonas Björkert on 2024-07-24.
-//
+// LoopFollow
+// HKQuantity+AnyConvertible.swift
+// Created by Jonas Björkert on 2024-07-28.
 
 import HealthKit
 

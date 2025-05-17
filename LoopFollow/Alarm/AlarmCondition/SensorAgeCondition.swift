@@ -1,10 +1,6 @@
-//
-//  SensorAgeCondition.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-17.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// SensorAgeCondition.swift
+// Created by Jonas Björkert on 2025-05-17.
 
 import Foundation
 

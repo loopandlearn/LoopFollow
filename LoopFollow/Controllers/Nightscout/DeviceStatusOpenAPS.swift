@@ -1,7 +1,6 @@
-// DeviceStatusOpenAPS.swift
 // LoopFollow
-// Created by Jonas Björkert on 2024-05-19.
-// Copyright © 2024 Jon Fawcett. All rights reserved.
+// DeviceStatusOpenAPS.swift
+// Created by Jonas Björkert on 2024-05-31.
 
 import Foundation
 import HealthKit

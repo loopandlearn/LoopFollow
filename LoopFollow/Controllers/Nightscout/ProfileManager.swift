@@ -1,7 +1,6 @@
-// ProfileManager.swift
 // LoopFollow
-// Created by Jonas Björkert on 2024-07-12.
-// Copyright © 2024 Jon Fawcett. All rights reserved.
+// ProfileManager.swift
+// Created by Jonas Björkert on 2024-07-15.
 
 import Foundation
 import HealthKit

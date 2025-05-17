@@ -1,7 +1,6 @@
-// NSProfile.swift
 // LoopFollow
-// Created by Jonas Björkert on 2024-07-12.
-// Copyright © 2024 Jon Fawcett. All rights reserved.
+// NSProfile.swift
+// Created by Jonas Björkert on 2024-07-15.
 
 import Foundation
 

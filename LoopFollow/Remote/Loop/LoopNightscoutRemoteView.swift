@@ -1,10 +1,6 @@
-//
-//  LoopNightscoutRemoteView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-14.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// LoopNightscoutRemoteView.swift
+// Created by Jonas Björkert on 2025-01-27.
 
 import SwiftUI
 

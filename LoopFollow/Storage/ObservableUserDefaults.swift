@@ -1,10 +1,6 @@
-//
-//  ObservableUserDefaults.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-24.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// ObservableUserDefaults.swift
+// Created by Jonas Björkert on 2024-07-28.
 
 import Combine
 import Foundation

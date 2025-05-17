@@ -1,10 +1,6 @@
-//
-//  SearchBar.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-13.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// SearchBar.swift
+// Created by Jonas Björkert on 2025-01-13.
 
 import SwiftUI
 import UIKit

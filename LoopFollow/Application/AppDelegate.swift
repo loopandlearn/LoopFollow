@@ -1,10 +1,6 @@
-//
-//  AppDelegate.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 6/1/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// AppDelegate.swift
+// Created by Jon Fawcett on 2020-06-01.
 
 import CoreData
 import EventKit

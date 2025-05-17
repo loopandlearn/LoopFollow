@@ -1,10 +1,6 @@
-//
-//  AnyConvertible.swift
-//  nightguard
-//
-//  Created by Florian Preknya on 1/27/19.
-//  Copyright © 2019 private. All rights reserved.
-//
+// LoopFollow
+// AnyConvertible.swift
+// Created by Jon Fawcett on 2020-06-05.
 
 import Foundation
 

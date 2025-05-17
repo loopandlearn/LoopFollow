@@ -1,10 +1,6 @@
-//
-//  SettingsViewController.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 6/3/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// SettingsViewController.swift
+// Created by Jon Fawcett on 2020-06-05.
 
 import Eureka
 import EventKit

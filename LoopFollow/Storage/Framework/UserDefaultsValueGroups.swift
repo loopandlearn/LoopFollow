@@ -1,10 +1,6 @@
-//
-//  UserDefaultsValueGroups.swift
-//  nightguard
-//
-//  Created by Florian Preknya on 1/29/19.
-//  Copyright © 2019 private. All rights reserved.
-//
+// LoopFollow
+// UserDefaultsValueGroups.swift
+// Created by Jon Fawcett on 2020-06-05.
 
 import Foundation
 

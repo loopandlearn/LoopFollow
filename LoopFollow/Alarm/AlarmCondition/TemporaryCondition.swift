@@ -1,10 +1,6 @@
-//
-//  TemporaryCondition.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-16.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TemporaryCondition.swift
+// Created by Jonas Björkert on 2025-05-16.
 
 import Foundation
 

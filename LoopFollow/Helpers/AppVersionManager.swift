@@ -1,10 +1,6 @@
-//
-//  AppVersionManager.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-05-11.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// AppVersionManager.swift
+// Created by Jonas Björkert on 2024-05-11.
 
 import Foundation
 

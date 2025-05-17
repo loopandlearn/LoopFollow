@@ -1,10 +1,6 @@
-//
-//  HKUnit+Extensions.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-15.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// HKUnit+Extensions.swift
+// Created by Jonas Björkert on 2024-07-16.
 
 import Foundation
 import HealthKit

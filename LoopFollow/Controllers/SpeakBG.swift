@@ -1,3 +1,7 @@
+// LoopFollow
+// SpeakBG.swift
+// Created by Jonas Björkert on 2025-05-03.
+
 import AVFoundation
 import CallKit
 import Foundation

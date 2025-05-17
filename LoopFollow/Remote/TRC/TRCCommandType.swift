@@ -1,10 +1,6 @@
-//
-//  TRCCommandType.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-10-05.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TRCCommandType.swift
+// Created by Jonas Björkert on 2024-10-05.
 
 import Foundation
 

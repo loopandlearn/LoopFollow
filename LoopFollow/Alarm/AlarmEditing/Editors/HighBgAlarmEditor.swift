@@ -1,10 +1,6 @@
-//
-//  HighBgAlarmEditor.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-09.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// HighBgAlarmEditor.swift
+// Created by Jonas Björkert on 2025-04-26.
 
 import SwiftUI
 

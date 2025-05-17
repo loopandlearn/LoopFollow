@@ -1,10 +1,6 @@
-//
-//  Chart.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 6/3/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// Chart.swift
+// Created by Jon Fawcett on 2020-06-05.
 
 import Charts
 import Foundation

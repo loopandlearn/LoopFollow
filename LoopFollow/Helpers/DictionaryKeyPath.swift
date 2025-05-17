@@ -1,3 +1,7 @@
+// LoopFollow
+// DictionaryKeyPath.swift
+// Created by Jon Fawcett on 2020-06-11.
+
 // For details, see
 // http://stackoverflow.com/questions/40261857/remove-nested-key-from-dictionary
 import Foundation

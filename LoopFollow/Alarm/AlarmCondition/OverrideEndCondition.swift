@@ -1,10 +1,6 @@
-//
-//  OverrideEndCondition.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-14.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// OverrideEndCondition.swift
+// Created by Jonas Björkert on 2025-05-14.
 
 import Foundation
 

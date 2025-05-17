@@ -1,10 +1,6 @@
-//
-//  RemoteViewController.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-19.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// RemoteViewController.swift
+// Created by Jonas Björkert on 2024-07-19.
 
 import Combine
 import Foundation

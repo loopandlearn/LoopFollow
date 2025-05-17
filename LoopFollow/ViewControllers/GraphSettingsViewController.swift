@@ -1,10 +1,6 @@
-//
-//  GraphSettingsViewController.swift
-//  LoopFollow
-//
-//  Created by Jose Paredes on 7/16/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// GraphSettingsViewController.swift
+// Created by Jose Paredes on 2020-07-17.
 
 import Eureka
 import EventKit

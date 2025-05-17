@@ -1,10 +1,6 @@
-//
-//  Timers.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 9/3/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// Timers.swift
+// Created by Jon Fawcett on 2020-09-03.
 
 import Foundation
 import UIKit

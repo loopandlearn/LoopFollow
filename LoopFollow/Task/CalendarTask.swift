@@ -1,10 +1,6 @@
-//
-//  CalendarTask.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-12.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// CalendarTask.swift
+// Created by Jonas Björkert on 2025-01-13.
 
 import Foundation
 

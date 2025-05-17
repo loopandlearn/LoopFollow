@@ -1,10 +1,6 @@
-//
-//  InsulinCartridgeChange.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-05.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// InsulinCartridgeChange.swift
+// Created by Jonas Björkert on 2024-08-05.
 
 import Foundation
 

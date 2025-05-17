@@ -1,10 +1,6 @@
-//
-//  PushMessage.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-27.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// PushMessage.swift
+// Created by Jonas Björkert on 2024-09-17.
 
 import Foundation
 

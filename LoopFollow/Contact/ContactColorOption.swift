@@ -1,10 +1,6 @@
-//
-//  ContactColorOption.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-02-22.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// ContactColorOption.swift
+// Created by Jonas Björkert on 2025-02-23.
 
 import UIKit
 
