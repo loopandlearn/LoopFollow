@@ -147,6 +147,8 @@
 		DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */; };
 		DDC6CA452DD8D8E60060EE25 /* PumpChangeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */; };
 		DDC6CA472DD8D9010060EE25 /* PumpChangeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */; };
+		DDC6CA492DD8E47A0060EE25 /* PumpVolumeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */; };
+		DDC6CA4B2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */; };
 		DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */; };
 		DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */; };
 		DDC7E5382DBD887400EB1127 /* isOnPhoneCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */; };
@@ -497,6 +499,8 @@
 		DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorAgeCondition.swift; sourceTree = "<group>"; };
 		DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpChangeCondition.swift; sourceTree = "<group>"; };
 		DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpChangeAlarmEditor.swift; sourceTree = "<group>"; };
+		DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpVolumeCondition.swift; sourceTree = "<group>"; };
+		DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpVolumeAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerView.swift; sourceTree = "<group>"; };
 		DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewController.swift; sourceTree = "<group>"; };
 		DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isOnPhoneCall.swift; sourceTree = "<group>"; };
@@ -742,6 +746,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */,
 				DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */,
 				DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */,
 				DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */,
@@ -1014,6 +1019,7 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */,
 				DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */,
 				DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */,
 				DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */,
@@ -1793,6 +1799,7 @@
 				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
 				DD0650F12DCE9A9E004D3B41 /* MissedReadingCondition.swift in Sources */,
+				DDC6CA4B2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift in Sources */,
 				DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */,
 				DDFF3D7F2D1414A200BF9D9E /* BLEDevice.swift in Sources */,
 				DD9ACA042D32821400415D8A /* DeviceStatusTask.swift in Sources */,
@@ -1862,6 +1869,7 @@
 				DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */,
 				DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */,
 				DD13BC752C3FD6210062313B /* InfoType.swift in Sources */,
+				DDC6CA492DD8E47A0060EE25 /* PumpVolumeCondition.swift in Sources */,
 				DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */,
 				DD9ACA0A2D33095600415D8A /* MinAgoTask.swift in Sources */,
 				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
