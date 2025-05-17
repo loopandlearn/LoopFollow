@@ -11,7 +11,7 @@ struct LowBGCondition: AlarmCondition {
     static let type: AlarmType = .low
     init() {}
 
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         // ────────────────────────────────
         // 0. sanity checks
         // ────────────────────────────────

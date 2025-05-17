@@ -8,7 +8,7 @@ struct BuildExpireCondition: AlarmCondition {
     static let type: AlarmType = .buildExpire
     init() {}
 
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         guard let expiry = data.expireDate else { return false }
         guard let thresholdDays = alarm.threshold else { return false }
 

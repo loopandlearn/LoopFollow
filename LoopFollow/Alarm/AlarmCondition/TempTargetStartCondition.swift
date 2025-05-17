@@ -9,7 +9,7 @@ struct TempTargetStartCondition: AlarmCondition {
     static let type: AlarmType = .tempTargetStart
     init() {}
 
-    func evaluate(alarm _: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm _: Alarm, data: AlarmData, now _: Date) -> Bool {
         guard let startTS = data.latestTempTargetStart, startTS > 0 else { return false }
         guard Date().timeIntervalSince1970 - startTS <= 15 * 60 else { return false }
 

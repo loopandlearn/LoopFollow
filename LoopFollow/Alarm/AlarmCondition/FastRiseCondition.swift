@@ -9,7 +9,7 @@ struct FastRiseCondition: AlarmCondition {
     static let type: AlarmType = .fastRise
     init() {}
 
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         guard
             let rise = alarm.delta, rise > 0,
             let streak = alarm.monitoringWindow, streak > 0,

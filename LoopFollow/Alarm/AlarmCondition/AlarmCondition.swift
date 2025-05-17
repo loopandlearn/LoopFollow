@@ -8,7 +8,7 @@ protocol AlarmCondition {
     static var type: AlarmType { get }
     init()
     /// pure, per-alarm logic against `AlarmData`
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool
+    func evaluate(alarm: Alarm, data: AlarmData, now: Date) -> Bool
 }
 
 extension AlarmCondition {
@@ -78,6 +78,6 @@ extension AlarmCondition {
         }
 
         // finally, run the type-specific logic
-        return evaluate(alarm: alarm, data: data)
+        return evaluate(alarm: alarm, data: data, now: now)
     }
 }

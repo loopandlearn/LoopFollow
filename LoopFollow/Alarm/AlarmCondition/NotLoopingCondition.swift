@@ -8,7 +8,7 @@ struct NotLoopingCondition: AlarmCondition {
     static let type: AlarmType = .notLooping
     init() {}
 
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         // ────────────────────────────────
         // 0. sanity checks
         // ────────────────────────────────

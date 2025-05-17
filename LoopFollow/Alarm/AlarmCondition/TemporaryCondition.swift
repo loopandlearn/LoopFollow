@@ -9,7 +9,7 @@ struct TemporaryCondition: AlarmCondition {
     static let type: AlarmType = .temporary
     init() {}
 
-    func evaluate(alarm: Alarm, data _: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data _: AlarmData, now _: Date) -> Bool {
         // Needs at least ONE limit
         guard alarm.belowBG != nil || alarm.aboveBG != nil else { return false }
 
