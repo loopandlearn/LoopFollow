@@ -1,10 +1,6 @@
-//
-//  DexcomG7HeartBeat.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-04.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// DexcomG7HeartBeat.swift
+// Created by Jonas Björkert on 2025-01-13.
 
 // Denna behövs
 

@@ -1,10 +1,6 @@
-//
-//  TrioNightscoutRemoteController.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-26.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TrioNightscoutRemoteController.swift
+// Created by Jonas Björkert on 2024-07-19.
 
 import Foundation
 import HealthKit

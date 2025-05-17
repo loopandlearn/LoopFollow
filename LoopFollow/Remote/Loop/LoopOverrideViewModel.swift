@@ -1,10 +1,6 @@
-//
-//  LoopOverrideViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-15.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// LoopOverrideViewModel.swift
+// Created by Jonas Björkert on 2025-01-27.
 
 import Foundation
 

@@ -1,10 +1,6 @@
-//
-//  LoopOverrideView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-14.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// LoopOverrideView.swift
+// Created by Jonas Björkert on 2024-10-09.
 
 import HealthKit
 import SwiftUI

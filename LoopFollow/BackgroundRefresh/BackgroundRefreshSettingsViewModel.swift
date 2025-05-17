@@ -1,9 +1,6 @@
-//
-//  BackgroundRefreshSettingsViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-02.
-//
+// LoopFollow
+// BackgroundRefreshSettingsViewModel.swift
+// Created by Jonas Björkert on 2025-01-13.
 
 import Combine
 import Foundation

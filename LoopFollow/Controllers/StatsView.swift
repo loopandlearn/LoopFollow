@@ -1,10 +1,6 @@
-//
-//  StatsView.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 6/23/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// StatsView.swift
+// Created by Jon Fawcett on 2020-06-23.
 
 import Charts
 import Foundation

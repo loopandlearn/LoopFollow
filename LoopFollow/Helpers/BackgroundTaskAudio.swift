@@ -1,9 +1,6 @@
-//
-//  BackgroundTaskAudio.swift
-//
-//  Created by Yaro on 8/27/16.
-//  Copyright © 2016 Yaro. All rights reserved.
-//
+// LoopFollow
+// BackgroundTaskAudio.swift
+// Created by Jon Fawcett on 2020-06-05.
 
 import AVFoundation
 

@@ -1,10 +1,6 @@
-//
-//  AlarmSound.swift
-//  scoutwatch
-//
-//  Created by Dirk Hermanns on 03.01.16.
-//  Copyright © 2016 private. All rights reserved.
-//
+// LoopFollow
+// AlarmSound.swift
+// Created by Jon Fawcett on 2020-06-07.
 
 import AVFoundation
 import Foundation

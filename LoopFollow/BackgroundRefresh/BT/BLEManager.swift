@@ -1,7 +1,6 @@
-//
-//  BLEManager.swift
-//  LoopFollow
-//
+// LoopFollow
+// BLEManager.swift
+// Created by Jonas Björkert on 2025-01-13.
 
 import Combine
 import CoreBluetooth

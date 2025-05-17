@@ -1,7 +1,6 @@
-//
-//  BLEDeviceSelectionView.swift
-//  LoopFollow
-//
+// LoopFollow
+// BLEDeviceSelectionView.swift
+// Created by Jonas Björkert on 2025-01-13.
 
 import SwiftUI
 

@@ -1,10 +1,6 @@
-//
-//  MissedReadingCondition.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-09.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// MissedReadingCondition.swift
+// Created by Jonas Björkert on 2025-05-10.
 
 import Foundation
 

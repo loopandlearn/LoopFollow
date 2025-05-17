@@ -1,10 +1,6 @@
-//
-//  AppConstants.swift
-//  scoutwatch
-//
-//  Created by Dirk Hermanns on 26.12.15.
-//  Copyright © 2015 private. All rights reserved.
-//
+// LoopFollow
+// AppConstants.swift
+// Created by Jon Fawcett on 2020-06-05.
 
 import Foundation
 

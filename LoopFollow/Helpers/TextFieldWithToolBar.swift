@@ -1,10 +1,6 @@
-//
-//  TextFieldWithToolBar.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-27.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TextFieldWithToolBar.swift
+// Created by Jonas Björkert on 2024-07-28.
 
 import HealthKit
 import SwiftUI

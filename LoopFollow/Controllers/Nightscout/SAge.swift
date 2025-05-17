@@ -1,10 +1,6 @@
-//
-//  SAge.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2023-10-05.
-//  Copyright © 2023 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// SAge.swift
+// Created by Jonas Björkert on 2023-10-05.
 
 import Foundation
 

@@ -1,10 +1,6 @@
-//
-//  UserDefaultsValue.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 6/4/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// UserDefaultsValue.swift
+// Created by Jon Fawcett on 2020-06-05.
 
 import Foundation
 

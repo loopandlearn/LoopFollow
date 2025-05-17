@@ -1,10 +1,6 @@
-//
-//  TemporaryTarget.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-26.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TemporaryTarget.swift
+// Created by Jonas Björkert on 2024-07-28.
 
 import Foundation
 import HealthKit

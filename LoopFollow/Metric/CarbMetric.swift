@@ -1,10 +1,6 @@
-//
-//  CarbMetric.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-17.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// CarbMetric.swift
+// Created by Jonas Björkert on 2024-07-18.
 
 import Foundation
 

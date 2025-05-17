@@ -1,10 +1,6 @@
-//
-//  Localizer.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 6/22/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// Localizer.swift
+// Created by Jon Fawcett on 2020-06-22.
 
 import Foundation
 import HealthKit

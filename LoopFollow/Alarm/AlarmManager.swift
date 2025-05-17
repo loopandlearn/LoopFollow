@@ -1,10 +1,6 @@
-//
-//  AlarmManager.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-03-15.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// AlarmManager.swift
+// Created by Jonas Björkert on 2025-04-26.
 
 import Foundation
 import UserNotifications

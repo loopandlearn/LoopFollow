@@ -1,10 +1,6 @@
-//
-//  Globals.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 7/23/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// Globals.swift
+// Created by Jon Fawcett on 2020-07-23.
 
 import Foundation
 

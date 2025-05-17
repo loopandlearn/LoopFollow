@@ -1,10 +1,6 @@
-//
-//  DexcomSettingsViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-18.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// DexcomSettingsViewModel.swift
+// Created by Jonas Björkert on 2025-01-18.
 
 import Combine
 import Foundation

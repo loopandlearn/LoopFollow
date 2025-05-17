@@ -1,10 +1,6 @@
-//
-//  AlarmBGSection.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-06.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// AlarmBGSection.swift
+// Created by Jonas Björkert on 2025-05-06.
 
 import HealthKit
 import SwiftUI

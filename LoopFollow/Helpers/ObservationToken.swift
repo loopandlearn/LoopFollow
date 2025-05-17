@@ -1,10 +1,6 @@
-//
-//  ObservationToken.swift
-//  nightguard
-//
-//  Created by Florian Preknya on 1/30/19.
-//  Copyright © 2019 private. All rights reserved.
-//
+// LoopFollow
+// ObservationToken.swift
+// Created by Jon Fawcett on 2020-06-05.
 
 import Foundation
 

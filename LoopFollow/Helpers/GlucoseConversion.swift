@@ -1,10 +1,6 @@
-//
-//  GlucoseConversion.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-04-28.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// GlucoseConversion.swift
+// Created by Jonas Björkert on 2024-04-28.
 
 import Foundation
 

@@ -1,10 +1,6 @@
-//
-//  SnoozerViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-04.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// SnoozerViewModel.swift
+// Created by Jonas Björkert on 2025-05-04.
 
 import Combine
 import Foundation

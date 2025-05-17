@@ -1,10 +1,6 @@
-//
-//  ContactSettingsViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-12-10.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// ContactSettingsViewModel.swift
+// Created by Jonas Björkert on 2024-12-10.
 
 import Combine
 import Foundation

@@ -1,10 +1,6 @@
-//
-//  BackgroundAlertManager.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-06-22.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// BackgroundAlertManager.swift
+// Created by Jonas Björkert on 2024-06-22.
 
 import Foundation
 import UserNotifications

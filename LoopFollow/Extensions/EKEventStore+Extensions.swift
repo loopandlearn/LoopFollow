@@ -1,10 +1,6 @@
-//
-//  EKEventStore+Extensions.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2023-07-27.
-//  Copyright © 2023 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// EKEventStore+Extensions.swift
+// Created by Jonas Björkert on 2023-07-27.
 
 import EventKit
 import Foundation

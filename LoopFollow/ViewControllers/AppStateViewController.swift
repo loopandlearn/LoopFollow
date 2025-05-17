@@ -1,10 +1,6 @@
-//
-//  AppStateViewController.swift
-//  LoopFollow
-//
-//  Created by Jose Paredes on 7/17/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// AppStateViewController.swift
+// Created by Jose Paredes on 2020-07-18.
 
 import Foundation
 

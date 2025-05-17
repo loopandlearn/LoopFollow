@@ -12,8 +12,8 @@ assertEnvironment "${SRCROOT}" "Please set SRCROOT to project root folder"
 unset SDKROOT
 
 swift run -c release --package-path BuildTools swiftformat "${SRCROOT}" \
---enable fileHeader \
---exclude Pods,Generated,R.generated.swift,fastlane/swift,Dependencies, LoopKit, LibreTransmitter,G7SensorKit,OmniKit, dexcom-share-client-swift,CGMBLEKit,RileyLinkKit,OmniBLE,MinimedKit,TidepoolService
+--header "LoopFollow\n{file}\nCreated by {author.name} on {created}." \
+--exclude Pods,Generated,R.generated.swift,fastlane/swift,Dependencies,dexcom-share-client-swift
 
 # andOperator,\
 # anyObjectProtocol,\

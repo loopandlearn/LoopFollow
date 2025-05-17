@@ -1,10 +1,6 @@
-//
-//  AlarmActiveSection.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-12.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// AlarmActiveSection.swift
+// Created by Jonas Björkert on 2025-05-12.
 
 import SwiftUI
 

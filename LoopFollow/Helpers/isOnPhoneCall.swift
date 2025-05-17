@@ -1,10 +1,6 @@
-//
-//  isOnPhoneCall.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-04-26.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// isOnPhoneCall.swift
+// Created by Jonas Björkert on 2025-05-03.
 
 import CallKit
 import Foundation

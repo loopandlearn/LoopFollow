@@ -1,10 +1,6 @@
-//
-//  NightScout.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 6/16/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// NightScout.swift
+// Created by Jon Fawcett on 2020-06-17.
 
 import Foundation
 import UIKit

@@ -1,3 +1,7 @@
+// LoopFollow
+// AlarmEditor.swift
+// Created by Jonas Björkert on 2025-04-26.
+
 //
 //  AlarmEditor.swift
 //  LoopFollow

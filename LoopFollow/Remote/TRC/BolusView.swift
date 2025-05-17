@@ -1,10 +1,6 @@
-//
-//  BolusView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-25.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// BolusView.swift
+// Created by Jonas Björkert on 2024-09-17.
 
 import HealthKit
 import LocalAuthentication

@@ -1,10 +1,6 @@
-//
-//  RecBolusAlarmEditor.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-15.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// RecBolusAlarmEditor.swift
+// Created by Jonas Björkert on 2025-05-15.
 
 import SwiftUI
 

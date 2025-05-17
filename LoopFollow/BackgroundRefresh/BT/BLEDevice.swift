@@ -1,9 +1,6 @@
-//
-//  BLEDevice.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-02.
-//
+// LoopFollow
+// BLEDevice.swift
+// Created by Jonas Björkert on 2025-01-13.
 
 import Foundation
 
