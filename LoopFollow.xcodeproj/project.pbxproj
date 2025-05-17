@@ -143,6 +143,8 @@
 		DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */; };
 		DDC6CA3D2DD7C6090060EE25 /* TemporaryCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */; };
 		DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */; };
+		DDC6CA412DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */; };
+		DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */; };
 		DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */; };
 		DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */; };
 		DDC7E5382DBD887400EB1127 /* isOnPhoneCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */; };
@@ -489,6 +491,8 @@
 		DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideView.swift; sourceTree = "<group>"; };
 		DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryCondition.swift; sourceTree = "<group>"; };
 		DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryAlarmEditor.swift; sourceTree = "<group>"; };
+		DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorAgeAlarmEditor.swift; sourceTree = "<group>"; };
+		DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorAgeCondition.swift; sourceTree = "<group>"; };
 		DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerView.swift; sourceTree = "<group>"; };
 		DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewController.swift; sourceTree = "<group>"; };
 		DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isOnPhoneCall.swift; sourceTree = "<group>"; };
@@ -734,6 +738,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */,
 				DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */,
 				DD7F4C1E2DD6648B00D449E9 /* FastRiseCondition.swift */,
 				DD7F4C1A2DD6501D00D449E9 /* COBCondition.swift */,
@@ -1004,6 +1009,7 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */,
 				DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */,
 				DD7F4C202DD66BB100D449E9 /* FastRiseAlarmEditor.swift */,
 				DD7F4C1C2DD650D500D449E9 /* COBAlarmEditor.swift */,
@@ -1896,6 +1902,7 @@
 				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
+				DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */,
 				DD7F4C212DD66BB200D449E9 /* FastRiseAlarmEditor.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
 				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
@@ -1917,6 +1924,7 @@
 				FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */,
 				DD0C0C642C45A59400DBADDF /* HKUnit+Extensions.swift in Sources */,
 				DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */,
+				DDC6CA412DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift in Sources */,
 				DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */,
 				DD7F4C112DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift in Sources */,
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,

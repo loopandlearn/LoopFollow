@@ -19,6 +19,7 @@ struct AlarmData: Codable {
     let latestTempTargetEnd: TimeInterval?
     let recBolus: Double?
     let COB: Double?
+    let sageInsertTime: TimeInterval?
 }
 
 /*

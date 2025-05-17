@@ -25,6 +25,7 @@ extension MainViewController {
             let latestTempTargetEnd = self.tempTargetGraphData.last?.endDate
             let recBolus = UserDefaultsRepository.deviceRecBolus.value
             let COB = self.latestCOB?.value
+            let sensorInsertedAt = UserDefaultsRepository.alertSageInsertTime.value
 
             let alarmData = AlarmData(
                 bgReadings: self.bgData
@@ -40,7 +41,8 @@ extension MainViewController {
                 latestTempTargetStart: latestTempTargetStart,
                 latestTempTargetEnd: latestTempTargetEnd,
                 recBolus: recBolus,
-                COB: COB
+                COB: COB,
+                sageInsertTime: sensorInsertedAt
             )
 
             let finalAlarmData: AlarmData

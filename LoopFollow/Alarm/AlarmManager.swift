@@ -31,6 +31,7 @@ class AlarmManager {
             MissedReadingCondition.self,
             FastRiseCondition.self,
             TemporaryCondition.self,
+            SensorAgeCondition.self,
             // TODO: add other condition types here
         ]
     ) {
