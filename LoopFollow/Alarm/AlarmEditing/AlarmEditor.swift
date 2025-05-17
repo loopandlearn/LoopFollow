@@ -75,6 +75,8 @@ struct AlarmEditor: View {
             TemporaryAlarmEditor(alarm: $alarm)
         case .sensorChange:
             SensorAgeAlarmEditor(alarm: $alarm)
+        case .pumpChange:
+            PumpChangeAlarmEditor(alarm: $alarm)
         /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")

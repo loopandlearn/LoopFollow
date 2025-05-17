@@ -28,6 +28,7 @@ class AlarmManager {
             FastRiseCondition.self,
             TemporaryCondition.self,
             SensorAgeCondition.self,
+            PumpChangeCondition.self,
             // TODO: add other condition types here
         ]
     ) {

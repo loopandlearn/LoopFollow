@@ -145,6 +145,8 @@
 		DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */; };
 		DDC6CA412DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */; };
 		DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */; };
+		DDC6CA452DD8D8E60060EE25 /* PumpChangeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */; };
+		DDC6CA472DD8D9010060EE25 /* PumpChangeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */; };
 		DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */; };
 		DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */; };
 		DDC7E5382DBD887400EB1127 /* isOnPhoneCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */; };
@@ -493,6 +495,8 @@
 		DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorAgeAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorAgeCondition.swift; sourceTree = "<group>"; };
+		DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpChangeCondition.swift; sourceTree = "<group>"; };
+		DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpChangeAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerView.swift; sourceTree = "<group>"; };
 		DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewController.swift; sourceTree = "<group>"; };
 		DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isOnPhoneCall.swift; sourceTree = "<group>"; };
@@ -738,6 +742,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */,
 				DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */,
 				DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */,
 				DD7F4C1E2DD6648B00D449E9 /* FastRiseCondition.swift */,
@@ -1009,6 +1014,7 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */,
 				DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */,
 				DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */,
 				DD7F4C202DD66BB100D449E9 /* FastRiseAlarmEditor.swift */,
@@ -1850,6 +1856,7 @@
 				DD493ADF2ACF22BB009A6922 /* SAge.swift in Sources */,
 				DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */,
 				DDF699992C5AA3060058A8D9 /* TempTargetPresetManager.swift in Sources */,
+				DDC6CA452DD8D8E60060EE25 /* PumpChangeCondition.swift in Sources */,
 				DD0C0C722C4B000800DBADDF /* TrioNightscoutRemoteView.swift in Sources */,
 				DD493ADB2ACF21A3009A6922 /* Bolus.swift in Sources */,
 				DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */,
@@ -1899,6 +1906,7 @@
 				DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
 				DD0650EF2DCE96FF004D3B41 /* HighBGCondition.swift in Sources */,
 				DDDF6F452D479AB100884336 /* LoopOverrideView.swift in Sources */,
+				DDC6CA472DD8D9010060EE25 /* PumpChangeAlarmEditor.swift in Sources */,
 				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
