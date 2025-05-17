@@ -69,6 +69,8 @@ struct AlarmEditor: View {
             FastRiseAlarmEditor(alarm: $alarm)
         case .temporary:
             TemporaryAlarmEditor(alarm: $alarm)
+        case .sensorChange:
+            SensorAgeAlarmEditor(alarm: $alarm)
         /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")

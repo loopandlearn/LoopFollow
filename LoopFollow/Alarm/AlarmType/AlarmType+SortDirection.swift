@@ -42,6 +42,10 @@ extension AlarmType {
             return (direction: .descending,
                     key: { $0.threshold })
 
+        case .sensorChange:
+            return (direction: .ascending,
+                    key: { $0.threshold })
+
         default:
             return nil
         }
