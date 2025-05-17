@@ -8,7 +8,7 @@ struct COBCondition: AlarmCondition {
     static let type: AlarmType = .cob
     init() {}
 
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         guard let threshold = alarm.threshold, threshold > 0 else { return false }
         guard let cob = data.COB, cob >= threshold else {
             Storage.shared.lastCOBNotified.value = nil

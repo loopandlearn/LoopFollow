@@ -17,7 +17,7 @@ struct PumpVolumeCondition: AlarmCondition {
     static let type: AlarmType = .pump
     init() {}
 
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         guard let threshold = alarm.threshold, threshold > 0 else { return false }
         guard let latestVol = data.latestPumpVolume else { return false }
 

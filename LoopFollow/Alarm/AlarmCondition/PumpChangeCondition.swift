@@ -20,7 +20,7 @@ struct PumpChangeCondition: AlarmCondition {
     /// Pod lifetime = 3 days = 72 h
     private let lifetime: TimeInterval = 3 * 24 * 60 * 60
 
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         // 0. sanity guards
         guard let warnAheadHrs = alarm.threshold, warnAheadHrs > 0 else { return false }
         guard let insertTS = data.pumpInsertTime else { return false }

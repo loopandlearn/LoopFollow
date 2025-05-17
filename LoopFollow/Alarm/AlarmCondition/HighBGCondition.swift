@@ -9,7 +9,7 @@ struct HighBGCondition: AlarmCondition {
     static let type: AlarmType = .high
     init() {}
 
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         // ────────────────────────────────
         // 0. get the limit
         // ────────────────────────────────

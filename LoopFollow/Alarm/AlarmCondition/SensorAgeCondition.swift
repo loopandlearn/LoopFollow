@@ -13,7 +13,7 @@ struct SensorAgeCondition: AlarmCondition {
     /// Dexcom hard-stop = 10 days = 240 h
     private let lifetime: TimeInterval = 10 * 24 * 60 * 60
 
-    func evaluate(alarm: Alarm, data: AlarmData) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         // 0. basic guards
         guard let warnAheadHrs = alarm.threshold, warnAheadHrs > 0 else { return false }
         guard let insertTS = data.sageInsertTime else { return false }
