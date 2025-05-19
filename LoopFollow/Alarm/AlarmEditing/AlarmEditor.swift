@@ -79,6 +79,8 @@ struct AlarmEditor: View {
             PumpChangeAlarmEditor(alarm: $alarm)
         case .pump:
             PumpVolumeAlarmEditor(alarm: $alarm)
+        case .iob:
+            IOBAlarmEditor(alarm: $alarm)
         /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")
