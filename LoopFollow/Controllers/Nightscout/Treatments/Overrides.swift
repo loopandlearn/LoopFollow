@@ -45,12 +45,12 @@ extension MainViewController {
                let nextStart   = NightscoutUtils.parseDate(nextDateStr)?
                 .timeIntervalSince1970
             {
-                end = min(end, nextStart - 300)
+                end = min(end, nextStart - 60) // avoid overlapping overrides
             }
 
             end = min(end, maxEndDate)
 
-            if end - start < 300 { continue }
+            if end - start < 300 { continue } // skip short overrides
 
             let dot = DataStructs.overrideStruct(
                 insulNeedsScaleFactor: e["insulinNeedsScaleFactor"] as? Double ?? 1,
