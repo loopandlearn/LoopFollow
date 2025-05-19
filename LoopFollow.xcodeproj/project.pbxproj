@@ -140,6 +140,9 @@
 		DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */; };
 		DDB0AF522BB1A8BE00AFA48B /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */; };
 		DDB0AF552BB1B24A00AFA48B /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */; };
+		DDB9FC7B2DDB573F00EFAA76 /* IOBCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB9FC7A2DDB573F00EFAA76 /* IOBCondition.swift */; };
+		DDB9FC7D2DDB575300EFAA76 /* IOBAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB9FC7C2DDB575300EFAA76 /* IOBAlarmEditor.swift */; };
+		DDB9FC7F2DDB584500EFAA76 /* BolusEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB9FC7E2DDB584500EFAA76 /* BolusEntry.swift */; };
 		DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */; };
 		DDC6CA3D2DD7C6090060EE25 /* TemporaryCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */; };
 		DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */; };
@@ -492,6 +495,9 @@
 		DDB0AF502BB1A84500AFA48B /* capture-build-details.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "capture-build-details.sh"; sourceTree = "<group>"; };
 		DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
 		DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = BuildDetails.plist; sourceTree = "<group>"; };
+		DDB9FC7A2DDB573F00EFAA76 /* IOBCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBCondition.swift; sourceTree = "<group>"; };
+		DDB9FC7C2DDB575300EFAA76 /* IOBAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBAlarmEditor.swift; sourceTree = "<group>"; };
+		DDB9FC7E2DDB584500EFAA76 /* BolusEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusEntry.swift; sourceTree = "<group>"; };
 		DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideView.swift; sourceTree = "<group>"; };
 		DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryCondition.swift; sourceTree = "<group>"; };
 		DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryAlarmEditor.swift; sourceTree = "<group>"; };
@@ -746,6 +752,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DDB9FC7A2DDB573F00EFAA76 /* IOBCondition.swift */,
 				DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */,
 				DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */,
 				DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */,
@@ -1019,6 +1026,7 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DDB9FC7C2DDB575300EFAA76 /* IOBAlarmEditor.swift */,
 				DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */,
 				DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */,
 				DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */,
@@ -1065,6 +1073,7 @@
 		DDCF9A7E2D85FCE6004DF4DD /* Alarm */ = {
 			isa = PBXGroup;
 			children = (
+				DDB9FC7E2DDB584500EFAA76 /* BolusEntry.swift */,
 				DDC6CA3B2DD7B9050060EE25 /* AlarmType */,
 				DD5DA27B2DC930D6003D44FC /* GlucoseValue.swift */,
 				DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */,
@@ -1797,6 +1806,7 @@
 				DDCF9A8C2D86005E004DF4DD /* AlarmManager.swift in Sources */,
 				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,
 				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
+				DDB9FC7B2DDB573F00EFAA76 /* IOBCondition.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
 				DD0650F12DCE9A9E004D3B41 /* MissedReadingCondition.swift in Sources */,
 				DDC6CA4B2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift in Sources */,
@@ -1874,6 +1884,7 @@
 				DD9ACA0A2D33095600415D8A /* MinAgoTask.swift in Sources */,
 				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
 				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
+				DDB9FC7D2DDB575300EFAA76 /* IOBAlarmEditor.swift in Sources */,
 				DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */,
 				DD7F4C0B2DD51C5500D449E9 /* OverrideEndCondition.swift in Sources */,
 				DDFF3D872D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift in Sources */,
@@ -1887,6 +1898,7 @@
 				DDCF979624C1443C002C9752 /* GeneralSettingsViewController.swift in Sources */,
 				FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */,
 				DD493AD72ACF2139009A6922 /* SuspendPump.swift in Sources */,
+				DDB9FC7F2DDB584500EFAA76 /* BolusEntry.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				DDD10F072C529DE800D76A8E /* Observable.swift in Sources */,
 				DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */,

@@ -24,6 +24,7 @@ extension MainViewController {
             let sensorInsertedAt = UserDefaultsRepository.alertSageInsertTime.value
             let pumpInsertTime = UserDefaultsRepository.alertCageInsertTime.value
             let latestPumpVol = self.latestPumpVolume
+            let bolusEntries = self.bolusData.map { BolusEntry(units: $0.value, date: Date(timeIntervalSince1970: $0.date)) }
 
             let alarmData = AlarmData(
                 bgReadings: self.bgData
@@ -42,7 +43,9 @@ extension MainViewController {
                 COB: COB,
                 sageInsertTime: sensorInsertedAt,
                 pumpInsertTime: pumpInsertTime,
-                latestPumpVolume: latestPumpVol
+                latestPumpVolume: latestPumpVol,
+                IOB: self.latestIOB?.value,
+                recentBoluses: bolusEntries,
             )
 
             let finalAlarmData: AlarmData

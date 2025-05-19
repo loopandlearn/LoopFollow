@@ -30,6 +30,7 @@ class AlarmManager {
             SensorAgeCondition.self,
             PumpChangeCondition.self,
             PumpVolumeCondition.self,
+            IOBCondition.self,
             // TODO: add other condition types here
         ]
     ) {
