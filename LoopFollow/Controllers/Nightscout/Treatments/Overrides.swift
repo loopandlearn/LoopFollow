@@ -10,79 +10,80 @@ import Foundation
 import UIKit
 
 extension MainViewController {
-    // NS Override Response Processor
-    func processNSOverrides(entries: [[String:AnyObject]]) {
+
+    func processNSOverrides(entries: [[String: AnyObject]]) {
         overrideGraphData.removeAll()
-        var activeOverrideNote: String? = nil
+        var activeOverrideNote: String?
+
+        let sorted = entries.sorted { lhs, rhs in
+            guard
+                let ls = (lhs["timestamp"] as? String) ?? (lhs["created_at"] as? String),
+                let rs = (rhs["timestamp"] as? String) ?? (rhs["created_at"] as? String),
+                let ld = NightscoutUtils.parseDate(ls),
+                let rd = NightscoutUtils.parseDate(rs)
+            else { return false }
+            return ld < rd
+        }
 
         let now = Date().timeIntervalSince1970
-        let predictionLoadHours = UserDefaultsRepository.predictionToLoad.value
-        let predictionLoadSeconds = predictionLoadHours * 3600
-        let maxEndDate = now + predictionLoadSeconds
+        let maxEndDate = now + UserDefaultsRepository.predictionToLoad.value * 3600
+        let graphHorizon = dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * UserDefaultsRepository.downloadDays.value)
 
-        entries.reversed().enumerated().forEach { (index, currentEntry) in
-            guard let dateStr = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else { return }
-            guard let parsedDate = NightscoutUtils.parseDate(dateStr) else { return }
+        for i in 0..<sorted.count {
+            let e = sorted[i]
 
-            var dateTimeStamp = parsedDate.timeIntervalSince1970
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
-            if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
-                dateTimeStamp = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
-            }
-            
-            let multiplier = currentEntry["insulinNeedsScaleFactor"] as? Double ?? 1.0
-            
-            var duration: Double = 5.0
-            if let _ = currentEntry["durationType"] as? String, index == entries.count - 1 {
-                duration = dateTimeUtils.getNowTimeIntervalUTC() - dateTimeStamp + (60 * 60)
-            } else {
-                duration = (currentEntry["duration"] as? Double ?? 5.0) * 60
-            }
-            
-            if duration < 300 { return }
+            guard
+                let dateStr = (e["timestamp"] as? String) ?? (e["created_at"] as? String),
+                let startDate = NightscoutUtils.parseDate(dateStr)
+            else { continue }
 
-            let reason = currentEntry["reason"] as? String ?? ""
+            let start = max(startDate.timeIntervalSince1970, graphHorizon)
+            var end   = start + (e["duration"] as? Double ?? 5) * 60   // seconds
 
-            guard let enteredBy = currentEntry["enteredBy"] as? String else {
-                return
-            }
-
-            var range: [Int] = []
-            if let ranges = currentEntry["correctionRange"] as? [Int], ranges.count == 2 {
-                range = ranges
-            } else {
-                let low = currentEntry["targetBottom"] as? Int
-                let high = currentEntry["targetTop"] as? Int
-                if (low == nil && high != nil) || (low != nil && high == nil) { return }
-                range = [low ?? 0, high ?? 0]
-            }
-
-            // Limit displayed override duration to 'Hours of Prediction' after current time
-            var endDate = dateTimeStamp + duration
-            if endDate > maxEndDate {
-                endDate = maxEndDate
-                duration = endDate - dateTimeStamp
-            }
-
-            if dateTimeStamp <= now && now < endDate {
-                activeOverrideNote = currentEntry["notes"] as? String ?? currentEntry["reason"] as? String
-            }
-
-            let dot = DataStructs.overrideStruct(insulNeedsScaleFactor: multiplier, date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: range, enteredBy: enteredBy, reason: reason, sgv: -20)
-            overrideGraphData.append(dot)
-        }
-        
-        Observable.shared.override.value = activeOverrideNote
-
-        if ObservableUserDefaults.shared.device.value == "Trio" {
-            if let note = activeOverrideNote
+            if i + 1 < sorted.count,
+               let nextDateStr = (sorted[i + 1]["timestamp"] as? String) ?? (sorted[i + 1]["created_at"] as? String),
+               let nextStart   = NightscoutUtils.parseDate(nextDateStr)?
+                .timeIntervalSince1970
             {
+                end = min(end, nextStart - 300)
+            }
+
+            end = min(end, maxEndDate)
+
+            if end - start < 300 { continue }
+
+            let dot = DataStructs.overrideStruct(
+                insulNeedsScaleFactor: e["insulinNeedsScaleFactor"] as? Double ?? 1,
+                date:         start,
+                endDate:      end,
+                duration:     end - start,
+                correctionRange: {
+                    if let r = e["correctionRange"] as? [Int], r.count == 2 {
+                        return r
+                    }
+                    let lo = e["targetBottom"] as? Int ?? 0
+                    let hi = e["targetTop"]    as? Int ?? 0
+                    return [lo, hi]
+                }(),
+                enteredBy:    e["enteredBy"] as? String ?? "unknown",
+                reason:       e["reason"]    as? String ?? "",
+                sgv:          -20
+            )
+            overrideGraphData.append(dot)
+
+            if now >= start, now < end {
+                activeOverrideNote = e["notes"] as? String ?? e["reason"] as? String
+            }
+        }
+
+        Observable.shared.override.value = activeOverrideNote
+        if ObservableUserDefaults.shared.device.value == "Trio" {
+            if let note = activeOverrideNote {
                 infoManager.updateInfoData(type: .override, value: note)
             } else {
                 infoManager.clearInfoData(type: .override)
             }
         }
-
         if UserDefaultsRepository.graphOtherTreatments.value {
             updateOverrideGraph()
         }
