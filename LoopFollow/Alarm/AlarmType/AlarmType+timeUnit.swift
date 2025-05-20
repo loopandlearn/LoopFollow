@@ -12,7 +12,7 @@ extension AlarmType {
             return .day
         case .low, .high, .fastDrop, .fastRise,
              .missedReading, .notLooping, .missedBolus,
-             .bolus, .recBolus,
+             .recBolus,
              .overrideStart, .overrideEnd, .tempTargetStart,
              .tempTargetEnd, .temporary:
             return .minute
