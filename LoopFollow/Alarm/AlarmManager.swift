@@ -32,7 +32,7 @@ class AlarmManager {
             PumpVolumeCondition.self,
             IOBCondition.self,
             BatteryCondition.self,
-
+            BatteryDropCondition.self,
             // TODO: add other condition types here
         ]
     ) {

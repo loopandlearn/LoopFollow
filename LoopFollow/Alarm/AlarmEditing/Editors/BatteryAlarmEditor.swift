@@ -1,6 +1,6 @@
 // LoopFollow
 // BatteryAlarmEditor.swift
-// Created by Jonas Björkert on 2025-05-19.
+// Created by Jonas Björkert on 2025-05-17.
 
 import SwiftUI
 

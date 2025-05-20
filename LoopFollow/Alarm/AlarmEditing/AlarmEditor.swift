@@ -76,6 +76,8 @@ struct AlarmEditor: View {
             IOBAlarmEditor(alarm: $alarm)
         case .battery:
             BatteryAlarmEditor(alarm: $alarm)
+        case .batteryDrop:
+            BatteryDropAlarmEditor(alarm: $alarm)
         /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")
