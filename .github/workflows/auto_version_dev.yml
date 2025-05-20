@@ -1,0 +1,91 @@
+# -----------------------------------------------------------------------------
+# Workflow: Bump Dev Version
+#
+# Description:
+# This GitHub Actions workflow automatically increments the version number
+# defined in `Config.xcconfig` on every push to the `dev` branch.
+#
+# Versioning Logic:
+# - Reads the `LOOP_FOLLOW_MARKETING_VERSION` from `Config.xcconfig`.
+# - The version is `MAJOR.MINOR.PATCH` format (3 digits)
+#   where PATCH is 0 for main branch, each update to dev increments by 1
+#
+# Example:
+# - `2.4.0` for main
+#    for dev → `2.4.1`, then → `2.4.2`
+# - next release (main) will be `2.5.0`
+#
+# Commit Handling:
+# The updated version is then committed and pushed back to the `dev` branch.
+# - The bump commit includes the `[skip ci]` tag in its message
+# - This prevents the workflow from re-triggering itself in a loop
+#
+# Prerequisites:
+# - `LOOP_FOLLOW_MARKETING_VERSION` must exist and be defined using the format:
+#    LOOP_FOLLOW_MARKETING_VERSION = x.y.z
+# - GitHub Actions bot must have workflow permission to push to `dev`.
+# -----------------------------------------------------------------------------
+
+name: zzz [DO NOT RUN] Bump LOOP_FOLLOW_MARKETING_VERSION on dev push
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  bump-version:
+    if: github.repository_owner == 'loopandlearn'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+            token: ${{ secrets.LOOPFOLLOW_TOKEN_AUTOBUMP }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump dev version number in Config.xcconfig
+        run: |
+          FILE=Config.xcconfig
+
+          # Find the line with LOOP_FOLLOW_MARKETING_VERSION and extract the value
+          VERSION_LINE=$(grep -E '^LOOP_FOLLOW_MARKETING_VERSION *= *[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?' "$FILE")
+          CURRENT_VERSION=$(echo "$VERSION_LINE" | sed -E 's/^LOOP_FOLLOW_MARKETING_VERSION *= *//')
+          
+          # Split version into components (up to 3)
+          IFS='.' read -r MAJOR MINOR FIX <<< "$CURRENT_VERSION"
+
+          # Increment FIX
+          if [ -z "$FIX" ]; then
+            echo "Error, FIX not found"
+          else
+            FIX=$((FIX + 1))
+          fi
+
+          # Construct new version
+          NEW_VERSION="$MAJOR.$MINOR.$FIX"
+          echo "New version: $NEW_VERSION"
+
+          # Escape dots in current version for sed replacement
+          ESCAPED_CURRENT_VERSION=$(echo "$CURRENT_VERSION" | sed 's/\./\\./g')
+
+          # Replace the LOOP_FOLLOW_MARKETING_VERSION line in-place with new version
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' -E "s/LOOP_FOLLOW_MARKETING_VERSION *= *$ESCAPED_CURRENT_VERSION/LOOP_FOLLOW_MARKETING_VERSION = $NEW_VERSION/" "$FILE"
+          else
+            sed -i -E "s/LOOP_FOLLOW_MARKETING_VERSION *= *$ESCAPED_CURRENT_VERSION/LOOP_FOLLOW_MARKETING_VERSION = $NEW_VERSION/" "$FILE"
+          fi
+
+          # Export version so it's available in the next step
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: Commit and push changes
+        run: |
+          git add Config.xcconfig
+          git commit -m "CI: Bump dev version to $NEW_VERSION [skip ci]"
+          git push
