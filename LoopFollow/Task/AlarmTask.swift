@@ -47,7 +47,8 @@ extension MainViewController {
                 latestPumpVolume: latestPumpVol,
                 IOB: self.latestIOB?.value,
                 recentBoluses: bolusEntries,
-                latestBattery: latestBattery
+                latestBattery: latestBattery,
+                batteryHistory: self.deviceBatteryData
             )
 
             let finalAlarmData: AlarmData
