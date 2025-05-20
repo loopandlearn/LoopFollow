@@ -26,6 +26,7 @@ extension MainViewController {
             let latestPumpVol = self.latestPumpVolume
             let bolusEntries = self.bolusData.map { BolusEntry(units: $0.value, date: Date(timeIntervalSince1970: $0.date)) }
             let latestBattery = UserDefaultsRepository.deviceBatteryLevel.value
+            let recentCarbs: [CarbSample] = self.carbData.map { CarbSample(grams: $0.value, date: Date(timeIntervalSince1970: $0.date)) }
 
             let alarmData = AlarmData(
                 bgReadings: self.bgData
@@ -48,7 +49,8 @@ extension MainViewController {
                 IOB: self.latestIOB?.value,
                 recentBoluses: bolusEntries,
                 latestBattery: latestBattery,
-                batteryHistory: self.deviceBatteryData
+                batteryHistory: self.deviceBatteryData,
+                recentCarbs: recentCarbs
             )
 
             let finalAlarmData: AlarmData
