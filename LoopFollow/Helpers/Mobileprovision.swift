@@ -6,7 +6,6 @@
 //  MobileProvision.swift
 //  Fluux.io
 //
-//  Created by Mickaël Rémond on 03/11/2018.
 //  Copyright © 2018 ProcessOne.
 //  Distributed under Apache License v2
 //

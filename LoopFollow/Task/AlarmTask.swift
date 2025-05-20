@@ -25,6 +25,7 @@ extension MainViewController {
             let pumpInsertTime = UserDefaultsRepository.alertCageInsertTime.value
             let latestPumpVol = self.latestPumpVolume
             let bolusEntries = self.bolusData.map { BolusEntry(units: $0.value, date: Date(timeIntervalSince1970: $0.date)) }
+            let latestBattery = UserDefaultsRepository.deviceBatteryLevel.value
 
             let alarmData = AlarmData(
                 bgReadings: self.bgData
@@ -46,6 +47,7 @@ extension MainViewController {
                 latestPumpVolume: latestPumpVol,
                 IOB: self.latestIOB?.value,
                 recentBoluses: bolusEntries,
+                latestBattery: latestBattery
             )
 
             let finalAlarmData: AlarmData

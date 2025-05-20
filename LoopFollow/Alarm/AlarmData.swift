@@ -20,6 +20,7 @@ struct AlarmData: Codable {
     let latestPumpVolume: Double?
     let IOB: Double?
     let recentBoluses: [BolusEntry]
+    let latestBattery: Double?
 }
 
 /*
