@@ -27,23 +27,15 @@ struct RemoteSettingsView: View {
 
                     remoteTypeRow(type: .nightscout, label: "Nightscout", isEnabled: true)
 
-                    if BuildDetails.default.branch?.lowercased() != "main" {
-                        remoteTypeRow(
-                            type: .trc,
-                            label: "Trio Remote Control",
-                            isEnabled: viewModel.isTrioDevice
-                        )
-                    }
+                    remoteTypeRow(
+                        type: .trc,
+                        label: "Trio Remote Control",
+                        isEnabled: viewModel.isTrioDevice
+                    )
 
-                    Text("Nightscout is the only option for the released version of Trio and Loop.")
+                    Text("Nightscout is the only option for Loop.\nNightscout should be used for Trio 0.2.x or older.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
-
-                    if BuildDetails.default.branch?.lowercased() != "main" {
-                        Text("Trio Remote Control requires a special version of Trio, which is under development in a private repository until sufficient testing is completed.")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                    }
                 }
 
                 // MARK: - User Information Section
