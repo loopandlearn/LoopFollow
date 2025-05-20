@@ -228,8 +228,6 @@ struct Alarm: Identifiable, Codable, Equatable {
             soundFile = .indeed
         case .iob:
             soundFile = .alertToneRingtone1
-        case .bolus:
-            soundFile = .dholShuffleloop
         case .cob:
             soundFile = .alertToneRingtone2
         case .high:
@@ -286,7 +284,7 @@ extension AlarmType {
         switch self {
         case .low, .high, .fastDrop, .fastRise, .missedReading, .temporary:
             return .glucose
-        case .iob, .bolus, .cob, .missedBolus, .recBolus:
+        case .iob, .cob, .missedBolus, .recBolus:
             return .insulin
         case .battery, .batteryDrop, .pump, .pumpChange,
              .sensorChange, .notLooping, .buildExpire:
@@ -303,7 +301,7 @@ extension AlarmType {
         case .fastDrop: return "chevron.down.2"
         case .fastRise: return "chevron.up.2"
         case .missedReading: return "wifi.slash"
-        case .iob, .bolus: return "syringe"
+        case .iob: return "syringe"
         case .cob: return "fork.knife"
         case .missedBolus: return "exclamationmark.arrow.triangle.2.circlepath"
         case .recBolus: return "bolt.horizontal"
@@ -330,7 +328,6 @@ extension AlarmType {
         case .fastRise: return "Rapid upward BG trend."
         case .missedReading: return "No CGM data for X minutes."
         case .iob: return "High insulin-on-board."
-        case .bolus: return "Large individual bolus."
         case .cob: return "High carbs-on-board."
         case .missedBolus: return "Carbs without bolus."
         case .recBolus: return "Recommended bolus issued."

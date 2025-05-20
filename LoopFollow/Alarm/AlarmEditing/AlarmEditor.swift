@@ -80,9 +80,6 @@ struct AlarmEditor: View {
             BatteryDropAlarmEditor(alarm: $alarm)
         case .missedBolus:
             MissedBolusAlarmEditor(alarm: $alarm)
-        case .bolus:
-            // TODO:
-            MissedBolusAlarmEditor(alarm: $alarm)
         }
     }
 }

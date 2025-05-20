@@ -9,7 +9,6 @@ import Foundation
 enum AlarmType: String, CaseIterable, Codable {
     case temporary = "Temporary Alert"
     case iob = "IOB Alert"
-    case bolus = "Bolus Alert"
     case cob = "COB Alert"
     case low = "Low BG Alert"
     case high = "High BG Alert"
