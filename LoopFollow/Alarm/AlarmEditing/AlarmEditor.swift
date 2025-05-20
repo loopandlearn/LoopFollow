@@ -2,13 +2,6 @@
 // AlarmEditor.swift
 // Created by Jonas Björkert on 2025-04-26.
 
-//
-//  AlarmEditor.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-04-21.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
 import SwiftUI
 
 struct AlarmEditor: View {
@@ -81,6 +74,8 @@ struct AlarmEditor: View {
             PumpVolumeAlarmEditor(alarm: $alarm)
         case .iob:
             IOBAlarmEditor(alarm: $alarm)
+        case .battery:
+            BatteryAlarmEditor(alarm: $alarm)
         /* TODO: add other condition types here */
         default:
             Text("No editor for \(alarm.type.rawValue)")
