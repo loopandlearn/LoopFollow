@@ -19,10 +19,11 @@ struct RecBolusAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Threshold",
-                footer: "Alert when recommended bolus ≥ this value.",
-                title: "Units",
+                footer: "Alert when recommended bolus is above this value.",
+                title: "More than",
                 range: 0.1 ... 50,
                 step: 0.1,
+                unitLabel: "Units",
                 value: Binding(
                     get: { alarm.threshold ?? 1.0 },
                     set: { alarm.threshold = $0 }

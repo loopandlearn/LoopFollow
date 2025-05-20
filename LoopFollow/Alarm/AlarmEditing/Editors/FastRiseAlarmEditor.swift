@@ -20,8 +20,8 @@ struct FastRiseAlarmEditor: View {
 
             AlarmBGSection(
                 header: "Rate of Rise",
-                footer: "How much the BG must rise to count as a “fast” rise.",
-                title: "Rise per reading",
+                footer: "This is how much the glucose must rise to be considered a fast rise.",
+                title: "Rises by",
                 range: 3 ... 20,
                 value: Binding(
                     get: { alarm.delta ?? 3 },

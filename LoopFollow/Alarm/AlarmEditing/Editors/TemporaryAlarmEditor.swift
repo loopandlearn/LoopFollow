@@ -23,7 +23,7 @@ struct TemporaryAlarmEditor: View {
                 header: "Low Limit",
                 footer: "Alert if BG is equal to or below this value.",
                 toggleText: "Enable low limit",
-                pickerTitle: "≤ BG",
+                pickerTitle: "Below",
                 range: bgRange,
                 value: $alarm.belowBG
             )
@@ -32,7 +32,7 @@ struct TemporaryAlarmEditor: View {
                 header: "High Limit",
                 footer: "Alert if BG is equal to or above this value.",
                 toggleText: "Enable high limit",
-                pickerTitle: "≥ BG",
+                pickerTitle: "Above",
                 range: bgRange,
                 value: $alarm.aboveBG
             )

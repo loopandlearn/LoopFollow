@@ -17,10 +17,10 @@ struct SensorAgeAlarmEditor: View {
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmStepperSection(
-                header: "Advance warning",
+                header: "Early Reminder",
                 footer: "Number of hours before the 10-day mark that the alert " +
                     "will fire.",
-                title: "Hours",
+                title: "Reminder Time",
                 range: 1 ... 24,
                 step: 1,
                 unitLabel: "hours",

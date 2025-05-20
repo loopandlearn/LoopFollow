@@ -2,13 +2,6 @@
 // IOBAlarmEditor.swift
 // Created by Jonas Björkert on 2025-05-19.
 
-//
-//  IOBAlarmEditor.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-17.
-//
-
 import SwiftUI
 
 struct IOBAlarmEditor: View {
@@ -24,52 +17,52 @@ struct IOBAlarmEditor: View {
 
             AlarmGeneralSection(alarm: $alarm)
 
-            // ── individual bolus size ──
             AlarmStepperSection(
-                header: "Bolus Size",
-                footer: "Only boluses equal to or larger than this are counted.",
-                title: "Bolus ≥",
+                header: "Boluses Size Limit",
+                footer: "This counts only boluses larger than this size.",
+                title: "Above",
                 range: 0.1 ... 20,
                 step: 0.1,
+                unitLabel: "Units",
                 value: Binding(
                     get: { alarm.delta ?? 1.0 },
                     set: { alarm.delta = $0 }
                 )
             )
 
-            // ── number of boluses ──
             AlarmStepperSection(
                 header: "Bolus Count",
                 footer: "Number of qualifying boluses needed to trigger.",
-                title: "Count ≥",
+                title: "Count",
                 range: 1 ... 10,
                 step: 1,
+                unitLabel: "Boluses",
                 value: Binding(
                     get: { Double(alarm.monitoringWindow ?? 2) },
                     set: { alarm.monitoringWindow = Int($0) }
                 )
             )
 
-            // ── look-back window ──
             AlarmStepperSection(
                 header: "Time Window",
                 footer: "How far back to look for those boluses.",
-                title: "Minutes",
+                title: "Time",
                 range: 5 ... 120,
                 step: 5,
+                unitLabel: "min",
                 value: Binding(
                     get: { Double(alarm.predictiveMinutes ?? 30) },
                     set: { alarm.predictiveMinutes = Int($0) }
                 )
             )
 
-            // ── absolute IOB limit ──
             AlarmStepperSection(
-                header: "Total IOB",
+                header: "Insulin On Board",
                 footer: "Alert if current IOB or total boluses reach this.",
-                title: "IOB ≥",
+                title: "IOB Above",
                 range: 1 ... 20,
                 step: 0.5,
+                unitLabel: "Units",
                 value: Binding(
                     get: { alarm.threshold ?? 6 },
                     set: { alarm.threshold = $0 }
