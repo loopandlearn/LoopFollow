@@ -33,7 +33,6 @@ class AlarmManager {
             IOBCondition.self,
             BatteryCondition.self,
             BatteryDropCondition.self,
-            // TODO: add other condition types here
         ]
     ) {
         var dict = [AlarmType: AlarmCondition]()

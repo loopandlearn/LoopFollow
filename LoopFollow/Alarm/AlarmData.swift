@@ -22,8 +22,5 @@ struct AlarmData: Codable {
     let recentBoluses: [BolusEntry]
     let latestBattery: Double?
     let batteryHistory: [DataStructs.batteryStruct]
+    let recentCarbs: [CarbSample]
 }
-
-/*
- //    let latestCarbs: [CarbEntry]
- */

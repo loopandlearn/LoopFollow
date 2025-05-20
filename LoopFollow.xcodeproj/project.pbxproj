@@ -165,6 +165,9 @@
 		DDCC3A4D2DDBB77C006F1C10 /* BatteryAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A4C2DDBB77C006F1C10 /* BatteryAlarmEditor.swift */; };
 		DDCC3A4F2DDC5B54006F1C10 /* BatteryDropCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A4E2DDC5B54006F1C10 /* BatteryDropCondition.swift */; };
 		DDCC3A542DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A532DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift */; };
+		DDCC3A562DDC9617006F1C10 /* MissedBolusCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A552DDC9617006F1C10 /* MissedBolusCondition.swift */; };
+		DDCC3A582DDC9655006F1C10 /* MissedBolusAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A572DDC9655006F1C10 /* MissedBolusAlarmEditor.swift */; };
+		DDCC3A5A2DDC988F006F1C10 /* CarbSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A592DDC988F006F1C10 /* CarbSample.swift */; };
 		DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979324C0D380002C9752 /* UIViewExtension.swift */; };
 		DDCF979624C1443C002C9752 /* GeneralSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */; };
 		DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */; };
@@ -524,6 +527,9 @@
 		DDCC3A4C2DDBB77C006F1C10 /* BatteryAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryAlarmEditor.swift; sourceTree = "<group>"; };
 		DDCC3A4E2DDC5B54006F1C10 /* BatteryDropCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryDropCondition.swift; sourceTree = "<group>"; };
 		DDCC3A532DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryDropAlarmEditor.swift; sourceTree = "<group>"; };
+		DDCC3A552DDC9617006F1C10 /* MissedBolusCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissedBolusCondition.swift; sourceTree = "<group>"; };
+		DDCC3A572DDC9655006F1C10 /* MissedBolusAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissedBolusAlarmEditor.swift; sourceTree = "<group>"; };
+		DDCC3A592DDC988F006F1C10 /* CarbSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbSample.swift; sourceTree = "<group>"; };
 		DDCF979324C0D380002C9752 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
 		DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsViewController.swift; sourceTree = "<group>"; };
@@ -760,6 +766,7 @@
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
 			isa = PBXGroup;
 			children = (
+				DDCC3A552DDC9617006F1C10 /* MissedBolusCondition.swift */,
 				DDCC3A4E2DDC5B54006F1C10 /* BatteryDropCondition.swift */,
 				DDCC3A4A2DDBB5E4006F1C10 /* BatteryCondition.swift */,
 				DDB9FC7A2DDB573F00EFAA76 /* IOBCondition.swift */,
@@ -1036,6 +1043,7 @@
 		DDC7E53F2DBD8A1600EB1127 /* Editors */ = {
 			isa = PBXGroup;
 			children = (
+				DDCC3A572DDC9655006F1C10 /* MissedBolusAlarmEditor.swift */,
 				DDCC3A532DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift */,
 				DDCC3A4C2DDBB77C006F1C10 /* BatteryAlarmEditor.swift */,
 				DDB9FC7C2DDB575300EFAA76 /* IOBAlarmEditor.swift */,
@@ -1085,6 +1093,7 @@
 		DDCC3A502DDC5BD4006F1C10 /* DataStructs */ = {
 			isa = PBXGroup;
 			children = (
+				DDCC3A592DDC988F006F1C10 /* CarbSample.swift */,
 				DDB9FC7E2DDB584500EFAA76 /* BolusEntry.swift */,
 				DD5DA27B2DC930D6003D44FC /* GlucoseValue.swift */,
 			);
@@ -1830,6 +1839,7 @@
 				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
 				DDB9FC7B2DDB573F00EFAA76 /* IOBCondition.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
+				DDCC3A5A2DDC988F006F1C10 /* CarbSample.swift in Sources */,
 				DD0650F12DCE9A9E004D3B41 /* MissedReadingCondition.swift in Sources */,
 				DDC6CA4B2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift in Sources */,
 				DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */,
@@ -1841,6 +1851,7 @@
 				DD0650F92DCFE7BE004D3B41 /* FastDropAlarmEditor.swift in Sources */,
 				DD5817172D2710E90041FB98 /* BLEDeviceSelectionView.swift in Sources */,
 				FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */,
+				DDCC3A562DDC9617006F1C10 /* MissedBolusCondition.swift in Sources */,
 				DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */,
 				DDB0AF522BB1A8BE00AFA48B /* BuildDetails.swift in Sources */,
 				DDA9ACAA2D6A6B8300E6F1A9 /* ContactIncludeOption.swift in Sources */,
@@ -1996,6 +2007,7 @@
 				DD493ADD2ACF21E0009A6922 /* Basals.swift in Sources */,
 				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
+				DDCC3A582DDC9655006F1C10 /* MissedBolusAlarmEditor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
