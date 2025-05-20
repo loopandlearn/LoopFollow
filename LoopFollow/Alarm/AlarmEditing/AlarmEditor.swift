@@ -33,6 +33,7 @@ struct AlarmEditor: View {
                     }
                 }
         }
+        .preferredColorScheme(UserDefaultsRepository.forceDarkMode.value ? .dark : nil)
     }
 
     @ViewBuilder

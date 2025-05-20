@@ -41,6 +41,7 @@ struct AddAlarmSheet: View {
                 }
             }
         }
+        .preferredColorScheme(UserDefaultsRepository.forceDarkMode.value ? .dark : nil)
     }
 }
 
