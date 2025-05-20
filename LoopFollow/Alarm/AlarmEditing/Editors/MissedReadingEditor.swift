@@ -9,11 +9,12 @@ struct MissedReadingEditor: View {
 
     var body: some View {
         Form {
-            InfoBanner(text: "The app notifies you when no CGM reading has been received for the time you choose below.", alarmType: alarm.type)
+            InfoBanner(text: "This warns you if the glucose monitor stops sending readings for too long..", alarmType: alarm.type)
 
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmStepperSection(
+                header: "Reading Delay",
                 footer: "Choose how long the app should wait before alerting.",
                 title: "No reading for",
                 range: 11 ... 121,

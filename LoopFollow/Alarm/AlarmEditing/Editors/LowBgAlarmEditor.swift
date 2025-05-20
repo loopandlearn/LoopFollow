@@ -9,14 +9,13 @@ struct LowBgAlarmEditor: View {
 
     var body: some View {
         Form {
-            InfoBanner(text: "Alerts when your current CGM value — "
-                + "or any predicted value within the look-ahead window — "
-                + "falls at or below the threshold you set.")
+            InfoBanner(text: "This warns you if the glucose is too low now or might be soon, based on predictions. Note: predictions is currently not available for Trio.")
 
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmBGSection(
-                header: "Threshold",
+                header: "Low Limit",
+                footer: "Alert when any reading or prediction is at or below this value.",
                 title: "BG",
                 range: 40 ... 150,
                 value: Binding(

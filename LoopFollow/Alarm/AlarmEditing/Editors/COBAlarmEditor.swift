@@ -17,9 +17,9 @@ struct COBAlarmEditor: View {
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmStepperSection(
-                header: "Threshold",
-                footer: "Alert when COB ≥ this many grams.",
-                title: "COB",
+                header: "Carbs on Board Limit",
+                footer: "Alert when carbs-on-board is above this number.",
+                title: "Above",
                 range: 1 ... 200,
                 step: 1,
                 unitLabel: "g",

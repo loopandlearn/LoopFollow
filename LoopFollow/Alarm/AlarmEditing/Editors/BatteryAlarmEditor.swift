@@ -10,8 +10,7 @@ struct BatteryAlarmEditor: View {
     var body: some View {
         Form {
             InfoBanner(
-                text: "Alerts when the phone battery drops below the "
-                    + "percentage you set below.",
+                text: "This warns you when the phone’s battery gets low, based on the percentage you choose.",
                 alarmType: alarm.type
             )
 
@@ -19,8 +18,8 @@ struct BatteryAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Battery Level",
-                footer: "Alert when remaining charge is equal to or below this.",
-                title: "Level ≤",
+                footer: "This alerts you when the battery drops below this level.",
+                title: "Battery Below",
                 range: 0 ... 100,
                 step: 5,
                 unitLabel: "%",
@@ -32,9 +31,7 @@ struct BatteryAlarmEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
-            AlarmSnoozeSection(alarm: $alarm,
-                               range: 1 ... 24,
-                               step: 1)
+            AlarmSnoozeSection(alarm: $alarm, range: 1 ... 24, step: 1)
         }
         .navigationTitle(alarm.type.rawValue)
     }

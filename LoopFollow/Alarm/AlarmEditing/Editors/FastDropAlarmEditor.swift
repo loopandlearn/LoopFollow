@@ -18,8 +18,8 @@ struct FastDropAlarmEditor: View {
 
             AlarmBGSection(
                 header: "Rate of Fall",
-                footer: "How much the bg must fall to count as a “fast” drop.",
-                title: "Drop per reading",
+                footer: "This is how much the glucose must drop to be considered a fast drop.",
+                title: "Falls by",
                 range: 3 ... 20,
                 value: Binding(
                     get: { alarm.delta ?? 18 },
@@ -31,7 +31,7 @@ struct FastDropAlarmEditor: View {
             AlarmStepperSection(
                 header: "Consecutive Drops",
                 footer: "Number of drops—each meeting the rate above—required before an alert fires.",
-                title: "Drops in a row",
+                title: "Number of Drops",
                 range: 1 ... 3,
                 step: 1,
                 value: Binding(

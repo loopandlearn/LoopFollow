@@ -10,17 +10,16 @@ struct BatteryDropAlarmEditor: View {
     var body: some View {
         Form {
             InfoBanner(
-                text: "Alerts when the phone battery falls by a specified "
-                    + "percentage within a set time window.",
+                text: "This warns you if your phone’s battery drops quickly, based on the percentage and time you set.",
                 alarmType: alarm.type
             )
 
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmStepperSection(
-                header: "Drop Amount",
-                footer: "Trigger when charge falls by at least this much.",
-                title: "Δ %",
+                header: "Battery Drop",
+                footer: "This alerts you if the battery drops by this much or more.",
+                title: "Drop Amount",
                 range: 5 ... 100,
                 step: 5,
                 unitLabel: "%",
@@ -31,11 +30,12 @@ struct BatteryDropAlarmEditor: View {
             )
 
             AlarmStepperSection(
-                header: "Time Window",
+                header: "Over This Time",
                 footer: "How far back to look for that drop.",
-                title: "Minutes",
+                title: "Time Window",
                 range: 5 ... 30,
                 step: 5,
+                unitLabel: "min",
                 value: Binding(
                     get: { Double(alarm.monitoringWindow ?? 15) },
                     set: { alarm.monitoringWindow = Int($0) }

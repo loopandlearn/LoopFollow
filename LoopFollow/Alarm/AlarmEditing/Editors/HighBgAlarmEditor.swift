@@ -10,15 +10,15 @@ struct HighBgAlarmEditor: View {
     var body: some View {
         Form {
             InfoBanner(
-                text: "Alerts when your CGM glucose stays above the limit "
+                text: "Alerts when glucose stays above the limit "
                     + "you set below. Use Persistent if you want to ignore brief spikes."
             )
 
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmBGSection(
-                header: "Threshold",
-                footer: "The alarm becomes eligible once any reading is ≥ this value.",
+                header: "High Glucose Limit",
+                footer: "The alert becomes eligible once any reading is at or above this value.",
                 title: "BG",
                 range: 120 ... 350,
                 value: Binding(

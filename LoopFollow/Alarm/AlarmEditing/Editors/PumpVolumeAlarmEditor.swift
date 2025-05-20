@@ -2,13 +2,6 @@
 // PumpVolumeAlarmEditor.swift
 // Created by Jonas Björkert on 2025-05-17.
 
-//
-//  PumpVolumeAlarmEditor.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-17.
-//
-
 import SwiftUI
 
 struct PumpVolumeAlarmEditor: View {
@@ -17,8 +10,7 @@ struct PumpVolumeAlarmEditor: View {
     var body: some View {
         Form {
             InfoBanner(
-                text: "Alerts when the pump reservoir falls to or below the "
-                    + "unit level you set below.",
+                text: "This warns you when the insulin pump is running low on insulin.",
                 alarmType: alarm.type
             )
 
@@ -28,9 +20,10 @@ struct PumpVolumeAlarmEditor: View {
                 header: "Trigger Level",
                 footer: "An alert fires once the reservoir is at this value "
                     + "or lower.",
-                title: "Units ≤",
+                title: "Reservoir Below",
                 range: 1 ... 50,
                 step: 1,
+                unitLabel: "Units",
                 value: Binding(
                     get: { alarm.threshold ?? 20 },
                     set: { alarm.threshold = $0 }

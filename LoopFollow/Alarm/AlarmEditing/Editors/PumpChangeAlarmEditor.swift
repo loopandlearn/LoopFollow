@@ -2,13 +2,6 @@
 // PumpChangeAlarmEditor.swift
 // Created by Jonas Björkert on 2025-05-17.
 
-//
-//  PumpChangeAlarmEditor.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-05-17.
-//
-
 import SwiftUI
 
 struct PumpChangeAlarmEditor: View {
@@ -17,9 +10,9 @@ struct PumpChangeAlarmEditor: View {
     var body: some View {
         Form {
             InfoBanner(
-                text: "Alerts once when your pump / cannula is within the time "
+                text: "Alerts when the pump / cannula is within the time "
                     + "window you choose below (relative to the 3-day change "
-                    + "limit).  After it fires once it disables itself.",
+                    + "limit).",
                 alarmType: alarm.type
             )
 
@@ -27,12 +20,11 @@ struct PumpChangeAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Advance Notice",
-                footer: "How many hours before the 3-day limit the alert "
-                    + "should fire.  Set to 12 hours, for example, to get a "
-                    + "reminder half a day in advance.",
-                title: "Warn hours",
+                footer: "How many hours before the 3-day limit you’d like a reminder.",
+                title: "Warning Time",
                 range: 1 ... 24,
                 step: 1,
+                unitLabel: "Hours",
                 value: Binding(
                     get: { alarm.threshold ?? 12 },
                     set: { alarm.threshold = $0 }
