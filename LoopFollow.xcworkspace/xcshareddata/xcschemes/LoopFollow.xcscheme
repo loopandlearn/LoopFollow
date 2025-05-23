@@ -34,9 +34,20 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DD0247602DB2EB9A00FCADF6"
+               BlueprintIdentifier = "DDCC3AC62DDE1531006F1C10"
                BuildableName = "LoopFollowTests.xctest"
                BlueprintName = "LoopFollowTests"
+               ReferencedContainer = "container:LoopFollow.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DDCC3AD52DDE1790006F1C10"
+               BuildableName = "Tests.xctest"
+               BlueprintName = "Tests"
                ReferencedContainer = "container:LoopFollow.xcodeproj">
             </BuildableReference>
          </TestableReference>
