@@ -32,11 +32,7 @@ struct COBAlarmEditor: View {
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
 
-            AlarmSnoozeSection(
-                alarm: $alarm,
-                range: 1 ... 6,
-                step: 1
-            )
+            AlarmSnoozeSection(alarm: $alarm)
         }
         .navigationTitle(alarm.type.rawValue)
     }

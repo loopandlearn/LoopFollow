@@ -4,27 +4,6 @@
 
 import Foundation
 
-extension AlarmType {
-    /// What “unit” we use for snoozeDuration for this alarmType.
-    var snoozeTimeUnit: TimeUnit {
-        switch self {
-        case .buildExpire:
-            return .day
-        case .low, .high, .fastDrop, .fastRise,
-             .missedReading, .notLooping, .missedBolus,
-             .recBolus,
-             .overrideStart, .overrideEnd, .tempTargetStart,
-             .tempTargetEnd:
-            return .minute
-        case .battery, .batteryDrop, .sensorChange, .pumpChange, .cob, .iob,
-             .pump:
-            return .hour
-        case .temporary:
-            return .none
-        }
-    }
-}
-
 enum TimeUnit {
     case minute, hour, day, none
 

@@ -43,11 +43,7 @@ struct HighBgAlarmEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
-            AlarmSnoozeSection(
-                alarm: $alarm,
-                range: 10 ... 120,
-                step: 5
-            )
+            AlarmSnoozeSection(alarm: $alarm)
         }
         .navigationTitle(alarm.type.rawValue)
     }

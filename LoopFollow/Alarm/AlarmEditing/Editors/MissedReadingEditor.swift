@@ -28,11 +28,7 @@ struct MissedReadingEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
-            AlarmSnoozeSection(
-                alarm: $alarm,
-                range: 10 ... 180,
-                step: 5
-            )
+            AlarmSnoozeSection(alarm: $alarm)
         }
         .navigationTitle(alarm.type.rawValue)
     }
