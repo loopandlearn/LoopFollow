@@ -268,6 +268,9 @@ struct Alarm: Identifiable, Codable, Equatable {
             repeatSoundOption = .never
         case .temporary:
             soundFile = .indeed
+            snoozeDuration = 0
+            aboveBG = 180
+            belowBG = 70
         }
     }
 }

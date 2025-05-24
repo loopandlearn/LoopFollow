@@ -27,6 +27,9 @@ final class SnoozerViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+        if let alarm = activeAlarm {
+            snoozeUnits = alarm.snoozeDuration
+        }
     }
 
     func snoozeTapped() {

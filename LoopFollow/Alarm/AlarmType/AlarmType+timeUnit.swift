@@ -14,17 +14,19 @@ extension AlarmType {
              .missedReading, .notLooping, .missedBolus,
              .recBolus,
              .overrideStart, .overrideEnd, .tempTargetStart,
-             .tempTargetEnd, .temporary:
+             .tempTargetEnd:
             return .minute
         case .battery, .batteryDrop, .sensorChange, .pumpChange, .cob, .iob,
              .pump:
             return .hour
+        case .temporary:
+            return .none
         }
     }
 }
 
 enum TimeUnit {
-    case minute, hour, day
+    case minute, hour, day, none
 
     /// How many seconds in one “unit”
     var seconds: TimeInterval {
@@ -32,6 +34,7 @@ enum TimeUnit {
         case .minute: return 60
         case .hour: return 60 * 60
         case .day: return 60 * 60 * 24
+        case .none: return 0
         }
     }
 
@@ -41,6 +44,7 @@ enum TimeUnit {
         case .minute: return "min"
         case .hour: return "hours"
         case .day: return "days"
+        case .none: return "none"
         }
     }
 }
