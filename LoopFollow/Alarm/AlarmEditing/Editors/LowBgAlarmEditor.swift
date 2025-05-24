@@ -55,11 +55,7 @@ struct LowBgAlarmEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
-            AlarmSnoozeSection(
-                alarm: $alarm,
-                range: 5 ... 30,
-                step: 5
-            )
+            AlarmSnoozeSection(alarm: $alarm)
         }
         .navigationTitle(alarm.type.rawValue)
     }

@@ -18,7 +18,7 @@ struct OverrideStartAlarmEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm, hideRepeat: true)
-            AlarmSnoozeSection(alarm: $alarm, range: 0 ... 60, step: 5)
+            AlarmSnoozeSection(alarm: $alarm)
         }
         .navigationTitle(alarm.type.rawValue)
     }

@@ -6,8 +6,6 @@ import SwiftUI
 
 struct AlarmSnoozeSection: View {
     @Binding var alarm: Alarm
-    let range: ClosedRange<Int>
-    let step: Int
 
     private var unitLabel: String { alarm.type.snoozeTimeUnit.label }
 
@@ -44,15 +42,15 @@ struct AlarmSnoozeSection: View {
             footer: Text(
                 """
                 “Default Snooze” controls the default value for how long the alert stays quiet after you press Snooze. \
-                \(range.contains(0) ? "A snooze duration of 0 means the alarm is acknowledged (silenced), and will alert again next time the condition applies, without time limitation. " : "")\
+                "A snooze duration of 0 means the alarm is acknowledged (silenced), and will alert again next time the condition applies, without time limitation. " \
                 Toggle “Snoozed” to mute this alarm right now.
                 """
             )
         ) {
             Stepper(
                 value: defaultSnoozeBinding,
-                in: range,
-                step: step
+                in: alarm.type.snoozeRange,
+                step: alarm.type.snoozeStep
             ) {
                 HStack {
                     Text("Default Snooze:")

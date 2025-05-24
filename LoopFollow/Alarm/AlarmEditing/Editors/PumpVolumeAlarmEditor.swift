@@ -32,9 +32,7 @@ struct PumpVolumeAlarmEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
-            AlarmSnoozeSection(alarm: $alarm,
-                               range: 1 ... 24,
-                               step: 1)
+            AlarmSnoozeSection(alarm: $alarm)
         }
         .navigationTitle(alarm.type.rawValue)
     }

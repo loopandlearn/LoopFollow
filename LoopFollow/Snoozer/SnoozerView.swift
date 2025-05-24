@@ -104,9 +104,8 @@ struct SnoozerView: View {
                             }
                             Spacer()
                             Stepper("", value: $vm.snoozeUnits,
-                                    in: 1 ... (alarm.type.snoozeTimeUnit == .day ? 30 :
-                                        alarm.type.snoozeTimeUnit == .hour ? 24 : 60),
-                                    step: alarm.type.snoozeTimeUnit == .minute ? 5 : 1)
+                                    in: alarm.type.snoozeRange,
+                                    step: alarm.type.snoozeStep)
                                 .labelsHidden()
                         }
                         .padding(.horizontal, 24)

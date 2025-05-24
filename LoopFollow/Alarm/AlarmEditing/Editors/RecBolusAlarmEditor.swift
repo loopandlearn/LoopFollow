@@ -32,7 +32,7 @@ struct RecBolusAlarmEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
-            AlarmSnoozeSection(alarm: $alarm, range: 5 ... 60, step: 5)
+            AlarmSnoozeSection(alarm: $alarm)
         }
         .navigationTitle(alarm.type.rawValue)
     }
