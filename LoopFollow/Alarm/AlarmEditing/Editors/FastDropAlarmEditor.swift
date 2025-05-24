@@ -20,7 +20,7 @@ struct FastDropAlarmEditor: View {
                 header: "Rate of Fall",
                 footer: "This is how much the glucose must drop to be considered a fast drop.",
                 title: "Falls by",
-                range: 3 ... 20,
+                range: 3 ... 54,
                 value: Binding(
                     get: { alarm.delta ?? 18 },
                     set: { alarm.delta = $0 }
