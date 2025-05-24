@@ -15,7 +15,7 @@ struct TempTargetStartAlarmEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm, hideRepeat: true)
-            AlarmSnoozeSection(alarm: $alarm, range: 10 ... 60, step: 5)
+            AlarmSnoozeSection(alarm: $alarm, range: 0 ... 60, step: 5)
         }
         .navigationTitle(alarm.type.rawValue)
     }

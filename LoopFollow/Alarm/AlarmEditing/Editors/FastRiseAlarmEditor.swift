@@ -54,7 +54,7 @@ struct FastRiseAlarmEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
-            AlarmSnoozeSection(alarm: $alarm, range: 5 ... 60, step: 5)
+            AlarmSnoozeSection(alarm: $alarm, range: 0 ... 60, step: 5)
         }
         .navigationTitle(alarm.type.rawValue)
     }

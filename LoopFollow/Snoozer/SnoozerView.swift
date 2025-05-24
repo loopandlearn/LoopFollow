@@ -94,24 +94,26 @@ struct SnoozerView: View {
                     Divider()
 
                     // snooze controls
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Snooze for")
-                                .font(.headline)
-                            Text("\(vm.snoozeUnits) \(vm.timeUnitLabel)")
-                                .font(.title3).bold()
+                    if alarm.type.snoozeTimeUnit != .none {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Snooze for")
+                                    .font(.headline)
+                                Text("\(vm.snoozeUnits) \(vm.timeUnitLabel)")
+                                    .font(.title3).bold()
+                            }
+                            Spacer()
+                            Stepper("", value: $vm.snoozeUnits,
+                                    in: 1 ... (alarm.type.snoozeTimeUnit == .day ? 30 :
+                                        alarm.type.snoozeTimeUnit == .hour ? 24 : 60),
+                                    step: alarm.type.snoozeTimeUnit == .minute ? 5 : 1)
+                                .labelsHidden()
                         }
-                        Spacer()
-                        Stepper("", value: $vm.snoozeUnits,
-                                in: 1 ... (alarm.type.snoozeTimeUnit == .day ? 30 :
-                                    alarm.type.snoozeTimeUnit == .hour ? 24 : 60),
-                                step: alarm.type.snoozeTimeUnit == .minute ? 5 : 1)
-                            .labelsHidden()
+                        .padding(.horizontal, 24)
                     }
-                    .padding(.horizontal, 24)
 
                     Button(action: vm.snoozeTapped) {
-                        Text("Snooze")
+                        Text(vm.snoozeUnits == 0 ? "Acknowledge" : "Snooze")
                             .font(.title2).bold()
                             .frame(maxWidth: .infinity, minHeight: 50)
                             .background(Color.accentColor)

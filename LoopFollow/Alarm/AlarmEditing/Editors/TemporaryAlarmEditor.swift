@@ -37,7 +37,6 @@ struct TemporaryAlarmEditor: View {
                 value: $alarm.aboveBG
             )
 
-            // Validation: ensure at least one limit is on
             if alarm.belowBG == nil && alarm.aboveBG == nil {
                 Text("⚠️ Please enable at least one limit.")
                     .foregroundColor(.red)
@@ -45,7 +44,6 @@ struct TemporaryAlarmEditor: View {
 
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
-            AlarmSnoozeSection(alarm: $alarm, range: 5 ... 60, step: 5)
         }
         .navigationTitle(alarm.type.rawValue)
     }

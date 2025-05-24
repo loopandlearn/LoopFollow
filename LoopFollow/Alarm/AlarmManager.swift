@@ -159,9 +159,11 @@ class AlarmManager {
         if let idx = alarms.firstIndex(where: { $0.id == alarmID }) {
             let alarm = alarms[idx]
             let units = snoozeUnits ?? alarm.snoozeDuration
-            let snoozeSeconds = Double(units) * alarm.type.snoozeTimeUnit.seconds
-            alarms[idx].snoozedUntil = Date().addingTimeInterval(snoozeSeconds)
-            Storage.shared.alarms.value = alarms
+            if units > 0 {
+                let snoozeSeconds = Double(units) * alarm.type.snoozeTimeUnit.seconds
+                alarms[idx].snoozedUntil = Date().addingTimeInterval(snoozeSeconds)
+                Storage.shared.alarms.value = alarms
+            }
             stopAlarm()
         }
     }
