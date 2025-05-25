@@ -15,10 +15,11 @@ extension MainViewController {
 
     func alarmTaskAction() {
         DispatchQueue.main.async {
-            let latestOverrideStart = self.overrideGraphData.last?.date
-            let latestOverrideEnd = self.overrideGraphData.last?.endDate
-            let latestTempTargetStart = self.tempTargetGraphData.last?.date
-            let latestTempTargetEnd = self.tempTargetGraphData.last?.endDate
+            let now = Date().timeIntervalSince1970
+            let latestOverrideStart = self.overrideGraphData.last { $0.date <= now }?.date
+            let latestOverrideEnd = self.overrideGraphData.last { $0.endDate <= now }?.endDate
+            let latestTempTargetStart = self.tempTargetGraphData.last { $0.date <= now }?.date
+            let latestTempTargetEnd = self.tempTargetGraphData.last { $0.endDate <= now }?.endDate
             let recBolus = UserDefaultsRepository.deviceRecBolus.value
             let COB = self.latestCOB?.value
             let sensorInsertedAt = UserDefaultsRepository.alertSageInsertTime.value
