@@ -467,31 +467,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // check the app state
         if let appState = appStateController {
             if appState.chartSettingsChanged {
-                // can look at settings flags to be more fine tuned
                 updateBGGraphSettings()
 
-                if ChartSettingsChangeEnum.smallGraphHeight.rawValue != 0 {
-                    smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
-                    view.layoutIfNeeded()
-                }
+                smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
+                view.layoutIfNeeded()
 
                 // reset the app state
                 appState.chartSettingsChanged = false
-                appState.chartSettingsChanges = 0
             }
-            if appState.generalSettingsChanged {
-                // reset the app state
-                appState.generalSettingsChanged = false
-                appState.generalSettingsChanges = 0
-            }
-            if appState.infoDataSettingsChanged {
-                infoTable.reloadData()
-
-                // reset
-                appState.infoDataSettingsChanged = false
-            }
-
-            // add more processing of the app state
         }
     }
 

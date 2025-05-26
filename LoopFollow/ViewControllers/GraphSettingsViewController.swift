@@ -79,7 +79,6 @@ class GraphSettingsViewController: FormViewController {
                 // tell main screen that grap needs updating
                 if let appState = self!.appStateController {
                     appState.chartSettingsChanged = true
-                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.showDotsChanged.rawValue
                 }
             }
             <<< SwitchRow("switchRowLines") { row in
@@ -94,7 +93,6 @@ class GraphSettingsViewController: FormViewController {
 
                 if let appState = self!.appStateController {
                     appState.chartSettingsChanged = true
-                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.showLinesChanged.rawValue
                 }
             }
             <<< SwitchRow("showValues") { row in
@@ -121,7 +119,6 @@ class GraphSettingsViewController: FormViewController {
                 // tell main screen that graph needs updating
                 if let appState = self!.appStateController {
                     appState.chartSettingsChanged = true
-                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.showDIALinesChanged.rawValue
                 }
             }
             <<< SwitchRow("show30MinLine") { row in
@@ -134,7 +131,6 @@ class GraphSettingsViewController: FormViewController {
                 // Tell the main screen that graph needs updating
                 if let appState = self!.appStateController {
                     appState.chartSettingsChanged = true
-                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.show30MinLineChanged.rawValue
                 }
             }
             <<< SwitchRow("show90MinLine") { row in
@@ -147,7 +143,6 @@ class GraphSettingsViewController: FormViewController {
                 // Tell the main screen that graph needs updating
                 if let appState = self!.appStateController {
                     appState.chartSettingsChanged = true
-                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.show90MinLineChanged.rawValue
                 }
             }
             <<< SwitchRow("smallGraphTreatments") { row in
@@ -173,7 +168,6 @@ class GraphSettingsViewController: FormViewController {
 
                 if let appState = self!.appStateController {
                     appState.chartSettingsChanged = true
-                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.smallGraphHeight.rawValue
                 }
             }
             <<< StepperRow("predictionToLoad") { row in
@@ -231,7 +225,6 @@ class GraphSettingsViewController: FormViewController {
                 // tell main screen to update
                 if let appState = self!.appStateController {
                     appState.chartSettingsChanged = true
-                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.lowLineChanged.rawValue
                 }
             }
             <<< StepperRow("highLine") { row in
@@ -254,7 +247,6 @@ class GraphSettingsViewController: FormViewController {
                 // let app state know of the change
                 if let appState = self!.appStateController {
                     appState.chartSettingsChanged = true
-                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.highLineChanged.rawValue
                 }
             }
             <<< StepperRow("downloadDays") { row in
@@ -282,7 +274,6 @@ class GraphSettingsViewController: FormViewController {
                 // tell main screen that graph needs updating
                 if let appState = self!.appStateController {
                     appState.chartSettingsChanged = true
-                    appState.chartSettingsChanges |= ChartSettingsChangeEnum.showMidnightLinesChanged.rawValue
                 }
             }
 
