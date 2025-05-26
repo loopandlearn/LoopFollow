@@ -176,5 +176,11 @@ extension Storage {
         moveFloatToDouble(UserDefaultsValue<Float>(key: "highLine", default: 180.0), into: highLine)
         move(UserDefaultsValue<Int>(key: "downloadDays", default: 1), into: downloadDays)
         // Remove this in a year later than the release of the new Alarms [END]
+
+        // ── Watch / Calendar ────────────────────────────────────────────────
+        move(UserDefaultsValue<Bool>(key: "writeCalendarEvent", default: false), into: writeCalendarEvent)
+        move(UserDefaultsValue<String>(key: "calendarIdentifier", default: ""), into: calendarIdentifier)
+        move(UserDefaultsValue<String>(key: "watchLine1", default: "%BG% %DIRECTION% %DELTA% %MINAGO%"), into: watchLine1)
+        move(UserDefaultsValue<String>(key: "watchLine2", default: "C:%COB% I:%IOB% B:%BASAL%"), into: watchLine2)
     }
 }

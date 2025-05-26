@@ -100,6 +100,13 @@ class Storage {
     var downloadDays = StorageValue<Int>(key: "downloadDays", defaultValue: 1)
     // Graph Settings [END]
 
+    // Calendar entries [BEGIN]
+    var writeCalendarEvent = StorageValue<Bool>(key: "writeCalendarEvent", defaultValue: false)
+    var calendarIdentifier = StorageValue<String>(key: "calendarIdentifier", defaultValue: "")
+    var watchLine1 = StorageValue<String>(key: "watchLine1", defaultValue: "%BG% %DIRECTION% %DELTA% %MINAGO%")
+    var watchLine2 = StorageValue<String>(key: "watchLine2", defaultValue: "C:%COB% I:%IOB% B:%BASAL%")
+    // Calendar entries [END]
+
     static let shared = Storage()
     private init() {}
 }
