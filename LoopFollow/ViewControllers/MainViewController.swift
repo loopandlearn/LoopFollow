@@ -587,7 +587,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         let direction = bgDirectionGraphic(bgData[bgData.count - 1].direction ?? "")
 
-        var eventStartDate = Date(timeIntervalSince1970: bgData[bgData.count - 1].date)
+        let eventStartDate = Date(timeIntervalSince1970: bgData[bgData.count - 1].date)
         var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
         var eventTitle = Storage.shared.watchLine1.value
         if Storage.shared.watchLine2.value.count > 1 {
@@ -621,12 +621,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal)
 
         // Delete Events from last 2 hours and 2 hours in future
-        var deleteStartDate = Date().addingTimeInterval(-60 * 60 * 2)
-        var deleteEndDate = Date().addingTimeInterval(60 * 60 * 2)
+        let deleteStartDate = Date().addingTimeInterval(-60 * 60 * 2)
+        let deleteEndDate = Date().addingTimeInterval(60 * 60 * 2)
         // guard solves for some ios upgrades removing the calendar
         guard let deleteCalendar = store.calendar(withIdentifier: Storage.shared.calendarIdentifier.value) as? EKCalendar else { return }
-        var predicate2 = store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
-        var eVDelete = store.events(matching: predicate2) as [EKEvent]?
+        let predicate2 = store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
+        let eVDelete = store.events(matching: predicate2) as [EKEvent]?
         if eVDelete != nil {
             for i in eVDelete! {
                 do {
@@ -638,7 +638,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
         // Write New Event
-        var event = EKEvent(eventStore: store)
+        let event = EKEvent(eventStore: store)
         event.title = eventTitle
         event.startDate = eventStartDate
         event.endDate = eventEndDate
@@ -649,7 +649,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
             lastCalDate = bgData[bgData.count - 1].date
         } catch {
-            LogManager.shared.log(category: .calendar, message: "Error storing to the calendar")
+            let msg = "Error storing to calendar: \(error.localizedDescription) (\(error))"
+            LogManager.shared.log(category: .calendar, message: msg)
         }
     }
 

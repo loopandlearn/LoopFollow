@@ -126,6 +126,7 @@
 		DD83164A2DE4C504004467AA /* SettingsStepperRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316492DE4C504004467AA /* SettingsStepperRow.swift */; };
 		DD83164C2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */; };
 		DD83164E2DE4E093004467AA /* WatchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164D2DE4E093004467AA /* WatchSettingsView.swift */; };
+		DD8316502DE4E635004467AA /* SettingsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164F2DE4E635004467AA /* SettingsMenuView.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
 		DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */; };
@@ -488,6 +489,7 @@
 		DD8316492DE4C504004467AA /* SettingsStepperRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStepperRow.swift; sourceTree = "<group>"; };
 		DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BinaryFloatingPoint+localized.swift"; sourceTree = "<group>"; };
 		DD83164D2DE4E093004467AA /* WatchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettingsView.swift; sourceTree = "<group>"; };
+		DD83164F2DE4E635004467AA /* SettingsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMenuView.swift; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
 		DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareClientExtension.swift; sourceTree = "<group>"; };
@@ -841,6 +843,7 @@
 		DD1A97122D429495000DDC11 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				DD83164F2DE4E635004467AA /* SettingsMenuView.swift */,
 				DD83164D2DE4E093004467AA /* WatchSettingsView.swift */,
 				DD8316452DE49B09004467AA /* GraphSettingsView.swift */,
 				DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */,
@@ -2005,6 +2008,7 @@
 				DD7F4C132DD51FD500D449E9 /* TempTargetEndCondition.swift in Sources */,
 				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
+				DD8316502DE4E635004467AA /* SettingsMenuView.swift in Sources */,
 				DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */,
 				DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */,
 				DD8316482DE49EE5004467AA /* Storage+Migrate.swift in Sources */,
