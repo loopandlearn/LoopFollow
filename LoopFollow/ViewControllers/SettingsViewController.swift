@@ -162,10 +162,14 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
                 $0.title = "Calendar"
                 $0.presentationMode = .show(
                     controllerProvider: .callback(builder: {
-                        let controller = WatchSettingsViewController()
-                        return controller
-                    }
-                    ), onDismiss: nil
+                        let host = UIHostingController(rootView: WatchSettingsView())
+                        host.modalPresentationStyle = .formSheet
+                        if Storage.shared.forceDarkMode.value {
+                            host.overrideUserInterfaceStyle = .dark
+                        }
+                        return host
+                    }),
+                    onDismiss: nil
                 )
             }
             <<< ButtonRow("contact") {

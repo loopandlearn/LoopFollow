@@ -14,8 +14,8 @@ extension MainViewController {
     }
 
     func calendarTaskAction() {
-        if UserDefaultsRepository.writeCalendarEvent.value,
-           !UserDefaultsRepository.calendarIdentifier.value.isEmpty
+        if Storage.shared.writeCalendarEvent.value,
+           !Storage.shared.calendarIdentifier.value.isEmpty
         {
             writeCalendar()
         }

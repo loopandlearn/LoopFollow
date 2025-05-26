@@ -559,7 +559,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     func processCalendarUpdates() {
-        if UserDefaultsRepository.calendarIdentifier.value == "" { return }
+        if Storage.shared.calendarIdentifier.value == "" { return }
 
         if bgData.count < 1 { return }
 
@@ -589,9 +589,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         var eventStartDate = Date(timeIntervalSince1970: bgData[bgData.count - 1].date)
         var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
-        var eventTitle = UserDefaultsRepository.watchLine1.value
-        if UserDefaultsRepository.watchLine2.value.count > 1 {
-            eventTitle += "\n" + UserDefaultsRepository.watchLine2.value
+        var eventTitle = Storage.shared.watchLine1.value
+        if Storage.shared.watchLine2.value.count > 1 {
+            eventTitle += "\n" + Storage.shared.watchLine2.value
         }
         eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)))
         eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
@@ -624,7 +624,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         var deleteStartDate = Date().addingTimeInterval(-60 * 60 * 2)
         var deleteEndDate = Date().addingTimeInterval(60 * 60 * 2)
         // guard solves for some ios upgrades removing the calendar
-        guard let deleteCalendar = store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value) as? EKCalendar else { return }
+        guard let deleteCalendar = store.calendar(withIdentifier: Storage.shared.calendarIdentifier.value) as? EKCalendar else { return }
         var predicate2 = store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
         var eVDelete = store.events(matching: predicate2) as [EKEvent]?
         if eVDelete != nil {
@@ -642,13 +642,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         event.title = eventTitle
         event.startDate = eventStartDate
         event.endDate = eventEndDate
-        event.calendar = store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
+        event.calendar = store.calendar(withIdentifier: Storage.shared.calendarIdentifier.value)
         do {
             try store.save(event, span: .thisEvent, commit: true)
             lastCalendarWriteAttemptTime = now
 
             lastCalDate = bgData[bgData.count - 1].date
-            // UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
         } catch {
             LogManager.shared.log(category: .calendar, message: "Error storing to the calendar")
         }
