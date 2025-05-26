@@ -102,8 +102,6 @@ class UserDefaultsRepository {
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
 
     static let dimScreenWhenIdle = UserDefaultsValue<Int>(key: "dimScreenWhenIdle", default: 0)
-    static let persistentNotification = UserDefaultsValue<Bool>(key: "persistentNotification", default: false)
-    static let persistentNotificationLastBGTime = UserDefaultsValue<TimeInterval>(key: "persistentNotificationLastBGTime", default: 0)
 
     // Advanced Settings
     // static let onlyDownloadBG = UserDefaultsValue<Bool>(key: "onlyDownloadBG", default: false)

@@ -787,16 +787,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
-    func persistentNotification(bgTime: TimeInterval) {
-        if UserDefaultsRepository.persistentNotification.value && bgTime > UserDefaultsRepository.persistentNotificationLastBGTime.value && bgData.count > 0 {
-            /* TODO:
-             guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-             snoozer.sendNotification(self, bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: Observable.shared.directionText.value, deltaVal: latestDeltaString, minAgoVal: Observable.shared.minAgoText.value, alertLabelVal: "Latest BG") */
-        }
-    }
-
-    // General Notifications
-
     func sendGeneralNotification(_: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
         let content = UNMutableNotificationContent()
         content.title = title
