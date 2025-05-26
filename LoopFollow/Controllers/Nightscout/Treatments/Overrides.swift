@@ -21,8 +21,8 @@ extension MainViewController {
         }
 
         let now = Date().timeIntervalSince1970
-        let maxEndDate = now + UserDefaultsRepository.predictionToLoad.value * 3600
-        let graphHorizon = dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * UserDefaultsRepository.downloadDays.value)
+        let maxEndDate = now + Storage.shared.predictionToLoad.value * 3600
+        let graphHorizon = dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * Storage.shared.downloadDays.value)
 
         for i in 0 ..< sorted.count {
             let e = sorted[i]

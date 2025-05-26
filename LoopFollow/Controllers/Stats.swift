@@ -27,9 +27,9 @@ class StatsData {
 
         for i in 0 ..< bgData.count {
             // Set low/range/high counts for pie chart and %'s
-            if Float(bgData[i].sgv) <= UserDefaultsRepository.lowLine.value {
+            if Double(bgData[i].sgv) <= Storage.shared.lowLine.value {
                 countLow += 1
-            } else if Float(bgData[i].sgv) >= UserDefaultsRepository.highLine.value {
+            } else if Double(bgData[i].sgv) >= Storage.shared.highLine.value {
                 countHigh += 1
             } else {
                 countRange += 1

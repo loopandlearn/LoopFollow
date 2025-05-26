@@ -43,8 +43,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     let speechSynthesizer = AVSpeechSynthesizer()
 
-    var appStateController: AppStateController?
-
     // Variables for BG Charts
     var firstGraphLoad: Bool = true
     var currentOverride = 1.0
@@ -89,8 +87,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
 
-    var topBG: Float = UserDefaultsRepository.minBGScale.value
-    var topPredictionBG: Float = UserDefaultsRepository.minBGScale.value
+    var topBG: Double = Storage.shared.minBGScale.value
+    var topPredictionBG: Double = Storage.shared.minBGScale.value
 
     var lastOverrideAlarm: TimeInterval = 0
 
@@ -125,116 +123,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             Storage.shared.remoteType.value = .none
         }
 
-        // Migration of UserDefaultsRepository -> Storage handling
-        if !UserDefaultsRepository.backgroundRefresh.value {
-            Storage.shared.backgroundRefreshType.value = .none
-            UserDefaultsRepository.backgroundRefresh.value = true
-        }
-
-        // Remove this in a year later than the release of the new Alarms [BEGIN]
-        let legacyColorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
-        if legacyColorBGText.exists {
-            Storage.shared.colorBGText.value = legacyColorBGText.value
-            legacyColorBGText.setNil(key: "colorBGText")
-        }
-
-        let legacyAppBadge = UserDefaultsValue<Bool>(key: "appBadge", default: true)
-        if legacyAppBadge.exists {
-            Storage.shared.appBadge.value = legacyAppBadge.value
-            legacyAppBadge.setNil(key: "appBadge")
-        }
-
-        let legacyForceDarkMode = UserDefaultsValue<Bool>(key: "forceDarkMode", default: true)
-        if legacyForceDarkMode.exists {
-            Storage.shared.forceDarkMode.value = legacyForceDarkMode.value
-            legacyForceDarkMode.setNil(key: "forceDarkMode")
-        }
-
-        let legacyShowStats = UserDefaultsValue<Bool>(key: "showStats", default: true)
-        if legacyShowStats.exists {
-            Storage.shared.showStats.value = legacyShowStats.value
-            legacyShowStats.setNil(key: "showStats")
-        }
-
-        let legacyUseIFCC = UserDefaultsValue<Bool>(key: "useIFCC", default: false)
-        if legacyUseIFCC.exists {
-            Storage.shared.useIFCC.value = legacyUseIFCC.value
-            legacyUseIFCC.setNil(key: "useIFCC")
-        }
-
-        let legacyShowSmallGraph = UserDefaultsValue<Bool>(key: "showSmallGraph", default: true)
-        if legacyShowSmallGraph.exists {
-            Storage.shared.showSmallGraph.value = legacyShowSmallGraph.value
-            legacyShowSmallGraph.setNil(key: "showSmallGraph")
-        }
-
-        let legacyScreenlockSwitchState = UserDefaultsValue<Bool>(key: "screenlockSwitchState", default: true)
-        if legacyScreenlockSwitchState.exists {
-            Storage.shared.screenlockSwitchState.value = legacyScreenlockSwitchState.value
-            legacyScreenlockSwitchState.setNil(key: "screenlockSwitchState")
-        }
-
-        let legacyShowDisplayName = UserDefaultsValue<Bool>(key: "showDisplayName", default: false)
-        if legacyShowDisplayName.exists {
-            Storage.shared.showDisplayName.value = legacyShowDisplayName.value
-            legacyShowDisplayName.setNil(key: "showDisplayName")
-        }
-
-        let legacySpeakBG = UserDefaultsValue<Bool>(key: "speakBG", default: false)
-        if legacySpeakBG.exists {
-            Storage.shared.speakBG.value = legacySpeakBG.value
-            legacySpeakBG.setNil(key: "speakBG")
-        }
-
-        let legacySpeakBGAlways = UserDefaultsValue<Bool>(key: "speakBGAlways", default: true)
-        if legacySpeakBGAlways.exists {
-            Storage.shared.speakBGAlways.value = legacySpeakBGAlways.value
-            legacySpeakBGAlways.setNil(key: "speakBGAlways")
-        }
-
-        let legacySpeakLowBG = UserDefaultsValue<Bool>(key: "speakLowBG", default: false)
-        if legacySpeakLowBG.exists {
-            Storage.shared.speakLowBG.value = legacySpeakLowBG.value
-            legacySpeakLowBG.setNil(key: "speakLowBG")
-        }
-
-        let legacySpeakProactiveLowBG = UserDefaultsValue<Bool>(key: "speakProactiveLowBG", default: false)
-        if legacySpeakProactiveLowBG.exists {
-            Storage.shared.speakProactiveLowBG.value = legacySpeakProactiveLowBG.value
-            legacySpeakProactiveLowBG.setNil(key: "speakProactiveLowBG")
-        }
-
-        let legacySpeakFastDropDelta = UserDefaultsValue<Float>(key: "speakFastDropDelta", default: 10.0)
-        if legacySpeakFastDropDelta.exists {
-            Storage.shared.speakFastDropDelta.value = Double(legacySpeakFastDropDelta.value)
-            legacySpeakFastDropDelta.setNil(key: "speakFastDropDelta")
-        }
-
-        let legacySpeakLowBGLimit = UserDefaultsValue<Float>(key: "speakLowBGLimit", default: 72.0)
-        if legacySpeakLowBGLimit.exists {
-            Storage.shared.speakLowBGLimit.value = Double(legacySpeakLowBGLimit.value)
-            legacySpeakLowBGLimit.setNil(key: "speakLowBGLimit")
-        }
-
-        let legacySpeakHighBGLimit = UserDefaultsValue<Float>(key: "speakHighBGLimit", default: 180.0)
-        if legacySpeakHighBGLimit.exists {
-            Storage.shared.speakHighBGLimit.value = Double(legacySpeakHighBGLimit.value)
-            legacySpeakHighBGLimit.setNil(key: "speakHighBGLimit")
-        }
-
-        let legacySpeakHighBG = UserDefaultsValue<Bool>(key: "speakHighBG", default: false)
-        if legacySpeakHighBG.exists {
-            Storage.shared.speakHighBG.value = legacySpeakHighBG.value
-            legacySpeakHighBG.setNil(key: "speakHighBG")
-        }
-
-        let legacySpeakLanguage = UserDefaultsValue<String>(key: "speakLanguage", default: "en")
-        if legacySpeakLanguage.exists {
-            Storage.shared.speakLanguage.value = legacySpeakLanguage.value
-            legacySpeakLanguage.setNil(key: "speakLanguage")
-        }
-
-        // Remove this in a year later than the release of the new Alarms [END]
+        Storage.shared.migrate()
 
         // Ensure alertNotLooping has a minimum value of 16.
         if UserDefaultsRepository.alertNotLooping.value < 16 {
@@ -252,7 +141,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         infoManager = InfoManager(tableView: infoTable)
 
-        smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
+        smallGraphHeightConstraint.constant = CGFloat(Storage.shared.smallGraphHeight.value)
         view.layoutIfNeeded()
 
         let shareUserName = UserDefaultsRepository.shareUserName.value
@@ -461,20 +350,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     override func viewWillAppear(_: Bool) {
-        // set screen lock
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
 
-        // check the app state
-        if let appState = appStateController {
-            if appState.chartSettingsChanged {
-                updateBGGraphSettings()
+        if Observable.shared.chartSettingsChanged.value {
+            updateBGGraphSettings()
 
-                smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
-                view.layoutIfNeeded()
+            smallGraphHeightConstraint.constant = CGFloat(Storage.shared.smallGraphHeight.value)
+            view.layoutIfNeeded()
 
-                // reset the app state
-                appState.chartSettingsChanged = false
-            }
+            Observable.shared.chartSettingsChanged.value = false
         }
     }
 
@@ -640,10 +524,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             let latestBG = bgData[bgData.count - 1].sgv
             var color = NSUIColor.label
             if Storage.shared.colorBGText.value {
-                if Float(latestBG) >= UserDefaultsRepository.highLine.value {
+                if Double(latestBG) >= Storage.shared.highLine.value {
                     color = NSUIColor.systemYellow
                     Observable.shared.bgTextColor.value = .yellow
-                } else if Float(latestBG) <= UserDefaultsRepository.lowLine.value {
+                } else if Double(latestBG) <= Storage.shared.lowLine.value {
                     color = NSUIColor.systemRed
                     Observable.shared.bgTextColor.value = .red
                 } else {
@@ -796,7 +680,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     func calculateMaxBgGraphValue() -> Float {
-        return max(topBG, topPredictionBG)
+        return max(Float(topBG), Float(topPredictionBG))
     }
 
     func loadDebugData() {

@@ -36,7 +36,7 @@ extension MainViewController {
 
         var basalSegments: [DataStructs.basalProfileSegment] = []
 
-        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        let graphHours = 24 * Storage.shared.downloadDays.value
         // Build scheduled basal segments from right to left by
         // moving pointers to the current midnight and current basal
         var midnight = dateTimeUtils.getTimeIntervalMidnightToday()
@@ -69,7 +69,7 @@ extension MainViewController {
 
         var firstPass = true
         // Runs the scheduled basal to the end of the prediction line
-        var predictionEndTime = dateTimeUtils.getNowTimeIntervalUTC() + (3600 * UserDefaultsRepository.predictionToLoad.value)
+        var predictionEndTime = dateTimeUtils.getNowTimeIntervalUTC() + (3600 * Storage.shared.predictionToLoad.value)
         basalScheduleData.removeAll()
 
         for i in 0 ..< basalSegments.count {

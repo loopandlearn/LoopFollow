@@ -8,8 +8,6 @@ import WebKit
 class NightscoutViewController: UIViewController {
     @IBOutlet var webView: WKWebView!
 
-    var appStateController: AppStateController?
-
     override func viewDidLoad() {
         super.viewDidLoad()
         if Storage.shared.forceDarkMode.value {

@@ -8,8 +8,6 @@ import EventKitUI
 import Foundation
 
 class WatchSettingsViewController: FormViewController {
-    var appStateController: AppStateController?
-
     override func viewDidLoad() {
         super.viewDidLoad()
         if Storage.shared.forceDarkMode.value {

@@ -17,7 +17,7 @@ extension MainViewController {
             guard let parsedDate = NightscoutUtils.parseDate(dateStr) else { continue }
 
             var dateTimeStamp = parsedDate.timeIntervalSince1970
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 dateTimeStamp = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             }

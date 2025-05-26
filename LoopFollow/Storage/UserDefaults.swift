@@ -81,30 +81,12 @@ class UserDefaultsRepository {
 
     // Graph Settings
     static let chartScaleX = UserDefaultsValue<Float>(key: "chartScaleX", default: 18.0)
-    static let showDots = UserDefaultsValue<Bool>(key: "showDots", default: true)
-    static let smallGraphTreatments = UserDefaultsValue<Bool>(key: "smallGraphTreatments", default: true)
-    static let showValues = UserDefaultsValue<Bool>(key: "showValues", default: true)
-    static let showAbsorption = UserDefaultsValue<Bool>(key: "showAbsorption", default: true)
-    static let showLines = UserDefaultsValue<Bool>(key: "showLines", default: true)
     static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
-    static let predictionToLoad = UserDefaultsValue<Double>(key: "predictionToLoad", default: 1)
-    static let minBasalScale = UserDefaultsValue<Double>(key: "minBasalScale", default: 5.0)
-    static let minBGScale = UserDefaultsValue<Float>(key: "minBGScale", default: 250.0)
-    static let showDIALines = UserDefaultsValue<Bool>(key: "showDIAMarkers", default: true)
-    static let show30MinLine = UserDefaultsValue<Bool>(key: "show30MinLine", default: false)
-    static let show90MinLine = UserDefaultsValue<Bool>(key: "show90MinLine", default: false)
-    static let showMidnightLines = UserDefaultsValue<Bool>(key: "showMidnightMarkers", default: false)
-    static let lowLine = UserDefaultsValue<Float>(key: "lowLine", default: 70.0)
-    static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
-    static let smallGraphHeight = UserDefaultsValue<Int>(key: "smallGraphHeight", default: 40)
 
     // Deprecated, used to detect if backgroundRefresh was set to off. TODO: Remove in the beginning of 2026
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
 
-    static let dimScreenWhenIdle = UserDefaultsValue<Int>(key: "dimScreenWhenIdle", default: 0)
-
     // Advanced Settings
-    // static let onlyDownloadBG = UserDefaultsValue<Bool>(key: "onlyDownloadBG", default: false)
     static let downloadTreatments = UserDefaultsValue<Bool>(key: "downloadTreatments", default: true)
     static let downloadPrediction = UserDefaultsValue<Bool>(key: "downloadPrediction", default: true)
     static let graphOtherTreatments = UserDefaultsValue<Bool>(key: "graphOtherTreatments", default: true)
@@ -112,7 +94,6 @@ class UserDefaultsRepository {
     static let graphBolus = UserDefaultsValue<Bool>(key: "graphBolus", default: true)
     static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
     static let bgUpdateDelay = UserDefaultsValue<Int>(key: "bgUpdateDelay", default: 10)
-    static let downloadDays = UserDefaultsValue<Int>(key: "downloadDays", default: 1)
 
     // Watch Calendar Settings
     static let calendarIdentifier = UserDefaultsValue<String>(key: "calendarIdentifier", default: "")

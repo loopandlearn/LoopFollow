@@ -78,8 +78,27 @@ class Storage {
     var speakHighBGLimit = StorageValue<Double>(key: "speakHighBGLimit", defaultValue: 180.0)
     var speakHighBG = StorageValue<Bool>(key: "speakHighBG", defaultValue: false)
     var speakLanguage = StorageValue<String>(key: "speakLanguage", defaultValue: "en")
-
     // General Settings [END]
+
+    // Graph Settings [BEGIN]
+    var showDots = StorageValue<Bool>(key: "showDots", defaultValue: true)
+    var showLines = StorageValue<Bool>(key: "showLines", defaultValue: true)
+    var showValues = StorageValue<Bool>(key: "showValues", defaultValue: true)
+    var showAbsorption = StorageValue<Bool>(key: "showAbsorption", defaultValue: true)
+    var showDIALines = StorageValue<Bool>(key: "showDIAMarkers", defaultValue: true)
+    var show30MinLine = StorageValue<Bool>(key: "show30MinLine", defaultValue: false)
+    var show90MinLine = StorageValue<Bool>(key: "show90MinLine", defaultValue: false)
+    var showMidnightLines = StorageValue<Bool>(key: "showMidnightMarkers", defaultValue: false)
+    var smallGraphTreatments = StorageValue<Bool>(key: "smallGraphTreatments", defaultValue: true)
+
+    var smallGraphHeight = StorageValue<Int>(key: "smallGraphHeight", defaultValue: 40)
+    var predictionToLoad = StorageValue<Double>(key: "predictionToLoad", defaultValue: 1.0)
+    var minBasalScale = StorageValue<Double>(key: "minBasalScale", defaultValue: 5.0)
+    var minBGScale = StorageValue<Double>(key: "minBGScale", defaultValue: 250.0)
+    var lowLine = StorageValue<Double>(key: "lowLine", defaultValue: 70.0)
+    var highLine = StorageValue<Double>(key: "highLine", defaultValue: 180.0)
+    var downloadDays = StorageValue<Int>(key: "downloadDays", defaultValue: 1)
+    // Graph Settings [END]
 
     static let shared = Storage()
     private init() {}
