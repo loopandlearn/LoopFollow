@@ -31,7 +31,7 @@ struct AlarmBGSection: View {
             header: header.map(Text.init),
             footer: footer.map(Text.init)
         ) {
-            AlarmBGPicker(
+            BGPicker(
                 title: title,
                 range: range,
                 value: $value

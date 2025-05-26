@@ -12,7 +12,7 @@ class NightscoutViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
 

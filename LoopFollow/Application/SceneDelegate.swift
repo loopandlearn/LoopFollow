@@ -37,10 +37,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 vc.appStateController = appStateController
             }
         }
-
-        // Register the SceneDelegate as an observer for the "toggleSpeakBG" notification, which will be triggered when the user toggles the "Speak BG" feature in General Settings. This helps ensure that the Quick Action is updated according to the current setting.
-        NotificationCenter.default.addObserver(self, selector: #selector(handleToggleSpeakBGEvent), name: NSNotification.Name("toggleSpeakBG"), object: nil)
-        updateQuickActions()
     }
 
     func sceneDidDisconnect(_: UIScene) {
@@ -48,8 +44,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This occurs shortly after the scene enters the background, or when its session is discarded.
         // Release any resources associated with this scene that can be re-created the next time the scene connects.
         // The scene may re-connect later, as its session was not neccessarily discarded (see `application:didDiscardSceneSessions` instead).
-
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("toggleSpeakBG"), object: nil)
     }
 
     func sceneDidBecomeActive(_: UIScene) {
@@ -76,29 +70,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
 
-    // Update the Home Screen Quick Action for toggling the "Speak BG" feature based on the current setting in UserDefaultsRepository. This function uses UIApplicationShortcutItem to create a 3D touch action for controlling the feature.
-    func updateQuickActions() {
-        let iconName = UserDefaultsRepository.speakBG.value ? "pause.circle.fill" : "play.circle.fill"
-        let iconTemplate = UIApplicationShortcutIcon(systemImageName: iconName)
-
-        let shortcut = UIApplicationShortcutItem(type: Bundle.main.bundleIdentifier! + ".toggleSpeakBG",
-                                                 localizedTitle: "Speak BG",
-                                                 localizedSubtitle: nil,
-                                                 icon: iconTemplate,
-                                                 userInfo: nil)
-        UIApplication.shared.shortcutItems = [shortcut]
-    }
-
     // Handle the UIApplicationShortcutItem when the user taps on the Home Screen Quick Action. This function toggles the "Speak BG" setting in UserDefaultsRepository, speaks the current state (on/off) using AVSpeechSynthesizer, and updates the Quick Action appearance.
     func handleShortcutItem(_ shortcutItem: UIApplicationShortcutItem) {
         if let bundleIdentifier = Bundle.main.bundleIdentifier {
             let expectedType = bundleIdentifier + ".toggleSpeakBG"
             if shortcutItem.type == expectedType {
-                UserDefaultsRepository.speakBG.value.toggle()
-                let message = UserDefaultsRepository.speakBG.value ? "BG Speak is now on" : "BG Speak is now off"
+                Storage.shared.speakBG.value.toggle()
+                let message = Storage.shared.speakBG.value ? "BG Speak is now on" : "BG Speak is now off"
                 let utterance = AVSpeechUtterance(string: message)
                 synthesizer.speak(utterance)
-                updateQuickActions()
             }
         }
     }
@@ -106,9 +86,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     // The following method is called when the user taps on the Home Screen Quick Action
     func windowScene(_: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler _: @escaping (Bool) -> Void) {
         handleShortcutItem(shortcutItem)
-    }
-
-    @objc func handleToggleSpeakBGEvent() {
-        updateQuickActions()
     }
 }

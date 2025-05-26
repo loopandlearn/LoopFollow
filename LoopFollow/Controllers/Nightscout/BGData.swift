@@ -208,7 +208,7 @@ extension MainViewController {
     }
 
     func updateServerText(with serverText: String? = nil) {
-        if UserDefaultsRepository.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
+        if Storage.shared.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
             self.serverText.text = displayName
         } else if let serverText = serverText {
             self.serverText.text = serverText
@@ -238,8 +238,8 @@ extension MainViewController {
             // Set BGText with the latest BG value
             self.setBGTextColor()
 
-            Observable.shared.bgText.value = Localizer
-                .toDisplayUnits(String(latestBG))
+            Observable.shared.bgText.value = Localizer.toDisplayUnits(String(latestBG))
+            Observable.shared.bg.value = latestBG
 
             // Direction handling
             if let directionBG = entries[latestEntryIndex].direction {

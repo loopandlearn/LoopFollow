@@ -1,5 +1,5 @@
 // LoopFollow
-// StatsView.swift
+// MainViewController+updateStats.swift
 // Created by Jon Fawcett on 2020-06-23.
 
 import Charts
@@ -27,7 +27,7 @@ extension MainViewController {
             statsInRangePercent.text = String(format: "%.1f%", stats.percentRange) + "%"
             statsHighPercent.text = String(format: "%.1f%", stats.percentHigh) + "%"
             statsAvgBG.text = Localizer.toDisplayUnits(String(format: "%.0f%", stats.avgBG))
-            if UserDefaultsRepository.useIFCC.value {
+            if Storage.shared.useIFCC.value {
                 statsEstA1C.text = String(format: "%.0f%", stats.a1C)
             } else {
                 statsEstA1C.text = String(format: "%.1f%", stats.a1C)
@@ -38,7 +38,7 @@ extension MainViewController {
         }
     }
 
-    func createStatsPie(pieData: [DataStructs.pieData]) {
+    fileprivate func createStatsPie(pieData: [DataStructs.pieData]) {
         statsPieChart.legend.enabled = false
         statsPieChart.drawEntryLabelsEnabled = false
         statsPieChart.drawHoleEnabled = false

@@ -13,6 +13,8 @@ struct SnoozerView: View {
     @ObservedObject var directionText = Observable.shared.directionText
     @ObservedObject var deltaText = Observable.shared.deltaText
     @ObservedObject var bgStale = Observable.shared.bgStale
+    @ObservedObject var bg = Observable.shared.bg
+    @ObservedObject var snoozerEmoji = Storage.shared.snoozerEmoji
 
     var body: some View {
         GeometryReader { geo in
@@ -128,15 +130,60 @@ struct SnoozerView: View {
                 .animation(.spring(), value: vm.activeAlarm != nil)
             } else {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
-                    Text(context.date, format:
-                        Date.FormatStyle(date: .omitted, time: .shortened))
-                        .font(.system(size: 70))
-                        .minimumScaleFactor(0.5)
-                        .foregroundColor(.white)
-                        .frame(height: 78)
+                    VStack(spacing: 4) {
+                        if snoozerEmoji.value {
+                            Text(bgEmoji)
+                                .font(.system(size: 128))
+                                .minimumScaleFactor(0.5)
+                        }
+
+                        Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
+                            .font(.system(size: 70))
+                            .minimumScaleFactor(0.5)
+                            .foregroundColor(.white)
+                            .frame(height: 78)
+                    }
                 }
                 Spacer()
             }
+        }
+    }
+
+    private var bgEmoji: String {
+        guard let bg = bg.value, !bgStale.value else {
+            return "🤷"
+        }
+
+        if UserDefaultsRepository.getPreferredUnit() == .millimolesPerLiter, Localizer.removePeriodAndCommaForBadge(bgText.value) == "55" {
+            return "🦄"
+        }
+
+        if UserDefaultsRepository.getPreferredUnit() == .milligramsPerDeciliter, bg == 100 {
+            return "🦄"
+        }
+
+        switch bg {
+        case ..<40: return "❌"
+        case ..<55: return "🥶"
+        case ..<73: return "😱"
+        case ..<98: return "😊"
+        case ..<102: return "🥇"
+        case ..<109: return "😎"
+        case ..<127: return "🥳"
+        case ..<145: return "🤔"
+        case ..<163: return "😳"
+        case ..<181: return "😵‍💫"
+        case ..<199: return "🎃"
+        case ..<217: return "🙀"
+        case ..<235: return "🔥"
+        case ..<253: return "😬"
+        case ..<271: return "😡"
+        case ..<289: return "🤬"
+        case ..<307: return "🥵"
+        case ..<325: return "🫣"
+        case ..<343: return "😩"
+        case ..<361: return "🤯"
+        default: return "👿"
         }
     }
 }

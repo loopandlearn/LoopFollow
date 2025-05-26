@@ -8,17 +8,17 @@ import Foundation
 
 extension MainViewController {
     func evaluateSpeakConditions(currentValue: Int, previousValue: Int) {
-        if !UserDefaultsRepository.speakBG.value {
+        guard Storage.shared.speakBG.value else {
             return
         }
 
-        let always = UserDefaultsRepository.speakBGAlways.value
-        let lowThreshold = UserDefaultsRepository.speakLowBGLimit.value
-        let fastDropDelta = UserDefaultsRepository.speakFastDropDelta.value
-        let highThreshold = UserDefaultsRepository.speakHighBGLimit.value
-        let speakLowBG = UserDefaultsRepository.speakLowBG.value
-        let speakProactiveLowBG = UserDefaultsRepository.speakProactiveLowBG.value
-        let speakHighBG = UserDefaultsRepository.speakHighBG.value
+        let always = Storage.shared.speakBGAlways.value
+        let lowThreshold = Storage.shared.speakLowBGLimit.value
+        let fastDropDelta = Storage.shared.speakFastDropDelta.value
+        let highThreshold = Storage.shared.speakHighBGLimit.value
+        let speakLowBG = Storage.shared.speakLowBG.value
+        let speakProactiveLowBG = Storage.shared.speakProactiveLowBG.value
+        let speakHighBG = Storage.shared.speakHighBG.value
 
         // Speak always
         if always {
@@ -42,7 +42,7 @@ extension MainViewController {
         // * next predictive value is low
         // * fast drop occurs below high
         if speakProactiveLowBG {
-            let predictiveTrigger = !predictionData.isEmpty && Float(predictionData.first!.sgv) <= lowThreshold
+            let predictiveTrigger = !predictionData.isEmpty && Double(predictionData.first!.sgv) <= lowThreshold
 
             if predictiveTrigger ||
                 currentValue <= Int(lowThreshold) || previousValue <= Int(lowThreshold) ||
@@ -147,7 +147,7 @@ extension MainViewController {
 
         let bloodGlucoseDifference = currentValue - previousValue
 
-        let preferredLanguage = UserDefaultsRepository.speakLanguage.value
+        let preferredLanguage = Storage.shared.speakLanguage.value
         let voiceLanguageCode = LanguageVoiceMapping.voiceLanguageCode(forAppLanguage: preferredLanguage)
 
         let texts = AnnouncementTexts.forLanguage(preferredLanguage)

@@ -38,7 +38,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             overrideUserInterfaceStyle = .dark
         }
 
@@ -98,11 +98,10 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
                 $0.title = "General Settings"
                 $0.presentationMode = .show(
                     controllerProvider: .callback(builder: {
-                        let controller = GeneralSettingsViewController()
-                        controller.appStateController = self.appStateController
-                        return controller
-                    }
-                    ), onDismiss: nil
+                        self.presentGeneralSettings()
+                        return UIViewController()
+                    }),
+                    onDismiss: nil
                 )
             }
             <<< ButtonRow("graphSettings") {
@@ -283,7 +282,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: settingsView)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
@@ -296,7 +295,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: settingsView)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
@@ -308,7 +307,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: settingsView)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
@@ -320,7 +319,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: settingsView)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
@@ -333,7 +332,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: contactSettingsView)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
@@ -346,7 +345,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: settingsView)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
@@ -359,7 +358,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: logView)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
@@ -374,7 +373,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: view)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
@@ -391,7 +390,7 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: settingsView)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
@@ -404,11 +403,22 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
         let hostingController = UIHostingController(rootView: view)
         hostingController.modalPresentationStyle = .formSheet
 
-        if UserDefaultsRepository.forceDarkMode.value {
+        if Storage.shared.forceDarkMode.value {
             hostingController.overrideUserInterfaceStyle = .dark
         }
 
         present(hostingController, animated: true, completion: nil)
+    }
+
+    func presentGeneralSettings() {
+        let view = GeneralSettingsView()
+        let hostingController = UIHostingController(rootView: view)
+        hostingController.modalPresentationStyle = .formSheet
+
+        if Storage.shared.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        }
+        present(hostingController, animated: true)
     }
 
     private func shareLogs() {
