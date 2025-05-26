@@ -98,37 +98,12 @@ class UserDefaultsRepository {
     static let highLine = UserDefaultsValue<Float>(key: "highLine", default: 180.0)
     static let smallGraphHeight = UserDefaultsValue<Int>(key: "smallGraphHeight", default: 40)
 
-    // General Settings
-    static let colorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
-    static let showStats = UserDefaultsValue<Bool>(key: "showStats", default: true)
-    static let useIFCC = UserDefaultsValue<Bool>(key: "useIFCC", default: false)
-    static let showSmallGraph = UserDefaultsValue<Bool>(key: "showSmallGraph", default: true)
-    static let speakBG = UserDefaultsValue<Bool>(key: "speakBG", default: false)
-    static let speakBGAlways = UserDefaultsValue<Bool>(key: "speakBGAlways", default: true)
-    static let speakLowBG = UserDefaultsValue<Bool>(key: "speakLowBG", default: false)
-    static let speakProactiveLowBG = UserDefaultsValue<Bool>(key: "speakProactiveLowBG", default: false)
-    static let speakFastDropDelta = UserDefaultsValue<Float>(key: "speakFastDropDelta", default: 10.0)
-    static let speakLowBGLimit = UserDefaultsValue<Float>(key: "speakLowBGLimit", default: 72.0)
-    static let speakHighBGLimit = UserDefaultsValue<Float>(key: "speakHighBGLimit", default: 180.0)
-    static let speakHighBG = UserDefaultsValue<Bool>(key: "speakHighBG", default: false)
-    static let speakLanguage = UserDefaultsValue<String>(key: "speakLanguage", default: "en")
-    static let showDisplayName = UserDefaultsValue<Bool>(key: "showDisplayName", default: false)
-
     // Deprecated, used to detect if backgroundRefresh was set to off. TODO: Remove in the beginning of 2026
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
 
-    static let appBadge = UserDefaultsValue<Bool>(key: "appBadge", default: true)
     static let dimScreenWhenIdle = UserDefaultsValue<Int>(key: "dimScreenWhenIdle", default: 0)
-    static let forceDarkMode = UserDefaultsValue<Bool>(key: "forceDarkMode", default: true)
     static let persistentNotification = UserDefaultsValue<Bool>(key: "persistentNotification", default: false)
     static let persistentNotificationLastBGTime = UserDefaultsValue<TimeInterval>(key: "persistentNotificationLastBGTime", default: 0)
-    static let screenlockSwitchState = UserDefaultsValue<Bool>(
-        key: "screenlockSwitchState",
-        default: UIApplication.shared.isIdleTimerDisabled,
-        onChange: { screenlock in
-            UIApplication.shared.isIdleTimerDisabled = screenlock
-        }
-    )
 
     // Advanced Settings
     // static let onlyDownloadBG = UserDefaultsValue<Bool>(key: "onlyDownloadBG", default: false)

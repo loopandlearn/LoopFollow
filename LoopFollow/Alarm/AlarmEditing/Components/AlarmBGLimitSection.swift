@@ -53,7 +53,7 @@ struct AlarmBGLimitSection: View {
             Toggle(toggleText, isOn: isOn)
 
             if isOn.wrappedValue {
-                AlarmBGPicker(
+                BGPicker(
                     title: pickerTitle,
                     range: range,
                     value: pickerValue

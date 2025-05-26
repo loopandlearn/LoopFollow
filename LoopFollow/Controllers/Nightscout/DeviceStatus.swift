@@ -67,7 +67,7 @@ extension MainViewController {
             LoopStatusLabel.textAlignment = .right
             LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
 
-            if UserDefaultsRepository.forceDarkMode.value {
+            if Storage.shared.forceDarkMode.value {
                 LoopStatusLabel.textColor = UIColor.white
             } else {
                 LoopStatusLabel.textColor = UIColor.black

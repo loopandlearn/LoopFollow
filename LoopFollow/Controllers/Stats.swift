@@ -66,7 +66,7 @@ class StatsData {
             stdDev = stdDev * Float(GlucoseConversion.mgDlToMmolL)
         }
 
-        if UserDefaultsRepository.useIFCC.value {
+        if Storage.shared.useIFCC.value {
             a1C = (((46.7 + Float(avgBG)) / 28.7) - 2.152) / 0.09148
         } else {
             a1C = (46.7 + Float(avgBG)) / 28.7

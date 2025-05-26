@@ -4,6 +4,7 @@
 
 import Foundation
 import HealthKit
+import UIKit
 
 /*
  Observable persistant storage
@@ -56,6 +57,29 @@ class Storage {
     var lastRecBolusNotified = StorageValue<Double?>(key: "lastRecBolusNotified", defaultValue: nil)
     var lastCOBNotified = StorageValue<Double?>(key: "lastCOBNotified", defaultValue: nil)
     var lastMissedBolusNotified = StorageValue<Date?>(key: "lastMissedBolusNotified", defaultValue: nil)
+
+    // General Settings [BEGIN]
+    var appBadge = StorageValue<Bool>(key: "appBadge", defaultValue: true)
+    var colorBGText = StorageValue<Bool>(key: "colorBGText", defaultValue: true)
+    var forceDarkMode = StorageValue<Bool>(key: "forceDarkMode", defaultValue: true)
+    var showStats = StorageValue<Bool>(key: "showStats", defaultValue: true)
+    var useIFCC = StorageValue<Bool>(key: "useIFCC", defaultValue: false)
+    var showSmallGraph = StorageValue<Bool>(key: "showSmallGraph", defaultValue: true)
+    var screenlockSwitchState = StorageValue<Bool>(key: "screenlockSwitchState", defaultValue: true)
+    var showDisplayName = StorageValue<Bool>(key: "showDisplayName", defaultValue: false)
+    var snoozerEmoji = StorageValue<Bool>(key: "snoozerEmoji", defaultValue: false)
+
+    var speakBG = StorageValue<Bool>(key: "speakBG", defaultValue: false)
+    var speakBGAlways = StorageValue<Bool>(key: "speakBGAlways", defaultValue: true)
+    var speakLowBG = StorageValue<Bool>(key: "speakLowBG", defaultValue: false)
+    var speakProactiveLowBG = StorageValue<Bool>(key: "speakProactiveLowBG", defaultValue: false)
+    var speakFastDropDelta = StorageValue<Double>(key: "speakFastDropDelta", defaultValue: 10.0)
+    var speakLowBGLimit = StorageValue<Double>(key: "speakLowBGLimit", defaultValue: 72.0)
+    var speakHighBGLimit = StorageValue<Double>(key: "speakHighBGLimit", defaultValue: 180.0)
+    var speakHighBG = StorageValue<Bool>(key: "speakHighBG", defaultValue: false)
+    var speakLanguage = StorageValue<String>(key: "speakLanguage", defaultValue: "en")
+
+    // General Settings [END]
 
     static let shared = Storage()
     private init() {}

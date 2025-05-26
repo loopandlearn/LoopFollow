@@ -53,14 +53,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: UISceneSession Lifecycle
 
     func application(_: UIApplication, willFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // set "prevent screen lock" to ON when the app is started for the first time
-        if !UserDefaultsRepository.screenlockSwitchState.exists {
-            UserDefaultsRepository.screenlockSwitchState.value = true
-        }
-
         // set the "prevent screen lock" option when the app is started
         // This method doesn't seem to be working anymore. Added to view controllers as solution offered on SO
-        UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value
+        UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
 
         return true
     }

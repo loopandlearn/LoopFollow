@@ -98,7 +98,6 @@
 		DD7F4B9D2DD1EAE500D449E9 /* AlarmAudioSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */; };
 		DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */; };
 		DD7F4BA12DD2193F00D449E9 /* AlarmSnoozeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */; };
-		DD7F4BA32DD3C8A900D449E9 /* AlarmBGPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4BA22DD3C8A900D449E9 /* AlarmBGPicker.swift */; };
 		DD7F4BC52DD3CE0700D449E9 /* AlarmBGLimitSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4BC42DD3CE0700D449E9 /* AlarmBGLimitSection.swift */; };
 		DD7F4BC72DD473A600D449E9 /* FastDropCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4BC62DD473A600D449E9 /* FastDropCondition.swift */; };
 		DD7F4C032DD4B92E00D449E9 /* NotLoopingAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C022DD4B92E00D449E9 /* NotLoopingAlarmEditor.swift */; };
@@ -120,6 +119,8 @@
 		DD7F4C232DD7A62200D449E9 /* AlarmType+SortDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C222DD7A62200D449E9 /* AlarmType+SortDirection.swift */; };
 		DD7F4C252DD7B20700D449E9 /* AlarmType+timeUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C242DD7B20700D449E9 /* AlarmType+timeUnit.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
+		DD8316182DE3633D004467AA /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316172DE3633D004467AA /* GeneralSettingsView.swift */; };
+		DD8316442DE47CA9004467AA /* BGPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316432DE47CA9004467AA /* BGPicker.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
 		DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */; };
@@ -169,7 +170,6 @@
 		DDCC3A582DDC9655006F1C10 /* MissedBolusAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A572DDC9655006F1C10 /* MissedBolusAlarmEditor.swift */; };
 		DDCC3A5A2DDC988F006F1C10 /* CarbSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A592DDC988F006F1C10 /* CarbSample.swift */; };
 		DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979324C0D380002C9752 /* UIViewExtension.swift */; };
-		DDCF979624C1443C002C9752 /* GeneralSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */; };
 		DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */; };
 		DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */; };
 		DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979D24C2382A002C9752 /* AppStateController.swift */; };
@@ -211,7 +211,7 @@
 		FC16A97F249969E2003D6245 /* Graphs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97E249969E2003D6245 /* Graphs.swift */; };
 		FC16A98124996C07003D6245 /* DateTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A98024996C07003D6245 /* DateTime.swift */; };
 		FC1BDD2B24A22650001B652C /* Stats.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2A24A22650001B652C /* Stats.swift */; };
-		FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2C24A23204001B652C /* StatsView.swift */; };
+		FC1BDD2D24A23204001B652C /* MainViewController+updateStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2C24A23204001B652C /* MainViewController+updateStats.swift */; };
 		FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2E24A232A3001B652C /* DataStructs.swift */; };
 		FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC3AE7B3249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld */; };
 		FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTaskAudio.swift */; };
@@ -458,7 +458,6 @@
 		DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmAudioSection.swift; sourceTree = "<group>"; };
 		DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmActiveSection.swift; sourceTree = "<group>"; };
 		DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSnoozeSection.swift; sourceTree = "<group>"; };
-		DD7F4BA22DD3C8A900D449E9 /* AlarmBGPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmBGPicker.swift; sourceTree = "<group>"; };
 		DD7F4BC42DD3CE0700D449E9 /* AlarmBGLimitSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmBGLimitSection.swift; sourceTree = "<group>"; };
 		DD7F4BC62DD473A600D449E9 /* FastDropCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastDropCondition.swift; sourceTree = "<group>"; };
 		DD7F4C022DD4B92E00D449E9 /* NotLoopingAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotLoopingAlarmEditor.swift; sourceTree = "<group>"; };
@@ -480,6 +479,8 @@
 		DD7F4C222DD7A62200D449E9 /* AlarmType+SortDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlarmType+SortDirection.swift"; sourceTree = "<group>"; };
 		DD7F4C242DD7B20700D449E9 /* AlarmType+timeUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlarmType+timeUnit.swift"; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
+		DD8316172DE3633D004467AA /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		DD8316432DE47CA9004467AA /* BGPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGPicker.swift; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
 		DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareClientExtension.swift; sourceTree = "<group>"; };
@@ -532,7 +533,6 @@
 		DDCC3ABF2DDE10B0006F1C10 /* Testing.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Testing.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/Testing.framework; sourceTree = DEVELOPER_DIR; };
 		DDCC3AD62DDE1790006F1C10 /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDCF979324C0D380002C9752 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
-		DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979D24C2382A002C9752 /* AppStateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateController.swift; sourceTree = "<group>"; };
@@ -574,7 +574,7 @@
 		FC16A97E249969E2003D6245 /* Graphs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphs.swift; sourceTree = "<group>"; };
 		FC16A98024996C07003D6245 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
 		FC1BDD2A24A22650001B652C /* Stats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stats.swift; sourceTree = "<group>"; };
-		FC1BDD2C24A23204001B652C /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		FC1BDD2C24A23204001B652C /* MainViewController+updateStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MainViewController+updateStats.swift"; sourceTree = "<group>"; };
 		FC1BDD2E24A232A3001B652C /* DataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStructs.swift; sourceTree = "<group>"; };
 		FC3AE7B4249E8E0E00AAE1E0 /* LoopFollow.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LoopFollow.xcdatamodel; sourceTree = "<group>"; };
 		FC5A5C3C2497B229009C550E /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -839,6 +839,7 @@
 			children = (
 				DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */,
 				DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */,
+				DD8316172DE3633D004467AA /* GeneralSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -1026,7 +1027,6 @@
 			isa = PBXGroup;
 			children = (
 				DD7F4BC42DD3CE0700D449E9 /* AlarmBGLimitSection.swift */,
-				DD7F4BA22DD3C8A900D449E9 /* AlarmBGPicker.swift */,
 				DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */,
 				DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */,
 				DD7F4B9C2DD1EAE500D449E9 /* AlarmAudioSection.swift */,
@@ -1162,6 +1162,7 @@
 		DDF6999C2C5AAA4C0058A8D9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DD8316432DE47CA9004467AA /* BGPicker.swift */,
 				DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */,
 				DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */,
 				DD16AF102C997B4600FB655A /* LoadingButtonView.swift */,
@@ -1214,7 +1215,7 @@
 				FC16A97C24996747003D6245 /* SpeakBG.swift */,
 				FC16A97E249969E2003D6245 /* Graphs.swift */,
 				FC1BDD2A24A22650001B652C /* Stats.swift */,
-				FC1BDD2C24A23204001B652C /* StatsView.swift */,
+				FC1BDD2C24A23204001B652C /* MainViewController+updateStats.swift */,
 				FCA2DDE52501095000254A8C /* Timers.swift */,
 				DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */,
 			);
@@ -1456,7 +1457,6 @@
 				FC97881B2485969B00A7906C /* MainViewController.swift */,
 				FC97881D2485969B00A7906C /* NightScoutViewController.swift */,
 				FCFEECA1248857A600402A7F /* SettingsViewController.swift */,
-				DDCF979524C1443C002C9752 /* GeneralSettingsViewController.swift */,
 				DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */,
 				DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */,
 			);
@@ -1789,7 +1789,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DD7F4BA32DD3C8A900D449E9 /* AlarmBGPicker.swift in Sources */,
 				DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */,
 				DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */,
 				DD0B9D582DE1F3B20090C337 /* AlarmType+canAcknowledge.swift in Sources */,
@@ -1859,6 +1858,7 @@
 				DDA9ACAA2D6A6B8300E6F1A9 /* ContactIncludeOption.swift in Sources */,
 				DD7F4C1D2DD650D500D449E9 /* COBAlarmEditor.swift in Sources */,
 				DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */,
+				DD8316182DE3633D004467AA /* GeneralSettingsView.swift in Sources */,
 				DD58171E2D299FCA0041FB98 /* BluetoothDeviceDelegate.swift in Sources */,
 				DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */,
 				DDD10F032C518A6500D76A8E /* TreatmentResponse.swift in Sources */,
@@ -1932,7 +1932,7 @@
 				DD6A935E2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift in Sources */,
 				DD493AD52ACF2109009A6922 /* ResumePump.swift in Sources */,
 				DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */,
-				DDCF979624C1443C002C9752 /* GeneralSettingsViewController.swift in Sources */,
+				DD8316442DE47CA9004467AA /* BGPicker.swift in Sources */,
 				FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */,
 				DD493AD72ACF2139009A6922 /* SuspendPump.swift in Sources */,
 				DDB9FC7F2DDB584500EFAA76 /* BolusEntry.swift in Sources */,
@@ -1980,7 +1980,7 @@
 				DDA9ACAC2D6B317100E6F1A9 /* ContactType.swift in Sources */,
 				DDDF6F432D479A9900884336 /* LoopNightscoutRemoteView.swift in Sources */,
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,
-				FC1BDD2D24A23204001B652C /* StatsView.swift in Sources */,
+				FC1BDD2D24A23204001B652C /* MainViewController+updateStats.swift in Sources */,
 				DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */,
 				DD7F4C152DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift in Sources */,
 				DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */,
