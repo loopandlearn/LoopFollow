@@ -28,5 +28,7 @@ class Observable {
 
     var debug = ObservableValue<Bool>(default: false)
 
+    var chartSettingsChanged = ObservableValue<Bool>(default: false)
+
     private init() {}
 }

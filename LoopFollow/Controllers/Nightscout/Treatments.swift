@@ -10,7 +10,7 @@ extension MainViewController {
     func WebLoadNSTreatments() {
         if !UserDefaultsRepository.downloadTreatments.value { return }
 
-        let startTimeString = dateTimeUtils.getDateTimeString(addingDays: -1 * UserDefaultsRepository.downloadDays.value)
+        let startTimeString = dateTimeUtils.getDateTimeString(addingDays: -1 * Storage.shared.downloadDays.value)
         let currentTimeString = dateTimeUtils.getDateTimeString(addingHours: 6)
         let parameters: [String: String] = [
             "find[created_at][$gte]": startTimeString,

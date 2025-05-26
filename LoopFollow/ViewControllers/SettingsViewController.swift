@@ -10,7 +10,6 @@ import UIKit
 
 class SettingsViewController: FormViewController, NightscoutSettingsViewModelDelegate {
     var tokenRow: TextRow?
-    var appStateController: AppStateController?
     var statusLabelRow: LabelRow!
 
     func showHideNSDetails() {
@@ -108,11 +107,10 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
                 $0.title = "Graph Settings"
                 $0.presentationMode = .show(
                     controllerProvider: .callback(builder: {
-                        let controller = GraphSettingsViewController()
-                        controller.appStateController = self.appStateController
-                        return controller
-                    }
-                    ), onDismiss: nil
+                        self.presentGraphSettings()
+                        return UIViewController()
+                    }),
+                    onDismiss: nil
                 )
             }
             <<< ButtonRow("informationDisplaySettings") {
@@ -165,7 +163,6 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
                 $0.presentationMode = .show(
                     controllerProvider: .callback(builder: {
                         let controller = WatchSettingsViewController()
-                        controller.appStateController = self.appStateController
                         return controller
                     }
                     ), onDismiss: nil
@@ -419,6 +416,18 @@ class SettingsViewController: FormViewController, NightscoutSettingsViewModelDel
             hostingController.overrideUserInterfaceStyle = .dark
         }
         present(hostingController, animated: true)
+    }
+
+    func presentGraphSettings() {
+        let view = GraphSettingsView()
+        let host = UIHostingController(rootView: view)
+        host.modalPresentationStyle = .formSheet
+
+        if Storage.shared.forceDarkMode.value {
+            host.overrideUserInterfaceStyle = .dark
+        }
+
+        present(host, animated: true)
     }
 
     private func shareLogs() {

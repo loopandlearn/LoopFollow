@@ -121,6 +121,10 @@
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
 		DD8316182DE3633D004467AA /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316172DE3633D004467AA /* GeneralSettingsView.swift */; };
 		DD8316442DE47CA9004467AA /* BGPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316432DE47CA9004467AA /* BGPicker.swift */; };
+		DD8316462DE49B09004467AA /* GraphSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316452DE49B09004467AA /* GraphSettingsView.swift */; };
+		DD8316482DE49EE5004467AA /* Storage+Migrate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316472DE49EE5004467AA /* Storage+Migrate.swift */; };
+		DD83164A2DE4C504004467AA /* SettingsStepperRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316492DE4C504004467AA /* SettingsStepperRow.swift */; };
+		DD83164C2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
 		DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */; };
@@ -170,9 +174,7 @@
 		DDCC3A582DDC9655006F1C10 /* MissedBolusAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A572DDC9655006F1C10 /* MissedBolusAlarmEditor.swift */; };
 		DDCC3A5A2DDC988F006F1C10 /* CarbSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A592DDC988F006F1C10 /* CarbSample.swift */; };
 		DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979324C0D380002C9752 /* UIViewExtension.swift */; };
-		DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */; };
 		DDCF979A24C14DB4002C9752 /* WatchSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */; };
-		DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF979D24C2382A002C9752 /* AppStateController.swift */; };
 		DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A7F2D85FD09004DF4DD /* Alarm.swift */; };
 		DDCF9A822D85FD15004DF4DD /* AlarmType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A812D85FD14004DF4DD /* AlarmType.swift */; };
 		DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A872D85FD33004DF4DD /* AlarmData.swift */; };
@@ -481,6 +483,10 @@
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
 		DD8316172DE3633D004467AA /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		DD8316432DE47CA9004467AA /* BGPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGPicker.swift; sourceTree = "<group>"; };
+		DD8316452DE49B09004467AA /* GraphSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsView.swift; sourceTree = "<group>"; };
+		DD8316472DE49EE5004467AA /* Storage+Migrate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Storage+Migrate.swift"; sourceTree = "<group>"; };
+		DD8316492DE4C504004467AA /* SettingsStepperRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStepperRow.swift; sourceTree = "<group>"; };
+		DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BinaryFloatingPoint+localized.swift"; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
 		DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareClientExtension.swift; sourceTree = "<group>"; };
@@ -533,9 +539,7 @@
 		DDCC3ABF2DDE10B0006F1C10 /* Testing.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Testing.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/Testing.framework; sourceTree = DEVELOPER_DIR; };
 		DDCC3AD62DDE1790006F1C10 /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDCF979324C0D380002C9752 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
-		DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsViewController.swift; sourceTree = "<group>"; };
 		DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettingsViewController.swift; sourceTree = "<group>"; };
-		DDCF979D24C2382A002C9752 /* AppStateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateController.swift; sourceTree = "<group>"; };
 		DDCF9A7F2D85FD09004DF4DD /* Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
 		DDCF9A812D85FD14004DF4DD /* AlarmType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmType.swift; sourceTree = "<group>"; };
 		DDCF9A872D85FD33004DF4DD /* AlarmData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmData.swift; sourceTree = "<group>"; };
@@ -837,6 +841,7 @@
 		DD1A97122D429495000DDC11 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				DD8316452DE49B09004467AA /* GraphSettingsView.swift */,
 				DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */,
 				DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */,
 				DD8316172DE3633D004467AA /* GeneralSettingsView.swift */,
@@ -1085,6 +1090,7 @@
 				DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */,
 				DDD10F062C529DE800D76A8E /* Observable.swift */,
 				DD4878042C7B2C970048F05C /* Storage.swift */,
+				DD8316472DE49EE5004467AA /* Storage+Migrate.swift */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -1162,6 +1168,7 @@
 		DDF6999C2C5AAA4C0058A8D9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DD8316492DE4C504004467AA /* SettingsStepperRow.swift */,
 				DD8316432DE47CA9004467AA /* BGPicker.swift */,
 				DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */,
 				DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */,
@@ -1209,7 +1216,6 @@
 			isa = PBXGroup;
 			children = (
 				DD7E19802ACDA0EA00DBD158 /* Nightscout */,
-				DDCF979D24C2382A002C9752 /* AppStateController.swift */,
 				FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */,
 				FC16A97924996673003D6245 /* NightScout.swift */,
 				FC16A97C24996747003D6245 /* SpeakBG.swift */,
@@ -1425,6 +1431,7 @@
 		FCC688542489367300A0279D /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */,
 				DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */,
 				DD7B0D432D730A320063DCB6 /* CycleHelper.swift */,
 				DDF6999C2C5AAA4C0058A8D9 /* Views */,
@@ -1457,7 +1464,6 @@
 				FC97881B2485969B00A7906C /* MainViewController.swift */,
 				FC97881D2485969B00A7906C /* NightScoutViewController.swift */,
 				FCFEECA1248857A600402A7F /* SettingsViewController.swift */,
-				DDCF979724C1489C002C9752 /* GraphSettingsViewController.swift */,
 				DDCF979924C14DB4002C9752 /* WatchSettingsViewController.swift */,
 			);
 			path = ViewControllers;
@@ -1812,20 +1818,19 @@
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				DD7F4C092DD504A700D449E9 /* OverrideStartCondition.swift in Sources */,
-				DDCF979E24C2382A002C9752 /* AppStateController.swift in Sources */,
 				DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */,
 				DD7F4C052DD4BBE200D449E9 /* NotLoopingCondition.swift in Sources */,
 				DD5334212C60EBEE00062F9D /* InsulinCartridgeChange.swift in Sources */,
 				DD7F4B9D2DD1EAE500D449E9 /* AlarmAudioSection.swift in Sources */,
 				FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */,
 				DD608A0A2C23593900F91132 /* SMB.swift in Sources */,
-				DDCF979824C1489C002C9752 /* GraphSettingsViewController.swift in Sources */,
 				FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */,
 				DD7F4C252DD7B20700D449E9 /* AlarmType+timeUnit.swift in Sources */,
 				DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */,
 				DD7F4C072DD5042F00D449E9 /* OverrideStartAlarmEditor.swift in Sources */,
 				DDCC3A4B2DDBB5E4006F1C10 /* BatteryCondition.swift in Sources */,
 				DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */,
+				DD83164A2DE4C504004467AA /* SettingsStepperRow.swift in Sources */,
 				DD0650ED2DCE9371004D3B41 /* HighBgAlarmEditor.swift in Sources */,
 				DD7F4C172DD63FA700D449E9 /* RecBolusCondition.swift in Sources */,
 				FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */,
@@ -1958,6 +1963,7 @@
 				DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */,
 				DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */,
 				DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */,
+				DD83164C2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift in Sources */,
 				DD4AFB3D2DB55D2900BB593F /* AlarmConfiguration.swift in Sources */,
 				DDF699962C5582290058A8D9 /* TextFieldWithToolBar.swift in Sources */,
 				DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
@@ -1985,6 +1991,7 @@
 				DD7F4C152DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift in Sources */,
 				DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
+				DD8316462DE49B09004467AA /* GraphSettingsView.swift in Sources */,
 				DD5334232C60ED3600062F9D /* IAge.swift in Sources */,
 				FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */,
 				DD0C0C642C45A59400DBADDF /* HKUnit+Extensions.swift in Sources */,
@@ -2000,6 +2007,7 @@
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
 				DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */,
 				DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */,
+				DD8316482DE49EE5004467AA /* Storage+Migrate.swift in Sources */,
 				DD1A97162D4294B3000DDC11 /* AdvancedSettingsViewModel.swift in Sources */,
 				FCA2DDE62501095000254A8C /* Timers.swift in Sources */,
 				DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */,

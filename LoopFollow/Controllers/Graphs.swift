@@ -240,7 +240,7 @@ extension MainViewController {
     func createGraph() {
         // Create the BG Graph Data
         let bgChartEntry = [ChartDataEntry]()
-        let maxBG: Float = UserDefaultsRepository.minBGScale.value
+        let maxBG = Storage.shared.minBGScale.value
 
         // Setup BG line details
         let lineBG = LineChartDataSet(entries: bgChartEntry, label: "")
@@ -251,12 +251,12 @@ extension MainViewController {
         lineBG.highlightEnabled = true
         lineBG.drawValuesEnabled = false
 
-        if UserDefaultsRepository.showLines.value {
+        if Storage.shared.showLines.value {
             lineBG.lineWidth = 2
         } else {
             lineBG.lineWidth = 0
         }
-        if UserDefaultsRepository.showDots.value {
+        if Storage.shared.showDots.value {
             lineBG.drawCirclesEnabled = true
         } else {
             lineBG.drawCirclesEnabled = false
@@ -275,12 +275,12 @@ extension MainViewController {
         linePrediction.highlightEnabled = true
         linePrediction.drawValuesEnabled = false
 
-        if UserDefaultsRepository.showLines.value {
+        if Storage.shared.showLines.value {
             linePrediction.lineWidth = 2
         } else {
             linePrediction.lineWidth = 0
         }
-        if UserDefaultsRepository.showDots.value {
+        if Storage.shared.showDots.value {
             linePrediction.drawCirclesEnabled = true
         } else {
             linePrediction.drawCirclesEnabled = false
@@ -290,7 +290,7 @@ extension MainViewController {
 
         // create Basal graph data
         let chartEntry = [ChartDataEntry]()
-        let maxBasal = UserDefaultsRepository.minBasalScale.value
+        let maxBasal = Storage.shared.minBasalScale.value
         let lineBasal = LineChartDataSet(entries: chartEntry, label: "")
         lineBasal.setDrawHighlightIndicators(false)
         lineBasal.setColor(NSUIColor.systemBlue, alpha: 0.5)
@@ -322,7 +322,7 @@ extension MainViewController {
         lineBolus.drawCirclesEnabled = true
         lineBolus.drawFilledEnabled = false
 
-        if UserDefaultsRepository.showValues.value {
+        if Storage.shared.showValues.value {
             lineBolus.drawValuesEnabled = true
             lineBolus.highlightEnabled = false
         } else {
@@ -348,7 +348,7 @@ extension MainViewController {
         lineCarbs.drawCirclesEnabled = true
         lineCarbs.drawFilledEnabled = false
 
-        if UserDefaultsRepository.showValues.value {
+        if Storage.shared.showValues.value {
             lineCarbs.drawValuesEnabled = true
             lineCarbs.highlightEnabled = false
         } else {
@@ -469,12 +469,12 @@ extension MainViewController {
         COBlinePrediction.highlightEnabled = true
         COBlinePrediction.drawValuesEnabled = false
 
-        if UserDefaultsRepository.showLines.value {
+        if Storage.shared.showLines.value {
             COBlinePrediction.lineWidth = 2
         } else {
             COBlinePrediction.lineWidth = 0
         }
-        if UserDefaultsRepository.showDots.value {
+        if Storage.shared.showDots.value {
             COBlinePrediction.drawCirclesEnabled = true
         } else {
             COBlinePrediction.drawCirclesEnabled = false
@@ -493,12 +493,12 @@ extension MainViewController {
         IOBlinePrediction.highlightEnabled = true
         IOBlinePrediction.drawValuesEnabled = false
 
-        if UserDefaultsRepository.showLines.value {
+        if Storage.shared.showLines.value {
             IOBlinePrediction.lineWidth = 2
         } else {
             IOBlinePrediction.lineWidth = 0
         }
-        if UserDefaultsRepository.showDots.value {
+        if Storage.shared.showDots.value {
             IOBlinePrediction.drawCirclesEnabled = true
         } else {
             IOBlinePrediction.drawCirclesEnabled = false
@@ -517,12 +517,12 @@ extension MainViewController {
         UAMlinePrediction.highlightEnabled = true
         UAMlinePrediction.drawValuesEnabled = false
 
-        if UserDefaultsRepository.showLines.value {
+        if Storage.shared.showLines.value {
             UAMlinePrediction.lineWidth = 2
         } else {
             UAMlinePrediction.lineWidth = 0
         }
-        if UserDefaultsRepository.showDots.value {
+        if Storage.shared.showDots.value {
             UAMlinePrediction.drawCirclesEnabled = true
         } else {
             UAMlinePrediction.drawCirclesEnabled = false
@@ -541,12 +541,12 @@ extension MainViewController {
         ZTlinePrediction.highlightEnabled = true
         ZTlinePrediction.drawValuesEnabled = false
 
-        if UserDefaultsRepository.showLines.value {
+        if Storage.shared.showLines.value {
             ZTlinePrediction.lineWidth = 2
         } else {
             ZTlinePrediction.lineWidth = 0
         }
-        if UserDefaultsRepository.showDots.value {
+        if Storage.shared.showDots.value {
             ZTlinePrediction.drawCirclesEnabled = true
         } else {
             ZTlinePrediction.drawCirclesEnabled = false
@@ -570,7 +570,7 @@ extension MainViewController {
         lineSmb.drawCirclesEnabled = false
         lineSmb.drawFilledEnabled = false
 
-        if UserDefaultsRepository.showValues.value {
+        if Storage.shared.showValues.value {
             lineSmb.drawValuesEnabled = true
             lineSmb.highlightEnabled = false
         } else {
@@ -624,13 +624,13 @@ extension MainViewController {
 
         // Add lower red line based on low alert value
         let ll = ChartLimitLine()
-        ll.limit = Double(UserDefaultsRepository.lowLine.value)
+        ll.limit = Storage.shared.lowLine.value
         ll.lineColor = NSUIColor.systemRed.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ll)
 
         // Add upper yellow line based on low alert value
         let ul = ChartLimitLine()
-        ul.limit = Double(UserDefaultsRepository.highLine.value)
+        ul.limit = Storage.shared.highLine.value
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
 
@@ -689,7 +689,7 @@ extension MainViewController {
         ul.lineWidth = 1
         BGChart.xAxis.addLimitLine(ul)
 
-        if UserDefaultsRepository.show30MinLine.value {
+        if Storage.shared.show30MinLine.value {
             let ul2 = ChartLimitLine()
             ul2.limit = Double(dateTimeUtils.getNowTimeIntervalUTC().advanced(by: -30 * 60))
             ul2.lineColor = NSUIColor.systemBlue.withAlphaComponent(0.5)
@@ -697,7 +697,7 @@ extension MainViewController {
             BGChart.xAxis.addLimitLine(ul2)
         }
 
-        if UserDefaultsRepository.showDIALines.value {
+        if Storage.shared.showDIALines.value {
             for i in 1 ..< 7 {
                 let ul = ChartLimitLine()
                 ul.limit = Double(dateTimeUtils.getNowTimeIntervalUTC() - Double(i * 60 * 60))
@@ -710,7 +710,7 @@ extension MainViewController {
             }
         }
 
-        if UserDefaultsRepository.show90MinLine.value {
+        if Storage.shared.show90MinLine.value {
             let ul3 = ChartLimitLine()
             ul3.limit = Double(dateTimeUtils.getNowTimeIntervalUTC().advanced(by: -90 * 60))
             ul3.lineColor = NSUIColor.systemOrange.withAlphaComponent(0.5)
@@ -721,9 +721,9 @@ extension MainViewController {
 
     func createMidnightLines() {
         // Draw a line at midnight: useful when showing multiple days of data
-        if UserDefaultsRepository.showMidnightLines.value {
+        if Storage.shared.showMidnightLines.value {
             var midnightTimeInterval = dateTimeUtils.getTimeIntervalMidnightToday()
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             let graphStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             while midnightTimeInterval > graphStart {
                 // Large chart
@@ -752,14 +752,14 @@ extension MainViewController {
         let dataIndexPrediction = 1
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
         let linePrediction = BGChart.lineData!.dataSets[dataIndexPrediction] as! LineChartDataSet
-        if UserDefaultsRepository.showLines.value {
+        if Storage.shared.showLines.value {
             lineBG.lineWidth = 2
             linePrediction.lineWidth = 2
         } else {
             lineBG.lineWidth = 0
             linePrediction.lineWidth = 0
         }
-        if UserDefaultsRepository.showDots.value {
+        if Storage.shared.showDots.value {
             lineBG.drawCirclesEnabled = true
             linePrediction.drawCirclesEnabled = true
         } else {
@@ -774,13 +774,13 @@ extension MainViewController {
 
         // Add lower red line based on low alert value
         let ll = ChartLimitLine()
-        ll.limit = Double(UserDefaultsRepository.lowLine.value)
+        ll.limit = Storage.shared.lowLine.value
         ll.lineColor = NSUIColor.systemRed.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ll)
 
         // Add upper yellow line based on low alert value
         let ul = ChartLimitLine()
-        ul.limit = Double(UserDefaultsRepository.highLine.value)
+        ul.limit = Storage.shared.highLine.value
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
 
@@ -802,22 +802,22 @@ extension MainViewController {
         let smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
         mainChart.removeAll(keepingCapacity: false)
         smallChart.removeAll(keepingCapacity: false)
-        let maxBGOffset: Float = 50
+        let maxBGOffset: Double = 50
 
         var colors = [NSUIColor]()
 
-        topBG = UserDefaultsRepository.minBGScale.value
+        topBG = Storage.shared.minBGScale.value
         for i in 0 ..< entries.count {
-            if Float(entries[i].sgv) > topBG - maxBGOffset {
-                topBG = Float(entries[i].sgv) + maxBGOffset
+            if Double(entries[i].sgv) > topBG - maxBGOffset {
+                topBG = Double(entries[i].sgv) + maxBGOffset
             }
             let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillText(line1: Localizer.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
             mainChart.append(value)
             smallChart.append(value)
 
-            if Double(entries[i].sgv) >= Double(UserDefaultsRepository.highLine.value) {
+            if Double(entries[i].sgv) >= Storage.shared.highLine.value {
                 colors.append(NSUIColor.systemYellow)
-            } else if Double(entries[i].sgv) <= Double(UserDefaultsRepository.lowLine.value) {
+            } else if Double(entries[i].sgv) <= Storage.shared.lowLine.value {
                 colors.append(NSUIColor.systemRed)
             } else {
                 colors.append(NSUIColor.systemGreen)
@@ -877,17 +877,17 @@ extension MainViewController {
         smallChart.clear()
 
         var colors = [NSUIColor]()
-        let maxBGOffset: Float = 20
+        let maxBGOffset: Double = 20
 
-        topPredictionBG = UserDefaultsRepository.minBGScale.value
+        topPredictionBG = Storage.shared.minBGScale.value
         for i in 0 ..< predictionData.count {
             var predictionVal = Double(predictionData[i].sgv)
-            if Float(predictionVal) > topPredictionBG - maxBGOffset {
-                topPredictionBG = Float(predictionVal) + maxBGOffset
+            if Double(predictionVal) > topPredictionBG - maxBGOffset {
+                topPredictionBG = predictionVal + maxBGOffset
             }
 
             if i == 0 {
-                if UserDefaultsRepository.showDots.value {
+                if Storage.shared.showDots.value {
                     colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(0.0))
                 } else {
                     colors.append((color ?? NSUIColor.systemPurple).withAlphaComponent(1.0))
@@ -930,12 +930,12 @@ extension MainViewController {
         var dataIndex = 2
         BGChart.lineData?.dataSets[dataIndex].clear()
         BGChartFull.lineData?.dataSets[dataIndex].clear()
-        var maxBasal = UserDefaultsRepository.minBasalScale.value
+        var maxBasal = Storage.shared.minBasalScale.value
         var maxBasalSmall = 0.0
         for i in 0 ..< basalData.count {
             let value = ChartDataEntry(x: Double(basalData[i].date), y: Double(basalData[i].basalRate), data: formatPillText(line1: String(basalData[i].basalRate), time: basalData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
             }
             if basalData[i].basalRate > maxBasal {
@@ -953,7 +953,7 @@ extension MainViewController {
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
 
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -967,7 +967,7 @@ extension MainViewController {
         for i in 0 ..< basalScheduleData.count {
             let value = ChartDataEntry(x: Double(basalScheduleData[i].date), y: Double(basalScheduleData[i].basalRate))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
             }
         }
@@ -975,7 +975,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1010,12 +1010,12 @@ extension MainViewController {
             }
 
             // skip if outside of visible area
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
             mainChart.addEntry(dot)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 smallChart.addEntry(dot)
             }
         }
@@ -1040,7 +1040,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1082,12 +1082,12 @@ extension MainViewController {
                 dateTimeStamp = dateTimeStamp - 150
             }
 
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: formatter.string(from: NSNumber(value: smbData[i].value)))
             mainChart.addEntry(dot)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 smallChart.addEntry(dot)
             }
         }
@@ -1095,7 +1095,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1106,8 +1106,8 @@ extension MainViewController {
         var dataIndex = 4
         var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
         var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
-        mainChart.clear()
-        smallChart.clear()
+        mainChart.removeAll(keepingCapacity: true)
+        smallChart.removeAll(keepingCapacity: true)
 
         var colors = [NSUIColor]()
         for i in 0 ..< carbData.count {
@@ -1119,7 +1119,7 @@ extension MainViewController {
             var valueString: String = formatter.string(from: NSNumber(value: carbData[i].value))!
 
             var hours = 3
-            if carbData[i].absorptionTime > 0, UserDefaultsRepository.showAbsorption.value {
+            if carbData[i].absorptionTime > 0, Storage.shared.showAbsorption.value {
                 hours = carbData[i].absorptionTime / 60
                 valueString += " " + String(hours) + "h"
             }
@@ -1131,7 +1131,7 @@ extension MainViewController {
             colors.append(NSUIColor.systemOrange.withAlphaComponent(1.0))
 
             // skip if outside of visible area
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
             if carbShift {
@@ -1140,7 +1140,7 @@ extension MainViewController {
 
             let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(dot)
             }
         }
@@ -1165,7 +1165,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1184,12 +1184,12 @@ extension MainViewController {
             formatter.minimumIntegerDigits = 1
 
             // skip if outside of visible area
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if bgCheckData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
             let value = ChartDataEntry(x: Double(bgCheckData[i].date), y: Double(bgCheckData[i].sgv), data: formatPillText(line1: Localizer.toDisplayUnits(String(bgCheckData[i].sgv)), time: bgCheckData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
             }
         }
@@ -1197,7 +1197,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1211,12 +1211,12 @@ extension MainViewController {
         let thisData = suspendGraphData
         for i in 0 ..< thisData.count {
             // skip if outside of visible area
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Suspend Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
             }
         }
@@ -1224,7 +1224,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1238,12 +1238,12 @@ extension MainViewController {
         let thisData = resumeGraphData
         for i in 0 ..< thisData.count {
             // skip if outside of visible area
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Resume Pump", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
             }
         }
@@ -1251,7 +1251,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1265,12 +1265,12 @@ extension MainViewController {
         let thisData = sensorStartGraphData
         for i in 0 ..< thisData.count {
             // skip if outside of visible area
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: "Start Sensor", time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
             }
         }
@@ -1278,7 +1278,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1292,12 +1292,12 @@ extension MainViewController {
         let thisData = noteGraphData
         for i in 0 ..< thisData.count {
             // skip if outside of visible area
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if thisData[i].date < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
             let value = ChartDataEntry(x: Double(thisData[i].date), y: Double(thisData[i].sgv), data: formatPillText(line1: thisData[i].note, time: thisData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(value)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(value)
             }
         }
@@ -1305,7 +1305,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1316,7 +1316,7 @@ extension MainViewController {
         let entries = bgData
         var bgChartEntry = [ChartDataEntry]()
         var colors = [NSUIColor]()
-        var maxBG: Float = UserDefaultsRepository.minBGScale.value
+        var maxBG = Storage.shared.minBGScale.value
 
         let lineBG = LineChartDataSet(entries: bgChartEntry, label: "")
 
@@ -1346,7 +1346,7 @@ extension MainViewController {
 
         // create Basal graph data
         var chartEntry = [ChartDataEntry]()
-        var maxBasal = UserDefaultsRepository.minBasalScale.value
+        var maxBasal = Storage.shared.minBasalScale.value
         let lineBasal = LineChartDataSet(entries: chartEntry, label: "")
         lineBasal.setDrawHighlightIndicators(false)
         lineBasal.setColor(NSUIColor.systemBlue, alpha: 0.5)
@@ -1651,27 +1651,27 @@ extension MainViewController {
             // Shift dots 30 seconds to create an empty 0 space between consecutive temps
             let preStartDot = ChartDataEntry(x: Double(thisItem.date), y: yBottom, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(preStartDot)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(preStartDot)
             }
 
             let startDot = ChartDataEntry(x: Double(thisItem.date + 1), y: yTop, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(startDot)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(startDot)
             }
 
             // End Dot
             let endDot = ChartDataEntry(x: Double(thisItem.endDate - 2), y: yTop, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(endDot)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(endDot)
             }
 
             // Post end dot
             let postEndDot = ChartDataEntry(x: Double(thisItem.endDate - 1), y: yBottom, data: labelText)
             BGChart.data?.dataSets[dataIndex].addEntry(postEndDot)
-            if UserDefaultsRepository.smallGraphTreatments.value {
+            if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(postEndDot)
             }
         }
@@ -1679,7 +1679,7 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
-        if UserDefaultsRepository.smallGraphTreatments.value {
+        if Storage.shared.smallGraphTreatments.value {
             BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
             BGChartFull.data?.notifyDataChanged()
             BGChartFull.notifyDataSetChanged()
@@ -1704,7 +1704,7 @@ extension MainViewController {
 
     func addEntryToCharts(entry: ChartDataEntry, chart: LineChartDataSet, smallChart: LineChartDataSet?) {
         chart.addEntry(entry)
-        if UserDefaultsRepository.smallGraphTreatments.value, let smallChart = smallChart {
+        if Storage.shared.smallGraphTreatments.value, let smallChart = smallChart {
             smallChart.addEntry(entry)
         }
     }
@@ -1722,7 +1722,7 @@ extension MainViewController {
         mainChartDataSet.clear()
 
         var smallChartDataSet: LineChartDataSet?
-        if UserDefaultsRepository.smallGraphTreatments.value,
+        if Storage.shared.smallGraphTreatments.value,
            let smallChartData = BGChartFull.lineData,
            smallChartData.dataSets.count > dataIndex,
            let smallDataSet = smallChartData.dataSets[dataIndex] as? LineChartDataSet
@@ -1871,16 +1871,16 @@ extension MainViewController {
         smallChart.clear()
 
         var colors = [NSUIColor]()
-        let maxBGOffset: Float = 20
+        let maxBGOffset: Double = 20
 
         for i in 0 ..< predictionData.count {
             let predictionVal = Double(predictionData[i].sgv)
-            if Float(predictionVal) > topPredictionBG - maxBGOffset {
-                topPredictionBG = Float(predictionVal) + maxBGOffset
+            if predictionVal > topPredictionBG - maxBGOffset {
+                topPredictionBG = predictionVal + maxBGOffset
             }
 
             if i == 0 {
-                if UserDefaultsRepository.showDots.value {
+                if Storage.shared.showDots.value {
                     colors.append(color.withAlphaComponent(0.0))
                 } else {
                     colors.append(color.withAlphaComponent(1.0))

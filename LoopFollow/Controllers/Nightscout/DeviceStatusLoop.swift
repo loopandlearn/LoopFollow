@@ -69,7 +69,7 @@ extension MainViewController {
                     if UserDefaultsRepository.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
                         predictionData.removeAll()
                         var predictionTime = lastLoopTime
-                        let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
+                        let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
                         var i = 0
                         while i <= toLoad {
                             if i < prediction.count {

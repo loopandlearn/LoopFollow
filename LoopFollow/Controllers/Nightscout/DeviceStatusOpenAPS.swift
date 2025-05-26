@@ -181,7 +181,7 @@ extension MainViewController {
 
             let predictioncolor = UIColor.systemGray
             PredictionLabel.textColor = predictioncolor
-            topPredictionBG = UserDefaultsRepository.minBGScale.value
+            topPredictionBG = Storage.shared.minBGScale.value
             if let predbgdata = predBGsData {
                 let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
                     ("ZT", "ZT", 12),
@@ -197,7 +197,7 @@ extension MainViewController {
                     var predictionData = [ShareGlucoseData]()
                     if let graphdata = predbgdata[type] as? [Double] {
                         var predictionTime = updatedTime ?? Date().timeIntervalSince1970
-                        let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
+                        let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
 
                         for i in 0 ... toLoad {
                             if i < graphdata.count {

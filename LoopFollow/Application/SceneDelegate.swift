@@ -9,8 +9,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     let synthesizer = AVSpeechSynthesizer()
 
-    let appStateController = AppStateController()
-
     func scene(_ scene: UIScene, willConnectTo _: UISceneSession, options _: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
@@ -22,20 +20,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
               let viewControllers = tabBarController.viewControllers
         else {
             return
-        }
-
-        // set the main controllers' connection to the app sate
-        // other controllers that need to know app state are setup programatically
-        for i in 0 ..< viewControllers.count {
-            if let vc = viewControllers[i] as? MainViewController {
-                vc.appStateController = appStateController
-            }
-            if let vc = viewControllers[i] as? NightscoutViewController {
-                vc.appStateController = appStateController
-            }
-            if let vc = viewControllers[i] as? SettingsViewController {
-                vc.appStateController = appStateController
-            }
         }
     }
 

@@ -10,7 +10,7 @@ extension MainViewController {
     func webLoadDexShare() {
         // Dexcom Share only returns 24 hrs of data as of now
         // Requesting more just for consistency with NS
-        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        let graphHours = 24 * Storage.shared.downloadDays.value
         let count = graphHours * 12
         dexShare?.fetchData(count) { err, result in
             if let error = err {
@@ -52,8 +52,8 @@ extension MainViewController {
 
         var parameters: [String: String] = [:]
         let utcISODateFormatter = ISO8601DateFormatter()
-        let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
-        parameters["count"] = "\(UserDefaultsRepository.downloadDays.value * 2 * 24 * 60 / 5)"
+        let date = Calendar.current.date(byAdding: .day, value: -1 * Storage.shared.downloadDays.value, to: Date())!
+        parameters["count"] = "\(Storage.shared.downloadDays.value * 2 * 24 * 60 / 5)"
         parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: date)
 
         // Exclude 'cal' entries
@@ -118,7 +118,7 @@ extension MainViewController {
 
     /// Processes incoming BG data.
     func ProcessDexBGData(data: [ShareGlucoseData], sourceName: String) {
-        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        let graphHours = 24 * Storage.shared.downloadDays.value
 
         guard !data.isEmpty else {
             LogManager.shared.log(category: .nightscout, message: "No bg data received. Skipping processing.", limitIdentifier: "No bg data received. Skipping processing.")
