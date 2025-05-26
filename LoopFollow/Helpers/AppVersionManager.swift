@@ -7,6 +7,14 @@ import Foundation
 class AppVersionManager {
     private let githubService = GitHubService()
 
+    func checkForNewVersionAsync() async -> (latest: String?, isNewer: Bool, isBlacklisted: Bool) {
+        await withCheckedContinuation { cont in
+            checkForNewVersion { latest, newer, blacklisted in
+                cont.resume(returning: (latest, newer, blacklisted))
+            }
+        }
+    }
+
     /// Checks for the availability of a new app version and if the current version is blacklisted.
     /// - Parameter completion: Returns latest version, a boolean for newer version existence, and blacklist status.
     /// Usage: `versionManager.checkForNewVersion { latestVersion, isNewer, isBlacklisted in ... }`
