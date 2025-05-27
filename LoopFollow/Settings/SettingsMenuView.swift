@@ -12,14 +12,15 @@ struct SettingsMenuView: View {
 
     // MARK: – Local state
 
-    @State private var sheet: Sheet?
+    @State private var path = NavigationPath()
     @State private var latestVersion: String?
     @State private var versionTint: Color = .secondary
+    @State private var navPath = NavigationPath()
 
     // MARK: – Body
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 // ───────── Data settings ─────────
                 dataSection
@@ -29,26 +30,26 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "Background Refresh Settings",
                                   icon: "arrow.clockwise")
                     {
-                        sheet = .backgroundRefresh
+                        path.append(Sheet.backgroundRefresh)
                     }
 
                     NavigationRow(title: "General Settings",
                                   icon: "gearshape")
                     {
-                        sheet = .general
+                        path.append(Sheet.general)
                     }
 
                     NavigationRow(title: "Graph Settings",
                                   icon: "chart.xyaxis.line")
                     {
-                        sheet = .graph
+                        path.append(Sheet.graph)
                     }
 
                     if IsNightscoutEnabled() {
                         NavigationRow(title: "Information Display Settings",
                                       icon: "info.circle")
                         {
-                            sheet = .infoDisplay
+                            path.append(Sheet.infoDisplay)
                         }
                     }
                 }
@@ -58,13 +59,13 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "Alarms",
                                   icon: "bell")
                     {
-                        sheet = .alarmsList
+                        path.append(Sheet.alarmsList)
                     }
 
                     NavigationRow(title: "Alarm Settings",
                                   icon: "bell.badge")
                     {
-                        sheet = .alarmSettings
+                        path.append(Sheet.alarmSettings)
                     }
                 }
 
@@ -73,13 +74,13 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "Calendar",
                                   icon: "calendar")
                     {
-                        sheet = .calendar
+                        path.append(Sheet.calendar)
                     }
 
                     NavigationRow(title: "Contact",
                                   icon: "person.circle")
                     {
-                        sheet = .contact
+                        path.append(Sheet.contact)
                     }
                 }
 
@@ -88,7 +89,7 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "Advanced Settings",
                                   icon: "exclamationmark.shield")
                     {
-                        sheet = .advanced
+                        path.append(Sheet.advanced)
                     }
                 }
 
@@ -96,14 +97,12 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "View Log",
                                   icon: "doc.text.magnifyingglass")
                     {
-                        sheet = .viewLog
+                        path.append(Sheet.viewLog)
                     }
 
                     ActionRow(title: "Share Logs",
-                              icon: "square.and.arrow.up")
-                    {
-                        shareLogs()
-                    }
+                              icon: "square.and.arrow.up",
+                              action: shareLogs)
                 }
 
                 // ───────── Community ─────────
@@ -117,9 +116,9 @@ struct SettingsMenuView: View {
                 buildInfoSection
             }
             .navigationTitle("Settings")
+            .navigationDestination(for: Sheet.self) { $0.destination }
         }
         .task { await refreshVersionInfo() }
-        .sheet(item: $sheet) { $0.destination }
     }
 
     // MARK: – Section builders
@@ -140,13 +139,13 @@ struct SettingsMenuView: View {
             NavigationRow(title: "Nightscout Settings",
                           icon: "network")
             {
-                sheet = .nightscout
+                path.append(Sheet.nightscout)
             }
 
             NavigationRow(title: "Dexcom Settings",
                           icon: "sensor.tag.radiowaves.forward")
             {
-                sheet = .dexcom
+                path.append(Sheet.dexcom)
             }
         }
         .onAppear {
@@ -162,6 +161,7 @@ struct SettingsMenuView: View {
         Section("Build Information") {
             keyValue("Version", ver, tint: versionTint)
             keyValue("Latest version", latestVersion ?? "Fetching…")
+
             if !(build.isMacApp() || build.isSimulatorBuild()) {
                 keyValue(build.expirationHeaderString,
                          dateTimeUtils.formattedDate(from: build.calculateExpirationDate()))
@@ -212,9 +212,9 @@ struct SettingsMenuView: View {
     }
 }
 
-// MARK: – Sheet routing (unchanged)
+// MARK: – Sheet routing
 
-private enum Sheet: Identifiable {
+private enum Sheet: Hashable, Identifiable {
     case nightscout, dexcom
     case backgroundRefresh
     case general, graph
@@ -225,7 +225,7 @@ private enum Sheet: Identifiable {
     case advanced
     case viewLog
 
-    var id: Int { hashValue }
+    var id: Self { self }
 
     @ViewBuilder
     var destination: some View {
@@ -239,13 +239,15 @@ private enum Sheet: Identifiable {
         case .alarmsList: AlarmListView()
         case .alarmSettings: AlarmSettingsView()
         case .remote: RemoteSettingsView(viewModel: .init())
-        case .calendar: WatchSettingsView()
+        case .calendar: CalendarSettingsView()
         case .contact: ContactSettingsView(viewModel: .init())
         case .advanced: AdvancedSettingsView(viewModel: .init())
         case .viewLog: LogView(viewModel: .init())
         }
     }
 }
+
+// MARK: – UIKit helpers (unchanged)
 
 import UIKit
 
@@ -261,7 +263,9 @@ extension UIApplication {
 
 extension UIViewController {
     func presentSimpleAlert(title: String, message: String) {
-        let a = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let a = UIAlertController(title: title,
+                                  message: message,
+                                  preferredStyle: .alert)
         a.addAction(UIAlertAction(title: "OK", style: .default))
         present(a, animated: true)
     }

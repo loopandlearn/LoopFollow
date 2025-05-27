@@ -5,8 +5,6 @@
 import SwiftUI
 
 struct GeneralSettingsView: View {
-    @Environment(\.presentationMode) var presentationMode
-
     @ObservedObject var colorBGText = Storage.shared.colorBGText
     @ObservedObject var appBadge = Storage.shared.appBadge
     @ObservedObject var forceDarkMode = Storage.shared.forceDarkMode
@@ -29,7 +27,7 @@ struct GeneralSettingsView: View {
     @ObservedObject var speakHighBGLimit = Storage.shared.speakHighBGLimit
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
                 Section("App Settings") {
                     Toggle("Display App Badge", isOn: $appBadge.value)
@@ -103,15 +101,8 @@ struct GeneralSettingsView: View {
                     }
                 }
             }
-            .navigationTitle("General Settings")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("General Settings", displayMode: .inline)
     }
 }

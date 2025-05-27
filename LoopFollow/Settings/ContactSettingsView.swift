@@ -7,7 +7,6 @@ import SwiftUI
 
 struct ContactSettingsView: View {
     @ObservedObject var viewModel: ContactSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
 
     @State private var showAlert: Bool = false
     @State private var alertTitle: String = ""
@@ -77,19 +76,12 @@ struct ContactSettingsView: View {
                     }
                 }
             }
-            .navigationBarTitle("Contact Settings", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
             .alert(isPresented: $showAlert) {
                 Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Contact", displayMode: .inline)
     }
 
     private func requestContactAccess() {

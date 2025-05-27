@@ -6,7 +6,6 @@ import SwiftUI
 
 struct LogView: View {
     @ObservedObject var viewModel = LogViewModel()
-    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         NavigationView {
@@ -34,18 +33,11 @@ struct LogView: View {
                     .padding(.horizontal)
                 }
             }
-            .navigationBarTitle("Today's Logs", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
             .onAppear {
                 viewModel.loadLogEntries()
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Today's Logs", displayMode: .inline)
     }
 }

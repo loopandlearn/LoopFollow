@@ -6,7 +6,6 @@ import SwiftUI
 
 struct InfoDisplaySettingsView: View {
     @ObservedObject var viewModel: InfoDisplaySettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         NavigationView {
@@ -40,13 +39,11 @@ struct InfoDisplaySettingsView: View {
                     .environment(\.editMode, .constant(.active))
                 }
             }
-            .navigationBarItems(trailing: Button("Done") {
-                presentationMode.wrappedValue.dismiss()
-            })
             .onDisappear {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Information Display Settings", displayMode: .inline)
     }
 }

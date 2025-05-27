@@ -6,7 +6,6 @@ import SwiftUI
 
 struct BackgroundRefreshSettingsView: View {
     @ObservedObject var viewModel: BackgroundRefreshSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
     @State private var forceRefresh = false
     @State private var timer: Timer?
 
@@ -22,14 +21,6 @@ struct BackgroundRefreshSettingsView: View {
                     availableDevicesSection
                 }
             }
-            .navigationBarTitle("Background Refresh Settings", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
             .onAppear {
                 startTimer()
             }
@@ -38,6 +29,7 @@ struct BackgroundRefreshSettingsView: View {
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Background Refresh Settings", displayMode: .inline)
     }
 
     // MARK: - Subviews / Computed Properties

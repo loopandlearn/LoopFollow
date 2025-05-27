@@ -125,7 +125,7 @@
 		DD8316482DE49EE5004467AA /* Storage+Migrate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316472DE49EE5004467AA /* Storage+Migrate.swift */; };
 		DD83164A2DE4C504004467AA /* SettingsStepperRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316492DE4C504004467AA /* SettingsStepperRow.swift */; };
 		DD83164C2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */; };
-		DD83164E2DE4E093004467AA /* WatchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164D2DE4E093004467AA /* WatchSettingsView.swift */; };
+		DD83164E2DE4E093004467AA /* CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164D2DE4E093004467AA /* CalendarSettingsView.swift */; };
 		DD8316502DE4E635004467AA /* SettingsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164F2DE4E635004467AA /* SettingsMenuView.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
@@ -492,7 +492,7 @@
 		DD8316472DE49EE5004467AA /* Storage+Migrate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Storage+Migrate.swift"; sourceTree = "<group>"; };
 		DD8316492DE4C504004467AA /* SettingsStepperRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStepperRow.swift; sourceTree = "<group>"; };
 		DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BinaryFloatingPoint+localized.swift"; sourceTree = "<group>"; };
-		DD83164D2DE4E093004467AA /* WatchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettingsView.swift; sourceTree = "<group>"; };
+		DD83164D2DE4E093004467AA /* CalendarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingsView.swift; sourceTree = "<group>"; };
 		DD83164F2DE4E635004467AA /* SettingsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMenuView.swift; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
@@ -852,11 +852,15 @@
 			isa = PBXGroup;
 			children = (
 				DD83164F2DE4E635004467AA /* SettingsMenuView.swift */,
-				DD83164D2DE4E093004467AA /* WatchSettingsView.swift */,
+				DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */,
+				DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */,
+				DD83164D2DE4E093004467AA /* CalendarSettingsView.swift */,
 				DD8316452DE49B09004467AA /* GraphSettingsView.swift */,
 				DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */,
 				DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */,
 				DD8316172DE3633D004467AA /* GeneralSettingsView.swift */,
+				DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */,
+				DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -868,15 +872,6 @@
 				DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */,
 			);
 			path = Nightscout;
-			sourceTree = "<group>";
-		};
-		DD2C2E522D3C36A8006413A5 /* Dexcom */ = {
-			isa = PBXGroup;
-			children = (
-				DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */,
-				DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */,
-			);
-			path = Dexcom;
 			sourceTree = "<group>";
 		};
 		DD4878062C7B2E9E0048F05C /* Settings */ = {
@@ -932,19 +927,9 @@
 				DDA9ACAB2D6B316F00E6F1A9 /* ContactType.swift */,
 				DDA9ACA92D6A6B8200E6F1A9 /* ContactIncludeOption.swift */,
 				DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */,
-				DD50C7512D0828B40057AE6F /* Settings */,
 				DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */,
 			);
 			path = Contact;
-			sourceTree = "<group>";
-		};
-		DD50C7512D0828B40057AE6F /* Settings */ = {
-			isa = PBXGroup;
-			children = (
-				DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */,
-				DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */,
-			);
-			path = Settings;
 			sourceTree = "<group>";
 		};
 		DD5334252C61667700062F9D /* InfoDisplaySettings */ = {
@@ -1382,7 +1367,6 @@
 				DDC7E5142DBCE1B900EB1127 /* Snoozer */,
 				DDCF9A7E2D85FCE6004DF4DD /* Alarm */,
 				DD1A97122D429495000DDC11 /* Settings */,
-				DD2C2E522D3C36A8006413A5 /* Dexcom */,
 				DD2C2E4D2D3B8ACF006413A5 /* Nightscout */,
 				DD9ED0C62D355225000D2A63 /* Log */,
 				DDEF503D2D32753A00999A5D /* Task */,
@@ -1995,7 +1979,7 @@
 				DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */,
 				DD7F4C212DD66BB200D449E9 /* FastRiseAlarmEditor.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
-				DD83164E2DE4E093004467AA /* WatchSettingsView.swift in Sources */,
+				DD83164E2DE4E093004467AA /* CalendarSettingsView.swift in Sources */,
 				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
 				DD58171C2D299F940041FB98 /* BluetoothDevice.swift in Sources */,
 				DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */,
