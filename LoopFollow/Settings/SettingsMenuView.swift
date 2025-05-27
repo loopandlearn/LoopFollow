@@ -155,7 +155,7 @@ struct SettingsMenuView: View {
     private func navRow(
         title: String,
         icon: String,
-        tint: Color = .primary,
+        tint: Color = .white,
         destination: Sheet
     ) -> some View {
         Button {
