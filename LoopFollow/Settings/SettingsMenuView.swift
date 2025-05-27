@@ -62,7 +62,7 @@ struct SettingsMenuView: View {
                            destination: .calendar)
 
                     navRow(title: "Contact",
-                           icon: "envelope",
+                           icon: "person.circle",
                            destination: .contact)
                 }
 
@@ -83,7 +83,7 @@ struct SettingsMenuView: View {
                     } label: {
                         Label("Share Logs", systemImage: "square.and.arrow.up")
                     }
-                    .accessibilityIdentifier("ShareLogsButton")
+                    .buttonStyle(.plain)
                 }
 
                 // ────────────── Community ──────────────
@@ -119,11 +119,11 @@ struct SettingsMenuView: View {
             .pickerStyle(.segmented)
 
             navRow(title: "Nightscout Settings",
-                   icon: "antenna.radiowaves.left.and.right",
+                   icon: "network",
                    destination: .nightscout)
 
             navRow(title: "Dexcom Settings",
-                   icon: "waveform.path.ecg",
+                   icon: "sensor.tag.radiowaves.forward",
                    destination: .dexcom)
         }
         .onAppear {
