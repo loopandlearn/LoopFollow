@@ -1,6 +1,6 @@
 // LoopFollow
 // Helpers.swift
-// Created by Jonas Björkert on 2025-05-21.
+// Created by Jonas Björkert on 2025-05-23.
 
 // Tests/AlarmConditions/Helpers.swift
 import Foundation

@@ -9,7 +9,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/nicklockwood/SwiftFormat.git",
-            from: "0.41.2"
+            from: "0.56.1"
         ),
     ],
     targets: [
