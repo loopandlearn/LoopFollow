@@ -3,6 +3,7 @@
 // Created by Jonas Björkert on 2025-05-26.
 
 import SwiftUI
+import UIKit
 
 struct SettingsMenuView: View {
     // MARK: – Call-backs -----------------------------------------------------
@@ -153,15 +154,27 @@ struct SettingsMenuView: View {
     // MARK: – Row helpers ----------------------------------------------------
 
     /// Standard row with icon, chevron and sheet presentation
-    private func navRow(title: String,
-                        icon: String,
-                        destination: Sheet) -> some View
-    {
-        NavigationLink {
-            destination.destination
+    /// One tappable row, styled like the iOS Settings app
+    @ViewBuilder
+    private func navRow(
+        title: String,
+        icon: String,
+        tint: Color = .primary,
+        destination: Sheet
+    ) -> some View {
+        Button {
+            sheet = destination
         } label: {
-            Label(title, systemImage: icon)
+            HStack {
+                Glyph(symbol: icon, tint: tint)
+                Text(title)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(Color(uiColor: .tertiaryLabel))
+            }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 
     /// Simple key-value row
@@ -256,5 +269,25 @@ extension UIViewController {
         let a = UIAlertController(title: title, message: message, preferredStyle: .alert)
         a.addAction(UIAlertAction(title: "OK", style: .default))
         present(a, animated: true)
+    }
+}
+
+struct Glyph: View {
+    let symbol: String
+    let tint: Color
+
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color(uiColor: .systemGray))
+                .frame(width: 28, height: 28)
+
+            Image(systemName: symbol)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundStyle(tint)
+        }
+        .frame(width: 36, height: 36)
     }
 }
