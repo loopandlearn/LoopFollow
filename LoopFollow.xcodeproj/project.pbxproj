@@ -192,6 +192,10 @@
 		DDDF6F472D479AD200884336 /* LoopOverrideViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */; };
 		DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F482D479AEF00884336 /* NoRemoteView.swift */; };
 		DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE69ED12C7256260013EAEC /* RemoteType.swift */; };
+		DDE75D232DE5E505007C1FC1 /* Glyph.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D222DE5E505007C1FC1 /* Glyph.swift */; };
+		DDE75D272DE5E539007C1FC1 /* ActionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D262DE5E539007C1FC1 /* ActionRow.swift */; };
+		DDE75D292DE5E56C007C1FC1 /* LinkRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D282DE5E56C007C1FC1 /* LinkRow.swift */; };
+		DDE75D2B2DE5E613007C1FC1 /* NavigationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D2A2DE5E613007C1FC1 /* NavigationRow.swift */; };
 		DDEF503A2D31615000999A5D /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50392D31614200999A5D /* LogManager.swift */; };
 		DDEF503C2D31BE2D00999A5D /* TaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */; };
 		DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503E2D32754A00999A5D /* ProfileTask.swift */; };
@@ -558,6 +562,10 @@
 		DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideViewModel.swift; sourceTree = "<group>"; };
 		DDDF6F482D479AEF00884336 /* NoRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoRemoteView.swift; sourceTree = "<group>"; };
 		DDE69ED12C7256260013EAEC /* RemoteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteType.swift; sourceTree = "<group>"; };
+		DDE75D222DE5E505007C1FC1 /* Glyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glyph.swift; sourceTree = "<group>"; };
+		DDE75D262DE5E539007C1FC1 /* ActionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionRow.swift; sourceTree = "<group>"; };
+		DDE75D282DE5E56C007C1FC1 /* LinkRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkRow.swift; sourceTree = "<group>"; };
+		DDE75D2A2DE5E613007C1FC1 /* NavigationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationRow.swift; sourceTree = "<group>"; };
 		DDEF50392D31614200999A5D /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskScheduler.swift; sourceTree = "<group>"; };
 		DDEF503E2D32754A00999A5D /* ProfileTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTask.swift; sourceTree = "<group>"; };
@@ -1172,11 +1180,15 @@
 		DDF6999C2C5AAA4C0058A8D9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DDE75D222DE5E505007C1FC1 /* Glyph.swift */,
 				DD8316492DE4C504004467AA /* SettingsStepperRow.swift */,
 				DD8316432DE47CA9004467AA /* BGPicker.swift */,
 				DDF6999D2C5AAA640058A8D9 /* ErrorMessageView.swift */,
 				DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */,
 				DD16AF102C997B4600FB655A /* LoadingButtonView.swift */,
+				DDE75D262DE5E539007C1FC1 /* ActionRow.swift */,
+				DDE75D282DE5E56C007C1FC1 /* LinkRow.swift */,
+				DDE75D2A2DE5E613007C1FC1 /* NavigationRow.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1811,6 +1823,7 @@
 				DD4AFB492DB576C200BB593F /* AlarmSettingsView.swift in Sources */,
 				DD7F4C032DD4B92E00D449E9 /* NotLoopingAlarmEditor.swift in Sources */,
 				DD7F4C1B2DD6501D00D449E9 /* COBCondition.swift in Sources */,
+				DDE75D232DE5E505007C1FC1 /* Glyph.swift in Sources */,
 				DD4878202C7DAF890048F05C /* PushMessage.swift in Sources */,
 				DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */,
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
@@ -1865,6 +1878,7 @@
 				DDB0AF522BB1A8BE00AFA48B /* BuildDetails.swift in Sources */,
 				DDA9ACAA2D6A6B8300E6F1A9 /* ContactIncludeOption.swift in Sources */,
 				DD7F4C1D2DD650D500D449E9 /* COBAlarmEditor.swift in Sources */,
+				DDE75D272DE5E539007C1FC1 /* ActionRow.swift in Sources */,
 				DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */,
 				DD8316182DE3633D004467AA /* GeneralSettingsView.swift in Sources */,
 				DD58171E2D299FCA0041FB98 /* BluetoothDeviceDelegate.swift in Sources */,
@@ -1884,6 +1898,7 @@
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
 				DD7F4C232DD7A62200D449E9 /* AlarmType+SortDirection.swift in Sources */,
 				DD0650F72DCFDA26004D3B41 /* InfoBanner.swift in Sources */,
+				DDE75D292DE5E56C007C1FC1 /* LinkRow.swift in Sources */,
 				DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */,
 				DD7B0D442D730A3B0063DCB6 /* CycleHelper.swift in Sources */,
 				DD7F4BA12DD2193F00D449E9 /* AlarmSnoozeSection.swift in Sources */,
@@ -1951,6 +1966,7 @@
 				DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */,
 				DD50C7532D0828D10057AE6F /* ContactSettingsView.swift in Sources */,
 				DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */,
+				DDE75D2B2DE5E613007C1FC1 /* NavigationRow.swift in Sources */,
 				DD4AFB3B2DB55CB600BB593F /* TimeOfDay.swift in Sources */,
 				DDEF503C2D31BE2D00999A5D /* TaskScheduler.swift in Sources */,
 				DD0650EB2DCE8385004D3B41 /* LowBGCondition.swift in Sources */,

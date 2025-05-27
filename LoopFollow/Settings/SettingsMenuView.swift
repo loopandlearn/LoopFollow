@@ -6,91 +6,114 @@ import SwiftUI
 import UIKit
 
 struct SettingsMenuView: View {
-    // MARK: – Call-backs -----------------------------------------------------
+    // MARK: – Call-backs
 
     let onNightscoutVisibilityChange: (_ enabled: Bool) -> Void
 
-    // MARK: – Local state ----------------------------------------------------
+    // MARK: – Local state
 
     @State private var sheet: Sheet?
     @State private var latestVersion: String?
     @State private var versionTint: Color = .secondary
 
-    // MARK: – Body -----------------------------------------------------------
+    // MARK: – Body
 
     var body: some View {
         NavigationStack {
             List {
-                // ────────────── Data settings ──────────────
+                // ───────── Data settings ─────────
                 dataSection
 
-                // ────────────── App settings ──────────────
+                // ───────── App settings ─────────
                 Section("App Settings") {
-                    navRow(title: "Background Refresh Settings",
-                           icon: "arrow.clockwise",
-                           destination: .backgroundRefresh)
+                    NavigationRow(title: "Background Refresh Settings",
+                                  icon: "arrow.clockwise")
+                    {
+                        sheet = .backgroundRefresh
+                    }
 
-                    navRow(title: "General Settings",
-                           icon: "gearshape",
-                           destination: .general)
+                    NavigationRow(title: "General Settings",
+                                  icon: "gearshape")
+                    {
+                        sheet = .general
+                    }
 
-                    navRow(title: "Graph Settings",
-                           icon: "chart.xyaxis.line",
-                           destination: .graph)
+                    NavigationRow(title: "Graph Settings",
+                                  icon: "chart.xyaxis.line")
+                    {
+                        sheet = .graph
+                    }
 
                     if IsNightscoutEnabled() {
-                        navRow(title: "Information Display Settings",
-                               icon: "info.circle",
-                               destination: .infoDisplay)
+                        NavigationRow(title: "Information Display Settings",
+                                      icon: "info.circle")
+                        {
+                            sheet = .infoDisplay
+                        }
                     }
                 }
 
-                // ────────────── Alarms ──────────────
+                // ───────── Alarms ─────────
                 Section {
-                    navRow(title: "Alarms",
-                           icon: "bell",
-                           destination: .alarmsList)
+                    NavigationRow(title: "Alarms",
+                                  icon: "bell")
+                    {
+                        sheet = .alarmsList
+                    }
 
-                    navRow(title: "Alarm Settings",
-                           icon: "bell.badge",
-                           destination: .alarmSettings)
+                    NavigationRow(title: "Alarm Settings",
+                                  icon: "bell.badge")
+                    {
+                        sheet = .alarmSettings
+                    }
                 }
 
-                // ────────────── Integrations ──────────────
+                // ───────── Integrations ─────────
                 Section("Integrations") {
-                    navRow(title: "Calendar",
-                           icon: "calendar",
-                           destination: .calendar)
+                    NavigationRow(title: "Calendar",
+                                  icon: "calendar")
+                    {
+                        sheet = .calendar
+                    }
 
-                    navRow(title: "Contact",
-                           icon: "person.circle",
-                           destination: .contact)
+                    NavigationRow(title: "Contact",
+                                  icon: "person.circle")
+                    {
+                        sheet = .contact
+                    }
                 }
 
-                // ────────────── Advanced / Logs ──────────────
+                // ───────── Advanced / Logs ─────────
                 Section("Advanced Settings") {
-                    navRow(title: "Advanced Settings",
-                           icon: "exclamationmark.shield",
-                           destination: .advanced)
+                    NavigationRow(title: "Advanced Settings",
+                                  icon: "exclamationmark.shield")
+                    {
+                        sheet = .advanced
+                    }
                 }
 
                 Section("Logging") {
-                    navRow(title: "View Log",
-                           icon: "doc.text.magnifyingglass",
-                           destination: .viewLog)
+                    NavigationRow(title: "View Log",
+                                  icon: "doc.text.magnifyingglass")
+                    {
+                        sheet = .viewLog
+                    }
 
-                    actionRow(title: "Share Logs",
-                              icon: "square.and.arrow.up") { shareLogs() }
+                    ActionRow(title: "Share Logs",
+                              icon: "square.and.arrow.up")
+                    {
+                        shareLogs()
+                    }
                 }
 
-                // ────────────── Community ──────────────
+                // ───────── Community ─────────
                 Section("Community") {
-                    linkRow(title: "LoopFollow Facebook Group",
+                    LinkRow(title: "LoopFollow Facebook Group",
                             icon: "person.2.fill",
                             url: URL(string: "https://www.facebook.com/groups/loopfollowlnl")!)
                 }
 
-                // ────────────── Build info ──────────────
+                // ───────── Build info ─────────
                 buildInfoSection
             }
             .navigationTitle("Settings")
@@ -99,9 +122,8 @@ struct SettingsMenuView: View {
         .sheet(item: $sheet) { $0.destination }
     }
 
-    // MARK: – Section builders ----------------------------------------------
+    // MARK: – Section builders
 
-    /// “Data Settings”
     @ViewBuilder
     private var dataSection: some View {
         Section("Data Settings") {
@@ -115,20 +137,23 @@ struct SettingsMenuView: View {
             }
             .pickerStyle(.segmented)
 
-            navRow(title: "Nightscout Settings",
-                   icon: "network",
-                   destination: .nightscout)
+            NavigationRow(title: "Nightscout Settings",
+                          icon: "network")
+            {
+                sheet = .nightscout
+            }
 
-            navRow(title: "Dexcom Settings",
-                   icon: "sensor.tag.radiowaves.forward",
-                   destination: .dexcom)
+            NavigationRow(title: "Dexcom Settings",
+                          icon: "sensor.tag.radiowaves.forward")
+            {
+                sheet = .dexcom
+            }
         }
         .onAppear {
             onNightscoutVisibilityChange(IsNightscoutEnabled())
         }
     }
 
-    /// version / build info
     @ViewBuilder
     private var buildInfoSection: some View {
         let build = BuildDetails.default
@@ -137,45 +162,22 @@ struct SettingsMenuView: View {
         Section("Build Information") {
             keyValue("Version", ver, tint: versionTint)
             keyValue("Latest version", latestVersion ?? "Fetching…")
-
             if !(build.isMacApp() || build.isSimulatorBuild()) {
                 keyValue(build.expirationHeaderString,
                          dateTimeUtils.formattedDate(from: build.calculateExpirationDate()))
             }
-            keyValue("Built", dateTimeUtils.formattedDate(from: build.buildDate()))
+            keyValue("Built",
+                     dateTimeUtils.formattedDate(from: build.buildDate()))
             keyValue("Branch", build.branchAndSha)
         }
     }
 
-    // MARK: – Row helpers ----------------------------------------------------
+    // MARK: – Helpers
 
-    /// Standard row with icon, chevron and sheet presentation
-    /// One tappable row, styled like the iOS Settings app
-    @ViewBuilder
-    private func navRow(
-        title: String,
-        icon: String,
-        tint: Color = .white,
-        destination: Sheet
-    ) -> some View {
-        Button {
-            sheet = destination
-        } label: {
-            HStack {
-                Glyph(symbol: icon, tint: tint)
-                Text(title)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundColor(Color(uiColor: .tertiaryLabel))
-            }
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-    }
-
-    /// Simple key-value row
-    @ViewBuilder
-    private func keyValue(_ key: String, _ value: String, tint: Color = .secondary) -> some View {
+    private func keyValue(_ key: String,
+                          _ value: String,
+                          tint: Color = .secondary) -> some View
+    {
         HStack {
             Text(key)
             Spacer()
@@ -183,21 +185,17 @@ struct SettingsMenuView: View {
         }
     }
 
-    // MARK: – Version check --------------------------------------------------
-
     private func refreshVersionInfo() async {
-        let manager = AppVersionManager()
-        let (latest, newer, blacklisted) = await manager.checkForNewVersionAsync()
+        let mgr = AppVersionManager()
+        let (latest, newer, blacklisted) = await mgr.checkForNewVersionAsync()
         latestVersion = latest ?? "Unknown"
 
-        // match old colour logic
-        let current = manager.version()
-        versionTint = blacklisted ? .red :
-            newer ? .orange :
-            latest == current ? .green : .secondary
+        let current = mgr.version()
+        versionTint = blacklisted ? .red
+            : newer ? .orange
+            : latest == current ? .green
+            : .secondary
     }
-
-    // MARK: – Share logs -----------------------------------------------------
 
     private func shareLogs() {
         let files = LogManager.shared.logFilesForTodayAndYesterday()
@@ -208,12 +206,13 @@ struct SettingsMenuView: View {
             )
             return
         }
-        let avc = UIActivityViewController(activityItems: files, applicationActivities: nil)
+        let avc = UIActivityViewController(activityItems: files,
+                                           applicationActivities: nil)
         UIApplication.shared.topMost?.present(avc, animated: true)
     }
 }
 
-// MARK: – Sheet routing identical to earlier -------------------------------
+// MARK: – Sheet routing (unchanged)
 
 private enum Sheet: Identifiable {
     case nightscout, dexcom
@@ -265,57 +264,5 @@ extension UIViewController {
         let a = UIAlertController(title: title, message: message, preferredStyle: .alert)
         a.addAction(UIAlertAction(title: "OK", style: .default))
         present(a, animated: true)
-    }
-}
-
-struct Glyph: View {
-    let symbol: String
-    let tint: Color
-
-    @Environment(\.colorScheme) private var scheme
-
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color(uiColor: .systemGray))
-                .frame(width: 28, height: 28)
-
-            Image(systemName: symbol)
-                .font(.system(size: 16, weight: .regular))
-                .foregroundStyle(tint)
-        }
-        .frame(width: 36, height: 36)
-    }
-}
-
-@ViewBuilder
-private func actionRow(
-    title: String,
-    icon: String,
-    tint: Color = .primary,
-    action: @escaping () -> Void
-) -> some View {
-    Button { action() } label: {
-        HStack {
-            Glyph(symbol: icon, tint: tint)
-            Text(title)
-            Spacer()
-            Image(systemName: "chevron.right")
-                .foregroundColor(Color(uiColor: .tertiaryLabel))
-        }
-        .contentShape(Rectangle())
-    }
-    .buttonStyle(.plain)
-}
-
-@ViewBuilder
-private func linkRow(
-    title: String,
-    icon: String,
-    tint: Color = .primary,
-    url: URL
-) -> some View {
-    actionRow(title: title, icon: icon, tint: tint) {
-        UIApplication.shared.open(url)
     }
 }
