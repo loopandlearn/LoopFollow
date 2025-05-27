@@ -206,6 +206,7 @@ struct RemoteSettingsView: View {
                 }
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 
     // MARK: - Custom Row for Remote Type Selection

@@ -112,5 +112,6 @@ struct GeneralSettingsView: View {
                 }
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 }

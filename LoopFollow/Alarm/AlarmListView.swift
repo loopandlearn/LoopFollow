@@ -142,6 +142,7 @@ struct AlarmListView: View {
                 sheetContent(for: info)
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 
     private func handleSheetDismiss() {

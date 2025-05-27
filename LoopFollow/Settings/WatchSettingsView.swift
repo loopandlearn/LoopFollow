@@ -82,6 +82,7 @@ struct WatchSettingsView: View {
                 await requestCalendarAccessAndLoad()
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 
     // MARK: - Helpers

@@ -47,5 +47,6 @@ struct InfoDisplaySettingsView: View {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 }

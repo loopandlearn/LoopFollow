@@ -37,5 +37,6 @@ struct AdvancedSettingsView: View {
                 }
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 }
