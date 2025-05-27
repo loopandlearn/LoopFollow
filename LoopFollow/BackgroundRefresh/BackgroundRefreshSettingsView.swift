@@ -37,6 +37,7 @@ struct BackgroundRefreshSettingsView: View {
                 stopTimer()
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 
     // MARK: - Subviews / Computed Properties

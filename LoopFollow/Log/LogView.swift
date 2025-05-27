@@ -46,5 +46,6 @@ struct LogView: View {
                 viewModel.loadLogEntries()
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 }

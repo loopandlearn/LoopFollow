@@ -27,6 +27,7 @@ struct NightscoutSettingsView: View {
                 viewModel.dismiss()
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 
     // MARK: - Subviews / Computed Properties
