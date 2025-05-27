@@ -79,19 +79,15 @@ struct SettingsMenuView: View {
                            icon: "doc.text.magnifyingglass",
                            destination: .viewLog)
 
-                    Button {
-                        shareLogs()
-                    } label: {
-                        Label("Share Logs", systemImage: "square.and.arrow.up")
-                    }
-                    .buttonStyle(.plain)
+                    actionRow(title: "Share Logs",
+                              icon: "square.and.arrow.up") { shareLogs() }
                 }
 
                 // ────────────── Community ──────────────
                 Section("Community") {
-                    Link(destination: URL(string: "https://www.facebook.com/groups/loopfollowlnl")!) {
-                        Label("LoopFollow Facebook Group", systemImage: "person.3")
-                    }
+                    linkRow(title: "LoopFollow Facebook Group",
+                            icon: "person.2.fill",
+                            url: URL(string: "https://www.facebook.com/groups/loopfollowlnl")!)
                 }
 
                 // ────────────── Build info ──────────────
@@ -289,5 +285,37 @@ struct Glyph: View {
                 .foregroundStyle(tint)
         }
         .frame(width: 36, height: 36)
+    }
+}
+
+@ViewBuilder
+private func actionRow(
+    title: String,
+    icon: String,
+    tint: Color = .primary,
+    action: @escaping () -> Void
+) -> some View {
+    Button { action() } label: {
+        HStack {
+            Glyph(symbol: icon, tint: tint)
+            Text(title)
+            Spacer()
+            Image(systemName: "chevron.right")
+                .foregroundColor(Color(uiColor: .tertiaryLabel))
+        }
+        .contentShape(Rectangle())
+    }
+    .buttonStyle(.plain)
+}
+
+@ViewBuilder
+private func linkRow(
+    title: String,
+    icon: String,
+    tint: Color = .primary,
+    url: URL
+) -> some View {
+    actionRow(title: title, icon: icon, tint: tint) {
+        UIApplication.shared.open(url)
     }
 }
