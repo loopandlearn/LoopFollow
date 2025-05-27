@@ -6,7 +6,6 @@ import SwiftUI
 
 struct AdvancedSettingsView: View {
     @ObservedObject var viewModel: AdvancedSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         NavigationView {
@@ -28,15 +27,8 @@ struct AdvancedSettingsView: View {
                     Toggle("Debug Log Level", isOn: $viewModel.debugLogLevel)
                 }
             }
-            .navigationBarTitle("Advanced Settings", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Advanced Settings", displayMode: .inline)
     }
 }

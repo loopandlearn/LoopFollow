@@ -1,12 +1,11 @@
 // LoopFollow
 // DexcomSettingsView.swift
-// Created by Jonas Björkert on 2025-01-18.
+// Created by Jonas Björkert on 2025-05-23.
 
 import SwiftUI
 
 struct DexcomSettingsView: View {
     @ObservedObject var viewModel: DexcomSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         NavigationView {
@@ -27,15 +26,8 @@ struct DexcomSettingsView: View {
                     .pickerStyle(SegmentedPickerStyle())
                 }
             }
-            .navigationBarTitle("Dexcom Settings", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Dexcom Settings", displayMode: .inline)
     }
 }

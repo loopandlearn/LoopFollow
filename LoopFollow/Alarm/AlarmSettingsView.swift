@@ -6,7 +6,6 @@ import SwiftUI
 
 struct AlarmSettingsView: View {
     @ObservedObject private var cfgStore = Storage.shared.alarmConfiguration
-    @Environment(\.presentationMode) var presentationMode
 
     /// Helper to bind an optional Date? into a non‑optional Date for DatePicker
     private func optDateBinding(_ b: Binding<Date?>) -> Binding<Date> {
@@ -187,15 +186,8 @@ struct AlarmSettingsView: View {
                     )
                 }
             }
-            .navigationTitle("Alarm Settings")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Alarm Settings", displayMode: .inline)
     }
 }

@@ -1,11 +1,11 @@
 // LoopFollow
-// WatchSettingsView.swift
+// CalendarSettingsView.swift
 // Created by Jonas Björkert on 2025-05-26.
 
 import EventKit
 import SwiftUI
 
-struct WatchSettingsView: View {
+struct CalendarSettingsView: View {
     // MARK: Storage bindings
 
     @ObservedObject private var writeCalendarEvent = Storage.shared.writeCalendarEvent
@@ -15,14 +15,13 @@ struct WatchSettingsView: View {
 
     // MARK: Local state
 
-    @Environment(\.presentationMode) private var presentationMode
     @State private var calendars: [EKCalendar] = []
     @State private var accessDenied = false
 
     // MARK: Body
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
                 // ------------- Calendar write -------------
                 Section {
@@ -72,17 +71,12 @@ struct WatchSettingsView: View {
                     }
                 }
             }
-            .navigationTitle("Calendar")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { presentationMode.wrappedValue.dismiss() }
-                }
-            }
             .task { // runs once on appear
                 await requestCalendarAccessAndLoad()
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Calendar", displayMode: .inline)
     }
 
     // MARK: - Helpers

@@ -17,13 +17,13 @@ struct AlarmEditor: View {
             innerEditor()
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    if isNew {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Done") {
-                                onDone()
-                                dismiss()
-                            }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {
+                            onDone()
+                            dismiss()
                         }
+                    }
+                    if isNew {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Cancel") {
                                 onCancel()

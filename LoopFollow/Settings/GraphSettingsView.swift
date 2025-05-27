@@ -5,9 +5,6 @@
 import SwiftUI
 
 struct GraphSettingsView: View {
-    @Environment(\.presentationMode) private var presentationMode
-
-    // ── Stored settings ──────────────────────────────────────────────────────
     @ObservedObject private var showDots = Storage.shared.showDots
     @ObservedObject private var showLines = Storage.shared.showLines
     @ObservedObject private var showValues = Storage.shared.showValues
@@ -26,11 +23,10 @@ struct GraphSettingsView: View {
     @ObservedObject private var highLine = Storage.shared.highLine
     @ObservedObject private var downloadDays = Storage.shared.downloadDays
 
-    // ─────────────────────────────────────────────────────────────────────────
     private var nightscoutEnabled: Bool { IsNightscoutEnabled() }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
                 // ── Graph Display ────────────────────────────────────────────
                 Section("Graph Display") {
@@ -136,14 +132,9 @@ struct GraphSettingsView: View {
                     }
                 }
             }
-            .navigationTitle("Graph Settings")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { presentationMode.wrappedValue.dismiss() }
-                }
-            }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Graph Settings", displayMode: .inline)
     }
 
     /// Marks the chart as needing a redraw

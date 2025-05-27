@@ -89,57 +89,50 @@ private enum SheetInfo: Identifiable {
 
 struct AlarmListView: View {
     @ObservedObject private var store = Storage.shared.alarms
-    @Environment(\.dismiss) private var dismiss
-
     @State private var sheetInfo: SheetInfo?
     @State private var deleteAfterDismiss: UUID?
+    @State private var selectedAlarm: Alarm?
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(store.value) { alarm in
-                    NavigationLink {
-                        AlarmEditor(alarm: binding(for: alarm))
-                    } label: {
-                        HStack(spacing: 12) {
-                            ZStack {
-                                Image(systemName: alarm.type.icon)
+        List {
+            ForEach(store.value) { alarm in
+                Button(action: {
+                    selectedAlarm = alarm
+                    sheetInfo = .editor(id: alarm.id, isNew: false)
+                }) {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            Image(systemName: alarm.type.icon)
+                                .font(.title3)
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(alarm.isEnabled ? Color.accentColor : Color.secondary)
+                                .opacity(iconOpacity(for: alarm))
+
+                            if let until = alarm.snoozedUntil, until > Date() {
+                                Image(systemName: "zzz")
                                     .font(.title3)
-                                    .symbolRenderingMode(.hierarchical)
-                                    .foregroundStyle(alarm.isEnabled ? Color.accentColor : Color.secondary)
-                                    .opacity(iconOpacity(for: alarm))
-
-                                if let until = alarm.snoozedUntil, until > Date() {
-                                    Image(systemName: "zzz")
-                                        .font(.title3)
-                                        .foregroundStyle(Color.secondary)
-                                        .shadow(color: .black.opacity(1), radius: 2, x: 0, y: 0)
-                                        .blendMode(.screen)
-                                        .offset(x: 6, y: 6)
-                                }
+                                    .foregroundStyle(Color.secondary)
+                                    .shadow(color: .black.opacity(1), radius: 2, x: 0, y: 0)
+                                    .blendMode(.screen)
+                                    .offset(x: 6, y: 6)
                             }
-                            .frame(width: 26, height: 26)
-
-                            Text(alarm.name)
-                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                        .frame(width: 26, height: 26)
+
+                        Text(alarm.name)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                .onDelete { store.value.remove(atOffsets: $0) }
             }
-            .navigationTitle("Alarms")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") { dismiss() }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { sheetInfo = .picker } label: { Image(systemName: "plus") }
-                }
-            }
-            .sheet(item: $sheetInfo,
-                   onDismiss: handleSheetDismiss)
-            { info in
-                sheetContent(for: info)
+            .onDelete { store.value.remove(atOffsets: $0) }
+        }
+        .sheet(item: $sheetInfo, onDismiss: handleSheetDismiss) { info in
+            sheetContent(for: info)
+        }
+        .navigationBarTitle("Alarms", displayMode: .inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { sheetInfo = .picker } label: { Image(systemName: "plus") }
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
@@ -171,7 +164,7 @@ struct AlarmListView: View {
                     isNew: isNew,
                     onDone: { sheetInfo = nil },
                     onCancel: {
-                        deleteAfterDismiss = id
+                        if isNew { deleteAfterDismiss = id }
                         sheetInfo = nil
                     }
                 )
@@ -179,13 +172,6 @@ struct AlarmListView: View {
                 Text("Alarm not found").padding()
             }
         }
-    }
-
-    private func binding(for alarm: Alarm) -> Binding<Alarm> {
-        guard let idx = store.value.firstIndex(where: { $0.id == alarm.id }) else {
-            fatalError("Alarm not found")
-        }
-        return $store.value[idx]
     }
 
     private func iconOpacity(for alarm: Alarm) -> Double {
