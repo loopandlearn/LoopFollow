@@ -117,6 +117,7 @@ struct AlarmListView: View {
 
                         Text(alarm.name)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.primary)
                     }
                 }
             }
