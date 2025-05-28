@@ -287,6 +287,9 @@ extension Storage {
         migrateLowAlarm()
         migrateHighAlarm()
         migrateUrgentHighAlarm()
+        migrateFastDropAlarm()
+        migrateFastRiseAlarm()
+        migrateMissedReadingAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -620,6 +623,70 @@ extension Storage {
             }
         }()
 
+        Storage.shared.alarms.value.append(alarm)
+    }
+
+    // MARK: - Missed-Reading alarm ---------------------------------------------
+
+    private func migrateMissedReadingAlarm() {
+        // Run only when the user has ever modified those settings
+        guard UserDefaultsValue<Bool>(key: "alertMissedReadingActive",
+                                      default: false).exists else { return }
+
+        // read-then-erase helper
+        func take<V: AnyConvertible & Equatable>(_ k: String, default d: V) -> V {
+            let b = UserDefaultsValue<V>(key: k, default: d)
+            defer { b.setNil(key: k) }
+            return b.value
+        }
+
+        var alarm = Alarm(type: .missedReading)
+        alarm.name = "Missed Reading"
+        alarm.isEnabled = take("alertMissedReadingActive", default: false)
+
+        // “No CGM data for X minutes”
+        alarm.persistentMinutes = take("alertMissedReading", default: 31)
+
+        // snoozing
+        alarm.snoozeDuration = take("alertMissedReadingSnooze", default: 30)
+        alarm.snoozedUntil = take("alertMissedReadingSnoozedTime",
+                                  default: nil as Date?)
+        // (legacy “is-snoozed” flag is implicit in snoozedUntil)
+
+        // sound
+        alarm.soundFile = SoundFile(
+            rawValue: take("alertMissedReadingSound",
+                           default: "Cartoon_Tip_Toe_Sneaky_Walk")
+        ) ?? .cartoonTipToeSneakyWalk
+
+        // play / repeat options
+        alarm.playSoundOption = PlaySoundOption(
+            rawValue: take("alertMissedReadingAudible",
+                           default: "Always").lowercased()
+        ) ?? .always
+
+        alarm.repeatSoundOption = RepeatSoundOption(
+            rawValue: take("alertMissedReadingRepeat",
+                           default: "Never").lowercased()
+        ) ?? .never
+
+        // activeOption ← “Pre-Snooze” picker + day/night flags
+        let autoStr = take("alertMissedReadingAutosnooze", default: "Never")
+            .lowercased()
+        let dayFlag = take("alertMissedReadingAutosnoozeDay", default: false)
+        let nightFlag = take("alertMissedReadingAutosnoozeNight", default: false)
+
+        alarm.activeOption = {
+            if dayFlag, !nightFlag { return .day }
+            if !dayFlag, nightFlag { return .night }
+            switch autoStr {
+            case "day", "at day": return .day
+            case "night", "at night": return .night
+            default: return .always // “Never” → always on
+            }
+        }()
+
+        // store in the new world
         Storage.shared.alarms.value.append(alarm)
     }
 }
