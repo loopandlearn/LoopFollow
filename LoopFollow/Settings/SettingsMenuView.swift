@@ -51,6 +51,12 @@ struct SettingsMenuView: View {
                         {
                             path.append(Sheet.infoDisplay)
                         }
+
+                        NavigationRow(title: "Remote Settings",
+                                      icon: "antenna.radiowaves.left.and.right")
+                        {
+                            path.append(Sheet.remote)
+                        }
                     }
                 }
 

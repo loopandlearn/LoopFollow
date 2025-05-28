@@ -197,15 +197,9 @@ struct Alarm: Identifiable, Codable, Equatable {
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
 
-        let action = UNNotificationAction(identifier: "snooze", title: "Snooze", options: [])
+        let action = UNNotificationAction(identifier: "snooze", title: snoozeDuration == 0 ? "Acknowledge" : "Snooze", options: [])
         let category = UNNotificationCategory(identifier: "category", actions: [action], intentIdentifiers: [], options: [])
         UNUserNotificationCenter.current().setNotificationCategories([category])
-
-        /* TODO: när vi gör bg alarm sätt timestamp/datum för denna readings tid så vi inte larmar på samma igen, se isBGBased
-             if snooozedBGReadingTime != nil {
-                 UserDefaultsRepository.snoozedBGReadingTime.value = snooozedBGReadingTime
-             }
-         */
 
         if playSound {
             AlarmSound.setSoundFile(str: soundFile.rawValue)
