@@ -97,23 +97,6 @@ class UserDefaultsRepository {
     static let alertCageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertCageInsertTime", default: 0)
     static let alertSageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0)
 
-    static let alertUrgentLowActive = UserDefaultsValue<Bool>(key: "alertUrgentLowActive", default: false)
-    static let alertUrgentLowBG = UserDefaultsValue<Float>(key: "alertUrgentLowBG", default: 55.0)
-    static let alertUrgentLowPredictiveMinutes = UserDefaultsValue<Int>(key: "alertUrgentLowPredictiveMinutes", default: 0)
-    static let alertUrgentLowSnooze = UserDefaultsValue<Int>(key: "alertUrgentLowSnooze", default: 5)
-    static let alertUrgentLowSnoozedTime = UserDefaultsValue<Date?>(key: "alertUrgentLowSnoozedTime", default: nil)
-    static let alertUrgentLowIsSnoozed = UserDefaultsValue<Bool>(key: "alertUrgentLowIsSnoozed", default: false)
-    static let alertUrgentLowRepeat = UserDefaultsValue<String>(key: "alertUrgentLowRepeat", default: "Always")
-    static let alertUrgentLowDayTime = UserDefaultsValue<Bool>(key: "alertUrgentLowDayTime", default: true) // need to change all DayTime to DayTimeRepeat
-    static let alertUrgentLowNightTime = UserDefaultsValue<Bool>(key: "alertUrgentLowNightTime", default: true) // need to change all NightTime to NightTimeRepeat
-    static let alertUrgentLowSound = UserDefaultsValue<String>(key: "alertUrgentLowSound", default: "Emergency_Alarm_Siren")
-    static let alertUrgentLowAudible = UserDefaultsValue<String>(key: "alertUrgentLowAudible", default: "Always")
-    static let alertUrgentLowDayTimeAudible = UserDefaultsValue<Bool>(key: "alertUrgentLowDayTimeAudible", default: true)
-    static let alertUrgentLowNightTimeAudible = UserDefaultsValue<Bool>(key: "alertUrgentLowNightTimeAudible", default: true)
-    static let alertUrgentLowAutosnooze = UserDefaultsValue<String>(key: "alertUrgentLowAutosnooze", default: "Never")
-    static let alertUrgentLowAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertUrgentLowAutosnoozeDay", default: false)
-    static let alertUrgentLowAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertUrgentLowAutosnoozeNight", default: false)
-
     static let alertLowActive = UserDefaultsValue<Bool>(key: "alertLowActive", default: false)
     static let alertLowBG = UserDefaultsValue<Float>(key: "alertLowBG", default: 70.0)
     static let alertLowPersistent = UserDefaultsValue<Int>(key: "alertLowPersistent", default: 0)
