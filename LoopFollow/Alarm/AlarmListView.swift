@@ -96,28 +96,24 @@ struct AlarmListView: View {
     var body: some View {
         List {
             ForEach(store.value) { alarm in
-                Button(action: {
+                Button {
                     selectedAlarm = alarm
                     sheetInfo = .editor(id: alarm.id, isNew: false)
-                }) {
+                } label: {
                     HStack(spacing: 12) {
-                        ZStack {
-                            Image(systemName: alarm.type.icon)
-                                .font(.title3)
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(alarm.isEnabled ? Color.accentColor : Color.secondary)
-                                .opacity(iconOpacity(for: alarm))
-
+                        Glyph(
+                            symbol: alarm.type.icon,
+                            tint: alarm.isEnabled ? .white : Color(uiColor: .darkGray)
+                        )
+                        .overlay {
                             if let until = alarm.snoozedUntil, until > Date() {
                                 Image(systemName: "zzz")
-                                    .font(.title3)
-                                    .foregroundStyle(Color.secondary)
-                                    .shadow(color: .black.opacity(1), radius: 2, x: 0, y: 0)
-                                    .blendMode(.screen)
-                                    .offset(x: 6, y: 6)
+                                    .font(.caption.bold())
+                                    .foregroundColor(.secondary)
+                                    .shadow(color: .black, radius: 2)
+                                    .offset(x: 8, y: 8)
                             }
                         }
-                        .frame(width: 26, height: 26)
 
                         Text(alarm.name)
                             .frame(maxWidth: .infinity, alignment: .leading)
