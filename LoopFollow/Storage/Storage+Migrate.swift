@@ -284,6 +284,7 @@ extension Storage {
         }
 
         migrateUrgentLowAlarm()
+        migrateLowAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -338,6 +339,66 @@ extension Storage {
         }()
 
         // Persist -----------------------------------------------------------------
+        Storage.shared.alarms.value.append(alarm)
+    }
+
+    // MARK: - Low-BG alarm -------------------------------------------------------
+
+    private func migrateLowAlarm() {
+        // Bail if the old keys were never written
+        guard UserDefaultsValue<Bool>(key: "alertLowActive", default: false).exists else { return }
+
+        // tiny helper: fetch value → erase key
+        func take<V: AnyConvertible & Equatable>(_ key: String, default def: V) -> V {
+            let box = UserDefaultsValue<V>(key: key, default: def)
+            defer { box.setNil(key: key) }
+            return box.value
+        }
+
+        // Build the new Alarm ----------------------------------------------------
+        var alarm = Alarm(type: .low)
+        alarm.name = "Low"
+        alarm.isEnabled = take("alertLowActive", default: false)
+        alarm.belowBG = Double(take("alertLowBG", default: 70.0))
+
+        // “Persistent ≥ X min”  → `persistentMinutes`
+        alarm.persistentMinutes = take("alertLowPersistent", default: 0)
+
+        // “Persistence max BG drop” -- ignoring this for now
+        // let persistentLowTriggerImmediatelyBG = UserDefaultsRepository.alertLowBG.value - UserDefaultsRepository.alertLowPersistenceMax.value
+        // (Float(persistentLowBG) <= UserDefaultsRepository.alertLowBG.value || Float(currentBG) <= persistentLowTriggerImmediatelyBG)
+        _ = Double(take("alertLowPersistenceMax", default: 5.0))
+
+        alarm.snoozeDuration = take("alertLowSnooze", default: 5)
+        alarm.snoozedUntil = take("alertLowSnoozedTime", default: nil as Date?)
+        alarm.soundFile = SoundFile(
+            rawValue: take("alertLowSound",
+                           default: "Indeed")) ?? .indeed
+
+        alarm.playSoundOption = PlaySoundOption(
+            rawValue: take("alertLowAudible",
+                           default: "Always").lowercased()) ?? .always
+
+        alarm.repeatSoundOption = RepeatSoundOption(
+            rawValue: take("alertLowRepeat",
+                           default: "Always").lowercased()) ?? .always
+
+        // activeOption  ← legacy “Pre-Snooze” flags / picker
+        let autoStr = take("alertLowAutosnooze", default: "Never").lowercased()
+        let dayFlag = take("alertLowAutosnoozeDay", default: false)
+        let nightFlag = take("alertLowAutosnoozeNight", default: false)
+
+        alarm.activeOption = {
+            if dayFlag, !nightFlag { return .day }
+            if !dayFlag, nightFlag { return .night }
+            switch autoStr {
+            case "day", "at day": return .day
+            case "night", "at night": return .night
+            default: return .always
+            }
+        }()
+
+        // Done → append to the modern store
         Storage.shared.alarms.value.append(alarm)
     }
 }
