@@ -57,30 +57,30 @@ struct RemoteSettingsView: View {
                     Section(header: Text("Trio Remote Control Settings")) {
                         HStack {
                             Text("Shared Secret")
-                            SecureField("Enter Shared Secret", text: $viewModel.sharedSecret)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .multilineTextAlignment(.trailing)
+                            TogglableSecureInput(
+                                placeholder: "Enter Shared Secret",
+                                text: $viewModel.sharedSecret,
+                                style: .singleLine
+                            )
                         }
 
                         HStack {
                             Text("APNS Key ID")
-                            SecureField("Enter APNS Key ID", text: $viewModel.keyId)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .multilineTextAlignment(.trailing)
+                            TogglableSecureInput(
+                                placeholder: "Enter APNS Key ID",
+                                text: $viewModel.keyId,
+                                style: .singleLine
+                            )
                         }
 
                         VStack(alignment: .leading) {
                             Text("APNS Key")
-                            TextEditor(text: $viewModel.apnsKey)
-                                .frame(height: 100)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                                )
+                            TogglableSecureInput(
+                                placeholder: "Paste APNS Key",
+                                text: $viewModel.apnsKey,
+                                style: .multiLine
+                            )
+                            .frame(minHeight: 110)
                         }
                     }
 

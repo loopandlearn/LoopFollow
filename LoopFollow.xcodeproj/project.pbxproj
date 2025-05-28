@@ -196,6 +196,7 @@
 		DDE75D272DE5E539007C1FC1 /* ActionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D262DE5E539007C1FC1 /* ActionRow.swift */; };
 		DDE75D292DE5E56C007C1FC1 /* LinkRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D282DE5E56C007C1FC1 /* LinkRow.swift */; };
 		DDE75D2B2DE5E613007C1FC1 /* NavigationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D2A2DE5E613007C1FC1 /* NavigationRow.swift */; };
+		DDE75D2D2DE71401007C1FC1 /* TogglableSecureInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D2C2DE71401007C1FC1 /* TogglableSecureInput.swift */; };
 		DDEF503A2D31615000999A5D /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50392D31614200999A5D /* LogManager.swift */; };
 		DDEF503C2D31BE2D00999A5D /* TaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */; };
 		DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503E2D32754A00999A5D /* ProfileTask.swift */; };
@@ -566,6 +567,7 @@
 		DDE75D262DE5E539007C1FC1 /* ActionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionRow.swift; sourceTree = "<group>"; };
 		DDE75D282DE5E56C007C1FC1 /* LinkRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkRow.swift; sourceTree = "<group>"; };
 		DDE75D2A2DE5E613007C1FC1 /* NavigationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationRow.swift; sourceTree = "<group>"; };
+		DDE75D2C2DE71401007C1FC1 /* TogglableSecureInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TogglableSecureInput.swift; sourceTree = "<group>"; };
 		DDEF50392D31614200999A5D /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskScheduler.swift; sourceTree = "<group>"; };
 		DDEF503E2D32754A00999A5D /* ProfileTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTask.swift; sourceTree = "<group>"; };
@@ -1165,6 +1167,7 @@
 		DDF6999C2C5AAA4C0058A8D9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DDE75D2C2DE71401007C1FC1 /* TogglableSecureInput.swift */,
 				DDE75D222DE5E505007C1FC1 /* Glyph.swift */,
 				DD8316492DE4C504004467AA /* SettingsStepperRow.swift */,
 				DD8316432DE47CA9004467AA /* BGPicker.swift */,
@@ -1834,6 +1837,7 @@
 				DD0650ED2DCE9371004D3B41 /* HighBgAlarmEditor.swift in Sources */,
 				DD7F4C172DD63FA700D449E9 /* RecBolusCondition.swift in Sources */,
 				FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */,
+				DDE75D2D2DE71401007C1FC1 /* TogglableSecureInput.swift in Sources */,
 				DD7E19842ACDA50C00DBD158 /* Overrides.swift in Sources */,
 				DD0B9D562DE1EC8A0090C337 /* AlarmType+Snooze.swift in Sources */,
 				DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */,
