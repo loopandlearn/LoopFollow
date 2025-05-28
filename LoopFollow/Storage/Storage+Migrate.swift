@@ -282,5 +282,62 @@ extension Storage {
             // finally persist the whole struct
             Storage.shared.alarmConfiguration.value = cfg
         }
+
+        migrateUrgentLowAlarm()
+    }
+
+    // MARK: - One-off alarm migrations
+
+    /// Reads *all* `alertUrgentLow*` keys, converts them into a single `Alarm`,
+    /// saves it to the modern `[Alarm]` store, then deletes the legacy keys.
+    private func migrateUrgentLowAlarm() {
+        // Did the user ever change that alert?  (No key ⇒ nothing to do.)
+        guard UserDefaultsValue<Bool>(key: "alertUrgentLowActive", default: false).exists else { return }
+
+        /// Helper: fetch-then-delete a legacy value in one line.
+        func take<V: AnyConvertible & Equatable>(_ key: String, default def: V) -> V {
+            let box = UserDefaultsValue<V>(key: key, default: def)
+            defer { box.setNil(key: key) }
+            return box.value
+        }
+
+        // Build the new Alarm ------------------------------------------------
+        var alarm = Alarm(type: .low)
+        alarm.name = "Urgent Low"
+        alarm.isEnabled = take("alertUrgentLowActive", default: false)
+        alarm.belowBG = Double(take("alertUrgentLowBG", default: 55.0))
+        alarm.predictiveMinutes = take("alertUrgentLowPredictiveMinutes", default: 0)
+        alarm.snoozeDuration = take("alertUrgentLowSnooze", default: 5)
+        alarm.snoozedUntil = take("alertUrgentLowSnoozedTime", default: nil as Date?)
+        alarm.soundFile = SoundFile(
+            rawValue: take("alertUrgentLowSound",
+                           default: "Emergency_Alarm_Siren"))
+            ?? .emergencyAlarmSiren
+
+        alarm.playSoundOption = PlaySoundOption(
+            rawValue: take("alertUrgentLowAudible",
+                           default: "Always").lowercased()) ?? .always
+
+        alarm.repeatSoundOption = RepeatSoundOption(
+            rawValue: take("alertUrgentLowRepeat",
+                           default: "Always").lowercased()) ?? .always
+
+        // Day / Night active-window (“Pre-Snooze”)
+        let autoStr = take("alertUrgentLowAutosnooze", default: "Never").lowercased()
+        let dayFlag = take("alertUrgentLowAutosnoozeDay", default: false)
+        let nightFlag = take("alertUrgentLowAutosnoozeNight", default: false)
+
+        alarm.activeOption = {
+            if dayFlag, !nightFlag { return .day }
+            if !dayFlag, nightFlag { return .night }
+            switch autoStr {
+            case "day", "at day": return .day
+            case "night", "at night": return .night
+            default: return .always // “Never” → always active
+            }
+        }()
+
+        // Persist -----------------------------------------------------------------
+        Storage.shared.alarms.value.append(alarm)
     }
 }
