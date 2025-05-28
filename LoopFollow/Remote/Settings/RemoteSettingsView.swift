@@ -7,7 +7,6 @@ import SwiftUI
 
 struct RemoteSettingsView: View {
     @ObservedObject var viewModel: RemoteSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
 
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
@@ -58,7 +57,7 @@ struct RemoteSettingsView: View {
                     Section(header: Text("Trio Remote Control Settings")) {
                         HStack {
                             Text("Shared Secret")
-                            TextField("Enter Shared Secret", text: $viewModel.sharedSecret)
+                            SecureField("Enter Shared Secret", text: $viewModel.sharedSecret)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
                                 .multilineTextAlignment(.trailing)
@@ -66,7 +65,7 @@ struct RemoteSettingsView: View {
 
                         HStack {
                             Text("APNS Key ID")
-                            TextField("Enter APNS Key ID", text: $viewModel.keyId)
+                            SecureField("Enter APNS Key ID", text: $viewModel.keyId)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
                                 .multilineTextAlignment(.trailing)
@@ -185,14 +184,6 @@ struct RemoteSettingsView: View {
                     }
                 }
             }
-            .navigationBarTitle("Remote Settings", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
             .alert(isPresented: $showAlert) {
                 switch alertType {
                 case .validation:
@@ -207,6 +198,7 @@ struct RemoteSettingsView: View {
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Remote Settings", displayMode: .inline)
     }
 
     // MARK: - Custom Row for Remote Type Selection
