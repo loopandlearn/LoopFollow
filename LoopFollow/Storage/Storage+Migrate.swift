@@ -285,6 +285,8 @@ extension Storage {
 
         migrateUrgentLowAlarm()
         migrateLowAlarm()
+        migrateHighAlarm()
+        migrateUrgentHighAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -399,6 +401,113 @@ extension Storage {
         }()
 
         // Done → append to the modern store
+        Storage.shared.alarms.value.append(alarm)
+    }
+
+    // MARK: - High-BG alarm -----------------------------------------------------
+
+    private func migrateHighAlarm() {
+        // Only run if the legacy key ever existed
+        guard UserDefaultsValue<Bool>(key: "alertHighActive", default: false).exists else { return }
+
+        /// Fetch → erase helper
+        func take<V: AnyConvertible & Equatable>(_ key: String, default def: V) -> V {
+            let box = UserDefaultsValue<V>(key: key, default: def)
+            defer { box.setNil(key: key) } // remove legacy value
+            return box.value
+        }
+
+        // ---------- Build Alarm -----------------------------------------------
+        var alarm = Alarm(type: .high)
+        alarm.name = "High"
+        alarm.isEnabled = take("alertHighActive", default: false)
+        alarm.aboveBG = Double(take("alertHighBG", default: 180.0))
+
+        alarm.persistentMinutes = take("alertHighPersistent", default: 60)
+        alarm.snoozeDuration = take("alertHighSnooze", default: 60)
+        alarm.snoozedUntil = take("alertHighSnoozedTime", default: nil as Date?)
+
+        alarm.soundFile = SoundFile(
+            rawValue: take("alertHighSound",
+                           default: "Time_Has_Come")) ?? .timeHasCome
+
+        alarm.playSoundOption = PlaySoundOption(
+            rawValue: take("alertHighAudible",
+                           default: "Always").lowercased()) ?? .always
+
+        alarm.repeatSoundOption = RepeatSoundOption(
+            rawValue: take("alertHighRepeat",
+                           default: "Always").lowercased()) ?? .always
+
+        // ── activeOption derived from “Pre-Snooze” picker & flags
+        let autoStr = take("alertHighAutosnooze", default: "Never").lowercased()
+        let dayFlag = take("alertHighAutosnoozeDay", default: false)
+        let nightFlag = take("alertHighAutosnoozeNight", default: false)
+
+        alarm.activeOption = {
+            if dayFlag, !nightFlag { return .day }
+            if !dayFlag, nightFlag { return .night }
+            switch autoStr {
+            case "day", "at day": return .day
+            case "night", "at night": return .night
+            default: return .always
+            }
+        }()
+
+        // ---------- Persist & we’re done --------------------------------------
+        Storage.shared.alarms.value.append(alarm)
+    }
+
+    // MARK: - Urgent-High alarm --------------------------------------------------
+
+    private func migrateUrgentHighAlarm() {
+        // run only once, only if the user ever changed that toggle
+        guard UserDefaultsValue<Bool>(key: "alertUrgentHighActive", default: false).exists else { return }
+
+        // helper: read-then-erase a legacy value
+        func take<V: AnyConvertible & Equatable>(_ key: String, default def: V) -> V {
+            let box = UserDefaultsValue<V>(key: key, default: def)
+            defer { box.setNil(key: key) } // wipe legacy key
+            return box.value
+        }
+
+        // ───────── Build the Alarm ────────────────────────────────────────────
+        var alarm = Alarm(type: .high) // we map to the existing `.high` type
+        alarm.name = "Urgent High"
+        alarm.isEnabled = take("alertUrgentHighActive", default: false)
+        alarm.aboveBG = Double(take("alertUrgentHighBG", default: 250.0))
+
+        alarm.snoozeDuration = take("alertUrgentHighSnooze", default: 30)
+        alarm.snoozedUntil = take("alertUrgentHighSnoozedTime", default: nil as Date?)
+
+        alarm.soundFile = SoundFile(
+            rawValue: take("alertUrgentHighSound",
+                           default: "Pager_Beeps")) ?? .pagerBeeps
+
+        alarm.playSoundOption = PlaySoundOption(
+            rawValue: take("alertUrgentHighAudible",
+                           default: "Always").lowercased()) ?? .always
+
+        alarm.repeatSoundOption = RepeatSoundOption(
+            rawValue: take("alertUrgentHighRepeat",
+                           default: "Always").lowercased()) ?? .always
+
+        // activeOption comes from the old “Pre-Snooze” picker + its day/night flags
+        let autoStr = take("alertUrgentHighAutosnooze", default: "Never").lowercased()
+        let dayFlag = take("alertUrgentHighAutosnoozeDay", default: false)
+        let nightFlag = take("alertUrgentHighAutosnoozeNight", default: false)
+
+        alarm.activeOption = {
+            if dayFlag, !nightFlag { return .day }
+            if !dayFlag, nightFlag { return .night }
+            switch autoStr { // fall back to picker value
+            case "day", "at day": return .day
+            case "night", "at night": return .night
+            default: return .always
+            }
+        }()
+
+        // ───────── Persist in new storage ─────────────────────────────────────
         Storage.shared.alarms.value.append(alarm)
     }
 }
