@@ -512,8 +512,8 @@ extension Storage {
     }
 
     // MARK: - Fast-Drop alarm ----------------------------------------------------
-    private func migrateFastDropAlarm() {
 
+    private func migrateFastDropAlarm() {
         guard UserDefaultsValue<Bool>(key: "alertFastDropDeltaActive",
                                       default: false).exists else { return }
 
@@ -525,22 +525,22 @@ extension Storage {
         }
 
         var alarm = Alarm(type: .fastDrop)
-        alarm.name           = "Fast Drop"
-        alarm.isEnabled      = take("alertFastDropDeltaActive", default: false)
+        alarm.name = "Fast Drop"
+        alarm.isEnabled = take("alertFastDropDeltaActive", default: false)
 
         // core trigger parameters
-        alarm.delta          = Double(take("alertFastDropDelta", default: 10.0))
-        alarm.monitoringWindow = take("alertFastDropReadings", default: 3)   // store #readings
+        alarm.delta = Double(take("alertFastDropDelta", default: 10.0))
+        alarm.monitoringWindow = take("alertFastDropReadings", default: 3) // store #readings
         if take("alertFastDropUseLimit", default: false) {
-            alarm.belowBG    = Double(take("alertFastDropBelowBG", default: 120.0))
+            alarm.belowBG = Double(take("alertFastDropBelowBG", default: 120.0))
         }
 
         // snoozing
         alarm.snoozeDuration = take("alertFastDropDeltaSnooze", default: 10)
-        alarm.snoozedUntil   = take("alertFastDropSnoozedTime", default: nil as Date?)
+        alarm.snoozedUntil = take("alertFastDropSnoozedTime", default: nil as Date?)
 
         // sound + options
-        alarm.soundFile      = SoundFile(
+        alarm.soundFile = SoundFile(
             rawValue: take("alertFastDropSound", default: "Big_Clock_Ticking")
         ) ?? .bigClockTicking
 
@@ -553,16 +553,16 @@ extension Storage {
         ) ?? .never
 
         // activeOption from old “Pre-Snooze” picker + day/night flags
-        let autoStr   = take("alertFastDropAutosnooze",      default: "Never").lowercased()
-        let dayFlag   = take("alertFastDropAutosnoozeDay",   default: false)
+        let autoStr = take("alertFastDropAutosnooze", default: "Never").lowercased()
+        let dayFlag = take("alertFastDropAutosnoozeDay", default: false)
         let nightFlag = take("alertFastDropAutosnoozeNight", default: false)
         alarm.activeOption = {
-            if  dayFlag,  !nightFlag { return .day }
-            if !dayFlag,   nightFlag { return .night }
+            if dayFlag, !nightFlag { return .day }
+            if !dayFlag, nightFlag { return .night }
             switch autoStr {
-            case "day", "at day":     return .day
+            case "day", "at day": return .day
             case "night", "at night": return .night
-            default:                  return .always
+            default: return .always
             }
         }()
 
@@ -570,8 +570,8 @@ extension Storage {
     }
 
     // MARK: - Fast-Rise alarm ----------------------------------------------------
-    private func migrateFastRiseAlarm() {
 
+    private func migrateFastRiseAlarm() {
         guard UserDefaultsValue<Bool>(key: "alertFastRiseDeltaActive",
                                       default: false).exists else { return }
 
@@ -582,19 +582,19 @@ extension Storage {
         }
 
         var alarm = Alarm(type: .fastRise)
-        alarm.name           = "Fast Rise"
-        alarm.isEnabled      = take("alertFastRiseDeltaActive", default: false)
+        alarm.name = "Fast Rise"
+        alarm.isEnabled = take("alertFastRiseDeltaActive", default: false)
 
-        alarm.delta          = Double(take("alertFastRiseDelta", default: 10.0))
+        alarm.delta = Double(take("alertFastRiseDelta", default: 10.0))
         alarm.monitoringWindow = take("alertFastRiseReadings", default: 3)
         if take("alertFastRiseUseLimit", default: false) {
-            alarm.aboveBG    = Double(take("alertFastRiseAboveBG", default: 200.0))
+            alarm.aboveBG = Double(take("alertFastRiseAboveBG", default: 200.0))
         }
 
         alarm.snoozeDuration = take("alertFastRiseDeltaSnooze", default: 10)
-        alarm.snoozedUntil   = take("alertFastRiseSnoozedTime", default: nil as Date?)
+        alarm.snoozedUntil = take("alertFastRiseSnoozedTime", default: nil as Date?)
 
-        alarm.soundFile      = SoundFile(
+        alarm.soundFile = SoundFile(
             rawValue: take("alertFastRiseSound",
                            default: "Cartoon_Fail_Strings_Trumpet")
         ) ?? .cartoonFailStringsTrumpet
@@ -607,16 +607,16 @@ extension Storage {
             rawValue: take("alertFastRiseRepeat", default: "Never").lowercased()
         ) ?? .never
 
-        let autoStr   = take("alertFastRiseAutosnooze",      default: "Never").lowercased()
-        let dayFlag   = take("alertFastRiseAutosnoozeDay",   default: false)
+        let autoStr = take("alertFastRiseAutosnooze", default: "Never").lowercased()
+        let dayFlag = take("alertFastRiseAutosnoozeDay", default: false)
         let nightFlag = take("alertFastRiseAutosnoozeNight", default: false)
         alarm.activeOption = {
-            if  dayFlag,  !nightFlag { return .day }
-            if !dayFlag,   nightFlag { return .night }
+            if dayFlag, !nightFlag { return .day }
+            if !dayFlag, nightFlag { return .night }
             switch autoStr {
-            case "day", "at day":     return .day
+            case "day", "at day": return .day
             case "night", "at night": return .night
-            default:                  return .always
+            default: return .always
             }
         }()
 
