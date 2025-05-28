@@ -98,21 +98,6 @@ class UserDefaultsRepository {
     static let alertSageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0)
 
 
-    static let alertMissedReadingActive = UserDefaultsValue<Bool>(key: "alertMissedReadingActive", default: false)
-    static let alertMissedReading = UserDefaultsValue<Int>(key: "alertMissedReading", default: 31)
-    static let alertMissedReadingSnooze = UserDefaultsValue<Int>(key: "alertMissedReadingSnooze", default: 30)
-    static let alertMissedReadingSnoozedTime = UserDefaultsValue<Date?>(key: "alertMissedReadingSnoozedTime", default: nil)
-    static let alertMissedReadingIsSnoozed = UserDefaultsValue<Bool>(key: "alertMissedReadingIsSnoozed", default: false)
-    static let alertMissedReadingRepeat = UserDefaultsValue<String>(key: "alertMissedReadingRepeat", default: "Never")
-    static let alertMissedReadingDayTime = UserDefaultsValue<Bool>(key: "alertMissedReadingDayTime", default: false)
-    static let alertMissedReadingNightTime = UserDefaultsValue<Bool>(key: "alertMissedReadingNightTime", default: false)
-    static let alertMissedReadingSound = UserDefaultsValue<String>(key: "alertMissedReadingSound", default: "Cartoon_Tip_Toe_Sneaky_Walk")
-    static let alertMissedReadingAudible = UserDefaultsValue<String>(key: "alertMissedReadingAudible", default: "Always")
-    static let alertMissedReadingDayTimeAudible = UserDefaultsValue<Bool>(key: "alertMissedReadingDayTimeAudible", default: true)
-    static let alertMissedReadingNightTimeAudible = UserDefaultsValue<Bool>(key: "alertMissedReadingNightTimeAudible", default: true)
-    static let alertMissedReadingAutosnooze = UserDefaultsValue<String>(key: "alertMissedReadingAutosnooze", default: "Never")
-    static let alertMissedReadingAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertMissedReadingAutosnoozeDay", default: false)
-    static let alertMissedReadingAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertMissedReadingAutosnoozeNight", default: false)
 
     static let alertNotLoopingActive = UserDefaultsValue<Bool>(key: "alertNotLoopingActive", default: false)
     static let alertNotLooping = UserDefaultsValue<Int>(key: "alertNotLooping", default: 31)
