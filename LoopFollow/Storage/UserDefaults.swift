@@ -81,7 +81,6 @@ class UserDefaultsRepository {
 
     // Graph Settings
     static let chartScaleX = UserDefaultsValue<Float>(key: "chartScaleX", default: 18.0)
-    static let hoursToLoad = UserDefaultsValue<Int>(key: "hoursToLoad", default: 24)
 
     // Deprecated, used to detect if backgroundRefresh was set to off. TODO: Remove in the beginning of 2026
     static let backgroundRefresh = UserDefaultsValue<Bool>(key: "backgroundRefresh", default: true)
@@ -95,33 +94,8 @@ class UserDefaultsRepository {
     static let graphCarbs = UserDefaultsValue<Bool>(key: "graphCarbs", default: true)
     static let bgUpdateDelay = UserDefaultsValue<Int>(key: "bgUpdateDelay", default: 10)
 
-    // Alarm Settings
-    static let systemOutputVolume = UserDefaultsValue<Float>(key: "systemOutputVolume", default: 0.5)
-    static let fadeInTimeInterval = UserDefaultsValue<TimeInterval>(key: "fadeInTimeInterval", default: 0)
-    static let vibrate = UserDefaultsValue<Bool>(key: "vibrate", default: true)
-    static let overrideSystemOutputVolume = UserDefaultsValue<Bool>(key: "overrideSystemOutputVolume", default: true)
-    static let forcedOutputVolume = UserDefaultsValue<Float>(key: "forcedOutputVolume", default: 0.5)
-
-    // Alerts
-
-    let components = DateComponents(hour: 20, minute: 0)
-    static let quietHourStart = UserDefaultsValue<Date?>(key: "quietHourStart", default: nil) // eventually need to adjust this to night time instead of quiet hour to clean up
-    static let quietHourEnd = UserDefaultsValue<Date?>(key: "quietHourEnd", default: nil) // eventually need to adjust this to night time instead of quiet hour to clean up
-    static let nightTime = UserDefaultsValue<Bool>(key: "nightTime", default: false)
-
-    static let snoozedBGReadingTime = UserDefaultsValue<TimeInterval?>(key: "snoozedBGReadingTime", default: 0)
-
-    static let alertIgnoreZero = UserDefaultsValue<Bool>(key: "alertIgnoreZero", default: true)
-    static let alertAudioDuringPhone = UserDefaultsValue<Bool>(key: "alertAudioDuringPhone", default: true)
-    static let alertAutoSnoozeCGMStart = UserDefaultsValue<Bool>(key: "alertAutoSnoozeCGMStart", default: false)
-
     static let alertCageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertCageInsertTime", default: 0)
     static let alertSageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0)
-
-    static let alertSnoozeAllTime = UserDefaultsValue<Date?>(key: "alertSnoozeAllTime", default: nil)
-    static let alertSnoozeAllIsSnoozed = UserDefaultsValue<Bool>(key: "alertSnoozeAllIsSnoozed", default: false)
-    static let alertMuteAllTime = UserDefaultsValue<Date?>(key: "alertMuteAllTime", default: nil)
-    static let alertMuteAllIsMuted = UserDefaultsValue<Bool>(key: "alertMuteAllIsMuted", default: false)
 
     static let alertUrgentLowActive = UserDefaultsValue<Bool>(key: "alertUrgentLowActive", default: false)
     static let alertUrgentLowBG = UserDefaultsValue<Float>(key: "alertUrgentLowBG", default: 55.0)

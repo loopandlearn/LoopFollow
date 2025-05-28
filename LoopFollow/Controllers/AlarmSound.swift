@@ -23,10 +23,6 @@ class AlarmSound {
     static var soundFile = "Indeed"
     static var isTesting: Bool = false
 
-    // static let volumeChangeDetector = VolumeChangeDetector()
-
-    static let vibrate = UserDefaultsRepository.vibrate
-
     fileprivate static var systemOutputVolumeBeforeOverride: Float?
 
     fileprivate static var playingTimer: Timer?
@@ -70,11 +66,7 @@ class AlarmSound {
      * Sets the volume of the alarm back to the volume before it has been muted.
      */
     static func unmuteVolume() {
-        if UserDefaultsRepository.fadeInTimeInterval.value > 0 {
-            audioPlayer?.setVolume(1.0, fadeDuration: UserDefaultsRepository.fadeInTimeInterval.value)
-        } else {
-            audioPlayer?.volume = 1.0
-        }
+        audioPlayer?.volume = 1.0
         muted = false
     }
 
@@ -101,10 +93,6 @@ class AlarmSound {
             try AVAudioSession.sharedInstance().setActive(true)
 
             audioPlayer?.numberOfLoops = 0
-
-            // init volume before start playing (mute if fade-in)
-
-            // self.audioPlayer!.volume = (self.muted || (UserDefaultsRepository.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
 
             if !audioPlayer!.prepareToPlay() {
                 LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed preparing to play")
@@ -145,9 +133,6 @@ class AlarmSound {
                 systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
             }
 
-            // init volume before start playing (mute if fade-in)
-            // self.audioPlayer!.volume = (self.muted || (UserDefaultsRepository.fadeInTimeInterval.value > 0)) ? 0.0 : 1.0
-
             if !audioPlayer!.prepareToPlay() {
                 LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed preparing to play")
             }
@@ -160,11 +145,6 @@ class AlarmSound {
             } else {
                 LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed to play")
             }
-
-            // do fade-in
-            // if !self.muted && (UserDefaultsRepository.fadeInTimeInterval.value > 0) {
-            //    self.audioPlayer!.setVolume(1.0, fadeDuration: UserDefaultsRepository.fadeInTimeInterval.value)
-            // }
 
             if Storage.shared.alarmConfiguration.value.overrideSystemOutputVolume {
                 MPVolumeView.setVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
@@ -215,7 +195,7 @@ class AlarmSound {
     }
 
     fileprivate static func restoreSystemOutputVolume() {
-        guard UserDefaultsRepository.overrideSystemOutputVolume.value else {
+        guard Storage.shared.alarmConfiguration.value.overrideSystemOutputVolume else {
             return
         }
 

@@ -182,5 +182,105 @@ extension Storage {
         move(UserDefaultsValue<String>(key: "calendarIdentifier", default: ""), into: calendarIdentifier)
         move(UserDefaultsValue<String>(key: "watchLine1", default: "%BG% %DIRECTION% %DELTA% %MINAGO%"), into: watchLine1)
         move(UserDefaultsValue<String>(key: "watchLine2", default: "C:%COB% I:%IOB% B:%BASAL%"), into: watchLine2)
+
+        // Migration of generic alarm settings
+        // ── AlarmConfiguration migration ─────────────────────────────────────────
+        do {
+            // Work on a mutable copy, then write the whole thing back once.
+            var cfg = Storage.shared.alarmConfiguration.value
+            let cal = Calendar.current
+
+            /// Copy *one* legacy value → struct field → delete old key
+            func move<T: AnyConvertible & Equatable>(
+                _ legacy: @autoclosure () -> UserDefaultsValue<T>,
+                write: (inout AlarmConfiguration, T) -> Void
+            ) {
+                let item = legacy()
+                guard item.exists else { return }
+                write(&cfg, item.value)
+                item.setNil(key: item.key)
+            }
+
+            // 1.  Override-volume toggle
+            move(UserDefaultsValue<Bool>(key: "overrideSystemOutputVolume",
+                                         default: cfg.overrideSystemOutputVolume))
+            {
+                $0.overrideSystemOutputVolume = $1
+            }
+
+            // 2.  Forced output volume itself.
+            //     Prefer newer key (“forcedOutputVolume”); otherwise fall back.
+            if UserDefaultsValue<Float>(key: "forcedOutputVolume",
+                                        default: cfg.forcedOutputVolume).exists
+            {
+                move(UserDefaultsValue<Float>(key: "forcedOutputVolume",
+                                              default: cfg.forcedOutputVolume))
+                {
+                    $0.forcedOutputVolume = $1
+                }
+            } else {
+                move(UserDefaultsValue<Float>(key: "systemOutputVolume",
+                                              default: cfg.forcedOutputVolume))
+                {
+                    $0.forcedOutputVolume = $1
+                }
+            }
+
+            // 3.  Play audio during phone calls
+            move(UserDefaultsValue<Bool>(key: "alertAudioDuringPhone",
+                                         default: cfg.audioDuringCalls))
+            {
+                $0.audioDuringCalls = $1
+            }
+
+            // 4.  Auto-snooze CGM-start alarm
+            move(UserDefaultsValue<Bool>(key: "alertAutoSnoozeCGMStart",
+                                         default: cfg.autoSnoozeCGMStart))
+            {
+                $0.autoSnoozeCGMStart = $1
+            }
+
+            // 5.  Global “Snooze all”  →  snoozeUntil
+            move(UserDefaultsValue<Date?>(key: "alertSnoozeAllTime",
+                                          default: cfg.snoozeUntil))
+            {
+                $0.snoozeUntil = $1
+            }
+
+            // 6.  Global “Mute all”  →  muteUntil
+            move(UserDefaultsValue<Date?>(key: "alertMuteAllTime",
+                                          default: cfg.muteUntil))
+            {
+                $0.muteUntil = $1
+            }
+
+            // 7 & 8.  Legacy quiet-hours → day/night start
+            //         (only if both dates exist and are on the same “reference” day)
+            let qStart = UserDefaultsValue<Date?>(key: "quietHourStart", default: nil)
+            let qEnd = UserDefaultsValue<Date?>(key: "quietHourEnd", default: nil)
+            if let s = qStart.value, let e = qEnd.value {
+                let compsStart = cal.dateComponents([.hour, .minute], from: s)
+                let compsEnd = cal.dateComponents([.hour, .minute], from: e)
+
+                if let sh = compsStart.hour, let sm = compsStart.minute,
+                   let eh = compsEnd.hour, let em = compsEnd.minute
+                {
+                    cfg.nightStart = TimeOfDay(hour: sh, minute: sm)
+                    cfg.dayStart = TimeOfDay(hour: eh, minute: em)
+                    qStart.setNil(key: qStart.key)
+                    qEnd.setNil(key: qEnd.key)
+                }
+            }
+
+            // 9.  Legacy “ignore zero BG” flag  →  ignoreZeroBG
+            move(UserDefaultsValue<Bool>(key: "alertIgnoreZero",
+                                         default: cfg.ignoreZeroBG))
+            {
+                $0.ignoreZeroBG = $1
+            }
+
+            // finally persist the whole struct
+            Storage.shared.alarmConfiguration.value = cfg
+        }
     }
 }
