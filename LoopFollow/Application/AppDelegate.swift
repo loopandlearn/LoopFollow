@@ -43,8 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    func applicationWillTerminate(_: UIApplication) {
-    }
+    func applicationWillTerminate(_: UIApplication) {}
 
     // MARK: UISceneSession Lifecycle
 

@@ -97,67 +97,6 @@ class UserDefaultsRepository {
     static let alertCageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertCageInsertTime", default: 0)
     static let alertSageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0)
 
-    static let alertTemporaryActive = UserDefaultsValue<Bool>(key: "alertTemporaryActive", default: false)
-    static let alertTemporaryBelow = UserDefaultsValue<Bool>(key: "alertTemporaryBelow", default: true)
-    static let alertTemporaryBG = UserDefaultsValue<Float>(key: "alertTemporaryBG", default: 90.0)
-    static let alertTemporaryBGRepeat = UserDefaultsValue<Bool>(key: "alertTemporaryBGRepeat", default: false)
-    static let alertTemporaryBGAudible = UserDefaultsValue<Bool>(key: "alertTemporaryBGRepeatAudible", default: true)
-    static let alertTemporarySound = UserDefaultsValue<String>(key: "alertTemporarySound", default: "Indeed")
-
-    static let alertPump = UserDefaultsValue<Bool>(key: "alertPump", default: false)
-    static let alertPumpAt = UserDefaultsValue<Int>(key: "alertPumpAt", default: 10) // Units
-    static let alertPumpQuiet = UserDefaultsValue<Bool>(key: "alertPumpQuiet", default: false)
-    static let alertPumpRepeat = UserDefaultsValue<String>(key: "alertPumpRepeat", default: "Never")
-    static let alertPumpDayTime = UserDefaultsValue<Bool>(key: "alertPumpDayTime", default: false)
-    static let alertPumpNightTime = UserDefaultsValue<Bool>(key: "alertPumpNightTime", default: false)
-    static let alertPumpAudible = UserDefaultsValue<String>(key: "alertPumpAudible", default: "Always")
-    static let alertPumpDayTimeAudible = UserDefaultsValue<Bool>(key: "alertPumpDayTimeAudible", default: true)
-    static let alertPumpNightTimeAudible = UserDefaultsValue<Bool>(key: "alertPumpNightTimeAudible", default: true)
-    static let alertPumpSound = UserDefaultsValue<String>(key: "alertPumpSound", default: "Marimba_Descend")
-    static let alertPumpSnoozeHours = UserDefaultsValue<Int>(key: "alertPumpSnoozeHours", default: 5) // Hours
-    static let alertPumpIsSnoozed = UserDefaultsValue<Bool>(key: "alertPumpIsSnoozed", default: false)
-    static let alertPumpSnoozedTime = UserDefaultsValue<Date?>(key: "alertPumpSnoozedTime", default: nil)
-    static let alertPumpAutosnooze = UserDefaultsValue<String>(key: "alertPumpAutosnooze", default: "Never")
-    static let alertPumpAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertPumpAutosnoozeDay", default: false)
-    static let alertPumpAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertPumpAutosnoozeNight", default: false)
-
-    static let alertIOB = UserDefaultsValue<Bool>(key: "alertIOB", default: false)
-    static let alertIOBAt = UserDefaultsValue<Double>(key: "alertIOBAt", default: 1.5) // Units
-    static let alertIOBNumber = UserDefaultsValue<Int>(key: "alertIOBNumber", default: 3) // Number
-    static let alertIOBBolusesWithin = UserDefaultsValue<Int>(key: "alertIOBBolusesWithin", default: 60) // Minutes
-    static let alertIOBMaxBoluses = UserDefaultsValue<Int>(key: "alertIOBMaxBoluses", default: 10) // Units
-    static let alertIOBQuiet = UserDefaultsValue<Bool>(key: "alertIOBQuiet", default: false)
-    static let alertIOBRepeat = UserDefaultsValue<String>(key: "alertIOBRepeat", default: "Always")
-    static let alertIOBDayTime = UserDefaultsValue<Bool>(key: "alertIOBDayTime", default: true)
-    static let alertIOBNightTime = UserDefaultsValue<Bool>(key: "alertIOBNightTime", default: true)
-    static let alertIOBAudible = UserDefaultsValue<String>(key: "alertIOBAudible", default: "Always")
-    static let alertIOBDayTimeAudible = UserDefaultsValue<Bool>(key: "alertIOBDayTimeAudible", default: true)
-    static let alertIOBNightTimeAudible = UserDefaultsValue<Bool>(key: "alertIOBNightTimeAudible", default: true)
-    static let alertIOBSound = UserDefaultsValue<String>(key: "alertIOBSound", default: "Alert_Tone_Ringtone_1")
-    static let alertIOBSnoozeHours = UserDefaultsValue<Int>(key: "alertIOBSnoozeHours", default: 1) // Hours
-    static let alertIOBIsSnoozed = UserDefaultsValue<Bool>(key: "alertIOBIsSnoozed", default: false)
-    static let alertIOBSnoozedTime = UserDefaultsValue<Date?>(key: "alertIOBSnoozedTime", default: nil)
-    static let alertIOBAutosnooze = UserDefaultsValue<String>(key: "alertIOBAutosnooze", default: "Never")
-    static let alertIOBAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertIOBAutosnoozeDay", default: false)
-    static let alertIOBAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertIOBAutosnoozeNight", default: false)
-
-    static let alertCOB = UserDefaultsValue<Bool>(key: "alertCOB", default: false)
-    static let alertCOBAt = UserDefaultsValue<Int>(key: "alertCOBAt", default: 50) // Units
-    static let alertCOBQuiet = UserDefaultsValue<Bool>(key: "alertCOBQuiet", default: false)
-    static let alertCOBRepeat = UserDefaultsValue<String>(key: "alertCOBRepeat", default: "Always")
-    static let alertCOBDayTime = UserDefaultsValue<Bool>(key: "alertCOBDayTime", default: true)
-    static let alertCOBNightTime = UserDefaultsValue<Bool>(key: "alertCOBNightTime", default: true)
-    static let alertCOBAudible = UserDefaultsValue<String>(key: "alertCOBAudible", default: "Always")
-    static let alertCOBDayTimeAudible = UserDefaultsValue<Bool>(key: "alertCOBDayTimeAudible", default: true)
-    static let alertCOBNightTimeAudible = UserDefaultsValue<Bool>(key: "alertCOBNightTimeAudible", default: true)
-    static let alertCOBSound = UserDefaultsValue<String>(key: "alertCOBSound", default: "Alert_Tone_Ringtone_2")
-    static let alertCOBSnoozeHours = UserDefaultsValue<Int>(key: "alertCOBSnoozeHours", default: 1) // Hours
-    static let alertCOBIsSnoozed = UserDefaultsValue<Bool>(key: "alertCOBIsSnoozed", default: false)
-    static let alertCOBSnoozedTime = UserDefaultsValue<Date?>(key: "alertCOBSnoozedTime", default: nil)
-    static let alertCOBAutosnooze = UserDefaultsValue<String>(key: "alertCOBAutosnooze", default: "Never")
-    static let alertCOBAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertCOBAutosnoozeDay", default: false)
-    static let alertCOBAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertCOBAutosnoozeNight", default: false)
-
     static let alertBatteryActive = UserDefaultsValue<Bool>(key: "alertBatteryActive", default: false)
     static let alertBatteryLevel = UserDefaultsValue<Int>(key: "alertBatteryLevel", default: 25)
     static let alertBatterySound = UserDefaultsValue<String>(key: "alertBatterySound", default: "Machine_Charge")
