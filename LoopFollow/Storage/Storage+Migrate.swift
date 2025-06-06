@@ -294,6 +294,8 @@ extension Storage {
         migrateMissedBolusAlarm()
         migrateSensorChangeAlarm()
         migratePumpChangeAlarm()
+        migrateOverrideStartAlarm()
+        migrateOverrideEndAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -992,6 +994,154 @@ extension Storage {
             default: return .never
             }
         }()
+
+        var list = Storage.shared.alarms.value
+        list.append(alarm)
+        Storage.shared.alarms.value = list
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    //  MARK: Override-Start  →  .overrideStart
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    private func migrateOverrideStartAlarm() {
+        let exists = UserDefaultsValue<Bool>(key: "alertOverrideStart", default: false)
+        guard exists.exists else { return } // user never touched it
+
+        func take<V: AnyConvertible & Equatable>(_ k: String, _ def: V) -> V {
+            let box = UserDefaultsValue<V>(key: k, default: def)
+            defer { box.setNil(key: k) } // wipe after reading
+            return box.value
+        }
+
+        var alarm = Alarm(type: .overrideStart)
+        alarm.name = "Override Started"
+        alarm.disableAfterFiring = true // fire once, then stay off
+
+        alarm.isEnabled = take("alertOverrideStart", false)
+        alarm.snoozeDuration = 5 // legacy UI had no stepper
+        if take("alertOverrideStartIsSnoozed", false) {
+            alarm.snoozedUntil = take("alertOverrideStartSnoozedTime", nil as Date?)
+        }
+
+        alarm.soundFile = SoundFile(
+            rawValue: take("alertOverrideStartSound", "Ending_Reached")
+        ) ?? .endingReached
+
+        // ── ACTIVE (legacy “Pre-Snooze” day/night flags) ──────────────
+        let actDay = take("alertOverrideStartAutosnoozeDay", false)
+        let actNight = take("alertOverrideStartAutosnoozeNight", false)
+        alarm.activeOption = {
+            switch (actDay, actNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .always
+            }
+        }()
+
+        // ── PLAY (legacy “Play Sound” day/night flags) ───────────────
+        let playDay = take("alertOverrideStartDayTimeAudible", true)
+        let playNight = take("alertOverrideStartNightTimeAudible", true)
+        alarm.playSoundOption = {
+            switch (playDay, playNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
+        // ── REPEAT (legacy “Repeat Sound” day/night flags) ───────────
+        let repDay = take("alertOverrideStartDayTime", false)
+        let repNight = take("alertOverrideStartNightTime", false)
+        alarm.repeatSoundOption = {
+            switch (repDay, repNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
+        // ignore & wipe unused keys
+        _ = take("alertOverrideStartQuiet", false as Bool)
+        _ = take("alertOverrideStartRepeatAudible", "Always" as String)
+
+        var list = Storage.shared.alarms.value
+        list.append(alarm)
+        Storage.shared.alarms.value = list
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    //  MARK: Override-End  →  .overrideEnd
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    private func migrateOverrideEndAlarm() {
+        let exists = UserDefaultsValue<Bool>(key: "alertOverrideEnd", default: false)
+        guard exists.exists else { return }
+
+        func take<V: AnyConvertible & Equatable>(_ k: String, _ def: V) -> V {
+            let box = UserDefaultsValue<V>(key: k, default: def)
+            defer { box.setNil(key: k) }
+            return box.value
+        }
+
+        var alarm = Alarm(type: .overrideEnd)
+        alarm.name = "Override Ended"
+        alarm.disableAfterFiring = true
+
+        alarm.isEnabled = take("alertOverrideEnd", false)
+        alarm.snoozeDuration = 5
+        if take("alertOverrideEndIsSnoozed", false) {
+            alarm.snoozedUntil = take("alertOverrideEndSnoozedTime", nil as Date?)
+        }
+
+        alarm.soundFile = SoundFile(
+            rawValue: take("alertOverrideEndSound", "Alert_Tone_Busy")
+        ) ?? .alertToneBusy
+
+        // ACTIVE
+        let actDay = take("alertOverrideEndAutosnoozeDay", false)
+        let actNight = take("alertOverrideEndAutosnoozeNight", false)
+        alarm.activeOption = {
+            switch (actDay, actNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .always
+            }
+        }()
+
+        // PLAY
+        let playDay = take("alertOverrideEndDayTimeAudible", true)
+        let playNight = take("alertOverrideEndNightTimeAudible", true)
+        alarm.playSoundOption = {
+            switch (playDay, playNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
+        // REPEAT
+        let repDay = take("alertOverrideEndDayTime", false)
+        let repNight = take("alertOverrideEndNightTime", false)
+        alarm.repeatSoundOption = {
+            switch (repDay, repNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
+        // wipe unused keys
+        _ = take("alertOverrideEndQuiet", false as Bool)
+        _ = take("alertOverrideEndRepeatAudible", "Always" as String)
 
         var list = Storage.shared.alarms.value
         list.append(alarm)
