@@ -64,7 +64,7 @@ class NightscoutUtils {
 
     static func executeRequest<T: Decodable>(eventType: EventType, parameters: [String: String], completion: @escaping (Result<T, Error>) -> Void) {
         let baseURL = ObservableUserDefaults.shared.url.value
-        let token = UserDefaultsRepository.token.value
+        let token = Storage.shared.token.value
 
         guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
             completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to construct URL"])))
@@ -114,7 +114,7 @@ class NightscoutUtils {
 
     static func executeDynamicRequest(eventType: EventType, parameters: [String: String], completion: @escaping (Result<Any, Error>) -> Void) {
         let baseURL = ObservableUserDefaults.shared.url.value
-        let token = UserDefaultsRepository.token.value
+        let token = Storage.shared.token.value
 
         guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
             completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to construct URL"])))
@@ -187,7 +187,7 @@ class NightscoutUtils {
 
     static func verifyURLAndToken(completion: @escaping (NightscoutError?, String?, Bool, Bool) -> Void) {
         let urlUser = ObservableUserDefaults.shared.url.value
-        let token = UserDefaultsRepository.token.value
+        let token = Storage.shared.token.value
 
         if urlUser.isEmpty {
             completion(.emptyAddress, nil, false, false)
@@ -285,7 +285,7 @@ class NightscoutUtils {
 
     static func retrieveJWTToken() async throws -> String {
         let urlUser = ObservableUserDefaults.shared.url.value
-        let token = UserDefaultsRepository.token.value
+        let token = Storage.shared.token.value
 
         if urlUser.isEmpty {
             throw NightscoutError.emptyAddress

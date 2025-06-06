@@ -138,7 +138,7 @@ extension MainViewController {
             basalData.append(endDot)
         }
 
-        if UserDefaultsRepository.graphBasal.value {
+        if Storage.shared.graphBasal.value {
             updateBasalGraph()
         }
 

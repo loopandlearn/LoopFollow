@@ -350,7 +350,6 @@
 		FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */; };
 		FCC6885C2489559400A0279D /* blank.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885B2489559400A0279D /* blank.wav */; };
 		FCC6885E24896A6C00A0279D /* silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885D24896A6C00A0279D /* silence.mp3 */; };
-		FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886424898EEE00A0279D /* UserDefaults.swift */; };
 		FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886624898F8000A0279D /* UserDefaultsValue.swift */; };
 		FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */; };
 		FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886A24898FD800A0279D /* ObservationToken.swift */; };
@@ -724,7 +723,6 @@
 		FCC688592489554800A0279D /* BackgroundTaskAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskAudio.swift; sourceTree = "<group>"; };
 		FCC6885B2489559400A0279D /* blank.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blank.wav; sourceTree = "<group>"; };
 		FCC6885D24896A6C00A0279D /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
-		FCC6886424898EEE00A0279D /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		FCC6886624898F8000A0279D /* UserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValue.swift; sourceTree = "<group>"; };
 		FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValueGroups.swift; sourceTree = "<group>"; };
 		FCC6886A24898FD800A0279D /* ObservationToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationToken.swift; sourceTree = "<group>"; };
@@ -1085,7 +1083,6 @@
 			isa = PBXGroup;
 			children = (
 				FCC688512489363F00A0279D /* Framework */,
-				FCC6886424898EEE00A0279D /* UserDefaults.swift */,
 				DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */,
 				DDD10F062C529DE800D76A8E /* Observable.swift */,
 				DD4878042C7B2C970048F05C /* Storage.swift */,
@@ -1910,7 +1907,6 @@
 				FCEF87AC24A141A700AE6FA0 /* Localizer.swift in Sources */,
 				FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */,
 				DDF6999E2C5AAA640058A8D9 /* ErrorMessageView.swift in Sources */,
-				FCC6886524898EEE00A0279D /* UserDefaults.swift in Sources */,
 				DD4878152C7B75230048F05C /* MealView.swift in Sources */,
 				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
 				FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */,

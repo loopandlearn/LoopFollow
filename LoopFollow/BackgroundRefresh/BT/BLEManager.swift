@@ -248,7 +248,7 @@ extension BLEManager {
             return nil
         }
 
-        let pollingDelay: TimeInterval = Double(UserDefaultsRepository.bgUpdateDelay.value)
+        let pollingDelay: TimeInterval = Double(Storage.shared.bgUpdateDelay.value)
 
         let expectedOffset = sensorOffset + pollingDelay
 

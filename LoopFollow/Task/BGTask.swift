@@ -21,16 +21,16 @@ extension MainViewController {
         )
 
         // If no Dexcom credentials and no Nightscout, schedule a retry in 60 seconds.
-        if UserDefaultsRepository.shareUserName.value == "",
-           UserDefaultsRepository.sharePassword.value == "",
+        if Storage.shared.shareUserName.value == "",
+           Storage.shared.sharePassword.value == "",
            !IsNightscoutEnabled()
         {
             return
         }
 
         // If Dexcom credentials exist, fetch from DexShare
-        if UserDefaultsRepository.shareUserName.value != "",
-           UserDefaultsRepository.sharePassword.value != ""
+        if Storage.shared.shareUserName.value != "",
+           Storage.shared.sharePassword.value != ""
         {
             webLoadDexShare()
         } else {

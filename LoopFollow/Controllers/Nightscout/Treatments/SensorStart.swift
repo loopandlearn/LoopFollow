@@ -35,7 +35,7 @@ extension MainViewController {
                 print("Failed to parse date")
             }
         }
-        if UserDefaultsRepository.graphOtherTreatments.value {
+        if Storage.shared.graphOtherTreatments.value {
             updateSensorStart()
         }
     }

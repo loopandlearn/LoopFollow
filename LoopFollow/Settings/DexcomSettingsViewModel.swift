@@ -6,26 +6,26 @@ import Combine
 import Foundation
 
 class DexcomSettingsViewModel: ObservableObject {
-    @Published var userName: String = UserDefaultsRepository.shareUserName.value {
+    @Published var userName: String = Storage.shared.shareUserName.value {
         willSet {
             if newValue != userName {
-                UserDefaultsRepository.shareUserName.value = newValue
+                Storage.shared.shareUserName.value = newValue
             }
         }
     }
 
-    @Published var password: String = UserDefaultsRepository.sharePassword.value {
+    @Published var password: String = Storage.shared.sharePassword.value {
         willSet {
             if newValue != password {
-                UserDefaultsRepository.sharePassword.value = newValue
+                Storage.shared.sharePassword.value = newValue
             }
         }
     }
 
-    @Published var server: String = UserDefaultsRepository.shareServer.value {
+    @Published var server: String = Storage.shared.shareServer.value {
         willSet {
             if newValue != server {
-                UserDefaultsRepository.shareServer.value = newValue
+                Storage.shared.shareServer.value = newValue
             }
         }
     }

@@ -126,7 +126,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         Storage.shared.migrate()
 
         // Synchronize info types to ensure arrays are the correct size
-        UserDefaultsRepository.synchronizeInfoTypes()
+        synchronizeInfoTypes()
 
         infoTable.rowHeight = 21
         infoTable.dataSource = self
@@ -139,9 +139,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         smallGraphHeightConstraint.constant = CGFloat(Storage.shared.smallGraphHeight.value)
         view.layoutIfNeeded()
 
-        let shareUserName = UserDefaultsRepository.shareUserName.value
-        let sharePassword = UserDefaultsRepository.sharePassword.value
-        let shareServer = UserDefaultsRepository.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
+        let shareUserName = Storage.shared.shareUserName.value
+        let sharePassword = Storage.shared.sharePassword.value
+        let shareServer = Storage.shared.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
         dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer)
 
         // setup show/hide small graph and stats
@@ -420,17 +420,17 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
             // Check if the current version is blacklisted, or if there is a newer version available
             if isBlacklisted {
-                let lastBlacklistShown = UserDefaultsRepository.lastBlacklistNotificationShown.value ?? Date.distantPast
+                let lastBlacklistShown = Storage.shared.lastBlacklistNotificationShown.value ?? Date.distantPast
                 if now.timeIntervalSince(lastBlacklistShown) > 86400 { // 24 hours
                     self.versionAlert(message: "The current version has a critical issue and should be updated as soon as possible.")
-                    UserDefaultsRepository.lastBlacklistNotificationShown.value = now
-                    UserDefaultsRepository.lastVersionUpdateNotificationShown.value = now
+                    Storage.shared.lastBlacklistNotificationShown.value = now
+                    Storage.shared.lastVersionUpdateNotificationShown.value = now
                 }
             } else if isNewer {
-                let lastVersionUpdateShown = UserDefaultsRepository.lastVersionUpdateNotificationShown.value ?? Date.distantPast
+                let lastVersionUpdateShown = Storage.shared.lastVersionUpdateNotificationShown.value ?? Date.distantPast
                 if now.timeIntervalSince(lastVersionUpdateShown) > 1_209_600 { // 2 weeks
                     self.versionAlert(message: "A new version is available: \(latestVersion ?? "Unknown"). It is recommended to update.")
-                    UserDefaultsRepository.lastVersionUpdateNotificationShown.value = now
+                    Storage.shared.lastVersionUpdateNotificationShown.value = now
                 }
             }
         }
@@ -450,10 +450,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let weekBeforeExpiration = Calendar.current.date(byAdding: .day, value: -7, to: expirationDate)!
 
         if now >= weekBeforeExpiration {
-            let lastExpirationShown = UserDefaultsRepository.lastExpirationNotificationShown.value ?? Date.distantPast
+            let lastExpirationShown = Storage.shared.lastExpirationNotificationShown.value ?? Date.distantPast
             if now.timeIntervalSince(lastExpirationShown) > 86400 { // 24 hours
                 expirationAlert()
-                UserDefaultsRepository.lastExpirationNotificationShown.value = now
+                Storage.shared.lastExpirationNotificationShown.value = now
             }
         }
     }
@@ -493,7 +493,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         infoTable.isHidden = isHidden
 
-        if UserDefaultsRepository.hideInfoTable.value {
+        if Storage.shared.hideInfoTable.value {
             infoTable.isHidden = true
         }
 
@@ -706,11 +706,47 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 }
 
                 if let token = debugData.token {
-                    UserDefaultsRepository.token.value = token
+                    Storage.shared.token.value = token
                 }
             } catch {
                 LogManager.shared.log(category: .alarm, message: "Failed to load DebugData: \(error)", isDebug: true)
             }
         }
+    }
+
+    private func synchronizeInfoTypes() {
+        var sortArray = Storage.shared.infoSort.value
+        var visibleArray = Storage.shared.infoVisible.value
+
+        // Current valid indices based on InfoType
+        let currentValidIndices = InfoType.allCases.map { $0.rawValue }
+
+        // Add missing indices to sortArray
+        for index in currentValidIndices {
+            if !sortArray.contains(index) {
+                sortArray.append(index)
+                // print("Added missing index \(index) to sortArray")
+            }
+        }
+
+        // Remove deprecated indices
+        sortArray = sortArray.filter { currentValidIndices.contains($0) }
+
+        // Ensure visibleArray is updated with new entries
+        if visibleArray.count < currentValidIndices.count {
+            for i in visibleArray.count ..< currentValidIndices.count {
+                visibleArray.append(InfoType(rawValue: i)?.defaultVisible ?? false)
+                // print("Added default visibility for new index \(i)")
+            }
+        }
+
+        // Trim excess elements if there are more than needed
+        if visibleArray.count > currentValidIndices.count {
+            visibleArray = Array(visibleArray.prefix(currentValidIndices.count))
+            // print("Trimmed visibleArray to match current valid indices")
+        }
+
+        Storage.shared.infoSort.value = sortArray
+        Storage.shared.infoVisible.value = visibleArray
     }
 }

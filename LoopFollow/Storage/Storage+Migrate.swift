@@ -28,11 +28,6 @@ extension Storage {
             item.setNil(key: item.key)
         }
 
-        if !UserDefaultsRepository.backgroundRefresh.value {
-            Storage.shared.backgroundRefreshType.value = .none
-            UserDefaultsRepository.backgroundRefresh.value = true
-        }
-
         // Remove this in a year later than the release of the new Alarms [BEGIN]
         let legacyColorBGText = UserDefaultsValue<Bool>(key: "colorBGText", default: true)
         if legacyColorBGText.exists {
@@ -282,6 +277,72 @@ extension Storage {
             // finally persist the whole struct
             Storage.shared.alarmConfiguration.value = cfg
         }
+
+        // ── Dexcom Share --------------------------------------------------------
+        move(UserDefaultsValue<String>(key: "shareUserName", default: ""),
+             into: Storage.shared.shareUserName)
+
+        move(UserDefaultsValue<String>(key: "sharePassword", default: ""),
+             into: Storage.shared.sharePassword)
+
+        move(UserDefaultsValue<String>(key: "shareServer", default: "US"),
+             into: Storage.shared.shareServer)
+
+        // ── Graph ---------------------------------------------------------------
+        moveFloatToDouble(
+            UserDefaultsValue<Float>(key: "chartScaleX", default: 18.0),
+            into: Storage.shared.chartScaleX
+        )
+
+        // ── Advanced settings ---------------------------------------------------
+        move(UserDefaultsValue<Bool>(key: "downloadTreatments", default: true),
+             into: Storage.shared.downloadTreatments)
+        move(UserDefaultsValue<Bool>(key: "downloadPrediction", default: true),
+             into: Storage.shared.downloadPrediction)
+        move(UserDefaultsValue<Bool>(key: "graphOtherTreatments", default: true),
+             into: Storage.shared.graphOtherTreatments)
+        move(UserDefaultsValue<Bool>(key: "graphBasal", default: true),
+             into: Storage.shared.graphBasal)
+        move(UserDefaultsValue<Bool>(key: "graphBolus", default: true),
+             into: Storage.shared.graphBolus)
+        move(UserDefaultsValue<Bool>(key: "graphCarbs", default: true),
+             into: Storage.shared.graphCarbs)
+        move(UserDefaultsValue<Int>(key: "bgUpdateDelay", default: 10),
+             into: Storage.shared.bgUpdateDelay)
+
+        // ── Insert times --------------------------------------------------------
+        move(UserDefaultsValue<TimeInterval>(key: "alertCageInsertTime", default: 0),
+             into: Storage.shared.cageInsertTime)
+        move(UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0),
+             into: Storage.shared.sageInsertTime)
+
+        // ── Version-cache / notification bookkeeping ---------------------------
+        move(UserDefaultsValue<String?>(key: "cachedForVersion", default: nil),
+             into: Storage.shared.cachedForVersion)
+        move(UserDefaultsValue<String?>(key: "latestVersion", default: nil),
+             into: Storage.shared.latestVersion)
+        move(UserDefaultsValue<Date?>(key: "latestVersionChecked", default: nil),
+             into: Storage.shared.latestVersionChecked)
+        move(UserDefaultsValue<Bool>(key: "currentVersionBlackListed", default: false),
+             into: Storage.shared.currentVersionBlackListed)
+        move(UserDefaultsValue<Date?>(key: "lastBlacklistNotificationShown", default: nil),
+             into: Storage.shared.lastBlacklistNotificationShown)
+        move(UserDefaultsValue<Date?>(key: "lastVersionUpdateNotificationShown", default: nil),
+             into: Storage.shared.lastVersionUpdateNotificationShown)
+        move(UserDefaultsValue<Date?>(key: "lastExpirationNotificationShown", default: nil),
+             into: Storage.shared.lastExpirationNotificationShown)
+
+        move(UserDefaultsValue<Bool>(key: "hideInfoTable", default: false), into: Storage.shared.hideInfoTable)
+        move(UserDefaultsValue<String>(key: "token", default: ""), into: Storage.shared.token)
+        move(UserDefaultsValue<String>(key: "units", default: "mg/dL"), into: Storage.shared.units)
+
+        move(UserDefaultsValue<[Int]>(key: "infoSort",
+                                      default: InfoType.allCases.map { $0.sortOrder }),
+             into: Storage.shared.infoSort)
+
+        move(UserDefaultsValue<[Bool]>(key: "infoVisible",
+                                       default: InfoType.allCases.map { $0.defaultVisible }),
+             into: Storage.shared.infoVisible)
 
         migrateUrgentLowAlarm()
         migrateLowAlarm()

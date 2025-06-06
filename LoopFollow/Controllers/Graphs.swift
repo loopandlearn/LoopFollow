@@ -200,7 +200,7 @@ class TempTargetRenderer: LineChartRenderer {
     }
 }
 
-let ScaleXMax: Float = 150.0
+let ScaleXMax: Double = 150.0
 extension MainViewController {
     func updateChartRenderers() {
         let tempTargetDataIndex = GraphDataIndex.tempTarget.rawValue
@@ -230,11 +230,11 @@ extension MainViewController {
 
     func chartScaled(_: ChartViewBase, scaleX _: CGFloat, scaleY _: CGFloat) {
         // dont store huge values
-        var scale = Float(BGChart.scaleX)
+        var scale = Double(BGChart.scaleX)
         if scale > ScaleXMax {
             scale = ScaleXMax
         }
-        UserDefaultsRepository.chartScaleX.value = Float(scale)
+        Storage.shared.chartScaleX.value = scale
     }
 
     func createGraph() {
@@ -853,10 +853,10 @@ extension MainViewController {
         BGChartFull.notifyDataSetChanged()
 
         if firstGraphLoad {
-            var scaleX = CGFloat(UserDefaultsRepository.chartScaleX.value)
+            var scaleX = CGFloat(Storage.shared.chartScaleX.value)
             if scaleX > CGFloat(ScaleXMax) {
                 scaleX = CGFloat(ScaleXMax)
-                UserDefaultsRepository.chartScaleX.value = ScaleXMax
+                Storage.shared.chartScaleX.value = ScaleXMax
             }
             BGChart.zoom(scaleX: scaleX, scaleY: 1, x: 1, y: 1)
             firstGraphLoad = false

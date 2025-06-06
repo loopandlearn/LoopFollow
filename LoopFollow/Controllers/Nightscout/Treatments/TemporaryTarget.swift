@@ -63,7 +63,7 @@ extension MainViewController {
             }
         }
 
-        if UserDefaultsRepository.graphOtherTreatments.value {
+        if Storage.shared.graphOtherTreatments.value {
             updateTempTargetGraph()
             updateChartRenderers()
         }

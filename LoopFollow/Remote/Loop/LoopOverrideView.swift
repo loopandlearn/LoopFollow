@@ -99,7 +99,7 @@ struct LoopOverrideView: View {
                                                     .foregroundColor(.secondary)
                                                 if !override.targetRange.isEmpty {
                                                     let range = override.targetRange.map { Localizer.formatQuantity($0) }.joined(separator: " - ")
-                                                    Text("Target Range: \(range) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)")
+                                                    Text("Target Range: \(range) \(Localizer.getPreferredUnit().localizedShortUnitString)")
                                                         .font(.subheadline)
                                                         .foregroundColor(.secondary)
                                                 }

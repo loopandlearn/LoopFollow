@@ -34,7 +34,7 @@ extension MainViewController {
             }
         }
 
-        if UserDefaultsRepository.graphBolus.value {
+        if Storage.shared.graphBolus.value {
             updateSmbGraph()
             updateChartRenderers()
         }

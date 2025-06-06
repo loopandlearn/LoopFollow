@@ -85,7 +85,7 @@ class ContactImageUpdater {
         paragraphStyle.alignment = .center
 
         // Format extraDelta based on the user's unit preference
-        let unitPreference = UserDefaultsRepository.units.value
+        let unitPreference = Storage.shared.units.value
         let yOffset: CGFloat = 48
         if contactType == .Trend, Storage.shared.contactTrend.value == .separate {
             let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)

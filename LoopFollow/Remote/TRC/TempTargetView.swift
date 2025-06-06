@@ -50,7 +50,7 @@ struct TempTargetView: View {
                                     Text("Current Target")
                                     Spacer()
                                     Text(Localizer.formatQuantity(tempTargetValue))
-                                    Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
+                                    Text(Localizer.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                                 }
                                 Button {
                                     alertType = .confirmCancellation
@@ -73,7 +73,7 @@ struct TempTargetView: View {
                                 TextFieldWithToolBar(
                                     quantity: $newHKTarget,
                                     maxLength: 4,
-                                    unit: UserDefaultsRepository.getPreferredUnit(),
+                                    unit: Localizer.getPreferredUnit(),
                                     minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80),
                                     maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200),
                                     onValidationError: { message in
@@ -81,7 +81,7 @@ struct TempTargetView: View {
                                     }
                                 )
                                 .focused($targetFieldIsFocused)
-                                Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
+                                Text(Localizer.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                             }
                             HStack {
                                 Text("Duration")
@@ -173,7 +173,7 @@ struct TempTargetView: View {
                 case .confirmCommand:
                     return Alert(
                         title: Text("Confirm Command"),
-                        message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
+                        message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(Localizer.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
                         primaryButton: .default(Text("Confirm"), action: {
                             enactTempTarget()
                         }),
@@ -242,7 +242,7 @@ struct TempTargetView: View {
     }
 
     private var isButtonDisabled: Bool {
-        return newHKTarget.doubleValue(for: UserDefaultsRepository.getPreferredUnit()) == 0 ||
+        return newHKTarget.doubleValue(for: Localizer.getPreferredUnit()) == 0 ||
             duration.doubleValue(for: HKUnit.minute()) == 0 || isLoading
     }
 

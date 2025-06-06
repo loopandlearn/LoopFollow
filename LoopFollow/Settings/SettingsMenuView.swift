@@ -134,8 +134,8 @@ struct SettingsMenuView: View {
         Section("Data Settings") {
             Picker("Units",
                    selection: Binding(
-                       get: { UserDefaultsRepository.units.value },
-                       set: { UserDefaultsRepository.units.value = $0 }
+                       get: { Storage.shared.units.value },
+                       set: { Storage.shared.units.value = $0 }
                    )) {
                 Text("mg/dL").tag("mg/dL")
                 Text("mmol/L").tag("mmol/L")

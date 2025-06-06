@@ -58,7 +58,7 @@ struct TrioNightscoutRemoteView: View {
                                     Text("Current Target")
                                     Spacer()
                                     Text(Localizer.formatQuantity(tempTargetValue))
-                                    Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
+                                    Text(Localizer.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                                 }
                                 Button {
                                     alertType = .confirmCancellation
@@ -81,7 +81,7 @@ struct TrioNightscoutRemoteView: View {
                                 TextFieldWithToolBar(
                                     quantity: $newHKTarget,
                                     maxLength: 4,
-                                    unit: UserDefaultsRepository.getPreferredUnit(),
+                                    unit: Localizer.getPreferredUnit(),
                                     minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80),
                                     maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200),
                                     onValidationError: { message in
@@ -89,7 +89,7 @@ struct TrioNightscoutRemoteView: View {
                                     }
                                 )
                                 .focused($targetFieldIsFocused)
-                                Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
+                                Text(Localizer.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                             }
                             HStack {
                                 Text("Duration")
@@ -181,7 +181,7 @@ struct TrioNightscoutRemoteView: View {
                 case .confirmCommand:
                     return Alert(
                         title: Text("Confirm Command"),
-                        message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
+                        message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(Localizer.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
                         primaryButton: .default(Text("Confirm"), action: {
                             enactTempTarget()
                         }),
@@ -244,7 +244,7 @@ struct TrioNightscoutRemoteView: View {
     }
 
     private var isButtonDisabled: Bool {
-        return newHKTarget.doubleValue(for: UserDefaultsRepository.getPreferredUnit()) == 0 ||
+        return newHKTarget.doubleValue(for: Localizer.getPreferredUnit()) == 0 ||
             duration.doubleValue(for: HKUnit.minute()) == 0 || isLoading
     }
 
@@ -257,13 +257,13 @@ struct TrioNightscoutRemoteView: View {
                     self.statusMessage = "Command successfully sent to Nightscout."
                     LogManager.shared.log(
                         category: .nightscout,
-                        message: "sendTempTarget succeeded - New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
+                        message: "sendTempTarget succeeded - New Target: \(Localizer.formatQuantity(newHKTarget)) \(Localizer.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
                     )
                 } else {
                     self.statusMessage = "Failed to enact target."
                     LogManager.shared.log(
                         category: .nightscout,
-                        message: "sendTempTarget failed - New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
+                        message: "sendTempTarget failed - New Target: \(Localizer.formatQuantity(newHKTarget)) \(Localizer.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
                     )
                 }
                 self.alertType = .status

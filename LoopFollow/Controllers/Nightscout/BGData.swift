@@ -167,7 +167,7 @@ extension MainViewController {
                                       message: "Reading is close to 5 minutes old (\(secondsAgo) sec). Scheduling next fetch in 5 seconds.",
                                       isDebug: true)
             } else {
-                delayToSchedule = 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value)
+                delayToSchedule = 300 - secondsAgo + Double(Storage.shared.bgUpdateDelay.value)
                 LogManager.shared.log(category: .nightscout,
                                       message: "Fresh reading. Scheduling next fetch in \(delayToSchedule) seconds.",
                                       isDebug: true)
