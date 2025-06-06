@@ -12,8 +12,8 @@ struct InfoDisplaySettingsView: View {
             Form {
                 Section(header: Text("General")) {
                     Toggle(isOn: Binding(
-                        get: { UserDefaultsRepository.hideInfoTable.value },
-                        set: { UserDefaultsRepository.hideInfoTable.value = $0 }
+                        get: { Storage.shared.hideInfoTable.value },
+                        set: { Storage.shared.hideInfoTable.value = $0 }
                     )) {
                         Text("Hide Information Table")
                     }

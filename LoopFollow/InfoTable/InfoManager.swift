@@ -67,11 +67,11 @@ class InfoManager {
     }
 
     func numberOfRows() -> Int {
-        return UserDefaultsRepository.infoSort.value.filter { UserDefaultsRepository.infoVisible.value[$0] }.count
+        return Storage.shared.infoSort.value.filter { Storage.shared.infoVisible.value[$0] }.count
     }
 
     func dataForIndexPath(_ indexPath: IndexPath) -> InfoData? {
-        let sortedAndVisibleIndexes = UserDefaultsRepository.infoSort.value.filter { UserDefaultsRepository.infoVisible.value[$0] }
+        let sortedAndVisibleIndexes = Storage.shared.infoSort.value.filter { Storage.shared.infoVisible.value[$0] }
 
         guard indexPath.row < sortedAndVisibleIndexes.count else {
             return nil

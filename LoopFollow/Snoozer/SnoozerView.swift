@@ -154,11 +154,11 @@ struct SnoozerView: View {
             return "🤷"
         }
 
-        if UserDefaultsRepository.getPreferredUnit() == .millimolesPerLiter, Localizer.removePeriodAndCommaForBadge(bgText.value) == "55" {
+        if Localizer.getPreferredUnit() == .millimolesPerLiter, Localizer.removePeriodAndCommaForBadge(bgText.value) == "55" {
             return "🦄"
         }
 
-        if UserDefaultsRepository.getPreferredUnit() == .milligramsPerDeciliter, bg == 100 {
+        if Localizer.getPreferredUnit() == .milligramsPerDeciliter, bg == 100 {
             return "🦄"
         }
 

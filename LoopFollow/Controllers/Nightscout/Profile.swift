@@ -110,7 +110,7 @@ extension MainViewController {
             }
         }
 
-        if UserDefaultsRepository.graphBasal.value {
+        if Storage.shared.graphBasal.value {
             updateBasalScheduledGraph()
         }
     }

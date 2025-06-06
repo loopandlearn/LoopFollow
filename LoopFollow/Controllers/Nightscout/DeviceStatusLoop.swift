@@ -66,7 +66,7 @@ extension MainViewController {
                     let prediction = predictdata["values"] as! [Double]
                     PredictionLabel.text = Localizer.toDisplayUnits(String(Int(prediction.last!)))
                     PredictionLabel.textColor = UIColor.systemPurple
-                    if UserDefaultsRepository.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
+                    if Storage.shared.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
                         predictionData.removeAll()
                         var predictionTime = lastLoopTime
                         let toLoad = Int(Storage.shared.predictionToLoad.value * 12)

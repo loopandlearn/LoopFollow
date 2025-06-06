@@ -23,15 +23,15 @@ class AppVersionManager {
         let now = Date()
 
         // Retrieve cache
-        let latestVersionChecked = UserDefaultsRepository.latestVersionChecked.value ?? Date.distantPast
-        let latestVersion = UserDefaultsRepository.latestVersion.value
-        let currentVersionBlackListed = UserDefaultsRepository.currentVersionBlackListed.value
-        let cachedForVersion = UserDefaultsRepository.cachedForVersion.value
+        let latestVersionChecked = Storage.shared.latestVersionChecked.value ?? Date.distantPast
+        let latestVersion = Storage.shared.latestVersion.value
+        let currentVersionBlackListed = Storage.shared.currentVersionBlackListed.value
+        let cachedForVersion = Storage.shared.cachedForVersion.value
 
         // Reset notifications if version has changed
         if let cachedVersion = cachedForVersion, cachedVersion != currentVersion {
-            UserDefaultsRepository.lastBlacklistNotificationShown.value = Date.distantPast
-            UserDefaultsRepository.lastVersionUpdateNotificationShown.value = Date.distantPast
+            Storage.shared.lastBlacklistNotificationShown.value = Date.distantPast
+            Storage.shared.lastVersionUpdateNotificationShown.value = Date.distantPast
         }
 
         // Check if the cache is still valid
@@ -59,10 +59,10 @@ class AppVersionManager {
                         .map { $0.blacklistedVersions.map { $0.version }.contains(currentVersion) } ?? false
 
                     // Update cache with new data
-                    UserDefaultsRepository.latestVersion.value = fetchedVersion
-                    UserDefaultsRepository.latestVersionChecked.value = Date()
-                    UserDefaultsRepository.currentVersionBlackListed.value = isBlacklisted
-                    UserDefaultsRepository.cachedForVersion.value = currentVersion
+                    Storage.shared.latestVersion.value = fetchedVersion
+                    Storage.shared.latestVersionChecked.value = Date()
+                    Storage.shared.currentVersionBlackListed.value = isBlacklisted
+                    Storage.shared.cachedForVersion.value = currentVersion
 
                     // Call completion with new data
                     completion(fetchedVersion, isNewer, isBlacklisted)

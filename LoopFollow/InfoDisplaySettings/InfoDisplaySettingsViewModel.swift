@@ -10,18 +10,18 @@ class InfoDisplaySettingsViewModel: ObservableObject {
     @Published var infoVisible: [Bool]
 
     init() {
-        infoSort = UserDefaultsRepository.infoSort.value
-        infoVisible = UserDefaultsRepository.infoVisible.value
+        infoSort = Storage.shared.infoSort.value
+        infoVisible = Storage.shared.infoVisible.value
     }
 
     func toggleVisibility(for sortedIndex: Int) {
         infoVisible[sortedIndex].toggle()
-        UserDefaultsRepository.infoVisible.value = infoVisible
+        Storage.shared.infoVisible.value = infoVisible
     }
 
     func move(from source: IndexSet, to destination: Int) {
         infoSort.move(fromOffsets: source, toOffset: destination)
-        UserDefaultsRepository.infoSort.value = infoSort
+        Storage.shared.infoSort.value = infoSort
     }
 
     func getName(for index: Int) -> String {

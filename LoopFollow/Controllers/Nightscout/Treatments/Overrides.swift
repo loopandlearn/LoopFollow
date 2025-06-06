@@ -79,7 +79,7 @@ extension MainViewController {
                 infoManager.clearInfoData(type: .override)
             }
         }
-        if UserDefaultsRepository.graphOtherTreatments.value {
+        if Storage.shared.graphOtherTreatments.value {
             updateOverrideGraph()
         }
     }

@@ -6,6 +6,16 @@ import Foundation
 import HealthKit
 
 class Localizer {
+    static func getPreferredUnit() -> HKUnit {
+        let unitString = Storage.shared.units.value
+        switch unitString {
+        case "mmol/L":
+            return .millimolesPerLiter
+        default:
+            return .milligramsPerDeciliter
+        }
+    }
+
     static func formatToLocalizedString(_ value: Double, maxFractionDigits: Int = 1, minFractionDigits: Int = 0) -> String {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
@@ -18,7 +28,7 @@ class Localizer {
     }
 
     static func formatQuantity(_ quantity: HKQuantity) -> String {
-        let unit: HKUnit = UserDefaultsRepository.getPreferredUnit()
+        let unit: HKUnit = getPreferredUnit()
         let value = quantity.doubleValue(for: unit)
 
         return formatToLocalizedString(value, maxFractionDigits: unit.preferredFractionDigits, minFractionDigits: unit.preferredFractionDigits)
@@ -41,7 +51,7 @@ class Localizer {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
 
-        let units = unit ?? UserDefaultsRepository.units.value
+        let units = unit ?? Storage.shared.units.value
 
         if units == "mg/dL" {
             numberFormatter.maximumFractionDigits = 0 // No decimal places for mg/dL
@@ -60,7 +70,7 @@ class Localizer {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
 
-        if UserDefaultsRepository.units.value == "mg/dL" {
+        if Storage.shared.units.value == "mg/dL" {
             numberFormatter.maximumFractionDigits = 0 // No decimal places for mg/dL
         } else {
             numberFormatter.maximumFractionDigits = 1 // Always one decimal place for mmol/L
@@ -70,7 +80,7 @@ class Localizer {
         numberFormatter.locale = Locale.current
 
         if let number = Float(value) {
-            if UserDefaultsRepository.units.value == "mg/dL" {
+            if Storage.shared.units.value == "mg/dL" {
                 let numberValue = NSNumber(value: number)
                 return numberFormatter.string(from: numberValue) ?? value
             } else {

@@ -15,7 +15,7 @@ class NightscoutViewController: UIViewController {
         }
 
         var url = ObservableUserDefaults.shared.url.value
-        let token = UserDefaultsRepository.token.value
+        let token = Storage.shared.token.value
 
         if token != "" {
             url = url + "?token=" + token

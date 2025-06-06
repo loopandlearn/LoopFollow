@@ -92,7 +92,7 @@ struct OverrideView: View {
                                                 }
 
                                                 if let target = override.target {
-                                                    Text("Target: \(Localizer.formatQuantity(target)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)")
+                                                    Text("Target: \(Localizer.formatQuantity(target)) \(Localizer.getPreferredUnit().localizedShortUnitString)")
                                                         .font(.subheadline)
                                                         .foregroundColor(.secondary)
                                                 }

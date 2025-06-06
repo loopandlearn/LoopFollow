@@ -44,7 +44,7 @@ extension MainViewController {
                                    .withTime,
                                    .withDashSeparatorInDate,
                                    .withColonSeparatorInTime]
-        UserDefaultsRepository.alertSageInsertTime.value = formatter.date(from: lastSageString)?.timeIntervalSince1970 as! TimeInterval
+        Storage.shared.sageInsertTime.value = formatter.date(from: lastSageString)?.timeIntervalSince1970 as! TimeInterval
 
         // -- Auto-snooze CGM start ────────────────────────────────────────────────
         let now = Date()
@@ -52,7 +52,7 @@ extension MainViewController {
         // 1.  Do we *want* the automatic global snooze?
         if Storage.shared.alarmConfiguration.value.autoSnoozeCGMStart {
             // 2.  When did the sensor start?
-            let insertTime = UserDefaultsRepository.alertSageInsertTime.value
+            let insertTime = Storage.shared.sageInsertTime.value
 
             // 3.  If the start is less than 2 h ago, snooze *all* alarms for the
             //     remainder of that 2-hour window.

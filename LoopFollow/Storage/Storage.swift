@@ -107,6 +107,48 @@ class Storage {
     var watchLine2 = StorageValue<String>(key: "watchLine2", defaultValue: "C:%COB% I:%IOB% B:%BASAL%")
     // Calendar entries [END]
 
+    // MARK: - Dexcom Share --------------------------------------------------------
+
+    var shareUserName = StorageValue<String>(key: "shareUserName", defaultValue: "")
+    var sharePassword = StorageValue<String>(key: "sharePassword", defaultValue: "")
+    var shareServer = StorageValue<String>(key: "shareServer", defaultValue: "US")
+
+    // MARK: - Graph ---------------------------------------------------------------
+
+    var chartScaleX = StorageValue<Double>(key: "chartScaleX", defaultValue: 18.0)
+
+    // MARK: - Advanced settings ---------------------------------------------------
+
+    var downloadTreatments = StorageValue<Bool>(key: "downloadTreatments", defaultValue: true)
+    var downloadPrediction = StorageValue<Bool>(key: "downloadPrediction", defaultValue: true)
+    var graphOtherTreatments = StorageValue<Bool>(key: "graphOtherTreatments", defaultValue: true)
+    var graphBasal = StorageValue<Bool>(key: "graphBasal", defaultValue: true)
+    var graphBolus = StorageValue<Bool>(key: "graphBolus", defaultValue: true)
+    var graphCarbs = StorageValue<Bool>(key: "graphCarbs", defaultValue: true)
+    var bgUpdateDelay = StorageValue<Int>(key: "bgUpdateDelay", defaultValue: 10)
+
+    // MARK: - Insert times (sensor / pump) ---------------------------------------
+
+    var cageInsertTime = StorageValue<TimeInterval>(key: "cageInsertTime", defaultValue: 0)
+    var sageInsertTime = StorageValue<TimeInterval>(key: "sageInsertTime", defaultValue: 0)
+
+    // MARK: - Version-info ---------------------------
+
+    var cachedForVersion = StorageValue<String?>(key: "cachedForVersion", defaultValue: nil)
+    var latestVersion = StorageValue<String?>(key: "latestVersion", defaultValue: nil)
+    var latestVersionChecked = StorageValue<Date?>(key: "latestVersionChecked", defaultValue: nil)
+    var currentVersionBlackListed = StorageValue<Bool>(key: "currentVersionBlackListed", defaultValue: false)
+    var lastBlacklistNotificationShown = StorageValue<Date?>(key: "lastBlacklistNotificationShown", defaultValue: nil)
+    var lastVersionUpdateNotificationShown = StorageValue<Date?>(key: "lastVersionUpdateNotificationShown", defaultValue: nil)
+    var lastExpirationNotificationShown = StorageValue<Date?>(key: "lastExpirationNotificationShown", defaultValue: nil)
+
+    var hideInfoTable = StorageValue<Bool>(key: "hideInfoTable", defaultValue: false)
+    var token = StorageValue<String>(key: "token", defaultValue: "")
+    var units = StorageValue<String>(key: "units", defaultValue: "mg/dL")
+
+    var infoSort = StorageValue<[Int]>(key: "infoSort", defaultValue: InfoType.allCases.map { $0.sortOrder })
+    var infoVisible = StorageValue<[Bool]>(key: "infoVisible", defaultValue: InfoType.allCases.map { $0.defaultVisible })
+
     static let shared = Storage()
     private init() {}
 }

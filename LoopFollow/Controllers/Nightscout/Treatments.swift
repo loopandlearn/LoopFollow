@@ -8,7 +8,7 @@ extension MainViewController {
     // NS Treatments Web Call
     // Downloads Basal, Bolus, Carbs, BG Check, Notes, Overrides
     func WebLoadNSTreatments() {
-        if !UserDefaultsRepository.downloadTreatments.value { return }
+        if !Storage.shared.downloadTreatments.value { return }
 
         let startTimeString = dateTimeUtils.getDateTimeString(addingDays: -1 * Storage.shared.downloadDays.value)
         let currentTimeString = dateTimeUtils.getDateTimeString(addingHours: 6)

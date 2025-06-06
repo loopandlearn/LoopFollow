@@ -10,7 +10,7 @@ extension MainViewController {
             updateIage(data: entries)
         } else if let iage = currentIage {
             updateIage(data: [iage])
-        } else if UserDefaultsRepository.infoVisible.value[InfoType.iage.rawValue] {
+        } else if Storage.shared.infoVisible.value[InfoType.iage.rawValue] {
             webLoadNSIage()
         }
     }

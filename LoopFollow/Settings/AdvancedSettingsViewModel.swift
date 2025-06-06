@@ -7,43 +7,43 @@ import Foundation
 class AdvancedSettingsViewModel: ObservableObject {
     @Published var downloadTreatments: Bool {
         didSet {
-            UserDefaultsRepository.downloadTreatments.value = downloadTreatments
+            Storage.shared.downloadTreatments.value = downloadTreatments
         }
     }
 
     @Published var downloadPrediction: Bool {
         didSet {
-            UserDefaultsRepository.downloadPrediction.value = downloadPrediction
+            Storage.shared.downloadPrediction.value = downloadPrediction
         }
     }
 
     @Published var graphBasal: Bool {
         didSet {
-            UserDefaultsRepository.graphBasal.value = graphBasal
+            Storage.shared.graphBasal.value = graphBasal
         }
     }
 
     @Published var graphBolus: Bool {
         didSet {
-            UserDefaultsRepository.graphBolus.value = graphBolus
+            Storage.shared.graphBolus.value = graphBolus
         }
     }
 
     @Published var graphCarbs: Bool {
         didSet {
-            UserDefaultsRepository.graphCarbs.value = graphCarbs
+            Storage.shared.graphCarbs.value = graphCarbs
         }
     }
 
     @Published var graphOtherTreatments: Bool {
         didSet {
-            UserDefaultsRepository.graphOtherTreatments.value = graphOtherTreatments
+            Storage.shared.graphOtherTreatments.value = graphOtherTreatments
         }
     }
 
     @Published var bgUpdateDelay: Int {
         didSet {
-            UserDefaultsRepository.bgUpdateDelay.value = bgUpdateDelay
+            Storage.shared.bgUpdateDelay.value = bgUpdateDelay
         }
     }
 
@@ -54,13 +54,13 @@ class AdvancedSettingsViewModel: ObservableObject {
     }
 
     init() {
-        downloadTreatments = UserDefaultsRepository.downloadTreatments.value
-        downloadPrediction = UserDefaultsRepository.downloadPrediction.value
-        graphBasal = UserDefaultsRepository.graphBasal.value
-        graphBolus = UserDefaultsRepository.graphBolus.value
-        graphCarbs = UserDefaultsRepository.graphCarbs.value
-        graphOtherTreatments = UserDefaultsRepository.graphOtherTreatments.value
-        bgUpdateDelay = UserDefaultsRepository.bgUpdateDelay.value
+        downloadTreatments = Storage.shared.downloadTreatments.value
+        downloadPrediction = Storage.shared.downloadPrediction.value
+        graphBasal = Storage.shared.graphBasal.value
+        graphBolus = Storage.shared.graphBolus.value
+        graphCarbs = Storage.shared.graphCarbs.value
+        graphOtherTreatments = Storage.shared.graphOtherTreatments.value
+        bgUpdateDelay = Storage.shared.bgUpdateDelay.value
         debugLogLevel = Storage.shared.debugLogLevel.value
     }
 }

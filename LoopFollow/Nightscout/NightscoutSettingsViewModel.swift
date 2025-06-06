@@ -24,10 +24,10 @@ class NightscoutSettingsViewModel: ObservableObject {
         }
     }
 
-    @Published var nightscoutToken: String = UserDefaultsRepository.token.value {
+    @Published var nightscoutToken: String = Storage.shared.token.value {
         willSet {
             if newValue != nightscoutToken {
-                UserDefaultsRepository.token.value = newValue
+                Storage.shared.token.value = newValue
                 triggerCheckStatus()
             }
         }
@@ -41,7 +41,7 @@ class NightscoutSettingsViewModel: ObservableObject {
 
     init() {
         initialURL = ObservableUserDefaults.shared.url.value
-        initialToken = UserDefaultsRepository.token.value
+        initialToken = Storage.shared.token.value
 
         setupDebounce()
         checkNightscoutStatus()

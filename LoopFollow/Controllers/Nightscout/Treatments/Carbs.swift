@@ -46,7 +46,7 @@ extension MainViewController {
             }
         }
 
-        if UserDefaultsRepository.graphCarbs.value {
+        if Storage.shared.graphCarbs.value {
             updateCarbGraph()
         }
     }
