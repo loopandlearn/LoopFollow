@@ -290,6 +290,7 @@ extension Storage {
         migrateFastDropAlarm()
         migrateFastRiseAlarm()
         migrateMissedReadingAlarm()
+        migrateNotLoopingAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -688,5 +689,81 @@ extension Storage {
 
         // store in the new world
         Storage.shared.alarms.value.append(alarm)
+    }
+
+    // MARK: - “Not Looping”  (legacy → Storage.shared.alarms)
+
+    private func migrateNotLoopingAlarm() {
+        // Check if the user ever configured this alarm
+        let activeFlag = UserDefaultsValue<Bool>(key: "alertNotLoopingActive", default: false)
+        guard activeFlag.exists else { return } // nothing to migrate
+
+        // Convenience: read-then-erase
+        func take<V: AnyConvertible & Equatable>(_ key: String, default def: V) -> V {
+            let box = UserDefaultsValue<V>(key: key, default: def)
+            defer { box.setNil(key: key) } // wipe after reading
+            return box.value
+        }
+
+        // Build the new Alarm ---------------------------------------------------
+        var alarm = Alarm(type: .notLooping)
+        alarm.name = "Not Looping Alert"
+        alarm.isEnabled = take("alertNotLoopingActive", default: false)
+        alarm.threshold = Double(take("alertNotLooping", default: 31)) // minutes
+        alarm.snoozeDuration = take("alertNotLoopingSnooze", default: 30)
+        alarm.snoozedUntil = take("alertNotLoopingSnoozedTime", default: nil as Date?)
+        alarm.soundFile = SoundFile(rawValue:
+            take("alertNotLoopingSound",
+                 default: "Sci-Fi_Engine_Shut_Down")) ?? .sciFiEngineShutDown
+
+        // ── ACTIVE-DURING (day/night)  ← old **Pre-Snooze** flags --------------
+        let actDay = take("alertNotLoopingAutosnoozeDay", default: false)
+        let actNight = take("alertNotLoopingAutosnoozeNight", default: false)
+        alarm.activeOption = {
+            switch (actDay, actNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .always // “Never” in old UI
+            }
+        }()
+
+        // ── PLAY-SOUND option ---------------------------------------------------
+        let playStr = take("alertNotLoopingAudible", default: "Always").lowercased()
+        let playDay = take("alertNotLoopingDayTimeAudible", default: true)
+        let playNight = take("alertNotLoopingNightTimeAudible", default: true)
+        alarm.playSoundOption = {
+            if !playDay, !playNight { return .never }
+            else if playDay, playNight { return .always }
+            else if playDay { return .day }
+            else { return .night }
+        }()
+
+        // ── REPEAT-SOUND option -------------------------------------------------
+        let repStr = take("alertNotLoopingRepeat", default: "Never").lowercased()
+        let repDay = take("alertNotLoopingDayTime", default: false)
+        let repNight = take("alertNotLoopingNightTime", default: false)
+        alarm.repeatSoundOption = {
+            if repDay, repNight { return .always }
+            else if repDay, !repNight { return .day }
+            else if repNight, !repDay { return .night }
+            else { return .never }
+        }()
+
+        // ── BG-limit guard ------------------------------------------------------
+        if take("alertNotLoopingUseLimits", default: false) {
+            alarm.belowBG = Double(take("alertNotLoopingLowerLimit", default: 100.0))
+            alarm.aboveBG = Double(take("alertNotLoopingUpperLimit", default: 160.0))
+        }
+
+        // ── Per-alarm snooze state ---------------------------------------------
+        if !take("alertNotLoopingIsSnoozed", default: false) {
+            alarm.snoozedUntil = nil // ignore stored date if flag isn’t set
+        }
+
+        // Persist & finish -------------------------------------------------------
+        var list = Storage.shared.alarms.value
+        list.append(alarm)
+        Storage.shared.alarms.value = list
     }
 }

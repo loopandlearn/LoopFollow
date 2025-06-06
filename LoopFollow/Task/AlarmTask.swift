@@ -37,7 +37,7 @@ extension MainViewController {
                     .prefix(12)
                     .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) }, /// These are oldest .. newest, Predictions not currently available for Trio
                 expireDate: Storage.shared.expirationDate.value,
-                lastLoopTime: UserDefaultsRepository.alertLastLoopTime.value,
+                lastLoopTime: Observable.shared.alertLastLoopTime.value,
                 latestOverrideStart: latestOverrideStart,
                 latestOverrideEnd: latestOverrideEnd,
                 latestTempTargetStart: latestTempTargetStart,

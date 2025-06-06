@@ -25,11 +25,11 @@ extension MainViewController {
                 if let timestampString = enacted["timestamp"] as? String,
                    let lastLoopTime = formatter.date(from: timestampString)?.timeIntervalSince1970
                 {
-                    let storedTime = UserDefaultsRepository.alertLastLoopTime.value
+                    let storedTime = Observable.shared.alertLastLoopTime.value ?? 0
                     if lastLoopTime < storedTime {
                         LogManager.shared.log(category: .deviceStatus, message: "Received an old timestamp for enacted: \(lastLoopTime) is older than last stored time \(storedTime), ignoring update.", isDebug: false)
                     } else {
-                        UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+                        Observable.shared.alertLastLoopTime.value = lastLoopTime
                         LogManager.shared.log(category: .deviceStatus, message: "New LastLoopTime: \(lastLoopTime)", isDebug: true)
                     }
                 }
