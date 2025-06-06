@@ -109,7 +109,7 @@ extension MainViewController {
                         batteryText = String(format: "%.0f", upbat) + "%"
                     }
                     infoManager.updateInfoData(type: .battery, value: batteryText)
-                    UserDefaultsRepository.deviceBatteryLevel.value = upbat
+                    Observable.shared.deviceBatteryLevel.value = upbat
 
                     let timestamp = uploader["timestamp"] as? Date ?? Date()
                     let currentBattery = DataStructs.batteryStruct(batteryLevel: upbat, timestamp: timestamp)

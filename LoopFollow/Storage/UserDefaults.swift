@@ -97,33 +97,6 @@ class UserDefaultsRepository {
     static let alertCageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertCageInsertTime", default: 0)
     static let alertSageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0)
 
-    static let alertBatteryActive = UserDefaultsValue<Bool>(key: "alertBatteryActive", default: false)
-    static let alertBatteryLevel = UserDefaultsValue<Int>(key: "alertBatteryLevel", default: 25)
-    static let alertBatterySound = UserDefaultsValue<String>(key: "alertBatterySound", default: "Machine_Charge")
-    static let alertBatteryRepeat = UserDefaultsValue<Bool>(key: "alertBatteryRepeat", default: true)
-    static let alertBatteryIsSnoozed = UserDefaultsValue<Bool>(key: "alertBatteryIsSnoozed", default: false)
-    static let alertBatterySnoozedTime = UserDefaultsValue<Date?>(key: "alertBatterySnoozedTime", default: nil)
-    static let alertBatterySnoozeHours = UserDefaultsValue<Int>(key: "alertBatterySnoozeHours", default: 1)
-    static var deviceBatteryLevel: UserDefaultsValue<Double> = UserDefaultsValue(key: "deviceBatteryLevel", default: 100.0)
-
-    static let alertBatteryDropActive = UserDefaultsValue<Bool>(key: "alertBatteryDropActive", default: false)
-    static let alertBatteryDropPercentage = UserDefaultsValue<Int>(key: "alertBatteryDropPercentage", default: 5)
-    static let alertBatteryDropPeriod = UserDefaultsValue<Int>(key: "alertBatteryDropPeriod", default: 15)
-    static let alertBatteryDropSound = UserDefaultsValue<String>(key: "alertBatteryDropSound", default: "Machine_Charge")
-    static let alertBatteryDropRepeat = UserDefaultsValue<Bool>(key: "alertBatteryDropRepeat", default: true)
-    static let alertBatteryDropIsSnoozed = UserDefaultsValue<Bool>(key: "alertBatteryDropIsSnoozed", default: false)
-    static let alertBatteryDropSnoozedTime = UserDefaultsValue<Date?>(key: "alertBatteryDropSnoozedTime", default: nil)
-    static let alertBatteryDropSnoozeHours = UserDefaultsValue<Int>(key: "alertBatteryDropSnoozeHours", default: 1)
-
-    static let alertRecBolusActive = UserDefaultsValue<Bool>(key: "alertRecBolusActive", default: false)
-    static let alertRecBolusLevel = UserDefaultsValue<Double>(key: "alertRecBolusLevel", default: 1) // Unit[s]
-    static let alertRecBolusSound = UserDefaultsValue<String>(key: "alertRecBolusSound", default: "Dhol_Shuffleloop")
-    static let alertRecBolusRepeat = UserDefaultsValue<Bool>(key: "alertRecBolusRepeat", default: false)
-    static let alertRecBolusIsSnoozed = UserDefaultsValue<Bool>(key: "alertRecBolusIsSnoozed", default: false)
-    static let alertRecBolusSnooze = UserDefaultsValue<Int>(key: "alertRecBolusSnooze", default: 5)
-    static let alertRecBolusSnoozedTime = UserDefaultsValue<Date?>(key: "alertRecBolusSnoozedTime", default: nil)
-    static var deviceRecBolus: UserDefaultsValue<Double> = UserDefaultsValue(key: "deviceRecBolus", default: 0.0)
-
     // What version is the cache valid for
     static let cachedForVersion = UserDefaultsValue<String?>(key: "cachedForVersion", default: nil)
 
