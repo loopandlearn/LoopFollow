@@ -30,5 +30,7 @@ class Observable {
 
     var chartSettingsChanged = ObservableValue<Bool>(default: false)
 
+    var alertLastLoopTime = ObservableValue<TimeInterval?>(default: nil)
+
     private init() {}
 }

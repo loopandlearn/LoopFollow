@@ -35,17 +35,12 @@ extension MainViewController {
 
     func evaluateNotLooping() {
         guard let statusStackView = LoopStatusLabel.superview as? UIStackView else { return }
+        guard let lastLoopTime = Observable.shared.alertLastLoopTime.value, lastLoopTime > 0 else {
+            return
+        }
 
         let now = TimeInterval(Date().timeIntervalSince1970)
-        let lastLoopTime = UserDefaultsRepository.alertLastLoopTime.value
-        let isAlarmEnabled = UserDefaultsRepository.alertNotLoopingActive.value
-        let nonLoopingTimeThreshold: TimeInterval
-
-        if isAlarmEnabled {
-            nonLoopingTimeThreshold = Double(UserDefaultsRepository.alertNotLooping.value * 60)
-        } else {
-            nonLoopingTimeThreshold = 15 * 60
-        }
+        let nonLoopingTimeThreshold: TimeInterval = 15 * 60
 
         if IsNightscoutEnabled(), (now - lastLoopTime) >= nonLoopingTimeThreshold, lastLoopTime > 0 {
             IsNotLooping = true
@@ -165,7 +160,7 @@ extension MainViewController {
 
         // Start the timer based on the timestamp
         let now = dateTimeUtils.getNowTimeIntervalUTC()
-        let secondsAgo = now - UserDefaultsRepository.alertLastLoopTime.value
+        let secondsAgo = now - (Observable.shared.alertLastLoopTime.value ?? 0)
 
         DispatchQueue.main.async {
             if secondsAgo >= (20 * 60) {

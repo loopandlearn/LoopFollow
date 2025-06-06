@@ -125,11 +125,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         Storage.shared.migrate()
 
-        // Ensure alertNotLooping has a minimum value of 16.
-        if UserDefaultsRepository.alertNotLooping.value < 16 {
-            UserDefaultsRepository.alertNotLooping.value = 16
-        }
-
         // Synchronize info types to ensure arrays are the correct size
         UserDefaultsRepository.synchronizeInfoTypes()
 

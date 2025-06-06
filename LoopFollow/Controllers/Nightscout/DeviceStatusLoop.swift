@@ -16,8 +16,8 @@ extension MainViewController {
         }
 
         if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970 {
-            let previousLastLoopTime = UserDefaultsRepository.alertLastLoopTime.value
-            UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+            let previousLastLoopTime = Observable.shared.alertLastLoopTime.value ?? 0
+            Observable.shared.alertLastLoopTime.value = lastLoopTime
             if let failure = lastLoopRecord["failureReason"] {
                 LoopStatusLabel.text = "X"
                 latestLoopStatusString = "X"
