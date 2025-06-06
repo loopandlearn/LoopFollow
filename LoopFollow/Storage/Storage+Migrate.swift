@@ -300,6 +300,8 @@ extension Storage {
         migrateTempTargetEndAlarm()
         migrateTemporaryBGAlarm()
         migratePumpVolumeAlarm()
+        migrateIOBAlarm()
+        migrateCOBAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -328,7 +330,7 @@ extension Storage {
         alarm.soundFile = SoundFile(
             rawValue: take("alertUrgentLowSound",
                            default: "Emergency_Alarm_Siren"))
-        ?? .emergencyAlarmSiren
+            ?? .emergencyAlarmSiren
 
         alarm.playSoundOption = PlaySoundOption(
             rawValue: take("alertUrgentLowAudible",
@@ -722,8 +724,8 @@ extension Storage {
         alarm.snoozeDuration = take("alertNotLoopingSnooze", default: 30)
         alarm.snoozedUntil = take("alertNotLoopingSnoozedTime", default: nil as Date?)
         alarm.soundFile = SoundFile(rawValue:
-                                        take("alertNotLoopingSound",
-                                             default: "Sci-Fi_Engine_Shut_Down")) ?? .sciFiEngineShutDown
+            take("alertNotLoopingSound",
+                 default: "Sci-Fi_Engine_Shut_Down")) ?? .sciFiEngineShutDown
 
         // ── ACTIVE-DURING (day/night)  ← old **Pre-Snooze** flags --------------
         let actDay = take("alertNotLoopingAutosnoozeDay", default: false)
@@ -820,8 +822,8 @@ extension Storage {
 
         // sound & tone
         alarm.soundFile = SoundFile(rawValue:
-                                        take("alertMissedBolusSound",
-                                             "Dhol_Shuffleloop")) ?? .dholShuffleloop
+            take("alertMissedBolusSound",
+                 "Dhol_Shuffleloop")) ?? .dholShuffleloop
 
         // ── ACTIVE-DURING  ← old “Pre-Snooze” flags
         let actDay = take("alertMissedBolusAutosnoozeDay", false)
@@ -893,7 +895,7 @@ extension Storage {
             alarm.snoozedUntil = take("alertSAGESnoozedTime", nil as Date?)
         }
         alarm.soundFile = SoundFile(rawValue:
-                                        take("alertSAGESound", "Wake_Up_Will_You")) ?? .wakeUpWillYou
+            take("alertSAGESound", "Wake_Up_Will_You")) ?? .wakeUpWillYou
 
         // ACTIVE (day / night)
         let actDay = take("alertSAGEAutosnoozeDay", false)
@@ -961,7 +963,7 @@ extension Storage {
             alarm.snoozedUntil = take("alertCAGESnoozedTime", nil as Date?)
         }
         alarm.soundFile = SoundFile(rawValue:
-                                        take("alertCAGESound", "Wake_Up_Will_You")) ?? .wakeUpWillYou
+            take("alertCAGESound", "Wake_Up_Will_You")) ?? .wakeUpWillYou
 
         // ACTIVE
         let actDay = take("alertCAGEAutosnoozeDay", false)
@@ -1182,7 +1184,7 @@ extension Storage {
             switch (d, n) { case (true, true): return .always
             case (true, false): return .day
             case (false, true): return .night
-                default: return .always }
+            default: return .always }
         }()
 
         // PLAY
@@ -1192,7 +1194,7 @@ extension Storage {
             switch (d, n) { case (true, true): return .always
             case (true, false): return .day
             case (false, true): return .night
-                default: return .never }
+            default: return .never }
         }()
 
         // REPEAT
@@ -1202,7 +1204,7 @@ extension Storage {
             switch (d, n) { case (true, true): return .always
             case (true, false): return .day
             case (false, true): return .night
-                default: return .never }
+            default: return .never }
         }()
 
         // wipe “quiet / RepeatAudible” extras
@@ -1245,7 +1247,7 @@ extension Storage {
             switch (d, n) { case (true, true): return .always
             case (true, false): return .day
             case (false, true): return .night
-                default: return .always }
+            default: return .always }
         }()
 
         alarm.playSoundOption = {
@@ -1254,7 +1256,7 @@ extension Storage {
             switch (d, n) { case (true, true): return .always
             case (true, false): return .day
             case (false, true): return .night
-                default: return .never }
+            default: return .never }
         }()
 
         alarm.repeatSoundOption = {
@@ -1263,7 +1265,7 @@ extension Storage {
             switch (d, n) { case (true, true): return .always
             case (true, false): return .day
             case (false, true): return .night
-                default: return .never }
+            default: return .never }
         }()
 
         _ = take("alertTempTargetEndQuiet", false as Bool)
@@ -1275,6 +1277,7 @@ extension Storage {
     }
 
     // MARK: ––––– TEMPORARY BG LIMIT  →  .temporary –––––
+
     private func migrateTemporaryBGAlarm() {
         let flag = UserDefaultsValue<Bool>(key: "alertTemporaryActive", default: false)
         guard flag.exists else { return }
@@ -1286,8 +1289,8 @@ extension Storage {
         }
 
         var alarm = Alarm(type: .temporary)
-        alarm.name        = "Temporary BG Limit"
-        alarm.isEnabled   = take("alertTemporaryActive", false)
+        alarm.name = "Temporary BG Limit"
+        alarm.isEnabled = take("alertTemporaryActive", false)
 
         // limit direction ↓ / ↑
         let limit = Double(take("alertTemporaryBG", 90.0 as Float))
@@ -1299,15 +1302,16 @@ extension Storage {
 
         // audio & repeat
         alarm.soundFile = SoundFile(rawValue:
-                                        take("alertTemporarySound", "Indeed")) ?? .indeed
+            take("alertTemporarySound", "Indeed")) ?? .indeed
 
-        alarm.playSoundOption   = take("alertTemporaryBGAudible", true) ? .always : .never
+        alarm.playSoundOption = take("alertTemporaryBGAudible", true) ? .always : .never
         alarm.repeatSoundOption = take("alertTemporaryBGRepeat", false) ? .always : .never
 
         Storage.shared.alarms.value.append(alarm)
     }
 
     // MARK: ––––– PUMP RESERVOIR LEVEL  →  .pump –––––
+
     private func migratePumpVolumeAlarm() {
         let flag = UserDefaultsValue<Bool>(key: "alertPump", default: false)
         guard flag.exists else { return }
@@ -1319,9 +1323,9 @@ extension Storage {
         }
 
         var alarm = Alarm(type: .pump)
-        alarm.name        = "Pump Reservoir"
-        alarm.isEnabled   = take("alertPump", false)
-        alarm.threshold   = Double(take("alertPumpAt", 10))        // units left
+        alarm.name = "Pump Reservoir"
+        alarm.isEnabled = take("alertPump", false)
+        alarm.threshold = Double(take("alertPumpAt", 10)) // units left
 
         // Snooze — stored in hours, so keep as-is.
         alarm.snoozeDuration = take("alertPumpSnoozeHours", 5)
@@ -1331,51 +1335,192 @@ extension Storage {
         }
 
         alarm.soundFile = SoundFile(rawValue:
-                                        take("alertPumpSound", "Marimba_Descend")) ?? .marimbaDescend
+            take("alertPumpSound", "Marimba_Descend")) ?? .marimbaDescend
 
         // PLAY-sound option (day / night / never)
         alarm.playSoundOption = {
-            let d = take("alertPumpDayTimeAudible",  true)
-            let n = take("alertPumpNightTimeAudible",true)
-            switch (d,n) {
-            case (true, true):   return .always
-            case (true, false):  return .day
-            case (false, true):  return .night
-            default:             return .never
+            let d = take("alertPumpDayTimeAudible", true)
+            let n = take("alertPumpNightTimeAudible", true)
+            switch (d, n) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
             }
         }()
 
         // REPEAT-sound option  – derived from legacy picker flags
         alarm.repeatSoundOption = {
-            let d = take("alertPumpDayTime",  false)
-            let n = take("alertPumpNightTime",false)
-            switch (d,n) {
-            case (true, true):   return .always
-            case (true, false):  return .day
-            case (false, true):  return .night
-            default:             return .never
+            let d = take("alertPumpDayTime", false)
+            let n = take("alertPumpNightTime", false)
+            switch (d, n) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
             }
         }()
 
         // ACTIVE day/night  ← old “Pre-Snooze” flags
         alarm.activeOption = {
-            let d = take("alertPumpAutosnoozeDay",   false)
+            let d = take("alertPumpAutosnoozeDay", false)
             let n = take("alertPumpAutosnoozeNight", false)
-            switch (d,n) {
-            case (true, true):   return .always
-            case (true, false):  return .day
-            case (false, true):  return .night
-            default:             return .always
+            switch (d, n) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .always
             }
         }()
 
         // Discard no-longer-needed extras
-        _ = take("alertPumpQuiet",           false as Bool)
-        _ = take("alertPumpRepeat",          "Never" as String)
-        _ = take("alertPumpAudible",         "Always" as String)
-        _ = take("alertPumpAutosnooze",      "Never" as String)
+        _ = take("alertPumpQuiet", false as Bool)
+        _ = take("alertPumpRepeat", "Never" as String)
+        _ = take("alertPumpAudible", "Always" as String)
+        _ = take("alertPumpAutosnooze", "Never" as String)
 
         Storage.shared.alarms.value.append(alarm)
     }
 
+    // -----------------------------------------------------------------------------
+
+    // MARK: - Helpers (place them once, near the top of the migrate() file)
+
+    // -----------------------------------------------------------------------------
+
+    /// Legacy picker + day/night flags  →  PlaySoundOption
+    private func playOption(from picker: String,
+                            dayFlag: Bool,
+                            nightFlag: Bool) -> PlaySoundOption
+    {
+        let p = picker.lowercased()
+        if p == "never" { return .never }
+        if p == "always" { return .always }
+
+        switch (dayFlag, nightFlag) {
+        case (true, true): return .always
+        case (true, false): return .day
+        case (false, true): return .night
+        default: return .never
+        }
+    }
+
+    /// Legacy picker + day/night flags  →  RepeatSoundOption
+    private func repeatOption(from picker: String,
+                              dayFlag: Bool,
+                              nightFlag: Bool) -> RepeatSoundOption
+    {
+        let p = picker.lowercased()
+        if p == "never" { return .never }
+        if p == "always" { return .always }
+
+        switch (dayFlag, nightFlag) {
+        case (true, true): return .always
+        case (true, false): return .day
+        case (false, true): return .night
+        default: return .never
+        }
+    }
+
+    /// Convenience: load-then-erase a legacy `UserDefaultsValue`
+    private func take<V: AnyConvertible & Equatable>(
+        _ key: String,
+        _ defaultValue: V
+    ) -> V {
+        let box = UserDefaultsValue<V>(key: key, default: defaultValue)
+        defer { box.setNil(key: key) }
+        return box.value
+    }
+
+    // -----------------------------------------------------------------------------
+
+    // MARK: - IOB Alarm migration
+
+    // -----------------------------------------------------------------------------
+
+    private func migrateIOBAlarm() {
+        // Only migrate if the user ever touched IOB alarm settings
+        guard UserDefaultsValue<Bool>(key: "alertIOB", default: false).exists else {
+            return
+        }
+
+        var alarm = Alarm(type: .iob)
+        alarm.name = "High IOB"
+        alarm.isEnabled = take("alertIOB", false)
+        alarm.aboveBG = nil // BG band not used
+        alarm.threshold = Double(take("alertIOBAt", 1.5)) // units threshold
+        alarm.bolusCountThreshold = take("alertIOBNumber", 3)
+        alarm.bolusWindowMinutes = take("alertIOBBolusesWithin", 60)
+        alarm.delta = Double(take("alertIOBMaxBoluses", 10)) // max total bolus
+        alarm.snoozeDuration = take("alertIOBSnoozeHours", 1) * 60 // hours → minutes
+        alarm.snoozedUntil = take("alertIOBSnoozedTime", nil as Date?)
+        alarm.soundFile = SoundFile(rawValue:
+            take("alertIOBSound", "Alert_Tone_Ringtone_1"))
+            ?? .alertToneRingtone1
+
+        // Audio options
+        alarm.playSoundOption = playOption(
+            from: take("alertIOBAudible", "Always"),
+            dayFlag: take("alertIOBDayTimeAudible", true),
+            nightFlag: take("alertIOBNightTimeAudible", true)
+        )
+        alarm.repeatSoundOption = repeatOption(
+            from: take("alertIOBRepeat", "Always"),
+            dayFlag: take("alertIOBDayTime", true),
+            nightFlag: take("alertIOBNightTime", true)
+        )
+
+        // Active (day/night) option comes from the legacy “Pre-Snooze” picker,
+        // but the IOB alarm never had one, so treat it as always-on.
+        alarm.activeOption = .always
+
+        // Persist
+        Storage.shared.alarms.value.append(alarm)
+    }
+
+    // -----------------------------------------------------------------------------
+
+    // MARK: - COB Alarm migration
+
+    // -----------------------------------------------------------------------------
+
+    private func migrateCOBAlarm() {
+        // Only migrate if the user ever touched COB alarm settings
+        guard UserDefaultsValue<Bool>(key: "alertCOB", default: false).exists else {
+            return
+        }
+
+        var alarm = Alarm(type: .cob)
+        alarm.name = "High COB"
+        alarm.isEnabled = take("alertCOB", false)
+        alarm.threshold = Double(take("alertCOBAt", 50)) // grams threshold
+        alarm.snoozeDuration = take("alertCOBSnoozeHours", 1) * 60 // hours → minutes
+        alarm.snoozedUntil = take("alertCOBSnoozedTime", nil as Date?)
+        alarm.soundFile = SoundFile(rawValue:
+            take("alertCOBSound", "Alert_Tone_Ringtone_2"))
+            ?? .alertToneRingtone2
+
+        // Audio options
+        alarm.playSoundOption = playOption(
+            from: take("alertCOBAudible", "Always"),
+            dayFlag: take("alertCOBDayTimeAudible", true),
+            nightFlag: take("alertCOBNightTimeAudible", true)
+        )
+        alarm.repeatSoundOption = repeatOption(
+            from: take("alertCOBRepeat", "Always"),
+            dayFlag: take("alertCOBDayTime", true),
+            nightFlag: take("alertCOBNightTime", true)
+        )
+
+        alarm.activeOption = .always // same reason as above
+
+        // Persist
+        Storage.shared.alarms.value.append(alarm)
+    }
+
+    // -----------------------------------------------------------------------------
+
+    // MARK: - Inject into main migrate() entry point
+
+    // -----------------------------------------------------------------------------
 }
