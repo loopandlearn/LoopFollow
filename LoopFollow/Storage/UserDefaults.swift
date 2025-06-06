@@ -97,40 +97,6 @@ class UserDefaultsRepository {
     static let alertCageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertCageInsertTime", default: 0)
     static let alertSageInsertTime = UserDefaultsValue<TimeInterval>(key: "alertSageInsertTime", default: 0)
 
-    static let alertSAGEActive = UserDefaultsValue<Bool>(key: "alertSAGEActive", default: false)
-    static let alertSAGE = UserDefaultsValue<Int>(key: "alertSAGE", default: 8) // Hours
-    static let alertSAGEQuiet = UserDefaultsValue<Bool>(key: "alertSAGEQuiet", default: false)
-    static let alertSAGERepeat = UserDefaultsValue<String>(key: "alertSAGERepeat", default: "Never")
-    static let alertSAGEDayTime = UserDefaultsValue<Bool>(key: "alertSAGEDayTime", default: false)
-    static let alertSAGENightTime = UserDefaultsValue<Bool>(key: "alertSAGENightTime", default: false)
-    static let alertSAGEAudible = UserDefaultsValue<String>(key: "alertSAGEAudible", default: "Always")
-    static let alertSAGEDayTimeAudible = UserDefaultsValue<Bool>(key: "alertSAGEDayTimeAudible", default: true)
-    static let alertSAGENightTimeAudible = UserDefaultsValue<Bool>(key: "alertSAGENightTimeAudible", default: true)
-    static let alertSAGESnooze = UserDefaultsValue<Int>(key: "alertSAGESnooze", default: 2) // Hours
-    static let alertSAGESnoozedTime = UserDefaultsValue<Date?>(key: "alertSAGESnoozedTime", default: nil)
-    static let alertSAGEIsSnoozed = UserDefaultsValue<Bool>(key: "alertSAGEIsSnoozed", default: false)
-    static let alertSAGESound = UserDefaultsValue<String>(key: "alertSAGESound", default: "Wake_Up_Will_You")
-    static let alertSAGEAutosnooze = UserDefaultsValue<String>(key: "alertSAGEAutosnooze", default: "At night")
-    static let alertSAGEAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertSAGEAutosnoozeDay", default: false)
-    static let alertSAGEAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertSAGEAutosnoozeNight", default: true)
-
-    static let alertCAGEActive = UserDefaultsValue<Bool>(key: "alertCAGEActive", default: false)
-    static let alertCAGE = UserDefaultsValue<Int>(key: "alertCAGE", default: 4) // Hours
-    static let alertCAGEQuiet = UserDefaultsValue<Bool>(key: "alertCAGEQuiet", default: false)
-    static let alertCAGERepeat = UserDefaultsValue<String>(key: "alertCAGERepeat", default: "Never")
-    static let alertCAGEDayTime = UserDefaultsValue<Bool>(key: "alertCAGEDayTime", default: false)
-    static let alertCAGENightTime = UserDefaultsValue<Bool>(key: "alertCAGENightTime", default: false)
-    static let alertCAGEAudible = UserDefaultsValue<String>(key: "alertCAGEAudible", default: "Always")
-    static let alertCAGEDayTimeAudible = UserDefaultsValue<Bool>(key: "alertCAGEDayTimeAudible", default: true)
-    static let alertCAGENightTimeAudible = UserDefaultsValue<Bool>(key: "alertCAGENightTimeAudible", default: true)
-    static let alertCAGESnooze = UserDefaultsValue<Int>(key: "alertCAGESnooze", default: 2) // Hours
-    static let alertCAGESnoozedTime = UserDefaultsValue<Date?>(key: "alertCAGESnoozedTime", default: nil)
-    static let alertCAGEIsSnoozed = UserDefaultsValue<Bool>(key: "alertCAGEIsSnoozed", default: false)
-    static let alertCAGESound = UserDefaultsValue<String>(key: "alertCAGESound", default: "Wake_Up_Will_You")
-    static let alertCAGEAutosnooze = UserDefaultsValue<String>(key: "alertCAGEAutosnooze", default: "At night")
-    static let alertCAGEAutosnoozeDay = UserDefaultsValue<Bool>(key: "alertCAGEAutosnoozeDay", default: false)
-    static let alertCAGEAutosnoozeNight = UserDefaultsValue<Bool>(key: "alertCAGEAutosnoozeNight", default: true)
-
     static let alertAppInactive = UserDefaultsValue<Bool>(key: "alertAppInactive", default: false)
 
     static let alertTemporaryActive = UserDefaultsValue<Bool>(key: "alertTemporaryActive", default: false)
