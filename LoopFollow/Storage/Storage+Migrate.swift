@@ -296,6 +296,8 @@ extension Storage {
         migratePumpChangeAlarm()
         migrateOverrideStartAlarm()
         migrateOverrideEndAlarm()
+        migrateTempTargetStartAlarm()
+        migrateTempTargetEndAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -1017,7 +1019,6 @@ extension Storage {
 
         var alarm = Alarm(type: .overrideStart)
         alarm.name = "Override Started"
-        alarm.disableAfterFiring = true // fire once, then stay off
 
         alarm.isEnabled = take("alertOverrideStart", false)
         alarm.snoozeDuration = 5 // legacy UI had no stepper
@@ -1091,7 +1092,6 @@ extension Storage {
 
         var alarm = Alarm(type: .overrideEnd)
         alarm.name = "Override Ended"
-        alarm.disableAfterFiring = true
 
         alarm.isEnabled = take("alertOverrideEnd", false)
         alarm.snoozeDuration = 5
@@ -1142,6 +1142,130 @@ extension Storage {
         // wipe unused keys
         _ = take("alertOverrideEndQuiet", false as Bool)
         _ = take("alertOverrideEndRepeatAudible", "Always" as String)
+
+        var list = Storage.shared.alarms.value
+        list.append(alarm)
+        Storage.shared.alarms.value = list
+    }
+
+    // MARK: ––––– Temp-Target START  →  .tempTargetStart –––––
+
+    private func migrateTempTargetStartAlarm() {
+        let touched = UserDefaultsValue<Bool>(key: "alertTempTargetStart", default: false)
+        guard touched.exists else { return }
+
+        func take<V: AnyConvertible & Equatable>(_ k: String, _ def: V) -> V {
+            let box = UserDefaultsValue<V>(key: k, default: def)
+            defer { box.setNil(key: k) } // scrub after read
+            return box.value
+        }
+
+        var alarm = Alarm(type: .tempTargetStart)
+        alarm.name = "Temp Target Started"
+
+        alarm.isEnabled = take("alertTempTargetStart", false)
+        alarm.snoozeDuration = 5
+        if take("alertTempTargetStartIsSnoozed", false) {
+            alarm.snoozedUntil = take("alertTempTargetStartSnoozedTime", nil as Date?)
+        }
+
+        alarm.soundFile = SoundFile(
+            rawValue: take("alertTempTargetStartSound", "Ending_Reached")
+        ) ?? .endingReached
+
+        // ACTIVE  ← legacy Pre-Snooze day/night flags
+        alarm.activeOption = {
+            let d = take("alertTempTargetStartAutosnoozeDay", false)
+            let n = take("alertTempTargetStartAutosnoozeNight", false)
+            switch (d, n) { case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .always }
+        }()
+
+        // PLAY
+        alarm.playSoundOption = {
+            let d = take("alertTempTargetStartDayTimeAudible", true)
+            let n = take("alertTempTargetStartNightTimeAudible", true)
+            switch (d, n) { case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never }
+        }()
+
+        // REPEAT
+        alarm.repeatSoundOption = {
+            let d = take("alertTempTargetStartDayTime", false)
+            let n = take("alertTempTargetStartNightTime", false)
+            switch (d, n) { case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never }
+        }()
+
+        // wipe “quiet / RepeatAudible” extras
+        _ = take("alertTempTargetStartQuiet", false as Bool)
+        _ = take("alertTempTargetStartRepeatAudible", "Always" as String)
+
+        var list = Storage.shared.alarms.value
+        list.append(alarm)
+        Storage.shared.alarms.value = list
+    }
+
+    // MARK: ––––– Temp-Target END  →  .tempTargetEnd –––––
+
+    private func migrateTempTargetEndAlarm() {
+        let touched = UserDefaultsValue<Bool>(key: "alertTempTargetEnd", default: false)
+        guard touched.exists else { return }
+
+        func take<V: AnyConvertible & Equatable>(_ k: String, _ def: V) -> V {
+            let box = UserDefaultsValue<V>(key: k, default: def)
+            defer { box.setNil(key: k) }
+            return box.value
+        }
+
+        var alarm = Alarm(type: .tempTargetEnd)
+        alarm.name = "Temp Target Ended"
+
+        alarm.isEnabled = take("alertTempTargetEnd", false)
+        alarm.snoozeDuration = 5
+        if take("alertTempTargetEndIsSnoozed", false) {
+            alarm.snoozedUntil = take("alertTempTargetEndSnoozedTime", nil as Date?)
+        }
+
+        alarm.soundFile = SoundFile(
+            rawValue: take("alertTempTargetEndSound", "Alert_Tone_Busy")
+        ) ?? .alertToneBusy
+
+        alarm.activeOption = {
+            let d = take("alertTempTargetEndAutosnoozeDay", false)
+            let n = take("alertTempTargetEndAutosnoozeNight", false)
+            switch (d, n) { case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .always }
+        }()
+
+        alarm.playSoundOption = {
+            let d = take("alertTempTargetEndDayTimeAudible", true)
+            let n = take("alertTempTargetEndNightTimeAudible", true)
+            switch (d, n) { case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never }
+        }()
+
+        alarm.repeatSoundOption = {
+            let d = take("alertTempTargetEndDayTime", false)
+            let n = take("alertTempTargetEndNightTime", false)
+            switch (d, n) { case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never }
+        }()
+
+        _ = take("alertTempTargetEndQuiet", false as Bool)
+        _ = take("alertTempTargetEndRepeatAudible", "Always" as String)
 
         var list = Storage.shared.alarms.value
         list.append(alarm)
