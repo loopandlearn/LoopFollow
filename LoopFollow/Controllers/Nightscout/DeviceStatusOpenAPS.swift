@@ -120,9 +120,9 @@ extension MainViewController {
             // Insulin Required
             if let insulinReqMetric = InsulinMetric(from: enactedOrSuggested, key: "insulinReq") {
                 infoManager.updateInfoData(type: .recBolus, value: insulinReqMetric)
-                UserDefaultsRepository.deviceRecBolus.value = insulinReqMetric.value
+                Observable.shared.deviceRecBolus.value = insulinReqMetric.value
             } else {
-                UserDefaultsRepository.deviceRecBolus.value = 0
+                Observable.shared.deviceRecBolus.value = 0
             }
 
             // Autosens

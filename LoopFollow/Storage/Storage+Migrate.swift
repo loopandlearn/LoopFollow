@@ -302,6 +302,9 @@ extension Storage {
         migratePumpVolumeAlarm()
         migrateIOBAlarm()
         migrateCOBAlarm()
+        migrateBatteryAlarm()
+        migrateBatteryDropAlarm()
+        migrateRecBolusAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -1518,9 +1521,80 @@ extension Storage {
         Storage.shared.alarms.value.append(alarm)
     }
 
-    // -----------------------------------------------------------------------------
+    // =============================================================================
+    //  BATTERY-LEVEL alarm  (old keys → .battery)
+    // =============================================================================
+    private func migrateBatteryAlarm() {
+        guard UserDefaultsValue<Bool>(key: "alertBatteryActive",
+                                      default: false).exists else { return }
 
-    // MARK: - Inject into main migrate() entry point
+        var alarm = Alarm(type: .battery)
+        alarm.name = "Low Battery"
+        alarm.isEnabled = take("alertBatteryActive", false)
+        alarm.threshold = Double(take("alertBatteryLevel", 25)) // %
+        alarm.snoozeDuration = take("alertBatterySnoozeHours", 1) * 60
+        alarm.snoozedUntil = take("alertBatterySnoozedTime", nil as Date?)
+        alarm.soundFile = SoundFile(rawValue:
+            take("alertBatterySound", "Machine_Charge"))
+            ?? .machineCharge
 
-    // -----------------------------------------------------------------------------
+        // ── audio – legacy had a simple Bool “repeat / no-repeat”
+        let rpt = take("alertBatteryRepeat", true)
+        alarm.playSoundOption = .always // no day/night picker in legacy UI
+        alarm.repeatSoundOption = rpt ? .always : .never
+
+        alarm.activeOption = .always // no day/night activation picker
+        Storage.shared.alarms.value.append(alarm)
+    }
+
+    // =============================================================================
+    //  BATTERY-DROP alarm  (old keys → .batteryDrop)
+    // =============================================================================
+    private func migrateBatteryDropAlarm() {
+        guard UserDefaultsValue<Bool>(key: "alertBatteryDropActive",
+                                      default: false).exists else { return }
+
+        var alarm = Alarm(type: .batteryDrop)
+        alarm.name = "Battery Drop"
+        alarm.isEnabled = take("alertBatteryDropActive", false)
+        alarm.delta = Double(take("alertBatteryDropPercentage", 5)) // % drop
+        alarm.monitoringWindow = take("alertBatteryDropPeriod", 15) // min
+        alarm.snoozeDuration = take("alertBatteryDropSnoozeHours", 1) * 60
+        alarm.snoozedUntil = take("alertBatteryDropSnoozedTime", nil as Date?)
+        alarm.soundFile = SoundFile(rawValue:
+            take("alertBatteryDropSound", "Machine_Charge"))
+            ?? .machineCharge
+
+        let rpt = take("alertBatteryDropRepeat", true)
+        alarm.playSoundOption = .always
+        alarm.repeatSoundOption = rpt ? .always : .never
+        alarm.activeOption = .always
+
+        Storage.shared.alarms.value.append(alarm)
+    }
+
+    // =============================================================================
+    //  REC-BOLUS alarm  (old keys → .recBolus)
+    // =============================================================================
+    private func migrateRecBolusAlarm() {
+        guard UserDefaultsValue<Bool>(key: "alertRecBolusActive",
+                                      default: false).exists else { return }
+
+        var alarm = Alarm(type: .recBolus)
+        alarm.name = "Recommended Bolus"
+        alarm.isEnabled = take("alertRecBolusActive", false)
+        alarm.delta = take("alertRecBolusLevel", 1.0) // units
+        alarm.snoozeDuration = take("alertRecBolusSnooze", 5) // min
+        alarm.snoozedUntil = take("alertRecBolusSnoozedTime", nil as Date?)
+        alarm.soundFile = SoundFile(rawValue:
+            take("alertRecBolusSound", "Dhol_Shuffleloop"))
+            ?? .dholShuffleloop
+
+        let rpt = take("alertRecBolusRepeat", false)
+        alarm.playSoundOption = .always
+        alarm.repeatSoundOption = rpt ? .always : .never
+        alarm.activeOption = .always
+
+        Storage.shared.alarms.value.append(alarm)
+    }
 }

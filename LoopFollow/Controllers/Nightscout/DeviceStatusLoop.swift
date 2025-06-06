@@ -101,7 +101,7 @@ extension MainViewController {
                 if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
                     let formattedRecBolus = String(format: "%.2fU", recBolus)
                     infoManager.updateInfoData(type: .recBolus, value: formattedRecBolus)
-                    UserDefaultsRepository.deviceRecBolus.value = recBolus
+                    Observable.shared.deviceRecBolus.value = recBolus
                 }
                 if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
                     if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {

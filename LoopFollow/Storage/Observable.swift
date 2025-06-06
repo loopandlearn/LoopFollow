@@ -31,6 +31,8 @@ class Observable {
     var chartSettingsChanged = ObservableValue<Bool>(default: false)
 
     var alertLastLoopTime = ObservableValue<TimeInterval?>(default: nil)
+    var deviceRecBolus = ObservableValue<Double?>(default: nil)
+    var deviceBatteryLevel = ObservableValue<Double?>(default: nil)
 
     private init() {}
 }

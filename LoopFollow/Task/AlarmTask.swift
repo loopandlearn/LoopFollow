@@ -20,13 +20,13 @@ extension MainViewController {
             let latestOverrideEnd = self.overrideGraphData.last { $0.endDate <= now }?.endDate
             let latestTempTargetStart = self.tempTargetGraphData.last { $0.date <= now }?.date
             let latestTempTargetEnd = self.tempTargetGraphData.last { $0.endDate <= now }?.endDate
-            let recBolus = UserDefaultsRepository.deviceRecBolus.value
+            let recBolus = Observable.shared.deviceRecBolus.value
             let COB = self.latestCOB?.value
             let sensorInsertedAt = UserDefaultsRepository.alertSageInsertTime.value
             let pumpInsertTime = UserDefaultsRepository.alertCageInsertTime.value
             let latestPumpVol = self.latestPumpVolume
             let bolusEntries = self.bolusData.map { BolusEntry(units: $0.value, date: Date(timeIntervalSince1970: $0.date)) }
-            let latestBattery = UserDefaultsRepository.deviceBatteryLevel.value
+            let latestBattery = Observable.shared.deviceBatteryLevel.value
             let recentCarbs: [CarbSample] = self.carbData.map { CarbSample(grams: $0.value, date: Date(timeIntervalSince1970: $0.date)) }
 
             let alarmData = AlarmData(
