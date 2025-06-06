@@ -44,10 +44,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(_: UIApplication) {
-        if UserDefaultsRepository.alertAppInactive.value {
-            AlarmSound.setSoundFile(str: "Alarm_Buzzer")
-            AlarmSound.playTerminated()
-        }
     }
 
     // MARK: UISceneSession Lifecycle
