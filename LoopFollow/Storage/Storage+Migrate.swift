@@ -291,6 +291,7 @@ extension Storage {
         migrateFastRiseAlarm()
         migrateMissedReadingAlarm()
         migrateNotLoopingAlarm()
+        migrateMissedBolusAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -762,6 +763,97 @@ extension Storage {
         }
 
         // Persist & finish -------------------------------------------------------
+        var list = Storage.shared.alarms.value
+        list.append(alarm)
+        Storage.shared.alarms.value = list
+    }
+
+    // MARK: – Missed-Bolus alarm -------------------------------------------------
+
+    private func migrateMissedBolusAlarm() {
+        // Was the old alarm ever configured?
+        let legacyActive = UserDefaultsValue<Bool>(key: "alertMissedBolusActive",
+                                                   default: false)
+        guard legacyActive.exists else { return } // nothing to do
+
+        // helper: read-then-delete ------------------------------------------------
+        func take<V: AnyConvertible & Equatable>(_ k: String,
+                                                 _ def: V) -> V
+        {
+            let box = UserDefaultsValue<V>(key: k, default: def)
+            defer { box.setNil(key: k) } // wipe after reading
+            return box.value
+        }
+
+        // ────────────────────────────────────────────────────────────────────────
+        // Build the new Alarm
+        // ────────────────────────────────────────────────────────────────────────
+        var alarm = Alarm(type: .missedBolus)
+        alarm.name = "Missed Bolus Alert"
+        alarm.isEnabled = take("alertMissedBolusActive", false)
+
+        // core timings
+        alarm.monitoringWindow = take("alertMissedBolus", 10) // delay
+        alarm.predictiveMinutes = take("alertMissedBolusPrebolus", 20) // pre-bolus window
+        alarm.snoozeDuration = take("alertMissedBolusSnooze", 10)
+
+        // snooze-state
+        if take("alertMissedBolusIsSnoozed", false) {
+            alarm.snoozedUntil = take("alertMissedBolusSnoozedTime",
+                                      nil as Date?)
+        }
+
+        // carb / bolus filters
+        alarm.delta = take("alertMissedBolusIgnoreBolus", 0.5)
+        alarm.threshold = Double(
+            take("alertMissedBolusLowGrams", 10))
+        alarm.aboveBG = Double(
+            take("alertMissedBolusLowGramsBG", 70.0))
+
+        // sound & tone
+        alarm.soundFile = SoundFile(rawValue:
+            take("alertMissedBolusSound",
+                 "Dhol_Shuffleloop")) ?? .dholShuffleloop
+
+        // ── ACTIVE-DURING  ← old “Pre-Snooze” flags
+        let actDay = take("alertMissedBolusAutosnoozeDay", false)
+        let actNight = take("alertMissedBolusAutosnoozeNight", false)
+        alarm.activeOption = {
+            switch (actDay, actNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .always // “Never” → always
+            }
+        }()
+
+        // ── PLAY-SOUND  ← old “PlaySound” picker
+        let playDay = take("alertMissedBolusDayTimeAudible", true)
+        let playNight = take("alertMissedBolusNightTimeAudible", true)
+        alarm.playSoundOption = {
+            switch (playDay, playNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
+        // ── REPEAT-SOUND  ← old “Repeat Sound” picker
+        let repDay = take("alertMissedBolusDayTime", false)
+        let repNight = take("alertMissedBolusNightTime", false)
+        alarm.repeatSoundOption = {
+            switch (repDay, repNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
+        // (The deprecated “alertMissedBolusQuiet” key is ignored.)
+
+        // ── Store & finish ------------------------------------------------------
         var list = Storage.shared.alarms.value
         list.append(alarm)
         Storage.shared.alarms.value = list
