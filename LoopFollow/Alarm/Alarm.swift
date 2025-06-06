@@ -94,9 +94,6 @@ struct Alarm: Identifiable, Codable, Equatable {
     /// When is the alarm active
     var activeOption: ActiveOption = .always
 
-    /// For temporary alerts, it will trigger once and then disable itself
-    var disableAfterFiring: Bool = false
-
     // ─────────────────────────────────────────────────────────────
     //  Missed‑Bolus‑specific settings
     // ─────────────────────────────────────────────────────────────

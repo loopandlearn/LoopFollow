@@ -32,7 +32,6 @@ struct PumpChangeCondition: AlarmCondition {
         let expiry = insertedAt.addingTimeInterval(lifetime)
         let trigger = expiry.addingTimeInterval(-warnAheadHrs * 3600)
 
-        // 2. nothing else to track – disableAfterFiring=true handles repeats
         return Date() >= trigger
     }
 }
