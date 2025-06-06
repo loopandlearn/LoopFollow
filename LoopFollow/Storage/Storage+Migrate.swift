@@ -292,6 +292,8 @@ extension Storage {
         migrateMissedReadingAlarm()
         migrateNotLoopingAlarm()
         migrateMissedBolusAlarm()
+        migrateSensorChangeAlarm()
+        migratePumpChangeAlarm()
     }
 
     // MARK: - One-off alarm migrations
@@ -854,6 +856,143 @@ extension Storage {
         // (The deprecated “alertMissedBolusQuiet” key is ignored.)
 
         // ── Store & finish ------------------------------------------------------
+        var list = Storage.shared.alarms.value
+        list.append(alarm)
+        Storage.shared.alarms.value = list
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    //  MARK: SAGE  →  .sensorChange
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    private func migrateSensorChangeAlarm() {
+        // Was the old setting ever stored?
+        let flag = UserDefaultsValue<Bool>(key: "alertSAGEActive", default: false)
+        guard flag.exists else { return }
+
+        // tiny helper that *reads + wipes* a legacy key
+        func take<V: AnyConvertible & Equatable>(_ k: String, _ def: V) -> V {
+            let b = UserDefaultsValue<V>(key: k, default: def)
+            defer { b.setNil(key: k) }
+            return b.value
+        }
+
+        var alarm = Alarm(type: .sensorChange)
+        alarm.name = "Sensor Change Reminder"
+        alarm.isEnabled = take("alertSAGEActive", false)
+        alarm.threshold = Double(take("alertSAGE", 8)) // hours
+        alarm.snoozeDuration = take("alertSAGESnooze", 2) // hours
+        if take("alertSAGEIsSnoozed", false) {
+            alarm.snoozedUntil = take("alertSAGESnoozedTime", nil as Date?)
+        }
+        alarm.soundFile = SoundFile(rawValue:
+            take("alertSAGESound", "Wake_Up_Will_You")) ?? .wakeUpWillYou
+
+        // ACTIVE (day / night)
+        let actDay = take("alertSAGEAutosnoozeDay", false)
+        let actNight = take("alertSAGEAutosnoozeNight", true)
+        alarm.activeOption = {
+            switch (actDay, actNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .always
+            }
+        }()
+
+        // PLAY sound
+        let playDay = take("alertSAGEDayTimeAudible", true)
+        let playNight = take("alertSAGENightTimeAudible", true)
+        alarm.playSoundOption = {
+            switch (playDay, playNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
+        // REPEAT sound
+        let repDay = take("alertSAGEDayTime", false)
+        let repNight = take("alertSAGENightTime", false)
+        alarm.repeatSoundOption = {
+            switch (repDay, repNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
+        // Persist
+        var list = Storage.shared.alarms.value
+        list.append(alarm)
+        Storage.shared.alarms.value = list
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    //  MARK: CAGE  →  .pumpChange
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    private func migratePumpChangeAlarm() {
+        let flag = UserDefaultsValue<Bool>(key: "alertCAGEActive", default: false)
+        guard flag.exists else { return }
+
+        func take<V: AnyConvertible & Equatable>(_ k: String, _ def: V) -> V {
+            let b = UserDefaultsValue<V>(key: k, default: def)
+            defer { b.setNil(key: k) }
+            return b.value
+        }
+
+        var alarm = Alarm(type: .pumpChange)
+        alarm.name = "Pump / Cannula Change"
+        alarm.isEnabled = take("alertCAGEActive", false)
+        alarm.threshold = Double(take("alertCAGE", 4)) // hours
+        alarm.snoozeDuration = take("alertCAGESnooze", 2) // hours
+        if take("alertCAGEIsSnoozed", false) {
+            alarm.snoozedUntil = take("alertCAGESnoozedTime", nil as Date?)
+        }
+        alarm.soundFile = SoundFile(rawValue:
+            take("alertCAGESound", "Wake_Up_Will_You")) ?? .wakeUpWillYou
+
+        // ACTIVE
+        let actDay = take("alertCAGEAutosnoozeDay", false)
+        let actNight = take("alertCAGEAutosnoozeNight", true)
+        alarm.activeOption = {
+            switch (actDay, actNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .always
+            }
+        }()
+
+        // PLAY
+        let playDay = take("alertCAGEDayTimeAudible", true)
+        let playNight = take("alertCAGENightTimeAudible", true)
+        alarm.playSoundOption = {
+            switch (playDay, playNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
+        // REPEAT
+        let repDay = take("alertCAGEDayTime", false)
+        let repNight = take("alertCAGENightTime", false)
+        alarm.repeatSoundOption = {
+            switch (repDay, repNight) {
+            case (true, true): return .always
+            case (true, false): return .day
+            case (false, true): return .night
+            default: return .never
+            }
+        }()
+
         var list = Storage.shared.alarms.value
         list.append(alarm)
         Storage.shared.alarms.value = list
