@@ -9,7 +9,7 @@ struct TempTargetView: View {
     @Environment(\.presentationMode) private var presentationMode
     private let pushNotificationManager = PushNotificationManager()
 
-    @ObservedObject var device = ObservableUserDefaults.shared.device
+    @ObservedObject var device = Storage.shared.device
     @ObservedObject var tempTarget = Observable.shared.tempTarget
 
     @State private var newHKTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0.0)

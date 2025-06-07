@@ -9,7 +9,7 @@ struct OverrideView: View {
     @Environment(\.presentationMode) private var presentationMode
     private let pushNotificationManager = PushNotificationManager()
 
-    @ObservedObject var device = ObservableUserDefaults.shared.device
+    @ObservedObject var device = Storage.shared.device
     @ObservedObject var overrideNote = Observable.shared.override
 
     @State private var showAlert: Bool = false

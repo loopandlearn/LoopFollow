@@ -8,9 +8,9 @@ import SwiftUI
 struct TrioNightscoutRemoteView: View {
     private let remoteController = TrioNightscoutRemoteController()
 
-    @ObservedObject var nightscoutURL = ObservableUserDefaults.shared.url
-    @ObservedObject var device = ObservableUserDefaults.shared.device
-    @ObservedObject var nsWriteAuth = ObservableUserDefaults.shared.nsWriteAuth
+    @ObservedObject var nightscoutURL = Storage.shared.url
+    @ObservedObject var device = Storage.shared.device
+    @ObservedObject var nsWriteAuth = Storage.shared.nsWriteAuth
     @ObservedObject var tempTarget = Observable.shared.tempTarget
 
     @State private var newHKTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0.0)

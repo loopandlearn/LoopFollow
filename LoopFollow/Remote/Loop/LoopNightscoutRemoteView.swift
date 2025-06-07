@@ -6,7 +6,7 @@ import SwiftUI
 
 struct LoopNightscoutRemoteView: View {
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var nsAdmin = ObservableUserDefaults.shared.nsWriteAuth
+    @ObservedObject var nsAdmin = Storage.shared.nsWriteAuth
 
     var body: some View {
         NavigationView {

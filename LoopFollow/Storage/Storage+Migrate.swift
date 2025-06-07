@@ -5,7 +5,12 @@
 import Foundation
 
 extension Storage {
-    func migrate() {
+    func migrateStep1() {
+        Storage.shared.url.value = ObservableUserDefaults.shared.old_url.value
+        Storage.shared.device.value = ObservableUserDefaults.shared.old_device.value
+        Storage.shared.nsWriteAuth.value = ObservableUserDefaults.shared.old_nsWriteAuth.value
+        Storage.shared.nsAdminAuth.value = ObservableUserDefaults.shared.old_nsAdminAuth.value
+
         // Helper: 1-to-1 type -----------------------------------------------------------------
         func move<T: AnyConvertible & Equatable>(
             _ legacy: @autoclosure () -> UserDefaultsValue<T>,

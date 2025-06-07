@@ -19,7 +19,7 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var maxFat: HKQuantity
     @Published var mealWithBolus: Bool
     @Published var mealWithFatProtein: Bool
-    @Published var isTrioDevice: Bool = (ObservableUserDefaults.shared.device.value == "Trio")
+    @Published var isTrioDevice: Bool = (Storage.shared.device.value == "Trio")
 
     private var storage = Storage.shared
     private var cancellables = Set<AnyCancellable>()
@@ -85,7 +85,7 @@ class RemoteSettingsViewModel: ObservableObject {
             .sink { [weak self] in self?.storage.mealWithFatProtein.value = $0 }
             .store(in: &cancellables)
 
-        ObservableUserDefaults.shared.device.$value
+        Storage.shared.device.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] newValue in
                 self?.isTrioDevice = (newValue == "Trio")
