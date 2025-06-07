@@ -33,7 +33,13 @@ extension MainViewController {
             else { continue }
 
             let start = max(startDate.timeIntervalSince1970, graphHorizon)
-            var end = start + (e["duration"] as? Double ?? 5) * 60 // seconds
+
+            var end: TimeInterval
+            if (e["durationType"] as? String) == "indefinite" { // Only for Loop overrides
+                end = maxEndDate
+            } else {
+                end = start + (e["duration"] as? Double ?? 5) * 60
+            }
 
             if i + 1 < sorted.count,
                let nextDateStr = (sorted[i + 1]["timestamp"] as? String) ?? (sorted[i + 1]["created_at"] as? String),
