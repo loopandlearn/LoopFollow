@@ -46,6 +46,7 @@ struct FastDropAlarmEditor: View {
                 toggleText: "Use BG Limit",
                 pickerTitle: "Dropping below",
                 range: 40 ... 300,
+                defaultOnValue: 120,
                 value: $alarm.belowBG
             )
 
