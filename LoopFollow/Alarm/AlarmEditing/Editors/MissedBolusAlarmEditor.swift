@@ -78,6 +78,7 @@ struct MissedBolusAlarmEditor: View {
                 toggleText: "Use BG Limit",
                 pickerTitle: "Above",
                 range: 40 ... 140,
+                defaultOnValue: 70,
                 value: $alarm.aboveBG
             )
 

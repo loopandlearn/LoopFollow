@@ -38,6 +38,7 @@ struct NotLoopingAlarmEditor: View {
                 toggleText: "Enable low limit",
                 pickerTitle: "Below",
                 range: bgRange,
+                defaultOnValue: 100,
                 value: $alarm.belowBG
             )
 
@@ -47,6 +48,7 @@ struct NotLoopingAlarmEditor: View {
                 toggleText: "Enable high limit",
                 pickerTitle: "Above",
                 range: bgRange,
+                defaultOnValue: 160,
                 value: $alarm.aboveBG
             )
 
