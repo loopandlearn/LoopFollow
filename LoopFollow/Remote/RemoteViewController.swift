@@ -17,7 +17,7 @@ class RemoteViewController: UIViewController {
 
         cancellable = Publishers.CombineLatest(
             Storage.shared.remoteType.$value,
-            ObservableUserDefaults.shared.device.$value
+            Storage.shared.device.$value
         )
         .sink { [weak self] _, _ in
             DispatchQueue.main.async {
@@ -40,7 +40,7 @@ class RemoteViewController: UIViewController {
         if remoteType == .nightscout {
             var remoteView: AnyView
 
-            switch ObservableUserDefaults.shared.device.value {
+            switch Storage.shared.device.value {
             case "Trio":
                 remoteView = AnyView(TrioNightscoutRemoteView())
             case "Loop":
@@ -51,7 +51,7 @@ class RemoteViewController: UIViewController {
 
             hostingController = UIHostingController(rootView: remoteView)
         } else if remoteType == .trc {
-            if ObservableUserDefaults.shared.device.value != "Trio" {
+            if Storage.shared.device.value != "Trio" {
                 hostingController = UIHostingController(
                     rootView: AnyView(
                         Text("Trio Remote Control is only supported for 'Trio'")
@@ -81,11 +81,11 @@ class RemoteViewController: UIViewController {
             hostingController.didMove(toParent: self)
         }
 
-        if remoteType == .nightscout, !ObservableUserDefaults.shared.nsWriteAuth.value {
+        if remoteType == .nightscout, !Storage.shared.nsWriteAuth.value {
             NightscoutUtils.verifyURLAndToken { _, _, nsWriteAuth, nsAdminAuth in
                 DispatchQueue.main.async {
-                    ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
-                    ObservableUserDefaults.shared.nsAdminAuth.value = nsAdminAuth
+                    Storage.shared.nsWriteAuth.value = nsWriteAuth
+                    Storage.shared.nsAdminAuth.value = nsAdminAuth
                 }
             }
         }

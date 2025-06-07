@@ -63,7 +63,7 @@ class NightscoutUtils {
     }
 
     static func executeRequest<T: Decodable>(eventType: EventType, parameters: [String: String], completion: @escaping (Result<T, Error>) -> Void) {
-        let baseURL = ObservableUserDefaults.shared.url.value
+        let baseURL = Storage.shared.url.value
         let token = Storage.shared.token.value
 
         guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
@@ -113,7 +113,7 @@ class NightscoutUtils {
     }
 
     static func executeDynamicRequest(eventType: EventType, parameters: [String: String], completion: @escaping (Result<Any, Error>) -> Void) {
-        let baseURL = ObservableUserDefaults.shared.url.value
+        let baseURL = Storage.shared.url.value
         let token = Storage.shared.token.value
 
         guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
@@ -186,7 +186,7 @@ class NightscoutUtils {
     }
 
     static func verifyURLAndToken(completion: @escaping (NightscoutError?, String?, Bool, Bool) -> Void) {
-        let urlUser = ObservableUserDefaults.shared.url.value
+        let urlUser = Storage.shared.url.value
         let token = Storage.shared.token.value
 
         if urlUser.isEmpty {
@@ -284,7 +284,7 @@ class NightscoutUtils {
     }
 
     static func retrieveJWTToken() async throws -> String {
-        let urlUser = ObservableUserDefaults.shared.url.value
+        let urlUser = Storage.shared.url.value
         let token = Storage.shared.token.value
 
         if urlUser.isEmpty {
@@ -327,7 +327,7 @@ class NightscoutUtils {
 
     static func executePostRequest<T: Decodable>(eventType: EventType, body: [String: Any]) async throws -> T {
         let jwtToken = try await retrieveJWTToken()
-        let baseURL = ObservableUserDefaults.shared.url.value
+        let baseURL = Storage.shared.url.value
 
         guard let url = URL(string: "\(baseURL)\(eventType.endpoint)") else {
             throw NightscoutError.invalidURL
@@ -357,7 +357,7 @@ class NightscoutUtils {
 
     static func executePostRequest(eventType: EventType, body: [String: Any]) async throws -> String {
         let jwtToken = try await retrieveJWTToken()
-        let baseURL = ObservableUserDefaults.shared.url.value
+        let baseURL = Storage.shared.url.value
 
         guard let url = URL(string: "\(baseURL)\(eventType.endpoint)") else {
             throw NightscoutError.invalidURL

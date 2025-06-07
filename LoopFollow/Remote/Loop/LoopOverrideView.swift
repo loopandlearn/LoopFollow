@@ -8,9 +8,9 @@ import SwiftUI
 struct LoopOverrideView: View {
     @Environment(\.presentationMode) private var presentationMode
 
-    @ObservedObject var device = ObservableUserDefaults.shared.device
+    @ObservedObject var device = Storage.shared.device
     @ObservedObject var overrideNote = Observable.shared.override
-    @ObservedObject var nsAdmin = ObservableUserDefaults.shared.nsWriteAuth
+    @ObservedObject var nsAdmin = Storage.shared.nsWriteAuth
 
     @StateObject private var viewModel = LoopOverrideViewModel()
 

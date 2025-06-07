@@ -149,6 +149,13 @@ class Storage {
     var infoSort = StorageValue<[Int]>(key: "infoSort", defaultValue: InfoType.allCases.map { $0.sortOrder })
     var infoVisible = StorageValue<[Bool]>(key: "infoVisible", defaultValue: InfoType.allCases.map { $0.defaultVisible })
 
+    var url = StorageValue<String>(key: "url", defaultValue: "")
+    var device = StorageValue<String>(key: "device", defaultValue: "")
+    var nsWriteAuth = StorageValue<Bool>(key: "nsWriteAuth", defaultValue: false)
+    var nsAdminAuth = StorageValue<Bool>(key: "nsAdminAuth", defaultValue: false)
+
+    var migrationStep = StorageValue<Int>(key: "migrationStep", defaultValue: 0)
+
     static let shared = Storage()
     private init() {}
 }

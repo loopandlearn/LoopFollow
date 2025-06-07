@@ -12,10 +12,10 @@ import Foundation
 class ObservableUserDefaults {
     static let shared = ObservableUserDefaults()
 
-    var url = ObservableUserDefaultsValue<String>(key: "url", default: "")
-    var device = ObservableUserDefaultsValue<String>(key: "device", default: "")
-    var nsWriteAuth = ObservableUserDefaultsValue<Bool>(key: "nsWriteAuth", default: false)
-    var nsAdminAuth = ObservableUserDefaultsValue<Bool>(key: "nsAdminAuth", default: false)
+    var old_url = ObservableUserDefaultsValue<String>(key: "url", default: "")
+    var old_device = ObservableUserDefaultsValue<String>(key: "device", default: "")
+    var old_nsWriteAuth = ObservableUserDefaultsValue<Bool>(key: "nsWriteAuth", default: false)
+    var old_nsAdminAuth = ObservableUserDefaultsValue<Bool>(key: "nsAdminAuth", default: false)
 
     private init() {}
 }

@@ -15,10 +15,10 @@ class NightscoutSettingsViewModel: ObservableObject {
     private var initialURL: String
     private var initialToken: String
 
-    @Published var nightscoutURL: String = ObservableUserDefaults.shared.url.value {
+    @Published var nightscoutURL: String = Storage.shared.url.value {
         willSet {
             if newValue != nightscoutURL {
-                ObservableUserDefaults.shared.url.value = newValue
+                Storage.shared.url.value = newValue
                 triggerCheckStatus()
             }
         }
@@ -40,7 +40,7 @@ class NightscoutSettingsViewModel: ObservableObject {
     private var checkStatusWorkItem: DispatchWorkItem?
 
     init() {
-        initialURL = ObservableUserDefaults.shared.url.value
+        initialURL = Storage.shared.url.value
         initialToken = Storage.shared.token.value
 
         setupDebounce()
@@ -98,8 +98,8 @@ class NightscoutSettingsViewModel: ObservableObject {
     func checkNightscoutStatus() {
         NightscoutUtils.verifyURLAndToken { error, _, nsWriteAuth, nsAdminAuth in
             DispatchQueue.main.async {
-                ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
-                ObservableUserDefaults.shared.nsAdminAuth.value = nsAdminAuth
+                Storage.shared.nsWriteAuth.value = nsWriteAuth
+                Storage.shared.nsAdminAuth.value = nsAdminAuth
 
                 self.updateStatusLabel(error: error)
             }
@@ -126,10 +126,10 @@ class NightscoutSettingsViewModel: ObservableObject {
             }
         } else {
             let authStatus: String
-            if ObservableUserDefaults.shared.nsAdminAuth.value {
+            if Storage.shared.nsAdminAuth.value {
                 authStatus = "Admin"
             } else {
-                authStatus = "Read" + (ObservableUserDefaults.shared.nsWriteAuth.value ? " & Write" : "")
+                authStatus = "Read" + (Storage.shared.nsWriteAuth.value ? " & Write" : "")
             }
 
             nightscoutStatus = "OK (\(authStatus))"

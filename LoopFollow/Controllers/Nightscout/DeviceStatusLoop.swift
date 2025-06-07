@@ -9,7 +9,7 @@ import UIKit
 
 extension MainViewController {
     func DeviceStatusLoop(formatter: ISO8601DateFormatter, lastLoopRecord: [String: AnyObject]) {
-        ObservableUserDefaults.shared.device.value = "Loop"
+        Storage.shared.device.value = "Loop"
 
         if Storage.shared.remoteType.value == .trc {
             Storage.shared.remoteType.value = .none

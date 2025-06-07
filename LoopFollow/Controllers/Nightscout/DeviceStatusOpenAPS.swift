@@ -8,7 +8,7 @@ import UIKit
 
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
-        ObservableUserDefaults.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
+        Storage.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
         if lastLoopRecord["failureReason"] != nil {
             LoopStatusLabel.text = "X"
             latestLoopStatusString = "X"

@@ -13,7 +13,7 @@ import UIKit
 import UserNotifications
 
 func IsNightscoutEnabled() -> Bool {
-    return !ObservableUserDefaults.shared.url.value.isEmpty
+    return !Storage.shared.url.value.isEmpty
 }
 
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
@@ -119,11 +119,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         loadDebugData()
 
-        if ObservableUserDefaults.shared.device.value != "Trio" && Storage.shared.remoteType.value == .trc {
-            Storage.shared.remoteType.value = .none
+        if Storage.shared.migrationStep.value < 1 {
+            Storage.shared.migrateStep1()
+            Storage.shared.migrationStep.value = 1
         }
-
-        Storage.shared.migrate()
 
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
@@ -702,7 +701,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 }
 
                 if let url = debugData.url {
-                    ObservableUserDefaults.shared.url.value = url
+                    Storage.shared.url.value = url
                 }
 
                 if let token = debugData.token {
