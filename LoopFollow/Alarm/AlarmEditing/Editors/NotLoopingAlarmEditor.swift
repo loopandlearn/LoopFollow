@@ -7,6 +7,8 @@ import SwiftUI
 struct NotLoopingAlarmEditor: View {
     @Binding var alarm: Alarm
 
+    private let bgRange: ClosedRange<Double> = 40 ... 300
+
     var body: some View {
         Form {
             InfoBanner(
@@ -28,6 +30,24 @@ struct NotLoopingAlarmEditor: View {
                     get: { alarm.threshold ?? 31 },
                     set: { alarm.threshold = $0 }
                 )
+            )
+
+            AlarmBGLimitSection(
+                header: "Low Limit",
+                footer: "Alert only if BG is equal to or below this value.",
+                toggleText: "Enable low limit",
+                pickerTitle: "Below",
+                range: bgRange,
+                value: $alarm.belowBG
+            )
+
+            AlarmBGLimitSection(
+                header: "High Limit",
+                footer: "Alert only if BG is equal to or above this value.",
+                toggleText: "Enable high limit",
+                pickerTitle: "Above",
+                range: bgRange,
+                value: $alarm.aboveBG
             )
 
             AlarmActiveSection(alarm: $alarm)
