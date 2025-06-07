@@ -1,3 +1,7 @@
+// LoopFollow
+// AlarmBGLimitSection.swift
+// Created by Jonas Björkert on 2025-05-14.
+
 import SwiftUI
 
 struct AlarmBGLimitSection: View {
@@ -21,11 +25,11 @@ struct AlarmBGLimitSection: View {
         defaultOnValue: Double? = nil,
         value: Binding<Double?>
     ) {
-        self.header       = header
-        self.footer       = footer
-        self.toggleText   = toggleText
-        self.pickerTitle  = pickerTitle
-        self.range        = range
+        self.header = header
+        self.footer = footer
+        self.toggleText = toggleText
+        self.pickerTitle = pickerTitle
+        self.range = range
         if let v = defaultOnValue, range.contains(v) {
             self.defaultOnValue = v
         } else {
