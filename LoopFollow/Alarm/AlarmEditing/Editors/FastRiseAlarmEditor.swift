@@ -8,7 +8,7 @@ struct FastRiseAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when glucose readings rise rapidly. For example, "
                     + "three straight readings each climbing by at least the amount "
@@ -51,6 +51,5 @@ struct FastRiseAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

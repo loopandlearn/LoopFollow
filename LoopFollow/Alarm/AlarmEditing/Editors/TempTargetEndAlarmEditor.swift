@@ -8,7 +8,7 @@ struct TempTargetEndAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(text: "Alerts when a temp target ends.", alarmType: alarm.type)
 
             AlarmGeneralSection(alarm: $alarm)
@@ -17,6 +17,5 @@ struct TempTargetEndAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm, hideRepeat: true)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

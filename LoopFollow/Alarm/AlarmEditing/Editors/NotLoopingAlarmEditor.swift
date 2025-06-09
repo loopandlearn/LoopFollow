@@ -10,7 +10,7 @@ struct NotLoopingAlarmEditor: View {
     private let bgRange: ClosedRange<Double> = 40 ... 300
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when no successful loop has occurred for the time "
                     + "you set below.", alarmType: alarm.type
@@ -53,6 +53,5 @@ struct NotLoopingAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

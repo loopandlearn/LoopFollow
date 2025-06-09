@@ -8,7 +8,7 @@ struct HighBgAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when glucose stays above the limit "
                     + "you set below. Use Persistent if you want to ignore brief spikes."
@@ -39,6 +39,5 @@ struct HighBgAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

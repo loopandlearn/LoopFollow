@@ -8,7 +8,7 @@ struct RecBolusAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when the recommended bolus equals or exceeds the " +
                     "threshold you set below.",
@@ -31,6 +31,5 @@ struct RecBolusAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

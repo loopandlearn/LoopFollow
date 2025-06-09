@@ -8,7 +8,7 @@ struct PumpVolumeAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "This warns you when the insulin pump is running low on insulin.",
                 alarmType: alarm.type
@@ -31,6 +31,5 @@ struct PumpVolumeAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

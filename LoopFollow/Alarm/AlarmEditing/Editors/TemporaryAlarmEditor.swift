@@ -11,7 +11,7 @@ struct TemporaryAlarmEditor: View {
     private let bgRange: ClosedRange<Double> = 40 ... 300
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "This alert fires once when glucose crosses either of the limits you set below, and then disables itself.",
                 alarmType: alarm.type
@@ -45,6 +45,5 @@ struct TemporaryAlarmEditor: View {
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

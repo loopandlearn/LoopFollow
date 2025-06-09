@@ -8,7 +8,7 @@ struct COBAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when Carbs-on-Board exceeds the amount you set below.",
                 alarmType: alarm.type
@@ -31,6 +31,5 @@ struct COBAlarmEditor: View {
 
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }
