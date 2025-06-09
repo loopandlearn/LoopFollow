@@ -23,10 +23,7 @@ struct FastRiseAlarmEditor: View {
                 footer: "This is how much the glucose must rise to be considered a fast rise.",
                 title: "Rises by",
                 range: 3 ... 54,
-                value: Binding(
-                    get: { alarm.delta ?? 10 }, // This value has not effect since it is set as default on the alarm
-                    set: { alarm.delta = $0 }
-                )
+                value: $alarm.delta
             )
 
             AlarmStepperSection(
