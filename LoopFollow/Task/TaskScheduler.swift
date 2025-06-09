@@ -43,7 +43,7 @@ class TaskScheduler {
     }
 
     func rescheduleTask(id: TaskID, to newRunDate: Date) {
-        let timeString = formatTime(newRunDate)
+        // let timeString = formatTime(newRunDate)
         // LogManager.shared.log(category: .taskScheduler, message: "Reschedule Task \(id): next run = \(timeString)", isDebug: true)
 
         queue.async {
@@ -97,9 +97,9 @@ class TaskScheduler {
                 continue
             }
 
-            // Skip alarm checks if data-fetching tasks (deviceStatus, treatments, fetchBG) are currently due or just executed.
+            // Skip alarm checks if data-fetching tasks (deviceStatus, treatments, fetchBG) are currently due.
             // This ensures alarms are evaluated with the latest data, avoiding premature or incorrect triggers.
-            // If skipped, reschedule alarmCheck 5 seconds later to retry after data updates.
+            // If skipped, reschedule alarmCheck 1 second later to retry after data updates.
             if taskID == .alarmCheck {
                 let shouldSkip = tasksToSkipAlarmCheck.contains {
                     guard let checkTask = tasks[$0] else { return false }
@@ -107,7 +107,7 @@ class TaskScheduler {
                 }
                 if shouldSkip {
                     guard var existingTask = tasks[taskID] else { continue }
-                    existingTask.nextRun = Date().addingTimeInterval(5)
+                    existingTask.nextRun = Date().addingTimeInterval(1)
                     tasks[taskID] = existingTask
                     continue
                 }
