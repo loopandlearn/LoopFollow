@@ -25,10 +25,7 @@ struct PumpChangeAlarmEditor: View {
                 range: 1 ... 24,
                 step: 1,
                 unitLabel: "Hours",
-                value: Binding(
-                    get: { alarm.threshold ?? 12 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmActiveSection(alarm: $alarm)

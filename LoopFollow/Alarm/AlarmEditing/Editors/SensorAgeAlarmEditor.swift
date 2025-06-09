@@ -24,10 +24,7 @@ struct SensorAgeAlarmEditor: View {
                 range: 1 ... 24,
                 step: 1,
                 unitLabel: "hours",
-                value: Binding(
-                    get: { alarm.threshold ?? 12 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmActiveSection(alarm: $alarm)

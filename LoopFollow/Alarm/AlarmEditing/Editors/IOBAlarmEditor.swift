@@ -24,10 +24,7 @@ struct IOBAlarmEditor: View {
                 range: 0.1 ... 20,
                 step: 0.1,
                 unitLabel: "Units",
-                value: Binding(
-                    get: { alarm.delta ?? 1.0 },
-                    set: { alarm.delta = $0 }
-                )
+                value: $alarm.delta
             )
 
             AlarmStepperSection(
@@ -37,10 +34,7 @@ struct IOBAlarmEditor: View {
                 range: 1 ... 10,
                 step: 1,
                 unitLabel: "Boluses",
-                value: Binding(
-                    get: { Double(alarm.monitoringWindow ?? 2) },
-                    set: { alarm.monitoringWindow = Int($0) }
-                )
+                value: $alarm.monitoringWindow
             )
 
             AlarmStepperSection(
@@ -50,10 +44,7 @@ struct IOBAlarmEditor: View {
                 range: 5 ... 120,
                 step: 5,
                 unitLabel: "min",
-                value: Binding(
-                    get: { Double(alarm.predictiveMinutes ?? 30) },
-                    set: { alarm.predictiveMinutes = Int($0) }
-                )
+                value: $alarm.predictiveMinutes
             )
 
             AlarmStepperSection(
@@ -63,10 +54,7 @@ struct IOBAlarmEditor: View {
                 range: 1 ... 20,
                 step: 0.5,
                 unitLabel: "Units",
-                value: Binding(
-                    get: { alarm.threshold ?? 6 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmActiveSection(alarm: $alarm)

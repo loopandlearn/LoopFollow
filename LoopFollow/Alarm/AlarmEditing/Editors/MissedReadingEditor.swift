@@ -20,10 +20,7 @@ struct MissedReadingEditor: View {
                 range: 11 ... 121,
                 step: 5,
                 unitLabel: alarm.type.snoozeTimeUnit.label,
-                value: Binding(
-                    get: { alarm.threshold ?? 16 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmActiveSection(alarm: $alarm)

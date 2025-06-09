@@ -32,10 +32,7 @@ struct LowBgAlarmEditor: View {
                 range: 0 ... 120,
                 step: 5,
                 unitLabel: alarm.type.snoozeTimeUnit.label,
-                value: Binding(
-                    get: { Double(alarm.persistentMinutes ?? 0) },
-                    set: { alarm.persistentMinutes = Int($0) }
-                )
+                value: $alarm.persistentMinutes
             )
 
             AlarmStepperSection(
@@ -47,10 +44,7 @@ struct LowBgAlarmEditor: View {
                 range: 0 ... 60,
                 step: 5,
                 unitLabel: alarm.type.snoozeTimeUnit.label,
-                value: Binding(
-                    get: { Double(alarm.predictiveMinutes ?? 0) },
-                    set: { alarm.predictiveMinutes = Int($0) }
-                )
+                value: $alarm.predictiveMinutes
             )
 
             AlarmActiveSection(alarm: $alarm)

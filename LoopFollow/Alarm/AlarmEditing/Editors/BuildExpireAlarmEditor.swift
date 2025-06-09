@@ -22,10 +22,7 @@ struct BuildExpireAlarmEditor: View {
                 range: 1 ... 14,
                 step: 1,
                 unitLabel: alarm.type.snoozeTimeUnit.label,
-                value: Binding(
-                    get: { alarm.threshold ?? 1 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmActiveSection(alarm: $alarm)

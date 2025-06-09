@@ -24,10 +24,7 @@ struct RecBolusAlarmEditor: View {
                 range: 0.1 ... 50,
                 step: 0.1,
                 unitLabel: "Units",
-                value: Binding(
-                    get: { alarm.threshold ?? 1.0 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmActiveSection(alarm: $alarm)

@@ -22,7 +22,7 @@ struct HighBgAlarmEditor: View {
                 title: "BG",
                 range: 120 ... 350,
                 value: Binding(
-                    get: { alarm.aboveBG ?? 180 },
+                    get: { alarm.aboveBG ?? 180 }, // This value is not used, default is set on the alarm type
                     set: { alarm.aboveBG = $0 }
                 )
             )
@@ -35,10 +35,7 @@ struct HighBgAlarmEditor: View {
                 range: 0 ... 120,
                 step: 5,
                 unitLabel: alarm.type.snoozeTimeUnit.label,
-                value: Binding(
-                    get: { Double(alarm.persistentMinutes ?? 0) },
-                    set: { alarm.persistentMinutes = Int($0) }
-                )
+                value: $alarm.persistentMinutes
             )
 
             AlarmActiveSection(alarm: $alarm)
