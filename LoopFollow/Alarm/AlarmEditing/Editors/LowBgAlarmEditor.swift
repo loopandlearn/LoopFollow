@@ -18,10 +18,7 @@ struct LowBgAlarmEditor: View {
                 footer: "Alert when any reading or prediction is at or below this value.",
                 title: "BG",
                 range: 40 ... 150,
-                value: Binding(
-                    get: { alarm.belowBG ?? 80 },
-                    set: { alarm.belowBG = $0 }
-                )
+                value: $alarm.belowBG
             )
 
             AlarmStepperSection(

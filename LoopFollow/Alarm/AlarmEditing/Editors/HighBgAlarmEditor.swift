@@ -21,10 +21,7 @@ struct HighBgAlarmEditor: View {
                 footer: "The alert becomes eligible once any reading is at or above this value.",
                 title: "BG",
                 range: 120 ... 350,
-                value: Binding(
-                    get: { alarm.aboveBG ?? 180 }, // This value is not used, default is set on the alarm type
-                    set: { alarm.aboveBG = $0 }
-                )
+                value: $alarm.aboveBG
             )
 
             AlarmStepperSection(

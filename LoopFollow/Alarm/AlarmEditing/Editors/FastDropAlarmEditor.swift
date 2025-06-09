@@ -21,10 +21,7 @@ struct FastDropAlarmEditor: View {
                 footer: "This is how much the glucose must drop to be considered a fast drop.",
                 title: "Falls by",
                 range: 3 ... 54,
-                value: Binding(
-                    get: { alarm.delta ?? 18 }, // This value is not used, the default value is set on the alarm
-                    set: { alarm.delta = $0 }
-                )
+                value: $alarm.delta
             )
 
             AlarmStepperSection(

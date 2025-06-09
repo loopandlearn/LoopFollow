@@ -614,7 +614,7 @@ extension Storage {
 
         // core trigger parameters
         alarm.delta = Double(take("alertFastDropDelta", default: 10.0))
-        alarm.monitoringWindow = take("alertFastDropReadings", default: 3) - 1// store #readings
+        alarm.monitoringWindow = take("alertFastDropReadings", default: 3) - 1 // store #readings
         if take("alertFastDropUseLimit", default: false) {
             alarm.belowBG = Double(take("alertFastDropBelowBG", default: 120.0))
         }
