@@ -22,22 +22,18 @@ struct FastDropAlarmEditor: View {
                 title: "Falls by",
                 range: 3 ... 54,
                 value: Binding(
-                    get: { alarm.delta ?? 18 },
+                    get: { alarm.delta ?? 18 }, // This value is not used, the default value is set on the alarm
                     set: { alarm.delta = $0 }
                 )
             )
 
-            // TODO: In the migration script, use 1 value less than stored since we are switching from readings to drops
             AlarmStepperSection(
                 header: "Consecutive Drops",
                 footer: "Number of drops—each meeting the rate above—required before an alert fires.",
                 title: "Number of Drops",
                 range: 1 ... 3,
                 step: 1,
-                value: Binding(
-                    get: { Double(alarm.monitoringWindow ?? 2) },
-                    set: { alarm.monitoringWindow = Int($0) }
-                )
+                value: $alarm.monitoringWindow
             )
 
             AlarmBGLimitSection(

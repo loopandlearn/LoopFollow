@@ -26,10 +26,7 @@ struct NotLoopingAlarmEditor: View {
                 range: 16 ... 61,
                 step: 5,
                 unitLabel: alarm.type.snoozeTimeUnit.label,
-                value: Binding(
-                    get: { alarm.threshold ?? 31 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmBGLimitSection(

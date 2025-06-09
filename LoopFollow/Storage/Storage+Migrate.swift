@@ -614,7 +614,7 @@ extension Storage {
 
         // core trigger parameters
         alarm.delta = Double(take("alertFastDropDelta", default: 10.0))
-        alarm.monitoringWindow = take("alertFastDropReadings", default: 3) // store #readings
+        alarm.monitoringWindow = take("alertFastDropReadings", default: 3) - 1// store #readings
         if take("alertFastDropUseLimit", default: false) {
             alarm.belowBG = Double(take("alertFastDropBelowBG", default: 120.0))
         }
@@ -726,7 +726,7 @@ extension Storage {
         alarm.isEnabled = take("alertMissedReadingActive", default: false)
 
         // “No CGM data for X minutes”
-        alarm.persistentMinutes = take("alertMissedReading", default: 31)
+        alarm.threshold = take("alertMissedReading", default: 31)
 
         // snoozing
         alarm.snoozeDuration = take("alertMissedReadingSnooze", default: 30)

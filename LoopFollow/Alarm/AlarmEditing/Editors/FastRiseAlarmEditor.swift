@@ -24,7 +24,7 @@ struct FastRiseAlarmEditor: View {
                 title: "Rises by",
                 range: 3 ... 54,
                 value: Binding(
-                    get: { alarm.delta ?? 3 },
+                    get: { alarm.delta ?? 10 }, // This value has not effect since it is set as default on the alarm
                     set: { alarm.delta = $0 }
                 )
             )
@@ -36,10 +36,7 @@ struct FastRiseAlarmEditor: View {
                 title: "Rises in a row",
                 range: 1 ... 3,
                 step: 1,
-                value: Binding(
-                    get: { Double(alarm.monitoringWindow ?? 2) },
-                    set: { alarm.monitoringWindow = Int($0) }
-                )
+                value: $alarm.monitoringWindow
             )
 
             AlarmBGLimitSection(

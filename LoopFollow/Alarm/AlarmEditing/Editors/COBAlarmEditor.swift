@@ -23,10 +23,7 @@ struct COBAlarmEditor: View {
                 range: 1 ... 200,
                 step: 1,
                 unitLabel: "g",
-                value: Binding(
-                    get: { alarm.threshold ?? 20 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmActiveSection(alarm: $alarm)

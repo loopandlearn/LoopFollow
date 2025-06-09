@@ -23,10 +23,7 @@ struct BatteryDropAlarmEditor: View {
                 range: 5 ... 100,
                 step: 5,
                 unitLabel: "%",
-                value: Binding(
-                    get: { alarm.delta ?? 10 },
-                    set: { alarm.delta = $0 }
-                )
+                value: $alarm.delta
             )
 
             AlarmStepperSection(
@@ -36,10 +33,7 @@ struct BatteryDropAlarmEditor: View {
                 range: 5 ... 30,
                 step: 5,
                 unitLabel: "min",
-                value: Binding(
-                    get: { Double(alarm.monitoringWindow ?? 15) },
-                    set: { alarm.monitoringWindow = Int($0) }
-                )
+                value: $alarm.monitoringWindow
             )
 
             AlarmActiveSection(alarm: $alarm)

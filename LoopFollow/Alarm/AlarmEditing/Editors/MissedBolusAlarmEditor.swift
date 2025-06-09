@@ -26,10 +26,7 @@ struct MissedBolusAlarmEditor: View {
                 range: 5 ... 60,
                 step: 5,
                 unitLabel: "min",
-                value: Binding(
-                    get: { Double(alarm.monitoringWindow ?? 15) },
-                    set: { alarm.monitoringWindow = Int($0) }
-                )
+                value: $alarm.monitoringWindow
             )
 
             AlarmStepperSection(
@@ -40,10 +37,7 @@ struct MissedBolusAlarmEditor: View {
                 range: 0 ... 45,
                 step: 5,
                 unitLabel: "min",
-                value: Binding(
-                    get: { Double(alarm.predictiveMinutes ?? 15) },
-                    set: { alarm.predictiveMinutes = Int($0) }
-                )
+                value: $alarm.predictiveMinutes
             )
 
             AlarmStepperSection(
@@ -53,10 +47,7 @@ struct MissedBolusAlarmEditor: View {
                 range: 0.05 ... 2,
                 step: 0.05,
                 unitLabel: "Units",
-                value: Binding(
-                    get: { alarm.delta ?? 0.1 },
-                    set: { alarm.delta = $0 }
-                )
+                value: $alarm.delta
             )
 
             AlarmStepperSection(
@@ -66,10 +57,7 @@ struct MissedBolusAlarmEditor: View {
                 range: 0 ... 15,
                 step: 1,
                 unitLabel: "Grams",
-                value: Binding(
-                    get: { alarm.threshold ?? 4 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmBGLimitSection(

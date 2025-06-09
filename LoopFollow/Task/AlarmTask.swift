@@ -63,6 +63,7 @@ extension MainViewController {
             }
 
             LogManager.shared.log(category: .alarm, message: "Checking alarms based on \(finalAlarmData)", isDebug: true)
+            LogManager.shared.log(category: .alarm, message: "Alarms \(Storage.shared.alarms.value)", isDebug: true)
 
             AlarmManager.shared.checkAlarms(data: finalAlarmData)
 

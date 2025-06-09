@@ -23,10 +23,7 @@ struct BatteryAlarmEditor: View {
                 range: 0 ... 100,
                 step: 5,
                 unitLabel: "%",
-                value: Binding(
-                    get: { alarm.threshold ?? 20 },
-                    set: { alarm.threshold = $0 }
-                )
+                value: $alarm.threshold
             )
 
             AlarmActiveSection(alarm: $alarm)

@@ -217,34 +217,61 @@ struct Alarm: Identifiable, Codable, Equatable {
             repeatSoundOption = .always
         case .low:
             soundFile = .indeed
+            belowBG = 80
+            persistentMinutes = 0
+            predictiveMinutes = 0
         case .iob:
             soundFile = .alertToneRingtone1
+            delta = 1
+            monitoringWindow = 2
+            predictiveMinutes = 30
+            threshold = 6
         case .cob:
             soundFile = .alertToneRingtone2
+            threshold = 20
         case .high:
             soundFile = .timeHasCome
+            aboveBG = 180
+            persistentMinutes = 0
         case .fastDrop:
             soundFile = .bigClockTicking
+            delta = 18
+            monitoringWindow = 2
         case .fastRise:
             soundFile = .cartoonFailStringsTrumpet
+            delta = 10
+            monitoringWindow = 3
         case .missedReading:
             soundFile = .cartoonTipToeSneakyWalk
+            threshold = 16
         case .notLooping:
             soundFile = .sciFiEngineShutDown
+            threshold = 31
         case .missedBolus:
             soundFile = .dholShuffleloop
+            monitoringWindow = 15
+            predictiveMinutes = 15
+            delta = 0.1
+            threshold = 4
         case .sensorChange:
             soundFile = .wakeUpWillYou
+            threshold = 12
         case .pumpChange:
             soundFile = .wakeUpWillYou
+            threshold = 12
         case .pump:
             soundFile = .marimbaDescend
+            threshold = 20
         case .battery:
             soundFile = .machineCharge
+            threshold = 20
         case .batteryDrop:
             soundFile = .machineCharge
+            delta = 10
+            monitoringWindow = 15
         case .recBolus:
             soundFile = .dholShuffleloop
+            threshold = 1
         case .overrideStart:
             soundFile = .endingReached
             repeatSoundOption = .never
