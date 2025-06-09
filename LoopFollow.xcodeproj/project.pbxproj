@@ -187,6 +187,7 @@
 		DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F042C529DA200D76A8E /* ObservableValue.swift */; };
 		DDD10F072C529DE800D76A8E /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F062C529DE800D76A8E /* Observable.swift */; };
 		DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */; };
+		DDDB86F12DF7223C00AADDAC /* DeleteAlarmSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */; };
 		DDDF6F432D479A9900884336 /* LoopNightscoutRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */; };
 		DDDF6F452D479AB100884336 /* LoopOverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F442D479AB000884336 /* LoopOverrideView.swift */; };
 		DDDF6F472D479AD200884336 /* LoopOverrideViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */; };
@@ -557,6 +558,7 @@
 		DDD10F042C529DA200D76A8E /* ObservableValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableValue.swift; sourceTree = "<group>"; };
 		DDD10F062C529DE800D76A8E /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTarget.swift; sourceTree = "<group>"; };
+		DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAlarmSection.swift; sourceTree = "<group>"; };
 		DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopNightscoutRemoteView.swift; sourceTree = "<group>"; };
 		DDDF6F442D479AB000884336 /* LoopOverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideView.swift; sourceTree = "<group>"; };
 		DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideViewModel.swift; sourceTree = "<group>"; };
@@ -1028,6 +1030,7 @@
 		DDC7E53B2DBD8A1600EB1127 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */,
 				DD7F4BC42DD3CE0700D449E9 /* AlarmBGLimitSection.swift */,
 				DD7F4BA02DD2193F00D449E9 /* AlarmSnoozeSection.swift */,
 				DD7F4B9E2DD1F92700D449E9 /* AlarmActiveSection.swift */,
@@ -1821,6 +1824,7 @@
 				DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */,
 				DD7F4C052DD4BBE200D449E9 /* NotLoopingCondition.swift in Sources */,
 				DD5334212C60EBEE00062F9D /* InsulinCartridgeChange.swift in Sources */,
+				DDDB86F12DF7223C00AADDAC /* DeleteAlarmSection.swift in Sources */,
 				DD7F4B9D2DD1EAE500D449E9 /* AlarmAudioSection.swift in Sources */,
 				FC97881E2485969B00A7906C /* NightScoutViewController.swift in Sources */,
 				DD608A0A2C23593900F91132 /* SMB.swift in Sources */,

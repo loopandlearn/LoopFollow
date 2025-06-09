@@ -8,7 +8,7 @@ struct BatteryDropAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "This warns you if your phone’s battery drops quickly, based on the percentage and time you set.",
                 alarmType: alarm.type
@@ -40,6 +40,5 @@ struct BatteryDropAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

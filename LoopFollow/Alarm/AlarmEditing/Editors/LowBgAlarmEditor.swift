@@ -8,7 +8,7 @@ struct LowBgAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(text: "This warns you if the glucose is too low now or might be soon, based on predictions. Note: predictions is currently not available for Trio.")
 
             AlarmGeneralSection(alarm: $alarm)
@@ -48,6 +48,5 @@ struct LowBgAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

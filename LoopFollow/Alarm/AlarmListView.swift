@@ -163,6 +163,10 @@ struct AlarmListView: View {
                     onCancel: {
                         if isNew { deleteAfterDismiss = id }
                         sheetInfo = nil
+                    },
+                    onDelete: {
+                        deleteAfterDismiss = id
+                        sheetInfo = nil
                     }
                 )
             } else {

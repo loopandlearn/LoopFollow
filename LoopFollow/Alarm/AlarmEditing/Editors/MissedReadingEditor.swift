@@ -8,7 +8,7 @@ struct MissedReadingEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(text: "This warns you if the glucose monitor stops sending readings for too long..", alarmType: alarm.type)
 
             AlarmGeneralSection(alarm: $alarm)
@@ -27,6 +27,5 @@ struct MissedReadingEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

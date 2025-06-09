@@ -8,7 +8,7 @@ struct IOBAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when insulin-on-board is high, or when several "
                     + "boluses in quick succession exceed the limits you set.",
@@ -61,6 +61,5 @@ struct IOBAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

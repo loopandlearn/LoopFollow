@@ -10,7 +10,7 @@ struct FastDropAlarmEditor: View {
     @State private var useLimit: Bool = false
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when glucose readings drop rapidly. For example, three straight readings each falling by at least the amount you set. Optionally limit alerts to only fire below a certain BG level."
             )
@@ -47,6 +47,5 @@ struct FastDropAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

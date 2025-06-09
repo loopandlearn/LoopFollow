@@ -8,7 +8,7 @@ struct OverrideStartAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when an override begins.",
                 alarmType: alarm.type
@@ -20,6 +20,5 @@ struct OverrideStartAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm, hideRepeat: true)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

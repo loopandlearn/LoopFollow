@@ -8,7 +8,7 @@ struct SensorAgeAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Warn me this many hours before the sensor’s 10-day change-over.",
                 alarmType: alarm.type
@@ -31,6 +31,5 @@ struct SensorAgeAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

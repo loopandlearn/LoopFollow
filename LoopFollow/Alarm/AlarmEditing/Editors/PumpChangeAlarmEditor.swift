@@ -8,7 +8,7 @@ struct PumpChangeAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when the pump / cannula is within the time "
                     + "window you choose below (relative to the 3-day change "
@@ -32,6 +32,5 @@ struct PumpChangeAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }

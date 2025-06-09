@@ -8,7 +8,7 @@ struct MissedBolusAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
-        Form {
+        Group {
             InfoBanner(
                 text: "Alerts when carbs are logged but no bolus is delivered " +
                     "within the delay below.  Allows small-carb / treatment " +
@@ -74,6 +74,5 @@ struct MissedBolusAlarmEditor: View {
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)
         }
-        .navigationTitle(alarm.type.rawValue)
     }
 }
