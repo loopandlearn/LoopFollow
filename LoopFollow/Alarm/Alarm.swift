@@ -177,26 +177,7 @@ struct Alarm: Identifiable, Codable, Equatable {
             }
         }()
 
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-
-        let content = UNMutableNotificationContent()
-        content.title = type.rawValue
-        content.subtitle += Observable.shared.bgText.value + " "
-        content.subtitle += Observable.shared.directionText.value + " "
-        content.subtitle += Observable.shared.deltaText.value
-        content.categoryIdentifier = "category"
-        // This is needed to trigger vibrate on watch and phone
-        // See if we can use .Critcal
-        // See if we should use this method instead of direct sound player
-        content.sound = .default
-
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-
-        let action = UNNotificationAction(identifier: "snooze", title: snoozeDuration == 0 ? "Acknowledge" : "Snooze", options: [])
-        let category = UNNotificationCategory(identifier: "category", actions: [action], intentIdentifiers: [], options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([category])
+        AlarmManager.shared.sendNotification(title: type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
 
         if playSound {
             AlarmSound.setSoundFile(str: soundFile.rawValue)

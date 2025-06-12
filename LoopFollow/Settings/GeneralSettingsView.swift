@@ -14,6 +14,7 @@ struct GeneralSettingsView: View {
     @ObservedObject var screenlockSwitchState = Storage.shared.screenlockSwitchState
     @ObservedObject var showDisplayName = Storage.shared.showDisplayName
     @ObservedObject var snoozerEmoji = Storage.shared.snoozerEmoji
+    @ObservedObject var persistentNotification = Storage.shared.persistentNotification
 
     // Speak-BG settings
     @ObservedObject var speakBG = Storage.shared.speakBG
@@ -31,6 +32,7 @@ struct GeneralSettingsView: View {
             Form {
                 Section("App Settings") {
                     Toggle("Display App Badge", isOn: $appBadge.value)
+                    Toggle("Persistent Notification", isOn: $persistentNotification.value)
                 }
 
                 Section("Display") {

@@ -648,19 +648,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
-    func sendGeneralNotification(_: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.subtitle = subtitle
-        content.body = body
-        content.categoryIdentifier = "noAction"
-        content.sound = .default
-
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timer, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-    }
-
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive _: UNNotificationResponse, withCompletionHandler _: @escaping () -> Void) {}
 
     // User has scrolled the chart

@@ -156,6 +156,9 @@ class Storage {
 
     var migrationStep = StorageValue<Int>(key: "migrationStep", defaultValue: 0)
 
+    var persistentNotification = StorageValue<Bool>(key: "persistentNotification", defaultValue: false)
+    var persistentNotificationLastBGTime = StorageValue<Date>(key: "persistentNotificationLastBGTime", defaultValue: .distantPast)
+
     static let shared = Storage()
     private init() {}
 }

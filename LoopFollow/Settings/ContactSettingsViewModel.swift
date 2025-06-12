@@ -1,6 +1,6 @@
 // LoopFollow
 // ContactSettingsViewModel.swift
-// Created by Jonas Björkert on 2025-05-23.
+// Created by Jonas Björkert on 2024-12-10.
 
 import Combine
 import Foundation
