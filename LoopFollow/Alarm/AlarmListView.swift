@@ -95,7 +95,7 @@ struct AlarmListView: View {
 
     var body: some View {
         List {
-            ForEach(store.value) { alarm in
+            ForEach(store.value.sorted(by: Alarm.byPriorityThenSpec)) { alarm in
                 Button {
                     selectedAlarm = alarm
                     sheetInfo = .editor(id: alarm.id, isNew: false)

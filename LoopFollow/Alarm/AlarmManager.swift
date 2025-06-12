@@ -45,30 +45,7 @@ class AlarmManager {
         var alarmTriggered = false
         let alarms = Storage.shared.alarms.value
 
-        let sorted = alarms.sorted { lhs, rhs in
-            // 1) type-level priority (hard-coded table in AlarmType)
-            if lhs.type.priority != rhs.type.priority {
-                return lhs.type.priority < rhs.type.priority
-            }
-
-            // 2) per-type “main value” ordering
-            if lhs.type == rhs.type, // only makes sense within the same type
-               let spec = lhs.type.sortSpec
-            { // (direction, key extractor)
-                let lv = spec.key(lhs)
-                let rv = spec.key(rhs)
-
-                switch spec.direction {
-                case .ascending: // smaller ⇒ more urgent
-                    return (lv ?? Double.infinity) < (rv ?? Double.infinity)
-                case .descending: // bigger  ⇒ more urgent
-                    return (lv ?? -Double.infinity) > (rv ?? -Double.infinity)
-                }
-            }
-
-            // 3) fallback – keep original insertion order
-            return false
-        }
+        let sorted = alarms.sorted(by: Alarm.byPriorityThenSpec)
         var skipType: AlarmType?
 
         let isLatestReadingRecent: Bool = {

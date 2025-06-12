@@ -150,6 +150,7 @@
 		DDB9FC7B2DDB573F00EFAA76 /* IOBCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB9FC7A2DDB573F00EFAA76 /* IOBCondition.swift */; };
 		DDB9FC7D2DDB575300EFAA76 /* IOBAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB9FC7C2DDB575300EFAA76 /* IOBAlarmEditor.swift */; };
 		DDB9FC7F2DDB584500EFAA76 /* BolusEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB9FC7E2DDB584500EFAA76 /* BolusEntry.swift */; };
+		DDBD19962DFB44B0005C2D69 /* Alarm+byPriorityThenSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD19952DFB44B0005C2D69 /* Alarm+byPriorityThenSpec.swift */; };
 		DDBE3ABD2CB5A961006B37DC /* OverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */; };
 		DDC6CA3D2DD7C6090060EE25 /* TemporaryCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */; };
 		DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */; };
@@ -519,6 +520,7 @@
 		DDB9FC7A2DDB573F00EFAA76 /* IOBCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBCondition.swift; sourceTree = "<group>"; };
 		DDB9FC7C2DDB575300EFAA76 /* IOBAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBAlarmEditor.swift; sourceTree = "<group>"; };
 		DDB9FC7E2DDB584500EFAA76 /* BolusEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusEntry.swift; sourceTree = "<group>"; };
+		DDBD19952DFB44B0005C2D69 /* Alarm+byPriorityThenSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Alarm+byPriorityThenSpec.swift"; sourceTree = "<group>"; };
 		DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideView.swift; sourceTree = "<group>"; };
 		DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryCondition.swift; sourceTree = "<group>"; };
 		DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryAlarmEditor.swift; sourceTree = "<group>"; };
@@ -1117,6 +1119,7 @@
 				DDCF9A8B2D86005E004DF4DD /* AlarmManager.swift */,
 				DDCF9A872D85FD33004DF4DD /* AlarmData.swift */,
 				DDCF9A7F2D85FD09004DF4DD /* Alarm.swift */,
+				DDBD19952DFB44B0005C2D69 /* Alarm+byPriorityThenSpec.swift */,
 			);
 			path = Alarm;
 			sourceTree = "<group>";
@@ -1815,6 +1818,7 @@
 				DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */,
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
 				DD7F4C0F2DD51EC200D449E9 /* TempTargetStartCondition.swift in Sources */,
+				DDBD19962DFB44B0005C2D69 /* Alarm+byPriorityThenSpec.swift in Sources */,
 				DDC6CA3D2DD7C6090060EE25 /* TemporaryCondition.swift in Sources */,
 				DD9ACA0E2D340BFF00415D8A /* AlarmTask.swift in Sources */,
 				DDCF9A822D85FD15004DF4DD /* AlarmType.swift in Sources */,
