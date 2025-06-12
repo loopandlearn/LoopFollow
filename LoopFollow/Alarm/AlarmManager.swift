@@ -42,6 +42,7 @@ class AlarmManager {
 
     func checkAlarms(data: AlarmData) {
         let now = Date()
+        var alarmTriggered = false
         let alarms = Storage.shared.alarms.value
 
         let sorted = alarms.sorted { lhs, rhs in
@@ -149,7 +150,14 @@ class AlarmManager {
                     Storage.shared.alarms.value = list
                 }
             }
+
+            alarmTriggered = true
             break
+        }
+
+        if isLatestReadingRecent, Storage.shared.persistentNotification.value, !alarmTriggered, let latestDate = data.bgReadings.last?.date, latestDate > Storage.shared.persistentNotificationLastBGTime.value {
+            sendNotification(title: "Latest BG")
+            Storage.shared.persistentNotificationLastBGTime.value = now
         }
     }
 
@@ -172,5 +180,27 @@ class AlarmManager {
         AlarmSound.stop()
         Observable.shared.currentAlarm.value = nil
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+
+    func sendNotification(title: String, actionTitle: String? = nil) {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.subtitle += Observable.shared.bgText.value + " "
+        content.subtitle += Observable.shared.directionText.value + " "
+        content.subtitle += Observable.shared.deltaText.value
+        content.categoryIdentifier = "category"
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+
+        if let actionTitle = actionTitle {
+            let action = UNNotificationAction(identifier: "snooze", title: actionTitle, options: [])
+            let category = UNNotificationCategory(identifier: "category", actions: [action], intentIdentifiers: [], options: [])
+            UNUserNotificationCenter.current().setNotificationCategories([category])
+        }
     }
 }

@@ -1,6 +1,6 @@
 // LoopFollow
 // DexcomSettingsView.swift
-// Created by Jonas Björkert on 2025-05-23.
+// Created by Jonas Björkert on 2025-01-18.
 
 import SwiftUI
 

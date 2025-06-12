@@ -136,6 +136,8 @@ extension Storage {
             legacySpeakLanguage.setNil(key: "speakLanguage")
         }
 
+        move(UserDefaultsValue<Bool>(key: "persistentNotification", default: true), into: Storage.shared.persistentNotification)
+
         // ── General (done earlier, but safe to repeat) ──
         move(UserDefaultsValue<Bool>(key: "colorBGText", default: true), into: Storage.shared.colorBGText)
         move(UserDefaultsValue<Bool>(key: "appBadge", default: true), into: appBadge)
