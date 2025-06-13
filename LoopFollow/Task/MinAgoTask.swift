@@ -21,11 +21,6 @@ extension MainViewController {
                 self.MinAgoText.text = ""
                 Observable.shared.minAgoText.value = ""
                 Observable.shared.bgText.value = ""
-                /* TODO:
-                 if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
-                     snoozer.BGLabel.attributedText = NSAttributedString(string: "")
-                 }
-                  */
             }
             TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date().addingTimeInterval(1))
             return
@@ -56,22 +51,25 @@ extension MainViewController {
                 guard let self = self else { return }
                 self.MinAgoText.text = minAgoDisplayText
                 Observable.shared.minAgoText.value = minAgoDisplayText
-
-                /* TODO:
-                 if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
-                     let bgLabelText = snoozer.BGLabel.text ?? ""
-                     let attributeString = NSMutableAttributedString(string: bgLabelText)
-                     attributeString.addAttribute(.strikethroughStyle,
-                                                  value: NSUnderlineStyle.single.rawValue,
-                                                  range: NSRange(location: 0, length: attributeString.length))
-                     attributeString.addAttribute(.strikethroughColor,
-                                                  value: secondsAgo >= 720 ? UIColor.systemRed : UIColor.clear,
-                                                  range: NSRange(location: 0, length: attributeString.length))
-                     snoozer.BGLabel.attributedText = attributeString
-                 }
-                  */
             }
         }
+
+        let deltaTime = secondsAgo / 60
+        Observable.shared.bgStale.value = deltaTime >= 12
+
+        // Apply strikethrough to BGText based on the staleness of the data
+        // Also clear badge if bgvalue is stale
+        let bgTextStr = BGText.text ?? ""
+        let attributeString = NSMutableAttributedString(string: bgTextStr)
+        attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
+        if Observable.shared.bgStale.value { // Data is stale
+            attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
+            updateBadge(val: 0)
+        } else { // Data is fresh
+            attributeString.addAttribute(.strikethroughColor, value: UIColor.clear, range: NSRange(location: 0, length: attributeString.length))
+            updateBadge(val: Observable.shared.bg.value ?? 0)
+        }
+        BGText.attributedText = attributeString
 
         // Determine the next run interval based on the current state
         let nextUpdateInterval: TimeInterval

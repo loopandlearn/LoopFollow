@@ -233,7 +233,6 @@ extension MainViewController {
             let deltaBG = latestBG - priorBG
             let lastBGTime = entries[latestEntryIndex].date
 
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
             self.updateServerText(with: sourceName)
 
             // Set BGText with the latest BG value
@@ -256,28 +255,11 @@ extension MainViewController {
                 Observable.shared.deltaText.value = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
 
-            // Stale
-            Observable.shared.bgStale.value = deltaTime >= 12
-
-            // Apply strikethrough to BGText based on the staleness of the data
-            // Also clear badge if bgvalue is stale
-            let bgTextStr = self.BGText.text ?? ""
-            let attributeString = NSMutableAttributedString(string: bgTextStr)
-            attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
-            if Observable.shared.bgStale.value { // Data is stale
-                attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
-                self.updateBadge(val: 0)
-            } else { // Data is fresh
-                attributeString.addAttribute(.strikethroughColor, value: UIColor.clear, range: NSRange(location: 0, length: attributeString.length))
-                self.updateBadge(val: latestBG)
-            }
-            self.BGText.attributedText = attributeString
-
             // Update contact
             if Storage.shared.contactEnabled.value {
                 self.contactImageUpdater
                     .updateContactImage(
-                        bgValue: bgTextStr,
+                        bgValue: Observable.shared.bgText.value,
                         trend: Observable.shared.directionText.value,
                         delta: Observable.shared.deltaText.value,
                         stale: Observable.shared.bgStale.value
