@@ -21,8 +21,8 @@ class RemoteViewController: UIViewController {
         super.viewDidLoad()
 
         cancellable = Publishers.CombineLatest(
-            Storage.shared.remoteType.$value,
-            ObservableUserDefaults.shared.device.$value
+            Storage.shared.remoteType.$value.removeDuplicates(),
+            ObservableUserDefaults.shared.device.$value.removeDuplicates()
         )
         .sink { [weak self] newRemoteType, newDevice in
             DispatchQueue.main.async {
