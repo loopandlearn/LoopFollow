@@ -7,7 +7,7 @@ set -o errtrace
 trap 'echo "❌  Error – aborting"; exit 1' ERR
 
 # -------- configurable -----------------
-APP_NAME="${1:-MyApp}"
+APP_NAME="${1:-LoopFollow}"
 SECOND_DIR="${APP_NAME}_Second"
 THIRD_DIR="${APP_NAME}_Third"
 VERSION_FILE="Config.xcconfig"
