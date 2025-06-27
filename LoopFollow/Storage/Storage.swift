@@ -68,6 +68,7 @@ class Storage {
     var screenlockSwitchState = StorageValue<Bool>(key: "screenlockSwitchState", defaultValue: true)
     var showDisplayName = StorageValue<Bool>(key: "showDisplayName", defaultValue: false)
     var snoozerEmoji = StorageValue<Bool>(key: "snoozerEmoji", defaultValue: false)
+    var forcePortraitMode = StorageValue<Bool>(key: "forcePortraitMode", defaultValue: false)
 
     var speakBG = StorageValue<Bool>(key: "speakBG", defaultValue: false)
     var speakBGAlways = StorageValue<Bool>(key: "speakBGAlways", defaultValue: true)
