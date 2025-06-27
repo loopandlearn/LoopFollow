@@ -93,9 +93,13 @@ struct AlarmListView: View {
     @State private var deleteAfterDismiss: UUID?
     @State private var selectedAlarm: Alarm?
 
+    private var sortedAlarms: [Alarm] {
+        store.value.sorted(by: Alarm.byPriorityThenSpec)
+    }
+
     var body: some View {
         List {
-            ForEach(store.value.sorted(by: Alarm.byPriorityThenSpec)) { alarm in
+            ForEach(sortedAlarms) { alarm in
                 Button {
                     selectedAlarm = alarm
                     sheetInfo = .editor(id: alarm.id, isNew: false)
@@ -121,7 +125,7 @@ struct AlarmListView: View {
                     }
                 }
             }
-            .onDelete { store.value.remove(atOffsets: $0) }
+            .onDelete(perform: deleteItems)
         }
         .sheet(item: $sheetInfo, onDismiss: handleSheetDismiss) { info in
             sheetContent(for: info)
@@ -133,6 +137,14 @@ struct AlarmListView: View {
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+    }
+
+    private func deleteItems(at offsets: IndexSet) {
+        let alarmsToDelete = offsets.map { sortedAlarms[$0] }
+
+        let idsToDelete = alarmsToDelete.map { $0.id }
+
+        store.value.removeAll { idsToDelete.contains($0.id) }
     }
 
     private func handleSheetDismiss() {
