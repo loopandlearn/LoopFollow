@@ -19,8 +19,8 @@ extension MainViewController {
                 return
             }
 
-            guard let data = result else {
-                LogManager.shared.log(category: .dexcom, message: "Received nil data from Dexcom", limitIdentifier: "Received nil data from Dexcom")
+            guard let data = result, !data.isEmpty else {
+                LogManager.shared.log(category: .dexcom, message: "Received empty data array from Dexcom", limitIdentifier: "Received empty data array from Dexcom")
                 self.webLoadNSBGData()
                 return
             }
