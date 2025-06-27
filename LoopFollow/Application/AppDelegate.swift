@@ -126,6 +126,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         completionHandler()
     }
+
+    func application(_: UIApplication, supportedInterfaceOrientationsFor _: UIWindow?) -> UIInterfaceOrientationMask {
+        let forcePortrait = Storage.shared.forcePortraitMode.value
+
+        if forcePortrait {
+            return .portrait
+        } else {
+            return .all
+        }
+    }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {

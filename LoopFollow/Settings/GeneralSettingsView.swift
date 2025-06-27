@@ -14,6 +14,7 @@ struct GeneralSettingsView: View {
     @ObservedObject var screenlockSwitchState = Storage.shared.screenlockSwitchState
     @ObservedObject var showDisplayName = Storage.shared.showDisplayName
     @ObservedObject var snoozerEmoji = Storage.shared.snoozerEmoji
+    @ObservedObject var forcePortraitMode = Storage.shared.forcePortraitMode
     @ObservedObject var persistentNotification = Storage.shared.persistentNotification
 
     // Speak-BG settings
@@ -44,6 +45,17 @@ struct GeneralSettingsView: View {
                     Toggle("Keep Screen Active", isOn: $screenlockSwitchState.value)
                     Toggle("Show Display Name", isOn: $showDisplayName.value)
                     Toggle("Snoozer emoji", isOn: $snoozerEmoji.value)
+                    Toggle("Force portrait mode", isOn: $forcePortraitMode.value)
+                        .onChange(of: forcePortraitMode.value) { _ in
+                            if #available(iOS 16.0, *) {
+                                let window = UIApplication.shared.connectedScenes
+                                    .compactMap { $0 as? UIWindowScene }
+                                    .flatMap { $0.windows }
+                                    .first
+
+                                window?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                            }
+                        }
                 }
 
                 Section("Speak BG") {
