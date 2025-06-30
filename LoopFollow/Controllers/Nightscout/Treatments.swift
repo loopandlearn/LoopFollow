@@ -56,7 +56,7 @@ extension MainViewController {
             switch eventType {
             case "Temp Basal":
                 tempBasal.append(entry)
-            case "Correction Bolus", "Bolus":
+            case "Correction Bolus", "Bolus", "External Insulin":
                 if let automatic = entry["automatic"] as? Bool, automatic {
                     smb.append(entry)
                 } else {
