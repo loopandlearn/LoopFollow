@@ -1,6 +1,6 @@
 // LoopFollow
 // DeviceStatusOpenAPS.swift
-// Created by Jonas Björkert on 2024-05-31.
+// Created by Jonas Björkert.
 
 import Foundation
 import HealthKit

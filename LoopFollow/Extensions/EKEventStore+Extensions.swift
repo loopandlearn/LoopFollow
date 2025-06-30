@@ -1,6 +1,6 @@
 // LoopFollow
 // EKEventStore+Extensions.swift
-// Created by Jonas Björkert on 2023-07-27.
+// Created by Jonas Björkert.
 
 import EventKit
 import Foundation

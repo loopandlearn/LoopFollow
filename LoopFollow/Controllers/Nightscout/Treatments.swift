@@ -1,6 +1,6 @@
 // LoopFollow
 // Treatments.swift
-// Created by Jonas Björkert on 2023-10-05.
+// Created by Jonas Björkert.
 
 import Foundation
 

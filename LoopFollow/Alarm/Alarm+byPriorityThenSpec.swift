@@ -1,6 +1,6 @@
 // LoopFollow
 // Alarm+byPriorityThenSpec.swift
-// Created by Jonas Björkert on 2025-06-12.
+// Created by Jonas Björkert.
 
 import Foundation
 

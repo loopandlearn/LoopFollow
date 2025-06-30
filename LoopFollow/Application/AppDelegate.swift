@@ -1,6 +1,6 @@
 // LoopFollow
 // AppDelegate.swift
-// Created by Jon Fawcett on 2020-06-01.
+// Created by Jon Fawcett.
 
 import CoreData
 import EventKit

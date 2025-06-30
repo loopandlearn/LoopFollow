@@ -1,6 +1,6 @@
 // LoopFollow
 // HighBGCondition.swift
-// Created by Jonas Björkert on 2025-05-09.
+// Created by Jonas Björkert.
 
 import Foundation
 

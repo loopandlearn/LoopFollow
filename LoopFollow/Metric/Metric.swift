@@ -1,6 +1,6 @@
 // LoopFollow
 // Metric.swift
-// Created by Jonas Björkert on 2024-07-18.
+// Created by Jonas Björkert.
 
 import Foundation
 

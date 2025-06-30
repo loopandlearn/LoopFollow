@@ -1,6 +1,6 @@
 // LoopFollow
 // BuildDetails.swift
-// Created by Jonas Björkert on 2024-03-25.
+// Created by Jonas Björkert.
 
 import Foundation
 

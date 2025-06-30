@@ -1,6 +1,6 @@
 // LoopFollow
 // AlarmSnoozeSection.swift
-// Created by Jonas Björkert on 2025-05-12.
+// Created by Jonas Björkert.
 
 import SwiftUI
 

@@ -1,6 +1,6 @@
 // LoopFollow
 // NoRemoteView.swift
-// Created by Jonas Björkert on 2025-01-27.
+// Created by Jonas Björkert.
 
 import SwiftUI
 

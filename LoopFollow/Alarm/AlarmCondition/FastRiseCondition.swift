@@ -1,6 +1,6 @@
 // LoopFollow
 // FastRiseCondition.swift
-// Created by Jonas Björkert on 2025-05-15.
+// Created by Jonas Björkert.
 
 import Foundation
 

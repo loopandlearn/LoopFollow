@@ -1,6 +1,6 @@
 // LoopFollow
 // CycleHelper.swift
-// Created by Jonas Björkert on 2025-03-01.
+// Created by Jonas Björkert.
 
 import Foundation
 

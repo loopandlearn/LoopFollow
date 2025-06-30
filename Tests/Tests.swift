@@ -1,6 +1,6 @@
 // LoopFollow
 // Tests.swift
-// Created by Jonas Björkert on 2025-05-23.
+// Created by Jonas Björkert.
 
 import Testing
 

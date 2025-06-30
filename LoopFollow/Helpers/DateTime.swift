@@ -1,6 +1,6 @@
 // LoopFollow
 // DateTime.swift
-// Created by Jon Fawcett on 2020-06-17.
+// Created by Jon Fawcett.
 
 import Foundation
 

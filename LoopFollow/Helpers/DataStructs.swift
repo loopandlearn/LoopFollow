@@ -1,6 +1,6 @@
 // LoopFollow
 // DataStructs.swift
-// Created by Jon Fawcett on 2020-06-23.
+// Created by Jon Fawcett.
 
 import Foundation
 

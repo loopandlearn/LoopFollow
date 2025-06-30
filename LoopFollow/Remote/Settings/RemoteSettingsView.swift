@@ -1,6 +1,6 @@
 // LoopFollow
 // RemoteSettingsView.swift
-// Created by Jonas Björkert on 2024-09-17.
+// Created by Jonas Björkert.
 
 import HealthKit
 import SwiftUI
