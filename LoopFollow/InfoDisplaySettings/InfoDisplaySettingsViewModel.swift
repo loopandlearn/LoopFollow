@@ -1,6 +1,6 @@
 // LoopFollow
 // InfoDisplaySettingsViewModel.swift
-// Created by Jonas Björkert on 2024-08-05.
+// Created by Jonas Björkert.
 
 import Foundation
 import SwiftUI

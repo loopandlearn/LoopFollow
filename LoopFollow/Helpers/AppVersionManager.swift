@@ -1,6 +1,6 @@
 // LoopFollow
 // AppVersionManager.swift
-// Created by Jonas Björkert on 2024-05-11.
+// Created by Jonas Björkert.
 
 import Foundation
 

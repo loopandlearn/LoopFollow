@@ -1,6 +1,6 @@
 // LoopFollow
 // NightscoutUtils.swift
-// Created by bjorkert on 2023-04-09.
+// Created by bjorkert.
 
 import Foundation
 

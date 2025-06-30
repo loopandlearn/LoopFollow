@@ -1,6 +1,6 @@
 // LoopFollow
 // AlarmType+SortDirection.swift
-// Created by Jonas Björkert on 2025-05-16.
+// Created by Jonas Björkert.
 
 import Foundation
 

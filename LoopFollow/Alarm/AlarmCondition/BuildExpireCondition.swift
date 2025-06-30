@@ -1,6 +1,6 @@
 // LoopFollow
 // BuildExpireCondition.swift
-// Created by Jonas Björkert on 2025-04-26.
+// Created by Jonas Björkert.
 
 import Foundation
 

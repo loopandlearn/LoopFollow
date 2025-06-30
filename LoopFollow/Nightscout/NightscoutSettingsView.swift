@@ -1,6 +1,6 @@
 // LoopFollow
 // NightscoutSettingsView.swift
-// Created by Jonas Björkert on 2025-01-18.
+// Created by Jonas Björkert.
 
 import SwiftUI
 

@@ -1,6 +1,6 @@
 // LoopFollow
 // isOnPhoneCall.swift
-// Created by Jonas Björkert on 2025-05-03.
+// Created by Jonas Björkert.
 
 import CallKit
 import Foundation

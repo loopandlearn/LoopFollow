@@ -1,6 +1,6 @@
 // LoopFollow
 // GlucoseConversion.swift
-// Created by Jonas Björkert on 2024-04-28.
+// Created by Jonas Björkert.
 
 import Foundation
 

@@ -1,6 +1,6 @@
 // LoopFollow
 // GlucoseValue.swift
-// Created by Jonas Björkert on 2025-05-06.
+// Created by Jonas Björkert.
 
 import Foundation
 

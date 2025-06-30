@@ -1,6 +1,6 @@
 // LoopFollow
 // Localizer.swift
-// Created by Jon Fawcett on 2020-06-22.
+// Created by Jon Fawcett.
 
 import Foundation
 import HealthKit

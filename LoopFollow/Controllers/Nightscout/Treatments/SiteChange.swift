@@ -1,6 +1,6 @@
 // LoopFollow
 // SiteChange.swift
-// Created by Jonas Björkert on 2023-10-06.
+// Created by Jonas Björkert.
 
 import Foundation
 

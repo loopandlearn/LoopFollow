@@ -1,6 +1,6 @@
 // LoopFollow
 // OverrideStartAlarmEditor.swift
-// Created by Jonas Björkert on 2025-05-14.
+// Created by Jonas Björkert.
 
 import SwiftUI
 

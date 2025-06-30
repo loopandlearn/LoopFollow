@@ -1,6 +1,6 @@
 // LoopFollow
 // TRCCommandType.swift
-// Created by Jonas Björkert on 2024-10-05.
+// Created by Jonas Björkert.
 
 import Foundation
 

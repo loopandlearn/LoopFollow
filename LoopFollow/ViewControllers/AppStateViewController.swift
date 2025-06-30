@@ -1,6 +1,6 @@
 // LoopFollow
 // AppStateViewController.swift
-// Created by Jose Paredes on 2020-07-18.
+// Created by Jose Paredes.
 
 import Foundation
 

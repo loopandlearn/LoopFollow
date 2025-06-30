@@ -1,6 +1,6 @@
 // LoopFollow
 // SensorAgeCondition.swift
-// Created by Jonas Björkert on 2025-05-17.
+// Created by Jonas Björkert.
 
 import Foundation
 

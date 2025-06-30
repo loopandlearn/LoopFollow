@@ -1,6 +1,6 @@
 // LoopFollow
 // BatteryCondition.swift
-// Created by Jonas Björkert on 2025-05-20.
+// Created by Jonas Björkert.
 
 import Foundation
 

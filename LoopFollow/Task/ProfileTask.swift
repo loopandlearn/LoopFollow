@@ -1,6 +1,6 @@
 // LoopFollow
 // ProfileTask.swift
-// Created by Jonas Björkert on 2025-01-13.
+// Created by Jonas Björkert.
 
 import Foundation
 

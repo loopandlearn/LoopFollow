@@ -1,6 +1,6 @@
 // LoopFollow
 // LoopOverrideView.swift
-// Created by Jonas Björkert on 2024-10-09.
+// Created by Jonas Björkert.
 
 import HealthKit
 import SwiftUI

@@ -1,6 +1,6 @@
 // LoopFollow
 // TempTargetPresetManager.swift
-// Created by Jonas Björkert on 2024-07-31.
+// Created by Jonas Björkert.
 
 import Combine
 import Foundation

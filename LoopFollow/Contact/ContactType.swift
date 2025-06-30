@@ -1,6 +1,6 @@
 // LoopFollow
 // ContactType.swift
-// Created by Jonas Björkert on 2025-02-23.
+// Created by Jonas Björkert.
 
 enum ContactType: String, CaseIterable {
     case BG

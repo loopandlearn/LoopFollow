@@ -1,6 +1,6 @@
 // LoopFollow
 // TogglableSecureInput.swift
-// Created by Jonas Björkert on 2025-05-28.
+// Created by Jonas Björkert.
 
 import SwiftUI
 

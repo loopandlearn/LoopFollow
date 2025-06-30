@@ -1,6 +1,6 @@
 // LoopFollow
 // Mobileprovision.swift
-// Created by Jon Fawcett on 2020-10-05.
+// Created by Jon Fawcett.
 
 //
 //  MobileProvision.swift

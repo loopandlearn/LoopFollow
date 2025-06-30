@@ -1,6 +1,6 @@
 // LoopFollow
 // SnoozerViewModel.swift
-// Created by Jonas Björkert on 2025-05-04.
+// Created by Jonas Björkert.
 
 import Combine
 import Foundation
