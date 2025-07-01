@@ -189,6 +189,8 @@
 		DDD10F072C529DE800D76A8E /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F062C529DE800D76A8E /* Observable.swift */; };
 		DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */; };
 		DDDB86F12DF7223C00AADDAC /* DeleteAlarmSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */; };
+		DDDC31CC2E13A7DF009EA0F3 /* AddAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */; };
+		DDDC31CE2E13A811009EA0F3 /* AlarmTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */; };
 		DDDF6F432D479A9900884336 /* LoopNightscoutRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */; };
 		DDDF6F452D479AB100884336 /* LoopOverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F442D479AB000884336 /* LoopOverrideView.swift */; };
 		DDDF6F472D479AD200884336 /* LoopOverrideViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */; };
@@ -561,6 +563,8 @@
 		DDD10F062C529DE800D76A8E /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTarget.swift; sourceTree = "<group>"; };
 		DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAlarmSection.swift; sourceTree = "<group>"; };
+		DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmSheet.swift; sourceTree = "<group>"; };
+		DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmTile.swift; sourceTree = "<group>"; };
 		DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopNightscoutRemoteView.swift; sourceTree = "<group>"; };
 		DDDF6F442D479AB000884336 /* LoopOverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideView.swift; sourceTree = "<group>"; };
 		DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideViewModel.swift; sourceTree = "<group>"; };
@@ -1109,6 +1113,7 @@
 		DDCF9A7E2D85FCE6004DF4DD /* Alarm */ = {
 			isa = PBXGroup;
 			children = (
+				DDDC31CA2E13A7D2009EA0F3 /* AddAlarm */,
 				DDCC3A502DDC5BD4006F1C10 /* DataStructs */,
 				DDC6CA3B2DD7B9050060EE25 /* AlarmType */,
 				DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */,
@@ -1122,6 +1127,15 @@
 				DDBD19952DFB44B0005C2D69 /* Alarm+byPriorityThenSpec.swift */,
 			);
 			path = Alarm;
+			sourceTree = "<group>";
+		};
+		DDDC31CA2E13A7D2009EA0F3 /* AddAlarm */ = {
+			isa = PBXGroup;
+			children = (
+				DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */,
+				DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */,
+			);
+			path = AddAlarm;
 			sourceTree = "<group>";
 		};
 		DDDF6F412D479A8E00884336 /* Loop */ = {
@@ -1894,12 +1908,14 @@
 				DDE75D292DE5E56C007C1FC1 /* LinkRow.swift in Sources */,
 				DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */,
 				DD7B0D442D730A3B0063DCB6 /* CycleHelper.swift in Sources */,
+				DDDC31CC2E13A7DF009EA0F3 /* AddAlarmSheet.swift in Sources */,
 				DD7F4BA12DD2193F00D449E9 /* AlarmSnoozeSection.swift in Sources */,
 				DD9ACA0C2D33BB8600415D8A /* CalendarTask.swift in Sources */,
 				DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */,
 				DD0C0C702C4AFFE800DBADDF /* RemoteViewController.swift in Sources */,
 				DD48780A2C7B30D40048F05C /* RemoteSettingsViewModel.swift in Sources */,
 				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
+				DDDC31CE2E13A811009EA0F3 /* AlarmTile.swift in Sources */,
 				DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */,
 				DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */,
 				DDC7E5422DBD8A1600EB1127 /* AlarmGeneralSection.swift in Sources */,
