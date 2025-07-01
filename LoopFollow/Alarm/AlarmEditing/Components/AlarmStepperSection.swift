@@ -19,7 +19,7 @@ struct AlarmStepperSection: View {
     @Binding
     private var value: Double?
 
-    // MARK: – designated initialiser  (Double?)
+    // MARK: – designated initialiser (Double?)
 
     init(
         header: String? = nil,
@@ -39,7 +39,7 @@ struct AlarmStepperSection: View {
         _value = value
     }
 
-    // MARK: – convenience initialiser  (Int?)
+    // MARK: – convenience initialiser (Int?)
 
     /// Same API but for **`Binding<Int?>`** — it bridges to Double internally.
     init(
@@ -74,6 +74,19 @@ struct AlarmStepperSection: View {
         )
     }
 
+    private var decimalPlaces: Int {
+        // If step is a whole number (e.g., 1.0, 5.0), we want 0 decimal places.
+        if step.truncatingRemainder(dividingBy: 1) == 0 {
+            return 0
+        }
+        // Otherwise, count characters after the decimal in the step value.
+        let stepString = String(step)
+        if let decimalIndex = stepString.firstIndex(of: ".") {
+            return stepString.distance(from: stepString.index(after: decimalIndex), to: stepString.endIndex)
+        }
+        return 1 // Fallback to 1
+    }
+
     // MARK: – view
 
     var body: some View {
@@ -86,7 +99,7 @@ struct AlarmStepperSection: View {
                     Text(title)
                     Spacer()
                     Text(
-                        "\(Int(nonOptional.wrappedValue))" +
+                        String(format: "%.\(decimalPlaces)f", nonOptional.wrappedValue) +
                             (unitLabel.map { " \($0)" } ?? "")
                     )
                     .foregroundColor(.secondary)
