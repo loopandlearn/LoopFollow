@@ -65,7 +65,7 @@ struct AlarmListView: View {
 
             // --- ACTIVE ALARMS SECTION ---
             if !activeAlarms.isEmpty {
-                Section(header: Text("Active Alarms")) {
+                Section(header: Text("Active")) {
                     ForEach(activeAlarms) { alarm in
                         alarmRow(for: alarm)
                     }
@@ -74,7 +74,7 @@ struct AlarmListView: View {
 
             // --- INACTIVE ALARMS SECTION ---
             if !inactiveAlarms.isEmpty {
-                Section(header: Text("Inactive Alarms")) {
+                Section(header: Text("Inactive")) {
                     ForEach(inactiveAlarms) { alarm in
                         alarmRow(for: alarm)
                             .opacity(0.6)
