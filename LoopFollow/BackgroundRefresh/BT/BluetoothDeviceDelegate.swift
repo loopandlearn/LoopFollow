@@ -1,13 +1,9 @@
-//
-//  BluetoothDeviceDelegate.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-04.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// BluetoothDeviceDelegate.swift
+// Created by Jonas Björkert.
 
-import Foundation
 import CoreBluetooth
+import Foundation
 
 protocol BluetoothDeviceDelegate: AnyObject {
     func didConnectTo(bluetoothDevice: BluetoothDevice)

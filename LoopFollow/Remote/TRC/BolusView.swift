@@ -1,14 +1,10 @@
-//
-//  BolusView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-25.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// BolusView.swift
+// Created by Jonas Björkert.
 
-import SwiftUI
 import HealthKit
 import LocalAuthentication
+import SwiftUI
 
 struct BolusView: View {
     @Environment(\.presentationMode) private var presentationMode

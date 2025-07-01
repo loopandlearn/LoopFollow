@@ -1,16 +1,11 @@
-//
-//  AdvancedSettingsView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-23.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// AdvancedSettingsView.swift
+// Created by Jonas Björkert.
 
 import SwiftUI
 
 struct AdvancedSettingsView: View {
     @ObservedObject var viewModel: AdvancedSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         NavigationView {
@@ -23,7 +18,7 @@ struct AdvancedSettingsView: View {
                     Toggle("Graph Carbs", isOn: $viewModel.graphCarbs)
                     Toggle("Graph Other Treatments", isOn: $viewModel.graphOtherTreatments)
 
-                    Stepper(value: $viewModel.bgUpdateDelay, in: 1...30, step: 1) {
+                    Stepper(value: $viewModel.bgUpdateDelay, in: 1 ... 30, step: 1) {
                         Text("BG Update Delay (Sec): \(viewModel.bgUpdateDelay)")
                     }
                 }
@@ -32,14 +27,8 @@ struct AdvancedSettingsView: View {
                     Toggle("Debug Log Level", isOn: $viewModel.debugLogLevel)
                 }
             }
-            .navigationBarTitle("Advanced Settings", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Advanced Settings", displayMode: .inline)
     }
 }

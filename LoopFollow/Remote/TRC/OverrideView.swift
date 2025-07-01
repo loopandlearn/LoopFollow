@@ -1,19 +1,15 @@
-//
-//  OverrideView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-10-07.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// OverrideView.swift
+// Created by Jonas Björkert.
 
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct OverrideView: View {
     @Environment(\.presentationMode) private var presentationMode
     private let pushNotificationManager = PushNotificationManager()
 
-    @ObservedObject var device = ObservableUserDefaults.shared.device
+    @ObservedObject var device = Storage.shared.device
     @ObservedObject var overrideNote = Observable.shared.override
 
     @State private var showAlert: Bool = false
@@ -96,7 +92,7 @@ struct OverrideView: View {
                                                 }
 
                                                 if let target = override.target {
-                                                    Text("Target: \(Localizer.formatQuantity(target)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)")
+                                                    Text("Target: \(Localizer.formatQuantity(target)) \(Localizer.getPreferredUnit().localizedShortUnitString)")
                                                         .font(.subheadline)
                                                         .foregroundColor(.secondary)
                                                 }

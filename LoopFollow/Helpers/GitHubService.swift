@@ -1,10 +1,6 @@
-//
-//  GitHubService.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-05-11.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// GitHubService.swift
+// Created by Jonas Björkert.
 
 import Foundation
 
@@ -12,7 +8,7 @@ class GitHubService {
     enum GitHubDataType {
         case versionConfig
         case blacklistedVersions
-        
+
         var url: String {
             switch self {
             case .versionConfig:
@@ -22,14 +18,14 @@ class GitHubService {
             }
         }
     }
-    
+
     func fetchData(for dataType: GitHubDataType, completion: @escaping (Data?) -> Void) {
         let urlString = dataType.url
         guard let url = URL(string: urlString) else {
             completion(nil)
             return
         }
-        
+
         URLSession.shared.dataTask(with: url) { data, response, error in
             guard let data = data, error == nil else {
                 completion(nil)

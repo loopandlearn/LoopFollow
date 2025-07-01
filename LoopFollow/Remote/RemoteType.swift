@@ -1,10 +1,6 @@
-//
-//  RemoteType.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-18.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// RemoteType.swift
+// Created by Jonas Björkert.
 
 import Foundation
 

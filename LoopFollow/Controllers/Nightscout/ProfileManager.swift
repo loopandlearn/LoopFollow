@@ -1,16 +1,17 @@
-// ProfileManager.swift
 // LoopFollow
-// Created by Jonas Björkert on 2024-07-12.
-// Copyright © 2024 Jon Fawcett. All rights reserved.
+// ProfileManager.swift
+// Created by Jonas Björkert.
 
 import Foundation
 import HealthKit
 
 final class ProfileManager {
     // MARK: - Singleton Instance
+
     static let shared = ProfileManager()
 
     // MARK: - Properties
+
     var isfSchedule: [TimeValue<HKQuantity>]
     var basalSchedule: [TimeValue<Double>]
     var carbRatioSchedule: [TimeValue<Double>]
@@ -23,6 +24,7 @@ final class ProfileManager {
     var defaultProfile: String
 
     // MARK: - Nested Structures
+
     struct TimeValue<T> {
         let timeAsSeconds: Int
         let value: T
@@ -44,39 +46,42 @@ final class ProfileManager {
     }
 
     // MARK: - Initializer
+
     private init() {
-        self.isfSchedule = []
-        self.basalSchedule = []
-        self.carbRatioSchedule = []
-        self.targetLowSchedule = []
-        self.targetHighSchedule = []
-        self.loopOverrides = []
-        self.trioOverrides = []
-        self.units = .millimolesPerLiter
-        self.timezone = TimeZone.current
-        self.defaultProfile = ""
+        isfSchedule = []
+        basalSchedule = []
+        carbRatioSchedule = []
+        targetLowSchedule = []
+        targetHighSchedule = []
+        loopOverrides = []
+        trioOverrides = []
+        units = .millimolesPerLiter
+        timezone = TimeZone.current
+        defaultProfile = ""
     }
 
     // MARK: - Methods
+
     func loadProfile(from profileData: NSProfile) {
         guard let store = profileData.store[profileData.defaultProfile] else {
             return
         }
 
-        self.units = store.units.lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
-        self.defaultProfile = profileData.defaultProfile
+        units = store.units.lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
+        defaultProfile = profileData.defaultProfile
 
-        self.timezone = getTimeZone(from: store.timezone)
+        timezone = getTimeZone(from: store.timezone)
 
-        self.isfSchedule = store.sens.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) }
-        self.basalSchedule = store.basal.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: $0.value) }
-        self.carbRatioSchedule = store.carbratio.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: $0.value) }
-        self.targetLowSchedule = store.target_low?.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) } ?? []
-        self.targetHighSchedule = store.target_high?.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) } ?? []
+        isfSchedule = store.sens.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) }
+        basalSchedule = store.basal.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: $0.value) }
+        carbRatioSchedule = store.carbratio.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: $0.value) }
+        targetLowSchedule = store.target_low?.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) } ?? []
+        targetHighSchedule = store.target_high?.map { TimeValue(timeAsSeconds: Int($0.timeAsSeconds), value: HKQuantity(unit: self.units, doubleValue: $0.value)) } ?? []
 
         if let loopSettings = profileData.loopSettings,
-           let overridePresets = loopSettings.overridePresets {
-            self.loopOverrides = overridePresets.map { preset in
+           let overridePresets = loopSettings.overridePresets
+        {
+            loopOverrides = overridePresets.map { preset in
                 let targetRangeQuantities = preset.targetRange?.map { HKQuantity(unit: self.units, doubleValue: $0) }
                 return LoopOverride(
                     name: preset.name,
@@ -87,7 +92,7 @@ final class ProfileManager {
                 )
             }
         } else {
-            self.loopOverrides = []
+            loopOverrides = []
         }
 
         if let trioOverrides = profileData.trioOverrides {
@@ -101,10 +106,15 @@ final class ProfileManager {
                 )
             }
         } else {
-            self.trioOverrides = []
+            trioOverrides = []
         }
 
         Storage.shared.deviceToken.value = profileData.deviceToken ?? ""
+        if let expirationDate = profileData.expirationDate {
+            Storage.shared.expirationDate.value = NightscoutUtils.parseDate(expirationDate)
+        } else {
+            Storage.shared.expirationDate.value = nil
+        }
         Storage.shared.bundleId.value = profileData.bundleIdentifier ?? ""
         Storage.shared.productionEnvironment.value = profileData.isAPNSProduction ?? false
         Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
@@ -138,11 +148,11 @@ final class ProfileManager {
 
         let now = Date()
         var calendar = Calendar.current
-        calendar.timeZone = self.timezone
+        calendar.timeZone = timezone
 
         let currentTimeInSeconds = calendar.component(.hour, from: now) * 3600 +
-        calendar.component(.minute, from: now) * 60 +
-        calendar.component(.second, from: now)
+            calendar.component(.minute, from: now) * 60 +
+            calendar.component(.second, from: now)
 
         var lastValue: T?
         for timeValue in schedule {
@@ -183,15 +193,15 @@ final class ProfileManager {
     }
 
     func clear() {
-        self.isfSchedule = []
-        self.basalSchedule = []
-        self.carbRatioSchedule = []
-        self.targetLowSchedule = []
-        self.targetHighSchedule = []
-        self.loopOverrides = []
-        self.trioOverrides = []
-        self.units = .millimolesPerLiter
-        self.timezone = TimeZone.current
-        self.defaultProfile = ""
+        isfSchedule = []
+        basalSchedule = []
+        carbRatioSchedule = []
+        targetLowSchedule = []
+        targetHighSchedule = []
+        loopOverrides = []
+        trioOverrides = []
+        units = .millimolesPerLiter
+        timezone = TimeZone.current
+        defaultProfile = ""
     }
 }

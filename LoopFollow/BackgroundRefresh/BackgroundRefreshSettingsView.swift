@@ -1,13 +1,11 @@
-//
-//  BackgroundRefreshSettingsView.swift
-//  LoopFollow
-//
+// LoopFollow
+// BackgroundRefreshSettingsView.swift
+// Created by Jonas Björkert.
 
 import SwiftUI
 
 struct BackgroundRefreshSettingsView: View {
     @ObservedObject var viewModel: BackgroundRefreshSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
     @State private var forceRefresh = false
     @State private var timer: Timer?
 
@@ -23,14 +21,6 @@ struct BackgroundRefreshSettingsView: View {
                     availableDevicesSection
                 }
             }
-            .navigationBarTitle("Background Refresh Settings", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
             .onAppear {
                 startTimer()
             }
@@ -38,6 +28,8 @@ struct BackgroundRefreshSettingsView: View {
                 stopTimer()
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Background Refresh Settings", displayMode: .inline)
     }
 
     // MARK: - Subviews / Computed Properties
@@ -96,8 +88,7 @@ struct BackgroundRefreshSettingsView: View {
 
                     deviceConnectionStatus(for: storedDevice)
 
-                    if(storedDevice.rssi != 0)
-                    {
+                    if storedDevice.rssi != 0 {
                         Text("RSSI: \(storedDevice.rssi) dBm")
                             .foregroundColor(.secondary)
                             .font(.footnote)

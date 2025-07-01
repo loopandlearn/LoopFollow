@@ -1,12 +1,9 @@
-//
-//  SiteChange.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2023-10-06.
-//  Copyright © 2023 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// SiteChange.swift
+// Created by Jonas Björkert.
 
 import Foundation
+
 extension MainViewController {
     func processCage(entries: [cageData]) {
         if !entries.isEmpty {

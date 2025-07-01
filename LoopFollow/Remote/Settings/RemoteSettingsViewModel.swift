@@ -1,13 +1,9 @@
-//
-//  RemoteSettingsViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-25.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// RemoteSettingsViewModel.swift
+// Created by Jonas Björkert.
 
-import Foundation
 import Combine
+import Foundation
 import HealthKit
 
 class RemoteSettingsViewModel: ObservableObject {
@@ -23,23 +19,23 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var maxFat: HKQuantity
     @Published var mealWithBolus: Bool
     @Published var mealWithFatProtein: Bool
-    @Published var isTrioDevice: Bool = (ObservableUserDefaults.shared.device.value == "Trio")
+    @Published var isTrioDevice: Bool = (Storage.shared.device.value == "Trio")
 
     private var storage = Storage.shared
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        self.remoteType = storage.remoteType.value
-        self.user = storage.user.value
-        self.sharedSecret = storage.sharedSecret.value
-        self.apnsKey = storage.apnsKey.value
-        self.keyId = storage.keyId.value
-        self.maxBolus = storage.maxBolus.value
-        self.maxCarbs = storage.maxCarbs.value
-        self.maxProtein = storage.maxProtein.value
-        self.maxFat = storage.maxFat.value
-        self.mealWithBolus = storage.mealWithBolus.value
-        self.mealWithFatProtein = storage.mealWithFatProtein.value
+        remoteType = storage.remoteType.value
+        user = storage.user.value
+        sharedSecret = storage.sharedSecret.value
+        apnsKey = storage.apnsKey.value
+        keyId = storage.keyId.value
+        maxBolus = storage.maxBolus.value
+        maxCarbs = storage.maxCarbs.value
+        maxProtein = storage.maxProtein.value
+        maxFat = storage.maxFat.value
+        mealWithBolus = storage.mealWithBolus.value
+        mealWithFatProtein = storage.mealWithFatProtein.value
 
         setupBindings()
     }
@@ -68,7 +64,7 @@ class RemoteSettingsViewModel: ObservableObject {
         $maxBolus
             .sink { [weak self] in self?.storage.maxBolus.value = $0 }
             .store(in: &cancellables)
-        
+
         $maxCarbs
             .sink { [weak self] in self?.storage.maxCarbs.value = $0 }
             .store(in: &cancellables)
@@ -89,8 +85,8 @@ class RemoteSettingsViewModel: ObservableObject {
             .sink { [weak self] in self?.storage.mealWithFatProtein.value = $0 }
             .store(in: &cancellables)
 
-        ObservableUserDefaults.shared.device.$value
-            .receive(on: DispatchQueue.main            )
+        Storage.shared.device.$value
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] newValue in
                 self?.isTrioDevice = (newValue == "Trio")
             }

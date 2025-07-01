@@ -1,10 +1,6 @@
-//
-//  TreatmentResponse.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-24.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TreatmentResponse.swift
+// Created by Jonas Björkert.
 
 import Foundation
 
@@ -20,14 +16,14 @@ struct TreatmentResponse: Decodable {
     let id: String
 
     enum CodingKeys: String, CodingKey {
-        case enteredBy = "enteredBy"
-        case eventType = "eventType"
-        case reason = "reason"
-        case targetTop = "targetTop"
-        case targetBottom = "targetBottom"
-        case duration = "duration"
+        case enteredBy
+        case eventType
+        case reason
+        case targetTop
+        case targetBottom
+        case duration
         case createdAt = "created_at"
-        case utcOffset = "utcOffset"
+        case utcOffset
         case id = "_id"
     }
 }
@@ -42,12 +38,12 @@ struct TreatmentCancelResponse: Decodable {
     let id: String
 
     enum CodingKeys: String, CodingKey {
-        case enteredBy = "enteredBy"
-        case eventType = "eventType"
-        case reason = "reason"
-        case duration = "duration"
+        case enteredBy
+        case eventType
+        case reason
+        case duration
         case createdAt = "created_at"
-        case utcOffset = "utcOffset"
+        case utcOffset
         case id = "_id"
     }
 }

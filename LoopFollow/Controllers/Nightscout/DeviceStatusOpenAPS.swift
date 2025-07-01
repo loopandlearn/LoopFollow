@@ -1,15 +1,14 @@
-// DeviceStatusOpenAPS.swift
 // LoopFollow
-// Created by Jonas Björkert on 2024-05-19.
-// Copyright © 2024 Jon Fawcett. All rights reserved.
+// DeviceStatusOpenAPS.swift
+// Created by Jonas Björkert.
 
 import Foundation
-import UIKit
 import HealthKit
+import UIKit
 
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
-        ObservableUserDefaults.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
+        Storage.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
         if lastLoopRecord["failureReason"] != nil {
             LoopStatusLabel.text = "X"
             latestLoopStatusString = "X"
@@ -20,16 +19,17 @@ extension MainViewController {
                 return
             }
 
-            var wasEnacted : Bool
+            var wasEnacted: Bool
             if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] {
                 wasEnacted = true
                 if let timestampString = enacted["timestamp"] as? String,
-                   let lastLoopTime = formatter.date(from: timestampString)?.timeIntervalSince1970 {
-                    let storedTime = UserDefaultsRepository.alertLastLoopTime.value
+                   let lastLoopTime = formatter.date(from: timestampString)?.timeIntervalSince1970
+                {
+                    let storedTime = Observable.shared.alertLastLoopTime.value ?? 0
                     if lastLoopTime < storedTime {
                         LogManager.shared.log(category: .deviceStatus, message: "Received an old timestamp for enacted: \(lastLoopTime) is older than last stored time \(storedTime), ignoring update.", isDebug: false)
                     } else {
-                        UserDefaultsRepository.alertLastLoopTime.value = lastLoopTime
+                        Observable.shared.alertLastLoopTime.value = lastLoopTime
                         LogManager.shared.log(category: .deviceStatus, message: "New LastLoopTime: \(lastLoopTime)", isDebug: true)
                     }
                 }
@@ -41,7 +41,8 @@ extension MainViewController {
             var updatedTime: TimeInterval?
 
             if let timestamp = enactedOrSuggested["timestamp"] as? String,
-               let parsedTime = formatter.date(from: timestamp)?.timeIntervalSince1970 {
+               let parsedTime = formatter.date(from: timestamp)?.timeIntervalSince1970
+            {
                 updatedTime = parsedTime
                 let formattedTime = Localizer.formatTimestampToLocalString(parsedTime)
                 infoManager.updateInfoData(type: .updated, value: formattedTime)
@@ -97,7 +98,8 @@ extension MainViewController {
                 // Fallback: Extract COB from reason string
                 let cobPattern = "COB: (\\d+(?:\\.\\d+)?)"
                 if let cobRegex = try? NSRegularExpression(pattern: cobPattern),
-                   let cobMatch = cobRegex.firstMatch(in: reasonString, range: NSRange(location: 0, length: reasonString.utf16.count)) {
+                   let cobMatch = cobRegex.firstMatch(in: reasonString, range: NSRange(location: 0, length: reasonString.utf16.count))
+                {
                     let cobValueString = (reasonString as NSString).substring(with: cobMatch.range(at: 1))
                     if let cobValue = Double(cobValueString) {
                         let tempDict: [String: AnyObject] = ["COB": cobValue as AnyObject]
@@ -118,9 +120,9 @@ extension MainViewController {
             // Insulin Required
             if let insulinReqMetric = InsulinMetric(from: enactedOrSuggested, key: "insulinReq") {
                 infoManager.updateInfoData(type: .recBolus, value: insulinReqMetric)
-                UserDefaultsRepository.deviceRecBolus.value = insulinReqMetric.value
+                Observable.shared.deviceRecBolus.value = insulinReqMetric.value
             } else {
-                UserDefaultsRepository.deviceRecBolus.value = 0
+                Observable.shared.deviceRecBolus.value = 0
             }
 
             // Autosens
@@ -164,13 +166,14 @@ extension MainViewController {
                 infoManager.updateInfoData(type: .tdd, value: tddMetric)
             }
 
-
             let predBGsData: [String: AnyObject]? = {
                 if let enacted = lastLoopRecord["suggested"] as? [String: AnyObject],
-                   let predBGs = enacted["predBGs"] as? [String: AnyObject] {
+                   let predBGs = enacted["predBGs"] as? [String: AnyObject]
+                {
                     return predBGs
                 } else if let suggested = lastLoopRecord["enacted"] as? [String: AnyObject],
-                          let predBGs = suggested["predBGs"] as? [String: AnyObject] {
+                          let predBGs = suggested["predBGs"] as? [String: AnyObject]
+                {
                     return predBGs
                 }
                 return nil
@@ -178,13 +181,13 @@ extension MainViewController {
 
             let predictioncolor = UIColor.systemGray
             PredictionLabel.textColor = predictioncolor
-            topPredictionBG = UserDefaultsRepository.minBGScale.value
+            topPredictionBG = Storage.shared.minBGScale.value
             if let predbgdata = predBGsData {
                 let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
                     ("ZT", "ZT", 12),
                     ("IOB", "Insulin", 13),
                     ("COB", "LoopYellow", 14),
-                    ("UAM", "UAM", 15)
+                    ("UAM", "UAM", 15),
                 ]
 
                 var minPredBG = Double.infinity
@@ -194,9 +197,9 @@ extension MainViewController {
                     var predictionData = [ShareGlucoseData]()
                     if let graphdata = predbgdata[type] as? [Double] {
                         var predictionTime = updatedTime ?? Date().timeIntervalSince1970
-                        let toLoad = Int(UserDefaultsRepository.predictionToLoad.value * 12)
+                        let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
 
-                        for i in 0...toLoad {
+                        for i in 0 ... toLoad {
                             if i < graphdata.count {
                                 let predictionValue = graphdata[i]
                                 minPredBG = min(minPredBG, predictionValue)
@@ -218,7 +221,7 @@ extension MainViewController {
                     )
                 }
 
-                if minPredBG != Double.infinity && maxPredBG != -Double.infinity {
+                if minPredBG != Double.infinity, maxPredBG != -Double.infinity {
                     let value = "\(Localizer.toDisplayUnits(String(minPredBG)))/\(Localizer.toDisplayUnits(String(maxPredBG)))"
                     infoManager.updateInfoData(type: .minMax, value: value)
                 } else {
@@ -232,7 +235,7 @@ extension MainViewController {
                     if bgData.count > 0 {
                         lastBGTime = bgData[bgData.count - 1].date
                     }
-                    if tempBasalTime > lastBGTime && !wasEnacted {
+                    if tempBasalTime > lastBGTime, !wasEnacted {
                         LoopStatusLabel.text = "⏀"
                         latestLoopStatusString = "⏀"
                     } else {

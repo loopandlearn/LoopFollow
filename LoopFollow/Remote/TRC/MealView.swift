@@ -1,14 +1,10 @@
-//
-//  MealView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-25.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// MealView.swift
+// Created by Jonas Björkert.
 
-import SwiftUI
 import HealthKit
 import LocalAuthentication
+import SwiftUI
 
 struct MealView: View {
     @Environment(\.presentationMode) private var presentationMode
@@ -138,8 +134,9 @@ struct MealView: View {
 
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 guard carbs.doubleValue(for: .gram()) != 0 ||
-                                        protein.doubleValue(for: .gram()) != 0 ||
-                                        fat.doubleValue(for: .gram()) != 0 else {
+                                    protein.doubleValue(for: .gram()) != 0 ||
+                                    fat.doubleValue(for: .gram()) != 0
+                                else {
                                     return
                                 }
                                 if !showAlert {
@@ -211,7 +208,6 @@ struct MealView: View {
                         }),
                         secondaryButton: .cancel()
                     )
-
                 case .statusSuccess:
                     return Alert(
                         title: Text("Status"),

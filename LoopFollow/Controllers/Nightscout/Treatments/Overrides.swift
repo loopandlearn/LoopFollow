@@ -1,16 +1,11 @@
-//
-//  Overrides.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2023-10-04.
-//  Copyright © 2023 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// Overrides.swift
+// Created by Jonas Björkert.
 
 import Foundation
 import UIKit
 
 extension MainViewController {
-
     func processNSOverrides(entries: [[String: AnyObject]]) {
         overrideGraphData.removeAll()
         var activeOverrideNote: String?
@@ -26,10 +21,10 @@ extension MainViewController {
         }
 
         let now = Date().timeIntervalSince1970
-        let maxEndDate = now + UserDefaultsRepository.predictionToLoad.value * 3600
-        let graphHorizon = dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * UserDefaultsRepository.downloadDays.value)
+        let maxEndDate = now + Storage.shared.predictionToLoad.value * 3600
+        let graphHorizon = dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * Storage.shared.downloadDays.value)
 
-        for i in 0..<sorted.count {
+        for i in 0 ..< sorted.count {
             let e = sorted[i]
 
             guard
@@ -48,8 +43,8 @@ extension MainViewController {
 
             if i + 1 < sorted.count,
                let nextDateStr = (sorted[i + 1]["timestamp"] as? String) ?? (sorted[i + 1]["created_at"] as? String),
-               let nextStart   = NightscoutUtils.parseDate(nextDateStr)?
-                .timeIntervalSince1970
+               let nextStart = NightscoutUtils.parseDate(nextDateStr)?
+               .timeIntervalSince1970
             {
                 end = min(end, nextStart - 60) // avoid overlapping overrides
             }
@@ -60,20 +55,20 @@ extension MainViewController {
 
             let dot = DataStructs.overrideStruct(
                 insulNeedsScaleFactor: e["insulinNeedsScaleFactor"] as? Double ?? 1,
-                date:         start,
-                endDate:      end,
-                duration:     end - start,
+                date: start,
+                endDate: end,
+                duration: end - start,
                 correctionRange: {
                     if let r = e["correctionRange"] as? [Int], r.count == 2 {
                         return r
                     }
                     let lo = e["targetBottom"] as? Int ?? 0
-                    let hi = e["targetTop"]    as? Int ?? 0
+                    let hi = e["targetTop"] as? Int ?? 0
                     return [lo, hi]
                 }(),
-                enteredBy:    e["enteredBy"] as? String ?? "unknown",
-                reason:       e["reason"]    as? String ?? "",
-                sgv:          -20
+                enteredBy: e["enteredBy"] as? String ?? "unknown",
+                reason: e["reason"] as? String ?? "",
+                sgv: -20
             )
             overrideGraphData.append(dot)
 
@@ -83,14 +78,14 @@ extension MainViewController {
         }
 
         Observable.shared.override.value = activeOverrideNote
-        if ObservableUserDefaults.shared.device.value == "Trio" {
+        if Storage.shared.device.value == "Trio" {
             if let note = activeOverrideNote {
                 infoManager.updateInfoData(type: .override, value: note)
             } else {
                 infoManager.clearInfoData(type: .override)
             }
         }
-        if UserDefaultsRepository.graphOtherTreatments.value {
+        if Storage.shared.graphOtherTreatments.value {
             updateOverrideGraph()
         }
     }

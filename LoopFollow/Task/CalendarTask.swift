@@ -1,10 +1,6 @@
-//
-//  CalendarTask.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-12.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// CalendarTask.swift
+// Created by Jonas Björkert.
 
 import Foundation
 
@@ -18,10 +14,10 @@ extension MainViewController {
     }
 
     func calendarTaskAction() {
-        if UserDefaultsRepository.writeCalendarEvent.value,
-           !UserDefaultsRepository.calendarIdentifier.value.isEmpty
+        if Storage.shared.writeCalendarEvent.value,
+           !Storage.shared.calendarIdentifier.value.isEmpty
         {
-            self.writeCalendar()
+            writeCalendar()
         }
 
         TaskScheduler.shared.rescheduleTask(id: .calendarWrite, to: Date().addingTimeInterval(30))

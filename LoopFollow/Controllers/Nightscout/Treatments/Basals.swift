@@ -1,17 +1,12 @@
-//
-//  Basals.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2023-10-05.
-//  Copyright © 2023 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// Basals.swift
+// Created by Jonas Björkert.
 
 import Foundation
 
 extension MainViewController {
-
     // NS Temp Basal Response Processor
-    func processNSBasals(entries: [[String:AnyObject]]) {
+    func processNSBasals(entries: [[String: AnyObject]]) {
         infoManager.clearInfoData(type: .basal)
 
         basalData.removeAll()
@@ -21,14 +16,15 @@ extension MainViewController {
         var tempArray = entries
         tempArray.reverse()
 
-        for i in 0..<tempArray.count {
-            guard let currentEntry = tempArray[i] as [String : AnyObject]? else { continue }
+        for i in 0 ..< tempArray.count {
+            guard let currentEntry = tempArray[i] as [String: AnyObject]? else { continue }
 
             // Decide which field to parse
             let dateString = currentEntry["timestamp"] as? String
-            ?? currentEntry["created_at"] as? String
+                ?? currentEntry["created_at"] as? String
             guard let rawDateStr = dateString,
-                  let dateParsed = NightscoutUtils.parseDate(rawDateStr) else {
+                  let dateParsed = NightscoutUtils.parseDate(rawDateStr)
+            else {
                 continue
             }
 
@@ -40,12 +36,12 @@ extension MainViewController {
             let duration = currentEntry["duration"] as? Double ?? 0.0
 
             if i > 0 {
-                let priorEntry = tempArray[i - 1] as [String : AnyObject]?
+                let priorEntry = tempArray[i - 1] as [String: AnyObject]?
                 let priorDateStr = priorEntry?["timestamp"] as? String
-                ?? priorEntry?["created_at"] as? String
+                    ?? priorEntry?["created_at"] as? String
                 if let rawPrior = priorDateStr,
-                   let priorDateParsed = NightscoutUtils.parseDate(rawPrior) {
-
+                   let priorDateParsed = NightscoutUtils.parseDate(rawPrior)
+                {
                     let priorDateTimeStamp = priorDateParsed.timeIntervalSince1970
                     let priorDuration = priorEntry?["duration"] as? Double ?? 0.0
 
@@ -55,7 +51,7 @@ extension MainViewController {
                         var midGapTime: TimeInterval = 0
                         var midGapValue: Double = 0
 
-                        for b in 0..<basalScheduleData.count {
+                        for b in 0 ..< basalScheduleData.count {
                             let priorEnd = priorDateTimeStamp + (priorDuration * 60)
                             if priorEnd >= basalScheduleData[b].date {
                                 scheduled = basalScheduleData[b].basalRate
@@ -101,12 +97,12 @@ extension MainViewController {
 
             // Overlap check
             if i < tempArray.count - 1 {
-                let nextEntry = tempArray[i + 1] as [String : AnyObject]?
+                let nextEntry = tempArray[i + 1] as [String: AnyObject]?
                 let nextDateStr = nextEntry?["timestamp"] as? String
-                ?? nextEntry?["created_at"] as? String
+                    ?? nextEntry?["created_at"] as? String
                 if let rawNext = nextDateStr,
-                   let nextDateParsed = NightscoutUtils.parseDate(rawNext) {
-
+                   let nextDateParsed = NightscoutUtils.parseDate(rawNext)
+                {
                     let nextDateTimeStamp = nextDateParsed.timeIntervalSince1970
                     if nextDateTimeStamp < (dateTimeStamp + (duration * 60)) {
                         lastDot = nextDateTimeStamp
@@ -122,9 +118,9 @@ extension MainViewController {
         // If last basal was prior to right now, we need to create one last scheduled entry
         if lastEndDot <= dateTimeUtils.getNowTimeIntervalUTC() {
             var scheduled = 0.0
-            for b in 0..<basalProfile.count {
+            for b in 0 ..< basalProfile.count {
                 let scheduleTimeToday = basalProfile[b].timeAsSeconds
-                + dateTimeUtils.getTimeIntervalMidnightToday()
+                    + dateTimeUtils.getTimeIntervalMidnightToday()
                 if lastEndDot >= scheduleTimeToday {
                     scheduled = basalProfile[b].value
                 }
@@ -142,12 +138,13 @@ extension MainViewController {
             basalData.append(endDot)
         }
 
-        if UserDefaultsRepository.graphBasal.value {
+        if Storage.shared.graphBasal.value {
             updateBasalGraph()
         }
 
         if let profileBasal = profileManager.currentBasal(),
-           profileBasal != latestBasal {
+           profileBasal != latestBasal
+        {
             latestBasal = "\(profileBasal) → \(latestBasal)"
         }
         infoManager.updateInfoData(type: .basal, value: latestBasal)

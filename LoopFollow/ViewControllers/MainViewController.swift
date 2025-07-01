@@ -1,83 +1,58 @@
-//
-//  FirstViewController.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 6/1/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// MainViewController.swift
+// Created by Jon Fawcett.
 
-import UIKit
+import AVFAudio
 import Charts
+import Combine
+import CoreBluetooth
 import EventKit
 import ShareClient
+import SwiftUI
+import UIKit
 import UserNotifications
-import AVFAudio
-import CoreBluetooth
 
 func IsNightscoutEnabled() -> Bool {
-    return !ObservableUserDefaults.shared.url.value.isEmpty
+    return !Storage.shared.url.value.isEmpty
 }
 
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
-    
-    @IBOutlet weak var BGText: UILabel!
-    @IBOutlet weak var DeltaText: UILabel!
-    @IBOutlet weak var DirectionText: UILabel!
-    @IBOutlet weak var BGChart: LineChartView!
-    @IBOutlet weak var BGChartFull: LineChartView!
-    @IBOutlet weak var MinAgoText: UILabel!
-    @IBOutlet weak var infoTable: UITableView!
-    @IBOutlet weak var Console: UITableViewCell!
-    @IBOutlet weak var DragBar: UIImageView!
-    @IBOutlet weak var PredictionLabel: UILabel!
-    @IBOutlet weak var LoopStatusLabel: UILabel!
-    @IBOutlet weak var statsPieChart: PieChartView!
-    @IBOutlet weak var statsLowPercent: UILabel!
-    @IBOutlet weak var statsInRangePercent: UILabel!
-    @IBOutlet weak var statsHighPercent: UILabel!
-    @IBOutlet weak var statsAvgBG: UILabel!
-    @IBOutlet weak var statsEstA1C: UILabel!
-    @IBOutlet weak var statsStdDev: UILabel!
-    @IBOutlet weak var serverText: UILabel!
-    @IBOutlet weak var statsView: UIView!
-    @IBOutlet weak var smallGraphHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var BGText: UILabel!
+    @IBOutlet var DeltaText: UILabel!
+    @IBOutlet var DirectionText: UILabel!
+    @IBOutlet var BGChart: LineChartView!
+    @IBOutlet var BGChartFull: LineChartView!
+    @IBOutlet var MinAgoText: UILabel!
+    @IBOutlet var infoTable: UITableView!
+    @IBOutlet var Console: UITableViewCell!
+    @IBOutlet var DragBar: UIImageView!
+    @IBOutlet var PredictionLabel: UILabel!
+    @IBOutlet var LoopStatusLabel: UILabel!
+    @IBOutlet var statsPieChart: PieChartView!
+    @IBOutlet var statsLowPercent: UILabel!
+    @IBOutlet var statsInRangePercent: UILabel!
+    @IBOutlet var statsHighPercent: UILabel!
+    @IBOutlet var statsAvgBG: UILabel!
+    @IBOutlet var statsEstA1C: UILabel!
+    @IBOutlet var statsStdDev: UILabel!
+    @IBOutlet var serverText: UILabel!
+    @IBOutlet var statsView: UIView!
+    @IBOutlet var smallGraphHeightConstraint: NSLayoutConstraint!
     var refreshScrollView: UIScrollView!
     var refreshControl: UIRefreshControl!
 
     let speechSynthesizer = AVSpeechSynthesizer()
 
-    var appStateController: AppStateController?
-
     // Variables for BG Charts
-    public var numPoints: Int = 13
-    public var linePlotData: [Double] = []
-    public var linePlotDataTime: [Double] = []
     var firstGraphLoad: Bool = true
-    var firstBasalGraphLoad: Bool = true
-    var minAgoBG: Double = 0.0
     var currentOverride = 1.0
-    
-    // Vars for NS Pull
-    var mmol = false as Bool
-    var apnsKey = UserDefaultsRepository.token.value as String
-    var defaults : UserDefaults?
-    let consoleLogging = true
-    var timeofLastBGUpdate = 0 as TimeInterval
-    var currentSage : sageData?
-    var currentCage : cageData?
-    var currentIage : iageData?
+
+    var currentSage: sageData?
+    var currentCage: cageData?
+    var currentIage: iageData?
 
     var backgroundTask = BackgroundTask()
-    
-    // Refresh NS Data
-    var timer = Timer()
-    // check every 30 Seconds whether new bgvalues should be retrieved
-    let timeInterval: TimeInterval = 30.0
-    
-    // Check Alarms Timer
-    // Don't check within 1 minute of alarm triggering to give the snoozer time to save data
-    var checkAlarmTimer = Timer()
-    var checkAlarmInterval: TimeInterval = 60.0
+
     var graphNowTimer = Timer()
 
     var lastCalendarWriteAttemptTime: TimeInterval = 0
@@ -103,11 +78,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var noteGraphData: [DataStructs.noteStruct] = []
     var chartData = LineChartData()
     var deviceBatteryData: [DataStructs.batteryStruct] = []
-    var newBGPulled = false
     var lastCalDate: Double = 0
-    var latestDirectionString = ""
-    var latestMinAgoString = ""
-    var latestDeltaString = ""
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
     var latestBasal = ""
@@ -115,9 +86,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var latestIOB: InsulinMetric?
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
-    
-    var topBG: Float = UserDefaultsRepository.minBGScale.value
-    var topPredictionBG: Float = UserDefaultsRepository.minBGScale.value
+
+    var topBG: Double = Storage.shared.minBGScale.value
+    var topPredictionBG: Double = Storage.shared.minBGScale.value
 
     var lastOverrideAlarm: TimeInterval = 0
 
@@ -127,75 +98,62 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     // share
     var bgDataShare: [ShareGlucoseData] = []
-    var dexShare: ShareClient?;
-    
+    var dexShare: ShareClient?
+
     // calendar setup
     let store = EKEventStore()
-    
-    var snoozeTabItem: UITabBarItem = UITabBarItem()
-    
+
     // Stores the time of the last speech announcement to prevent repeated announcements.
-    // This is a temporary safeguard until the issue with multiple calls to speakBG is fixed.
     var lastSpeechTime: Date?
 
     var autoScrollPauseUntil: Date? = nil
-    
+
     var IsNotLooping = false
 
     let contactImageUpdater = ContactImageUpdater()
 
+    private var cancellables = Set<AnyCancellable>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if ObservableUserDefaults.shared.device.value != "Trio" && Storage.shared.remoteType.value == .trc {
-            Storage.shared.remoteType.value = .none
-        }
+        loadDebugData()
 
-        //Migration of UserDefaultsRepository -> Storage handling
-        if !UserDefaultsRepository.backgroundRefresh.value {
-            Storage.shared.backgroundRefreshType.value = .none
-            UserDefaultsRepository.backgroundRefresh.value = true
-        }
-
-        // Ensure alertNotLooping has a minimum value of 16.
-        if UserDefaultsRepository.alertNotLooping.value < 16 {
-            UserDefaultsRepository.alertNotLooping.value = 16
+        if Storage.shared.migrationStep.value < 1 {
+            Storage.shared.migrateStep1()
+            Storage.shared.migrationStep.value = 1
         }
 
         // Synchronize info types to ensure arrays are the correct size
-        UserDefaultsRepository.synchronizeInfoTypes()
+        synchronizeInfoTypes()
 
         infoTable.rowHeight = 21
         infoTable.dataSource = self
         infoTable.tableFooterView = UIView(frame: .zero)
         infoTable.bounces = false
         infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
-        
-        self.infoManager = InfoManager(tableView: infoTable)
 
-        smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
-        self.view.layoutIfNeeded()
+        infoManager = InfoManager(tableView: infoTable)
 
-        let shareUserName = UserDefaultsRepository.shareUserName.value
-        let sharePassword = UserDefaultsRepository.sharePassword.value
-        let shareServer = UserDefaultsRepository.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
-        dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer )
-        
+        smallGraphHeightConstraint.constant = CGFloat(Storage.shared.smallGraphHeight.value)
+        view.layoutIfNeeded()
+
+        let shareUserName = Storage.shared.shareUserName.value
+        let sharePassword = Storage.shared.sharePassword.value
+        let shareServer = Storage.shared.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
+        dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer)
+
         // setup show/hide small graph and stats
-        BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
-        statsView.isHidden = !UserDefaultsRepository.showStats.value
-        
+        BGChartFull.isHidden = !Storage.shared.showSmallGraph.value
+        statsView.isHidden = !Storage.shared.showStats.value
+
         BGChart.delegate = self
         BGChartFull.delegate = self
-        
-        if UserDefaultsRepository.forceDarkMode.value {
-            overrideUserInterfaceStyle = .dark
-            self.tabBarController?.overrideUserInterfaceStyle = .dark
-        }
 
-        // Load the snoozer tab
-        guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-        snoozer.loadViewIfNeeded()
+        if Storage.shared.forceDarkMode.value {
+            overrideUserInterfaceStyle = .dark
+            tabBarController?.overrideUserInterfaceStyle = .dark
+        }
 
         // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
@@ -207,10 +165,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             createGraph()
             createSmallBGGraph()
         }
-        
+
         // setup display for NS vs Dex
         showHideNSDetails()
-        
+
         scheduleAllTasks()
 
         // Set up refreshScrollView for BGText
@@ -218,29 +176,123 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         refreshScrollView.translatesAutoresizingMaskIntoConstraints = false
         refreshScrollView.alwaysBounceVertical = true
         view.addSubview(refreshScrollView)
-        
+
         NSLayoutConstraint.activate([
             refreshScrollView.leadingAnchor.constraint(equalTo: BGText.leadingAnchor),
             refreshScrollView.trailingAnchor.constraint(equalTo: BGText.trailingAnchor),
             refreshScrollView.topAnchor.constraint(equalTo: BGText.topAnchor),
-            refreshScrollView.bottomAnchor.constraint(equalTo: BGText.bottomAnchor)
+            refreshScrollView.bottomAnchor.constraint(equalTo: BGText.bottomAnchor),
         ])
-        
+
         refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
         refreshScrollView.addSubview(refreshControl)
-        
+
         // Add this line to prevent scrolling in other directions
         refreshScrollView.alwaysBounceVertical = true
-        
+
         refreshScrollView.delegate = self
         NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
+
+        Observable.shared.bgText.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.BGText.text = newValue
+            }
+            .store(in: &cancellables)
+
+        Observable.shared.directionText.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.DirectionText.text = newValue
+            }
+            .store(in: &cancellables)
+
+        Observable.shared.deltaText.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.DeltaText.text = newValue
+            }
+            .store(in: &cancellables)
+
+        /// When an alarm is triggered, go to the snoozer tab
+        Observable.shared.currentAlarm.$value
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 } /// Ignore nil
+            .sink { [weak self] _ in
+                self?.tabBarController?.selectedIndex = 2
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.colorBGText.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.setBGTextColor()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.showStats.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.statsView.isHidden = !Storage.shared.showStats.value
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.useIFCC.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateStats()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.showSmallGraph.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.BGChartFull.isHidden = !Storage.shared.showSmallGraph.value
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.screenlockSwitchState.$value
+            .receive(on: DispatchQueue.main)
+            .sink { newValue in
+                UIApplication.shared.isIdleTimerDisabled = newValue
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.showDisplayName.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateServerText()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.speakBG.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateQuickActions()
+            }
+            .store(in: &cancellables)
+
+        updateQuickActions()
     }
-    
+
+    // Update the Home Screen Quick Action for toggling the "Speak BG" feature based on the current speakBG setting.
+    func updateQuickActions() {
+        let iconName = Storage.shared.speakBG.value ? "pause.circle.fill" : "play.circle.fill"
+        let iconTemplate = UIApplicationShortcutIcon(systemImageName: iconName)
+
+        let shortcut = UIApplicationShortcutItem(type: Bundle.main.bundleIdentifier! + ".toggleSpeakBG",
+                                                 localizedTitle: "Speak BG",
+                                                 localizedSubtitle: nil,
+                                                 icon: iconTemplate,
+                                                 userInfo: nil)
+        UIApplication.shared.shortcutItems = [shortcut]
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("refresh"), object: nil)
     }
-    
+
     // Clean all timers and start new ones when refreshing
     @objc func refresh() {
         LogManager.shared.log(category: .general, message: "Refreshing")
@@ -269,7 +321,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
         MinAgoText.text = "Refreshing"
-        latestMinAgoString = "Refreshing"
+        Observable.shared.minAgoText.value = "Refreshing"
         scheduleAllTasks()
 
         currentCage = nil
@@ -278,7 +330,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         lastSpeechTime = nil
         refreshControl.endRefreshing()
     }
-    
+
     // Scroll down BGText when refreshing
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView == refreshScrollView {
@@ -290,77 +342,22 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         }
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        // set screen lock
-        UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
-        
-        // check the app state
-        // TODO: move to a function ?
-        if let appState = self.appStateController {
-            
-            if appState.chartSettingsChanged {
-                
-                // can look at settings flags to be more fine tuned
-                self.updateBGGraphSettings()
-                
-                if ChartSettingsChangeEnum.smallGraphHeight.rawValue != 0 {
-                    smallGraphHeightConstraint.constant = CGFloat(UserDefaultsRepository.smallGraphHeight.value)
-                    self.view.layoutIfNeeded()
-                }
-                
-                // reset the app state
-                appState.chartSettingsChanged = false
-                appState.chartSettingsChanges = 0
-            }
-            if appState.generalSettingsChanged {
-                
-                // settings for appBadge changed
-                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.appBadgeChange.rawValue != 0 {
-                    
-                }
-                
-                // settings for textcolor changed
-                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.colorBGTextChange.rawValue != 0 {
-                    self.setBGTextColor()
-                }
-                
-                // settings for showStats changed
-                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showStatsChange.rawValue != 0 {
-                    statsView.isHidden = !UserDefaultsRepository.showStats.value
-                }
-                
-                // settings for useIFCC changed
-                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.useIFCCChange.rawValue != 0 {
-                    updateStats()
-                }
-                
-                // settings for showSmallGraph changed
-                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showSmallGraphChange.rawValue != 0 {
-                    BGChartFull.isHidden = !UserDefaultsRepository.showSmallGraph.value
-                }
-                
-                if appState.generalSettingsChanges & GeneralSettingsChangeEnum.showDisplayNameChange.rawValue != 0 {
-                    self.updateServerText()
-                }
-                
-                // reset the app state
-                appState.generalSettingsChanged = false
-                appState.generalSettingsChanges = 0
-            }
-            if appState.infoDataSettingsChanged {
-                self.infoTable.reloadData()
-                
-                // reset
-                appState.infoDataSettingsChanged = false
-            }
-            
-            // add more processing of the app state
+
+    override func viewWillAppear(_: Bool) {
+        UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
+
+        if Observable.shared.chartSettingsChanged.value {
+            updateBGGraphSettings()
+
+            smallGraphHeightConstraint.constant = CGFloat(Storage.shared.smallGraphHeight.value)
+            view.layoutIfNeeded()
+
+            Observable.shared.chartSettingsChanged.value = false
         }
     }
 
     // Info Table Functions
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         guard let infoManager = infoManager else {
             return 0
         }
@@ -383,11 +380,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     @objc func appMovedToBackground() {
         // Allow screen to turn off
-        UIApplication.shared.isIdleTimerDisabled = false;
-        
+        UIApplication.shared.isIdleTimerDisabled = false
+
         // We want to always come back to the home screen
         tabBarController?.selectedIndex = 0
-        
+
         if Storage.shared.backgroundRefreshType.value == .silentTune {
             backgroundTask.startBackgroundTask()
         }
@@ -396,48 +393,48 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             BackgroundAlertManager.shared.startBackgroundAlert()
         }
     }
-    
+
     @objc func appCameToForeground() {
         // reset screenlock state if needed
-        UIApplication.shared.isIdleTimerDisabled = UserDefaultsRepository.screenlockSwitchState.value;
-        
+        UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
+
         if Storage.shared.backgroundRefreshType.value == .silentTune {
             backgroundTask.stopBackgroundTask()
         }
-        
+
         if Storage.shared.backgroundRefreshType.value != .none {
             BackgroundAlertManager.shared.stopBackgroundAlert()
         }
 
         TaskScheduler.shared.checkTasksNow()
-        
+
         checkAndNotifyVersionStatus()
         checkAppExpirationStatus()
     }
-    
+
     func checkAndNotifyVersionStatus() {
         let versionManager = AppVersionManager()
         versionManager.checkForNewVersion { latestVersion, isNewer, isBlacklisted in
             let now = Date()
-            
+
             // Check if the current version is blacklisted, or if there is a newer version available
             if isBlacklisted {
-                let lastBlacklistShown = UserDefaultsRepository.lastBlacklistNotificationShown.value ?? Date.distantPast
+                let lastBlacklistShown = Storage.shared.lastBlacklistNotificationShown.value ?? Date.distantPast
                 if now.timeIntervalSince(lastBlacklistShown) > 86400 { // 24 hours
                     self.versionAlert(message: "The current version has a critical issue and should be updated as soon as possible.")
-                    UserDefaultsRepository.lastBlacklistNotificationShown.value = now
-                    UserDefaultsRepository.lastVersionUpdateNotificationShown.value = now
+                    Storage.shared.lastBlacklistNotificationShown.value = now
+                    Storage.shared.lastVersionUpdateNotificationShown.value = now
                 }
             } else if isNewer {
-                let lastVersionUpdateShown = UserDefaultsRepository.lastVersionUpdateNotificationShown.value ?? Date.distantPast
-                if now.timeIntervalSince(lastVersionUpdateShown) > 1209600 { // 2 weeks
+                let lastVersionUpdateShown = Storage.shared.lastVersionUpdateNotificationShown.value ?? Date.distantPast
+                if now.timeIntervalSince(lastVersionUpdateShown) > 1_209_600 { // 2 weeks
                     self.versionAlert(message: "A new version is available: \(latestVersion ?? "Unknown"). It is recommended to update.")
-                    UserDefaultsRepository.lastVersionUpdateNotificationShown.value = now
+                    Storage.shared.lastVersionUpdateNotificationShown.value = now
                 }
             }
         }
     }
-    
+
     func versionAlert(title: String = "Update Available", message: String) {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -445,21 +442,21 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.present(alert, animated: true)
         }
     }
-    
+
     func checkAppExpirationStatus() {
         let now = Date()
         let expirationDate = BuildDetails.default.calculateExpirationDate()
         let weekBeforeExpiration = Calendar.current.date(byAdding: .day, value: -7, to: expirationDate)!
-        
+
         if now >= weekBeforeExpiration {
-            let lastExpirationShown = UserDefaultsRepository.lastExpirationNotificationShown.value ?? Date.distantPast
+            let lastExpirationShown = Storage.shared.lastExpirationNotificationShown.value ?? Date.distantPast
             if now.timeIntervalSince(lastExpirationShown) > 86400 { // 24 hours
                 expirationAlert()
-                UserDefaultsRepository.lastExpirationNotificationShown.value = now
+                Storage.shared.lastExpirationNotificationShown.value = now
             }
         }
     }
-    
+
     func expirationAlert() {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: "App Expiration Warning", message: "This app will expire in less than a week. Please rebuild to continue using it.", preferredStyle: .alert)
@@ -467,18 +464,18 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             self.present(alert, animated: true)
         }
     }
-    
-    @objc override func viewDidAppear(_ animated: Bool) {
+
+    @objc override func viewDidAppear(_: Bool) {
         showHideNSDetails()
     }
-    
+
     func stringFromTimeInterval(interval: TimeInterval) -> String {
         let interval = Int(interval)
         let minutes = (interval / 60) % 60
         let hours = (interval / 3600)
         return String(format: "%02d:%02d", hours, minutes)
     }
-    
+
     func showHideNSDetails() {
         var isHidden = false
         var isEnabled = true
@@ -486,31 +483,29 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             isHidden = true
             isEnabled = false
         }
-        
+
         LoopStatusLabel.isHidden = isHidden
         if IsNotLooping {
             PredictionLabel.isHidden = true
-        }
-        else {
+        } else {
             PredictionLabel.isHidden = isHidden
         }
         infoTable.isHidden = isHidden
-        
-        if UserDefaultsRepository.hideInfoTable.value {
+
+        if Storage.shared.hideInfoTable.value {
             infoTable.isHidden = true
         }
-        
+
         if IsNightscoutEnabled() {
             isEnabled = true
         }
-        
-        guard let nightscoutTab = self.tabBarController?.tabBar.items![3] else { return }
+
+        guard let nightscoutTab = tabBarController?.tabBar.items![3] else { return }
         nightscoutTab.isEnabled = isEnabled
-        
     }
-    
+
     func updateBadge(val: Int) {
-        if UserDefaultsRepository.appBadge.value {
+        if Storage.shared.appBadge.value {
             let latestBG = String(val)
             UIApplication.shared.applicationIconBadgeNumber = Int(Localizer.removePeriodAndCommaForBadge(Localizer.toDisplayUnits(latestBG))) ?? val
         } else {
@@ -520,34 +515,35 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     func setBGTextColor() {
         if bgData.count > 0 {
-            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
             let latestBG = bgData[bgData.count - 1].sgv
-            var color: NSUIColor = NSUIColor.label
-            if UserDefaultsRepository.colorBGText.value {
-                if Float(latestBG) >= UserDefaultsRepository.highLine.value {
+            var color = NSUIColor.label
+            if Storage.shared.colorBGText.value {
+                if Double(latestBG) >= Storage.shared.highLine.value {
                     color = NSUIColor.systemYellow
-                } else if Float(latestBG) <= UserDefaultsRepository.lowLine.value {
+                    Observable.shared.bgTextColor.value = .yellow
+                } else if Double(latestBG) <= Storage.shared.lowLine.value {
                     color = NSUIColor.systemRed
+                    Observable.shared.bgTextColor.value = .red
                 } else {
                     color = NSUIColor.systemGreen
+                    Observable.shared.bgTextColor.value = .green
                 }
+            } else {
+                Observable.shared.bgTextColor.value = .primary
             }
-            
+
             BGText.textColor = color
-            snoozer.BGLabel.textColor = color
         }
     }
-    
-    func bgDirectionGraphic(_ value:String)->String
-    {
-        if value == nil { return "-" }
-        let //graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
-    graphics:[String:String]=["Flat":"→","DoubleUp":"↑↑","SingleUp":"↑","FortyFiveUp":"↗","FortyFiveDown":"↘︎","SingleDown":"↓","DoubleDown":"↓↓","None":"-","NONE":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-", "": "-"]
+
+    func bgDirectionGraphic(_ value: String) -> String {
+        let // graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
+            graphics: [String: String] = ["Flat": "→", "DoubleUp": "↑↑", "SingleUp": "↑", "FortyFiveUp": "↗", "FortyFiveDown": "↘︎", "SingleDown": "↓", "DoubleDown": "↓↓", "None": "-", "NONE": "-", "NOT COMPUTABLE": "-", "RATE OUT OF RANGE": "-", "": "-"]
         return graphics[value]!
     }
-    
+
     func writeCalendar() {
-        self.store.requestCalendarAccess { (granted, error) in
+        store.requestCalendarAccess { granted, error in
             if !granted {
                 LogManager.shared.log(category: .calendar, message: "Failed to get calendar access: \(String(describing: error))")
                 return
@@ -557,9 +553,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     func processCalendarUpdates() {
-        if UserDefaultsRepository.calendarIdentifier.value == "" { return }
+        if Storage.shared.calendarIdentifier.value == "" { return }
 
-        if self.bgData.count < 1 { return }
+        if bgData.count < 1 { return }
 
         // This lets us fire the method to write Min Ago entries only once a minute starting after 6 minutes but allows new readings through
         let now = dateTimeUtils.getNowTimeIntervalUTC()
@@ -573,38 +569,36 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         // Create Event info
         var deltaBG = 0 // protect index out of bounds
-        if self.bgData.count > 1 {
-            deltaBG = self.bgData[self.bgData.count - 1].sgv -  self.bgData[self.bgData.count - 2].sgv as Int
+        if bgData.count > 1 {
+            deltaBG = bgData[bgData.count - 1].sgv - bgData[bgData.count - 2].sgv as Int
         }
-        let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - self.bgData[self.bgData.count - 1].date) / 60
+        let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - bgData[bgData.count - 1].date) / 60
         var deltaString = ""
         if deltaBG < 0 {
             deltaString = Localizer.toDisplayUnits(String(deltaBG))
-        }
-        else
-        {
+        } else {
             deltaString = "+" + Localizer.toDisplayUnits(String(deltaBG))
         }
-        let direction = self.bgDirectionGraphic(self.bgData[self.bgData.count - 1].direction ?? "")
-        
-        var eventStartDate = Date(timeIntervalSince1970: self.bgData[self.bgData.count - 1].date)
+        let direction = bgDirectionGraphic(bgData[bgData.count - 1].direction ?? "")
+
+        let eventStartDate = Date(timeIntervalSince1970: bgData[bgData.count - 1].date)
         var eventEndDate = eventStartDate.addingTimeInterval(60 * 10)
-        var  eventTitle = UserDefaultsRepository.watchLine1.value
-        if (UserDefaultsRepository.watchLine2.value.count > 1) {
-            eventTitle += "\n" + UserDefaultsRepository.watchLine2.value
+        var eventTitle = Storage.shared.watchLine1.value
+        if Storage.shared.watchLine2.value.count > 1 {
+            eventTitle += "\n" + Storage.shared.watchLine2.value
         }
-        eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: Localizer.toDisplayUnits(String(self.bgData[self.bgData.count - 1].sgv)))
+        eventTitle = eventTitle.replacingOccurrences(of: "%BG%", with: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)))
         eventTitle = eventTitle.replacingOccurrences(of: "%DIRECTION%", with: direction)
         eventTitle = eventTitle.replacingOccurrences(of: "%DELTA%", with: deltaString)
-        if self.currentOverride != 1.0 {
-            let val = Int( self.currentOverride*100)
+        if currentOverride != 1.0 {
+            let val = Int(currentOverride * 100)
             // let overrideText = String(format:"%f1", self.currentOverride*100)
             let text = String(val) + "%"
             eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: text)
         } else {
             eventTitle = eventTitle.replacingOccurrences(of: "%OVERRIDE%", with: "")
         }
-        eventTitle = eventTitle.replacingOccurrences(of: "%LOOP%", with: self.latestLoopStatusString)
+        eventTitle = eventTitle.replacingOccurrences(of: "%LOOP%", with: latestLoopStatusString)
         var minAgo = ""
         if deltaTime > 9 {
             // write old BG reading and continue pushing out end date to show last entry
@@ -612,83 +606,52 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
         }
         var basal = "~"
-        if self.latestBasal != "" {
-            basal = self.latestBasal
+        if latestBasal != "" {
+            basal = latestBasal
         }
         eventTitle = eventTitle.replacingOccurrences(of: "%MINAGO%", with: minAgo)
         eventTitle = eventTitle.replacingOccurrences(of: "%IOB%", with: latestIOB?.formattedValue() ?? "0")
         eventTitle = eventTitle.replacingOccurrences(of: "%COB%", with: latestCOB?.formattedValue() ?? "0")
         eventTitle = eventTitle.replacingOccurrences(of: "%BASAL%", with: basal)
-        
+
         // Delete Events from last 2 hours and 2 hours in future
-        var deleteStartDate = Date().addingTimeInterval(-60*60*2)
-        var deleteEndDate = Date().addingTimeInterval(60*60*2)
+        let deleteStartDate = Date().addingTimeInterval(-60 * 60 * 2)
+        let deleteEndDate = Date().addingTimeInterval(60 * 60 * 2)
         // guard solves for some ios upgrades removing the calendar
-        guard let deleteCalendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value) as? EKCalendar else { return }
-        var predicate2 = self.store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
-        var eVDelete = self.store.events(matching: predicate2) as [EKEvent]?
+        guard let deleteCalendar = store.calendar(withIdentifier: Storage.shared.calendarIdentifier.value) as? EKCalendar else { return }
+        let predicate2 = store.predicateForEvents(withStart: deleteStartDate, end: deleteEndDate, calendars: [deleteCalendar])
+        let eVDelete = store.events(matching: predicate2) as [EKEvent]?
         if eVDelete != nil {
             for i in eVDelete! {
                 do {
-                    try self.store.remove(i, span: EKSpan.thisEvent, commit: true)
-                } catch let error {
+                    try store.remove(i, span: EKSpan.thisEvent, commit: true)
+                } catch {
                     print(error)
                 }
             }
         }
-        
+
         // Write New Event
-        var event = EKEvent(eventStore: self.store)
+        let event = EKEvent(eventStore: store)
         event.title = eventTitle
         event.startDate = eventStartDate
         event.endDate = eventEndDate
-        event.calendar = self.store.calendar(withIdentifier: UserDefaultsRepository.calendarIdentifier.value)
+        event.calendar = store.calendar(withIdentifier: Storage.shared.calendarIdentifier.value)
         do {
-            try self.store.save(event, span: .thisEvent, commit: true)
-            self.lastCalendarWriteAttemptTime = now
+            try store.save(event, span: .thisEvent, commit: true)
+            lastCalendarWriteAttemptTime = now
 
-            self.lastCalDate = self.bgData[self.bgData.count - 1].date
-            //UserDefaultsRepository.savedEventID.value = event.eventIdentifier //save event id to access this particular event later
+            lastCalDate = bgData[bgData.count - 1].date
         } catch {
-            LogManager.shared.log(category: .calendar, message: "Error storing to the calendar")
-        }
-    }
-    
-    
-    func persistentNotification(bgTime: TimeInterval)
-    {
-        if UserDefaultsRepository.persistentNotification.value && bgTime > UserDefaultsRepository.persistentNotificationLastBGTime.value && bgData.count > 0 {
-            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-            snoozer.sendNotification(self, bgVal: Localizer.toDisplayUnits(String(bgData[bgData.count - 1].sgv)), directionVal: latestDirectionString, deltaVal: latestDeltaString, minAgoVal: latestMinAgoString, alertLabelVal: "Latest BG")
+            let msg = "Error storing to calendar: \(error.localizedDescription) (\(error))"
+            LogManager.shared.log(category: .calendar, message: msg)
         }
     }
 
-    // General Notifications
-    
-    func sendGeneralNotification(_ sender: Any, title: String, subtitle: String, body: String, timer: TimeInterval) {
-        
-        UNUserNotificationCenter.current().delegate = self
-        
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.subtitle = subtitle
-        content.body = body
-        content.categoryIdentifier = "noAction"
-        content.sound = .default
-        
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timer, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-        
-        
-    }
-    
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        
-    }
-    
+    func userNotificationCenter(_: UNUserNotificationCenter, didReceive _: UNNotificationResponse, withCompletionHandler _: @escaping () -> Void) {}
+
     // User has scrolled the chart
-    func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
+    func chartTranslated(_: ChartViewBase, dX _: CGFloat, dY _: CGFloat) {
         let isViewingLatestData = abs(BGChart.highestVisibleX - BGChart.chartXMax) < 0.001
         if isViewingLatestData {
             autoScrollPauseUntil = nil // User is back at the latest data, allow auto-scrolling
@@ -698,6 +661,78 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     func calculateMaxBgGraphValue() -> Float {
-        return max(topBG, topPredictionBG)
+        return max(Float(topBG), Float(topPredictionBG))
+    }
+
+    func loadDebugData() {
+        struct DebugData: Codable {
+            let debug: Bool?
+            let url: String?
+            let token: String?
+        }
+
+        let fileManager = FileManager.default
+        let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("debugData.json")
+
+        if fileManager.fileExists(atPath: url.path) {
+            do {
+                let data = try Data(contentsOf: url)
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+
+                let debugData = try decoder.decode(DebugData.self, from: data)
+                LogManager.shared.log(category: .alarm, message: "Loaded DebugData from \(url.path)", isDebug: true)
+
+                if let debug = debugData.debug {
+                    Observable.shared.debug.value = debug
+                }
+
+                if let url = debugData.url {
+                    Storage.shared.url.value = url
+                }
+
+                if let token = debugData.token {
+                    Storage.shared.token.value = token
+                }
+            } catch {
+                LogManager.shared.log(category: .alarm, message: "Failed to load DebugData: \(error)", isDebug: true)
+            }
+        }
+    }
+
+    private func synchronizeInfoTypes() {
+        var sortArray = Storage.shared.infoSort.value
+        var visibleArray = Storage.shared.infoVisible.value
+
+        // Current valid indices based on InfoType
+        let currentValidIndices = InfoType.allCases.map { $0.rawValue }
+
+        // Add missing indices to sortArray
+        for index in currentValidIndices {
+            if !sortArray.contains(index) {
+                sortArray.append(index)
+                // print("Added missing index \(index) to sortArray")
+            }
+        }
+
+        // Remove deprecated indices
+        sortArray = sortArray.filter { currentValidIndices.contains($0) }
+
+        // Ensure visibleArray is updated with new entries
+        if visibleArray.count < currentValidIndices.count {
+            for i in visibleArray.count ..< currentValidIndices.count {
+                visibleArray.append(InfoType(rawValue: i)?.defaultVisible ?? false)
+                // print("Added default visibility for new index \(i)")
+            }
+        }
+
+        // Trim excess elements if there are more than needed
+        if visibleArray.count > currentValidIndices.count {
+            visibleArray = Array(visibleArray.prefix(currentValidIndices.count))
+            // print("Trimmed visibleArray to match current valid indices")
+        }
+
+        Storage.shared.infoSort.value = sortArray
+        Storage.shared.infoVisible.value = visibleArray
     }
 }

@@ -1,10 +1,6 @@
-//
-//  LoopOverrideViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-15.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// LoopOverrideViewModel.swift
+// Created by Jonas Björkert.
 
 import Foundation
 
@@ -18,7 +14,7 @@ final class LoopOverrideViewModel: ObservableObject, Sendable {
                 "eventType": "Temporary Override",
                 "enteredBy": Storage.shared.user.value,
                 "reason": override.name,
-                "reasonDisplay": "\(override.symbol) \(override.name)"
+                "reasonDisplay": "\(override.symbol) \(override.name)",
             ]
 
             do {
@@ -45,7 +41,7 @@ final class LoopOverrideViewModel: ObservableObject, Sendable {
     func sendCancelOverrideRequest(completion: @escaping (Bool, String?) -> Void) {
         Task {
             let body: [String: Any] = [
-                "eventType": "Temporary Override Cancel"
+                "eventType": "Temporary Override Cancel",
             ]
 
             do {

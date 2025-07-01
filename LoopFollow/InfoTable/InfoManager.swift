@@ -1,21 +1,17 @@
-//
-//  InfoManager.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-11.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// InfoManager.swift
+// Created by Jonas Björkert.
 
 import Foundation
-import UIKit
 import HealthKit
+import UIKit
 
 class InfoManager {
     var tableData: [InfoData]
     weak var tableView: UITableView?
 
     init(tableView: UITableView) {
-        self.tableData = InfoType.allCases.map { InfoData(name: $0.name) }
+        tableData = InfoType.allCases.map { InfoData(name: $0.name) }
         self.tableView = tableView
     }
 
@@ -57,7 +53,7 @@ class InfoManager {
         let formattedValue = value.formattedValue()
         updateInfoData(type: type, value: formattedValue)
     }
-    
+
     func clearInfoData(type: InfoType) {
         tableData[type.rawValue].value = ""
         tableView?.reloadData()
@@ -71,11 +67,11 @@ class InfoManager {
     }
 
     func numberOfRows() -> Int {
-        return UserDefaultsRepository.infoSort.value.filter { UserDefaultsRepository.infoVisible.value[$0] }.count
+        return Storage.shared.infoSort.value.filter { Storage.shared.infoVisible.value[$0] }.count
     }
 
     func dataForIndexPath(_ indexPath: IndexPath) -> InfoData? {
-        let sortedAndVisibleIndexes = UserDefaultsRepository.infoSort.value.filter { UserDefaultsRepository.infoVisible.value[$0] }
+        let sortedAndVisibleIndexes = Storage.shared.infoSort.value.filter { Storage.shared.infoVisible.value[$0] }
 
         guard indexPath.row < sortedAndVisibleIndexes.count else {
             return nil

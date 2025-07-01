@@ -1,10 +1,6 @@
-//
-//  MinAgoTask.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-11.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// MinAgoTask.swift
+// Created by Jonas Björkert.
 
 import Foundation
 import UIKit
@@ -23,12 +19,8 @@ extension MainViewController {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.MinAgoText.text = ""
-                self.latestMinAgoString = ""
-                if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
-                    snoozer.MinAgoLabel.text = ""
-                    snoozer.BGLabel.text = ""
-                    snoozer.BGLabel.attributedText = NSAttributedString(string: "")
-                }
+                Observable.shared.minAgoText.value = ""
+                Observable.shared.bgText.value = ""
             }
             TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date().addingTimeInterval(1))
             return
@@ -54,34 +46,37 @@ extension MainViewController {
         let minAgoDisplayText = formattedDuration + " min ago"
 
         // Update UI only if the display text has changed
-        if minAgoDisplayText != latestMinAgoString {
+        if minAgoDisplayText != Observable.shared.minAgoText.value {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.MinAgoText.text = minAgoDisplayText
-                self.latestMinAgoString = minAgoDisplayText
-
-                if let snoozer = self.tabBarController?.viewControllers?[2] as? SnoozeViewController {
-                    snoozer.MinAgoLabel.text = minAgoDisplayText
-
-                    let bgLabelText = snoozer.BGLabel.text ?? ""
-                    let attributeString = NSMutableAttributedString(string: bgLabelText)
-                    attributeString.addAttribute(.strikethroughStyle,
-                                                 value: NSUnderlineStyle.single.rawValue,
-                                                 range: NSRange(location: 0, length: attributeString.length))
-                    attributeString.addAttribute(.strikethroughColor,
-                                                 value: secondsAgo >= 720 ? UIColor.systemRed : UIColor.clear,
-                                                 range: NSRange(location: 0, length: attributeString.length))
-                    snoozer.BGLabel.attributedText = attributeString
-                }
+                Observable.shared.minAgoText.value = minAgoDisplayText
             }
         }
+
+        let deltaTime = secondsAgo / 60
+        Observable.shared.bgStale.value = deltaTime >= 12
+
+        // Apply strikethrough to BGText based on the staleness of the data
+        // Also clear badge if bgvalue is stale
+        let bgTextStr = BGText.text ?? ""
+        let attributeString = NSMutableAttributedString(string: bgTextStr)
+        attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
+        if Observable.shared.bgStale.value { // Data is stale
+            attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
+            updateBadge(val: 0)
+        } else { // Data is fresh
+            attributeString.addAttribute(.strikethroughColor, value: UIColor.clear, range: NSRange(location: 0, length: attributeString.length))
+            updateBadge(val: Observable.shared.bg.value ?? 0)
+        }
+        BGText.attributedText = attributeString
 
         // Determine the next run interval based on the current state
         let nextUpdateInterval: TimeInterval
         if shouldDisplaySeconds {
             // Update every second when showing seconds
             nextUpdateInterval = 1.0
-        } else if secondsAgo >= 240 && secondsAgo < 720 {
+        } else if secondsAgo >= 240, secondsAgo < 720 {
             // Schedule exactly at the transition point to start showing seconds
             nextUpdateInterval = 270.0 - secondsAgo
         } else {

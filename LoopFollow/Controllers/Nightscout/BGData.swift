@@ -1,10 +1,6 @@
-//
-//  BGData.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2023-10-05.
-//  Copyright © 2023 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// BGData.swift
+// Created by Jonas Björkert.
 
 import Foundation
 import UIKit
@@ -14,10 +10,9 @@ extension MainViewController {
     func webLoadDexShare() {
         // Dexcom Share only returns 24 hrs of data as of now
         // Requesting more just for consistency with NS
-        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        let graphHours = 24 * Storage.shared.downloadDays.value
         let count = graphHours * 12
-        dexShare?.fetchData(count) { (err, result) -> () in
-
+        dexShare?.fetchData(count) { err, result in
             if let error = err {
                 LogManager.shared.log(category: .dexcom, message: "Error fetching Dexcom data: \(error.localizedDescription)", limitIdentifier: "Error fetching Dexcom data")
                 self.webLoadNSBGData()
@@ -33,14 +28,14 @@ extension MainViewController {
             // If Dex data is old, load from NS instead
             let latestDate = data[0].date
             let now = dateTimeUtils.getNowTimeIntervalUTC()
-            if (latestDate + 330) < now && IsNightscoutEnabled() {
+            if (latestDate + 330) < now, IsNightscoutEnabled() {
                 LogManager.shared.log(category: .dexcom, message: "Dexcom data is old, loading from NS instead", limitIdentifier: "Dexcom data is old, loading from NS instead")
                 self.webLoadNSBGData()
                 return
             }
 
             // Dexcom only returns 24 hrs of data. If we need more, call NS.
-            if graphHours > 24 && IsNightscoutEnabled() {
+            if graphHours > 24, IsNightscoutEnabled() {
                 self.webLoadNSBGData(dexData: data)
             } else {
                 self.ProcessDexBGData(data: data, sourceName: "Dexcom")
@@ -57,8 +52,8 @@ extension MainViewController {
 
         var parameters: [String: String] = [:]
         let utcISODateFormatter = ISO8601DateFormatter()
-        let date = Calendar.current.date(byAdding: .day, value: -1 * UserDefaultsRepository.downloadDays.value, to: Date())!
-        parameters["count"] = "\(UserDefaultsRepository.downloadDays.value * 2 * 24 * 60 / 5)"
+        let date = Calendar.current.date(byAdding: .day, value: -1 * Storage.shared.downloadDays.value, to: Date())!
+        parameters["count"] = "\(Storage.shared.downloadDays.value * 2 * 24 * 60 / 5)"
         parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: date)
 
         // Exclude 'cal' entries
@@ -66,11 +61,11 @@ extension MainViewController {
 
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
             switch result {
-            case .success(let entriesResponse):
+            case let .success(entriesResponse):
                 var nsData = entriesResponse
                 DispatchQueue.main.async {
                     // transform NS data to look like Dex data
-                    for i in 0..<nsData.count {
+                    for i in 0 ..< nsData.count {
                         // convert the NS timestamp to seconds instead of milliseconds
                         nsData[i].date /= 1000
                         nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
@@ -78,7 +73,7 @@ extension MainViewController {
 
                     var nsData2: [ShareGlucoseData] = []
                     var lastAddedTime = Double.infinity
-                    var lastAddedSGV: Int? = nil
+                    var lastAddedSGV: Int?
                     let minInterval: Double = 30
 
                     for reading in nsData {
@@ -94,7 +89,7 @@ extension MainViewController {
                     if !dexData.isEmpty {
                         let oldestDexDate = dexData[dexData.count - 1].date
                         var itemsToRemove = 0
-                        while itemsToRemove < nsData2.count && nsData2[itemsToRemove].date >= oldestDexDate {
+                        while itemsToRemove < nsData2.count, nsData2[itemsToRemove].date >= oldestDexDate {
                             itemsToRemove += 1
                         }
                         nsData2.removeFirst(itemsToRemove)
@@ -104,7 +99,7 @@ extension MainViewController {
                     // trigger the processor for the data after downloading.
                     self.ProcessDexBGData(data: nsData2, sourceName: sourceName)
                 }
-            case .failure(let error):
+            case let .failure(error):
                 LogManager.shared.log(category: .nightscout, message: "Failed to fetch bg data: \(error)", limitIdentifier: "Failed to fetch bg data")
                 DispatchQueue.main.async {
                     TaskScheduler.shared.rescheduleTask(
@@ -123,7 +118,7 @@ extension MainViewController {
 
     /// Processes incoming BG data.
     func ProcessDexBGData(data: [ShareGlucoseData], sourceName: String) {
-        let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+        let graphHours = 24 * Storage.shared.downloadDays.value
 
         guard !data.isEmpty else {
             LogManager.shared.log(category: .nightscout, message: "No bg data received. Skipping processing.", limitIdentifier: "No bg data received. Skipping processing.")
@@ -172,10 +167,11 @@ extension MainViewController {
                                       message: "Reading is close to 5 minutes old (\(secondsAgo) sec). Scheduling next fetch in 5 seconds.",
                                       isDebug: true)
             } else {
-                delayToSchedule = 300 - secondsAgo + Double(UserDefaultsRepository.bgUpdateDelay.value)
+                delayToSchedule = 300 - secondsAgo + Double(Storage.shared.bgUpdateDelay.value)
                 LogManager.shared.log(category: .nightscout,
                                       message: "Fresh reading. Scheduling next fetch in \(delayToSchedule) seconds.",
                                       isDebug: true)
+                TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date())
             }
 
             TaskScheduler.shared.rescheduleTask(id: .fetchBG, to: Date().addingTimeInterval(delayToSchedule))
@@ -188,7 +184,7 @@ extension MainViewController {
 
         // Process data for graph display.
         bgData.removeAll()
-        for i in 0..<data.count {
+        for i in 0 ..< data.count {
             let readingTimestamp = data[data.count - 1 - i].date
             if readingTimestamp >= dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 let sgvValue = data[data.count - 1 - i].sgv
@@ -213,7 +209,7 @@ extension MainViewController {
     }
 
     func updateServerText(with serverText: String? = nil) {
-        if UserDefaultsRepository.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
+        if Storage.shared.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
             self.serverText.text = displayName
         } else if let serverText = serverText {
             self.serverText.text = serverText
@@ -237,61 +233,37 @@ extension MainViewController {
             let deltaBG = latestBG - priorBG
             let lastBGTime = entries[latestEntryIndex].date
 
-            let deltaTime = (TimeInterval(Date().timeIntervalSince1970) - lastBGTime) / 60
             self.updateServerText(with: sourceName)
 
-            var snoozerBG = ""
-            var snoozerDirection = ""
-            var snoozerDelta = ""
-
             // Set BGText with the latest BG value
-            self.BGText.text = Localizer.toDisplayUnits(String(latestBG))
-            snoozerBG = Localizer.toDisplayUnits(String(latestBG))
             self.setBGTextColor()
+
+            Observable.shared.bgText.value = Localizer.toDisplayUnits(String(latestBG))
+            Observable.shared.bg.value = latestBG
 
             // Direction handling
             if let directionBG = entries[latestEntryIndex].direction {
-                self.DirectionText.text = self.bgDirectionGraphic(directionBG)
-                snoozerDirection = self.bgDirectionGraphic(directionBG)
-                self.latestDirectionString = self.bgDirectionGraphic(directionBG)
+                Observable.shared.directionText.value = self.bgDirectionGraphic(directionBG)
             } else {
-                self.DirectionText.text = ""
-                snoozerDirection = ""
-                self.latestDirectionString = ""
+                Observable.shared.directionText.value = ""
             }
 
             // Delta handling
             if deltaBG < 0 {
-                self.latestDeltaString = Localizer.toDisplayUnits(String(deltaBG))
-
+                Observable.shared.deltaText.value = Localizer.toDisplayUnits(String(deltaBG))
             } else {
-                self.latestDeltaString = "+" + Localizer.toDisplayUnits(String(deltaBG))
+                Observable.shared.deltaText.value = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
-            self.DeltaText.text = self.latestDeltaString
-            snoozerDelta = self.latestDeltaString
-
-            // Apply strikethrough to BGText based on the staleness of the data
-            let bgTextStr = self.BGText.text ?? ""
-            let attributeString = NSMutableAttributedString(string: bgTextStr)
-            attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
-            if deltaTime >= 12 { // Data is stale
-                attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
-                self.updateBadge(val: 0)
-            } else { // Data is fresh
-                attributeString.addAttribute(.strikethroughColor, value: UIColor.clear, range: NSRange(location: 0, length: attributeString.length))
-                self.updateBadge(val: latestBG)
-            }
-            self.BGText.attributedText = attributeString
-
-            // Snoozer Display
-            guard let snoozer = self.tabBarController!.viewControllers?[2] as? SnoozeViewController else { return }
-            snoozer.BGLabel.text = snoozerBG
-            snoozer.DirectionLabel.text = snoozerDirection
-            snoozer.DeltaLabel.text = snoozerDelta
 
             // Update contact
             if Storage.shared.contactEnabled.value {
-                self.contactImageUpdater.updateContactImage(bgValue: bgTextStr, trend: snoozerDirection, delta: snoozerDelta, stale: deltaTime >= 12)
+                self.contactImageUpdater
+                    .updateContactImage(
+                        bgValue: Observable.shared.bgText.value,
+                        trend: Observable.shared.directionText.value,
+                        delta: Observable.shared.deltaText.value,
+                        stale: Observable.shared.bgStale.value
+                    )
             }
         }
     }
