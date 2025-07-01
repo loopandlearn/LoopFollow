@@ -1,14 +1,10 @@
-//
-//  TempTargetPresetManager.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-31.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TempTargetPresetManager.swift
+// Created by Jonas Björkert.
 
+import Combine
 import Foundation
 import HealthKit
-import Combine
 
 class TempTargetPresetManager: ObservableObject {
     static let shared = TempTargetPresetManager()
@@ -24,7 +20,7 @@ class TempTargetPresetManager: ObservableObject {
     func loadPresets() {
         if let data = UserDefaults.standard.data(forKey: presetsKey) {
             if let decodedPresets = try? JSONDecoder().decode([TempTargetPreset].self, from: data) {
-                self.presets = decodedPresets
+                presets = decodedPresets
             }
         }
     }

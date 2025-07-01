@@ -1,62 +1,66 @@
-//
-//  AdvancedSettingsViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-23.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// AdvancedSettingsViewModel.swift
+// Created by Jonas Björkert.
 
 import Foundation
 
 class AdvancedSettingsViewModel: ObservableObject {
     @Published var downloadTreatments: Bool {
         didSet {
-            UserDefaultsRepository.downloadTreatments.value = downloadTreatments
+            Storage.shared.downloadTreatments.value = downloadTreatments
         }
     }
+
     @Published var downloadPrediction: Bool {
         didSet {
-            UserDefaultsRepository.downloadPrediction.value = downloadPrediction
+            Storage.shared.downloadPrediction.value = downloadPrediction
         }
     }
+
     @Published var graphBasal: Bool {
         didSet {
-            UserDefaultsRepository.graphBasal.value = graphBasal
+            Storage.shared.graphBasal.value = graphBasal
         }
     }
+
     @Published var graphBolus: Bool {
         didSet {
-            UserDefaultsRepository.graphBolus.value = graphBolus
+            Storage.shared.graphBolus.value = graphBolus
         }
     }
+
     @Published var graphCarbs: Bool {
         didSet {
-            UserDefaultsRepository.graphCarbs.value = graphCarbs
+            Storage.shared.graphCarbs.value = graphCarbs
         }
     }
+
     @Published var graphOtherTreatments: Bool {
         didSet {
-            UserDefaultsRepository.graphOtherTreatments.value = graphOtherTreatments
+            Storage.shared.graphOtherTreatments.value = graphOtherTreatments
         }
     }
+
     @Published var bgUpdateDelay: Int {
         didSet {
-            UserDefaultsRepository.bgUpdateDelay.value = bgUpdateDelay
+            Storage.shared.bgUpdateDelay.value = bgUpdateDelay
         }
     }
+
     @Published var debugLogLevel: Bool {
         didSet {
             Storage.shared.debugLogLevel.value = debugLogLevel
         }
     }
+
     init() {
-        self.downloadTreatments = UserDefaultsRepository.downloadTreatments.value
-        self.downloadPrediction = UserDefaultsRepository.downloadPrediction.value
-        self.graphBasal = UserDefaultsRepository.graphBasal.value
-        self.graphBolus = UserDefaultsRepository.graphBolus.value
-        self.graphCarbs = UserDefaultsRepository.graphCarbs.value
-        self.graphOtherTreatments = UserDefaultsRepository.graphOtherTreatments.value
-        self.bgUpdateDelay = UserDefaultsRepository.bgUpdateDelay.value
-        self.debugLogLevel = Storage.shared.debugLogLevel.value
+        downloadTreatments = Storage.shared.downloadTreatments.value
+        downloadPrediction = Storage.shared.downloadPrediction.value
+        graphBasal = Storage.shared.graphBasal.value
+        graphBolus = Storage.shared.graphBolus.value
+        graphCarbs = Storage.shared.graphCarbs.value
+        graphOtherTreatments = Storage.shared.graphOtherTreatments.value
+        bgUpdateDelay = Storage.shared.bgUpdateDelay.value
+        debugLogLevel = Storage.shared.debugLogLevel.value
     }
 }

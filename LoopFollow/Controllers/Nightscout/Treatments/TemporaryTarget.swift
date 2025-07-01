@@ -1,27 +1,23 @@
-//
-//  TemporaryTarget.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-26.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TemporaryTarget.swift
+// Created by Jonas Björkert.
 
 import Foundation
-import UIKit
 import HealthKit
+import UIKit
 
 extension MainViewController {
     // NS Temporary Target Response Processor
     func processNSTemporaryTarget(entries: [[String: AnyObject]]) {
         tempTargetGraphData.removeAll()
-        var activeTempTarget: Int? = nil
+        var activeTempTarget: Int?
 
-        entries.reversed().enumerated().forEach { (index, currentEntry) in
-            guard let dateStr = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else { return }
-            guard let parsedDate = NightscoutUtils.parseDate(dateStr) else { return }
+        for (index, currentEntry) in entries.reversed().enumerated() {
+            guard let dateStr = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else { continue }
+            guard let parsedDate = NightscoutUtils.parseDate(dateStr) else { continue }
 
             var dateTimeStamp = parsedDate.timeIntervalSince1970
-            let graphHours = 24 * UserDefaultsRepository.downloadDays.value
+            let graphHours = 24 * Storage.shared.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) {
                 dateTimeStamp = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             }
@@ -34,17 +30,17 @@ extension MainViewController {
                     tempTargetGraphData[activeIndex].endDate = dateTimeStamp
                     activeTempTarget = nil
                 }
-                return
+                continue
             }
 
             if duration < 300 {
-                return
+                continue
             }
 
             let reason = currentEntry["reason"] as? String ?? ""
 
             guard let enteredBy = currentEntry["enteredBy"] as? String else {
-                return
+                continue
             }
 
             let low = currentEntry["targetBottom"] as? Double
@@ -52,7 +48,7 @@ extension MainViewController {
             let targetValue = low ?? high
 
             if targetValue == nil {
-                return
+                continue
             }
 
             let endDate = dateTimeStamp + duration
@@ -67,7 +63,7 @@ extension MainViewController {
             }
         }
 
-        if UserDefaultsRepository.graphOtherTreatments.value {
+        if Storage.shared.graphOtherTreatments.value {
             updateTempTargetGraph()
             updateChartRenderers()
         }

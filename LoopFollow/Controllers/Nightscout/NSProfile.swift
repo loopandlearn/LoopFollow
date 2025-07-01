@@ -1,7 +1,6 @@
-// NSProfile.swift
 // LoopFollow
-// Created by Jonas Björkert on 2024-07-12.
-// Copyright © 2024 Jon Fawcett. All rights reserved.
+// NSProfile.swift
+// Created by Jonas Björkert.
 
 import Foundation
 
@@ -12,16 +11,19 @@ struct NSProfile: Decodable {
             let time: String
             let timeAsSeconds: Double
         }
+
         struct SensEntry: Decodable {
             let value: Double
             let time: String
             let timeAsSeconds: Double
         }
+
         struct CarbRatioEntry: Decodable {
             let value: Double
             let time: String
             let timeAsSeconds: Double
         }
+
         struct TargetEntry: Decodable {
             let value: Double
             let time: String
@@ -46,6 +48,7 @@ struct NSProfile: Decodable {
     let isAPNSProduction: Bool?
     let deviceToken: String?
     let teamID: String?
+    let expirationDate: String?
 
     struct TrioOverrideEntry: Decodable {
         let name: String
@@ -92,7 +95,8 @@ struct NSProfile: Decodable {
         case isAPNSProduction
         case deviceToken
         case trioOverrides = "overridePresets"
-        case loopSettings = "loopSettings"
+        case loopSettings
         case teamID
+        case expirationDate
     }
 }

@@ -1,12 +1,7 @@
-//
-//  TrioRemoteControlViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-25.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TrioRemoteControlViewModel.swift
+// Created by Jonas Björkert.
 
 import Foundation
 
-class TrioRemoteControlViewModel: ObservableObject {
-}
+class TrioRemoteControlViewModel: ObservableObject {}

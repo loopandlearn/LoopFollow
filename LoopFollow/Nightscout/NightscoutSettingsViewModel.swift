@@ -1,13 +1,9 @@
-//
-//  NightscoutSettingsViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-18.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// NightscoutSettingsViewModel.swift
+// Created by Jonas Björkert.
 
-import Foundation
 import Combine
+import Foundation
 
 protocol NightscoutSettingsViewModelDelegate: AnyObject {
     func nightscoutSettingsDidFinish()
@@ -19,22 +15,24 @@ class NightscoutSettingsViewModel: ObservableObject {
     private var initialURL: String
     private var initialToken: String
 
-    @Published var nightscoutURL: String = ObservableUserDefaults.shared.url.value {
+    @Published var nightscoutURL: String = Storage.shared.url.value {
         willSet {
             if newValue != nightscoutURL {
-                ObservableUserDefaults.shared.url.value = newValue
+                Storage.shared.url.value = newValue
                 triggerCheckStatus()
             }
         }
     }
-    @Published var nightscoutToken: String = UserDefaultsRepository.token.value {
+
+    @Published var nightscoutToken: String = Storage.shared.token.value {
         willSet {
             if newValue != nightscoutToken {
-                UserDefaultsRepository.token.value = newValue
+                Storage.shared.token.value = newValue
                 triggerCheckStatus()
             }
         }
     }
+
     @Published var nightscoutStatus: String = "Checking..."
 
     private var cancellables = Set<AnyCancellable>()
@@ -42,8 +40,8 @@ class NightscoutSettingsViewModel: ObservableObject {
     private var checkStatusWorkItem: DispatchWorkItem?
 
     init() {
-        self.initialURL = ObservableUserDefaults.shared.url.value
-        self.initialToken = UserDefaultsRepository.token.value
+        initialURL = Storage.shared.url.value
+        initialToken = Storage.shared.token.value
 
         setupDebounce()
         checkNightscoutStatus()
@@ -98,10 +96,10 @@ class NightscoutSettingsViewModel: ObservableObject {
     }
 
     func checkNightscoutStatus() {
-        NightscoutUtils.verifyURLAndToken { error, jwtToken, nsWriteAuth, nsAdminAuth in
+        NightscoutUtils.verifyURLAndToken { error, _, nsWriteAuth, nsAdminAuth in
             DispatchQueue.main.async {
-                ObservableUserDefaults.shared.nsWriteAuth.value = nsWriteAuth
-                ObservableUserDefaults.shared.nsAdminAuth.value = nsAdminAuth
+                Storage.shared.nsWriteAuth.value = nsWriteAuth
+                Storage.shared.nsAdminAuth.value = nsAdminAuth
 
                 self.updateStatusLabel(error: error)
             }
@@ -128,15 +126,15 @@ class NightscoutSettingsViewModel: ObservableObject {
             }
         } else {
             let authStatus: String
-            if ObservableUserDefaults.shared.nsAdminAuth.value {
+            if Storage.shared.nsAdminAuth.value {
                 authStatus = "Admin"
             } else {
-                authStatus = "Read" + (ObservableUserDefaults.shared.nsWriteAuth.value ? " & Write" : "")
+                authStatus = "Read" + (Storage.shared.nsWriteAuth.value ? " & Write" : "")
             }
 
             nightscoutStatus = "OK (\(authStatus))"
 
-            if (nightscoutURL != initialURL || nightscoutToken != initialToken) {
+            if nightscoutURL != initialURL || nightscoutToken != initialToken {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
             }
         }

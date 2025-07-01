@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
     <device id="retina6_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -13,13 +13,13 @@
         <!--Home-->
         <scene sceneID="hNz-n2-bh7">
             <objects>
-                <viewController id="9pv-A4-QxB" userLabel="Home" customClass="MainViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="9pv-A4-QxB" userLabel="Home" customClass="MainViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="tsR-hK-woN">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="250" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="mJy-Ly-Jze">
-                                <rect key="frame" x="8" y="52" width="398" height="339"/>
+                                <rect key="frame" x="8" y="96" width="398" height="339"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="Ptf-fu-Ue4" userLabel="BGview">
                                         <rect key="frame" x="0.0" y="0.0" width="144.66666666666666" height="339"/>
@@ -114,21 +114,21 @@
                                 </subviews>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="1000" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="751-02-Xte">
-                                <rect key="frame" x="8" y="399" width="398" height="406"/>
+                                <rect key="frame" x="8" y="443" width="398" height="328"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" verticalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="51B-JU-npv" customClass="LineChartView" customModule="Charts">
-                                        <rect key="frame" x="0.0" y="0.0" width="398" height="250"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="398" height="172"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     </view>
                                     <view autoresizesSubviews="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="Nml-lr-dgQ" userLabel="BGChartFull" customClass="LineChartView" customModule="Charts">
-                                        <rect key="frame" x="0.0" y="258" width="398" height="40"/>
+                                        <rect key="frame" x="0.0" y="180" width="398" height="40"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="40" id="qmO-ga-QWl"/>
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="ikj-at-auF" userLabel="statsView">
-                                        <rect key="frame" x="0.0" y="306" width="398" height="100"/>
+                                        <rect key="frame" x="0.0" y="228" width="398" height="100"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" ambiguous="YES" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="XsT-6R-Vym">
                                                 <rect key="frame" x="0.0" y="0.0" width="398" height="100"/>
@@ -321,150 +321,14 @@
         <!--Snoozer-->
         <scene sceneID="gSd-1V-vbL">
             <objects>
-                <viewController id="e0E-cx-0Wr" customClass="SnoozeViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="e0E-cx-0Wr" customClass="SnoozerViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="oqe-Oz-Hai">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="ZaU-Ss-piB" userLabel="BGview">
-                                <rect key="frame" x="8" y="94" width="398" height="711"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="BG" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Iq3-I1-HX0">
-                                        <rect key="frame" x="0.0" y="0.0" width="398" height="167.33333333333334"/>
-                                        <fontDescription key="fontDescription" type="system" weight="black" pointSize="220"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                        <variation key="heightClass=regular-widthClass=compact">
-                                            <fontDescription key="fontDescription" type="system" weight="black" pointSize="140"/>
-                                        </variation>
-                                    </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hLM-Es-BOa" userLabel="Direction">
-                                        <rect key="frame" x="0.0" y="167.33333333333331" width="398" height="95.666666666666686"/>
-                                        <fontDescription key="fontDescription" type="system" weight="black" pointSize="110"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                        <variation key="heightClass=regular-widthClass=compact">
-                                            <fontDescription key="fontDescription" type="system" weight="black" pointSize="80"/>
-                                        </variation>
-                                    </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Delta" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YCF-22-z3g" userLabel="Delta">
-                                        <rect key="frame" x="0.0" y="263" width="398" height="77.666666666666686"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="70"/>
-                                        <nil key="textColor"/>
-                                        <color key="highlightedColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <variation key="heightClass=regular-widthClass=compact">
-                                            <fontDescription key="fontDescription" type="system" pointSize="65"/>
-                                        </variation>
-                                    </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MinAgo" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HNC-P8-PbV">
-                                        <rect key="frame" x="0.0" y="340.66666666666669" width="398" height="48"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="70"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                        <variation key="heightClass=regular-widthClass=compact">
-                                            <fontDescription key="fontDescription" type="system" pointSize="40"/>
-                                        </variation>
-                                    </label>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xzZ-jc-k2v">
-                                        <rect key="frame" x="0.0" y="388.66666666666674" width="398" height="322.33333333333326"/>
-                                        <subviews>
-                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="HFL-Ye-6HR">
-                                                <rect key="frame" x="103.33333333333333" y="112.33333333333331" width="191.66666666666669" height="97.666666666666686"/>
-                                                <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Clock" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r85-eB-vVd">
-                                                        <rect key="frame" x="0.0" y="0.0" width="191.66666666666666" height="77.666666666666671"/>
-                                                        <fontDescription key="fontDescription" type="system" pointSize="70"/>
-                                                        <nil key="textColor"/>
-                                                        <nil key="highlightedColor"/>
-                                                        <variation key="heightClass=regular-widthClass=compact">
-                                                            <fontDescription key="fontDescription" type="system" pointSize="65"/>
-                                                        </variation>
-                                                    </label>
-                                                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Alert Name" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tiA-fs-ZRV">
-                                                        <rect key="frame" x="0.0" y="87.666666666666629" width="191.66666666666666" height="0.0"/>
-                                                        <fontDescription key="fontDescription" type="system" pointSize="70"/>
-                                                        <nil key="textColor"/>
-                                                        <nil key="highlightedColor"/>
-                                                        <variation key="heightClass=regular-widthClass=compact">
-                                                            <fontDescription key="fontDescription" type="system" pointSize="40"/>
-                                                        </variation>
-                                                    </label>
-                                                    <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Meu-VT-byv">
-                                                        <rect key="frame" x="0.0" y="87.666666666666629" width="191.66666666666666" height="0.0"/>
-                                                        <color key="backgroundColor" systemColor="labelColor"/>
-                                                        <fontDescription key="fontDescription" type="system" pointSize="70"/>
-                                                        <state key="normal" title="Snooze">
-                                                            <color key="titleColor" systemColor="systemBackgroundColor"/>
-                                                        </state>
-                                                        <variation key="heightClass=regular-widthClass=compact">
-                                                            <fontDescription key="fontDescription" type="system" pointSize="40"/>
-                                                        </variation>
-                                                        <connections>
-                                                            <action selector="SnoozeButton:" destination="e0E-cx-0Wr" eventType="touchUpInside" id="vNY-W3-rAn"/>
-                                                        </connections>
-                                                    </button>
-                                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dav-Y8-lSK">
-                                                        <rect key="frame" x="0.0" y="97.666666666666629" width="191.66666666666666" height="0.0"/>
-                                                        <subviews>
-                                                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="snoozeMinutes" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iC4-A1-q9b">
-                                                                <rect key="frame" x="0.0" y="0.0" width="0.0" height="32"/>
-                                                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                                                <nil key="textColor"/>
-                                                                <nil key="highlightedColor"/>
-                                                            </label>
-                                                            <stepper hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" maximumValue="1000" translatesAutoresizingMaskIntoConstraints="NO" id="0cS-P2-Zus">
-                                                                <rect key="frame" x="0.0" y="0.0" width="0.0" height="32"/>
-                                                                <connections>
-                                                                    <action selector="snoozeForMinuteValChanged:" destination="e0E-cx-0Wr" eventType="valueChanged" id="6x5-Fb-oad"/>
-                                                                </connections>
-                                                            </stepper>
-                                                        </subviews>
-                                                    </stackView>
-                                                </subviews>
-                                            </stackView>
-                                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="9ey-Az-e5u" userLabel="debugTextView">
-                                                <rect key="frame" x="8" y="8" width="382" height="306.33333333333331"/>
-                                                <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences" autocorrectionType="no"/>
-                                            </textView>
-                                        </subviews>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                        <constraints>
-                                            <constraint firstItem="HFL-Ye-6HR" firstAttribute="centerY" secondItem="xzZ-jc-k2v" secondAttribute="centerY" id="7yv-SD-WC5"/>
-                                            <constraint firstItem="9ey-Az-e5u" firstAttribute="leading" secondItem="xzZ-jc-k2v" secondAttribute="leading" constant="8" id="8DB-3W-vzX"/>
-                                            <constraint firstItem="HFL-Ye-6HR" firstAttribute="centerX" secondItem="xzZ-jc-k2v" secondAttribute="centerX" id="9b8-g8-Qgc"/>
-                                            <constraint firstAttribute="trailing" secondItem="9ey-Az-e5u" secondAttribute="trailing" constant="8" id="MdV-jD-BcV"/>
-                                            <constraint firstAttribute="bottom" secondItem="9ey-Az-e5u" secondAttribute="bottom" constant="8" id="rD1-uF-92v"/>
-                                            <constraint firstItem="9ey-Az-e5u" firstAttribute="top" secondItem="xzZ-jc-k2v" secondAttribute="top" constant="8" id="w6s-Ek-CoQ"/>
-                                        </constraints>
-                                    </view>
-                                </subviews>
-                            </stackView>
-                        </subviews>
                         <viewLayoutGuide key="safeArea" id="Dt4-CR-Iqb"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="Dt4-CR-Iqb" firstAttribute="trailing" secondItem="ZaU-Ss-piB" secondAttribute="trailing" constant="8" id="IRK-1u-ILj"/>
-                            <constraint firstItem="ZaU-Ss-piB" firstAttribute="leading" secondItem="Dt4-CR-Iqb" secondAttribute="leading" constant="8" id="Rbf-PP-eex"/>
-                            <constraint firstItem="Dt4-CR-Iqb" firstAttribute="bottom" secondItem="ZaU-Ss-piB" secondAttribute="bottom" constant="8" id="WgA-wX-qtd"/>
-                            <constraint firstItem="Dt4-CR-Iqb" firstAttribute="bottom" secondItem="xzZ-jc-k2v" secondAttribute="bottom" constant="8" id="bY3-br-SWl"/>
-                            <constraint firstItem="ZaU-Ss-piB" firstAttribute="top" secondItem="Dt4-CR-Iqb" secondAttribute="top" constant="50" id="cD1-U9-tJJ"/>
-                        </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Snoozer" image="zzz" catalog="system" id="TdI-rW-rdW"/>
-                    <connections>
-                        <outlet property="AlertLabel" destination="tiA-fs-ZRV" id="bGa-wR-GbX"/>
-                        <outlet property="BGLabel" destination="Iq3-I1-HX0" id="nkC-0M-OpG"/>
-                        <outlet property="DeltaLabel" destination="YCF-22-z3g" id="bmQ-Wc-E3S"/>
-                        <outlet property="DirectionLabel" destination="hLM-Es-BOa" id="Q2e-By-G1t"/>
-                        <outlet property="MinAgoLabel" destination="HNC-P8-PbV" id="gLP-TD-hOq"/>
-                        <outlet property="SnoozeButton" destination="Meu-VT-byv" id="Xnm-tj-t53"/>
-                        <outlet property="clockLabel" destination="r85-eB-vVd" id="JTa-Uu-hdN"/>
-                        <outlet property="debugTextView" destination="9ey-Az-e5u" id="ycy-T9-ioF"/>
-                        <outlet property="snoozeForMinuteLabel" destination="iC4-A1-q9b" id="Jvg-g0-bjs"/>
-                        <outlet property="snoozeForMinuteStepper" destination="0cS-P2-Zus" id="ren-xl-jxN"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5xM-cL-5VG" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -473,13 +337,13 @@
         <!--Nightscout-->
         <scene sceneID="wg7-f3-ORb">
             <objects>
-                <viewController id="8rJ-Kc-sve" customClass="NightscoutViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="8rJ-Kc-sve" customClass="NightscoutViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="QS5-Rx-YEW">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5Xw-bG-4Kg">
-                                <rect key="frame" x="0.0" y="44" width="414" height="769"/>
+                                <rect key="frame" x="0.0" y="88" width="414" height="691"/>
                                 <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <wkWebViewConfiguration key="configuration">
                                     <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
@@ -508,7 +372,7 @@
         <!--Remote-->
         <scene sceneID="sEH-4N-YEn">
             <objects>
-                <viewController storyboardIdentifier="RemoteViewController" id="7an-Fz-r9u" customClass="RemoteViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="RemoteViewController" id="7an-Fz-r9u" customClass="RemoteViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="53u-XU-GCk">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -525,7 +389,7 @@
         <!--Alarm View Controller-->
         <scene sceneID="a12-B3-C4d">
             <objects>
-                <viewController storyboardIdentifier="AlarmViewController" id="b34-C5-D6e" customClass="AlarmViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="AlarmViewController" id="b34-C5-D6e" customClass="AlarmViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="c56-D7-E8f">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -541,7 +405,7 @@
         <!--Settings-->
         <scene sceneID="ORV-wr-Fd3">
             <objects>
-                <viewController id="hDv-qK-Udb" customClass="SettingsViewController" customModule="Loop_Follow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="hDv-qK-Udb" customClass="SettingsViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ljg-dW-5uR">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -582,11 +446,8 @@
         <image name="house" catalog="system" width="128" height="104"/>
         <image name="safari" catalog="system" width="128" height="123"/>
         <image name="zzz" catalog="system" width="119" height="128"/>
-        <systemColor name="labelColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
         <systemColor name="secondarySystemBackgroundColor">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

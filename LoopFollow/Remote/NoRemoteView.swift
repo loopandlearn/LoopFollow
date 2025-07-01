@@ -1,10 +1,6 @@
-//
-//  NoRemoteView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-14.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// NoRemoteView.swift
+// Created by Jonas Björkert.
 
 import SwiftUI
 

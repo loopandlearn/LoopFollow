@@ -1,10 +1,6 @@
-//
-//  BackgroundAlertManager.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-06-22.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// BackgroundAlertManager.swift
+// Created by Jonas Björkert.
 
 import Foundation
 import UserNotifications
@@ -92,7 +88,7 @@ class BackgroundAlertManager {
                 body: isBluetoothActive
                     ? "App inactive for 18 minutes. Verify Bluetooth connectivity."
                     : "App inactive for 18 minutes. Open to resume."
-            )
+            ),
         ]
 
         for alert in alerts {
