@@ -4,75 +4,6 @@
 
 import SwiftUI
 
-struct AddAlarmSheet: View {
-    let onSelect: (AlarmType) -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    private let columns = [
-        GridItem(.adaptive(minimum: 110), spacing: 16),
-    ]
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(AlarmType.Group.allCases, id: \.self) { group in
-                        if AlarmType.allCases.contains(where: { $0.group == group }) {
-                            Section(header: Text(group.rawValue)
-                                .font(.headline)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 4)
-                            ) {
-                                ForEach(AlarmType.allCases.filter { $0.group == group }, id: \.self) { type in
-                                    AlarmTile(type: type) {
-                                        onSelect(type)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                .padding()
-            }
-            .navigationTitle("Add Alarm")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-            }
-        }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
-    }
-}
-
-private struct AlarmTile: View {
-    let type: AlarmType
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                Image(systemName: type.icon)
-                    .font(.title2)
-                    .foregroundColor(.accentColor)
-                Text(type.rawValue)
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                Text(type.blurb)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-            }
-            .padding()
-            .frame(maxWidth: .infinity, minHeight: 110)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
-        }
-        .buttonStyle(.plain)
-    }
-}
-
 private enum SheetInfo: Identifiable {
     case picker
     case editor(id: UUID, isNew: Bool)
@@ -93,39 +24,63 @@ struct AlarmListView: View {
     @State private var deleteAfterDismiss: UUID?
     @State private var selectedAlarm: Alarm?
 
-    private var sortedAlarms: [Alarm] {
-        store.value.sorted(by: Alarm.byPriorityThenSpec)
+    // MARK: - Categorized Alarms
+
+    private var snoozedAlarms: [Alarm] {
+        store.value.filter { $0.snoozedUntil ?? .distantPast > Date() && $0.isEnabled }
+            .sorted(by: Alarm.byPriorityThenSpec)
     }
+
+    private var activeAlarms: [Alarm] {
+        store.value.filter { $0.isEnabled && ($0.snoozedUntil ?? .distantPast <= Date()) }
+            .sorted(by: Alarm.byPriorityThenSpec)
+    }
+
+    private var inactiveAlarms: [Alarm] {
+        store.value.filter { !$0.isEnabled }
+            .sorted(by: Alarm.byPriorityThenSpec)
+    }
+
+    // MARK: - Formatters
+
+    private var timeFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }
+
+    // MARK: - Body
 
     var body: some View {
         List {
-            ForEach(sortedAlarms) { alarm in
-                Button {
-                    selectedAlarm = alarm
-                    sheetInfo = .editor(id: alarm.id, isNew: false)
-                } label: {
-                    HStack(spacing: 12) {
-                        Glyph(
-                            symbol: alarm.type.icon,
-                            tint: alarm.isEnabled ? .white : Color(uiColor: .darkGray)
-                        )
-                        .overlay {
-                            if let until = alarm.snoozedUntil, until > Date() {
-                                Image(systemName: "zzz")
-                                    .font(.caption.bold())
-                                    .foregroundColor(.secondary)
-                                    .shadow(color: .black, radius: 2)
-                                    .offset(x: 8, y: 8)
-                            }
-                        }
-
-                        Text(alarm.name)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(.primary)
+            // --- SNOOZED ALARMS SECTION ---
+            if !snoozedAlarms.isEmpty {
+                Section(header: Text("Snoozed")) {
+                    ForEach(snoozedAlarms) { alarm in
+                        alarmRow(for: alarm)
                     }
                 }
             }
-            .onDelete(perform: deleteItems)
+
+            // --- ACTIVE ALARMS SECTION ---
+            if !activeAlarms.isEmpty {
+                Section(header: Text("Active Alarms")) {
+                    ForEach(activeAlarms) { alarm in
+                        alarmRow(for: alarm)
+                    }
+                }
+            }
+
+            // --- INACTIVE ALARMS SECTION ---
+            if !inactiveAlarms.isEmpty {
+                Section(header: Text("Inactive Alarms")) {
+                    ForEach(inactiveAlarms) { alarm in
+                        alarmRow(for: alarm)
+                            .opacity(0.6)
+                    }
+                }
+            }
         }
         .sheet(item: $sheetInfo, onDismiss: handleSheetDismiss) { info in
             sheetContent(for: info)
@@ -139,13 +94,50 @@ struct AlarmListView: View {
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
     }
 
-    private func deleteItems(at offsets: IndexSet) {
-        let alarmsToDelete = offsets.map { sortedAlarms[$0] }
+    // MARK: - Views
 
-        let idsToDelete = alarmsToDelete.map { $0.id }
+    @ViewBuilder
+    private func alarmRow(for alarm: Alarm) -> some View {
+        Button {
+            selectedAlarm = alarm
+            sheetInfo = .editor(id: alarm.id, isNew: false)
+        } label: {
+            HStack(spacing: 12) {
+                Glyph(
+                    symbol: alarm.type.icon,
+                    tint: .primary
+                )
 
-        store.value.removeAll { idsToDelete.contains($0.id) }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(alarm.name)
+                        .foregroundColor(.primary)
+
+                    if let until = alarm.snoozedUntil, until > Date() {
+                        HStack(spacing: 4) {
+                            Image(systemName: "zzz")
+                                .font(.caption2)
+                            Text("Snoozed until \(until, formatter: timeFormatter)")
+                                .font(.caption)
+                        }
+                        .foregroundColor(.secondary)
+                    }
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .swipeActions {
+            Button(role: .destructive) {
+                store.value.removeAll { $0.id == alarm.id }
+            } label: {
+                Label("Delete", systemImage: "trash.fill")
+            }
+        }
     }
+
+    // MARK: - Sheet Management
 
     private func handleSheetDismiss() {
         if let id = deleteAfterDismiss,
@@ -185,11 +177,5 @@ struct AlarmListView: View {
                 Text("Alarm not found").padding()
             }
         }
-    }
-
-    private func iconOpacity(for alarm: Alarm) -> Double {
-        if !alarm.isEnabled { return 0.35 }
-        if let until = alarm.snoozedUntil, until > Date() { return 0.55 }
-        return 1.0
     }
 }
