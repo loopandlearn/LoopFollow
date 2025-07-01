@@ -1772,71 +1772,50 @@ extension MainViewController {
     }
 
     func wrapText(_ text: String, maxLineLength: Int) -> String {
-        return text
-        var lines: [String] = []
-        var currentLine = ""
+        guard maxLineLength > 0 else {
+            return text
+        }
 
-        let words = text.components(separatedBy: .whitespacesAndNewlines)
-        for word in words {
-            if word.count > maxLineLength {
-                var wordToProcess = word
-                while !wordToProcess.isEmpty {
-                    let spaceCount = currentLine.isEmpty ? 0 : 1
-                    let availableSpace = maxLineLength - (currentLine.count + spaceCount)
+        var result: [String] = []
+        let lines = text.components(separatedBy: .newlines)
 
-                    if availableSpace <= 0 {
-                        if !currentLine.isEmpty {
-                            lines.append(currentLine)
-                            currentLine = ""
-                        }
-                        continue
-                    }
+        for line in lines {
+            var currentLine = ""
+            let words = line.components(separatedBy: .whitespaces)
 
-                    let takeCount = min(wordToProcess.count, availableSpace)
-                    if takeCount <= 0 {
-                        if !currentLine.isEmpty {
-                            lines.append(currentLine)
-                            currentLine = ""
-                        }
-                        continue
-                    }
-
-                    let index = wordToProcess.index(wordToProcess.startIndex, offsetBy: takeCount)
-                    let substring = wordToProcess[..<index]
-
-                    if currentLine.isEmpty {
-                        currentLine = String(substring)
-                    } else {
-                        currentLine += " " + substring
-                    }
-
-                    wordToProcess = String(wordToProcess[index...])
-
-                    if currentLine.count >= maxLineLength {
-                        lines.append(currentLine)
+            for word in words {
+                // Handles words that are longer than a single line.
+                if word.count > maxLineLength {
+                    if !currentLine.isEmpty {
+                        result.append(currentLine)
                         currentLine = ""
                     }
-                }
-            } else {
-                let spaceNeeded = currentLine.isEmpty ? 0 : 1
-                if currentLine.count + spaceNeeded + word.count > maxLineLength {
-                    lines.append(currentLine)
-                    currentLine = word
+
+                    var wordToSplit = word
+                    while !wordToSplit.isEmpty {
+                        let splitIndex = wordToSplit.index(wordToSplit.startIndex, offsetBy: min(maxLineLength, wordToSplit.count))
+                        result.append(String(wordToSplit[..<splitIndex]))
+                        wordToSplit = String(wordToSplit[splitIndex...])
+                    }
                 } else {
+                    // The word fits on the line.
                     if currentLine.isEmpty {
                         currentLine = word
-                    } else {
+                    } else if currentLine.count + word.count + 1 <= maxLineLength {
                         currentLine += " " + word
+                    } else {
+                        result.append(currentLine)
+                        currentLine = word
                     }
                 }
             }
+
+            if !currentLine.isEmpty {
+                result.append(currentLine)
+            }
         }
 
-        if !currentLine.isEmpty {
-            lines.append(currentLine)
-        }
-
-        return lines.joined(separator: "\r\n")
+        return result.joined(separator: "\r\n")
     }
 
     func formatPillText(line1: String, time: TimeInterval, line2: String? = nil) -> String {
