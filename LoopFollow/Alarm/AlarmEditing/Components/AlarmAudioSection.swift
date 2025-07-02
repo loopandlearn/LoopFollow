@@ -96,32 +96,38 @@ private struct TonePickerSheet: View {
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(SoundFile.allCases) { tone in
-                    Button {
-                        selected = tone
-                        AlarmSound.setSoundFile(str: tone.rawValue)
-                        AlarmSound.stop()
-                        AlarmSound.playTest()
-                    } label: {
-                        HStack {
-                            Text(tone.displayName)
-                            if tone == selected {
-                                Spacer()
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.accentColor)
+            ScrollViewReader { proxy in
+                List {
+                    ForEach(SoundFile.allCases) { tone in
+                        Button {
+                            selected = tone
+                            AlarmSound.setSoundFile(str: tone.rawValue)
+                            AlarmSound.stop()
+                            AlarmSound.playTest()
+                        } label: {
+                            HStack {
+                                Text(tone.displayName)
+                                if tone == selected {
+                                    Spacer()
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.accentColor)
+                                }
                             }
+                        }
+                        .id(tone)
+                    }
+                }
+                .navigationTitle("Choose Tone")
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {
+                            AlarmSound.stop()
+                            dismiss()
                         }
                     }
                 }
-            }
-            .navigationTitle("Choose Tone")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        AlarmSound.stop()
-                        dismiss()
-                    }
+                .onAppear {
+                    proxy.scrollTo(selected, anchor: .center)
                 }
             }
         }
