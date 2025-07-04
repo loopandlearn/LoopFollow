@@ -8,6 +8,8 @@ import UIKit
 
 extension MainViewController {
     func webLoadNSDeviceStatus() {
+        Storage.shared.lastLoopingChecked.value = Date()
+
         let parameters = ["count": "1"]
         NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
             switch result {
