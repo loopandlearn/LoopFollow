@@ -103,8 +103,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // calendar setup
     let store = EKEventStore()
 
-    // Stores the time of the last speech announcement to prevent repeated announcements.
-    var lastSpeechTime: Date?
+    // Stores the timestamp of the last BG value that was spoken.
+    var lastSpokenBGDate: TimeInterval = 0
 
     var autoScrollPauseUntil: Date? = nil
 
@@ -274,6 +274,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .store(in: &cancellables)
 
         updateQuickActions()
+
+        speechSynthesizer.delegate = self
     }
 
     // Update the Home Screen Quick Action for toggling the "Speak BG" feature based on the current speakBG setting.
@@ -327,7 +329,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         currentCage = nil
         currentSage = nil
         currentIage = nil
-        lastSpeechTime = nil
+        lastSpokenBGDate = 0
         refreshControl.endRefreshing()
     }
 
@@ -734,5 +736,23 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         Storage.shared.infoSort.value = sortArray
         Storage.shared.infoVisible.value = visibleArray
+    }
+}
+
+extension MainViewController: AVSpeechSynthesizerDelegate {
+    func speechSynthesizer(_: AVSpeechSynthesizer, didFinish _: AVSpeechUtterance) {
+        let appState = UIApplication.shared.applicationState
+        let isSilentTuneMode = Storage.shared.backgroundRefreshType.value == .silentTune
+
+        if isSilentTuneMode, appState == .background {
+            LogManager.shared.log(category: .general, message: "Silent tune active in background; not deactivating session.", isDebug: true)
+        } else {
+            do {
+                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                LogManager.shared.log(category: .general, message: "Audio session deactivated after speech.", isDebug: true)
+            } catch {
+                LogManager.shared.log(category: .alarm, message: "Failed to deactivate audio session: \(error)")
+            }
+        }
     }
 }

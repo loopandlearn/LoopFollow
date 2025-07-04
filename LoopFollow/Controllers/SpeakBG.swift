@@ -121,37 +121,38 @@ extension MainViewController {
     }
 
     // Speaks the current blood glucose value and the change from the previous value.
-    // Repeated calls to the function within 30 seconds are prevented.
     func speakBG(currentValue: Int, previousValue: Int) {
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.playback, mode: .default)
-            try audioSession.setActive(true)
-        } catch {
-            LogManager.shared.log(category: .alarm, message: "speakBG, Failed to set up audio session: \(error)")
-        }
-
-        // Get the current time
-        let currentTime = Date()
-
-        // Check if speakBG was called less than 30 seconds ago. If so, prevent repeated announcements and return.
-        // If `lastSpeechTime` is `nil` (i.e., this is the first time `speakBG` is being called), use `Date.distantPast` as the default
-        // value to ensure that the `guard` statement passes and the announcement is made.
-        guard currentTime.timeIntervalSince(lastSpeechTime ?? .distantPast) >= 30 else {
-            LogManager.shared.log(category: .general, message: "Repeated calls to speakBG detected!", isDebug: true)
+        // 1. Check if there's a new, unspoken BG value
+        guard let lastBG = bgData.last else {
+            // No data, so nothing to speak.
             return
         }
 
-        // Update the last speech time
-        lastSpeechTime = currentTime
+        // Compare the timestamp of the latest BG reading with the last one we spoke.
+        guard lastBG.date > lastSpokenBGDate else {
+            // The latest value has already been spoken, so we do nothing.
+            return
+        }
 
+        // 2. Now that we know we need to speak, activate the audio session.
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.playback, mode: .default, options: .duckOthers)
+            try audioSession.setActive(true)
+        } catch {
+            LogManager.shared.log(category: .general, message: "speakBG, Failed to set up audio session: \(error)")
+            return
+        }
+
+        // 3. Mark this BG value as spoken
+        // This prevents race conditions where another call might try to speak the same value.
+        lastSpokenBGDate = lastBG.date
+
+        // 4. Generate announcement text.
         let bloodGlucoseDifference = currentValue - previousValue
-
         let preferredLanguage = Storage.shared.speakLanguage.value
         let voiceLanguageCode = LanguageVoiceMapping.voiceLanguageCode(forAppLanguage: preferredLanguage)
-
         let texts = AnnouncementTexts.forLanguage(preferredLanguage)
-
         let negligibleThreshold = 3
         let localizedCurrentValue = Localizer.toDisplayUnits(String(currentValue)).replacingOccurrences(of: ",", with: ".")
         let announcementText: String
@@ -164,9 +165,9 @@ extension MainViewController {
             announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(directionText) \(absoluteDifference)"
         }
 
+        // 5. Speak.
         let speechUtterance = AVSpeechUtterance(string: announcementText)
         speechUtterance.voice = AVSpeechSynthesisVoice(language: voiceLanguageCode)
-
         speechSynthesizer.speak(speechUtterance)
     }
 }
