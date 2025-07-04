@@ -329,7 +329,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         currentCage = nil
         currentSage = nil
         currentIage = nil
-        lastSpokenBGDate = 0
         refreshControl.endRefreshing()
     }
 
