@@ -43,6 +43,17 @@ class AlarmManager {
     func checkAlarms(data: AlarmData) {
         let now = Date()
         var alarmTriggered = false
+
+        let config = Storage.shared.alarmConfiguration.value
+
+        // Honor the "Snooze All" setting. If active, stop any current alarm and exit.
+        if let snoozeUntil = config.snoozeUntil, snoozeUntil > now {
+            if Observable.shared.currentAlarm.value != nil {
+                stopAlarm()
+            }
+            return
+        }
+
         let alarms = Storage.shared.alarms.value
 
         let sorted = alarms.sorted(by: Alarm.byPriorityThenSpec)
