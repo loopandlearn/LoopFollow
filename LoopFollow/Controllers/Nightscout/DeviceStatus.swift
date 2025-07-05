@@ -72,7 +72,12 @@ extension MainViewController {
 
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
-        infoManager.clearInfoData(types: [.iob, .cob, .override, .battery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
+        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
+
+        // For Loop, clear the current override here - For Trio, it is handled using treatments
+        if Storage.shared.device.value == "Loop" {
+            infoManager.clearInfoData(types: [.override])
+        }
 
         if jsonDeviceStatus.count == 0 {
             LogManager.shared.log(category: .deviceStatus, message: "Device status is empty")
