@@ -31,6 +31,8 @@
 		DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */; };
 		DD0C0C702C4AFFE800DBADDF /* RemoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */; };
 		DD0C0C722C4B000800DBADDF /* TrioNightscoutRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C712C4B000800DBADDF /* TrioNightscoutRemoteView.swift */; };
+		DD12D4852E1705D9004E0112 /* AlarmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD12D4842E1705D9004E0112 /* AlarmViewController.swift */; };
+		DD12D4872E1705E6004E0112 /* AlarmsContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD12D4862E1705E6004E0112 /* AlarmsContainerView.swift */; };
 		DD13BC752C3FD6210062313B /* InfoType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC742C3FD6200062313B /* InfoType.swift */; };
 		DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC762C3FD64E0062313B /* InfoData.swift */; };
 		DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC782C3FE63A0062313B /* InfoManager.swift */; };
@@ -403,6 +405,8 @@
 		DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbMetric.swift; sourceTree = "<group>"; };
 		DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteViewController.swift; sourceTree = "<group>"; };
 		DD0C0C712C4B000800DBADDF /* TrioNightscoutRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioNightscoutRemoteView.swift; sourceTree = "<group>"; };
+		DD12D4842E1705D9004E0112 /* AlarmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmViewController.swift; sourceTree = "<group>"; };
+		DD12D4862E1705E6004E0112 /* AlarmsContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmsContainerView.swift; sourceTree = "<group>"; };
 		DD13BC742C3FD6200062313B /* InfoType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoType.swift; sourceTree = "<group>"; };
 		DD13BC762C3FD64E0062313B /* InfoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoData.swift; sourceTree = "<group>"; };
 		DD13BC782C3FE63A0062313B /* InfoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoManager.swift; sourceTree = "<group>"; };
@@ -1113,6 +1117,7 @@
 		DDCF9A7E2D85FCE6004DF4DD /* Alarm */ = {
 			isa = PBXGroup;
 			children = (
+				DD12D4862E1705E6004E0112 /* AlarmsContainerView.swift */,
 				DDDC31CA2E13A7D2009EA0F3 /* AddAlarm */,
 				DDCC3A502DDC5BD4006F1C10 /* DataStructs */,
 				DDC6CA3B2DD7B9050060EE25 /* AlarmType */,
@@ -1481,6 +1486,7 @@
 		FCC68871248A736700A0279D /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				DD12D4842E1705D9004E0112 /* AlarmViewController.swift */,
 				FC97881B2485969B00A7906C /* MainViewController.swift */,
 				FC97881D2485969B00A7906C /* NightScoutViewController.swift */,
 				FCFEECA1248857A600402A7F /* SettingsViewController.swift */,
@@ -1852,6 +1858,7 @@
 				DD7F4C072DD5042F00D449E9 /* OverrideStartAlarmEditor.swift in Sources */,
 				DDCC3A4B2DDBB5E4006F1C10 /* BatteryCondition.swift in Sources */,
 				DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */,
+				DD12D4872E1705E6004E0112 /* AlarmsContainerView.swift in Sources */,
 				DD83164A2DE4C504004467AA /* SettingsStepperRow.swift in Sources */,
 				DD0650ED2DCE9371004D3B41 /* HighBgAlarmEditor.swift in Sources */,
 				DD7F4C172DD63FA700D449E9 /* RecBolusCondition.swift in Sources */,
@@ -1978,6 +1985,7 @@
 				DD4AFB3B2DB55CB600BB593F /* TimeOfDay.swift in Sources */,
 				DDEF503C2D31BE2D00999A5D /* TaskScheduler.swift in Sources */,
 				DD0650EB2DCE8385004D3B41 /* LowBGCondition.swift in Sources */,
+				DD12D4852E1705D9004E0112 /* AlarmViewController.swift in Sources */,
 				DD0C0C6B2C48562000DBADDF /* InsulinMetric.swift in Sources */,
 				DD493AD92ACF2171009A6922 /* Carbs.swift in Sources */,
 				DD493AE92ACF2445009A6922 /* BGData.swift in Sources */,
