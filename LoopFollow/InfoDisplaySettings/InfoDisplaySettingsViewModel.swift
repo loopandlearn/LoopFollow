@@ -1,10 +1,6 @@
-//
-//  InfoDisplaySettingsViewModel.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-05.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// InfoDisplaySettingsViewModel.swift
+// Created by Jonas Björkert.
 
 import Foundation
 import SwiftUI
@@ -14,18 +10,18 @@ class InfoDisplaySettingsViewModel: ObservableObject {
     @Published var infoVisible: [Bool]
 
     init() {
-        self.infoSort = UserDefaultsRepository.infoSort.value
-        self.infoVisible = UserDefaultsRepository.infoVisible.value
+        infoSort = Storage.shared.infoSort.value
+        infoVisible = Storage.shared.infoVisible.value
     }
 
     func toggleVisibility(for sortedIndex: Int) {
         infoVisible[sortedIndex].toggle()
-        UserDefaultsRepository.infoVisible.value = infoVisible
+        Storage.shared.infoVisible.value = infoVisible
     }
 
     func move(from source: IndexSet, to destination: Int) {
         infoSort.move(fromOffsets: source, toOffset: destination)
-        UserDefaultsRepository.infoSort.value = infoSort
+        Storage.shared.infoSort.value = infoSort
     }
 
     func getName(for index: Int) -> String {

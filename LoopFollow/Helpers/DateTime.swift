@@ -1,16 +1,10 @@
-//
-//  DateTime.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 6/16/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// DateTime.swift
+// Created by Jon Fawcett.
 
 import Foundation
 
-
 class dateTimeUtils {
-    
     static func getTimeIntervalMidnightToday() -> TimeInterval {
         let now = Date()
         let formatter = DateFormatter()
@@ -24,7 +18,7 @@ class dateTimeUtils {
         guard let midnightTimeInterval = newDate?.timeIntervalSince1970 else { return 0 }
         return midnightTimeInterval
     }
-    
+
     static func getTimeIntervalMidnightYesterday() -> TimeInterval {
         let now = Date().addingTimeInterval(-86400)
         let formatter = DateFormatter()
@@ -38,13 +32,13 @@ class dateTimeUtils {
         guard let midnightTimeInterval = newDate?.timeIntervalSince1970 else { return 0 }
         return midnightTimeInterval
     }
-    
+
     static func getTimeIntervalNHoursAgo(N: Int) -> TimeInterval {
         let today = Date()
         let nHoursAgo = Calendar.current.date(byAdding: .hour, value: -N, to: today)!
         return nHoursAgo.timeIntervalSince1970
     }
-    
+
     static func getNowTimeIntervalUTC() -> TimeInterval {
         let now = Date()
         let formatter = DateFormatter()
@@ -56,24 +50,24 @@ class dateTimeUtils {
         guard let utcTime = day?.timeIntervalSince1970 else { return 0 }
         return utcTime
     }
-    
+
     static func getDateTimeString(addingHours hours: Int? = nil, addingDays days: Int? = nil) -> String {
         let currentDate = Date()
         var date = currentDate
-        
+
         if let hoursToAdd = hours {
             date = Calendar.current.date(byAdding: .hour, value: hoursToAdd, to: currentDate)!
         }
-        
+
         if let daysToAdd = days {
             date = Calendar.current.date(byAdding: .day, value: daysToAdd, to: currentDate)!
         }
-        
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         dateFormatter.locale = Locale(identifier: "en_US")
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        
+
         return dateFormatter.string(from: date)
     }
 
@@ -84,7 +78,7 @@ class dateTimeUtils {
         formatter.locale = Locale(identifier: "en_US")
         return formatter.string(from: date)
     }
-    
+
     static func is24Hour() -> Bool {
         let dateFormat = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: Locale.current)!
 

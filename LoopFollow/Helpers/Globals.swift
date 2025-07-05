@@ -1,17 +1,12 @@
-//
-//  Globals.swift
-//  LoopFollow
-//
-//  Created by Jon Fawcett on 7/23/20.
-//  Copyright © 2020 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// Globals.swift
+// Created by Jon Fawcett.
 
 import Foundation
 
-
-struct globalVariables {
+enum globalVariables {
     static var debugLog = ""
-    
+
     // Graph Settings
     static let dotBG: Float = 3
     static let dotCarb: Float = 5

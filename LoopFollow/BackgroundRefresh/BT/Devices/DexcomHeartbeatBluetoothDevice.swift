@@ -1,22 +1,18 @@
-//
-//  DexcomHeartbeatBluetoothDevice.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-04.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// DexcomHeartbeatBluetoothDevice.swift
+// Created by Jonas Björkert.
 
+import AVFoundation
+import CoreBluetooth
 import Foundation
 import os
-import CoreBluetooth
-import AVFoundation
 
 class DexcomHeartbeatBluetoothDevice: BluetoothDevice {
     private let CBUUID_Service_G7 = "F8083532-849E-531C-C594-30F1F86A4EA5"
     private let CBUUID_Advertisement_G7 = "FEBC"
     private let CBUUID_ReceiveCharacteristic_G7 = "F8083535-849E-531C-C594-30F1F86A4EA5"
 
-    init(address:String, name:String?, bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
+    init(address: String, name: String?, bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
         super.init(
             address: address,
             name: name,
@@ -29,7 +25,7 @@ class DexcomHeartbeatBluetoothDevice: BluetoothDevice {
 
     override func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         super.centralManager(central, didDisconnectPeripheral: peripheral, error: error)
-        self.bluetoothDeviceDelegate?.heartBeat()
+        bluetoothDeviceDelegate?.heartBeat()
     }
 
     override func expectedHeartbeatInterval() -> TimeInterval? {

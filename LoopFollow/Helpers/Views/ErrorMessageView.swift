@@ -1,10 +1,6 @@
-//
-//  ErrorMessageView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-31.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// ErrorMessageView.swift
+// Created by Jonas Björkert.
 
 import Foundation
 import SwiftUI

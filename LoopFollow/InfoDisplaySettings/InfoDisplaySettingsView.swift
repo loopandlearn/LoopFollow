@@ -1,24 +1,19 @@
-//
-//  InfoDisplaySettingsView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-05.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// InfoDisplaySettingsView.swift
+// Created by Jonas Björkert.
 
 import SwiftUI
 
 struct InfoDisplaySettingsView: View {
     @ObservedObject var viewModel: InfoDisplaySettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("General")) {
                     Toggle(isOn: Binding(
-                        get: { UserDefaultsRepository.hideInfoTable.value },
-                        set: { UserDefaultsRepository.hideInfoTable.value = $0 }
+                        get: { Storage.shared.hideInfoTable.value },
+                        set: { Storage.shared.hideInfoTable.value = $0 }
                     )) {
                         Text("Hide Information Table")
                     }
@@ -44,12 +39,11 @@ struct InfoDisplaySettingsView: View {
                     .environment(\.editMode, .constant(.active))
                 }
             }
-            .navigationBarItems(trailing: Button("Done") {
-                presentationMode.wrappedValue.dismiss()
-            })
             .onDisappear {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Information Display Settings", displayMode: .inline)
     }
 }

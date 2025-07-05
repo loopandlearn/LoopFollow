@@ -1,10 +1,6 @@
-//
-//  InfoDataSeparator.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-16.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// InfoDataSeparator.swift
+// Created by Jonas Björkert.
 
 import Foundation
 

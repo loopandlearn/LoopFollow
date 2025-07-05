@@ -1,10 +1,6 @@
-//
-//  TrioRemoteControlView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-25.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TrioRemoteControlView.swift
+// Created by Jonas Björkert.
 
 import SwiftUI
 
@@ -17,7 +13,7 @@ struct TrioRemoteControlView: View {
             VStack {
                 let columns = [
                     GridItem(.flexible(), spacing: 16),
-                    GridItem(.flexible(), spacing: 16)
+                    GridItem(.flexible(), spacing: 16),
                 ]
 
                 LazyVGrid(columns: columns, spacing: 16) {

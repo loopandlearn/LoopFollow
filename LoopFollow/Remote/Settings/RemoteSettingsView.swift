@@ -1,18 +1,12 @@
-//
-//  RemoteSettingsView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-08-25.
-//  Updated on 2024-09-16.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// RemoteSettingsView.swift
+// Created by Jonas Björkert.
 
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct RemoteSettingsView: View {
     @ObservedObject var viewModel: RemoteSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
 
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
@@ -26,6 +20,7 @@ struct RemoteSettingsView: View {
         NavigationView {
             Form {
                 // MARK: - Remote Type Section (Custom Rows)
+
                 Section(header: Text("Remote Type")) {
                     remoteTypeRow(type: .none, label: "None", isEnabled: true)
 
@@ -43,6 +38,7 @@ struct RemoteSettingsView: View {
                 }
 
                 // MARK: - User Information Section
+
                 if viewModel.remoteType != .none {
                     Section(header: Text("User Information")) {
                         HStack {
@@ -56,38 +52,40 @@ struct RemoteSettingsView: View {
                 }
 
                 // MARK: - Trio Remote Control Settings
+
                 if viewModel.remoteType == .trc {
                     Section(header: Text("Trio Remote Control Settings")) {
                         HStack {
                             Text("Shared Secret")
-                            TextField("Enter Shared Secret", text: $viewModel.sharedSecret)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .multilineTextAlignment(.trailing)
+                            TogglableSecureInput(
+                                placeholder: "Enter Shared Secret",
+                                text: $viewModel.sharedSecret,
+                                style: .singleLine
+                            )
                         }
 
                         HStack {
                             Text("APNS Key ID")
-                            TextField("Enter APNS Key ID", text: $viewModel.keyId)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .multilineTextAlignment(.trailing)
+                            TogglableSecureInput(
+                                placeholder: "Enter APNS Key ID",
+                                text: $viewModel.keyId,
+                                style: .singleLine
+                            )
                         }
 
                         VStack(alignment: .leading) {
                             Text("APNS Key")
-                            TextEditor(text: $viewModel.apnsKey)
-                                .frame(height: 100)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                                )
+                            TogglableSecureInput(
+                                placeholder: "Paste APNS Key",
+                                text: $viewModel.apnsKey,
+                                style: .multiLine
+                            )
+                            .frame(minHeight: 110)
                         }
                     }
 
                     // MARK: - Guardrails
+
                     Section(header: Text("Guardrails")) {
                         HStack {
                             Text("Max Bolus")
@@ -167,6 +165,7 @@ struct RemoteSettingsView: View {
                     }
 
                     // MARK: - Meal Section
+
                     Section(header: Text("Meal Settings")) {
                         Toggle("Meal with Bolus", isOn: $viewModel.mealWithBolus)
                             .toggleStyle(SwitchToggleStyle())
@@ -176,19 +175,12 @@ struct RemoteSettingsView: View {
                     }
 
                     // MARK: - Debug / Info
+
                     Section(header: Text("Debug / Info")) {
                         Text("Device Token: \(Storage.shared.deviceToken.value)")
                         Text("Production Env.: \(Storage.shared.productionEnvironment.value ? "True" : "False")")
                         Text("Team ID: \(Storage.shared.teamId.value ?? "")")
                         Text("Bundle ID: \(Storage.shared.bundleId.value)")
-                    }
-                }
-            }
-            .navigationBarTitle("Remote Settings", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
                     }
                 }
             }
@@ -205,9 +197,12 @@ struct RemoteSettingsView: View {
                 }
             }
         }
+        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .navigationBarTitle("Remote Settings", displayMode: .inline)
     }
 
     // MARK: - Custom Row for Remote Type Selection
+
     private func remoteTypeRow(type: RemoteType, label: String, isEnabled: Bool) -> some View {
         Button(action: {
             if isEnabled {
@@ -229,6 +224,7 @@ struct RemoteSettingsView: View {
     }
 
     // MARK: - Validation Error Handler
+
     private func handleValidationError(_ message: String) {
         alertMessage = message
         alertType = .validation

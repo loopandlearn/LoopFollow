@@ -1,13 +1,9 @@
-//
-//  ContactImageUpdater.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-12-10.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// ContactImageUpdater.swift
+// Created by Jonas Björkert.
 
-import Foundation
 import Contacts
+import Foundation
 import UIKit
 
 class ContactImageUpdater {
@@ -34,11 +30,11 @@ class ContactImageUpdater {
             let bundleDisplayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "LoopFollow"
 
             for contactType in ContactType.allCases {
-                if contactType == .Delta && Storage.shared.contactDelta.value != .separate {
+                if contactType == .Delta, Storage.shared.contactDelta.value != .separate {
                     continue
                 }
 
-                if contactType == .Trend && Storage.shared.contactTrend.value != .separate {
+                if contactType == .Trend, Storage.shared.contactTrend.value != .separate {
                     continue
                 }
 
@@ -89,27 +85,27 @@ class ContactImageUpdater {
         paragraphStyle.alignment = .center
 
         // Format extraDelta based on the user's unit preference
-        let unitPreference = UserDefaultsRepository.units.value
+        let unitPreference = Storage.shared.units.value
         let yOffset: CGFloat = 48
-        if contactType == .Trend && Storage.shared.contactTrend.value == .separate {
+        if contactType == .Trend, Storage.shared.contactTrend.value == .separate {
             let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
             let trendFontSize = max(40, 200 - CGFloat(trend.count * 15))
 
             let trendAttributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.boldSystemFont(ofSize: trendFontSize),
                 .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-                .paragraphStyle: paragraphStyle
+                .paragraphStyle: paragraphStyle,
             ]
 
             trend.draw(in: trendRect, withAttributes: trendAttributes)
-        } else if contactType == .Delta && Storage.shared.contactDelta.value == .separate {
+        } else if contactType == .Delta, Storage.shared.contactDelta.value == .separate {
             let deltaRect = CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
             let deltaFontSize = max(40, 200 - CGFloat(delta.count * 15))
 
             let deltaAttributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.boldSystemFont(ofSize: deltaFontSize),
                 .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-                .paragraphStyle: paragraphStyle
+                .paragraphStyle: paragraphStyle,
             ]
 
             delta.draw(in: deltaRect, withAttributes: deltaAttributes)
@@ -121,7 +117,7 @@ class ContactImageUpdater {
             var bgAttributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.boldSystemFont(ofSize: fontSize),
                 .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-                .paragraphStyle: paragraphStyle
+                .paragraphStyle: paragraphStyle,
             ]
 
             if stale {
@@ -132,8 +128,8 @@ class ContactImageUpdater {
             }
 
             let bgRect: CGRect = includesExtra
-            ? CGRect(x: 0, y: yOffset - 20, width: size.width, height: size.height / 2)
-            : CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
+                ? CGRect(x: 0, y: yOffset - 20, width: size.width, height: size.height / 2)
+                : CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
 
             bgValue.draw(in: bgRect, withAttributes: bgAttributes)
 
@@ -142,7 +138,7 @@ class ContactImageUpdater {
                 let extraAttributes: [NSAttributedString.Key: Any] = [
                     .font: UIFont.systemFont(ofSize: 90),
                     .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-                    .paragraphStyle: paragraphStyle
+                    .paragraphStyle: paragraphStyle,
                 ]
 
                 let extra = Storage.shared.contactDelta.value == .include ? delta : trend

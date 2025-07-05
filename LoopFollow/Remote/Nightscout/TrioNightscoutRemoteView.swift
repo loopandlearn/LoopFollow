@@ -1,20 +1,16 @@
-//
-//  TrioNightscoutRemoteView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-07-19.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// TrioNightscoutRemoteView.swift
+// Created by Jonas Björkert.
 
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct TrioNightscoutRemoteView: View {
     private let remoteController = TrioNightscoutRemoteController()
 
-    @ObservedObject var nightscoutURL = ObservableUserDefaults.shared.url
-    @ObservedObject var device = ObservableUserDefaults.shared.device
-    @ObservedObject var nsWriteAuth = ObservableUserDefaults.shared.nsWriteAuth
+    @ObservedObject var nightscoutURL = Storage.shared.url
+    @ObservedObject var device = Storage.shared.device
+    @ObservedObject var nsWriteAuth = Storage.shared.nsWriteAuth
     @ObservedObject var tempTarget = Observable.shared.tempTarget
 
     @State private var newHKTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0.0)
@@ -62,7 +58,7 @@ struct TrioNightscoutRemoteView: View {
                                     Text("Current Target")
                                     Spacer()
                                     Text(Localizer.formatQuantity(tempTargetValue))
-                                    Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
+                                    Text(Localizer.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                                 }
                                 Button {
                                     alertType = .confirmCancellation
@@ -85,7 +81,7 @@ struct TrioNightscoutRemoteView: View {
                                 TextFieldWithToolBar(
                                     quantity: $newHKTarget,
                                     maxLength: 4,
-                                    unit: UserDefaultsRepository.getPreferredUnit(),
+                                    unit: Localizer.getPreferredUnit(),
                                     minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80),
                                     maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200),
                                     onValidationError: { message in
@@ -93,7 +89,7 @@ struct TrioNightscoutRemoteView: View {
                                     }
                                 )
                                 .focused($targetFieldIsFocused)
-                                Text(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
+                                Text(Localizer.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
                             }
                             HStack {
                                 Text("Duration")
@@ -185,7 +181,7 @@ struct TrioNightscoutRemoteView: View {
                 case .confirmCommand:
                     return Alert(
                         title: Text("Confirm Command"),
-                        message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
+                        message: Text("New Target: \(Localizer.formatQuantity(newHKTarget)) \(Localizer.getPreferredUnit().localizedShortUnitString)\nDuration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"),
                         primaryButton: .default(Text("Confirm"), action: {
                             enactTempTarget()
                         }),
@@ -248,8 +244,8 @@ struct TrioNightscoutRemoteView: View {
     }
 
     private var isButtonDisabled: Bool {
-        return newHKTarget.doubleValue(for: UserDefaultsRepository.getPreferredUnit()) == 0 ||
-        duration.doubleValue(for: HKUnit.minute()) == 0 || isLoading
+        return newHKTarget.doubleValue(for: Localizer.getPreferredUnit()) == 0 ||
+            duration.doubleValue(for: HKUnit.minute()) == 0 || isLoading
     }
 
     private func enactTempTarget() {
@@ -261,13 +257,13 @@ struct TrioNightscoutRemoteView: View {
                     self.statusMessage = "Command successfully sent to Nightscout."
                     LogManager.shared.log(
                         category: .nightscout,
-                        message: "sendTempTarget succeeded - New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
+                        message: "sendTempTarget succeeded - New Target: \(Localizer.formatQuantity(newHKTarget)) \(Localizer.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
                     )
                 } else {
                     self.statusMessage = "Failed to enact target."
                     LogManager.shared.log(
                         category: .nightscout,
-                        message: "sendTempTarget failed - New Target: \(Localizer.formatQuantity(newHKTarget)) \(UserDefaultsRepository.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
+                        message: "sendTempTarget failed - New Target: \(Localizer.formatQuantity(newHKTarget)) \(Localizer.getPreferredUnit().localizedShortUnitString), Duration: \(Int(duration.doubleValue(for: HKUnit.minute()))) minutes"
                     )
                 }
                 self.alertType = .status

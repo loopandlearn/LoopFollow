@@ -1,10 +1,6 @@
-//
-//  LoadingButtonView.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2024-09-17.
-//  Copyright © 2024 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// LoadingButtonView.swift
+// Created by Jonas Björkert.
 
 import SwiftUI
 

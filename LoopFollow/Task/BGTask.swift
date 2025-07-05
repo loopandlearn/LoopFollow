@@ -1,10 +1,6 @@
-//
-//  BGTask.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-11.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// BGTask.swift
+// Created by Jonas Björkert.
 
 import Foundation
 
@@ -25,20 +21,20 @@ extension MainViewController {
         )
 
         // If no Dexcom credentials and no Nightscout, schedule a retry in 60 seconds.
-        if UserDefaultsRepository.shareUserName.value == "",
-           UserDefaultsRepository.sharePassword.value == "",
+        if Storage.shared.shareUserName.value == "",
+           Storage.shared.sharePassword.value == "",
            !IsNightscoutEnabled()
         {
             return
         }
 
         // If Dexcom credentials exist, fetch from DexShare
-        if UserDefaultsRepository.shareUserName.value != "" &&
-            UserDefaultsRepository.sharePassword.value != ""
+        if Storage.shared.shareUserName.value != "",
+           Storage.shared.sharePassword.value != ""
         {
-            self.webLoadDexShare()
+            webLoadDexShare()
         } else {
-            self.webLoadNSBGData()
+            webLoadNSBGData()
         }
     }
 }

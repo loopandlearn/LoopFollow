@@ -1,35 +1,31 @@
-//
-//  BluetoothDevice.swift
-//  LoopFollow
-//
-//  Created by Jonas Björkert on 2025-01-04.
-//  Copyright © 2025 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// BluetoothDevice.swift
+// Created by Jonas Björkert.
 
-import Foundation
 import CoreBluetooth
+import Foundation
 import os
 import UIKit
 
 class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     public weak var bluetoothDeviceDelegate: BluetoothDeviceDelegate?
-    private(set) var deviceAddress:String
-    private(set) var deviceName:String?
-    private let CBUUID_Advertisement:String?
-    private let servicesCBUUIDs:[CBUUID]?
-    private let CBUUID_ReceiveCharacteristic:String
+    private(set) var deviceAddress: String
+    private(set) var deviceName: String?
+    private let CBUUID_Advertisement: String?
+    private let servicesCBUUIDs: [CBUUID]?
+    private let CBUUID_ReceiveCharacteristic: String
     private var centralManager: CBCentralManager?
     private var peripheral: CBPeripheral?
-    private var timeStampLastStatusUpdate:Date
-    private var receiveCharacteristic:CBCharacteristic?
+    private var timeStampLastStatusUpdate: Date
+    private var receiveCharacteristic: CBCharacteristic?
     private let maxTimeToWaitForPeripheralResponse = 5.0
     private var connectTimeOutTimer: Timer?
     var lastHeartbeatTime: Date?
 
-    init(address:String, name:String?, CBUUID_Advertisement:String?, servicesCBUUIDs:[CBUUID]?, CBUUID_ReceiveCharacteristic:String, bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
-        self.lastHeartbeatTime = nil
-        self.deviceAddress = address
-        self.deviceName = name
+    init(address: String, name: String?, CBUUID_Advertisement: String?, servicesCBUUIDs: [CBUUID]?, CBUUID_ReceiveCharacteristic: String, bluetoothDeviceDelegate: BluetoothDeviceDelegate) {
+        lastHeartbeatTime = nil
+        deviceAddress = address
+        deviceName = name
 
         self.servicesCBUUIDs = servicesCBUUIDs
         self.CBUUID_Advertisement = CBUUID_Advertisement
@@ -67,11 +63,11 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
 
         peripheral = nil
         deviceName = nil
-        //deviceAddress = nil
+        // deviceAddress = nil
     }
 
     func stopScanning() {
-        self.centralManager?.stopScan()
+        centralManager?.stopScan()
     }
 
     func isScanning() -> Bool {
@@ -95,11 +91,11 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     disconnect()
                 }
                 return .connecting
-            default:()
+            default: ()
             }
         }
 
-        var services:[CBUUID]?
+        var services: [CBUUID]?
         if let CBUUID_Advertisement = CBUUID_Advertisement {
             services = [CBUUID(string: CBUUID_Advertisement)]
         }
@@ -122,7 +118,7 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 return returnValue
             }
         } else {
-            returnValue = .other(reason:"centralManager is nil, can not start scanning")
+            returnValue = .other(reason: "centralManager is nil, can not start scanning")
         }
 
         return returnValue
@@ -141,9 +137,9 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     fileprivate func stopScanAndconnect(to peripheral: CBPeripheral) {
         LogManager.shared.log(category: .bluetooth, message: "Stop Scan And Connect", isDebug: true)
 
-        self.centralManager?.stopScan()
-        self.deviceAddress = peripheral.identifier.uuidString
-        self.deviceName = peripheral.name
+        centralManager?.stopScan()
+        deviceAddress = peripheral.identifier.uuidString
+        deviceName = peripheral.name
         peripheral.delegate = self
         self.peripheral = peripheral
 
@@ -167,12 +163,11 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             connectTimeOutTimer.invalidate()
             self.connectTimeOutTimer = nil
         }
-
     }
 
-    fileprivate func retrievePeripherals(_ central:CBCentralManager) -> Bool {
+    fileprivate func retrievePeripherals(_ central: CBCentralManager) -> Bool {
         if let uuid = UUID(uuidString: deviceAddress) {
-            //trace("    uuid is not nil", log: log, category: ConstantsLog.categoryBlueToothTransmitter, type: .info)
+            // trace("    uuid is not nil", log: log, category: ConstantsLog.categoryBlueToothTransmitter, type: .info)
             let peripheralArr = central.retrievePeripherals(withIdentifiers: [uuid])
             if peripheralArr.count > 0 {
                 peripheral = peripheralArr[0]
@@ -186,7 +181,7 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         return false
     }
 
-    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+    func centralManager(_: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData _: [String: Any], rssi _: NSNumber) {
         print("[BLE] didDiscover")
 
         timeStampLastStatusUpdate = Date()
@@ -196,7 +191,7 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         }
     }
 
-    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    func centralManager(_: CBCentralManager, didConnect peripheral: CBPeripheral) {
         cancelConnectionTimer()
 
         timeStampLastStatusUpdate = Date()
@@ -206,7 +201,7 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         peripheral.discoverServices(servicesCBUUIDs)
     }
 
-    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+    func centralManager(_: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         timeStampLastStatusUpdate = Date()
 
         let peripheralName = peripheral.name ?? "Unknown"
@@ -227,17 +222,17 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         }
     }
 
-    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+    func centralManager(_: CBCentralManager, didDisconnectPeripheral _: CBPeripheral, error _: Error?) {
         timeStampLastStatusUpdate = Date()
 
         bluetoothDeviceDelegate?.didDisconnectFrom(bluetoothDevice: self)
 
-        if let ownPeripheral = self.peripheral {
+        if let ownPeripheral = peripheral {
             centralManager?.connect(ownPeripheral, options: nil)
         }
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices _: Error?) {
         timeStampLastStatusUpdate = Date()
 
         if let services = peripheral.services {
@@ -249,7 +244,7 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         }
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error _: Error?) {
         timeStampLastStatusUpdate = Date()
 
         if let characteristics = service.characteristics {
@@ -262,19 +257,19 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         }
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+    func peripheral(_: CBPeripheral, didWriteValueFor _: CBCharacteristic, error _: Error?) {
         timeStampLastStatusUpdate = Date()
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+    func peripheral(_: CBPeripheral, didUpdateNotificationStateFor _: CBCharacteristic, error _: Error?) {
         timeStampLastStatusUpdate = Date()
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+    func peripheral(_: CBPeripheral, didUpdateValueFor _: CBCharacteristic, error _: Error?) {
         timeStampLastStatusUpdate = Date()
     }
 
-    func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
+    func centralManager(_: CBCentralManager, willRestoreState _: [String: Any]) {
         LogManager.shared.log(category: .bluetooth, message: "Restoring BLE after crash/kill")
     }
 
@@ -295,7 +290,7 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         case unknown
         case unauthorized
         case nfcScanNeeded
-        case other(reason:String)
+        case other(reason: String)
 
         func description() -> String {
             switch self {
@@ -309,7 +304,7 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 return "alreadyConnected"
             case .connecting:
                 return "connecting"
-            case .other(let reason):
+            case let .other(reason):
                 return "other reason : " + reason
             case .unknown:
                 return "unknown"
