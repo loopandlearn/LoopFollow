@@ -1,6 +1,6 @@
 // LoopFollow
 // AlarmViewController.swift
-// Created by Jon Fawcett.
+// Created by Jonas Björkert.
 
 import SwiftUI
 import UIKit
