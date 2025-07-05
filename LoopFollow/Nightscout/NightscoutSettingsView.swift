@@ -25,35 +25,33 @@ struct NightscoutSettingsView: View {
     // MARK: - Subviews / Computed Properties
 
     private var urlSection: some View {
-        Section {
-            TextField("URL", text: $viewModel.nightscoutURL)
+        Section(header: Text("URL")) {
+            TextField("Enter URL", text: $viewModel.nightscoutURL)
                 .textContentType(.URL)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
                 .onChange(of: viewModel.nightscoutURL) { newValue in
                     viewModel.processURL(newValue)
                 }
-        } header: {
-            Text("URL")
         }
     }
 
     private var tokenSection: some View {
-        Section {
-            TextField("Token", text: $viewModel.nightscoutToken)
-                .textContentType(.password)
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-        } header: {
-            Text("Token")
+        Section(header: Text("Token")) {
+            HStack {
+                Text("Access Token")
+                TogglableSecureInput(
+                    placeholder: "Enter Token",
+                    text: $viewModel.nightscoutToken,
+                    style: .singleLine
+                )
+            }
         }
     }
 
     private var statusSection: some View {
-        Section {
+        Section(header: Text("Status")) {
             Text(viewModel.nightscoutStatus)
-        } header: {
-            Text("Status")
         }
     }
 }
