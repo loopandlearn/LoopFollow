@@ -16,6 +16,11 @@ func IsNightscoutEnabled() -> Bool {
     return !Storage.shared.url.value.isEmpty
 }
 
+private enum SecondTab {
+    case remote
+    case alarms
+}
+
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
     @IBOutlet var BGText: UILabel!
     @IBOutlet var DeltaText: UILabel!
@@ -103,8 +108,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // calendar setup
     let store = EKEventStore()
 
-    // Stores the time of the last speech announcement to prevent repeated announcements.
-    var lastSpeechTime: Date?
+    // Stores the timestamp of the last BG value that was spoken.
+    var lastSpokenBGDate: TimeInterval = 0
 
     var autoScrollPauseUntil: Date? = nil
 
@@ -273,7 +278,57 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
+        Storage.shared.remoteType.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] remoteType in
+                if remoteType == .none {
+                    // If remote is disabled, show the Alarms tab.
+                    self?.updateSecondTab(to: .alarms)
+                } else {
+                    // Otherwise, show the Remote tab.
+                    self?.updateSecondTab(to: .remote)
+                }
+            }
+            .store(in: &cancellables)
+
         updateQuickActions()
+
+        speechSynthesizer.delegate = self
+    }
+
+    private func updateSecondTab(to tab: SecondTab) {
+        guard let tabBarController = tabBarController,
+              var viewControllers = tabBarController.viewControllers,
+              viewControllers.count > 1
+        else {
+            return
+        }
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let newViewController: UIViewController
+        let newTabBarItem: UITabBarItem
+
+        switch tab {
+        case .remote:
+            newViewController = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
+            newTabBarItem = UITabBarItem(
+                title: "Remote",
+                image: UIImage(systemName: "antenna.radiowaves.left.and.right"),
+                tag: 1
+            )
+        case .alarms:
+            newViewController = storyboard.instantiateViewController(withIdentifier: "AlarmViewController")
+            newTabBarItem = UITabBarItem(
+                title: "Alarms",
+                image: UIImage(systemName: "alarm"),
+                tag: 1
+            )
+        }
+
+        newViewController.tabBarItem = newTabBarItem
+        viewControllers[1] = newViewController
+
+        tabBarController.setViewControllers(viewControllers, animated: false)
     }
 
     // Update the Home Screen Quick Action for toggling the "Speak BG" feature based on the current speakBG setting.
@@ -327,7 +382,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         currentCage = nil
         currentSage = nil
         currentIage = nil
-        lastSpeechTime = nil
         refreshControl.endRefreshing()
     }
 
@@ -734,5 +788,23 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         Storage.shared.infoSort.value = sortArray
         Storage.shared.infoVisible.value = visibleArray
+    }
+}
+
+extension MainViewController: AVSpeechSynthesizerDelegate {
+    func speechSynthesizer(_: AVSpeechSynthesizer, didFinish _: AVSpeechUtterance) {
+        let appState = UIApplication.shared.applicationState
+        let isSilentTuneMode = Storage.shared.backgroundRefreshType.value == .silentTune
+
+        if isSilentTuneMode, appState == .background {
+            LogManager.shared.log(category: .general, message: "Silent tune active in background; not deactivating session.", isDebug: true)
+        } else {
+            do {
+                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                LogManager.shared.log(category: .general, message: "Audio session deactivated after speech.", isDebug: true)
+            } catch {
+                LogManager.shared.log(category: .alarm, message: "Failed to deactivate audio session: \(error)")
+            }
+        }
     }
 }
