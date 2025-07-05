@@ -11,13 +11,22 @@ struct DexcomSettingsView: View {
         NavigationView {
             Form {
                 Section(header: Text("Dexcom Settings")) {
-                    TextField("User Name", text: $viewModel.userName)
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
+                    HStack {
+                        Text("User Name")
+                        TextField("Enter User Name", text: $viewModel.userName)
+                            .autocapitalization(.none)
+                            .disableAutocorrection(true)
+                            .multilineTextAlignment(.trailing)
+                    }
 
-                    TextField("Password", text: $viewModel.password)
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
+                    HStack {
+                        Text("Password")
+                        TogglableSecureInput(
+                            placeholder: "Enter Password",
+                            text: $viewModel.password,
+                            style: .singleLine
+                        )
+                    }
 
                     Picker("Server", selection: $viewModel.server) {
                         Text("US").tag("US")
