@@ -156,22 +156,90 @@ struct SnoozerView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .animation(.spring(), value: vm.activeAlarm != nil)
             } else {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    VStack(spacing: 4) {
-                        if snoozerEmoji.value {
-                            Text(bgEmoji)
-                                .font(.system(size: 128))
-                                .minimumScaleFactor(0.5)
-                        }
+                VStack {
+                    Spacer()
 
-                        Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
-                            .font(.system(size: 70))
-                            .minimumScaleFactor(0.5)
-                            .foregroundColor(.white)
-                            .frame(height: 78)
+                    // Global snooze indicator (positioned above clock)
+                    if vm.isGlobalSnoozeActive {
+                        HStack {
+                            Image(systemName: "moon.fill")
+                                .foregroundColor(.orange)
+                            Text("All Alarms Snoozed")
+                                .font(.headline)
+                                .foregroundColor(.orange)
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 8)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(12)
+                        .padding(.bottom, 16)
                     }
+
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        VStack(spacing: 4) {
+                            if snoozerEmoji.value {
+                                Text(bgEmoji)
+                                    .font(.system(size: 128))
+                                    .minimumScaleFactor(0.5)
+                            }
+
+                            HStack {
+                                Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
+                                    .font(.system(size: 70))
+                                    .minimumScaleFactor(0.5)
+                                    .foregroundColor(.white)
+
+                                if vm.isGlobalSnoozeActive {
+                                    Image(systemName: "moon.fill")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(.orange)
+                                }
+                            }
+                            .frame(height: 78)
+                        }
+                    }
+
+                    Spacer()
+
+                    // Global snooze controls (anchored to bottom)
+                    VStack(spacing: 24) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Snooze all alarms for")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                HStack {
+                                    Text("\(vm.globalSnoozeUnits) minutes")
+                                        .font(.title3).bold()
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                    Stepper("", value: $vm.globalSnoozeUnits,
+                                            in: 15 ... 480, // 15 minutes to 8 hours
+                                            step: 15)
+                                        .labelsHidden()
+                                        .onChange(of: vm.globalSnoozeUnits) { _ in
+                                            vm.globalSnoozeDurationChanged()
+                                        }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.top, 12)
+
+                        Button(action: vm.toggleGlobalSnooze) {
+                            Text(vm.isGlobalSnoozeActive ? "Disable Global Snooze" : "Snooze All Alarms")
+                                .font(.title3).bold()
+                                .frame(maxWidth: .infinity, minHeight: 60)
+                                .background(vm.isGlobalSnoozeActive ? Color.red : Color.accentColor)
+                                .foregroundColor(.white)
+                                .clipShape(Capsule())
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 20)
+                    }
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(20, corners: [.topLeft, .topRight])
                 }
-                Spacer()
             }
         }
     }
