@@ -1,6 +1,6 @@
 // LoopFollow
 // LoopRemoteInsulinView.swift
-// Created by codebymini
+// Created by daniel.
 
 import HealthKit
 import LocalAuthentication
@@ -15,6 +15,10 @@ struct LoopRemoteInsulinView: View {
     @State private var alertType: AlertType = .success
 
     @FocusState private var insulinFieldIsFocused: Bool
+
+    // Add state for recommended bolus and warning
+    @State private var recommendedBolus: Double? = nil
+    @State private var lastLoopTime: TimeInterval? = nil
 
     enum AlertType {
         case success
@@ -41,6 +45,18 @@ struct LoopRemoteInsulinView: View {
                                 showAlert = true
                             }
                         )
+                    }
+
+                    // Add warning section if recommended bolus is available
+                    if let recommendedBolus = recommendedBolus, let lastLoopTime = lastLoopTime {
+                        Section(header: Text("Warning")) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("WARNING: New treatments may have occurred since the last recommended bolus was calculated \(presentableMinutesFormat(timeInterval: Date().timeIntervalSince1970 - lastLoopTime)) ago.")
+                                    .font(.callout)
+                                    .foregroundColor(.red)
+                                    .multilineTextAlignment(.leading)
+                            }
+                        }
                     }
 
                     Section(header: Text("Security")) {
@@ -84,6 +100,9 @@ struct LoopRemoteInsulinView: View {
             .navigationBarItems(trailing: Button("Cancel") {
                 presentationMode.wrappedValue.dismiss()
             })
+            .onAppear {
+                loadRecommendedBolus()
+            }
             .alert(isPresented: $showAlert) {
                 switch alertType {
                 case .success:
@@ -112,6 +131,26 @@ struct LoopRemoteInsulinView: View {
                 }
             }
         }
+    }
+
+    private func loadRecommendedBolus() {
+        // Load recommended bolus from Observable
+        recommendedBolus = Observable.shared.deviceRecBolus.value
+        lastLoopTime = Observable.shared.alertLastLoopTime.value
+
+        // Pre-fill the insulin amount with recommended bolus if available
+        if let recommendedBolus = recommendedBolus, recommendedBolus > 0 {
+            insulinAmount = HKQuantity(unit: .internationalUnit(), doubleValue: recommendedBolus)
+        }
+    }
+
+    private func presentableMinutesFormat(timeInterval: TimeInterval) -> String {
+        let minutes = Int(timeInterval / 60)
+        var result = "\(minutes) minute"
+        if minutes == 0 || minutes > 1 {
+            result += "s"
+        }
+        return result
     }
 
     private func sendInsulin() {
