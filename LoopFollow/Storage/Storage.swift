@@ -11,7 +11,7 @@ import UIKit
  */
 
 class Storage {
-    var remoteType = StorageValue<RemoteType>(key: "remoteType", defaultValue: .nightscout)
+    var remoteType = StorageValue<RemoteType>(key: "remoteType", defaultValue: .none)
     var deviceToken = StorageValue<String>(key: "deviceToken", defaultValue: "")
     var expirationDate = StorageValue<Date?>(key: "expirationDate", defaultValue: nil)
     var sharedSecret = StorageValue<String>(key: "sharedSecret", defaultValue: "")
