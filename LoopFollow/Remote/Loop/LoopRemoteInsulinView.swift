@@ -1,6 +1,6 @@
 // LoopFollow
 // LoopRemoteInsulinView.swift
-// Created by daniel.
+// Created by codebymini
 
 import HealthKit
 import LocalAuthentication
@@ -37,7 +37,7 @@ struct LoopRemoteInsulinView: View {
                             unit: .internationalUnit(),
                             maxLength: 4,
                             minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05),
-                            maxValue: HKQuantity(unit: .internationalUnit(), doubleValue: 25.0),
+                            maxValue: Storage.shared.maxBolus.value,
                             isFocused: $insulinFieldIsFocused,
                             onValidationError: { message in
                                 alertMessage = message
@@ -156,6 +156,17 @@ struct LoopRemoteInsulinView: View {
     private func sendInsulin() {
         guard insulinAmount.doubleValue(for: .internationalUnit()) > 0 else {
             alertMessage = "Please enter a valid insulin amount"
+            alertType = .error
+            showAlert = true
+            return
+        }
+
+        // Check guardrails
+        let maxBolus = Storage.shared.maxBolus.value.doubleValue(for: .internationalUnit())
+        let insulinValue = insulinAmount.doubleValue(for: .internationalUnit())
+
+        if insulinValue > maxBolus {
+            alertMessage = "Insulin amount (\(String(format: "%.1f", insulinValue))U) exceeds the maximum allowed (\(String(format: "%.1f", maxBolus))U). Please reduce the amount."
             alertType = .error
             showAlert = true
             return

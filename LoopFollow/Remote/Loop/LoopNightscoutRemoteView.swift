@@ -26,28 +26,13 @@ struct LoopNightscoutRemoteView: View {
                         // Always show Overrides (uses existing Nightscout credentials)
                         CommandButtonView(command: "Overrides", iconName: "slider.horizontal.3", destination: LoopOverrideView())
 
-                        if !loopRemoteSetup.value {
-                            // Show setup button if QR code not configured
-                            CommandButtonView(command: "Add Remote Commands", iconName: "qrcode.viewfinder", destination: LoopRemoteSetupView())
-                        } else {
+                        if loopRemoteSetup.value {
                             // Show remote command buttons if QR code configured
-                            CommandButtonView(command: "Carbs", iconName: "leaf.fill", destination: LoopRemoteCarbsView())
-                            CommandButtonView(command: "Insulin", iconName: "drop.fill", destination: LoopRemoteInsulinView())
+                            CommandButtonView(command: "Carbs", iconName: "fork.knife", destination: LoopRemoteCarbsView())
+                            CommandButtonView(command: "Insulin", iconName: "syringe", destination: LoopRemoteInsulinView())
                         }
                     }
                     .padding(.horizontal)
-
-                    if loopRemoteSetup.value {
-                        Button(action: clearRemoteSetup) {
-                            HStack {
-                                Image(systemName: "trash")
-                                Text("Clear Remote Setup")
-                            }
-                            .foregroundColor(.red)
-                        }
-                        .padding(.top, 20)
-                    }
-
                     Spacer()
                 }
                 .navigationBarTitle("Loop Remote Control", displayMode: .inline)

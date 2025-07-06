@@ -35,7 +35,7 @@ struct LoopRemoteCarbsView: View {
                             unit: .gram(),
                             maxLength: 4,
                             minValue: HKQuantity(unit: .gram(), doubleValue: 1.0),
-                            maxValue: HKQuantity(unit: .gram(), doubleValue: 200.0),
+                            maxValue: Storage.shared.maxCarbs.value,
                             isFocused: $carbsFieldIsFocused,
                             onValidationError: { message in
                                 alertMessage = message
@@ -142,6 +142,17 @@ struct LoopRemoteCarbsView: View {
     private func sendCarbs() {
         guard carbsAmount.doubleValue(for: .gram()) > 0 else {
             alertMessage = "Please enter a valid carb amount"
+            alertType = .error
+            showAlert = true
+            return
+        }
+
+        // Check guardrails
+        let maxCarbs = Storage.shared.maxCarbs.value.doubleValue(for: .gram())
+        let carbsValue = carbsAmount.doubleValue(for: .gram())
+
+        if carbsValue > maxCarbs {
+            alertMessage = "Carbs amount (\(Int(carbsValue))g) exceeds the maximum allowed (\(Int(maxCarbs))g). Please reduce the amount."
             alertType = .error
             showAlert = true
             return

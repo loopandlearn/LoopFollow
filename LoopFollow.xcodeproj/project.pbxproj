@@ -10,7 +10,6 @@
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
 		654132E12E19E90C00BDBE08 /* LoopRemoteCarbsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E02E19E90C00BDBE08 /* LoopRemoteCarbsView.swift */; };
 		654132E32E19E91700BDBE08 /* LoopRemoteInsulinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E22E19E91700BDBE08 /* LoopRemoteInsulinView.swift */; };
-		654132E52E19E91F00BDBE08 /* LoopRemoteSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E42E19E91F00BDBE08 /* LoopRemoteSetupView.swift */; };
 		654132E72E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */; };
 		654132EA2E19F24800BDBE08 /* TOTPGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E92E19F24800BDBE08 /* TOTPGenerator.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
@@ -388,7 +387,6 @@
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
 		654132E02E19E90C00BDBE08 /* LoopRemoteCarbsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopRemoteCarbsView.swift; sourceTree = "<group>"; };
 		654132E22E19E91700BDBE08 /* LoopRemoteInsulinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopRemoteInsulinView.swift; sourceTree = "<group>"; };
-		654132E42E19E91F00BDBE08 /* LoopRemoteSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopRemoteSetupView.swift; sourceTree = "<group>"; };
 		654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleQRCodeScannerView.swift; sourceTree = "<group>"; };
 		654132E92E19F24800BDBE08 /* TOTPGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPGenerator.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1161,7 +1159,6 @@
 				DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */,
 				654132E02E19E90C00BDBE08 /* LoopRemoteCarbsView.swift */,
 				654132E22E19E91700BDBE08 /* LoopRemoteInsulinView.swift */,
-				654132E42E19E91F00BDBE08 /* LoopRemoteSetupView.swift */,
 			);
 			path = Loop;
 			sourceTree = "<group>";
@@ -2054,7 +2051,6 @@
 				DD7F4C112DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift in Sources */,
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
 				654132EA2E19F24800BDBE08 /* TOTPGenerator.swift in Sources */,
-				654132E52E19E91F00BDBE08 /* LoopRemoteSetupView.swift in Sources */,
 				DD0650F52DCF303F004D3B41 /* AlarmStepperSection.swift in Sources */,
 				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
 				DD7F4C132DD51FD500D449E9 /* TempTargetEndCondition.swift in Sources */,
