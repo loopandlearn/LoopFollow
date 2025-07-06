@@ -291,6 +291,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
+        Storage.shared.url.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                self?.tabBarController?.tabBar.items?[3].isEnabled = !value.isEmpty
+            }
+            .store(in: &cancellables)
+
         updateQuickActions()
 
         speechSynthesizer.delegate = self
