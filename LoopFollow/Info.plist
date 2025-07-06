@@ -57,6 +57,8 @@
 	<string>This app requires access to contacts to update a contact image with real-time blood glucose information.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>This app requires Face ID for secure authentication.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Used for scanning QR codes for remote authentication</string>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
 	<key>UIApplicationSceneManifest</key>

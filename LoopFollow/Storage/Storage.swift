@@ -162,6 +162,13 @@ class Storage {
 
     var lastLoopingChecked = StorageValue<Date?>(key: "lastLoopingChecked", defaultValue: nil)
 
+    // MARK: - Loop Remote Setup ---------------------------------------------------
+
+    var loopRemoteSetup = StorageValue<Bool>(key: "loopRemoteSetup", defaultValue: false)
+    var loopNightscoutURL = StorageValue<String>(key: "loopNightscoutURL", defaultValue: "")
+    var loopApiSecret = StorageValue<String>(key: "loopApiSecret", defaultValue: "")
+    var loopQrCodeURL = StorageValue<String>(key: "loopQrCodeURL", defaultValue: "")
+
     static let shared = Storage()
     private init() {}
 }
