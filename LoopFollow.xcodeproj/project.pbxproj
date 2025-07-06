@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
+		654132E12E19E90C00BDBE08 /* LoopRemoteCarbsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E02E19E90C00BDBE08 /* LoopRemoteCarbsView.swift */; };
+		654132E32E19E91700BDBE08 /* LoopRemoteInsulinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E22E19E91700BDBE08 /* LoopRemoteInsulinView.swift */; };
+		654132E52E19E91F00BDBE08 /* LoopRemoteSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E42E19E91F00BDBE08 /* LoopRemoteSetupView.swift */; };
+		654132E72E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */; };
+		654132EA2E19F24800BDBE08 /* TOTPGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E92E19F24800BDBE08 /* TOTPGenerator.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
 		DD0650A92DCA8A10004D3B41 /* AlarmBGSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */; };
@@ -381,6 +386,11 @@
 
 /* Begin PBXFileReference section */
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
+		654132E02E19E90C00BDBE08 /* LoopRemoteCarbsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopRemoteCarbsView.swift; sourceTree = "<group>"; };
+		654132E22E19E91700BDBE08 /* LoopRemoteInsulinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopRemoteInsulinView.swift; sourceTree = "<group>"; };
+		654132E42E19E91F00BDBE08 /* LoopRemoteSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopRemoteSetupView.swift; sourceTree = "<group>"; };
+		654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleQRCodeScannerView.swift; sourceTree = "<group>"; };
+		654132E92E19F24800BDBE08 /* TOTPGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPGenerator.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
 		DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireCondition.swift; sourceTree = "<group>"; };
@@ -1149,6 +1159,9 @@
 				DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */,
 				DDDF6F442D479AB000884336 /* LoopOverrideView.swift */,
 				DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */,
+				654132E02E19E90C00BDBE08 /* LoopRemoteCarbsView.swift */,
+				654132E22E19E91700BDBE08 /* LoopRemoteInsulinView.swift */,
+				654132E42E19E91F00BDBE08 /* LoopRemoteSetupView.swift */,
 			);
 			path = Loop;
 			sourceTree = "<group>";
@@ -1197,6 +1210,7 @@
 				DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */,
 				DD16AF102C997B4600FB655A /* LoadingButtonView.swift */,
 				DDE75D262DE5E539007C1FC1 /* ActionRow.swift */,
+				654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */,
 				DDE75D282DE5E56C007C1FC1 /* LinkRow.swift */,
 				DDE75D2A2DE5E613007C1FC1 /* NavigationRow.swift */,
 			);
@@ -1389,27 +1403,27 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
-				DDC7E5142DBCE1B900EB1127 /* Snoozer */,
 				DDCF9A7E2D85FCE6004DF4DD /* Alarm */,
-				DD1A97122D429495000DDC11 /* Settings */,
-				DD2C2E4D2D3B8ACF006413A5 /* Nightscout */,
-				DD9ED0C62D355225000D2A63 /* Log */,
-				DDEF503D2D32753A00999A5D /* Task */,
+				FC16A97624995FEE003D6245 /* Application */,
 				DDFF3D792D140F1800BF9D9E /* BackgroundRefresh */,
 				DD50C74D2D0828250057AE6F /* Contact */,
-				DD5334252C61667700062F9D /* InfoDisplaySettings */,
-				DD0C0C6E2C4AFFB800DBADDF /* Remote */,
-				DD0C0C692C4852A100DBADDF /* Metric */,
-				DD13BC732C3FD60E0062313B /* InfoTable */,
-				FCC688702489A57C00A0279D /* Loop Follow.entitlements */,
-				FC8DEEE62485D1ED0075863F /* Info.plist */,
-				FC7CE59A248D334B001F83B8 /* Resources */,
-				FCC68871248A736700A0279D /* ViewControllers */,
-				DD98F54224BCEF190007425A /* Extensions */,
 				FC16A9782499657E003D6245 /* Controllers */,
+				DD98F54224BCEF190007425A /* Extensions */,
 				FCC688542489367300A0279D /* Helpers */,
+				FC8DEEE62485D1ED0075863F /* Info.plist */,
+				DD5334252C61667700062F9D /* InfoDisplaySettings */,
+				DD13BC732C3FD60E0062313B /* InfoTable */,
+				DD9ED0C62D355225000D2A63 /* Log */,
+				FCC688702489A57C00A0279D /* Loop Follow.entitlements */,
+				DD0C0C692C4852A100DBADDF /* Metric */,
+				DD2C2E4D2D3B8ACF006413A5 /* Nightscout */,
+				DD0C0C6E2C4AFFB800DBADDF /* Remote */,
+				FC7CE59A248D334B001F83B8 /* Resources */,
+				DD1A97122D429495000DDC11 /* Settings */,
+				DDC7E5142DBCE1B900EB1127 /* Snoozer */,
 				DDC7E5CD2DC6637800EB1127 /* Storage */,
-				FC16A97624995FEE003D6245 /* Application */,
+				DDEF503D2D32753A00999A5D /* Task */,
+				FCC68871248A736700A0279D /* ViewControllers */,
 			);
 			path = LoopFollow;
 			sourceTree = "<group>";
@@ -1467,6 +1481,7 @@
 				FCFEEC9F2488157B00402A7F /* Chart.swift */,
 				FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */,
 				FC16A98024996C07003D6245 /* DateTime.swift */,
+				654132E92E19F24800BDBE08 /* TOTPGenerator.swift */,
 				FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */,
 				FCEF87AA24A1417900AE6FA0 /* Localizer.swift */,
 				FC1BDD2E24A232A3001B652C /* DataStructs.swift */,
@@ -1574,6 +1589,7 @@
 			mainGroup = FC97880B2485969B00A7906C;
 			packageReferences = (
 				DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */,
+				654132E82E19F0B800BDBE08 /* XCRemoteSwiftPackageReference "swift-crypto" */,
 			);
 			productRefGroup = FC9788152485969B00A7906C /* Products */;
 			projectDirPath = "";
@@ -1913,6 +1929,7 @@
 				DD7F4C232DD7A62200D449E9 /* AlarmType+SortDirection.swift in Sources */,
 				DD0650F72DCFDA26004D3B41 /* InfoBanner.swift in Sources */,
 				DDE75D292DE5E56C007C1FC1 /* LinkRow.swift in Sources */,
+				654132E32E19E91700BDBE08 /* LoopRemoteInsulinView.swift in Sources */,
 				DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */,
 				DD7B0D442D730A3B0063DCB6 /* CycleHelper.swift in Sources */,
 				DDDC31CC2E13A7DF009EA0F3 /* AddAlarmSheet.swift in Sources */,
@@ -1938,6 +1955,7 @@
 				FCEF87AC24A141A700AE6FA0 /* Localizer.swift in Sources */,
 				FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */,
 				DDF6999E2C5AAA640058A8D9 /* ErrorMessageView.swift in Sources */,
+				654132E72E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift in Sources */,
 				DD4878152C7B75230048F05C /* MealView.swift in Sources */,
 				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
 				FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */,
@@ -2035,6 +2053,8 @@
 				DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */,
 				DD7F4C112DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift in Sources */,
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
+				654132EA2E19F24800BDBE08 /* TOTPGenerator.swift in Sources */,
+				654132E52E19E91F00BDBE08 /* LoopRemoteSetupView.swift in Sources */,
 				DD0650F52DCF303F004D3B41 /* AlarmStepperSection.swift in Sources */,
 				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
 				DD7F4C132DD51FD500D449E9 /* TempTargetEndCondition.swift in Sources */,
@@ -2051,6 +2071,7 @@
 				DDFF3D892D1429AB00BF9D9E /* BackgroundRefreshType.swift in Sources */,
 				DD493AE32ACF2358009A6922 /* CAge.swift in Sources */,
 				DD493ADD2ACF21E0009A6922 /* Basals.swift in Sources */,
+				654132E12E19E90C00BDBE08 /* LoopRemoteCarbsView.swift in Sources */,
 				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 				DDCC3A582DDC9655006F1C10 /* MissedBolusAlarmEditor.swift in Sources */,
@@ -2339,6 +2360,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		654132E82E19F0B800BDBE08 /* XCRemoteSwiftPackageReference "swift-crypto" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-crypto.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.12.3;
+			};
+		};
 		DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Kitura/Swift-JWT.git";
