@@ -16,10 +16,7 @@ final class SettingsViewController: UIViewController {
         super.viewDidLoad()
 
         // Build SwiftUI menu
-        host = UIHostingController(
-            rootView: SettingsMenuView { [weak self] nightscoutEnabled in
-                self?.tabBarController?.tabBar.items?[3].isEnabled = nightscoutEnabled
-            })
+        host = UIHostingController(rootView: SettingsMenuView())
 
         // Dark-mode override
         if Storage.shared.forceDarkMode.value {

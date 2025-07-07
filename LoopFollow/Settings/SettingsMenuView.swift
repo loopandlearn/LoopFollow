@@ -6,9 +6,9 @@ import SwiftUI
 import UIKit
 
 struct SettingsMenuView: View {
-    // MARK: – Call-backs
+    // MARK: - Observed Objects
 
-    let onNightscoutVisibilityChange: (_ enabled: Bool) -> Void
+    @ObservedObject private var nightscoutURL = Storage.shared.url
 
     // MARK: – Local state
 
@@ -45,7 +45,7 @@ struct SettingsMenuView: View {
                         path.append(Sheet.graph)
                     }
 
-                    if IsNightscoutEnabled() {
+                    if !nightscoutURL.value.isEmpty {
                         NavigationRow(title: "Information Display Settings",
                                       icon: "info.circle")
                         {
@@ -153,9 +153,6 @@ struct SettingsMenuView: View {
             {
                 path.append(Sheet.dexcom)
             }
-        }
-        .onAppear {
-            onNightscoutVisibilityChange(IsNightscoutEnabled())
         }
     }
 
