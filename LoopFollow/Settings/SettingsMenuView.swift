@@ -9,18 +9,17 @@ struct SettingsMenuView: View {
     // MARK: - Observed Objects
 
     @ObservedObject private var nightscoutURL = Storage.shared.url
+    @ObservedObject private var settingsPath = Observable.shared.settingsPath
 
     // MARK: – Local state
 
-    @State private var path = NavigationPath()
     @State private var latestVersion: String?
     @State private var versionTint: Color = .secondary
-    @State private var navPath = NavigationPath()
 
     // MARK: – Body
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: $settingsPath.value) {
             List {
                 // ───────── Data settings ─────────
                 dataSection
@@ -30,32 +29,32 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "Background Refresh Settings",
                                   icon: "arrow.clockwise")
                     {
-                        path.append(Sheet.backgroundRefresh)
+                        settingsPath.value.append(Sheet.backgroundRefresh)
                     }
 
                     NavigationRow(title: "General Settings",
                                   icon: "gearshape")
                     {
-                        path.append(Sheet.general)
+                        settingsPath.value.append(Sheet.general)
                     }
 
                     NavigationRow(title: "Graph Settings",
                                   icon: "chart.xyaxis.line")
                     {
-                        path.append(Sheet.graph)
+                        settingsPath.value.append(Sheet.graph)
                     }
 
                     if !nightscoutURL.value.isEmpty {
                         NavigationRow(title: "Information Display Settings",
                                       icon: "info.circle")
                         {
-                            path.append(Sheet.infoDisplay)
+                            settingsPath.value.append(Sheet.infoDisplay)
                         }
 
                         NavigationRow(title: "Remote Settings",
                                       icon: "antenna.radiowaves.left.and.right")
                         {
-                            path.append(Sheet.remote)
+                            settingsPath.value.append(Sheet.remote)
                         }
                     }
                 }
@@ -65,13 +64,13 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "Alarms",
                                   icon: "bell")
                     {
-                        path.append(Sheet.alarmsList)
+                        settingsPath.value.append(Sheet.alarmsList)
                     }
 
                     NavigationRow(title: "Alarm Settings",
                                   icon: "bell.badge")
                     {
-                        path.append(Sheet.alarmSettings)
+                        settingsPath.value.append(Sheet.alarmSettings)
                     }
                 }
 
@@ -80,13 +79,13 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "Calendar",
                                   icon: "calendar")
                     {
-                        path.append(Sheet.calendar)
+                        settingsPath.value.append(Sheet.calendar)
                     }
 
                     NavigationRow(title: "Contact",
                                   icon: "person.circle")
                     {
-                        path.append(Sheet.contact)
+                        settingsPath.value.append(Sheet.contact)
                     }
                 }
 
@@ -95,7 +94,7 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "Advanced Settings",
                                   icon: "exclamationmark.shield")
                     {
-                        path.append(Sheet.advanced)
+                        settingsPath.value.append(Sheet.advanced)
                     }
                 }
 
@@ -103,7 +102,7 @@ struct SettingsMenuView: View {
                     NavigationRow(title: "View Log",
                                   icon: "doc.text.magnifyingglass")
                     {
-                        path.append(Sheet.viewLog)
+                        settingsPath.value.append(Sheet.viewLog)
                     }
 
                     ActionRow(title: "Share Logs",
@@ -145,13 +144,13 @@ struct SettingsMenuView: View {
             NavigationRow(title: "Nightscout Settings",
                           icon: "network")
             {
-                path.append(Sheet.nightscout)
+                settingsPath.value.append(Sheet.nightscout)
             }
 
             NavigationRow(title: "Dexcom Settings",
                           icon: "sensor.tag.radiowaves.forward")
             {
-                path.append(Sheet.dexcom)
+                settingsPath.value.append(Sheet.dexcom)
             }
         }
     }

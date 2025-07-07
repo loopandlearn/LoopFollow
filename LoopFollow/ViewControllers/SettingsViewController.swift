@@ -35,4 +35,10 @@ final class SettingsViewController: UIViewController {
         ])
         host.didMove(toParent: self)
     }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        Observable.shared.settingsPath.set(NavigationPath())
+    }
 }
