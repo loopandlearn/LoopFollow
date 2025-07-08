@@ -7,20 +7,19 @@ import SwiftUI
 import UIKit
 
 class RemoteViewController: UIViewController {
-    private var cancellables = Set<AnyCancellable>()
+    private var cancellable: AnyCancellable?
     private var hostingController: UIHostingController<AnyView>?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        Storage.shared.device.$value
+        cancellable = Storage.shared.device.$value
             .removeDuplicates()
             .sink { [weak self] _ in
                 DispatchQueue.main.async {
                     self?.updateView()
                 }
             }
-            .store(in: &cancellables)
     }
 
     private func updateView() {
@@ -92,6 +91,6 @@ class RemoteViewController: UIViewController {
     }
 
     deinit {
-        cancellables.forEach { $0.cancel() }
+        cancellable?.cancel()
     }
 }
