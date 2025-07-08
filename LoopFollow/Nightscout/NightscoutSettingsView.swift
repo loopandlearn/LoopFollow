@@ -27,7 +27,7 @@ struct NightscoutSettingsView: View {
     private var urlSection: some View {
         Section(header: Text("URL")) {
             TextField("Enter URL", text: $viewModel.nightscoutURL)
-                .textContentType(.URL)
+                .textContentType(.username)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
                 .onChange(of: viewModel.nightscoutURL) { newValue in
@@ -43,7 +43,8 @@ struct NightscoutSettingsView: View {
                 TogglableSecureInput(
                     placeholder: "Enter Token",
                     text: $viewModel.nightscoutToken,
-                    style: .singleLine
+                    style: .singleLine,
+                    textContentType: .password
                 )
             }
         }
