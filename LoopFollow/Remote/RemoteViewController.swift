@@ -3,8 +3,6 @@
 // Created by Jonas Björkert.
 
 import Combine
-import Foundation
-import HealthKit
 import SwiftUI
 import UIKit
 
@@ -15,17 +13,13 @@ class RemoteViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        cancellable = Publishers.CombineLatest(
-            Storage.shared.remoteType.$value.removeDuplicates(),
-            Storage.shared.device.$value.removeDuplicates()
-        )
-        .sink { [weak self] _, _ in
-            DispatchQueue.main.async {
-                self?.updateView()
+        cancellable = Storage.shared.device.$value
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.updateView()
+                }
             }
-        }
-
-        updateView()
     }
 
     private func updateView() {
@@ -89,6 +83,11 @@ class RemoteViewController: UIViewController {
                 }
             }
         }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateView()
     }
 
     deinit {
