@@ -20,10 +20,10 @@ struct RecBolusCondition: AlarmCondition {
         }
 
         // ────────────────────────────────
-        // 1. has it INCREASED past the last-notified value?
+        // 1. has it DECREASED past the last-notified value?
         // ────────────────────────────────
         if let last = Storage.shared.lastRecBolusNotified.value {
-            if rec <= last + 1e-4 { return false }
+            if rec < last { return false }
         }
 
         Storage.shared.lastRecBolusNotified.value = rec
