@@ -100,7 +100,7 @@ class TaskScheduler {
             updatedTask.nextRun = .distantFuture
             tasks[taskID] = updatedTask
 
-            LogManager.shared.log(category: .taskScheduler, message: "Executing Task \(taskID)", isDebug: true)
+            // LogManager.shared.log(category: .taskScheduler, message: "Executing Task \(taskID)", isDebug: true)
 
             DispatchQueue.main.async {
                 task.action()
