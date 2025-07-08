@@ -44,6 +44,12 @@ struct SettingsMenuView: View {
                         settingsPath.value.append(Sheet.graph)
                     }
 
+                    NavigationRow(title: "Tab Customization",
+                                  icon: "rectangle.3.group")
+                    {
+                        settingsPath.value.append(Sheet.tabCustomization)
+                    }
+
                     if !nightscoutURL.value.isEmpty {
                         NavigationRow(title: "Information Display Settings",
                                       icon: "info.circle")
@@ -226,6 +232,7 @@ private enum Sheet: Hashable, Identifiable {
     case calendar, contact
     case advanced
     case viewLog
+    case tabCustomization
 
     var id: Self { self }
 
@@ -245,6 +252,7 @@ private enum Sheet: Hashable, Identifiable {
         case .contact: ContactSettingsView(viewModel: .init())
         case .advanced: AdvancedSettingsView(viewModel: .init())
         case .viewLog: LogView(viewModel: .init())
+        case .tabCustomization: TabCustomizationSettingsView()
         }
     }
 }

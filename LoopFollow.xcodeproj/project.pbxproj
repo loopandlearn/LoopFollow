@@ -41,6 +41,8 @@
 		DD16AF112C997B4600FB655A /* LoadingButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF102C997B4600FB655A /* LoadingButtonView.swift */; };
 		DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */; };
 		DD1A97162D4294B3000DDC11 /* AdvancedSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */; };
+		DD1D52922E1D9E8200432050 /* TabSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52912E1D9E8200432050 /* TabSelection.swift */; };
+		DD1D52942E1DA31000432050 /* TabCustomizationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52932E1DA31000432050 /* TabCustomizationSettingsView.swift */; };
 		DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */; };
 		DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */; };
 		DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */; };
@@ -415,6 +417,8 @@
 		DD16AF102C997B4600FB655A /* LoadingButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingButtonView.swift; sourceTree = "<group>"; };
 		DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
 		DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsViewModel.swift; sourceTree = "<group>"; };
+		DD1D52912E1D9E8200432050 /* TabSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSelection.swift; sourceTree = "<group>"; };
+		DD1D52932E1DA31000432050 /* TabCustomizationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCustomizationSettingsView.swift; sourceTree = "<group>"; };
 		DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsView.swift; sourceTree = "<group>"; };
 		DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsViewModel.swift; sourceTree = "<group>"; };
 		DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsViewModel.swift; sourceTree = "<group>"; };
@@ -863,6 +867,7 @@
 		DD1A97122D429495000DDC11 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				DD1D52932E1DA31000432050 /* TabCustomizationSettingsView.swift */,
 				DD83164F2DE4E635004467AA /* SettingsMenuView.swift */,
 				DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */,
 				DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */,
@@ -1456,6 +1461,7 @@
 		FCC688542489367300A0279D /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				DD1D52912E1D9E8200432050 /* TabSelection.swift */,
 				DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */,
 				DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */,
 				DD7B0D432D730A320063DCB6 /* CycleHelper.swift */,
@@ -1825,6 +1831,7 @@
 				DD0B9D582DE1F3B20090C337 /* AlarmType+canAcknowledge.swift in Sources */,
 				DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */,
 				DD7F4BC52DD3CE0700D449E9 /* AlarmBGLimitSection.swift in Sources */,
+				DD1D52942E1DA31000432050 /* TabCustomizationSettingsView.swift in Sources */,
 				DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */,
 				DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */,
 				DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */,
@@ -2019,6 +2026,7 @@
 				DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */,
 				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */,
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
+				DD1D52922E1D9E8200432050 /* TabSelection.swift in Sources */,
 				DDA9ACAC2D6B317100E6F1A9 /* ContactType.swift in Sources */,
 				DDDF6F432D479A9900884336 /* LoopNightscoutRemoteView.swift in Sources */,
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,

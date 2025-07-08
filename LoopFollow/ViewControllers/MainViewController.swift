@@ -16,11 +16,6 @@ func IsNightscoutEnabled() -> Bool {
     return !Storage.shared.url.value.isEmpty
 }
 
-private enum SecondTab {
-    case remote
-    case alarms
-}
-
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
     @IBOutlet var BGText: UILabel!
     @IBOutlet var DeltaText: UILabel!
@@ -124,9 +119,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         loadDebugData()
 
+        // This step1 was released with 3.0
         if Storage.shared.migrationStep.value < 1 {
             Storage.shared.migrateStep1()
             Storage.shared.migrationStep.value = 1
+        }
+
+        // This step2 was released with 3.1
+        if Storage.shared.migrationStep.value < 2 {
+            Storage.shared.migrateStep2()
+            Storage.shared.migrationStep.value = 2
         }
 
         // Synchronize info types to ensure arrays are the correct size
@@ -278,64 +280,70 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
-        Storage.shared.remoteType.$value
+        Storage.shared.tab2Selection.$value
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] remoteType in
-                if remoteType == .none {
-                    // If remote is disabled, show the Alarms tab.
-                    self?.updateSecondTab(to: .alarms)
-                } else {
-                    // Otherwise, show the Remote tab.
-                    self?.updateSecondTab(to: .remote)
-                }
+            .sink { [weak self] selection in
+                self?.updateTab(at: 1, to: selection)
+                self?.updateNightscoutTabState()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.tab4Selection.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] selection in
+                self?.updateTab(at: 3, to: selection)
+                self?.updateNightscoutTabState()
             }
             .store(in: &cancellables)
 
         Storage.shared.url.$value
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                self?.tabBarController?.tabBar.items?[3].isEnabled = !value.isEmpty
+            .sink { [weak self] _ in
+                self?.updateNightscoutTabState()
             }
             .store(in: &cancellables)
 
         updateQuickActions()
+        updateTab(at: 1, to: Storage.shared.tab2Selection.value)
+        updateTab(at: 3, to: Storage.shared.tab4Selection.value)
+        updateNightscoutTabState()
 
         speechSynthesizer.delegate = self
     }
 
-    private func updateSecondTab(to tab: SecondTab) {
+    private func updateTab(at index: Int, to selection: TabSelection) {
         guard let tabBarController = tabBarController,
               var viewControllers = tabBarController.viewControllers,
-              viewControllers.count > 1
+              viewControllers.count > index
         else {
             return
         }
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let newViewController: UIViewController
-        let newTabBarItem: UITabBarItem
-
-        switch tab {
-        case .remote:
-            newViewController = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
-            newTabBarItem = UITabBarItem(
-                title: "Remote",
-                image: UIImage(systemName: "antenna.radiowaves.left.and.right"),
-                tag: 1
-            )
-        case .alarms:
-            newViewController = storyboard.instantiateViewController(withIdentifier: "AlarmViewController")
-            newTabBarItem = UITabBarItem(
-                title: "Alarms",
-                image: UIImage(systemName: "alarm"),
-                tag: 1
-            )
-        }
+        let newViewController = storyboard.instantiateViewController(withIdentifier: selection.storyboardIdentifier)
+        let newTabBarItem = UITabBarItem(
+            title: selection.displayName,
+            image: UIImage(systemName: selection.systemImage),
+            tag: index
+        )
 
         newViewController.tabBarItem = newTabBarItem
-        viewControllers[1] = newViewController
+        viewControllers[index] = newViewController
 
         tabBarController.setViewControllers(viewControllers, animated: false)
+    }
+
+    private func updateNightscoutTabState() {
+        guard let tabBarController = tabBarController,
+              let viewControllers = tabBarController.viewControllers else { return }
+
+        let isNightscoutEnabled = !Storage.shared.url.value.isEmpty
+
+        for (index, vc) in viewControllers.enumerated() {
+            if vc is NightscoutViewController {
+                tabBarController.tabBar.items?[index].isEnabled = isNightscoutEnabled
+            }
+        }
     }
 
     // Update the Home Screen Quick Action for toggling the "Speak BG" feature based on the current speakBG setting.
@@ -539,10 +547,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     func showHideNSDetails() {
         var isHidden = false
-        var isEnabled = true
         if !IsNightscoutEnabled() {
             isHidden = true
-            isEnabled = false
         }
 
         LoopStatusLabel.isHidden = isHidden
@@ -557,12 +563,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             infoTable.isHidden = true
         }
 
-        if IsNightscoutEnabled() {
-            isEnabled = true
-        }
-
-        guard let nightscoutTab = tabBarController?.tabBar.items![3] else { return }
-        nightscoutTab.isEnabled = isEnabled
+        updateNightscoutTabState()
     }
 
     func updateBadge(val: Int) {

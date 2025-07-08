@@ -375,6 +375,19 @@ extension Storage {
         migrateRecBolusAlarm()
     }
 
+    func migrateStep2() {
+        // Migrate from remoteType-based tab selection to user-configurable tabs
+        if remoteType.value == .none {
+            // If remote is disabled, set tab 2 to Alarms
+            tab2Selection.value = .alarms
+        } else {
+            // If remote is enabled (any type), set tab 2 to Remote
+            tab2Selection.value = .remote
+        }
+
+        // Tab 4 defaults to nightscout (already set by default value)
+    }
+
     // MARK: - One-off alarm migrations
 
     /// Reads *all* `alertUrgentLow*` keys, converts them into a single `Alarm`,
