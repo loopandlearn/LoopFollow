@@ -10,6 +10,7 @@ struct TogglableSecureInput: View {
     let placeholder: String
     @Binding var text: String
     let style: Style
+    var textContentType: UITextContentType? = nil
 
     @State private var isVisible = false
     @FocusState private var isFocused: Bool
@@ -20,9 +21,13 @@ struct TogglableSecureInput: View {
                 switch style {
                 case .singleLine:
                     if isVisible {
-                        TextField(placeholder, text: $text).multilineTextAlignment(.trailing)
+                        TextField(placeholder, text: $text)
+                            .multilineTextAlignment(.trailing)
+                            .textContentType(textContentType)
                     } else {
-                        SecureField(placeholder, text: $text).multilineTextAlignment(.trailing)
+                        SecureField(placeholder, text: $text)
+                            .multilineTextAlignment(.trailing)
+                            .textContentType(textContentType)
                     }
 
                 case .multiLine:
