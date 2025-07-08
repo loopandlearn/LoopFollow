@@ -43,7 +43,8 @@ struct NightscoutSettingsView: View {
                 TogglableSecureInput(
                     placeholder: "Enter Token",
                     text: $viewModel.nightscoutToken,
-                    style: .singleLine
+                    style: .singleLine,
+                    textContentType: .password
                 )
             }
         }
