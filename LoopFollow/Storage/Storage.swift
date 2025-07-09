@@ -15,7 +15,7 @@ class Storage {
     var deviceToken = StorageValue<String>(key: "deviceToken", defaultValue: "")
     var expirationDate = StorageValue<Date?>(key: "expirationDate", defaultValue: nil)
     var sharedSecret = StorageValue<String>(key: "sharedSecret", defaultValue: "")
-    var productionEnvironment = StorageValue<Bool>(key: "productionEnvironment", defaultValue: true)
+    var productionEnvironment = StorageValue<Bool>(key: "productionEnvironment", defaultValue: false)
     var apnsKey = StorageValue<String>(key: "apnsKey", defaultValue: "")
     var teamId = StorageValue<String?>(key: "teamId", defaultValue: nil)
     var keyId = StorageValue<String>(key: "keyId", defaultValue: "")
@@ -165,6 +165,20 @@ class Storage {
     var alarmsPosition = StorageValue<TabPosition>(key: "alarmsPosition", defaultValue: .position2)
     var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .more)
     var nightscoutPosition = StorageValue<TabPosition>(key: "nightscoutPosition", defaultValue: .position4)
+
+    // MARK: - Loop APNS Setup ---------------------------------------------------
+
+    var loopAPNSSetup = StorageValue<Bool>(key: "loopAPNSSetup", defaultValue: false)
+    var loopAPNSKeyId = StorageValue<String>(key: "loopAPNSKeyId", defaultValue: "")
+    var loopAPNSKey = StorageValue<String>(key: "loopAPNSKey", defaultValue: "")
+    var loopDeveloperTeamId = StorageValue<String>(key: "loopDeveloperTeamId", defaultValue: "")
+    var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
+    var loopAPNSDeviceToken = StorageValue<String>(key: "loopAPNSDeviceToken", defaultValue: "")
+    var loopAPNSBundleIdentifier = StorageValue<String>(key: "loopAPNSBundleIdentifier", defaultValue: "")
+
+    // MARK: - Override Presets ---------------------------------------------------
+
+    // Override presets are fetched from Nightscout, not stored locally
 
     static let shared = Storage()
     private init() {}
