@@ -90,27 +90,10 @@ class TaskScheduler {
         BackgroundAlertManager.shared.scheduleBackgroundAlert()
 
         let now = Date()
-        let tasksToSkipAlarmCheck: Set<TaskID> = [.deviceStatus, .treatments, .fetchBG]
 
         for taskID in TaskID.allCases {
             guard let task = tasks[taskID], task.nextRun <= now else {
                 continue
-            }
-
-            // Skip alarm checks if data-fetching tasks (deviceStatus, treatments, fetchBG) are currently due.
-            // This ensures alarms are evaluated with the latest data, avoiding premature or incorrect triggers.
-            // If skipped, reschedule alarmCheck 1 second later to retry after data updates.
-            if taskID == .alarmCheck {
-                let shouldSkip = tasksToSkipAlarmCheck.contains {
-                    guard let checkTask = tasks[$0] else { return false }
-                    return checkTask.nextRun <= now || checkTask.nextRun == .distantFuture
-                }
-                if shouldSkip {
-                    guard var existingTask = tasks[taskID] else { continue }
-                    existingTask.nextRun = Date().addingTimeInterval(1)
-                    tasks[taskID] = existingTask
-                    continue
-                }
             }
 
             var updatedTask = task
