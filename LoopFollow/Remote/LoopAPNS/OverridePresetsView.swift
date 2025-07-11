@@ -236,52 +236,25 @@ class OverridePresetsViewModel: ObservableObject {
     }
 
     private func fetchOverridePresetsFromNightscout() async throws -> [OverridePreset] {
-        let url = Storage.shared.url.value
-        guard !url.isEmpty else {
-            throw OverrideError.nightscoutNotConfigured
-        }
+        // Use ProfileManager's already loaded overrides instead of fetching from Nightscout
+        let loopOverrides = ProfileManager.shared.loopOverrides
 
-        let token = Storage.shared.token.value
-        guard !token.isEmpty else {
-            throw OverrideError.nightscoutNotConfigured
-        }
+        return loopOverrides.map { override in
+            let targetRange: ClosedRange<Double>?
+            if override.targetRange.count >= 2 {
+                let lowValue = override.targetRange[0].doubleValue(for: ProfileManager.shared.units)
+                let highValue = override.targetRange[1].doubleValue(for: ProfileManager.shared.units)
+                targetRange = lowValue ... highValue
+            } else {
+                targetRange = nil
+            }
 
-        let nightscoutURL = URL(string: url)!
-        let profileURL = nightscoutURL.appendingPathComponent("api/v1/profile.json")
-
-        var request = URLRequest(url: profileURL)
-
-        // Add token authentication
-        var components = URLComponents(url: profileURL, resolvingAgainstBaseURL: false)
-        components?.queryItems = [URLQueryItem(name: "token", value: token)]
-        if let urlWithToken = components?.url {
-            request.url = urlWithToken
-        }
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw OverrideError.invalidResponse
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            throw OverrideError.serverError(httpResponse.statusCode)
-        }
-
-        let profiles = try JSONDecoder().decode([ProfileData].self, from: data)
-
-        // Find the most recent profile with loopSettings
-        guard let latestProfile = profiles.first(where: { $0.loopSettings?.overridePresets != nil }) else {
-            return []
-        }
-
-        return latestProfile.loopSettings!.overridePresets.map { preset in
-            OverridePreset(
-                name: preset.name,
-                symbol: preset.symbol,
-                targetRange: preset.targetRange,
-                insulinNeedsScaleFactor: preset.insulinNeedsScaleFactor,
-                duration: preset.duration
+            return OverridePreset(
+                name: override.name,
+                symbol: override.symbol.isEmpty ? nil : override.symbol,
+                targetRange: targetRange,
+                insulinNeedsScaleFactor: override.insulinNeedsScaleFactor,
+                duration: TimeInterval(override.duration ?? 0)
             )
         }
     }
@@ -301,14 +274,6 @@ class OverridePresetsViewModel: ObservableObject {
 }
 
 // MARK: - Data Models
-
-struct ProfileData: Codable {
-    let loopSettings: LoopSettings?
-}
-
-struct LoopSettings: Codable {
-    let overridePresets: [OverridePresetData]
-}
 
 struct OverridePreset {
     let name: String
