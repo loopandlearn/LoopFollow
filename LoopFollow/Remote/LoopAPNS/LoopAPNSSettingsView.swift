@@ -5,7 +5,7 @@
 import SwiftUI
 
 struct LoopAPNSSettingsView: View {
-    @StateObject private var viewModel = RemoteSettingsViewModel()
+    @ObservedObject var viewModel: RemoteSettingsViewModel
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
@@ -193,10 +193,21 @@ struct LoopAPNSSettingsView: View {
                 }
             }
             .onAppear {
+                // Validate Loop APNS setup when view appears
+                viewModel.validateLoopAPNSSetup()
+
                 // Automatically fetch device token and bundle identifier when entering the setup screen
                 Task {
                     await viewModel.refreshDeviceToken()
                 }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoopAPNSSetupChanged"))) { _ in
+                // Update validation when Loop APNS setup changes
+                viewModel.validateLoopAPNSSetup()
+            }
+            .onDisappear {
+                // Force validation when leaving the settings view
+                viewModel.forceValidateLoopAPNSSetup()
             }
         }
     }

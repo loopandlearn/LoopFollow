@@ -7,6 +7,7 @@ import SwiftUI
 struct LoopAPNSRemoteView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var loopAPNSSetup = Storage.shared.loopAPNSSetup
+    @StateObject private var viewModel = RemoteSettingsViewModel()
 
     var body: some View {
         NavigationView {
@@ -37,7 +38,7 @@ struct LoopAPNSRemoteView: View {
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(.secondary)
 
-                            NavigationLink(destination: LoopAPNSSettingsView()) {
+                            NavigationLink(destination: LoopAPNSSettingsView(viewModel: viewModel)) {
                                 HStack {
                                     Image(systemName: "gear")
                                     Text("Configure Loop APNS")
@@ -55,6 +56,10 @@ struct LoopAPNSRemoteView: View {
                 Spacer()
             }
             .navigationBarTitle("Loop Remote Control", displayMode: .inline)
+            .onAppear {
+                // Validate Loop APNS setup when view appears
+                viewModel.validateLoopAPNSSetup()
+            }
         }
     }
 }

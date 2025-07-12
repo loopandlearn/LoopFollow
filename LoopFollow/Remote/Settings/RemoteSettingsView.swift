@@ -130,7 +130,7 @@ struct RemoteSettingsView: View {
                         }
                         .padding(.vertical, 8)
 
-                        NavigationLink(destination: LoopAPNSSettingsView()) {
+                        NavigationLink(destination: LoopAPNSSettingsView(viewModel: viewModel)) {
                             HStack {
                                 Image(systemName: "gear")
                                 Text("Configure Loop APNS Settings")
@@ -173,6 +173,10 @@ struct RemoteSettingsView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoopAPNSSetupChanged"))) { _ in
             // Update validation when Loop APNS setup changes
             viewModel.validateLoopAPNSSetup()
+        }
+        .onDisappear {
+            // Force validation when leaving the settings view
+            viewModel.forceValidateLoopAPNSSetup()
         }
     }
 

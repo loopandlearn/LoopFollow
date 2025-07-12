@@ -211,6 +211,55 @@ class RemoteSettingsViewModel: ObservableObject {
                 self?.validateFullLoopAPNSSetup()
             }
             .store(in: &cancellables)
+
+        // Auto-validate when individual Loop APNS fields change
+        $loopAPNSKeyId
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.validateLoopAPNSSetup()
+            }
+            .store(in: &cancellables)
+
+        $loopAPNSKey
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.validateLoopAPNSSetup()
+            }
+            .store(in: &cancellables)
+
+        $loopDeveloperTeamId
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.validateLoopAPNSSetup()
+            }
+            .store(in: &cancellables)
+
+        $loopAPNSDeviceToken
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.validateFullLoopAPNSSetup()
+            }
+            .store(in: &cancellables)
+
+        $loopAPNSBundleIdentifier
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.validateFullLoopAPNSSetup()
+            }
+            .store(in: &cancellables)
+
+        $loopAPNSQrCodeURL
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.validateLoopAPNSSetup()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Loop APNS Setup Methods
@@ -231,10 +280,16 @@ class RemoteSettingsViewModel: ObservableObject {
         // For full validation (after device token is fetched), check everything
         let hasFullSetup = hasBasicSetup && hasDeviceToken && hasBundleIdentifier
 
+        let oldSetup = loopAPNSSetup
         loopAPNSSetup = hasFullSetup
 
         // Log validation results for debugging
         LogManager.shared.log(category: .apns, message: "Loop APNS setup validation - Key ID: \(hasKeyId), APNS Key: \(hasAPNSKey), QR Code: \(hasQrCode), Device Token: \(hasDeviceToken), Bundle ID: \(hasBundleIdentifier), Valid: \(hasFullSetup)")
+
+        // Post notification if setup status changed
+        if oldSetup != hasFullSetup {
+            NotificationCenter.default.post(name: NSNotification.Name("LoopAPNSSetupChanged"), object: nil)
+        }
     }
 
     /// Validates the full Loop APNS setup including device token and bundle identifier
@@ -248,10 +303,16 @@ class RemoteSettingsViewModel: ObservableObject {
 
         let hasFullSetup = hasKeyId && hasAPNSKey && hasQrCode && hasDeviceToken && hasBundleIdentifier
 
+        let oldSetup = loopAPNSSetup
         loopAPNSSetup = hasFullSetup
 
         // Log validation results for debugging
         LogManager.shared.log(category: .apns, message: "Full Loop APNS setup validation - Key ID: \(hasKeyId), APNS Key: \(hasAPNSKey), QR Code: \(hasQrCode), Device Token: \(hasDeviceToken), Bundle ID: \(hasBundleIdentifier), Valid: \(hasFullSetup)")
+
+        // Post notification if setup status changed
+        if oldSetup != hasFullSetup {
+            NotificationCenter.default.post(name: NSNotification.Name("LoopAPNSSetupChanged"), object: nil)
+        }
     }
 
     func refreshDeviceToken() async {
@@ -350,5 +411,15 @@ class RemoteSettingsViewModel: ObservableObject {
             }
             self.isShowingLoopAPNSScanner = false
         }
+    }
+
+    /// Forces validation of Loop APNS setup
+    func forceValidateLoopAPNSSetup() {
+        validateLoopAPNSSetup()
+    }
+
+    /// Forces validation of full Loop APNS setup including device token
+    func forceValidateFullLoopAPNSSetup() {
+        validateFullLoopAPNSSetup()
     }
 }
