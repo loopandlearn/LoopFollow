@@ -96,12 +96,12 @@ class NightscoutSettingsViewModel: ObservableObject {
     }
 
     func checkNightscoutStatus() {
-        NightscoutUtils.verifyURLAndToken { [weak self] error, _, nsWriteAuth, nsAdminAuth in
+        NightscoutUtils.verifyURLAndToken { error, _, nsWriteAuth, nsAdminAuth in
             DispatchQueue.main.async {
                 Storage.shared.nsWriteAuth.value = nsWriteAuth
                 Storage.shared.nsAdminAuth.value = nsAdminAuth
 
-                self?.updateStatusLabel(error: error)
+                self.updateStatusLabel(error: error)
             }
         }
     }
