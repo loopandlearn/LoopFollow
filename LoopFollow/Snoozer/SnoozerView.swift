@@ -47,7 +47,7 @@ struct SnoozerView: View {
     private var leftColumn: some View {
         VStack(spacing: 0) {
             Text(bgText.value)
-                .font(.system(size: 220, weight: .black))
+                .font(.system(size: 350, weight: .black))
                 .minimumScaleFactor(0.5)
                 .foregroundColor(bgTextColor.value)
                 .strikethrough(
