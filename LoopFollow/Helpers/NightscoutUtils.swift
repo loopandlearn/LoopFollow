@@ -2,7 +2,6 @@
 // NightscoutUtils.swift
 // Created by bjorkert.
 
-import CommonCrypto
 import Foundation
 
 class NightscoutUtils {
