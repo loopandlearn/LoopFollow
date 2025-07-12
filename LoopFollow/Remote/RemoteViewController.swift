@@ -37,8 +37,6 @@ class RemoteViewController: UIViewController {
             switch Storage.shared.device.value {
             case "Trio":
                 remoteView = AnyView(TrioNightscoutRemoteView())
-            case "Loop":
-                remoteView = AnyView(LoopNightscoutRemoteView())
             default:
                 remoteView = AnyView(NoRemoteView())
             }
@@ -56,6 +54,8 @@ class RemoteViewController: UIViewController {
                 let trioRemoteControlView = TrioRemoteControlView(viewModel: trioRemoteControlViewModel)
                 hostingController = UIHostingController(rootView: AnyView(trioRemoteControlView))
             }
+        } else if remoteType == .loopAPNS {
+            hostingController = UIHostingController(rootView: AnyView(LoopAPNSRemoteView()))
         } else {
             hostingController = UIHostingController(rootView: AnyView(Text("Please select a Remote Type in Settings.")))
         }

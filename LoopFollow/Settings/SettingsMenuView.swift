@@ -16,6 +16,10 @@ struct SettingsMenuView: View {
     @State private var latestVersion: String?
     @State private var versionTint: Color = .secondary
 
+    // MARK: – Observed objects
+
+    @ObservedObject private var url = Storage.shared.url
+
     // MARK: – Body
 
     var body: some View {
