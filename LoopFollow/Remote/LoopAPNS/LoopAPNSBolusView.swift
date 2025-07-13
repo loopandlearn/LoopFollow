@@ -126,7 +126,7 @@ struct LoopAPNSBolusView: View {
                 case .confirmation:
                     return Alert(
                         title: Text("Confirm Insulin"),
-                        message: Text("Send \(String(format: "%.1f", insulinAmount.doubleValue(for: .internationalUnit()))) units of insulin?"),
+                        message: Text("Send \(String(format: "%.2f", insulinAmount.doubleValue(for: .internationalUnit()))) units of insulin?"),
                         primaryButton: .default(Text("Send")) {
                             authenticateAndSendInsulin()
                         },
@@ -170,7 +170,7 @@ struct LoopAPNSBolusView: View {
         let insulinValue = insulinAmount.doubleValue(for: .internationalUnit())
 
         if insulinValue > maxBolus {
-            alertMessage = "Insulin amount (\(String(format: "%.1f", insulinValue))U) exceeds the maximum allowed (\(String(format: "%.1f", maxBolus))U). Please reduce the amount."
+            alertMessage = "Insulin amount (\(String(format: "%.2f", insulinValue))U) exceeds the maximum allowed (\(String(format: "%.2f", maxBolus))U). Please reduce the amount."
             alertType = .error
             showAlert = true
             return
