@@ -116,9 +116,9 @@ struct SnoozerView: View {
                     Button(action: vm.snoozeTapped) {
                         Text(vm.snoozeUnits == 0 ? "Acknowledge" : "Snooze")
                             .font(.title2).bold()
-                            .frame(maxWidth: .infinity, minHeight: 50)
-                            .background(Color.accentColor)
-                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, minHeight: 100)
+                            .background(Color.white)
+                            .foregroundColor(.black)
                             .cornerRadius(12)
                     }
                     .padding(.horizontal, 24)
