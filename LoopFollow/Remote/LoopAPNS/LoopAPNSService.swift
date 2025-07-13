@@ -132,8 +132,8 @@ class LoopAPNSService {
     /// Validates the Loop APNS setup by checking all required fields
     /// - Returns: True if setup is valid, false otherwise
     func validateSetup() -> Bool {
-        let hasKeyId = !storage.loopAPNSKeyId.value.isEmpty
-        let hasAPNSKey = !storage.loopAPNSKey.value.isEmpty
+        let hasKeyId = !storage.keyId.value.isEmpty
+        let hasAPNSKey = !storage.apnsKey.value.isEmpty
         let hasQrCode = !storage.loopAPNSQrCodeURL.value.isEmpty
         let hasDeviceToken = !storage.loopAPNSDeviceToken.value.isEmpty
         let hasBundleIdentifier = !storage.loopAPNSBundleIdentifier.value.isEmpty
@@ -151,8 +151,8 @@ class LoopAPNSService {
     /// Validates the basic Loop APNS setup (without device token)
     /// - Returns: True if basic setup is valid, false otherwise
     func validateBasicSetup() -> Bool {
-        let hasKeyId = !storage.loopAPNSKeyId.value.isEmpty
-        let hasAPNSKey = !storage.loopAPNSKey.value.isEmpty
+        let hasKeyId = !storage.keyId.value.isEmpty
+        let hasAPNSKey = !storage.apnsKey.value.isEmpty
         let hasQrCode = !storage.loopAPNSQrCodeURL.value.isEmpty
 
         let isValid = hasKeyId && hasAPNSKey && hasQrCode
@@ -177,8 +177,8 @@ class LoopAPNSService {
 
     /// Validates the APNS key format and provides debugging information
     private func validateAPNSKeyFormat() {
-        let apnsKey = storage.loopAPNSKey.value
-        let keyId = storage.loopAPNSKeyId.value
+        let apnsKey = storage.apnsKey.value
+        let keyId = storage.keyId.value
         let teamId = storage.teamId.value ?? keyId
 
         // Validate key format
@@ -269,8 +269,8 @@ class LoopAPNSService {
             throw LoopAPNSError.invalidURL
         }
         let (deviceToken, bundleIdentifier) = try await getValidDeviceTokenAndBundle()
-        let keyId = storage.loopAPNSKeyId.value
-        let apnsKey = storage.loopAPNSKey.value
+        let keyId = storage.keyId.value
+        let apnsKey = storage.apnsKey.value
 
         // Create APNS notification payload (matching Loop's expected format)
         let now = Date()
@@ -320,8 +320,8 @@ class LoopAPNSService {
             throw LoopAPNSError.invalidURL
         }
         let (deviceToken, bundleIdentifier) = try await getValidDeviceTokenAndBundle()
-        let keyId = storage.loopAPNSKeyId.value
-        let apnsKey = storage.loopAPNSKey.value
+        let keyId = storage.keyId.value
+        let apnsKey = storage.apnsKey.value
 
         // Create APNS notification payload (matching Loop's expected format)
         let now = Date()
@@ -375,7 +375,7 @@ class LoopAPNSService {
         payload: [String: Any]
     ) async throws -> Bool {
         // Create JWT token for APNS authentication
-        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: Storage.shared.loopDeveloperTeamId.value, apnsKey: apnsKey) else {
+        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: Storage.shared.teamId.value ?? "", apnsKey: apnsKey) else {
             LogManager.shared.log(category: .apns, message: "Failed to create JWT using JWTManager. Check APNS credentials.")
             throw LoopAPNSError.invalidURL
         }
@@ -794,8 +794,8 @@ class LoopAPNSService {
         try await sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
-            keyId: storage.loopAPNSKeyId.value,
-            apnsKey: storage.loopAPNSKey.value,
+            keyId: storage.keyId.value,
+            apnsKey: storage.apnsKey.value,
             payload: payload
         )
     }
@@ -828,8 +828,8 @@ class LoopAPNSService {
         try await sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
-            keyId: storage.loopAPNSKeyId.value,
-            apnsKey: storage.loopAPNSKey.value,
+            keyId: storage.keyId.value,
+            apnsKey: storage.apnsKey.value,
             payload: payload
         )
     }

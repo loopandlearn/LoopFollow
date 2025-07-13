@@ -169,9 +169,6 @@ class Storage {
     // MARK: - Loop APNS Setup ---------------------------------------------------
 
     var loopAPNSSetup = StorageValue<Bool>(key: "loopAPNSSetup", defaultValue: false)
-    var loopAPNSKeyId = StorageValue<String>(key: "loopAPNSKeyId", defaultValue: "")
-    var loopAPNSKey = StorageValue<String>(key: "loopAPNSKey", defaultValue: "")
-    var loopDeveloperTeamId = StorageValue<String>(key: "loopDeveloperTeamId", defaultValue: "")
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
     var loopAPNSDeviceToken = StorageValue<String>(key: "loopAPNSDeviceToken", defaultValue: "")
     var loopAPNSBundleIdentifier = StorageValue<String>(key: "loopAPNSBundleIdentifier", defaultValue: "")

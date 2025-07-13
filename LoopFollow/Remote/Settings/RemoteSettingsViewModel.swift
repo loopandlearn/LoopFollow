@@ -53,9 +53,9 @@ class RemoteSettingsViewModel: ObservableObject {
         mealWithBolus = storage.mealWithBolus.value
         mealWithFatProtein = storage.mealWithFatProtein.value
 
-        loopAPNSKeyId = storage.loopAPNSKeyId.value
-        loopAPNSKey = storage.loopAPNSKey.value
-        loopDeveloperTeamId = storage.loopDeveloperTeamId.value
+        loopAPNSKeyId = storage.keyId.value
+        loopAPNSKey = storage.apnsKey.value
+        loopDeveloperTeamId = storage.teamId.value ?? ""
         loopAPNSQrCodeURL = storage.loopAPNSQrCodeURL.value
         loopAPNSDeviceToken = storage.loopAPNSDeviceToken.value
         loopAPNSBundleIdentifier = storage.loopAPNSBundleIdentifier.value
@@ -135,7 +135,7 @@ class RemoteSettingsViewModel: ObservableObject {
         // Loop APNS setup bindings
         $loopAPNSKeyId
             .dropFirst()
-            .sink { [weak self] in self?.storage.loopAPNSKeyId.value = $0 }
+            .sink { [weak self] in self?.storage.keyId.value = $0 }
             .store(in: &cancellables)
 
         $loopAPNSKey
@@ -151,13 +151,13 @@ class RemoteSettingsViewModel: ObservableObject {
                 let apnsService = LoopAPNSService()
                 let fixedKey = apnsService.validateAndFixAPNSKey(newValue)
 
-                self?.storage.loopAPNSKey.value = fixedKey
+                self?.storage.apnsKey.value = fixedKey
             }
             .store(in: &cancellables)
 
         $loopDeveloperTeamId
             .dropFirst()
-            .sink { [weak self] in self?.storage.loopDeveloperTeamId.value = $0 }
+            .sink { [weak self] in self?.storage.teamId.value = $0 }
             .store(in: &cancellables)
 
         $loopAPNSQrCodeURL
