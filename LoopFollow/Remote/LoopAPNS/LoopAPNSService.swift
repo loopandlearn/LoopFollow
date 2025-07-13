@@ -24,11 +24,6 @@ class LoopAPNSService {
         let bundleIdentifier: String?
     }
 
-    struct LoopAPNSJWTClaims: Claims {
-        let iss: String
-        let iat: Date
-    }
-
     enum LoopAPNSError: Error, LocalizedError {
         case invalidURL
         case networkError
@@ -380,11 +375,8 @@ class LoopAPNSService {
         payload: [String: Any]
     ) async throws -> Bool {
         // Create JWT token for APNS authentication
-        let jwt: String
-        do {
-            jwt = try createAPNSJWT(keyId: keyId, apnsKey: apnsKey, bundleIdentifier: bundleIdentifier)
-        } catch {
-            LogManager.shared.log(category: .apns, message: "Failed to create JWT: \(error.localizedDescription)")
+        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: Storage.shared.loopDeveloperTeamId.value, apnsKey: apnsKey) else {
+            LogManager.shared.log(category: .apns, message: "Failed to create JWT using JWTManager. Check APNS credentials.")
             throw LoopAPNSError.invalidURL
         }
 
@@ -669,143 +661,6 @@ class LoopAPNSService {
         guidance += "4. Have key data split into 64-character lines\n"
 
         return guidance
-    }
-
-    /// Creates a JWT token for APNS authentication
-    /// - Parameters:
-    ///   - keyId: The APNS key ID
-    ///   - apnsKey: The APNS key
-    ///   - bundleIdentifier: The bundle identifier
-    /// - Returns: The JWT token
-    /// - Throws: LoopAPNSError if JWT creation fails
-    private func createAPNSJWT(keyId: String, apnsKey: String, bundleIdentifier: String) throws -> String {
-        // Validate inputs
-        guard !keyId.isEmpty, !apnsKey.isEmpty, !bundleIdentifier.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "Invalid JWT inputs - keyId: \(keyId.isEmpty), apnsKey: \(apnsKey.isEmpty), bundleIdentifier: \(bundleIdentifier.isEmpty)")
-            throw LoopAPNSError.invalidURL
-        }
-
-        // Validate and fix APNS key format
-        let fixedApnsKey = validateAndFixAPNSKey(apnsKey)
-
-        // Validate keyId format (should be 10 alphanumeric characters)
-        let keyIdPattern = "^[A-Z0-9]{10}$"
-        let isValidKeyId = keyId.range(of: keyIdPattern, options: .regularExpression) != nil
-        LogManager.shared.log(category: .apns, message: "Key ID validation - Key ID: \(keyId), Is valid format: \(isValidKeyId)")
-
-        // For APNS, the issuer should be the Team ID
-        // Try to get the team ID from storage, but if not set, use the key ID (like Nightscout does)
-        let teamId: String
-        let storedTeamId = storage.loopDeveloperTeamId.value
-        if !storedTeamId.isEmpty {
-            teamId = storedTeamId
-            LogManager.shared.log(category: .apns, message: "Using Loop Team ID from storage: \(teamId)")
-        } else {
-            teamId = keyId
-            LogManager.shared.log(category: .apns, message: "No Loop Team ID in storage, using Key ID as Team ID: \(teamId)")
-        }
-
-        // Validate Team ID format (should be 10 alphanumeric characters)
-        let teamIdPattern = "^[A-Z0-9]{10}$"
-        let isValidTeamId = teamId.range(of: teamIdPattern, options: .regularExpression) != nil
-        LogManager.shared.log(category: .apns, message: "Team ID validation - Team ID: \(teamId), Is valid format: \(isValidTeamId)")
-
-        LogManager.shared.log(category: .apns, message: "Creating JWT with keyId: \(keyId), bundleIdentifier: \(bundleIdentifier), teamId: \(teamId)")
-
-        // Log APNS key details for debugging (without exposing the actual key)
-        let apnsKeyLines = fixedApnsKey.components(separatedBy: .newlines)
-        let apnsKeyLineCount = apnsKeyLines.count
-        let hasPrivateKeyHeader = fixedApnsKey.contains("-----BEGIN PRIVATE KEY-----")
-        let hasEndHeader = fixedApnsKey.contains("-----END PRIVATE KEY-----")
-        LogManager.shared.log(category: .apns, message: "APNS Key details - Lines: \(apnsKeyLineCount), Has PKCS8 header: \(hasPrivateKeyHeader), Has end header: \(hasEndHeader)")
-
-        // Log key guidance for debugging
-        let guidance = getAPNSKeyGuidance(fixedApnsKey)
-        LogManager.shared.log(category: .apns, message: guidance)
-
-        do {
-            // Try using CryptoKit approach for JWT creation (like our original implementation)
-            LogManager.shared.log(category: .apns, message: "Creating JWT using CryptoKit approach")
-
-            // Create JWT header
-            let header: [String: String] = [
-                "alg": "ES256",
-                "kid": keyId,
-                "typ": "JWT",
-            ]
-
-            let now = Date()
-            let payload: [String: Any] = [
-                "iss": teamId,
-                "iat": Int(now.timeIntervalSince1970),
-            ]
-
-            // Encode header and payload as base64url
-            let headerData = try JSONSerialization.data(withJSONObject: header)
-            let payloadData = try JSONSerialization.data(withJSONObject: payload)
-
-            let headerBase64 = base64urlEncode(headerData)
-            let payloadBase64 = base64urlEncode(payloadData)
-
-            // Create the signing input
-            let signingInput = "\(headerBase64).\(payloadBase64)"
-
-            // Sign the input with the APNS key using CryptoKit
-            let signature = try signWithES256(signingInput: signingInput, pemKey: fixedApnsKey)
-            let signatureBase64 = base64urlEncode(signature)
-
-            // Combine all parts
-            let jwt = "\(signingInput).\(signatureBase64)"
-
-            LogManager.shared.log(category: .apns, message: "JWT created successfully using CryptoKit")
-            return jwt
-        } catch {
-            LogManager.shared.log(category: .apns, message: "Failed to create JWT with CryptoKit: \(error.localizedDescription)")
-
-            // Try fallback method using SwiftJWT
-            LogManager.shared.log(category: .apns, message: "Attempting fallback JWT creation with SwiftJWT")
-
-            do {
-                let jwt = try createJWTWithSwiftJWT(keyId: keyId, apnsKey: fixedApnsKey, teamId: teamId)
-                LogManager.shared.log(category: .apns, message: "JWT created successfully using SwiftJWT fallback")
-                return jwt
-            } catch {
-                LogManager.shared.log(category: .apns, message: "Failed to create JWT with SwiftJWT fallback: \(error.localizedDescription)")
-
-                // Provide detailed error guidance
-                LogManager.shared.log(category: .apns, message: "Both JWT creation methods failed. This usually indicates:")
-                LogManager.shared.log(category: .apns, message: "1. The APNS key is incomplete or corrupted")
-                LogManager.shared.log(category: .apns, message: "2. The key is not a valid P-256 private key")
-                LogManager.shared.log(category: .apns, message: "3. The key was copied incorrectly from Apple Developer portal")
-                LogManager.shared.log(category: .apns, message: "Please verify the APNS key is complete and properly formatted.")
-
-                throw LoopAPNSError.invalidURL
-            }
-        }
-    }
-
-    /// Creates a JWT token using SwiftJWT as a fallback method
-    /// - Parameters:
-    ///   - keyId: The APNS key ID
-    ///   - apnsKey: The APNS key
-    ///   - teamId: The team ID
-    /// - Returns: The JWT token
-    /// - Throws: LoopAPNSError if JWT creation fails
-    private func createJWTWithSwiftJWT(keyId: String, apnsKey: String, teamId: String) throws -> String {
-        let header = Header(kid: keyId)
-        let claims = LoopAPNSJWTClaims(iss: teamId, iat: Date())
-
-        var jwt = JWT(header: header, claims: claims)
-
-        do {
-            let privateKey = Data(apnsKey.utf8)
-            let jwtSigner = JWTSigner.es256(privateKey: privateKey)
-            let signedJWT = try jwt.sign(using: jwtSigner)
-            return signedJWT
-        } catch {
-            LogManager.shared.log(category: .apns, message: "SwiftJWT signing failed: \(error.localizedDescription)")
-            throw LoopAPNSError.invalidURL
-        }
     }
 
     /// Extracts key data from PEM format

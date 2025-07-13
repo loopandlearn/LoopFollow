@@ -313,6 +313,30 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
+        Storage.shared.apnsKey.$value
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { _ in
+                JWTManager.shared.invalidateCache()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.teamId.$value
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { _ in
+                JWTManager.shared.invalidateCache()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.keyId.$value
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { _ in
+                JWTManager.shared.invalidateCache()
+            }
+            .store(in: &cancellables)
+
         updateQuickActions()
         setupTabBar()
 

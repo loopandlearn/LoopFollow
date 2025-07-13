@@ -198,6 +198,7 @@
 		DDD10F072C529DE800D76A8E /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F062C529DE800D76A8E /* Observable.swift */; };
 		DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */; };
 		DDDB86F12DF7223C00AADDAC /* DeleteAlarmSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */; };
+		DDDC01DD2E244B3100D9975C /* JWTManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC01DC2E244B3100D9975C /* JWTManager.swift */; };
 		DDDC31CC2E13A7DF009EA0F3 /* AddAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */; };
 		DDDC31CE2E13A811009EA0F3 /* AlarmTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */; };
 		DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F482D479AEF00884336 /* NoRemoteView.swift */; };
@@ -583,6 +584,7 @@
 		DDD10F062C529DE800D76A8E /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTarget.swift; sourceTree = "<group>"; };
 		DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAlarmSection.swift; sourceTree = "<group>"; };
+		DDDC01DC2E244B3100D9975C /* JWTManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JWTManager.swift; sourceTree = "<group>"; };
 		DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmSheet.swift; sourceTree = "<group>"; };
 		DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmTile.swift; sourceTree = "<group>"; };
 		DDDF6F482D479AEF00884336 /* NoRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoRemoteView.swift; sourceTree = "<group>"; };
@@ -1505,6 +1507,7 @@
 				DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */,
 				DDF699952C5582290058A8D9 /* TextFieldWithToolBar.swift */,
 				DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */,
+				DDDC01DC2E244B3100D9975C /* JWTManager.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -2007,6 +2010,7 @@
 				DDB9FC7F2DDB584500EFAA76 /* BolusEntry.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
 				654134182E1DC09700BDBE08 /* OverridePresetsView.swift in Sources */,
+				DDDC01DD2E244B3100D9975C /* JWTManager.swift in Sources */,
 				DDD10F072C529DE800D76A8E /* Observable.swift in Sources */,
 				DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */,
 				DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */,
