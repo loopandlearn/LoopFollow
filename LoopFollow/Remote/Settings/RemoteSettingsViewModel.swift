@@ -24,8 +24,6 @@ class RemoteSettingsViewModel: ObservableObject {
 
     // MARK: - Loop APNS Setup Properties
 
-    @Published var loopAPNSKeyId: String
-    @Published var loopAPNSKey: String
     @Published var loopDeveloperTeamId: String
     @Published var loopAPNSQrCodeURL: String
     @Published var loopAPNSDeviceToken: String
@@ -53,8 +51,6 @@ class RemoteSettingsViewModel: ObservableObject {
         mealWithBolus = storage.mealWithBolus.value
         mealWithFatProtein = storage.mealWithFatProtein.value
 
-        loopAPNSKeyId = storage.keyId.value
-        loopAPNSKey = storage.apnsKey.value
         loopDeveloperTeamId = storage.teamId.value ?? ""
         loopAPNSQrCodeURL = storage.loopAPNSQrCodeURL.value
         loopAPNSDeviceToken = storage.loopAPNSDeviceToken.value
@@ -133,12 +129,12 @@ class RemoteSettingsViewModel: ObservableObject {
             .store(in: &cancellables)
 
         // Loop APNS setup bindings
-        $loopAPNSKeyId
+        $keyId
             .dropFirst()
             .sink { [weak self] in self?.storage.keyId.value = $0 }
             .store(in: &cancellables)
 
-        $loopAPNSKey
+        $apnsKey
             .dropFirst()
             .sink { [weak self] newValue in
                 // Log APNS key changes for debugging
@@ -186,7 +182,7 @@ class RemoteSettingsViewModel: ObservableObject {
             .store(in: &cancellables)
 
         // Auto-validate Loop APNS setup when key ID, APNS key, or QR code changes
-        Publishers.CombineLatest3($loopAPNSKeyId, $loopAPNSKey, $loopAPNSQrCodeURL)
+        Publishers.CombineLatest3($keyId, $apnsKey, $loopAPNSQrCodeURL)
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _, _, _ in
@@ -213,7 +209,7 @@ class RemoteSettingsViewModel: ObservableObject {
             .store(in: &cancellables)
 
         // Auto-validate when individual Loop APNS fields change
-        $loopAPNSKeyId
+        $keyId
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -221,7 +217,7 @@ class RemoteSettingsViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        $loopAPNSKey
+        $apnsKey
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -267,8 +263,8 @@ class RemoteSettingsViewModel: ObservableObject {
     /// Validates the Loop APNS setup by checking all required fields
     /// - Returns: True if setup is valid, false otherwise
     func validateLoopAPNSSetup() {
-        let hasKeyId = !loopAPNSKeyId.isEmpty
-        let hasAPNSKey = !loopAPNSKey.isEmpty
+        let hasKeyId = !keyId.isEmpty
+        let hasAPNSKey = !apnsKey.isEmpty
         let hasQrCode = !loopAPNSQrCodeURL.isEmpty
         let hasDeviceToken = !loopAPNSDeviceToken.isEmpty
         let hasBundleIdentifier = !loopAPNSBundleIdentifier.isEmpty
@@ -295,8 +291,8 @@ class RemoteSettingsViewModel: ObservableObject {
     /// Validates the full Loop APNS setup including device token and bundle identifier
     /// - Returns: True if full setup is valid, false otherwise
     func validateFullLoopAPNSSetup() {
-        let hasKeyId = !loopAPNSKeyId.isEmpty
-        let hasAPNSKey = !loopAPNSKey.isEmpty
+        let hasKeyId = !keyId.isEmpty
+        let hasAPNSKey = !apnsKey.isEmpty
         let hasQrCode = !loopAPNSQrCodeURL.isEmpty
         let hasDeviceToken = !loopAPNSDeviceToken.isEmpty
         let hasBundleIdentifier = !loopAPNSBundleIdentifier.isEmpty

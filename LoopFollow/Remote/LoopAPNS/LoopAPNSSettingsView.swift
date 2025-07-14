@@ -42,7 +42,7 @@ struct LoopAPNSSettingsView: View {
                             .font(.headline)
                         TogglableSecureInput(
                             placeholder: "Enter your APNS Key ID",
-                            text: $viewModel.loopAPNSKeyId,
+                            text: $viewModel.keyId,
                             style: .singleLine
                         )
                         .autocapitalization(.none)
@@ -66,7 +66,7 @@ struct LoopAPNSSettingsView: View {
                             .font(.headline)
                         TogglableSecureInput(
                             placeholder: "Enter your APNS Key including -----BEGIN PRIVATE KEY----- and -----END PRIVATE KEY-----",
-                            text: $viewModel.loopAPNSKey,
+                            text: $viewModel.apnsKey,
                             style: .multiLine
                         )
                         .frame(minHeight: 110)
