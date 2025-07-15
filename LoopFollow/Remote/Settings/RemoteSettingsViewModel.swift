@@ -171,9 +171,12 @@ class RemoteSettingsViewModel: ObservableObject {
             .sink { [weak self] in self?.storage.loopAPNSBundleIdentifier.value = $0 }
             .store(in: &cancellables)
 
-        $loopAPNSSetup
-            .dropFirst()
-            .sink { [weak self] in self?.storage.loopAPNSSetup.value = $0 }
+        // Sync loopAPNSSetup with storage
+        Storage.shared.loopAPNSSetup.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.loopAPNSSetup = newValue
+            }
             .store(in: &cancellables)
 
         $productionEnvironment
@@ -277,7 +280,7 @@ class RemoteSettingsViewModel: ObservableObject {
         let hasFullSetup = hasBasicSetup && hasDeviceToken && hasBundleIdentifier
 
         let oldSetup = loopAPNSSetup
-        loopAPNSSetup = hasFullSetup
+        storage.loopAPNSSetup.value = hasFullSetup
 
         // Log validation results for debugging
         LogManager.shared.log(category: .apns, message: "Loop APNS setup validation - Key ID: \(hasKeyId), APNS Key: \(hasAPNSKey), QR Code: \(hasQrCode), Device Token: \(hasDeviceToken), Bundle ID: \(hasBundleIdentifier), Valid: \(hasFullSetup)")
@@ -300,7 +303,7 @@ class RemoteSettingsViewModel: ObservableObject {
         let hasFullSetup = hasKeyId && hasAPNSKey && hasQrCode && hasDeviceToken && hasBundleIdentifier
 
         let oldSetup = loopAPNSSetup
-        loopAPNSSetup = hasFullSetup
+        storage.loopAPNSSetup.value = hasFullSetup
 
         // Log validation results for debugging
         LogManager.shared.log(category: .apns, message: "Full Loop APNS setup validation - Key ID: \(hasKeyId), APNS Key: \(hasAPNSKey), QR Code: \(hasQrCode), Device Token: \(hasDeviceToken), Bundle ID: \(hasBundleIdentifier), Valid: \(hasFullSetup)")
