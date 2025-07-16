@@ -7,8 +7,9 @@ on:
   #push:
 
   schedule:
-    - cron: "0 12 * * 3" # Checks for updates at 12:00 UTC every Wednesday
-    - cron: "0 10 1 * *" # Builds the app on the 1st of every month at 10:00 UTC
+    # avoid starting an action at xx:00 when GitHub resources are impacted
+    - cron: "17 12 * * 3" # Checks for updates at 12:17 UTC every Wednesday
+    - cron: "17 10 1 * *" # Builds the app on the 1st of every month at 10:17 UTC
 
 env:  
   UPSTREAM_REPO: loopandlearn/LoopFollow
@@ -197,7 +198,7 @@ jobs:
       | # runs if started manually, or if sync schedule is set and enabled and scheduled on the first Saturday each month, or if sync schedule is set and enabled and new commits were found
       github.event_name == 'workflow_dispatch' ||
       (needs.check_alive_and_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
-        (vars.SCHEDULED_BUILD != 'false' && github.event.schedule == '0 10 1 * *') ||
+        (vars.SCHEDULED_BUILD != 'false' && github.event.schedule == '17 10 1 * *') ||
         (vars.SCHEDULED_SYNC != 'false' && needs.check_latest_from_upstream.outputs.NEW_COMMITS == 'true' )
       )
     steps:
