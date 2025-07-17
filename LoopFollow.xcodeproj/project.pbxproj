@@ -41,6 +41,9 @@
 		DD16AF112C997B4600FB655A /* LoadingButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF102C997B4600FB655A /* LoadingButtonView.swift */; };
 		DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */; };
 		DD1A97162D4294B3000DDC11 /* AdvancedSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */; };
+		DD1D52B92E1EB5DC00432050 /* TabPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52B82E1EB5DC00432050 /* TabPosition.swift */; };
+		DD1D52BB2E1EB60B00432050 /* MoreMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52BA2E1EB60B00432050 /* MoreMenuViewController.swift */; };
+		DD1D52BD2E1EB62E00432050 /* TabCustomizationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52BC2E1EB62E00432050 /* TabCustomizationSettingsView.swift */; };
 		DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */; };
 		DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */; };
 		DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */; };
@@ -415,6 +418,9 @@
 		DD16AF102C997B4600FB655A /* LoadingButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingButtonView.swift; sourceTree = "<group>"; };
 		DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
 		DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsViewModel.swift; sourceTree = "<group>"; };
+		DD1D52B82E1EB5DC00432050 /* TabPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPosition.swift; sourceTree = "<group>"; };
+		DD1D52BA2E1EB60B00432050 /* MoreMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreMenuViewController.swift; sourceTree = "<group>"; };
+		DD1D52BC2E1EB62E00432050 /* TabCustomizationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCustomizationSettingsView.swift; sourceTree = "<group>"; };
 		DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsView.swift; sourceTree = "<group>"; };
 		DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsViewModel.swift; sourceTree = "<group>"; };
 		DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsViewModel.swift; sourceTree = "<group>"; };
@@ -863,6 +869,7 @@
 		DD1A97122D429495000DDC11 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				DD1D52BC2E1EB62E00432050 /* TabCustomizationSettingsView.swift */,
 				DD83164F2DE4E635004467AA /* SettingsMenuView.swift */,
 				DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */,
 				DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */,
@@ -1456,6 +1463,7 @@
 		FCC688542489367300A0279D /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				DD1D52B82E1EB5DC00432050 /* TabPosition.swift */,
 				DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */,
 				DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */,
 				DD7B0D432D730A320063DCB6 /* CycleHelper.swift */,
@@ -1486,6 +1494,7 @@
 		FCC68871248A736700A0279D /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				DD1D52BA2E1EB60B00432050 /* MoreMenuViewController.swift */,
 				DD12D4842E1705D9004E0112 /* AlarmViewController.swift */,
 				FC97881B2485969B00A7906C /* MainViewController.swift */,
 				FC97881D2485969B00A7906C /* NightScoutViewController.swift */,
@@ -1938,6 +1947,7 @@
 				FCEF87AC24A141A700AE6FA0 /* Localizer.swift in Sources */,
 				FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */,
 				DDF6999E2C5AAA640058A8D9 /* ErrorMessageView.swift in Sources */,
+				DD1D52BB2E1EB60B00432050 /* MoreMenuViewController.swift in Sources */,
 				DD4878152C7B75230048F05C /* MealView.swift in Sources */,
 				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
 				FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */,
@@ -1993,6 +2003,7 @@
 				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				DD4AFB6B2DB6BF2A00BB593F /* Binding+Optional.swift in Sources */,
 				DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */,
+				DD1D52BD2E1EB62E00432050 /* TabCustomizationSettingsView.swift in Sources */,
 				DD5DA27C2DC930D6003D44FC /* GlucoseValue.swift in Sources */,
 				DD9ACA062D32AF7900415D8A /* TreatmentsTask.swift in Sources */,
 				DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */,
@@ -2034,6 +2045,7 @@
 				DDC6CA412DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift in Sources */,
 				DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */,
 				DD7F4C112DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift in Sources */,
+				DD1D52B92E1EB5DC00432050 /* TabPosition.swift in Sources */,
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
 				DD0650F52DCF303F004D3B41 /* AlarmStepperSection.swift in Sources */,
 				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
