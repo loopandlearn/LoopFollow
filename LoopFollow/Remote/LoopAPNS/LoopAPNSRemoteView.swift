@@ -20,8 +20,8 @@ struct LoopAPNSRemoteView: View {
                 LazyVGrid(columns: columns, spacing: 16) {
                     if loopAPNSSetup.value {
                         // Show Loop APNS command buttons if APNS setup configured
-                        CommandButtonView(command: "Carbs", iconName: "fork.knife.circle", destination: LoopAPNSCarbsView())
-                        CommandButtonView(command: "Bolus", iconName: "syringe.fill", destination: LoopAPNSBolusView())
+                        CommandButtonView(command: "Meal", iconName: "fork.knife", destination: LoopAPNSCarbsView())
+                        CommandButtonView(command: "Bolus", iconName: "syringe", destination: LoopAPNSBolusView())
                         CommandButtonView(command: "Overrides", iconName: "slider.horizontal.3", destination: OverridePresetsView())
                     } else {
                         // Show setup message if APNS is not configured
