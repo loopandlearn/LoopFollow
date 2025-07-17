@@ -211,23 +211,6 @@ class RemoteSettingsViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Auto-validate when individual Loop APNS fields change
-        $keyId
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.validateLoopAPNSSetup()
-            }
-            .store(in: &cancellables)
-
-        $apnsKey
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.validateLoopAPNSSetup()
-            }
-            .store(in: &cancellables)
-
         $loopDeveloperTeamId
             .dropFirst()
             .receive(on: DispatchQueue.main)
@@ -249,14 +232,6 @@ class RemoteSettingsViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.validateFullLoopAPNSSetup()
-            }
-            .store(in: &cancellables)
-
-        $loopAPNSQrCodeURL
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.validateLoopAPNSSetup()
             }
             .store(in: &cancellables)
     }
