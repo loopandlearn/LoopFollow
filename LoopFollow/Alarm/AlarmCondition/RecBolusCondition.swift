@@ -11,7 +11,7 @@ struct RecBolusCondition: AlarmCondition {
 
     func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         // ────────────────────────────────
-        // 0. sanity checks
+        // Reset alarm if below threshold
         // ────────────────────────────────
         guard let threshold = alarm.threshold, threshold > 0 else { return false }
         guard let rec = data.recBolus, rec >= threshold else {
@@ -20,13 +20,20 @@ struct RecBolusCondition: AlarmCondition {
         }
 
         // ────────────────────────────────
-        // 1. has it INCREASED past the last-notified value?
+        // Check if we should alert (increase or first time)
         // ────────────────────────────────
+        let shouldAlert: Bool
         if let last = Storage.shared.lastRecBolusNotified.value {
-            if rec <= last + 1e-4 { return false }
+            // Only alert if there's been more than 5% increase
+            shouldAlert = rec > last * (1.05)
+        } else {
+            // First time above threshold - alert
+            shouldAlert = true
         }
 
+        // Always update the stored value when above threshold
         Storage.shared.lastRecBolusNotified.value = rec
-        return true
+
+        return shouldAlert
     }
 }
