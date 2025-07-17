@@ -218,22 +218,6 @@ class RemoteSettingsViewModel: ObservableObject {
                 self?.validateLoopAPNSSetup()
             }
             .store(in: &cancellables)
-
-        $loopAPNSDeviceToken
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.validateFullLoopAPNSSetup()
-            }
-            .store(in: &cancellables)
-
-        $loopAPNSBundleIdentifier
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.validateFullLoopAPNSSetup()
-            }
-            .store(in: &cancellables)
     }
 
     // MARK: - Loop APNS Setup Methods
