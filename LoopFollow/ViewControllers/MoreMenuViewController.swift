@@ -35,6 +35,7 @@ class MoreMenuViewController: UIViewController {
         super.viewWillAppear(animated)
         updateMenuItems()
         tableView.reloadData()
+        Observable.shared.settingsPath.set(NavigationPath())
     }
 
     private func setupTableView() {
