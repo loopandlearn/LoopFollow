@@ -199,7 +199,7 @@ extension MainViewController {
                     id: .deviceStatus,
                     to: Date().addingTimeInterval(interval)
                 )
-                TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date())
+                TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(3))
             }
         }
 
