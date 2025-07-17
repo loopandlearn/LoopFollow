@@ -159,11 +159,6 @@ struct RemoteSettingsView: View {
             }
         }
 
-        .sheet(isPresented: $viewModel.isShowingLoopAPNSScanner) {
-            SimpleQRCodeScannerView { result in
-                viewModel.handleLoopAPNSQRCodeScanResult(result)
-            }
-        }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
         .navigationBarTitle("Remote Settings", displayMode: .inline)
         .onAppear {
