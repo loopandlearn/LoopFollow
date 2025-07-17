@@ -25,7 +25,7 @@ struct RecBolusCondition: AlarmCondition {
         let shouldAlert: Bool
         if let last = Storage.shared.lastRecBolusNotified.value {
             // Only alert if there's been more than 5% increase
-            shouldAlert = rec > last * (1.05)
+            shouldAlert = rec > last * 1.05
         } else {
             // First time above threshold - alert
             shouldAlert = true
