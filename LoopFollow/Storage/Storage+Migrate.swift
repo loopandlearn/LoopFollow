@@ -5,6 +5,18 @@
 import Foundation
 
 extension Storage {
+    func migrateStep2() {
+        // Migrate from old system to new position-based system
+        if remoteType.value != .none {
+            remotePosition.value = .position2
+            alarmsPosition.value = .more
+        } else {
+            alarmsPosition.value = .position2
+            remotePosition.value = .more
+        }
+        nightscoutPosition.value = .position4
+    }
+
     func migrateStep1() {
         Storage.shared.url.value = ObservableUserDefaults.shared.old_url.value
         Storage.shared.device.value = ObservableUserDefaults.shared.old_device.value
