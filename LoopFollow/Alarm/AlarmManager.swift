@@ -105,6 +105,8 @@ class AlarmManager {
                 // If this alarm is active, but no longer fulfill the requirements, stop it.
                 // Continue evaluating other alarams
                 if Observable.shared.currentAlarm.value == alarm.id {
+                    LogManager.shared.log(category: .alarm, message: "Stopping alarm \(alarm) because it no longer meets its requirements", isDebug: true)
+
                     stopAlarm()
                 }
 
