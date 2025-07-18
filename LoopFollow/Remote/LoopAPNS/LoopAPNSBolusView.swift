@@ -19,6 +19,9 @@ struct LoopAPNSBolusView: View {
     // Add state for recommended bolus and warning
     @State private var recommendedBolus: Double? = nil
     @State private var lastLoopTime: TimeInterval? = nil
+    @State private var otpTimeRemaining: Int? = nil
+    private let otpPeriod: TimeInterval = 30
+    private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     enum AlertType {
         case success
@@ -78,13 +81,18 @@ struct LoopAPNSBolusView: View {
                             Text("Current OTP Code")
                                 .font(.headline)
                             if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {
-                                Text(otpCode)
-                                    .font(.system(.body, design: .monospaced))
-                                    .foregroundColor(.green)
-                                    .padding(.vertical, 4)
-                                    .padding(.horizontal, 8)
-                                    .background(Color.green.opacity(0.1))
-                                    .cornerRadius(4)
+                                HStack {
+                                    Text(otpCode)
+                                        .font(.system(.body, design: .monospaced))
+                                        .foregroundColor(.green)
+                                        .padding(.vertical, 4)
+                                        .padding(.horizontal, 8)
+                                        .background(Color.green.opacity(0.1))
+                                        .cornerRadius(4)
+                                    Text("(" + (otpTimeRemaining.map { "\($0)s left" } ?? "-") + ")")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             } else {
                                 Text("Invalid QR code URL")
                                     .foregroundColor(.red)
@@ -106,6 +114,12 @@ struct LoopAPNSBolusView: View {
                 }
 
                 loadRecommendedBolus()
+                // Reset timer state so it shows '-' until first tick
+                otpTimeRemaining = nil
+            }
+            .onReceive(otpTimer) { _ in
+                let now = Date().timeIntervalSince1970
+                otpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
             }
             .alert(isPresented: $showAlert) {
                 switch alertType {
