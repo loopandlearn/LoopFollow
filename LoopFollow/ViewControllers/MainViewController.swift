@@ -320,30 +320,78 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     private func setupTabBar() {
         guard let tabBarController = tabBarController else { return }
 
-        // Check if we're currently in the More tab and it's about to disappear
-        let wasInMoreTab = tabBarController.selectedIndex == 4 &&
+        // Store current selection before making changes
+        let currentSelectedIndex = tabBarController.selectedIndex
+
+        // Check if we need to handle More tab disappearing
+        let wasInMoreTab = currentSelectedIndex == 4 &&
             tabBarController.viewControllers?.last is MoreMenuViewController
         let willHaveMoreTab = hasItemsInMore()
 
-        // If we're in More tab and it's going away, handle the transition
+        // If currently in More tab and it's going away, we need to handle this carefully
         if wasInMoreTab && !willHaveMoreTab {
-            // First dismiss any modal that might be presented
-            if let moreVC = tabBarController.viewControllers?.last as? MoreMenuViewController,
-               let presented = moreVC.presentedViewController
-            {
+            // First, dismiss any modals that might be open
+            if let presented = tabBarController.presentedViewController {
                 presented.dismiss(animated: false) { [weak self] in
-                    // After dismissal, switch to home and setup tabs
-                    tabBarController.selectedIndex = 0
-                    self?.completeTabBarSetup(tabBarController: tabBarController, willHaveMoreTab: willHaveMoreTab)
+                    // After dismissal, rebuild tabs with home selected
+                    self?.rebuildTabs(tabBarController: tabBarController,
+                                      willHaveMoreTab: willHaveMoreTab,
+                                      selectedIndex: 0)
                 }
                 return
-            } else {
-                // No modal presented, just switch to home
-                tabBarController.selectedIndex = 0
             }
         }
 
-        completeTabBarSetup(tabBarController: tabBarController, willHaveMoreTab: willHaveMoreTab)
+        // For all other cases, rebuild tabs normally
+        rebuildTabs(tabBarController: tabBarController,
+                    willHaveMoreTab: willHaveMoreTab,
+                    selectedIndex: wasInMoreTab && !willHaveMoreTab ? 0 : currentSelectedIndex)
+    }
+
+    private func rebuildTabs(tabBarController: UITabBarController,
+                             willHaveMoreTab: Bool,
+                             selectedIndex: Int)
+    {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        var viewControllers: [UIViewController] = []
+
+        // Tab 0 - Home (always)
+        viewControllers.append(self)
+
+        // Tab 1 - Dynamic based on what's assigned to position2
+        if let vc = createViewController(for: .position2, storyboard: storyboard) {
+            viewControllers.append(vc)
+        }
+
+        // Tab 2 - Snoozer (always)
+        let snoozerVC = storyboard.instantiateViewController(withIdentifier: "SnoozerViewController")
+        snoozerVC.tabBarItem = UITabBarItem(title: "Snoozer", image: UIImage(systemName: "zzz"), tag: 2)
+        viewControllers.append(snoozerVC)
+
+        // Tab 3 - Dynamic based on what's assigned to position4
+        if let vc = createViewController(for: .position4, storyboard: storyboard) {
+            viewControllers.append(vc)
+        }
+
+        // Tab 4 - Settings or More
+        if willHaveMoreTab {
+            let moreVC = MoreMenuViewController()
+            moreVC.tabBarItem = UITabBarItem(title: "More", image: UIImage(systemName: "ellipsis"), tag: 4)
+            viewControllers.append(moreVC)
+        } else {
+            let settingsVC = SettingsViewController()
+            settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gear"), tag: 4)
+            viewControllers.append(settingsVC)
+        }
+
+        // Update view controllers without animation to prevent glitches
+        tabBarController.setViewControllers(viewControllers, animated: false)
+
+        // Restore selection if valid, otherwise default to home
+        let safeIndex = min(selectedIndex, viewControllers.count - 1)
+        tabBarController.selectedIndex = max(0, safeIndex)
+
+        updateNightscoutTabState()
     }
 
     private func completeTabBarSetup(tabBarController: UITabBarController, willHaveMoreTab: Bool) {
