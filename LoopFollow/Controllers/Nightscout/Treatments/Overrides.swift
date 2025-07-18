@@ -21,7 +21,7 @@ extension MainViewController {
         }
 
         let now = Date().timeIntervalSince1970
-        let minimumFutureDisplayHours = 1.0
+        let minimumFutureDisplayHours = 0.25
         let effectiveFutureHours = max(Storage.shared.predictionToLoad.value, minimumFutureDisplayHours)
         let maxEndDate = now + effectiveFutureHours * 3600
 
