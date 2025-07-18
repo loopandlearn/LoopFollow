@@ -162,6 +162,10 @@ class Storage {
 
     var lastLoopingChecked = StorageValue<Date?>(key: "lastLoopingChecked", defaultValue: nil)
 
+    var alarmsPosition = StorageValue<TabPosition>(key: "alarmsPosition", defaultValue: .position2)
+    var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .more)
+    var nightscoutPosition = StorageValue<TabPosition>(key: "nightscoutPosition", defaultValue: .position4)
+
     static let shared = Storage()
     private init() {}
 }

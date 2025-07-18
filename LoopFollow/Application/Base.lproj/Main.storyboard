@@ -321,7 +321,7 @@
         <!--Snoozer-->
         <scene sceneID="gSd-1V-vbL">
             <objects>
-                <viewController id="e0E-cx-0Wr" customClass="SnoozerViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SnoozerViewController" id="e0E-cx-0Wr" customClass="SnoozerViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="oqe-Oz-Hai">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -337,7 +337,7 @@
         <!--Nightscout-->
         <scene sceneID="wg7-f3-ORb">
             <objects>
-                <viewController id="8rJ-Kc-sve" customClass="NightscoutViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="NightscoutViewController" id="8rJ-Kc-sve" customClass="NightscoutViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="QS5-Rx-YEW">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -405,7 +405,7 @@
         <!--Settings-->
         <scene sceneID="ORV-wr-Fd3">
             <objects>
-                <viewController id="hDv-qK-Udb" customClass="SettingsViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SettingsViewController" id="hDv-qK-Udb" customClass="SettingsViewController" customModule="LoopFollow" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ljg-dW-5uR">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

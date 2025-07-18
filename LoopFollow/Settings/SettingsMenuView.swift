@@ -15,6 +15,7 @@ struct SettingsMenuView: View {
 
     @State private var latestVersion: String?
     @State private var versionTint: Color = .secondary
+    @State private var showingTabCustomization = false
 
     // MARK: – Body
 
@@ -42,6 +43,12 @@ struct SettingsMenuView: View {
                                   icon: "chart.xyaxis.line")
                     {
                         settingsPath.value.append(Sheet.graph)
+                    }
+
+                    NavigationRow(title: "Tab Settings",
+                                  icon: "rectangle.3.group")
+                    {
+                        showingTabCustomization = true
                     }
 
                     if !nightscoutURL.value.isEmpty {
@@ -122,6 +129,15 @@ struct SettingsMenuView: View {
             }
             .navigationTitle("Settings")
             .navigationDestination(for: Sheet.self) { $0.destination }
+            .sheet(isPresented: $showingTabCustomization) {
+                TabCustomizationModal(
+                    isPresented: $showingTabCustomization,
+                    onApply: {
+                        // Dismiss any presented view controller and go to home tab
+                        handleTabReorganization()
+                    }
+                )
+            }
         }
         .task { await refreshVersionInfo() }
     }
@@ -211,6 +227,37 @@ struct SettingsMenuView: View {
         let avc = UIActivityViewController(activityItems: files,
                                            applicationActivities: nil)
         UIApplication.shared.topMost?.present(avc, animated: true)
+    }
+
+    private func handleTabReorganization() {
+        // Find the root tab bar controller
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController else { return }
+
+        // Navigate through the hierarchy to find the tab bar controller
+        var tabBarController: UITabBarController?
+
+        if let tbc = rootVC as? UITabBarController {
+            tabBarController = tbc
+        } else if let nav = rootVC as? UINavigationController,
+                  let tbc = nav.viewControllers.first as? UITabBarController
+        {
+            tabBarController = tbc
+        }
+
+        guard let tabBar = tabBarController else { return }
+
+        // Dismiss any modals first
+        if let presented = tabBar.presentedViewController {
+            presented.dismiss(animated: false) {
+                // After dismissal, switch to home tab
+                tabBar.selectedIndex = 0
+            }
+        } else {
+            // No modal to dismiss, just switch to home
+            tabBar.selectedIndex = 0
+        }
     }
 }
 
