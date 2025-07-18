@@ -36,6 +36,8 @@ class RemoteSettingsViewModel: ObservableObject {
 
     private var storage = Storage.shared
     private var cancellables = Set<AnyCancellable>()
+    private var isUpdatingLoopAPNSSetup = false
+    private var lastValidationTime: Date = .distantPast
 
     init() {
         // Initialize published properties from storage
@@ -61,7 +63,7 @@ class RemoteSettingsViewModel: ObservableObject {
         setupBindings()
 
         // Trigger initial validation
-        validateLoopAPNSSetup()
+        validateFullLoopAPNSSetup()
     }
 
     private func setupBindings() {
@@ -175,7 +177,8 @@ class RemoteSettingsViewModel: ObservableObject {
         Storage.shared.loopAPNSSetup.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] newValue in
-                self?.loopAPNSSetup = newValue
+                guard let self = self, !self.isUpdatingLoopAPNSSetup else { return }
+                self.loopAPNSSetup = newValue
             }
             .store(in: &cancellables)
 
@@ -189,7 +192,7 @@ class RemoteSettingsViewModel: ObservableObject {
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _, _, _ in
-                self?.validateLoopAPNSSetup()
+                self?.validateFullLoopAPNSSetup()
             }
             .store(in: &cancellables)
 
@@ -215,44 +218,28 @@ class RemoteSettingsViewModel: ObservableObject {
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.validateLoopAPNSSetup()
+                self?.validateFullLoopAPNSSetup()
             }
             .store(in: &cancellables)
     }
 
     // MARK: - Loop APNS Setup Methods
 
-    /// Validates the Loop APNS setup by checking all required fields
-    /// - Returns: True if setup is valid, false otherwise
-    func validateLoopAPNSSetup() {
-        let hasKeyId = !keyId.isEmpty
-        let hasAPNSKey = !apnsKey.isEmpty
-        let hasQrCode = !loopAPNSQrCodeURL.isEmpty
-        let hasDeviceToken = !loopAPNSDeviceToken.isEmpty
-        let hasBundleIdentifier = !loopAPNSBundleIdentifier.isEmpty
-
-        // For initial setup, we don't require device token and bundle identifier
-        // These will be fetched when the user clicks "Refresh Device Token"
-        let hasBasicSetup = hasKeyId && hasAPNSKey && hasQrCode
-
-        // For full validation (after device token is fetched), check everything
-        let hasFullSetup = hasBasicSetup && hasDeviceToken && hasBundleIdentifier
-
-        let oldSetup = loopAPNSSetup
-        storage.loopAPNSSetup.value = hasFullSetup
-
-        // Log validation results for debugging
-        LogManager.shared.log(category: .apns, message: "Loop APNS setup validation - Key ID: \(hasKeyId), APNS Key: \(hasAPNSKey), QR Code: \(hasQrCode), Device Token: \(hasDeviceToken), Bundle ID: \(hasBundleIdentifier), Valid: \(hasFullSetup)")
-
-        // Post notification if setup status changed
-        if oldSetup != hasFullSetup {
-            NotificationCenter.default.post(name: NSNotification.Name("LoopAPNSSetupChanged"), object: nil)
-        }
-    }
-
     /// Validates the full Loop APNS setup including device token and bundle identifier
     /// - Returns: True if full setup is valid, false otherwise
     func validateFullLoopAPNSSetup() {
+        // Debounce rapid successive calls (prevent calls within 100ms of each other)
+        let now = Date()
+        if now.timeIntervalSince(lastValidationTime) < 0.1 {
+            LogManager.shared.log(category: .apns, message: "Skipping validation - too soon since last call")
+            return
+        }
+        lastValidationTime = now
+
+        // Add call stack debugging
+        let callStack = Thread.callStackSymbols.prefix(3).map { $0.components(separatedBy: " ").last ?? "unknown" }.joined(separator: " -> ")
+        LogManager.shared.log(category: .apns, message: "validateFullLoopAPNSSetup called from: \(callStack)")
+
         let hasKeyId = !keyId.isEmpty
         let hasAPNSKey = !apnsKey.isEmpty
         let hasQrCode = !loopAPNSQrCodeURL.isEmpty
@@ -262,7 +249,13 @@ class RemoteSettingsViewModel: ObservableObject {
         let hasFullSetup = hasKeyId && hasAPNSKey && hasQrCode && hasDeviceToken && hasBundleIdentifier
 
         let oldSetup = loopAPNSSetup
-        storage.loopAPNSSetup.value = hasFullSetup
+
+        // Only update storage if the value has actually changed to prevent infinite loops
+        if storage.loopAPNSSetup.value != hasFullSetup {
+            isUpdatingLoopAPNSSetup = true
+            storage.loopAPNSSetup.value = hasFullSetup
+            isUpdatingLoopAPNSSetup = false
+        }
 
         // Log validation results for debugging
         LogManager.shared.log(category: .apns, message: "Full Loop APNS setup validation - Key ID: \(hasKeyId), APNS Key: \(hasAPNSKey), QR Code: \(hasQrCode), Device Token: \(hasDeviceToken), Bundle ID: \(hasBundleIdentifier), Valid: \(hasFullSetup)")
@@ -363,21 +356,12 @@ class RemoteSettingsViewModel: ObservableObject {
             case let .success(code):
                 self.loopAPNSQrCodeURL = code
                 // Trigger validation after QR code is scanned
-                self.validateLoopAPNSSetup()
+                LogManager.shared.log(category: .apns, message: "Loop APNS QR code scanned: \(code)")
+                self.validateFullLoopAPNSSetup()
             case let .failure(error):
                 self.loopAPNSErrorMessage = "Scanning failed: \(error.localizedDescription)"
             }
             self.isShowingLoopAPNSScanner = false
         }
-    }
-
-    /// Forces validation of Loop APNS setup
-    func forceValidateLoopAPNSSetup() {
-        validateLoopAPNSSetup()
-    }
-
-    /// Forces validation of full Loop APNS setup including device token
-    func forceValidateFullLoopAPNSSetup() {
-        validateFullLoopAPNSSetup()
     }
 }

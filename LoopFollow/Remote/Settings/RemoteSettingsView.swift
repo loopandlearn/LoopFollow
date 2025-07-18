@@ -163,15 +163,15 @@ struct RemoteSettingsView: View {
         .navigationBarTitle("Remote Settings", displayMode: .inline)
         .onAppear {
             // Refresh Loop APNS setup validation when returning to this screen
-            viewModel.validateLoopAPNSSetup()
+            viewModel.validateFullLoopAPNSSetup()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoopAPNSSetupChanged"))) { _ in
             // Update validation when Loop APNS setup changes
-            viewModel.validateLoopAPNSSetup()
+            viewModel.validateFullLoopAPNSSetup()
         }
         .onDisappear {
             // Force validation when leaving the settings view
-            viewModel.forceValidateLoopAPNSSetup()
+            viewModel.validateFullLoopAPNSSetup()
         }
     }
 

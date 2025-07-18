@@ -194,7 +194,7 @@ struct LoopAPNSSettingsView: View {
             }
             .onAppear {
                 // Validate Loop APNS setup when view appears
-                viewModel.validateLoopAPNSSetup()
+                viewModel.validateFullLoopAPNSSetup()
 
                 // Automatically fetch device token and bundle identifier when entering the setup screen
                 Task {
@@ -203,11 +203,11 @@ struct LoopAPNSSettingsView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoopAPNSSetupChanged"))) { _ in
                 // Update validation when Loop APNS setup changes
-                viewModel.validateLoopAPNSSetup()
+                viewModel.validateFullLoopAPNSSetup()
             }
             .onDisappear {
                 // Force validation when leaving the settings view
-                viewModel.forceValidateLoopAPNSSetup()
+                viewModel.validateFullLoopAPNSSetup()
             }
         }
     }

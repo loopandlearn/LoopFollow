@@ -58,7 +58,7 @@ struct LoopAPNSRemoteView: View {
             .navigationBarTitle("Loop Remote Control", displayMode: .inline)
             .onAppear {
                 // Validate Loop APNS setup when view appears
-                viewModel.validateLoopAPNSSetup()
+                viewModel.validateFullLoopAPNSSetup()
             }
         }
     }
