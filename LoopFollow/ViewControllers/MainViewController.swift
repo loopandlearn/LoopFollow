@@ -228,9 +228,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         /// When an alarm is triggered, go to the snoozer tab
         Observable.shared.currentAlarm.$value
             .receive(on: DispatchQueue.main)
-            .compactMap { $0 } /// Ignore nil
+            .compactMap { $0 }
             .sink { [weak self] _ in
-                self?.tabBarController?.selectedIndex = 2
+                if let snoozerIndex = self?.getSnoozerTabIndex() {
+                    self?.tabBarController?.selectedIndex = snoozerIndex
+                }
             }
             .store(in: &cancellables)
 
@@ -394,41 +396,17 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         updateNightscoutTabState()
     }
 
-    private func completeTabBarSetup(tabBarController: UITabBarController, willHaveMoreTab: Bool) {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        var viewControllers: [UIViewController] = []
+    private func getSnoozerTabIndex() -> Int? {
+        guard let tabBarController = tabBarController,
+              let viewControllers = tabBarController.viewControllers else { return nil }
 
-        // Tab 0 - Home (always)
-        viewControllers.append(self)
-
-        // Tab 1 - Dynamic based on what's assigned to position2
-        if let vc = createViewController(for: .position2, storyboard: storyboard) {
-            viewControllers.append(vc)
+        for (index, vc) in viewControllers.enumerated() {
+            if let _ = vc as? SnoozerViewController {
+                return index
+            }
         }
 
-        // Tab 2 - Snoozer (always)
-        let snoozerVC = storyboard.instantiateViewController(withIdentifier: "SnoozerViewController")
-        snoozerVC.tabBarItem = UITabBarItem(title: "Snoozer", image: UIImage(systemName: "zzz"), tag: 2)
-        viewControllers.append(snoozerVC)
-
-        // Tab 3 - Dynamic based on what's assigned to position4
-        if let vc = createViewController(for: .position4, storyboard: storyboard) {
-            viewControllers.append(vc)
-        }
-
-        // Tab 4 - Settings or More
-        if willHaveMoreTab {
-            let moreVC = MoreMenuViewController()
-            moreVC.tabBarItem = UITabBarItem(title: "More", image: UIImage(systemName: "ellipsis"), tag: 4)
-            viewControllers.append(moreVC)
-        } else {
-            let settingsVC = SettingsViewController()
-            settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gear"), tag: 4)
-            viewControllers.append(settingsVC)
-        }
-
-        tabBarController.setViewControllers(viewControllers, animated: false)
-        updateNightscoutTabState()
+        return nil
     }
 
     private func createViewController(for position: TabPosition, storyboard: UIStoryboard) -> UIViewController? {
