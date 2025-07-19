@@ -48,7 +48,7 @@ struct SnoozerView: View {
     private func leftColumn(isLandscape: Bool) -> some View {
         VStack(spacing: 0) {
             Text(bgText.value)
-                .font(.system(size: 250, weight: .black))
+                .font(.system(size: 300, weight: .black))
                 .minimumScaleFactor(0.5)
                 .foregroundColor(bgTextColor.value)
                 .strikethrough(
@@ -56,7 +56,7 @@ struct SnoozerView: View {
                     pattern: .solid,
                     color: bgStale.value ? .red : .clear
                 )
-                .frame(maxWidth: .infinity, maxHeight: 200)
+                .frame(maxWidth: .infinity, maxHeight: 240)
 
             if isLandscape {
                 HStack(alignment: .firstTextBaseline, spacing: 20) {
@@ -68,27 +68,27 @@ struct SnoozerView: View {
                 }
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white)
-                .frame(maxWidth: .infinity, maxHeight: 96)
+                .frame(maxWidth: .infinity, maxHeight: 80)
 
             } else {
                 Text(directionText.value)
                     .font(.system(size: 110, weight: .black))
                     .minimumScaleFactor(0.5)
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, maxHeight: 96)
+                    .frame(maxWidth: .infinity, maxHeight: 80)
 
                 Text(deltaText.value)
                     .font(.system(size: 70))
                     .minimumScaleFactor(0.5)
                     .foregroundColor(.white.opacity(0.8))
-                    .frame(maxWidth: .infinity, maxHeight: 78)
+                    .frame(maxWidth: .infinity, maxHeight: 68)
             }
 
             Text(minAgoText.value)
-                .font(.system(size: 70))
+                .font(.system(size: 60))
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white.opacity(0.6))
-                .frame(maxWidth: .infinity, maxHeight: 48)
+                .frame(maxWidth: .infinity, maxHeight: 40)
         }
         .padding(.top, 16)
         .padding(.horizontal, 16)
