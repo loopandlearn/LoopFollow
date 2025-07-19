@@ -23,7 +23,10 @@ class NightscoutViewController: UIViewController {
 
         guard let myUrl = URL(string: url) else { return }
 
-        webView.configuration.preferences.javaScriptEnabled = true
+        let webpagePreferences = WKWebpagePreferences()
+        webpagePreferences.allowsContentJavaScript = true
+        webView.configuration.defaultWebpagePreferences = webpagePreferences
+
         webView.navigationDelegate = self
         webView.uiDelegate = self
         webView.load(URLRequest(url: myUrl))
@@ -31,8 +34,6 @@ class NightscoutViewController: UIViewController {
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(reloadWebView(_:)), for: .valueChanged)
         webView.scrollView.addSubview(refreshControl)
-
-        webView.uiDelegate = self
     }
 
     @objc func reloadWebView(_ sender: UIRefreshControl) {
@@ -41,7 +42,6 @@ class NightscoutViewController: UIViewController {
         sender.endRefreshing()
     }
 
-    // New code to clear web cache
     func clearWebCache() {
         let dataStore = WKWebsiteDataStore.default()
         let cacheTypes = Set([WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache])
@@ -105,5 +105,16 @@ extension NightscoutViewController: WKNavigationDelegate, WKUIDelegate {
         }
 
         return nil
+    }
+
+    func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
+        let javascript = """
+        var meta = document.querySelector('meta[name="viewport"]');
+        if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=0.9, maximum-scale=5.0, user-scalable=yes');
+        }
+        """
+
+        webView.evaluateJavaScript(javascript)
     }
 }
