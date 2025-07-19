@@ -7,6 +7,7 @@ import SwiftUI
 struct SnoozerView: View {
     @StateObject private var vm = SnoozerViewModel()
 
+    @ObservedObject var showDisplayName = Storage.shared.showDisplayName
     @ObservedObject var minAgoText = Observable.shared.minAgoText
     @ObservedObject var bgText = Observable.shared.bgText
     @ObservedObject var bgTextColor = Observable.shared.bgTextColor
@@ -22,17 +23,17 @@ struct SnoozerView: View {
                 Color.black
                     .edgesIgnoringSafeArea(.all)
 
+                let isLandscape = geo.size.width > geo.size.height
+
                 Group {
-                    if geo.size.width > geo.size.height {
-                        // Landscape: two columns
+                    if isLandscape {
                         HStack(spacing: 0) {
-                            leftColumn
+                            leftColumn(isLandscape: true)
                             rightColumn
                         }
                     } else {
-                        // Portrait: single column
                         VStack(spacing: 0) {
-                            leftColumn
+                            leftColumn(isLandscape: false)
                             rightColumn
                         }
                     }
@@ -44,10 +45,10 @@ struct SnoozerView: View {
 
     // MARK: - Left Column (BG / Direction / Delta / Age)
 
-    private var leftColumn: some View {
+    private func leftColumn(isLandscape: Bool) -> some View {
         VStack(spacing: 0) {
             Text(bgText.value)
-                .font(.system(size: 220, weight: .black))
+                .font(.system(size: 250, weight: .black))
                 .minimumScaleFactor(0.5)
                 .foregroundColor(bgTextColor.value)
                 .strikethrough(
@@ -55,19 +56,33 @@ struct SnoozerView: View {
                     pattern: .solid,
                     color: bgStale.value ? .red : .clear
                 )
-                .frame(maxWidth: .infinity, maxHeight: 167)
+                .frame(maxWidth: .infinity, maxHeight: 200)
 
-            Text(directionText.value)
-                .font(.system(size: 110, weight: .black))
+            if isLandscape {
+                HStack(alignment: .firstTextBaseline, spacing: 20) {
+                    Text(directionText.value)
+                        .font(.system(size: 90, weight: .black))
+
+                    Text(deltaText.value)
+                        .font(.system(size: 70))
+                }
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: 96)
 
-            Text(deltaText.value)
-                .font(.system(size: 70))
-                .minimumScaleFactor(0.5)
-                .foregroundColor(.white.opacity(0.8))
-                .frame(maxWidth: .infinity, maxHeight: 78)
+            } else {
+                Text(directionText.value)
+                    .font(.system(size: 110, weight: .black))
+                    .minimumScaleFactor(0.5)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, maxHeight: 96)
+
+                Text(deltaText.value)
+                    .font(.system(size: 70))
+                    .minimumScaleFactor(0.5)
+                    .foregroundColor(.white.opacity(0.8))
+                    .frame(maxWidth: .infinity, maxHeight: 78)
+            }
 
             Text(minAgoText.value)
                 .font(.system(size: 70))
@@ -84,6 +99,12 @@ struct SnoozerView: View {
     private var rightColumn: some View {
         VStack(spacing: 0) {
             Spacer()
+            if showDisplayName.value {
+                Text(Bundle.main.displayName)
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(.white.opacity(0.8))
+                    .padding(.bottom, 4)
+            }
 
             if let alarm = vm.activeAlarm {
                 VStack(spacing: 16) {
