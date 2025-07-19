@@ -234,7 +234,7 @@ class PushNotificationManager {
             return
         }
 
-        guard let jwt = getOrGenerateJWT() else {
+        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: teamId, apnsKey: apnsKey) else {
             let errorMessage = "Failed to generate JWT, please check that the token is correct."
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
@@ -325,32 +325,5 @@ class PushNotificationManager {
         let host = productionEnvironment ? "api.push.apple.com" : "api.sandbox.push.apple.com"
         let urlString = "https://\(host)/3/device/\(deviceToken)"
         return URL(string: urlString)
-    }
-
-    private func getOrGenerateJWT() -> String? {
-        if let cachedJWT = Storage.shared.cachedJWT.value, let expirationDate = Storage.shared.jwtExpirationDate.value {
-            if Date() < expirationDate {
-                return cachedJWT
-            }
-        }
-
-        let header = Header(kid: keyId)
-        let claims = APNsJWTClaims(iss: teamId, iat: Date())
-
-        var jwt = JWT(header: header, claims: claims)
-
-        do {
-            let privateKey = Data(apnsKey.utf8)
-            let jwtSigner = JWTSigner.es256(privateKey: privateKey)
-            let signedJWT = try jwt.sign(using: jwtSigner)
-
-            Storage.shared.cachedJWT.value = signedJWT
-            Storage.shared.jwtExpirationDate.value = Date().addingTimeInterval(3600)
-
-            return signedJWT
-        } catch {
-            print("Failed to sign JWT: \(error.localizedDescription)")
-            return nil
-        }
     }
 }
