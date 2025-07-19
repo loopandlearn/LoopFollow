@@ -12,9 +12,16 @@ struct RemoteSettingsView: View {
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
     @State private var alertMessage: String? = nil
+    @State private var otpTimeRemaining: Int? = nil
+    private let otpPeriod: TimeInterval = 30
+    private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     enum AlertType {
         case validation
+    }
+
+    init(viewModel: RemoteSettingsViewModel) {
+        self.viewModel = viewModel
     }
 
     var body: some View {
@@ -145,6 +152,25 @@ struct RemoteSettingsView: View {
                     Section(header: Text("Debug / Info")) {
                         Text("Device Token: \(Storage.shared.loopAPNSDeviceToken.value)")
                         Text("Bundle ID: \(Storage.shared.loopAPNSBundleIdentifier.value)")
+
+                        if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {
+                            HStack {
+                                Text("Current TOTP Code:")
+                                Text(otpCode)
+                                    .font(.system(.body, design: .monospaced))
+                                    .foregroundColor(.green)
+                                    .padding(.vertical, 2)
+                                    .padding(.horizontal, 6)
+                                    .background(Color.green.opacity(0.1))
+                                    .cornerRadius(4)
+                                Text("(" + (otpTimeRemaining.map { "\($0)s left" } ?? "-") + ")")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        } else {
+                            Text("TOTP Code: Invalid QR code URL")
+                                .foregroundColor(.red)
+                        }
                     }
                 }
             }
@@ -160,6 +186,14 @@ struct RemoteSettingsView: View {
                     return Alert(title: Text("Unknown Alert"))
                 }
             }
+        }
+        .onAppear {
+            // Reset timer state so it shows '-' until first tick
+            otpTimeRemaining = nil
+        }
+        .onReceive(otpTimer) { _ in
+            let now = Date().timeIntervalSince1970
+            otpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
         }
 
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
