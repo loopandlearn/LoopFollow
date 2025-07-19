@@ -34,7 +34,7 @@ struct RemoteSettingsView: View {
                     remoteTypeRow(
                         type: .loopAPNS,
                         label: "Loop",
-                        isEnabled: true
+                        isEnabled: viewModel.isLoopDevice
                     )
                     remoteTypeRow(type: .nightscout, label: "Nightscout", isEnabled: true)
                     Text("Nightscout should be used for Trio 0.2.x or older.")
@@ -99,6 +99,8 @@ struct RemoteSettingsView: View {
                             .toggleStyle(SwitchToggleStyle())
                     }
 
+                    guardrailsSection
+
                     // MARK: - Debug / Info
 
                     Section(header: Text("Debug / Info")) {
@@ -137,12 +139,13 @@ struct RemoteSettingsView: View {
                             }
                         }
                     }
-                }
 
-                // MARK: - Shared Guardrails Section
-
-                if viewModel.remoteType != .none {
                     guardrailsSection
+
+                    Section(header: Text("Debug / Info")) {
+                        Text("Device Token: \(Storage.shared.loopAPNSDeviceToken.value)")
+                        Text("Bundle ID: \(Storage.shared.loopAPNSBundleIdentifier.value)")
+                    }
                 }
             }
             .alert(isPresented: $showAlert) {

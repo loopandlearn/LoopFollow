@@ -31,7 +31,6 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var productionEnvironment: Bool
     @Published var isShowingLoopAPNSScanner: Bool = false
     @Published var loopAPNSErrorMessage: String?
-    @Published var isRefreshingDeviceToken: Bool = false
 
     // MARK: - Computed property for Loop APNS Setup validation
 
@@ -165,79 +164,6 @@ class RemoteSettingsViewModel: ObservableObject {
             .dropFirst()
             .sink { [weak self] in self?.storage.productionEnvironment.value = $0 }
             .store(in: &cancellables)
-    }
-
-    // MARK: - Loop APNS Setup Methods
-
-    func refreshDeviceToken() async {
-        await MainActor.run {
-            isRefreshingDeviceToken = true
-            loopAPNSErrorMessage = nil
-        }
-
-        // Use the regular Nightscout profile endpoint instead of the Loop APNS service
-        let success = await fetchDeviceTokenFromNightscoutProfile()
-
-        await MainActor.run {
-            self.isRefreshingDeviceToken = false
-            if success {
-                self.loopAPNSDeviceToken = self.storage.loopAPNSDeviceToken.value
-                self.loopAPNSBundleIdentifier = self.storage.loopAPNSBundleIdentifier.value
-            } else {
-                self.loopAPNSErrorMessage = "Failed to refresh device token. Check your Nightscout URL and token."
-            }
-        }
-    }
-
-    private func fetchDeviceTokenFromNightscoutProfile() async -> Bool {
-        // Check if Nightscout is configured
-        guard !Storage.shared.url.value.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "Nightscout URL not configured")
-            return false
-        }
-
-        guard !Storage.shared.token.value.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "Nightscout token not configured")
-            return false
-        }
-
-        // Fetch profile from Nightscout using the regular profile endpoint
-        return await withCheckedContinuation { continuation in
-            NightscoutUtils.executeRequest(eventType: .profile, parameters: [:]) { (result: Result<NSProfile, Error>) in
-                DispatchQueue.main.async {
-                    switch result {
-                    case let .success(profileData):
-                        // Log the profile data for debugging
-                        LogManager.shared.log(category: .apns, message: "Profile fetched successfully for device token")
-
-                        // Update profile data which includes device token and bundle identifier
-                        ProfileManager.shared.loadProfile(from: profileData)
-
-                        // Store the device token and bundle identifier in the Loop APNS storage
-                        if let deviceToken = profileData.deviceToken, !deviceToken.isEmpty {
-                            self.storage.loopAPNSDeviceToken.value = deviceToken
-                        } else if let loopSettings = profileData.loopSettings, let deviceToken = loopSettings.deviceToken, !deviceToken.isEmpty {
-                            self.storage.loopAPNSDeviceToken.value = deviceToken
-                        }
-
-                        if let bundleIdentifier = profileData.bundleIdentifier, !bundleIdentifier.isEmpty {
-                            self.storage.loopAPNSBundleIdentifier.value = bundleIdentifier
-                        } else if let loopSettings = profileData.loopSettings, let bundleIdentifier = loopSettings.bundleIdentifier, !bundleIdentifier.isEmpty {
-                            self.storage.loopAPNSBundleIdentifier.value = bundleIdentifier
-                        }
-
-                        // Log successful configuration
-                        LogManager.shared.log(category: .apns, message: "Successfully configured device tokens from Nightscout profile")
-
-                        continuation.resume(returning: true)
-
-                    case let .failure(error):
-                        LogManager.shared.log(category: .apns, message: "Failed to fetch profile for device token configuration: \(error.localizedDescription)")
-                        continuation.resume(returning: false)
-                    }
-                }
-            }
-        }
     }
 
     func handleLoopAPNSQRCodeScanResult(_ result: Result<String, Error>) {
