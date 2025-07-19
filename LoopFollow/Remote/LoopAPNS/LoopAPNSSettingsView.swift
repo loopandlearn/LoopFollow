@@ -92,6 +92,7 @@ struct LoopAPNSSettingsView: View {
                     .buttonStyle(.borderedProminent)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
+
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Environment")
                             .font(.headline)
@@ -111,6 +112,7 @@ struct LoopAPNSSettingsView: View {
                         }
                         .padding(.top, 4)
                     }
+
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Device Token")
                             .font(.headline)
@@ -193,21 +195,10 @@ struct LoopAPNSSettingsView: View {
                 }
             }
             .onAppear {
-                // Validate Loop APNS setup when view appears
-                viewModel.validateFullLoopAPNSSetup()
-
                 // Automatically fetch device token and bundle identifier when entering the setup screen
                 Task {
                     await viewModel.refreshDeviceToken()
                 }
-            }
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoopAPNSSetupChanged"))) { _ in
-                // Update validation when Loop APNS setup changes
-                viewModel.validateFullLoopAPNSSetup()
-            }
-            .onDisappear {
-                // Force validation when leaving the settings view
-                viewModel.validateFullLoopAPNSSetup()
             }
         }
     }

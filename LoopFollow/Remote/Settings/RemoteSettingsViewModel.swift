@@ -28,16 +28,23 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var loopAPNSQrCodeURL: String
     @Published var loopAPNSDeviceToken: String
     @Published var loopAPNSBundleIdentifier: String
-    @Published var loopAPNSSetup: Bool
     @Published var productionEnvironment: Bool
     @Published var isShowingLoopAPNSScanner: Bool = false
     @Published var loopAPNSErrorMessage: String?
     @Published var isRefreshingDeviceToken: Bool = false
 
+    // MARK: - Computed property for Loop APNS Setup validation
+
+    var loopAPNSSetup: Bool {
+        !keyId.isEmpty &&
+            !apnsKey.isEmpty &&
+            !loopAPNSQrCodeURL.isEmpty &&
+            !loopAPNSDeviceToken.isEmpty &&
+            !loopAPNSBundleIdentifier.isEmpty
+    }
+
     private var storage = Storage.shared
     private var cancellables = Set<AnyCancellable>()
-    private var isUpdatingLoopAPNSSetup = false
-    private var lastValidationTime: Date = .distantPast
 
     init() {
         // Initialize published properties from storage
@@ -57,16 +64,13 @@ class RemoteSettingsViewModel: ObservableObject {
         loopAPNSQrCodeURL = storage.loopAPNSQrCodeURL.value
         loopAPNSDeviceToken = storage.loopAPNSDeviceToken.value
         loopAPNSBundleIdentifier = storage.loopAPNSBundleIdentifier.value
-        loopAPNSSetup = storage.loopAPNSSetup.value
         productionEnvironment = storage.productionEnvironment.value
 
         setupBindings()
-
-        // Trigger initial validation
-        validateFullLoopAPNSSetup()
     }
 
     private func setupBindings() {
+        // Basic property bindings
         $remoteType
             .dropFirst()
             .sink { [weak self] in self?.storage.remoteType.value = $0 }
@@ -84,7 +88,12 @@ class RemoteSettingsViewModel: ObservableObject {
 
         $apnsKey
             .dropFirst()
-            .sink { [weak self] in self?.storage.apnsKey.value = $0 }
+            .sink { [weak self] newValue in
+                // Validate and fix the APNS key format using the service
+                let apnsService = LoopAPNSService()
+                let fixedKey = apnsService.validateAndFixAPNSKey(newValue)
+                self?.storage.apnsKey.value = fixedKey
+            }
             .store(in: &cancellables)
 
         $keyId
@@ -122,6 +131,7 @@ class RemoteSettingsViewModel: ObservableObject {
             .sink { [weak self] in self?.storage.mealWithFatProtein.value = $0 }
             .store(in: &cancellables)
 
+        // Device type monitoring
         Storage.shared.device.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] newValue in
@@ -130,29 +140,7 @@ class RemoteSettingsViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Loop APNS setup bindings
-        $keyId
-            .dropFirst()
-            .sink { [weak self] in self?.storage.keyId.value = $0 }
-            .store(in: &cancellables)
-
-        $apnsKey
-            .dropFirst()
-            .sink { [weak self] newValue in
-                // Log APNS key changes for debugging
-                LogManager.shared.log(category: .apns, message: "APNS Key changed - Length: \(newValue.count)")
-                LogManager.shared.log(category: .apns, message: "APNS Key contains line breaks: \(newValue.contains("\n"))")
-                LogManager.shared.log(category: .apns, message: "APNS Key contains BEGIN header: \(newValue.contains("-----BEGIN PRIVATE KEY-----"))")
-                LogManager.shared.log(category: .apns, message: "APNS Key contains END header: \(newValue.contains("-----END PRIVATE KEY-----"))")
-
-                // Validate and fix the APNS key format using the service
-                let apnsService = LoopAPNSService()
-                let fixedKey = apnsService.validateAndFixAPNSKey(newValue)
-
-                self?.storage.apnsKey.value = fixedKey
-            }
-            .store(in: &cancellables)
-
+        // Loop APNS bindings
         $loopDeveloperTeamId
             .dropFirst()
             .sink { [weak self] in self?.storage.teamId.value = $0 }
@@ -173,98 +161,13 @@ class RemoteSettingsViewModel: ObservableObject {
             .sink { [weak self] in self?.storage.loopAPNSBundleIdentifier.value = $0 }
             .store(in: &cancellables)
 
-        // Sync loopAPNSSetup with storage
-        Storage.shared.loopAPNSSetup.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newValue in
-                guard let self = self, !self.isUpdatingLoopAPNSSetup else { return }
-                self.loopAPNSSetup = newValue
-            }
-            .store(in: &cancellables)
-
         $productionEnvironment
             .dropFirst()
             .sink { [weak self] in self?.storage.productionEnvironment.value = $0 }
             .store(in: &cancellables)
-
-        // Auto-validate Loop APNS setup when key ID, APNS key, or QR code changes
-        Publishers.CombineLatest3($keyId, $apnsKey, $loopAPNSQrCodeURL)
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _, _, _ in
-                self?.validateFullLoopAPNSSetup()
-            }
-            .store(in: &cancellables)
-
-        // Auto-validate when device token or bundle identifier changes
-        Publishers.CombineLatest($loopAPNSDeviceToken, $loopAPNSBundleIdentifier)
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _, _ in
-                self?.validateFullLoopAPNSSetup()
-            }
-            .store(in: &cancellables)
-
-        // Auto-validate when production environment changes
-        $productionEnvironment
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.validateFullLoopAPNSSetup()
-            }
-            .store(in: &cancellables)
-
-        $loopDeveloperTeamId
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.validateFullLoopAPNSSetup()
-            }
-            .store(in: &cancellables)
     }
 
     // MARK: - Loop APNS Setup Methods
-
-    /// Validates the full Loop APNS setup including device token and bundle identifier
-    /// - Returns: True if full setup is valid, false otherwise
-    func validateFullLoopAPNSSetup() {
-        // Debounce rapid successive calls (prevent calls within 100ms of each other)
-        let now = Date()
-        if now.timeIntervalSince(lastValidationTime) < 0.1 {
-            LogManager.shared.log(category: .apns, message: "Skipping validation - too soon since last call")
-            return
-        }
-        lastValidationTime = now
-
-        // Add call stack debugging
-        let callStack = Thread.callStackSymbols.prefix(3).map { $0.components(separatedBy: " ").last ?? "unknown" }.joined(separator: " -> ")
-        LogManager.shared.log(category: .apns, message: "validateFullLoopAPNSSetup called from: \(callStack)")
-
-        let hasKeyId = !keyId.isEmpty
-        let hasAPNSKey = !apnsKey.isEmpty
-        let hasQrCode = !loopAPNSQrCodeURL.isEmpty
-        let hasDeviceToken = !loopAPNSDeviceToken.isEmpty
-        let hasBundleIdentifier = !loopAPNSBundleIdentifier.isEmpty
-
-        let hasFullSetup = hasKeyId && hasAPNSKey && hasQrCode && hasDeviceToken && hasBundleIdentifier
-
-        let oldSetup = loopAPNSSetup
-
-        // Only update storage if the value has actually changed to prevent infinite loops
-        if storage.loopAPNSSetup.value != hasFullSetup {
-            isUpdatingLoopAPNSSetup = true
-            storage.loopAPNSSetup.value = hasFullSetup
-            isUpdatingLoopAPNSSetup = false
-        }
-
-        // Log validation results for debugging
-        LogManager.shared.log(category: .apns, message: "Full Loop APNS setup validation - Key ID: \(hasKeyId), APNS Key: \(hasAPNSKey), QR Code: \(hasQrCode), Device Token: \(hasDeviceToken), Bundle ID: \(hasBundleIdentifier), Valid: \(hasFullSetup)")
-
-        // Post notification if setup status changed
-        if oldSetup != hasFullSetup {
-            NotificationCenter.default.post(name: NSNotification.Name("LoopAPNSSetupChanged"), object: nil)
-        }
-    }
 
     func refreshDeviceToken() async {
         await MainActor.run {
@@ -280,8 +183,6 @@ class RemoteSettingsViewModel: ObservableObject {
             if success {
                 self.loopAPNSDeviceToken = self.storage.loopAPNSDeviceToken.value
                 self.loopAPNSBundleIdentifier = self.storage.loopAPNSBundleIdentifier.value
-                // Trigger validation immediately after updating values
-                self.validateFullLoopAPNSSetup()
             } else {
                 self.loopAPNSErrorMessage = "Failed to refresh device token. Check your Nightscout URL and token."
             }
@@ -308,13 +209,6 @@ class RemoteSettingsViewModel: ObservableObject {
                     case let .success(profileData):
                         // Log the profile data for debugging
                         LogManager.shared.log(category: .apns, message: "Profile fetched successfully for device token")
-                        LogManager.shared.log(category: .apns, message: "Device token from profile: \(profileData.deviceToken ?? "nil")")
-                        LogManager.shared.log(category: .apns, message: "Bundle identifier from profile: \(profileData.bundleIdentifier ?? "nil")")
-
-                        if let loopSettings = profileData.loopSettings {
-                            LogManager.shared.log(category: .apns, message: "Loop settings device token: \(loopSettings.deviceToken ?? "nil")")
-                            LogManager.shared.log(category: .apns, message: "Loop settings bundle identifier: \(loopSettings.bundleIdentifier ?? "nil")")
-                        }
 
                         // Update profile data which includes device token and bundle identifier
                         ProfileManager.shared.loadProfile(from: profileData)
@@ -331,10 +225,6 @@ class RemoteSettingsViewModel: ObservableObject {
                         } else if let loopSettings = profileData.loopSettings, let bundleIdentifier = loopSettings.bundleIdentifier, !bundleIdentifier.isEmpty {
                             self.storage.loopAPNSBundleIdentifier.value = bundleIdentifier
                         }
-
-                        // Log the stored values after processing
-                        LogManager.shared.log(category: .apns, message: "Stored device token: \(self.storage.loopAPNSDeviceToken.value)")
-                        LogManager.shared.log(category: .apns, message: "Stored bundle ID: \(self.storage.loopAPNSBundleIdentifier.value)")
 
                         // Log successful configuration
                         LogManager.shared.log(category: .apns, message: "Successfully configured device tokens from Nightscout profile")
@@ -355,9 +245,7 @@ class RemoteSettingsViewModel: ObservableObject {
             switch result {
             case let .success(code):
                 self.loopAPNSQrCodeURL = code
-                // Trigger validation after QR code is scanned
                 LogManager.shared.log(category: .apns, message: "Loop APNS QR code scanned: \(code)")
-                self.validateFullLoopAPNSSetup()
             case let .failure(error):
                 self.loopAPNSErrorMessage = "Scanning failed: \(error.localizedDescription)"
             }
