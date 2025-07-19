@@ -161,18 +161,6 @@ struct RemoteSettingsView: View {
 
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
         .navigationBarTitle("Remote Settings", displayMode: .inline)
-        .onAppear {
-            // Refresh Loop APNS setup validation when returning to this screen
-            viewModel.validateFullLoopAPNSSetup()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoopAPNSSetupChanged"))) { _ in
-            // Update validation when Loop APNS setup changes
-            viewModel.validateFullLoopAPNSSetup()
-        }
-        .onDisappear {
-            // Force validation when leaving the settings view
-            viewModel.validateFullLoopAPNSSetup()
-        }
     }
 
     // MARK: - Custom Row for Remote Type Selection

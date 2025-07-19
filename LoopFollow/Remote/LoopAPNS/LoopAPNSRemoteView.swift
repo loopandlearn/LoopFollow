@@ -6,7 +6,6 @@ import SwiftUI
 
 struct LoopAPNSRemoteView: View {
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var loopAPNSSetup = Storage.shared.loopAPNSSetup
     @StateObject private var viewModel = RemoteSettingsViewModel()
 
     var body: some View {
@@ -18,7 +17,7 @@ struct LoopAPNSRemoteView: View {
                 ]
 
                 LazyVGrid(columns: columns, spacing: 16) {
-                    if loopAPNSSetup.value {
+                    if viewModel.loopAPNSSetup {
                         // Show Loop APNS command buttons if APNS setup configured
                         CommandButtonView(command: "Meal", iconName: "fork.knife", destination: LoopAPNSCarbsView())
                         CommandButtonView(command: "Bolus", iconName: "syringe", destination: LoopAPNSBolusView())
@@ -56,10 +55,6 @@ struct LoopAPNSRemoteView: View {
                 Spacer()
             }
             .navigationBarTitle("Loop Remote Control", displayMode: .inline)
-            .onAppear {
-                // Validate Loop APNS setup when view appears
-                viewModel.validateFullLoopAPNSSetup()
-            }
         }
     }
 }
