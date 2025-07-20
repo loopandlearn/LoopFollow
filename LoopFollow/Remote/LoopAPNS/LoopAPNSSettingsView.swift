@@ -101,79 +101,6 @@ struct LoopAPNSSettingsView: View {
                         Text("Production is used for browser builders and should be switched off for Xcode builders")
                             .font(.caption)
                             .foregroundColor(.secondary)
-
-                        // Environment status indicator
-                        HStack {
-                            Image(systemName: viewModel.productionEnvironment ? "checkmark.circle.fill" : "gearshape.fill")
-                                .foregroundColor(viewModel.productionEnvironment ? .green : .blue)
-                            Text(viewModel.productionEnvironment ? "Production Environment" : "Development Environment")
-                                .font(.caption)
-                                .foregroundColor(viewModel.productionEnvironment ? .green : .blue)
-                        }
-                        .padding(.top, 4)
-                    }
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Device Token")
-                            .font(.headline)
-                        HStack {
-                            Text(viewModel.loopAPNSDeviceToken.isEmpty ? "Not configured" : viewModel.loopAPNSDeviceToken)
-                                .foregroundColor(viewModel.loopAPNSDeviceToken.isEmpty ? .red : .primary)
-                                .font(.system(.body, design: .monospaced))
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-
-                            Spacer()
-
-                            Button(action: {
-                                Task {
-                                    await viewModel.refreshDeviceToken()
-                                }
-                            }) {
-                                if viewModel.isRefreshingDeviceToken {
-                                    ProgressView()
-                                        .scaleEffect(0.8)
-                                } else {
-                                    Image(systemName: "arrow.clockwise")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                            .disabled(viewModel.isRefreshingDeviceToken)
-                        }
-
-                        // Device token status indicator
-                        if !viewModel.loopAPNSDeviceToken.isEmpty {
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                Text("Device token configured")
-                                    .font(.caption)
-                                    .foregroundColor(.green)
-                            }
-                            .padding(.top, 4)
-                        }
-                    }
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Bundle Identifier")
-                            .font(.headline)
-                        Text(viewModel.loopAPNSBundleIdentifier.isEmpty ? "Not configured" : viewModel.loopAPNSBundleIdentifier)
-                            .foregroundColor(viewModel.loopAPNSBundleIdentifier.isEmpty ? .red : .primary)
-                            .font(.system(.body, design: .monospaced))
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-
-                        // Bundle identifier status indicator
-                        if !viewModel.loopAPNSBundleIdentifier.isEmpty {
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                Text("Bundle identifier configured")
-                                    .font(.caption)
-                                    .foregroundColor(.green)
-                            }
-                            .padding(.top, 4)
-                        }
                     }
 
                 } header: {
@@ -192,12 +119,6 @@ struct LoopAPNSSettingsView: View {
             .sheet(isPresented: $viewModel.isShowingLoopAPNSScanner) {
                 SimpleQRCodeScannerView { result in
                     viewModel.handleLoopAPNSQRCodeScanResult(result)
-                }
-            }
-            .onAppear {
-                // Automatically fetch device token and bundle identifier when entering the setup screen
-                Task {
-                    await viewModel.refreshDeviceToken()
                 }
             }
         }

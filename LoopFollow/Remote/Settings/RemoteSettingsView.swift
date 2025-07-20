@@ -12,9 +12,16 @@ struct RemoteSettingsView: View {
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
     @State private var alertMessage: String? = nil
+    @State private var otpTimeRemaining: Int? = nil
+    private let otpPeriod: TimeInterval = 30
+    private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     enum AlertType {
         case validation
+    }
+
+    init(viewModel: RemoteSettingsViewModel) {
+        self.viewModel = viewModel
     }
 
     var body: some View {
@@ -34,7 +41,7 @@ struct RemoteSettingsView: View {
                     remoteTypeRow(
                         type: .loopAPNS,
                         label: "Loop",
-                        isEnabled: true
+                        isEnabled: viewModel.isLoopDevice
                     )
                     remoteTypeRow(type: .nightscout, label: "Nightscout", isEnabled: true)
                     Text("Nightscout should be used for Trio 0.2.x or older.")
@@ -99,6 +106,8 @@ struct RemoteSettingsView: View {
                             .toggleStyle(SwitchToggleStyle())
                     }
 
+                    guardrailsSection
+
                     // MARK: - Debug / Info
 
                     Section(header: Text("Debug / Info")) {
@@ -137,12 +146,32 @@ struct RemoteSettingsView: View {
                             }
                         }
                     }
-                }
 
-                // MARK: - Shared Guardrails Section
-
-                if viewModel.remoteType != .none {
                     guardrailsSection
+
+                    Section(header: Text("Debug / Info")) {
+                        Text("Device Token: \(Storage.shared.loopAPNSDeviceToken.value)")
+                        Text("Bundle ID: \(Storage.shared.loopAPNSBundleIdentifier.value)")
+
+                        if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {
+                            HStack {
+                                Text("Current TOTP Code:")
+                                Text(otpCode)
+                                    .font(.system(.body, design: .monospaced))
+                                    .foregroundColor(.green)
+                                    .padding(.vertical, 2)
+                                    .padding(.horizontal, 6)
+                                    .background(Color.green.opacity(0.1))
+                                    .cornerRadius(4)
+                                Text("(" + (otpTimeRemaining.map { "\($0)s left" } ?? "-") + ")")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        } else {
+                            Text("TOTP Code: Invalid QR code URL")
+                                .foregroundColor(.red)
+                        }
+                    }
                 }
             }
             .alert(isPresented: $showAlert) {
@@ -157,6 +186,14 @@ struct RemoteSettingsView: View {
                     return Alert(title: Text("Unknown Alert"))
                 }
             }
+        }
+        .onAppear {
+            // Reset timer state so it shows '-' until first tick
+            otpTimeRemaining = nil
+        }
+        .onReceive(otpTimer) { _ in
+            let now = Date().timeIntervalSince1970
+            otpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
         }
 
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)

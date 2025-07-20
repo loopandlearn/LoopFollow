@@ -218,49 +218,6 @@ class LoopAPNSService {
         }
     }
 
-    /// Refreshes the device token from Nightscout
-    /// - Returns: True if successful, false otherwise
-    func refreshDeviceToken() async -> Bool {
-        do {
-            let (deviceToken, bundleIdentifier) = try await fetchDeviceToken()
-
-            DispatchQueue.main.async {
-                self.storage.loopAPNSDeviceToken.value = deviceToken
-                self.storage.loopAPNSBundleIdentifier.value = bundleIdentifier
-            }
-
-            return true
-        } catch {
-            LogManager.shared.log(category: .apns, message: "Failed to refresh device token: \(error.localizedDescription)")
-
-            // Log additional debugging information
-            let nightscoutURL = storage.url.value
-            let token = storage.token.value
-
-            LogManager.shared.log(category: .apns, message: "Nightscout URL: \(nightscoutURL.isEmpty ? "Not configured" : nightscoutURL)")
-            LogManager.shared.log(category: .apns, message: "Token: \(token.isEmpty ? "Not configured" : "Configured")")
-
-            return false
-        }
-    }
-
-    // Helper to ensure we have a valid device token and bundle identifier
-    private func getValidDeviceTokenAndBundle() async throws -> (deviceToken: String, bundleIdentifier: String) {
-        var deviceToken = storage.loopAPNSDeviceToken.value
-        var bundleIdentifier = storage.loopAPNSBundleIdentifier.value
-        if deviceToken.isEmpty {
-            LogManager.shared.log(category: .apns, message: "Device token is empty or test token, refreshing from Nightscout...")
-            let refreshSuccess = await refreshDeviceToken()
-            if !refreshSuccess {
-                throw LoopAPNSError.noDeviceToken
-            }
-            deviceToken = storage.loopAPNSDeviceToken.value
-            bundleIdentifier = storage.loopAPNSBundleIdentifier.value
-        }
-
-        return (deviceToken, bundleIdentifier)
-    }
-
     /// Sends carbs via APNS push notification
     /// - Parameter payload: The carbs payload to send
     /// - Returns: True if successful, false otherwise
@@ -268,7 +225,8 @@ class LoopAPNSService {
         guard validateSetup() else {
             throw LoopAPNSError.invalidURL
         }
-        let (deviceToken, bundleIdentifier) = try await getValidDeviceTokenAndBundle()
+        let deviceToken = Storage.shared.loopAPNSDeviceToken.value
+        let bundleIdentifier = Storage.shared.loopAPNSBundleIdentifier.value
         let keyId = storage.keyId.value
         let apnsKey = storage.apnsKey.value
 
@@ -280,7 +238,7 @@ class LoopAPNSService {
         // Based on Nightscout's loop.js implementation
         let carbsAmount = payload.carbsAmount ?? 0.0
         let absorptionTime = payload.absorptionTime ?? 3.0
-        var finalPayload = [
+        let finalPayload = [
             "carbs-entry": carbsAmount,
             "absorption-time": absorptionTime,
             "otp": String(payload.otp),
@@ -319,7 +277,8 @@ class LoopAPNSService {
         guard validateSetup() else {
             throw LoopAPNSError.invalidURL
         }
-        let (deviceToken, bundleIdentifier) = try await getValidDeviceTokenAndBundle()
+        let deviceToken = Storage.shared.loopAPNSDeviceToken.value
+        let bundleIdentifier = Storage.shared.loopAPNSBundleIdentifier.value
         let keyId = storage.keyId.value
         let apnsKey = storage.apnsKey.value
 
@@ -330,7 +289,7 @@ class LoopAPNSService {
         // Create the complete notification payload (matching Nightscout's exact format)
         // Based on Nightscout's loop.js implementation
         let bolusAmount = payload.bolusAmount ?? 0.0
-        var finalPayload = [
+        let finalPayload = [
             "bolus-entry": bolusAmount,
             "otp": String(payload.otp),
             "remote-address": "LoopFollow",
@@ -382,7 +341,6 @@ class LoopAPNSService {
 
         // Determine APNS environment
         let isProduction = storage.productionEnvironment.value
-        let apnsEnvironment = isProduction ? "production" : "development"
         let apnsURL = isProduction ? "https://api.push.apple.com" : "https://api.sandbox.push.apple.com"
         let requestURL = URL(string: "\(apnsURL)/3/device/\(deviceToken)")!
         var request = URLRequest(url: requestURL)
