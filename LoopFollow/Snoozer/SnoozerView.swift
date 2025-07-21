@@ -29,12 +29,12 @@ struct SnoozerView: View {
                     if isLandscape {
                         HStack(spacing: 0) {
                             leftColumn(isLandscape: true)
-                            rightColumn
+                            rightColumn(isLandscape: true)
                         }
                     } else {
                         VStack(spacing: 0) {
                             leftColumn(isLandscape: false)
-                            rightColumn
+                            rightColumn(isLandscape: false)
                         }
                     }
                 }
@@ -47,6 +47,12 @@ struct SnoozerView: View {
 
     private func leftColumn(isLandscape: Bool) -> some View {
         VStack(spacing: 0) {
+            if !isLandscape && showDisplayName.value {
+                Text(Bundle.main.displayName)
+                    .font(.system(size: 50, weight: .bold))
+                    .foregroundColor(.white.opacity(0.9))
+            }
+
             Text(bgText.value)
                 .font(.system(size: 300, weight: .black))
                 .minimumScaleFactor(0.5)
@@ -96,14 +102,14 @@ struct SnoozerView: View {
 
     // MARK: - Right Column (Clock/Alert + Snooze Controls)
 
-    private var rightColumn: some View {
+    private func rightColumn(isLandscape: Bool) -> some View {
         VStack(spacing: 0) {
             Spacer()
-            if showDisplayName.value {
+            if showDisplayName.value && isLandscape {
                 Text(Bundle.main.displayName)
-                    .font(.title2.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(.bottom, 4)
+                    .font(.system(size: 50, weight: .bold))
+                    .foregroundColor(.white.opacity(0.9))
+                    .padding(.bottom, 8)
             }
 
             if let alarm = vm.activeAlarm {
