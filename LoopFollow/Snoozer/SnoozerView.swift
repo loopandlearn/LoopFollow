@@ -143,7 +143,7 @@ struct SnoozerView: View {
                     Button(action: vm.snoozeTapped) {
                         Text(vm.snoozeUnits == 0 ? "Acknowledge" : "Snooze")
                             .font(.system(size: 30, weight: .bold))
-                            .frame(maxWidth: .infinity, minHeight: 80)
+                            .frame(maxWidth: .infinity, minHeight: 60)
                             .background(Color.orange)
                             .foregroundColor(.white)
                             .clipShape(Capsule())
