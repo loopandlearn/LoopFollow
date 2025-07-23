@@ -30,7 +30,11 @@ struct RemoteSettingsView: View {
                 // MARK: - Remote Type Section (Custom Rows)
 
                 Section(header: Text("Remote Type")) {
-                    remoteTypeRow(type: .none, label: "None", isEnabled: true)
+                    remoteTypeRow(
+                        type: .none,
+                        label: "None",
+                        isEnabled: true
+                    )
 
                     remoteTypeRow(
                         type: .trc,
@@ -43,7 +47,13 @@ struct RemoteSettingsView: View {
                         label: "Loop",
                         isEnabled: viewModel.isLoopDevice
                     )
-                    remoteTypeRow(type: .nightscout, label: "Nightscout", isEnabled: true)
+
+                    remoteTypeRow(
+                        type: .nightscout,
+                        label: "Nightscout",
+                        isEnabled: viewModel.isTrioDevice
+                    )
+
                     Text("Nightscout should be used for Trio 0.2.x or older.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
