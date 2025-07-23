@@ -24,7 +24,7 @@ class LoopAPNSService {
         var errorDescription: String? {
             switch self {
             case .invalidConfiguration:
-                return "Loop APNS Configuration not valud"
+                return "Loop APNS Configuration not valid"
             case .networkError:
                 return "Network error occurred"
             case .invalidResponse:
