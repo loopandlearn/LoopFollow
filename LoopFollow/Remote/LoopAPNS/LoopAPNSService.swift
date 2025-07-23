@@ -12,7 +12,6 @@ class LoopAPNSService {
 
     enum LoopAPNSError: Error, LocalizedError {
         case invalidConfiguration
-        case invalidURL
         case networkError
         case invalidResponse
         case noDeviceToken
@@ -26,8 +25,6 @@ class LoopAPNSService {
             switch self {
             case .invalidConfiguration:
                 return "Loop APNS Configuration not valud"
-            case .invalidURL:
-                return "Invalid Nightscout URL"
             case .networkError:
                 return "Network error occurred"
             case .invalidResponse:
@@ -72,7 +69,7 @@ class LoopAPNSService {
     /// - Returns: True if successful, false otherwise
     func sendCarbsViaAPNS(payload: LoopAPNSPayload) async throws -> Bool {
         guard validateSetup() else {
-            throw LoopAPNSError.invalidURL
+            throw LoopAPNSError.invalidConfiguration
         }
         let deviceToken = Storage.shared.deviceToken.value
         let bundleIdentifier = Storage.shared.bundleId.value
@@ -124,7 +121,7 @@ class LoopAPNSService {
     /// - Returns: True if successful, false otherwise
     func sendBolusViaAPNS(payload: LoopAPNSPayload) async throws -> Bool {
         guard validateSetup() else {
-            throw LoopAPNSError.invalidURL
+            throw LoopAPNSError.invalidConfiguration
         }
         let deviceToken = Storage.shared.deviceToken.value
         let bundleIdentifier = Storage.shared.bundleId.value
@@ -185,7 +182,7 @@ class LoopAPNSService {
         // Create JWT token for APNS authentication
         guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: Storage.shared.teamId.value ?? "", apnsKey: apnsKey) else {
             LogManager.shared.log(category: .apns, message: "Failed to create JWT using JWTManager. Check APNS credentials.")
-            throw LoopAPNSError.invalidURL
+            throw LoopAPNSError.invalidConfiguration
         }
 
         // Determine APNS environment
@@ -244,7 +241,7 @@ class LoopAPNSService {
             }
         } catch {
             LogManager.shared.log(category: .apns, message: "Failed to serialize APNS payload: \(error.localizedDescription)")
-            throw LoopAPNSError.invalidURL
+            throw LoopAPNSError.invalidConfiguration
         }
         request.httpBody = jsonData
 
