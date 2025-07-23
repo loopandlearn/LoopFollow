@@ -10,21 +10,8 @@ import SwiftJWT
 class LoopAPNSService {
     private let storage = Storage.shared
 
-    struct DeviceTokenResponse: Codable {
-        let deviceToken: String?
-        let bundleIdentifier: String?
-    }
-
-    struct Profile: Codable {
-        let loopSettings: LoopSettings?
-    }
-
-    struct LoopSettings: Codable {
-        let deviceToken: String?
-        let bundleIdentifier: String?
-    }
-
     enum LoopAPNSError: Error, LocalizedError {
+        case invalidConfiguration
         case invalidURL
         case networkError
         case invalidResponse
@@ -37,6 +24,8 @@ class LoopAPNSService {
 
         var errorDescription: String? {
             switch self {
+            case .invalidConfiguration:
+                return "Loop APNS Configuration not valud"
             case .invalidURL:
                 return "Invalid Nightscout URL"
             case .networkError:
@@ -76,69 +65,6 @@ class LoopAPNSService {
         let hasFullSetup = hasBasicSetup && hasDeviceToken && hasBundleIdentifier
 
         return hasFullSetup
-    }
-
-    /// Validates the basic Loop APNS setup (without device token)
-    /// - Returns: True if basic setup is valid, false otherwise
-    func validateBasicSetup() -> Bool {
-        let hasKeyId = !storage.keyId.value.isEmpty
-        let hasAPNSKey = !storage.apnsKey.value.isEmpty
-        let hasQrCode = !storage.loopAPNSQrCodeURL.value.isEmpty
-
-        let isValid = hasKeyId && hasAPNSKey && hasQrCode
-
-        // Log validation results for debugging
-        LogManager.shared.log(category: .apns, message: "Basic setup validation - Key ID: \(hasKeyId), APNS Key: \(hasAPNSKey), QR Code: \(hasQrCode), Valid: \(isValid)")
-        LogManager.shared.log(category: .apns, message: "QR Code URL: \(storage.loopAPNSQrCodeURL.value)")
-
-        // Additional APNS key validation
-        if hasAPNSKey {
-            validateAPNSKeyFormat()
-        }
-        return isValid
-    }
-
-    /// Validates the APNS key format and provides debugging information
-    private func validateAPNSKeyFormat() {
-        let apnsKey = storage.apnsKey.value
-        let keyId = storage.keyId.value
-        let teamId = storage.teamId.value ?? keyId
-
-        // Validate key format
-        let hasPrivateKeyHeader = apnsKey.contains("-----BEGIN PRIVATE KEY-----")
-        let hasEndHeader = apnsKey.contains("-----END PRIVATE KEY-----")
-        let keyLines = apnsKey.components(separatedBy: .newlines)
-        let keyLineCount = keyLines.count
-
-        LogManager.shared.log(category: .apns, message: "APNS Key validation:")
-        LogManager.shared.log(category: .apns, message: "- Has PKCS8 header: \(hasPrivateKeyHeader)")
-        LogManager.shared.log(category: .apns, message: "- Has end header: \(hasEndHeader)")
-        LogManager.shared.log(category: .apns, message: "- Total lines: \(keyLineCount)")
-        LogManager.shared.log(category: .apns, message: "- Key ID: \(keyId)")
-        LogManager.shared.log(category: .apns, message: "- Team ID: \(teamId)")
-
-        // Validate key ID and team ID format
-        let keyIdPattern = "^[A-Z0-9]{10}$"
-        let teamIdPattern = "^[A-Z0-9]{10}$"
-        let isValidKeyId = keyId.range(of: keyIdPattern, options: .regularExpression) != nil
-        let isValidTeamId = teamId.range(of: teamIdPattern, options: .regularExpression) != nil
-
-        LogManager.shared.log(category: .apns, message: "- Key ID format valid: \(isValidKeyId)")
-        LogManager.shared.log(category: .apns, message: "- Team ID format valid: \(isValidTeamId)")
-
-        if !isValidKeyId || !isValidTeamId {
-            LogManager.shared.log(category: .apns, message: "WARNING: Key ID or Team ID format is invalid")
-        }
-
-        // Additional debugging for key format issues
-        if keyLineCount == 1 {
-            LogManager.shared.log(category: .apns, message: "WARNING: APNS Key appears to be on a single line - this may cause JWT creation to fail")
-            LogManager.shared.log(category: .apns, message: "Key length: \(apnsKey.count) characters")
-            LogManager.shared.log(category: .apns, message: "Key starts with: \(String(apnsKey.prefix(50)))")
-            LogManager.shared.log(category: .apns, message: "Key ends with: \(String(apnsKey.suffix(50)))")
-        } else {
-            LogManager.shared.log(category: .apns, message: "APNS Key appears to have proper line breaks (\(keyLineCount) lines)")
-        }
     }
 
     /// Sends carbs via APNS push notification
@@ -510,40 +436,6 @@ class LoopAPNSService {
         return fixedKey
     }
 
-    /// Provides guidance on proper APNS key format
-    /// - Parameter key: The APNS key to analyze
-    /// - Returns: A string with guidance on fixing the key
-    private func getAPNSKeyGuidance(_ key: String) -> String {
-        let lines = key.components(separatedBy: .newlines)
-        let keyDataLines = lines.filter { !$0.contains("-----BEGIN") && !$0.contains("-----END") && !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-        let combinedKeyData = keyDataLines.joined()
-
-        var guidance = "APNS Key Analysis:\n"
-        guidance += "- Total lines: \(lines.count)\n"
-        guidance += "- Key data lines: \(keyDataLines.count)\n"
-        guidance += "- Combined key length: \(combinedKeyData.count) characters\n"
-
-        if combinedKeyData.count != 44 {
-            guidance += "- ❌ Key length should be 44 characters for P-256 private key\n"
-        } else {
-            guidance += "- ✅ Key length is correct (44 characters)\n"
-        }
-
-        if Data(base64Encoded: combinedKeyData) == nil {
-            guidance += "- ❌ Key data is not valid base64\n"
-        } else {
-            guidance += "- ✅ Key data is valid base64\n"
-        }
-
-        guidance += "\nA proper APNS key should:\n"
-        guidance += "1. Start with '-----BEGIN PRIVATE KEY-----'\n"
-        guidance += "2. Have key data that is exactly 44 base64 characters\n"
-        guidance += "3. End with '-----END PRIVATE KEY-----'\n"
-        guidance += "4. Have key data split into 64-character lines\n"
-
-        return guidance
-    }
-
     /// Extracts key data from PEM format
     /// - Parameter pemString: The PEM formatted private key
     /// - Returns: The extracted key data string
@@ -557,65 +449,6 @@ class LoopAPNSService {
         }
         let keyLines = lines[(startIndex + 1) ..< endIndex]
         return keyLines.joined()
-    }
-
-    /// Base64url encodes data
-    /// - Parameter data: The data to encode
-    /// - Returns: Base64url encoded string
-    private func base64urlEncode(_ data: Data) -> String {
-        return data.base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-    }
-
-    /// Signs data with ES256 algorithm using the APNS key
-    /// - Parameters:
-    ///   - signingInput: The data to sign
-    ///   - pemKey: The PEM formatted private key
-    /// - Returns: Base64url encoded signature
-    private func signWithES256(signingInput: String, pemKey: String) throws -> Data {
-        guard let inputData = signingInput.data(using: .utf8) else {
-            LogManager.shared.log(category: .apns, message: "Failed to convert signing input to data")
-            throw LoopAPNSError.invalidURL
-        }
-
-        // Log the PEM key format for debugging
-        let pemLines = pemKey.components(separatedBy: .newlines)
-        LogManager.shared.log(category: .apns, message: "PEM key format - Total lines: \(pemLines.count)")
-        LogManager.shared.log(category: .apns, message: "PEM key first line: \(pemLines.first ?? "nil")")
-        LogManager.shared.log(category: .apns, message: "PEM key last line: \(pemLines.last ?? "nil")")
-
-        // Check if the key data looks valid
-        if pemLines.count > 2 {
-            let keyDataLines = Array(pemLines[1 ..< (pemLines.count - 1)])
-            LogManager.shared.log(category: .apns, message: "PEM key data lines: \(keyDataLines.count)")
-            if !keyDataLines.isEmpty {
-                LogManager.shared.log(category: .apns, message: "PEM key data first line length: \(keyDataLines[0].count)")
-                LogManager.shared.log(category: .apns, message: "PEM key data last line length: \(keyDataLines.last?.count ?? 0)")
-            }
-        }
-
-        do {
-            // Create a P256 private key from the PEM key
-            let privateKey = try P256.Signing.PrivateKey(pemRepresentation: pemKey)
-            let signature = try privateKey.signature(for: inputData)
-            return signature.derRepresentation
-        } catch {
-            LogManager.shared.log(category: .apns, message: "Failed to create signature with CryptoKit: \(error.localizedDescription)")
-
-            // Provide more specific error information
-            if let cryptoError = error as? CryptoKitError {
-                LogManager.shared.log(category: .apns, message: "CryptoKit error details: \(cryptoError)")
-            }
-
-            // Log additional debugging information
-            LogManager.shared.log(category: .apns, message: "PEM key length: \(pemKey.count)")
-            LogManager.shared.log(category: .apns, message: "PEM key contains BEGIN: \(pemKey.contains("-----BEGIN PRIVATE KEY-----"))")
-            LogManager.shared.log(category: .apns, message: "PEM key contains END: \(pemKey.contains("-----END PRIVATE KEY-----"))")
-
-            throw LoopAPNSError.invalidURL
-        }
     }
 
     // MARK: - Date Formatting Helper
