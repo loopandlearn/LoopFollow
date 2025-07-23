@@ -109,13 +109,14 @@ final class ProfileManager {
             trioOverrides = []
         }
 
-        Storage.shared.deviceToken.value = profileData.deviceToken ?? ""
+        Storage.shared.deviceToken.value = profileData.deviceToken ?? profileData.loopSettings?.deviceToken ?? ""
+
         if let expirationDate = profileData.expirationDate {
             Storage.shared.expirationDate.value = NightscoutUtils.parseDate(expirationDate)
         } else {
             Storage.shared.expirationDate.value = nil
         }
-        Storage.shared.bundleId.value = profileData.bundleIdentifier ?? ""
+        Storage.shared.bundleId.value = profileData.bundleIdentifier ?? profileData.loopSettings?.bundleIdentifier ?? ""
 
         Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
     }

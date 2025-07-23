@@ -169,12 +169,6 @@ class Storage {
     // MARK: - Loop APNS Setup ---------------------------------------------------
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
-    var loopAPNSDeviceToken = StorageValue<String>(key: "loopAPNSDeviceToken", defaultValue: "")
-    var loopAPNSBundleIdentifier = StorageValue<String>(key: "loopAPNSBundleIdentifier", defaultValue: "")
-
-    // MARK: - Override Presets ---------------------------------------------------
-
-    // Override presets are fetched from Nightscout, not stored locally
 
     static let shared = Storage()
     private init() {}

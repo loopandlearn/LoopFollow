@@ -26,8 +26,6 @@ class RemoteSettingsViewModel: ObservableObject {
 
     @Published var loopDeveloperTeamId: String
     @Published var loopAPNSQrCodeURL: String
-    @Published var loopAPNSDeviceToken: String
-    @Published var loopAPNSBundleIdentifier: String
     @Published var productionEnvironment: Bool
     @Published var isShowingLoopAPNSScanner: Bool = false
     @Published var loopAPNSErrorMessage: String?
@@ -38,8 +36,8 @@ class RemoteSettingsViewModel: ObservableObject {
         !keyId.isEmpty &&
             !apnsKey.isEmpty &&
             !loopAPNSQrCodeURL.isEmpty &&
-            !loopAPNSDeviceToken.isEmpty &&
-            !loopAPNSBundleIdentifier.isEmpty
+            !Storage.shared.deviceToken.value.isEmpty &&
+            !Storage.shared.bundleId.value.isEmpty
     }
 
     private var storage = Storage.shared
@@ -61,8 +59,6 @@ class RemoteSettingsViewModel: ObservableObject {
 
         loopDeveloperTeamId = storage.teamId.value ?? ""
         loopAPNSQrCodeURL = storage.loopAPNSQrCodeURL.value
-        loopAPNSDeviceToken = storage.loopAPNSDeviceToken.value
-        loopAPNSBundleIdentifier = storage.loopAPNSBundleIdentifier.value
         productionEnvironment = storage.productionEnvironment.value
 
         setupBindings()
@@ -148,16 +144,6 @@ class RemoteSettingsViewModel: ObservableObject {
         $loopAPNSQrCodeURL
             .dropFirst()
             .sink { [weak self] in self?.storage.loopAPNSQrCodeURL.value = $0 }
-            .store(in: &cancellables)
-
-        $loopAPNSDeviceToken
-            .dropFirst()
-            .sink { [weak self] in self?.storage.loopAPNSDeviceToken.value = $0 }
-            .store(in: &cancellables)
-
-        $loopAPNSBundleIdentifier
-            .dropFirst()
-            .sink { [weak self] in self?.storage.loopAPNSBundleIdentifier.value = $0 }
             .store(in: &cancellables)
 
         $productionEnvironment

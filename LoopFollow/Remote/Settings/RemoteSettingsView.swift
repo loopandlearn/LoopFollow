@@ -160,8 +160,8 @@ struct RemoteSettingsView: View {
                     guardrailsSection
 
                     Section(header: Text("Debug / Info")) {
-                        Text("Device Token: \(Storage.shared.loopAPNSDeviceToken.value)")
-                        Text("Bundle ID: \(Storage.shared.loopAPNSBundleIdentifier.value)")
+                        Text("Device Token: \(Storage.shared.deviceToken.value)")
+                        Text("Bundle ID: \(Storage.shared.bundleId.value)")
 
                         if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {
                             HStack {

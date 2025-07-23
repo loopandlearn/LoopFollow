@@ -135,8 +135,8 @@ class LoopAPNSService {
         let hasKeyId = !storage.keyId.value.isEmpty
         let hasAPNSKey = !storage.apnsKey.value.isEmpty
         let hasQrCode = !storage.loopAPNSQrCodeURL.value.isEmpty
-        let hasDeviceToken = !storage.loopAPNSDeviceToken.value.isEmpty
-        let hasBundleIdentifier = !storage.loopAPNSBundleIdentifier.value.isEmpty
+        let hasDeviceToken = !Storage.shared.deviceToken.value.isEmpty
+        let hasBundleIdentifier = !Storage.shared.bundleId.value.isEmpty
 
         // For initial setup, we don't require device token and bundle identifier
         // These will be fetched when the user clicks "Refresh Device Token"
@@ -166,13 +166,6 @@ class LoopAPNSService {
             validateAPNSKeyFormat()
         }
         return isValid
-    }
-
-    /// Sets a test device token for testing purposes
-    /// - Parameter testToken: The test device token to use
-    func setTestDeviceToken(_ testToken: String) {
-        storage.loopAPNSDeviceToken.value = testToken
-        LogManager.shared.log(category: .apns, message: "Test device token set: \(testToken)")
     }
 
     /// Validates the APNS key format and provides debugging information
@@ -225,8 +218,8 @@ class LoopAPNSService {
         guard validateSetup() else {
             throw LoopAPNSError.invalidURL
         }
-        let deviceToken = Storage.shared.loopAPNSDeviceToken.value
-        let bundleIdentifier = Storage.shared.loopAPNSBundleIdentifier.value
+        let deviceToken = Storage.shared.deviceToken.value
+        let bundleIdentifier = Storage.shared.bundleId.value
         let keyId = storage.keyId.value
         let apnsKey = storage.apnsKey.value
 
@@ -277,8 +270,8 @@ class LoopAPNSService {
         guard validateSetup() else {
             throw LoopAPNSError.invalidURL
         }
-        let deviceToken = Storage.shared.loopAPNSDeviceToken.value
-        let bundleIdentifier = Storage.shared.loopAPNSBundleIdentifier.value
+        let deviceToken = Storage.shared.deviceToken.value
+        let bundleIdentifier = Storage.shared.bundleId.value
         let keyId = storage.keyId.value
         let apnsKey = storage.apnsKey.value
 
@@ -709,12 +702,12 @@ class LoopAPNSService {
     // MARK: - Override Methods
 
     func sendOverrideNotification(presetName: String, duration: TimeInterval? = nil) async throws {
-        let deviceToken = Storage.shared.loopAPNSDeviceToken.value
+        let deviceToken = Storage.shared.deviceToken.value
         guard !deviceToken.isEmpty else {
             throw LoopAPNSError.deviceTokenNotConfigured
         }
 
-        let bundleIdentifier = Storage.shared.loopAPNSBundleIdentifier.value
+        let bundleIdentifier = Storage.shared.bundleId.value
         guard !bundleIdentifier.isEmpty else {
             throw LoopAPNSError.bundleIdentifierNotConfigured
         }
@@ -759,12 +752,12 @@ class LoopAPNSService {
     }
 
     func sendCancelOverrideNotification() async throws {
-        let deviceToken = Storage.shared.loopAPNSDeviceToken.value
+        let deviceToken = Storage.shared.deviceToken.value
         guard !deviceToken.isEmpty else {
             throw LoopAPNSError.deviceTokenNotConfigured
         }
 
-        let bundleIdentifier = Storage.shared.loopAPNSBundleIdentifier.value
+        let bundleIdentifier = Storage.shared.bundleId.value
         guard !bundleIdentifier.isEmpty else {
             throw LoopAPNSError.bundleIdentifierNotConfigured
         }
