@@ -12,6 +12,7 @@ class LoopAPNSService {
 
     enum LoopAPNSError: Error, LocalizedError {
         case invalidConfiguration
+        case jwtError
         case networkError
         case invalidResponse
         case noDeviceToken
@@ -25,6 +26,8 @@ class LoopAPNSService {
             switch self {
             case .invalidConfiguration:
                 return "Loop APNS Configuration not valid"
+            case .jwtError:
+                return "Failed generating JWT token, check APNS Key ID, APNS Key and Team ID"
             case .networkError:
                 return "Network error occurred"
             case .invalidResponse:
@@ -182,7 +185,7 @@ class LoopAPNSService {
         // Create JWT token for APNS authentication
         guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: Storage.shared.teamId.value ?? "", apnsKey: apnsKey) else {
             LogManager.shared.log(category: .apns, message: "Failed to create JWT using JWTManager. Check APNS credentials.")
-            throw LoopAPNSError.invalidConfiguration
+            throw LoopAPNSError.jwtError
         }
 
         // Determine APNS environment
