@@ -10,85 +10,106 @@ struct OverridePresetsView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                Section(header: Text("Available Overrides")) {
-                    if viewModel.isLoading {
-                        HStack {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                            Text("Loading override presets...")
+            VStack {
+                List {
+                    Section(header: Text("Available Overrides")) {
+                        if viewModel.isLoading {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Loading override presets...")
+                                    .foregroundColor(.secondary)
+                            }
+                        } else if viewModel.overridePresets.isEmpty {
+                            Text("No override presets found. Configure presets in your Loop app.")
                                 .foregroundColor(.secondary)
-                        }
-                    } else if viewModel.overridePresets.isEmpty {
-                        Text("No override presets found. Configure presets in your Loop app.")
-                            .foregroundColor(.secondary)
-                            .italic()
-                    } else {
-                        ForEach(viewModel.overridePresets, id: \.name) { preset in
-                            OverridePresetRow(
-                                preset: preset,
-                                isActivating: viewModel.isActivating,
-                                onActivate: {
-                                    Task {
-                                        await viewModel.activateOverride(preset: preset)
+                                .italic()
+                        } else {
+                            ForEach(viewModel.overridePresets, id: \.name) { preset in
+                                OverridePresetRow(
+                                    preset: preset,
+                                    isActivating: viewModel.isActivating && viewModel.selectedPreset?.name == preset.name,
+                                    onActivate: {
+                                        viewModel.selectedPreset = preset
+                                        viewModel.alertType = .confirmActivation
+                                        viewModel.showAlert = true
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
-                }
 
-                if !viewModel.overridePresets.isEmpty {
-                    Section {
-                        Button(action: {
-                            Task {
-                                await viewModel.cancelOverride()
-                            }
-                        }) {
-                            HStack {
-                                if viewModel.isActivating {
-                                    ProgressView()
-                                        .scaleEffect(0.8)
-                                        .foregroundColor(.red)
-                                } else {
+                    if !viewModel.overridePresets.isEmpty {
+                        Section {
+                            Button(action: {
+                                viewModel.alertType = .confirmCancellation
+                                viewModel.showAlert = true
+                            }) {
+                                HStack {
                                     Image(systemName: "xmark.circle")
                                         .foregroundColor(.red)
+                                    Text("Cancel Active Override")
+                                        .foregroundColor(.red)
                                 }
-                                Text("Cancel Active Override")
-                                    .foregroundColor(.red)
                             }
                         }
-                        .disabled(viewModel.isActivating)
                     }
                 }
 
-                if let errorMessage = viewModel.errorMessage, !errorMessage.isEmpty {
-                    Section {
-                        Text(errorMessage)
-                            .foregroundColor(.red)
-                            .font(.caption)
-                    }
-                }
-
-                if let successMessage = viewModel.successMessage, !successMessage.isEmpty {
-                    Section {
-                        Text(successMessage)
-                            .foregroundColor(.green)
-                            .font(.caption)
-                    }
+                if viewModel.isActivating {
+                    ProgressView("Please wait...")
+                        .padding()
                 }
             }
             .navigationBarTitle("Remote Overrides", displayMode: .inline)
             .onAppear {
-                viewModel.dismiss = { presentationMode.wrappedValue.dismiss() }
                 Task {
                     await viewModel.loadOverridePresets()
                 }
             }
-            .alert("Success", isPresented: $viewModel.showSuccessAlert) {
-                Button("OK") {}
-            } message: {
-                Text(viewModel.successAlertMessage)
+            .alert(isPresented: $viewModel.showAlert) {
+                switch viewModel.alertType {
+                case .confirmActivation:
+                    return Alert(
+                        title: Text("Activate Override"),
+                        message: Text("Do you want to activate the override '\(viewModel.selectedPreset?.name ?? "")'?"),
+                        primaryButton: .default(Text("Confirm"), action: {
+                            if let preset = viewModel.selectedPreset {
+                                Task {
+                                    await viewModel.activateOverride(preset: preset)
+                                }
+                            }
+                        }),
+                        secondaryButton: .cancel()
+                    )
+                case .confirmCancellation:
+                    return Alert(
+                        title: Text("Cancel Override"),
+                        message: Text("Are you sure you want to cancel the active override?"),
+                        primaryButton: .default(Text("Confirm"), action: {
+                            Task {
+                                await viewModel.cancelOverride()
+                            }
+                        }),
+                        secondaryButton: .cancel()
+                    )
+                case .statusSuccess:
+                    return Alert(
+                        title: Text("Success"),
+                        message: Text(viewModel.statusMessage ?? ""),
+                        dismissButton: .default(Text("OK"), action: {
+                            presentationMode.wrappedValue.dismiss()
+                        })
+                    )
+                case .statusFailure:
+                    return Alert(
+                        title: Text("Error"),
+                        message: Text(viewModel.statusMessage ?? "An error occurred."),
+                        dismissButton: .default(Text("OK"))
+                    )
+                case .none:
+                    return Alert(title: Text("Unknown Alert"))
+                }
             }
         }
     }
@@ -154,17 +175,21 @@ class OverridePresetsViewModel: ObservableObject {
     @Published var overridePresets: [OverridePreset] = []
     @Published var isLoading = false
     @Published var isActivating = false
-    @Published var errorMessage: String?
-    @Published var successMessage: String?
-    @Published var showSuccessAlert = false
-    @Published var successAlertMessage = ""
+    @Published var showAlert = false
+    @Published var alertType: AlertType? = nil
+    @Published var statusMessage: String? = nil
+    @Published var selectedPreset: OverridePreset? = nil
 
-    var dismiss: (() -> Void)?
+    enum AlertType {
+        case confirmActivation
+        case confirmCancellation
+        case statusSuccess
+        case statusFailure
+    }
 
     func loadOverridePresets() async {
         await MainActor.run {
             isLoading = true
-            errorMessage = nil
         }
 
         do {
@@ -175,7 +200,9 @@ class OverridePresetsViewModel: ObservableObject {
             }
         } catch {
             await MainActor.run {
-                self.errorMessage = "Failed to load override presets: \(error.localizedDescription)"
+                self.statusMessage = "Failed to load override presets: \(error.localizedDescription)"
+                self.alertType = .statusFailure
+                self.showAlert = true
                 self.isLoading = false
             }
         }
@@ -184,26 +211,21 @@ class OverridePresetsViewModel: ObservableObject {
     func activateOverride(preset: OverridePreset) async {
         await MainActor.run {
             isActivating = true
-            errorMessage = nil
-            successMessage = nil
         }
 
         do {
             try await sendOverrideNotification(preset: preset)
             await MainActor.run {
                 self.isActivating = false
-                self.successMessage = "\(preset.name) override activated successfully!"
-                self.successAlertMessage = "\(preset.name) Override Activated!"
-                self.showSuccessAlert = true
-
-                // Dismiss the view after successful activation
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    self.dismiss?()
-                }
+                self.statusMessage = "\(preset.name) override activated successfully."
+                self.alertType = .statusSuccess
+                self.showAlert = true
             }
         } catch {
             await MainActor.run {
-                self.errorMessage = "Failed to activate override: \(error.localizedDescription)"
+                self.statusMessage = "Failed to activate override: \(error.localizedDescription)"
+                self.alertType = .statusFailure
+                self.showAlert = true
                 self.isActivating = false
             }
         }
@@ -212,24 +234,21 @@ class OverridePresetsViewModel: ObservableObject {
     func cancelOverride() async {
         await MainActor.run {
             isActivating = true
-            errorMessage = nil
-            successMessage = nil
         }
 
         do {
             try await sendCancelOverrideNotification()
             await MainActor.run {
                 self.isActivating = false
-                self.successMessage = "Active override cancelled successfully!"
-
-                // Dismiss the view after successful cancellation
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    self.dismiss?()
-                }
+                self.statusMessage = "Active override cancelled successfully."
+                self.alertType = .statusSuccess
+                self.showAlert = true
             }
         } catch {
             await MainActor.run {
-                self.errorMessage = "Failed to cancel override: \(error.localizedDescription)"
+                self.statusMessage = "Failed to cancel override: \(error.localizedDescription)"
+                self.alertType = .statusFailure
+                self.showAlert = true
                 self.isActivating = false
             }
         }
