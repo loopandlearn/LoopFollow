@@ -59,6 +59,12 @@ struct RemoteSettingsView: View {
                         .foregroundColor(.secondary)
                 }
 
+                // MARK: - Guardrails Section (shown for both TRC and Loop)
+
+                if viewModel.remoteType == .trc || viewModel.remoteType == .loopAPNS {
+                    guardrailsSection
+                }
+
                 // MARK: - User Information Section
 
                 if viewModel.remoteType != .none && viewModel.remoteType != .loopAPNS {
@@ -115,8 +121,6 @@ struct RemoteSettingsView: View {
                         Toggle("Meal with Fat/Protein", isOn: $viewModel.mealWithFatProtein)
                             .toggleStyle(SwitchToggleStyle())
                     }
-
-                    guardrailsSection
 
                     // MARK: - Debug / Info
 
@@ -199,8 +203,6 @@ struct RemoteSettingsView: View {
                                 .font(.caption)
                         }
                     }
-
-                    guardrailsSection
 
                     Section(header: Text("Debug / Info")) {
                         Text("Device Token: \(Storage.shared.deviceToken.value)")
