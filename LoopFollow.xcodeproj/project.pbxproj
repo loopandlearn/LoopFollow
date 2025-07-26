@@ -214,7 +214,6 @@
 		DDEF50402D479B8A00884336 /* LoopAPNSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503F2D479B8A00884336 /* LoopAPNSService.swift */; };
 		DDEF50422D479BAA00884336 /* LoopAPNSCarbsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */; };
 		DDEF50432D479BBA00884336 /* LoopAPNSBolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50422D479BBA00884336 /* LoopAPNSBolusView.swift */; };
-		DDEF50442D479BCA00884336 /* LoopAPNSSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50432D479BCA00884336 /* LoopAPNSSettingsView.swift */; };
 		DDEF50452D479BDA00884336 /* LoopAPNSRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50442D479BDA00884336 /* LoopAPNSRemoteView.swift */; };
 		DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */; };
 		DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */; };
@@ -600,7 +599,6 @@
 		DDEF503F2D479B8A00884336 /* LoopAPNSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSService.swift; sourceTree = "<group>"; };
 		DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSCarbsView.swift; sourceTree = "<group>"; };
 		DDEF50422D479BBA00884336 /* LoopAPNSBolusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSBolusView.swift; sourceTree = "<group>"; };
-		DDEF50432D479BCA00884336 /* LoopAPNSSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSSettingsView.swift; sourceTree = "<group>"; };
 		DDEF50442D479BDA00884336 /* LoopAPNSRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSRemoteView.swift; sourceTree = "<group>"; };
 		DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubService.swift; sourceTree = "<group>"; };
 		DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionManager.swift; sourceTree = "<group>"; };
@@ -1194,7 +1192,6 @@
 				DDEF503F2D479B8A00884336 /* LoopAPNSService.swift */,
 				DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */,
 				DDEF50422D479BBA00884336 /* LoopAPNSBolusView.swift */,
-				DDEF50432D479BCA00884336 /* LoopAPNSSettingsView.swift */,
 				654134172E1DC09700BDBE08 /* OverridePresetsView.swift */,
 				654134192E1DC27900BDBE08 /* OverridePresetData.swift */,
 				DDEF50442D479BDA00884336 /* LoopAPNSRemoteView.swift */,
@@ -2093,7 +2090,6 @@
 				DDEF50402D479B8A00884336 /* LoopAPNSService.swift in Sources */,
 				DDEF50422D479BAA00884336 /* LoopAPNSCarbsView.swift in Sources */,
 				DDEF50432D479BBA00884336 /* LoopAPNSBolusView.swift in Sources */,
-				DDEF50442D479BCA00884336 /* LoopAPNSSettingsView.swift in Sources */,
 				DDEF50452D479BDA00884336 /* LoopAPNSRemoteView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

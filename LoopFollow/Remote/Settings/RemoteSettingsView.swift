@@ -61,7 +61,7 @@ struct RemoteSettingsView: View {
 
                 // MARK: - User Information Section
 
-                if viewModel.remoteType != .none {
+                if viewModel.remoteType != .none && viewModel.remoteType != .loopAPNS {
                     Section(header: Text("User Information")) {
                         HStack {
                             Text("User")
@@ -131,29 +131,72 @@ struct RemoteSettingsView: View {
                 // MARK: - Loop APNS Settings
 
                 if viewModel.remoteType == .loopAPNS {
-                    Section(header: Text("Loop APNS Settings")) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Image(systemName: viewModel.loopAPNSSetup ? "checkmark.circle.fill" : "exclamationmark.circle")
-                                    .foregroundColor(viewModel.loopAPNSSetup ? .green : .orange)
-                                Text(viewModel.loopAPNSSetup ? "Setup Complete" : "Setup Incomplete")
-                                    .font(.headline)
-                                    .foregroundColor(viewModel.loopAPNSSetup ? .green : .orange)
-                            }
+                    Section(header: Text("Loop APNS Configuration")) {
+                        HStack {
+                            Text("Developer Team ID")
+                            TogglableSecureInput(
+                                placeholder: "Enter Team ID",
+                                text: $viewModel.loopDeveloperTeamId,
+                                style: .singleLine
+                            )
+                        }
 
-                            if !viewModel.loopAPNSSetup {
-                                Text("Configure Loop APNS settings to send carbs and insulin directly to Loop app")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                        HStack {
+                            Text("APNS Key ID")
+                            TogglableSecureInput(
+                                placeholder: "Enter APNS Key ID",
+                                text: $viewModel.keyId,
+                                style: .singleLine
+                            )
+                        }
+
+                        VStack(alignment: .leading) {
+                            Text("APNS Key")
+                            TogglableSecureInput(
+                                placeholder: "Paste APNS Key",
+                                text: $viewModel.apnsKey,
+                                style: .multiLine
+                            )
+                            .frame(minHeight: 110)
+                        }
+
+                        HStack {
+                            Text("QR Code URL")
+                            TextField("Enter QR code URL or scan from Loop app", text: $viewModel.loopAPNSQrCodeURL)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                        }
+
+                        Button(action: {
+                            viewModel.isShowingLoopAPNSScanner = true
+                        }) {
+                            HStack {
+                                Image(systemName: "qrcode.viewfinder")
+                                Text("Scan QR Code from Loop App")
                             }
                         }
-                        .padding(.vertical, 8)
+                        .buttonStyle(.borderedProminent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
 
-                        NavigationLink(destination: LoopAPNSSettingsView(viewModel: viewModel)) {
-                            HStack {
-                                Image(systemName: "gear")
-                                Text("Configure Loop APNS Settings")
-                            }
+                        HStack {
+                            Text("Environment")
+                            Spacer()
+                            Toggle("Production", isOn: $viewModel.productionEnvironment)
+                                .toggleStyle(SwitchToggleStyle())
+                        }
+
+                        Text("Production is used for browser builders and should be switched off for Xcode builders")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    if let errorMessage = viewModel.loopAPNSErrorMessage, !errorMessage.isEmpty {
+                        Section {
+                            Text(errorMessage)
+                                .foregroundColor(.red)
+                                .font(.caption)
                         }
                     }
 
@@ -194,6 +237,11 @@ struct RemoteSettingsView: View {
                     )
                 case .none:
                     return Alert(title: Text("Unknown Alert"))
+                }
+            }
+            .sheet(isPresented: $viewModel.isShowingLoopAPNSScanner) {
+                SimpleQRCodeScannerView { result in
+                    viewModel.handleLoopAPNSQRCodeScanResult(result)
                 }
             }
         }

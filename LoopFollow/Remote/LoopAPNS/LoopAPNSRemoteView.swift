@@ -37,7 +37,7 @@ struct LoopAPNSRemoteView: View {
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(.secondary)
 
-                            NavigationLink(destination: LoopAPNSSettingsView(viewModel: viewModel)) {
+                            NavigationLink(destination: RemoteSettingsView(viewModel: viewModel)) {
                                 HStack {
                                     Image(systemName: "gear")
                                     Text("Configure Loop APNS")
