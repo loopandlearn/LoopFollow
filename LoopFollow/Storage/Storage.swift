@@ -166,8 +166,6 @@ class Storage {
     var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .more)
     var nightscoutPosition = StorageValue<TabPosition>(key: "nightscoutPosition", defaultValue: .position4)
 
-    // MARK: - Loop APNS Setup ---------------------------------------------------
-
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 
     static let shared = Storage()
