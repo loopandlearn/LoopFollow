@@ -54,7 +54,7 @@ struct RemoteSettingsView: View {
                         isEnabled: viewModel.isTrioDevice
                     )
 
-                    Text("Nightscout should be used for Trio 0.2.x or older.")
+                    Text("Nightscout should be used for Trio 0.2.x.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
