@@ -8,7 +8,7 @@ import os
 import UIKit
 
 class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
-    public weak var bluetoothDeviceDelegate: BluetoothDeviceDelegate?
+    weak var bluetoothDeviceDelegate: BluetoothDeviceDelegate?
     private(set) var deviceAddress: String
     private(set) var deviceName: String?
     private let CBUUID_Advertisement: String?
@@ -158,7 +158,7 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         _ = startScanning()
     }
 
-    public func cancelConnectionTimer() {
+    func cancelConnectionTimer() {
         if let connectTimeOutTimer = connectTimeOutTimer {
             connectTimeOutTimer.invalidate()
             self.connectTimeOutTimer = nil

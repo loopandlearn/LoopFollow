@@ -109,8 +109,8 @@ struct CalendarSettingsView: View {
         }
 
         // If the previously-saved calendar no longer exists, blank it out
-        if !calendarIdentifier.value.isEmpty &&
-            !calendars.contains(where: { $0.calendarIdentifier == calendarIdentifier.value })
+        if !calendarIdentifier.value.isEmpty,
+           !calendars.contains(where: { $0.calendarIdentifier == calendarIdentifier.value })
         {
             calendarIdentifier.value = ""
         }

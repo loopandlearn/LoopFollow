@@ -111,7 +111,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // Stores the timestamp of the last BG value that was spoken.
     var lastSpokenBGDate: TimeInterval = 0
 
-    var autoScrollPauseUntil: Date? = nil
+    var autoScrollPauseUntil: Date?
 
     var IsNotLooping = false
 
@@ -355,7 +355,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let willHaveMoreTab = hasItemsInMore()
 
         // If currently in More tab and it's going away, we need to handle this carefully
-        if wasInMoreTab && !willHaveMoreTab {
+        if wasInMoreTab, !willHaveMoreTab {
             // First, dismiss any modals that might be open
             if let presented = tabBarController.presentedViewController {
                 presented.dismiss(animated: false) { [weak self] in
