@@ -35,6 +35,7 @@ class RemoteSettingsViewModel: ObservableObject {
     var loopAPNSSetup: Bool {
         !keyId.isEmpty &&
             !apnsKey.isEmpty &&
+            !loopDeveloperTeamId.isEmpty &&
             !loopAPNSQrCodeURL.isEmpty &&
             !Storage.shared.deviceToken.value.isEmpty &&
             !Storage.shared.bundleId.value.isEmpty
