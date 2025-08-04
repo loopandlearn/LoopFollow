@@ -7,11 +7,48 @@ import SwiftUI
 struct OverridePresetsView: View {
     @StateObject private var viewModel = OverridePresetsViewModel()
     @Environment(\.presentationMode) var presentationMode
+    @ObservedObject var overrideNote = Observable.shared.override
 
     var body: some View {
         NavigationView {
             VStack {
                 List {
+                    // Current Active Override Section
+                    if let activeNote = overrideNote.value {
+                        Section(header: Text("Active Override")) {
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.title2)
+
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Active Override")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+
+                                    Text(activeNote)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+                            }
+                            .padding(.vertical, 4)
+
+                            Button(action: {
+                                viewModel.alertType = .confirmCancellation
+                                viewModel.showAlert = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "xmark.circle")
+                                        .foregroundColor(.red)
+                                    Text("Cancel Active Override")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
+                    }
+
                     Section(header: Text("Available Overrides")) {
                         if viewModel.isLoading {
                             HStack {
@@ -35,22 +72,6 @@ struct OverridePresetsView: View {
                                         viewModel.showAlert = true
                                     }
                                 )
-                            }
-                        }
-                    }
-
-                    if !viewModel.overridePresets.isEmpty {
-                        Section {
-                            Button(action: {
-                                viewModel.alertType = .confirmCancellation
-                                viewModel.showAlert = true
-                            }) {
-                                HStack {
-                                    Image(systemName: "xmark.circle")
-                                        .foregroundColor(.red)
-                                    Text("Cancel Active Override")
-                                        .foregroundColor(.red)
-                                }
                             }
                         }
                     }
