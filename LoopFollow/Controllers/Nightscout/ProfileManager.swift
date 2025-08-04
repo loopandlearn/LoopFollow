@@ -117,7 +117,11 @@ final class ProfileManager {
             Storage.shared.expirationDate.value = nil
         }
         Storage.shared.bundleId.value = profileData.bundleIdentifier ?? profileData.loopSettings?.bundleIdentifier ?? ""
-        Storage.shared.productionEnvironment.value = profileData.isAPNSProduction ?? false
+
+        if let isProduction = profileData.isAPNSProduction {
+            Storage.shared.productionEnvironment.value = isProduction
+        }
+
         Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
     }
 
