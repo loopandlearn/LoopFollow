@@ -43,7 +43,7 @@ struct RemoteSettingsView: View {
 
                 remoteTypeRow(
                     type: .loopAPNS,
-                    label: "Loop",
+                    label: "Loop Remote Control",
                     isEnabled: viewModel.isLoopDevice
                 )
 
