@@ -87,6 +87,7 @@ class LoopAPNSService {
         // Based on Nightscout's loop.js implementation
         let carbsAmount = payload.carbsAmount ?? 0.0
         let absorptionTime = payload.absorptionTime ?? 3.0
+        let startTime = payload.consumedDate ?? now
         let finalPayload = [
             "carbs-entry": carbsAmount,
             "absorption-time": absorptionTime,
@@ -96,7 +97,7 @@ class LoopAPNSService {
             "entered-by": "LoopFollow",
             "sent-at": formatDateForAPNS(now),
             "expiration": formatDateForAPNS(expiration),
-            "start-time": formatDateForAPNS(now),
+            "start-time": formatDateForAPNS(startTime),
             "alert": "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
         ] as [String: Any]
 

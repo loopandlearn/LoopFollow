@@ -8,8 +8,10 @@ import SwiftUI
 struct LoopAPNSCarbsView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0.0)
-    @State private var absorptionTime = HKQuantity(unit: .hour(), doubleValue: 3.0)
+    @State private var absorptionTimeString = "3.0"
     @State private var foodType = ""
+    @State private var consumedDate = Date()
+    @State private var showDatePickerSheet = false
     @State private var isLoading = false
     @State private var showAlert = false
     @State private var alertMessage = ""
@@ -47,27 +49,112 @@ struct LoopAPNSCarbsView: View {
                             }
                         )
 
-                        HKQuantityInputView(
-                            label: "Absorption Time",
-                            quantity: $absorptionTime,
-                            unit: .hour(),
-                            maxLength: 3,
-                            minValue: HKQuantity(unit: .hour(), doubleValue: 1.0),
-                            maxValue: HKQuantity(unit: .hour(), doubleValue: 8.0),
-                            isFocused: $absorptionFieldIsFocused,
-                            onValidationError: { message in
-                                alertMessage = message
-                                alertType = .error
-                                showAlert = true
-                            }
-                        )
-
-                        VStack(alignment: .leading) {
-                            Text("Food Type (optional)")
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Food Type")
                                 .font(.headline)
-                            TextField("e.g., Breakfast, Lunch, Snack", text: $foodType)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
+
+                            HStack(spacing: 12) {
+                                // Fast carb entry emoji (0.5 hours)
+                                Button(action: {
+                                    foodType = "🍭"
+                                    absorptionTimeString = "0.5"
+                                }) {
+                                    Text("🍭")
+                                        .font(.title)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
+                                // Medium carb entry emoji (3 hours)
+                                Button(action: {
+                                    foodType = "🌮"
+                                    absorptionTimeString = "3.0"
+                                }) {
+                                    Text("🌮")
+                                        .font(.title)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
+                                // Slow carb entry emoji (5 hours)
+                                Button(action: {
+                                    foodType = "🍕"
+                                    absorptionTimeString = "5.0"
+                                }) {
+                                    Text("🍕")
+                                        .font(.title)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
+                                // Custom carb entry emoji (clears and focuses absorption)
+                                Button(action: {
+                                    foodType = "🍽️"
+                                    absorptionTimeString = ""
+                                    absorptionFieldIsFocused = true
+                                }) {
+                                    Text("🍽️")
+                                        .font(.title)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
+                                Spacer()
+                            }
+                        }
+
+                        HStack {
+                            Text("Absorption Time")
+                            Spacer()
+                            TextField("0.0", text: $absorptionTimeString)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .focused($absorptionFieldIsFocused)
+                                .onChange(of: absorptionTimeString) { newValue in
+                                    // Only allow numbers and decimal point
+                                    let filtered = newValue.filter { "0123456789.".contains($0) }
+                                    // Ensure only one decimal point
+                                    let components = filtered.components(separatedBy: ".")
+                                    if components.count > 2 {
+                                        absorptionTimeString = String(filtered.dropLast())
+                                    } else {
+                                        absorptionTimeString = filtered
+                                    }
+                                }
+                            Text("hr")
+                                .foregroundColor(.secondary)
+                        }
+
+                        // Time input section
+                        VStack(alignment: .leading) {
+                            Text("Time")
+                                .font(.headline)
+
+                            Button(action: {
+                                showDatePickerSheet = true
+                            }) {
+                                HStack {
+                                    Text(consumedDate, format: Date.FormatStyle().hour().minute())
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                            }
                         }
                     }
                     Section {
@@ -113,7 +200,18 @@ struct LoopAPNSCarbsView: View {
                 .navigationTitle("Carbs")
                 .navigationBarTitleDisplayMode(.inline)
             }
-
+            .sheet(isPresented: $showDatePickerSheet) {
+                VStack {
+                    Text("Consumption Time")
+                        .font(.headline)
+                        .padding()
+                    Form {
+                        DatePicker("Time", selection: $consumedDate, displayedComponents: [.hourAndMinute, .date])
+                            .datePickerStyle(.automatic)
+                    }
+                }
+                .presentationDetents([.fraction(1 / 4)])
+            }
             .onAppear {
                 // Validate APNS setup
                 let apnsService = LoopAPNSService()
@@ -146,9 +244,12 @@ struct LoopAPNSCarbsView: View {
                         dismissButton: .default(Text("OK"))
                     )
                 case .confirmation:
+                    let timeFormatter = DateFormatter()
+                    timeFormatter.timeStyle = .short
+                    timeFormatter.dateStyle = .short
                     return Alert(
                         title: Text("Confirm Carbs"),
-                        message: Text("Send \(Int(carbsAmount.doubleValue(for: .gram())))g of carbs with \(Int(absorptionTime.doubleValue(for: .hour())))h absorption time?"),
+                        message: Text("Send \(Int(carbsAmount.doubleValue(for: .gram())))g of carbs with \(absorptionTimeString)h absorption time at \(timeFormatter.string(from: consumedDate))?"),
                         primaryButton: .default(Text("Send")) {
                             sendCarbsConfirmed()
                         },
@@ -178,6 +279,27 @@ struct LoopAPNSCarbsView: View {
             return
         }
 
+        // Validate time constraints (similar to LoopCaregiver)
+        let now = Date()
+        let maxPastHours = 12
+        let maxFutureHours = 1
+        let oldestAcceptedDate = now.addingTimeInterval(-60 * 60 * Double(maxPastHours))
+        let latestAcceptedDate = now.addingTimeInterval(60 * 60 * Double(maxFutureHours))
+
+        if consumedDate < oldestAcceptedDate {
+            alertMessage = "Time must be within the prior \(maxPastHours) hours"
+            alertType = .error
+            showAlert = true
+            return
+        }
+
+        if consumedDate > latestAcceptedDate {
+            alertMessage = "Time must be within the next \(maxFutureHours) hour"
+            alertType = .error
+            showAlert = true
+            return
+        }
+
         alertType = .confirmation
         showAlert = true
     }
@@ -194,12 +316,22 @@ struct LoopAPNSCarbsView: View {
             return
         }
 
-        // Create the APNS payload for carbs
+        // Parse absorption time string to double
+        guard let absorptionTimeValue = Double(absorptionTimeString), absorptionTimeValue >= 0.5, absorptionTimeValue <= 8.0 else {
+            alertMessage = "Please enter a valid absorption time between 0.5 and 8.0 hours"
+            alertType = .error
+            isLoading = false
+            showAlert = true
+            return
+        }
+
+        // Create the APNS payload for carbs with custom time
         let payload = LoopAPNSPayload(
             type: .carbs,
             carbsAmount: carbsAmount.doubleValue(for: .gram()),
-            absorptionTime: absorptionTime.doubleValue(for: .hour()),
+            absorptionTime: absorptionTimeValue,
             foodType: foodType.isEmpty ? nil : foodType,
+            consumedDate: consumedDate,
             otp: otpCode
         )
 
@@ -211,11 +343,13 @@ struct LoopAPNSCarbsView: View {
                 DispatchQueue.main.async {
                     isLoading = false
                     if success {
-                        alertMessage = "Carbs sent successfully!"
+                        let timeFormatter = DateFormatter()
+                        timeFormatter.timeStyle = .short
+                        alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: consumedDate))!"
                         alertType = .success
                         LogManager.shared.log(
                             category: .apns,
-                            message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionTime.doubleValue(for: .hour()))h"
+                            message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionTimeString)h, Time: \(consumedDate)"
                         )
                     } else {
                         alertMessage = "Failed to send carbs. Check your Loop APNS configuration."
@@ -255,14 +389,16 @@ struct LoopAPNSPayload {
     let absorptionTime: Double?
     let foodType: String?
     let bolusAmount: Double?
+    let consumedDate: Date?
     let otp: String
 
-    init(type: PayloadType, carbsAmount: Double? = nil, absorptionTime: Double? = nil, foodType: String? = nil, bolusAmount: Double? = nil, otp: String) {
+    init(type: PayloadType, carbsAmount: Double? = nil, absorptionTime: Double? = nil, foodType: String? = nil, bolusAmount: Double? = nil, consumedDate: Date? = nil, otp: String) {
         self.type = type
         self.carbsAmount = carbsAmount
         self.absorptionTime = absorptionTime
         self.foodType = foodType
         self.bolusAmount = bolusAmount
+        self.consumedDate = consumedDate
         self.otp = otp
     }
 }
