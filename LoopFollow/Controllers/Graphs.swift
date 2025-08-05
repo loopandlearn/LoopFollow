@@ -1772,12 +1772,60 @@ extension MainViewController {
     }
 
     func extractMessage(from logEntry: String) -> String? {
-        guard logEntry.contains("{\"") else {
+        // Check if this is a JSON-containing log entry
+        guard let jsonStartIndex = logEntry.range(of: "{\"")?.lowerBound else {
             return nil
         }
 
-        let messagePart = logEntry.components(separatedBy: "{\"").first ?? ""
-        return messagePart.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Extract the error message part (before JSON)
+        let errorMessage = String(logEntry[..<jsonStartIndex])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Extract and parse JSON to get context
+        let jsonString = String(logEntry[jsonStartIndex...])
+        var actionContext = ""
+
+        if let jsonData = jsonString.data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any]
+        {
+            // Extract relevant action information
+            var actionParts: [String] = []
+
+            // Check for bolus entry
+            if let bolusAmount = json["bolus-entry"] as? Double {
+                actionParts.append("Bolus: \(bolusAmount) U")
+            }
+
+            // Check for carbs entry
+            if let carbsAmount = json["carbs-entry"] as? Double {
+                actionParts.append("Carbs: \(carbsAmount) g")
+            }
+
+            // Check for absorption time (relevant for carbs)
+            if let absorptionTime = json["absorption-time"] as? Double {
+                actionParts.append("Absorption: \(absorptionTime) hrs")
+            }
+
+            // Check for OTP (password)
+            if let otp = json["otp"] as? String {
+                actionParts.append("OTP: \(otp)")
+            }
+
+            // Check for sender
+            if let enteredBy = json["entered-by"] as? String {
+                actionParts.append("From: \(enteredBy)")
+            }
+
+            // Combine action parts
+            if !actionParts.isEmpty {
+                actionContext = " [" + actionParts.joined(separator: ", ") + "]"
+            }
+        }
+
+        // Combine error message with action context
+        let finalMessage = errorMessage + actionContext
+
+        return finalMessage.isEmpty ? nil : finalMessage
     }
 
     func wrapText(_ text: String, maxLineLength: Int) -> String {
