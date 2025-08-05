@@ -58,6 +58,18 @@ struct RemoteSettingsView: View {
                     .foregroundColor(.secondary)
             }
 
+            // MARK: - Meal Section (for TRC only)
+
+            if viewModel.remoteType == .trc {
+                Section(header: Text("Meal Settings")) {
+                    Toggle("Meal with Bolus", isOn: $viewModel.mealWithBolus)
+                        .toggleStyle(SwitchToggleStyle())
+
+                    Toggle("Meal with Fat/Protein", isOn: $viewModel.mealWithFatProtein)
+                        .toggleStyle(SwitchToggleStyle())
+                }
+            }
+
             // MARK: - Guardrails Section (shown for both TRC and Loop)
 
             if viewModel.remoteType == .trc || viewModel.remoteType == .loopAPNS {
@@ -109,16 +121,6 @@ struct RemoteSettingsView: View {
                         )
                         .frame(minHeight: 110)
                     }
-                }
-
-                // MARK: - Meal Section
-
-                Section(header: Text("Meal Settings")) {
-                    Toggle("Meal with Bolus", isOn: $viewModel.mealWithBolus)
-                        .toggleStyle(SwitchToggleStyle())
-
-                    Toggle("Meal with Fat/Protein", isOn: $viewModel.mealWithFatProtein)
-                        .toggleStyle(SwitchToggleStyle())
                 }
 
                 // MARK: - Debug / Info
