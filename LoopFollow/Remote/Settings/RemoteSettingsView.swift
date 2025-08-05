@@ -36,15 +36,15 @@ struct RemoteSettingsView: View {
                 )
 
                 remoteTypeRow(
-                    type: .trc,
-                    label: "Trio Remote Control",
-                    isEnabled: viewModel.isTrioDevice
-                )
-
-                remoteTypeRow(
                     type: .loopAPNS,
                     label: "Loop Remote Control",
                     isEnabled: viewModel.isLoopDevice
+                )
+
+                remoteTypeRow(
+                    type: .trc,
+                    label: "Trio Remote Control",
+                    isEnabled: viewModel.isTrioDevice
                 )
 
                 remoteTypeRow(
