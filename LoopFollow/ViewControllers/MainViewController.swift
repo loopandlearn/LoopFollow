@@ -337,6 +337,27 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
+        Storage.shared.device.$value
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                let isTrioDevice = (Storage.shared.device.value == "Trio")
+                let isLoopDevice = (Storage.shared.device.value == "Loop")
+
+                let currentRemoteType = Storage.shared.remoteType.value
+
+                // Check if current remote type is invalid for the device
+                let shouldReset = (currentRemoteType == .loopAPNS && !isLoopDevice) ||
+                    (currentRemoteType == .trc && !isTrioDevice) ||
+                    (currentRemoteType == .nightscout && !isTrioDevice)
+
+                if shouldReset {
+                    Storage.shared.remoteType.value = .none
+                }
+            }
+            .store(in: &cancellables)
+
         updateQuickActions()
         setupTabBar()
 
