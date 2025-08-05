@@ -1772,11 +1772,11 @@ extension MainViewController {
     }
 
     func extractMessage(from logEntry: String) -> String? {
-        guard logEntry.contains("{\"aps\"") else {
+        guard logEntry.contains("{\"") else {
             return nil
         }
 
-        let messagePart = logEntry.components(separatedBy: "{\"aps\"").first ?? ""
+        let messagePart = logEntry.components(separatedBy: "{\"").first ?? ""
         return messagePart.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
