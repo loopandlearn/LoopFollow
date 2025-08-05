@@ -1771,26 +1771,35 @@ extension MainViewController {
         }
     }
 
+    func extractMessage(from logEntry: String) -> String? {
+        guard logEntry.contains("{\"aps\"") else {
+            return nil
+        }
+
+        let messagePart = logEntry.components(separatedBy: "{\"aps\"").first ?? ""
+        return messagePart.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     func wrapText(_ text: String, maxLineLength: Int) -> String {
+        let messageToWrap = extractMessage(from: text) ?? text
+
         guard maxLineLength > 0 else {
-            return text
+            return messageToWrap
         }
 
         var result: [String] = []
-        let lines = text.components(separatedBy: .newlines)
+        let lines = messageToWrap.components(separatedBy: .newlines)
 
         for line in lines {
             var currentLine = ""
             let words = line.components(separatedBy: .whitespaces)
 
             for word in words {
-                // Handles words that are longer than a single line.
                 if word.count > maxLineLength {
                     if !currentLine.isEmpty {
                         result.append(currentLine)
                         currentLine = ""
                     }
-
                     var wordToSplit = word
                     while !wordToSplit.isEmpty {
                         let splitIndex = wordToSplit.index(wordToSplit.startIndex, offsetBy: min(maxLineLength, wordToSplit.count))
@@ -1798,7 +1807,6 @@ extension MainViewController {
                         wordToSplit = String(wordToSplit[splitIndex...])
                     }
                 } else {
-                    // The word fits on the line.
                     if currentLine.isEmpty {
                         currentLine = word
                     } else if currentLine.count + word.count + 1 <= maxLineLength {
