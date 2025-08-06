@@ -326,12 +326,15 @@ struct LoopAPNSCarbsView: View {
         }
 
         // Create the APNS payload for carbs with custom time
+        // We "randomize" the milliseconds to avoid issue with NS which
+        // doesn't allow entries at the same second.
+        let adjustedConsumedDate = consumedDate.dateUsingCurrentSeconds()
         let payload = LoopAPNSPayload(
             type: .carbs,
             carbsAmount: carbsAmount.doubleValue(for: .gram()),
             absorptionTime: absorptionTimeValue,
             foodType: foodType.isEmpty ? nil : foodType,
-            consumedDate: consumedDate,
+            consumedDate: adjustedConsumedDate,
             otp: otpCode
         )
 
@@ -345,11 +348,11 @@ struct LoopAPNSCarbsView: View {
                     if success {
                         let timeFormatter = DateFormatter()
                         timeFormatter.timeStyle = .short
-                        alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: consumedDate))!"
+                        alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"
                         alertType = .success
                         LogManager.shared.log(
                             category: .apns,
-                            message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionTimeString)h, Time: \(consumedDate)"
+                            message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionTimeString)h, Time: \(adjustedConsumedDate)"
                         )
                     } else {
                         alertMessage = "Failed to send carbs. Check your Loop APNS configuration."
