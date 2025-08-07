@@ -17,6 +17,10 @@ struct SettingsMenuView: View {
     @State private var versionTint: Color = .secondary
     @State private var showingTabCustomization = false
 
+    // MARK: – Observed objects
+
+    @ObservedObject private var url = Storage.shared.url
+
     // MARK: – Body
 
     var body: some View {

@@ -19,7 +19,7 @@ extension HKUnit {
         case .millimolesPerLiter:
             return 1
         case .internationalUnit():
-            return 2
+            return 3
         default:
             return 0
         }

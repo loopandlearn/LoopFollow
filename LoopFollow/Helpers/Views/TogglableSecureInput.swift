@@ -14,6 +14,7 @@ struct TogglableSecureInput: View {
 
     @State private var isVisible = false
     @FocusState private var isFocused: Bool
+    @FocusState private var isMultilineFocused: Bool
 
     var body: some View {
         HStack(alignment: .top) {
@@ -24,18 +25,33 @@ struct TogglableSecureInput: View {
                         TextField(placeholder, text: $text)
                             .multilineTextAlignment(.trailing)
                             .textContentType(textContentType)
+                            .submitLabel(.done)
+                            .focused($isFocused)
                     } else {
                         SecureField(placeholder, text: $text)
                             .multilineTextAlignment(.trailing)
                             .textContentType(textContentType)
+                            .submitLabel(.done)
+                            .focused($isFocused)
                     }
 
                 case .multiLine:
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $text)
-                            .opacity(isVisible ? 1 : 0)
-                            .focused($isFocused)
+                            .focused($isMultilineFocused)
                             .frame(minHeight: 100)
+                            .opacity(isVisible ? 1 : 0)
+                            .disabled(!isVisible)
+                            .toolbar {
+                                ToolbarItemGroup(placement: .keyboard) {
+                                    if isMultilineFocused {
+                                        Spacer()
+                                        Button("Done") {
+                                            isMultilineFocused = false
+                                        }
+                                    }
+                                }
+                            }
 
                         if !isVisible {
                             Text(maskString)
@@ -46,14 +62,15 @@ struct TogglableSecureInput: View {
                                        alignment: .topLeading)
                                 .padding(.top, 8)
                                 .padding(.leading, 5)
+                                .allowsHitTesting(false)
                         }
                     }
+                    .frame(minHeight: 100)
                 }
             }
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
             .privacySensitive()
-            .submitLabel(.done)
 
             Button { isVisible.toggle() } label: {
                 Image(systemName: isVisible ? "eye.slash" : "eye")
@@ -63,7 +80,16 @@ struct TogglableSecureInput: View {
             .padding(.leading, 4)
         }
         .contentShape(Rectangle())
-        .onTapGesture { isFocused = true }
+        .onTapGesture {
+            if style == .multiLine && !isVisible {
+                isVisible = true
+                isMultilineFocused = true
+            } else if style == .singleLine {
+                isFocused = true
+            } else if style == .multiLine && isVisible {
+                isMultilineFocused = true
+            }
+        }
     }
 
     private var maskString: String {

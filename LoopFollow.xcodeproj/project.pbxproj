@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
+		654132E72E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */; };
+		654132EA2E19F24800BDBE08 /* TOTPGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E92E19F24800BDBE08 /* TOTPGenerator.swift */; };
+		6541341C2E1DC28000BDBE08 /* DateExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6541341B2E1DC28000BDBE08 /* DateExtensions.swift */; };
+		654134182E1DC09700BDBE08 /* OverridePresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654134172E1DC09700BDBE08 /* OverridePresetsView.swift */; };
+		6541341A2E1DC27900BDBE08 /* OverridePresetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654134192E1DC27900BDBE08 /* OverridePresetData.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
 		DD0650A92DCA8A10004D3B41 /* AlarmBGSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */; };
@@ -194,11 +199,9 @@
 		DDD10F072C529DE800D76A8E /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F062C529DE800D76A8E /* Observable.swift */; };
 		DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */; };
 		DDDB86F12DF7223C00AADDAC /* DeleteAlarmSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */; };
+		DDDC01DD2E244B3100D9975C /* JWTManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC01DC2E244B3100D9975C /* JWTManager.swift */; };
 		DDDC31CC2E13A7DF009EA0F3 /* AddAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */; };
 		DDDC31CE2E13A811009EA0F3 /* AlarmTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */; };
-		DDDF6F432D479A9900884336 /* LoopNightscoutRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */; };
-		DDDF6F452D479AB100884336 /* LoopOverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F442D479AB000884336 /* LoopOverrideView.swift */; };
-		DDDF6F472D479AD200884336 /* LoopOverrideViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */; };
 		DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F482D479AEF00884336 /* NoRemoteView.swift */; };
 		DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE69ED12C7256260013EAEC /* RemoteType.swift */; };
 		DDE75D232DE5E505007C1FC1 /* Glyph.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D222DE5E505007C1FC1 /* Glyph.swift */; };
@@ -209,6 +212,10 @@
 		DDEF503A2D31615000999A5D /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50392D31614200999A5D /* LogManager.swift */; };
 		DDEF503C2D31BE2D00999A5D /* TaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */; };
 		DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503E2D32754A00999A5D /* ProfileTask.swift */; };
+		DDEF50402D479B8A00884336 /* LoopAPNSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF503F2D479B8A00884336 /* LoopAPNSService.swift */; };
+		DDEF50422D479BAA00884336 /* LoopAPNSCarbsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */; };
+		DDEF50432D479BBA00884336 /* LoopAPNSBolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50422D479BBA00884336 /* LoopAPNSBolusView.swift */; };
+		DDEF50452D479BDA00884336 /* LoopAPNSRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50442D479BDA00884336 /* LoopAPNSRemoteView.swift */; };
 		DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */; };
 		DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */; };
 		DDF2C0142BEFD468007A20E6 /* blacklisted-versions.json in Resources */ = {isa = PBXBuildFile; fileRef = DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */; };
@@ -384,6 +391,11 @@
 
 /* Begin PBXFileReference section */
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
+		654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleQRCodeScannerView.swift; sourceTree = "<group>"; };
+		654132E92E19F24800BDBE08 /* TOTPGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPGenerator.swift; sourceTree = "<group>"; };
+		6541341B2E1DC28000BDBE08 /* DateExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtensions.swift; sourceTree = "<group>"; };
+		654134172E1DC09700BDBE08 /* OverridePresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetsView.swift; sourceTree = "<group>"; };
+		654134192E1DC27900BDBE08 /* OverridePresetData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetData.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
 		DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireCondition.swift; sourceTree = "<group>"; };
@@ -573,11 +585,9 @@
 		DDD10F062C529DE800D76A8E /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTarget.swift; sourceTree = "<group>"; };
 		DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAlarmSection.swift; sourceTree = "<group>"; };
+		DDDC01DC2E244B3100D9975C /* JWTManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JWTManager.swift; sourceTree = "<group>"; };
 		DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmSheet.swift; sourceTree = "<group>"; };
 		DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmTile.swift; sourceTree = "<group>"; };
-		DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopNightscoutRemoteView.swift; sourceTree = "<group>"; };
-		DDDF6F442D479AB000884336 /* LoopOverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideView.swift; sourceTree = "<group>"; };
-		DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopOverrideViewModel.swift; sourceTree = "<group>"; };
 		DDDF6F482D479AEF00884336 /* NoRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoRemoteView.swift; sourceTree = "<group>"; };
 		DDE69ED12C7256260013EAEC /* RemoteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteType.swift; sourceTree = "<group>"; };
 		DDE75D222DE5E505007C1FC1 /* Glyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glyph.swift; sourceTree = "<group>"; };
@@ -588,6 +598,10 @@
 		DDEF50392D31614200999A5D /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskScheduler.swift; sourceTree = "<group>"; };
 		DDEF503E2D32754A00999A5D /* ProfileTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTask.swift; sourceTree = "<group>"; };
+		DDEF503F2D479B8A00884336 /* LoopAPNSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSService.swift; sourceTree = "<group>"; };
+		DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSCarbsView.swift; sourceTree = "<group>"; };
+		DDEF50422D479BBA00884336 /* LoopAPNSBolusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSBolusView.swift; sourceTree = "<group>"; };
+		DDEF50442D479BDA00884336 /* LoopAPNSRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSRemoteView.swift; sourceTree = "<group>"; };
 		DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubService.swift; sourceTree = "<group>"; };
 		DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionManager.swift; sourceTree = "<group>"; };
 		DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "blacklisted-versions.json"; sourceTree = "<group>"; };
@@ -845,7 +859,7 @@
 			children = (
 				DDDF6F4A2D479B6A00884336 /* Nightscout */,
 				DDDF6F482D479AEF00884336 /* NoRemoteView.swift */,
-				DDDF6F412D479A8E00884336 /* Loop */,
+				DDEF503E2D479B8A00884336 /* LoopAPNS */,
 				DD4878112C7B74F90048F05C /* TRC */,
 				DD4878062C7B2E9E0048F05C /* Settings */,
 				DDF699972C5AA2E50058A8D9 /* TempTargetPreset */,
@@ -1150,16 +1164,6 @@
 			path = AddAlarm;
 			sourceTree = "<group>";
 		};
-		DDDF6F412D479A8E00884336 /* Loop */ = {
-			isa = PBXGroup;
-			children = (
-				DDDF6F462D479AD100884336 /* LoopOverrideViewModel.swift */,
-				DDDF6F442D479AB000884336 /* LoopOverrideView.swift */,
-				DDDF6F422D479A9800884336 /* LoopNightscoutRemoteView.swift */,
-			);
-			path = Loop;
-			sourceTree = "<group>";
-		};
 		DDDF6F4A2D479B6A00884336 /* Nightscout */ = {
 			isa = PBXGroup;
 			children = (
@@ -1184,6 +1188,19 @@
 			path = Task;
 			sourceTree = "<group>";
 		};
+		DDEF503E2D479B8A00884336 /* LoopAPNS */ = {
+			isa = PBXGroup;
+			children = (
+				DDEF503F2D479B8A00884336 /* LoopAPNSService.swift */,
+				DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */,
+				DDEF50422D479BBA00884336 /* LoopAPNSBolusView.swift */,
+				654134172E1DC09700BDBE08 /* OverridePresetsView.swift */,
+				654134192E1DC27900BDBE08 /* OverridePresetData.swift */,
+				DDEF50442D479BDA00884336 /* LoopAPNSRemoteView.swift */,
+			);
+			path = LoopAPNS;
+			sourceTree = "<group>";
+		};
 		DDF699972C5AA2E50058A8D9 /* TempTargetPreset */ = {
 			isa = PBXGroup;
 			children = (
@@ -1204,6 +1221,7 @@
 				DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */,
 				DD16AF102C997B4600FB655A /* LoadingButtonView.swift */,
 				DDE75D262DE5E539007C1FC1 /* ActionRow.swift */,
+				654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */,
 				DDE75D282DE5E56C007C1FC1 /* LinkRow.swift */,
 				DDE75D2A2DE5E613007C1FC1 /* NavigationRow.swift */,
 			);
@@ -1396,27 +1414,27 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
-				DDC7E5142DBCE1B900EB1127 /* Snoozer */,
 				DDCF9A7E2D85FCE6004DF4DD /* Alarm */,
-				DD1A97122D429495000DDC11 /* Settings */,
-				DD2C2E4D2D3B8ACF006413A5 /* Nightscout */,
-				DD9ED0C62D355225000D2A63 /* Log */,
-				DDEF503D2D32753A00999A5D /* Task */,
+				FC16A97624995FEE003D6245 /* Application */,
 				DDFF3D792D140F1800BF9D9E /* BackgroundRefresh */,
 				DD50C74D2D0828250057AE6F /* Contact */,
-				DD5334252C61667700062F9D /* InfoDisplaySettings */,
-				DD0C0C6E2C4AFFB800DBADDF /* Remote */,
-				DD0C0C692C4852A100DBADDF /* Metric */,
-				DD13BC732C3FD60E0062313B /* InfoTable */,
-				FCC688702489A57C00A0279D /* Loop Follow.entitlements */,
-				FC8DEEE62485D1ED0075863F /* Info.plist */,
-				FC7CE59A248D334B001F83B8 /* Resources */,
-				FCC68871248A736700A0279D /* ViewControllers */,
-				DD98F54224BCEF190007425A /* Extensions */,
 				FC16A9782499657E003D6245 /* Controllers */,
+				DD98F54224BCEF190007425A /* Extensions */,
 				FCC688542489367300A0279D /* Helpers */,
+				FC8DEEE62485D1ED0075863F /* Info.plist */,
+				DD5334252C61667700062F9D /* InfoDisplaySettings */,
+				DD13BC732C3FD60E0062313B /* InfoTable */,
+				DD9ED0C62D355225000D2A63 /* Log */,
+				FCC688702489A57C00A0279D /* Loop Follow.entitlements */,
+				DD0C0C692C4852A100DBADDF /* Metric */,
+				DD2C2E4D2D3B8ACF006413A5 /* Nightscout */,
+				DD0C0C6E2C4AFFB800DBADDF /* Remote */,
+				FC7CE59A248D334B001F83B8 /* Resources */,
+				DD1A97122D429495000DDC11 /* Settings */,
+				DDC7E5142DBCE1B900EB1127 /* Snoozer */,
 				DDC7E5CD2DC6637800EB1127 /* Storage */,
-				FC16A97624995FEE003D6245 /* Application */,
+				DDEF503D2D32753A00999A5D /* Task */,
+				FCC68871248A736700A0279D /* ViewControllers */,
 			);
 			path = LoopFollow;
 			sourceTree = "<group>";
@@ -1475,6 +1493,7 @@
 				FCFEEC9F2488157B00402A7F /* Chart.swift */,
 				FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */,
 				FC16A98024996C07003D6245 /* DateTime.swift */,
+				654132E92E19F24800BDBE08 /* TOTPGenerator.swift */,
 				FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */,
 				FCEF87AA24A1417900AE6FA0 /* Localizer.swift */,
 				FC1BDD2E24A232A3001B652C /* DataStructs.swift */,
@@ -1487,6 +1506,8 @@
 				DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */,
 				DDF699952C5582290058A8D9 /* TextFieldWithToolBar.swift */,
 				DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */,
+				DDDC01DC2E244B3100D9975C /* JWTManager.swift */,
+				6541341B2E1DC28000BDBE08 /* DateExtensions.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1583,6 +1604,7 @@
 			mainGroup = FC97880B2485969B00A7906C;
 			packageReferences = (
 				DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */,
+				654132E82E19F0B800BDBE08 /* XCRemoteSwiftPackageReference "swift-crypto" */,
 			);
 			productRefGroup = FC9788152485969B00A7906C /* Products */;
 			projectDirPath = "";
@@ -1853,6 +1875,7 @@
 				DD9ACA0E2D340BFF00415D8A /* AlarmTask.swift in Sources */,
 				DDCF9A822D85FD15004DF4DD /* AlarmType.swift in Sources */,
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
+				6541341A2E1DC27900BDBE08 /* OverridePresetData.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				DD7F4C092DD504A700D449E9 /* OverrideStartCondition.swift in Sources */,
 				DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */,
@@ -1910,7 +1933,6 @@
 				DDD10F032C518A6500D76A8E /* TreatmentResponse.swift in Sources */,
 				DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */,
 				DD7F4C1F2DD6648B00D449E9 /* FastRiseCondition.swift in Sources */,
-				DDDF6F472D479AD200884336 /* LoopOverrideViewModel.swift in Sources */,
 				DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */,
 				DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */,
 				DD0650F32DCE9B3D004D3B41 /* MissedReadingEditor.swift in Sources */,
@@ -1949,6 +1971,7 @@
 				FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */,
 				DDF6999E2C5AAA640058A8D9 /* ErrorMessageView.swift in Sources */,
 				DD1D52BB2E1EB60B00432050 /* MoreMenuViewController.swift in Sources */,
+				654132E72E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift in Sources */,
 				DD4878152C7B75230048F05C /* MealView.swift in Sources */,
 				FC16A97F249969E2003D6245 /* Graphs.swift in Sources */,
 				FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */,
@@ -1986,6 +2009,8 @@
 				DD493AD72ACF2139009A6922 /* SuspendPump.swift in Sources */,
 				DDB9FC7F2DDB584500EFAA76 /* BolusEntry.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
+				654134182E1DC09700BDBE08 /* OverridePresetsView.swift in Sources */,
+				DDDC01DD2E244B3100D9975C /* JWTManager.swift in Sources */,
 				DDD10F072C529DE800D76A8E /* Observable.swift in Sources */,
 				DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */,
 				DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */,
@@ -2014,7 +2039,6 @@
 				DDF699962C5582290058A8D9 /* TextFieldWithToolBar.swift in Sources */,
 				DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
 				DD0650EF2DCE96FF004D3B41 /* HighBGCondition.swift in Sources */,
-				DDDF6F452D479AB100884336 /* LoopOverrideView.swift in Sources */,
 				DDC6CA472DD8D9010060EE25 /* PumpChangeAlarmEditor.swift in Sources */,
 				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
@@ -2031,7 +2055,6 @@
 				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */,
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
 				DDA9ACAC2D6B317100E6F1A9 /* ContactType.swift in Sources */,
-				DDDF6F432D479A9900884336 /* LoopNightscoutRemoteView.swift in Sources */,
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,
 				FC1BDD2D24A23204001B652C /* MainViewController+updateStats.swift in Sources */,
 				DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */,
@@ -2047,6 +2070,8 @@
 				DD7F4C112DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift in Sources */,
 				DD1D52B92E1EB5DC00432050 /* TabPosition.swift in Sources */,
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
+				654132EA2E19F24800BDBE08 /* TOTPGenerator.swift in Sources */,
+				6541341C2E1DC28000BDBE08 /* DateExtensions.swift in Sources */,
 				DD0650F52DCF303F004D3B41 /* AlarmStepperSection.swift in Sources */,
 				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
 				DD7F4C132DD51FD500D449E9 /* TempTargetEndCondition.swift in Sources */,
@@ -2066,6 +2091,10 @@
 				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 				DDCC3A582DDC9655006F1C10 /* MissedBolusAlarmEditor.swift in Sources */,
+				DDEF50402D479B8A00884336 /* LoopAPNSService.swift in Sources */,
+				DDEF50422D479BAA00884336 /* LoopAPNSCarbsView.swift in Sources */,
+				DDEF50432D479BBA00884336 /* LoopAPNSBolusView.swift in Sources */,
+				DDEF50452D479BDA00884336 /* LoopAPNSRemoteView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2351,6 +2380,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		654132E82E19F0B800BDBE08 /* XCRemoteSwiftPackageReference "swift-crypto" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-crypto.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.12.3;
+			};
+		};
 		DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Kitura/Swift-JWT.git";

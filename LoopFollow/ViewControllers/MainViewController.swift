@@ -111,7 +111,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // Stores the timestamp of the last BG value that was spoken.
     var lastSpokenBGDate: TimeInterval = 0
 
-    var autoScrollPauseUntil: Date? = nil
+    var autoScrollPauseUntil: Date?
 
     var IsNotLooping = false
 
@@ -313,6 +313,51 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
+        Storage.shared.apnsKey.$value
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { _ in
+                JWTManager.shared.invalidateCache()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.teamId.$value
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { _ in
+                JWTManager.shared.invalidateCache()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.keyId.$value
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { _ in
+                JWTManager.shared.invalidateCache()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.device.$value
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                let isTrioDevice = (Storage.shared.device.value == "Trio")
+                let isLoopDevice = (Storage.shared.device.value == "Loop")
+
+                let currentRemoteType = Storage.shared.remoteType.value
+
+                // Check if current remote type is invalid for the device
+                let shouldReset = (currentRemoteType == .loopAPNS && !isLoopDevice) ||
+                    (currentRemoteType == .trc && !isTrioDevice) ||
+                    (currentRemoteType == .nightscout && !isTrioDevice)
+
+                if shouldReset {
+                    Storage.shared.remoteType.value = .none
+                }
+            }
+            .store(in: &cancellables)
+
         updateQuickActions()
         setupTabBar()
 
@@ -331,7 +376,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let willHaveMoreTab = hasItemsInMore()
 
         // If currently in More tab and it's going away, we need to handle this carefully
-        if wasInMoreTab && !willHaveMoreTab {
+        if wasInMoreTab, !willHaveMoreTab {
             // First, dismiss any modals that might be open
             if let presented = tabBarController.presentedViewController {
                 presented.dismiss(animated: false) { [weak self] in
