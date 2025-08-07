@@ -20,6 +20,7 @@ struct LoopAPNSBolusView: View {
     @State private var recommendedBolus: Double? = nil
     @State private var lastLoopTime: TimeInterval? = nil
     @State private var otpTimeRemaining: Int? = nil
+    @State private var showOldCalculationWarning = false
     private let otpPeriod: TimeInterval = 30
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -27,12 +28,45 @@ struct LoopAPNSBolusView: View {
         case success
         case error
         case confirmation
+        case oldCalculationWarning
     }
 
     var body: some View {
         NavigationView {
             VStack {
                 Form {
+                    // Recommended bolus section
+                    if let recommendedBolus = recommendedBolus, recommendedBolus > 0, let lastLoopTime = lastLoopTime {
+                        let timeSinceCalculation = Date().timeIntervalSince1970 - lastLoopTime
+                        let minutesSinceCalculation = Int(timeSinceCalculation / 60)
+
+                        // Only show if calculation is less than 12 minutes old
+                        if minutesSinceCalculation < 12 {
+                            Section(header: Text("Recommended Bolus")) {
+                                Button(action: {
+                                    handleRecommendedBolusTap()
+                                }) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("\(String(format: "%.2f", recommendedBolus))U")
+                                                .font(.headline)
+                                                .foregroundColor(.primary)
+                                            Text("Calculated \(minutesSinceCalculation) minute\(minutesSinceCalculation == 1 ? "" : "s") ago")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "arrow.up.circle.fill")
+                                            .foregroundColor(.blue)
+                                            .font(.title2)
+                                    }
+                                    .padding(.vertical, 8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                    }
+
                     Section {
                         HKQuantityInputView(
                             label: "Insulin Amount",
@@ -50,17 +84,26 @@ struct LoopAPNSBolusView: View {
                         )
                     }
 
-                    // Add warning section if recommended bolus is available
+                    // Warning section for recommended bolus age
                     if let recommendedBolus = recommendedBolus, let lastLoopTime = lastLoopTime {
-                        Section(header: Text("Warning")) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("WARNING: New treatments may have occurred since the last recommended bolus was calculated \(presentableMinutesFormat(timeInterval: Date().timeIntervalSince1970 - lastLoopTime)) ago.")
-                                    .font(.callout)
-                                    .foregroundColor(.red)
-                                    .multilineTextAlignment(.leading)
+                        let timeSinceCalculation = Date().timeIntervalSince1970 - lastLoopTime
+                        let minutesSinceCalculation = Int(timeSinceCalculation / 60)
+
+                        // Only show warning if calculation is less than 12 minutes old
+                        if minutesSinceCalculation < 12 {
+                            Section {
+                                let warningColor: Color = minutesSinceCalculation >= 5 ? .red : .yellow
+
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("WARNING: New treatments may have occurred since the last recommended bolus was calculated \(presentableMinutesFormat(timeInterval: timeSinceCalculation)) ago.")
+                                        .font(.callout)
+                                        .foregroundColor(warningColor)
+                                        .multilineTextAlignment(.leading)
+                                }
                             }
                         }
                     }
+
                     Section {
                         Button(action: sendInsulin) {
                             if isLoading {
@@ -120,6 +163,20 @@ struct LoopAPNSBolusView: View {
             .onReceive(otpTimer) { _ in
                 let now = Date().timeIntervalSince1970
                 otpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
+
+                // Check if recommended bolus calculation is older than 5 minutes (but less than 12 minutes)
+                if let lastLoopTime = lastLoopTime {
+                    let timeSinceCalculation = now - lastLoopTime
+                    let minutesSinceCalculation = Int(timeSinceCalculation / 60)
+
+                    // Only show warning if calculation is between 5-12 minutes old
+                    if minutesSinceCalculation > 5 && minutesSinceCalculation < 12 && !showOldCalculationWarning {
+                        showOldCalculationWarning = true
+                        alertMessage = "This recommended bolus was calculated \(minutesSinceCalculation) minutes ago. New treatments may have occurred since then. Proceed with caution."
+                        alertType = .oldCalculationWarning
+                        showAlert = true
+                    }
+                }
             }
             .alert(isPresented: $showAlert) {
                 switch alertType {
@@ -146,6 +203,15 @@ struct LoopAPNSBolusView: View {
                         },
                         secondaryButton: .cancel()
                     )
+                case .oldCalculationWarning:
+                    return Alert(
+                        title: Text("Old Calculation Warning"),
+                        message: Text(alertMessage),
+                        primaryButton: .default(Text("Use Anyway")) {
+                            applyRecommendedBolus()
+                        },
+                        secondaryButton: .cancel()
+                    )
                 }
             }
         }
@@ -156,10 +222,20 @@ struct LoopAPNSBolusView: View {
         recommendedBolus = Observable.shared.deviceRecBolus.value
         lastLoopTime = Observable.shared.alertLastLoopTime.value
 
-        // Pre-fill the insulin amount with recommended bolus if available
-        if let recommendedBolus = recommendedBolus, recommendedBolus > 0 {
-            insulinAmount = HKQuantity(unit: .internationalUnit(), doubleValue: recommendedBolus)
-        }
+        // Reset warning state when new data is loaded
+        showOldCalculationWarning = false
+    }
+
+    private func handleRecommendedBolusTap() {
+        guard let recommendedBolus = recommendedBolus, recommendedBolus > 0 else { return }
+
+        // Apply the recommended bolus directly (warning is handled by timer)
+        applyRecommendedBolus()
+    }
+
+    private func applyRecommendedBolus() {
+        guard let recommendedBolus = recommendedBolus, recommendedBolus > 0 else { return }
+        insulinAmount = HKQuantity(unit: .internationalUnit(), doubleValue: recommendedBolus)
     }
 
     private func presentableMinutesFormat(timeInterval: TimeInterval) -> String {
