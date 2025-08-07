@@ -26,6 +26,9 @@ if [ "${info_plist_path}" == "/" -o ! -e "${info_plist_path}" ]; then
 else
     echo "Gathering build details..."
 
+    # Capture the Development Team ID and write it to BuildDetails.plist
+    plutil -replace com-LoopFollow-development-team -string "${DEVELOPMENT_TEAM}" "${info_plist_path}"
+
     # Capture the current date and write it to BuildDetails.plist
     formatted_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     plutil -replace com-LoopFollow-build-date -string "$formatted_date" "${info_plist_path}"

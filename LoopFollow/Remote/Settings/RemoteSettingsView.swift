@@ -228,6 +228,29 @@ struct RemoteSettingsView: View {
                             .foregroundColor(.red)
                     }
                 }
+
+                if viewModel.areTeamIdsDifferent {
+                    Section(header: Text("Return Notification Settings"), footer: Text("Because LoopFollow and the target app were built with different Team IDs, you must provide the APNS credentials for LoopFollow below.").font(.caption)) {
+                        HStack {
+                            Text("Return APNS Key ID")
+                            TogglableSecureInput(
+                                placeholder: "Enter Key ID for LoopFollow",
+                                text: $viewModel.returnKeyId,
+                                style: .singleLine
+                            )
+                        }
+
+                        VStack(alignment: .leading) {
+                            Text("Return APNS Key")
+                            TogglableSecureInput(
+                                placeholder: "Paste APNS Key for LoopFollow",
+                                text: $viewModel.returnApnsKey,
+                                style: .multiLine
+                            )
+                            .frame(minHeight: 110)
+                        }
+                    }
+                }
             }
         }
         .alert(isPresented: $showAlert) {

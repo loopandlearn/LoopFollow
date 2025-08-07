@@ -18,6 +18,25 @@ struct PushMessage: Encodable {
     var timestamp: TimeInterval
     var overrideName: String?
     var scheduledTime: TimeInterval?
+    var returnNotification: ReturnNotificationInfo?
+
+    struct ReturnNotificationInfo: Encodable {
+        let productionEnvironment: Bool
+        let deviceToken: String
+        let bundleId: String
+        let teamId: String
+        let keyId: String
+        let apnsKey: String
+
+        enum CodingKeys: String, CodingKey {
+            case productionEnvironment = "production_environment"
+            case deviceToken = "device_token"
+            case bundleId = "bundle_id"
+            case teamId = "team_id"
+            case keyId = "key_id"
+            case apnsKey = "apns_key"
+        }
+    }
 
     enum CodingKeys: String, CodingKey {
         case aps
@@ -33,6 +52,7 @@ struct PushMessage: Encodable {
         case timestamp
         case overrideName
         case scheduledTime = "scheduled_time"
+        case returnNotification = "return_notification"
     }
 
     func encode(to encoder: Encoder) throws {
@@ -40,17 +60,16 @@ struct PushMessage: Encodable {
         try container.encode(aps, forKey: .aps)
         try container.encode(user, forKey: .user)
         try container.encode(commandType.rawValue, forKey: .commandType)
-        try container.encode(bolusAmount, forKey: .bolusAmount)
-        try container.encode(target, forKey: .target)
-        try container.encode(duration, forKey: .duration)
-        try container.encode(carbs, forKey: .carbs)
-        try container.encode(protein, forKey: .protein)
-        try container.encode(fat, forKey: .fat)
+        try container.encodeIfPresent(bolusAmount, forKey: .bolusAmount)
+        try container.encodeIfPresent(target, forKey: .target)
+        try container.encodeIfPresent(duration, forKey: .duration)
+        try container.encodeIfPresent(carbs, forKey: .carbs)
+        try container.encodeIfPresent(protein, forKey: .protein)
+        try container.encodeIfPresent(fat, forKey: .fat)
         try container.encode(sharedSecret, forKey: .sharedSecret)
         try container.encode(timestamp, forKey: .timestamp)
-        try container.encode(overrideName, forKey: .overrideName)
-        if let scheduledTime = scheduledTime {
-            try container.encode(scheduledTime, forKey: .scheduledTime)
-        }
+        try container.encodeIfPresent(overrideName, forKey: .overrideName)
+        try container.encodeIfPresent(scheduledTime, forKey: .scheduledTime)
+        try container.encodeIfPresent(returnNotification, forKey: .returnNotification)
     }
 }

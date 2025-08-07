@@ -36,5 +36,7 @@ class Observable {
 
     var settingsPath = ObservableValue<NavigationPath>(default: NavigationPath())
 
+    var loopFollowDeviceToken = ObservableValue<String>(default: "")
+
     private init() {}
 }
