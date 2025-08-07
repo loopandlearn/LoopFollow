@@ -1,6 +1,6 @@
 // LoopFollow
 // SimpleQRCodeScannerView.swift
-// Created by codebymini.
+// Created by Daniel Mini Johansson.
 
 import AVFoundation
 import SwiftUI

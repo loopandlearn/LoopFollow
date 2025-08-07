@@ -1,6 +1,6 @@
 // LoopFollow
 // LoopAPNSBolusView.swift
-// Created by codebymini.
+// Created by Daniel Mini Johansson.
 
 import HealthKit
 import LocalAuthentication
