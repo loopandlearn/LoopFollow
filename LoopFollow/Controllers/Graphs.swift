@@ -1771,26 +1771,83 @@ extension MainViewController {
         }
     }
 
+    func extractMessage(from logEntry: String) -> String? {
+        // Check if this is a JSON-containing log entry
+        guard let jsonStartIndex = logEntry.range(of: "{\"")?.lowerBound else {
+            return nil
+        }
+
+        // Extract the error message part (before JSON)
+        let errorMessage = String(logEntry[..<jsonStartIndex])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Extract and parse JSON to get context
+        let jsonString = String(logEntry[jsonStartIndex...])
+        var actionContext = ""
+
+        if let jsonData = jsonString.data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any]
+        {
+            // Extract relevant action information
+            var actionParts: [String] = []
+
+            // Check for bolus entry
+            if let bolusAmount = json["bolus-entry"] as? Double {
+                actionParts.append("Bolus: \(bolusAmount) U")
+            }
+
+            // Check for carbs entry
+            if let carbsAmount = json["carbs-entry"] as? Double {
+                actionParts.append("Carbs: \(carbsAmount) g")
+            }
+
+            // Check for absorption time (relevant for carbs)
+            if let absorptionTime = json["absorption-time"] as? Double {
+                actionParts.append("Absorption: \(absorptionTime) hrs")
+            }
+
+            // Check for OTP (password)
+            if let otp = json["otp"] as? String {
+                actionParts.append("OTP: \(otp)")
+            }
+
+            // Check for sender
+            if let enteredBy = json["entered-by"] as? String {
+                actionParts.append("From: \(enteredBy)")
+            }
+
+            // Combine action parts
+            if !actionParts.isEmpty {
+                actionContext = " [" + actionParts.joined(separator: ", ") + "]"
+            }
+        }
+
+        // Combine error message with action context
+        let finalMessage = errorMessage + actionContext
+
+        return finalMessage.isEmpty ? nil : finalMessage
+    }
+
     func wrapText(_ text: String, maxLineLength: Int) -> String {
+        let messageToWrap = extractMessage(from: text) ?? text
+
         guard maxLineLength > 0 else {
-            return text
+            return messageToWrap
         }
 
         var result: [String] = []
-        let lines = text.components(separatedBy: .newlines)
+        let lines = messageToWrap.components(separatedBy: .newlines)
 
         for line in lines {
             var currentLine = ""
             let words = line.components(separatedBy: .whitespaces)
 
             for word in words {
-                // Handles words that are longer than a single line.
                 if word.count > maxLineLength {
                     if !currentLine.isEmpty {
                         result.append(currentLine)
                         currentLine = ""
                     }
-
                     var wordToSplit = word
                     while !wordToSplit.isEmpty {
                         let splitIndex = wordToSplit.index(wordToSplit.startIndex, offsetBy: min(maxLineLength, wordToSplit.count))
@@ -1798,7 +1855,6 @@ extension MainViewController {
                         wordToSplit = String(wordToSplit[splitIndex...])
                     }
                 } else {
-                    // The word fits on the line.
                     if currentLine.isEmpty {
                         currentLine = word
                     } else if currentLine.count + word.count + 1 <= maxLineLength {
