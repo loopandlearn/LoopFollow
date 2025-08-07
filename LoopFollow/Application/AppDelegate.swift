@@ -2,6 +2,7 @@
 // AppDelegate.swift
 // Created by Jon Fawcett.
 
+import AVFoundation
 import CoreData
 import EventKit
 import UIKit
@@ -39,6 +40,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
 
         _ = BLEManager.shared
+
+        // Start volume button monitoring
+        VolumeButtonHandler.shared.startMonitoring()
 
         return true
     }
@@ -135,6 +139,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         } else {
             return .all
         }
+    }
+
+    // MARK: - App Lifecycle
+
+    func applicationWillResignActive(_: UIApplication) {
+        // Stop volume button monitoring when app goes to background
+        VolumeButtonHandler.shared.stopMonitoring()
+    }
+
+    func applicationDidBecomeActive(_: UIApplication) {
+        // Restart volume button monitoring when app comes to foreground
+        VolumeButtonHandler.shared.startMonitoring()
     }
 }
 

@@ -293,6 +293,9 @@ extension Storage {
                 $0.ignoreZeroBG = $1
             }
 
+            // 10. Volume button silence (new feature, defaults to true)
+            // No migration needed as it defaults to true in the struct
+
             // finally persist the whole struct
             Storage.shared.alarmConfiguration.value = cfg
         }
