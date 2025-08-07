@@ -297,7 +297,7 @@ struct RemoteSettingsView: View {
                 Spacer()
                 TextFieldWithToolBar(
                     quantity: $viewModel.maxBolus,
-                    maxLength: 4,
+                    maxLength: 5,
                     unit: HKUnit.internationalUnit(),
                     allowDecimalSeparator: true,
                     minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0),

@@ -38,8 +38,8 @@ struct LoopAPNSBolusView: View {
                             label: "Insulin Amount",
                             quantity: $insulinAmount,
                             unit: .internationalUnit(),
-                            maxLength: 4,
-                            minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05),
+                            maxLength: 5,
+                            minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.025),
                             maxValue: Storage.shared.maxBolus.value,
                             isFocused: $insulinFieldIsFocused,
                             onValidationError: { message in
