@@ -4,7 +4,7 @@
 
 import Foundation
 
-enum TRCCommandType: String {
+enum TRCCommandType: String, Encodable {
     case bolus
     case tempTarget = "temp_target"
     case cancelTempTarget = "cancel_temp_target"
