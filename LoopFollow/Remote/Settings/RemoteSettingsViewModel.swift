@@ -30,6 +30,12 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var isShowingLoopAPNSScanner: Bool = false
     @Published var loopAPNSErrorMessage: String?
 
+    // MARK: - QR Code Sharing Properties
+
+    @Published var isShowingQRCodeScanner: Bool = false
+    @Published var isShowingQRCodeDisplay: Bool = false
+    @Published var qrCodeErrorMessage: String?
+
     // MARK: - Computed property for Loop APNS Setup validation
 
     var loopAPNSSetup: Bool {
@@ -164,5 +170,53 @@ class RemoteSettingsViewModel: ObservableObject {
             }
             self.isShowingLoopAPNSScanner = false
         }
+    }
+
+    // MARK: - QR Code Sharing Methods
+
+    func handleRemoteCommandQRCodeScanResult(_ result: Result<String, Error>) {
+        DispatchQueue.main.async {
+            switch result {
+            case let .success(jsonString):
+                if let settings = RemoteCommandSettings.decodeFromJSON(jsonString) {
+                    if settings.isValid() {
+                        settings.applyToStorage()
+                        // Update the view model properties to reflect the new settings
+                        self.updateViewModelFromStorage()
+                        LogManager.shared.log(category: .remote, message: "Remote command settings imported from QR code")
+                    } else {
+                        self.qrCodeErrorMessage = "Invalid remote command settings in QR code"
+                    }
+                } else {
+                    self.qrCodeErrorMessage = "Failed to decode remote command settings from QR code"
+                }
+            case let .failure(error):
+                self.qrCodeErrorMessage = "Scanning failed: \(error.localizedDescription)"
+            }
+            self.isShowingQRCodeScanner = false
+        }
+    }
+
+    private func updateViewModelFromStorage() {
+        let storage = Storage.shared
+        remoteType = storage.remoteType.value
+        user = storage.user.value
+        sharedSecret = storage.sharedSecret.value
+        apnsKey = storage.apnsKey.value
+        keyId = storage.keyId.value
+        maxBolus = storage.maxBolus.value
+        maxCarbs = storage.maxCarbs.value
+        maxProtein = storage.maxProtein.value
+        maxFat = storage.maxFat.value
+        mealWithBolus = storage.mealWithBolus.value
+        mealWithFatProtein = storage.mealWithFatProtein.value
+        loopDeveloperTeamId = storage.teamId.value ?? ""
+        loopAPNSQrCodeURL = storage.loopAPNSQrCodeURL.value
+        productionEnvironment = storage.productionEnvironment.value
+    }
+
+    func generateQRCodeForCurrentSettings() -> String? {
+        let settings = RemoteCommandSettings.fromCurrentStorage()
+        return settings.encodeToJSON()
     }
 }
