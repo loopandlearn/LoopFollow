@@ -140,18 +140,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return .all
         }
     }
-
-    // MARK: - App Lifecycle
-
-    func applicationWillResignActive(_: UIApplication) {
-        // Stop volume button monitoring when app goes to background
-        VolumeButtonHandler.shared.stopMonitoring()
-    }
-
-    func applicationDidBecomeActive(_: UIApplication) {
-        // Restart volume button monitoring when app comes to foreground
-        VolumeButtonHandler.shared.startMonitoring()
-    }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {

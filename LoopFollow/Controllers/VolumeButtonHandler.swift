@@ -10,7 +10,7 @@ class VolumeButtonHandler: NSObject {
     static let shared = VolumeButtonHandler()
 
     // Volume button snoozer activation delay in seconds
-    private let volumeButtonActivationDelay: TimeInterval = 0.9
+    private let volumeButtonActivationDelay: TimeInterval = 1.0
 
     // Improved volume button detection parameters
     private let volumeButtonPressThreshold: Float = 0.02 // Minimum volume change to consider a button press
