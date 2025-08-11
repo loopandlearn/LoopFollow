@@ -139,6 +139,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return .all
         }
     }
+
+    // MARK: - App Lifecycle
+
+    func applicationWillResignActive(_: UIApplication) {
+        // Note: Volume button monitoring may continue in background due to audio background mode
+        // This allows users to snooze alarms even when the app is not in foreground
+        VolumeButtonHandler.shared.stopMonitoring()
+    }
+
+    func applicationDidBecomeActive(_: UIApplication) {
+        // Restart volume button monitoring when app comes to foreground
+        VolumeButtonHandler.shared.startMonitoring()
+    }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {

@@ -10,7 +10,7 @@ class VolumeButtonHandler: NSObject {
     static let shared = VolumeButtonHandler()
 
     // Volume button snoozer activation delay in seconds
-    private let volumeButtonActivationDelay: TimeInterval = 1.0
+    private let volumeButtonActivationDelay: TimeInterval = 0.9
 
     // Improved volume button detection parameters
     private let volumeButtonPressThreshold: Float = 0.02 // Minimum volume change to consider a button press
@@ -25,6 +25,7 @@ class VolumeButtonHandler: NSObject {
     private var hasReceivedFirstVolumeAfterAlarm: Bool = false
     private var lastVolumeButtonPressTime: Date?
     private var consecutiveVolumeChanges: Int = 0
+    private var isAlarmSystemChangingVolume: Bool = false
 
     // Improved button press detection
     private var recentVolumeChanges: [(volume: Float, timestamp: Date)] = []
@@ -102,22 +103,36 @@ class VolumeButtonHandler: NSObject {
 
         // Only respond to significant volume changes (likely from hardware buttons)
         if volumeDifference > volumeButtonPressThreshold {
+            LogManager.shared.log(category: .alarm, message: "Significant volume change detected: \(volumeDifference) (threshold: \(volumeButtonPressThreshold))")
+
+            // Check if this volume change is likely from the alarm system
+            if let startTime = alarmStartTime {
+                let timeSinceAlarmStart = now.timeIntervalSince(startTime)
+
+                // If the alarm just started and this is a volume change in the expected direction (increase),
+                // it's likely from the alarm system setting the volume
+                if timeSinceAlarmStart < 2.0, currentVolume > lastVolume {
+                    // Additional check: if this volume change matches the expected pattern from alarm system
+                    // (typically a small increase to ensure alarm is audible)
+                    if volumeDifference <= 0.15, timeSinceAlarmStart < 1.5 {
+                        LogManager.shared.log(category: .alarm, message: "Ignoring volume change likely from alarm system: \(lastVolume) -> \(currentVolume) (alarm started \(timeSinceAlarmStart)s ago)")
+                        lastVolume = currentVolume
+                        return
+                    }
+                }
+            }
+
             // Record this volume change for pattern analysis
             recordVolumeChange(currentVolume: currentVolume, timestamp: now)
 
             // Additional check: ensure we're not just getting the initial volume reading
             if lastVolume > 0 {
-                // Check if an alarm has been playing for at least the activation delay
+                // Check if there's an active alarm
                 if let startTime = alarmStartTime {
                     let timeSinceAlarmStart = now.timeIntervalSince(startTime)
-                    if timeSinceAlarmStart > volumeButtonActivationDelay {
-                        // Mark that we've received the first volume reading after alarm start
-                        if !hasReceivedFirstVolumeAfterAlarm {
-                            hasReceivedFirstVolumeAfterAlarm = true
-                            LogManager.shared.log(category: .alarm, message: "First volume reading after alarm start - ignoring")
-                            return
-                        }
+                    LogManager.shared.log(category: .alarm, message: "Alarm active for \(timeSinceAlarmStart)s, activation delay: \(volumeButtonActivationDelay)s")
 
+                    if timeSinceAlarmStart > volumeButtonActivationDelay {
                         // Check if we've pressed volume buttons recently (cooldown)
                         if let lastPress = lastVolumeButtonPressTime {
                             let timeSinceLastPress = now.timeIntervalSince(lastPress)
@@ -176,21 +191,22 @@ class VolumeButtonHandler: NSObject {
         // Criteria for identifying a volume button press:
 
         // 1. Volume change should be significant but not too large (typical button press range)
-        let isReasonableChange = volumeDifference >= 0.02 && volumeDifference <= 0.15
+        // Make this more strict to avoid system volume changes
+        let isReasonableChange = volumeDifference >= 0.03 && volumeDifference <= 0.12
 
         // 2. Should be a discrete change (not part of a continuous adjustment)
         let isDiscreteChange = recentVolumeChanges.count <= 2
 
         // 3. Timing should be consistent with button press patterns
         let hasConsistentTiming = volumeChangePattern.isEmpty ||
-            volumeChangePattern.last! >= 0.1 // At least 100ms between changes
+            volumeChangePattern.last! >= 0.15 // At least 150ms between changes (increased from 100ms)
 
         // 4. Should not be part of a rapid sequence (which might indicate slider usage)
         let isNotRapidSequence = recentVolumeChanges.count < 3 ||
             (recentVolumeChanges.count >= 3 &&
                 recentVolumeChanges.suffix(3).map { $0.timestamp.timeIntervalSinceReferenceDate }.enumerated().dropFirst().allSatisfy { index, timestamp in
                     let previousTimestamp = recentVolumeChanges.suffix(3).map { $0.timestamp.timeIntervalSinceReferenceDate }[index - 1]
-                    return timestamp - previousTimestamp > 0.05 // At least 50ms between rapid changes
+                    return timestamp - previousTimestamp > 0.08 // At least 80ms between rapid changes (increased from 50ms)
                 })
 
         let isButtonPress = isReasonableChange && isDiscreteChange && hasConsistentTiming && isNotRapidSequence
@@ -201,7 +217,10 @@ class VolumeButtonHandler: NSObject {
     }
 
     private func handleVolumeButtonPress() {
-        LogManager.shared.log(category: .alarm, message: "handleVolumeButtonPress called")
+        LogManager.shared.log(category: .alarm, message: "=== handleVolumeButtonPress called ===")
+        LogManager.shared.log(category: .alarm, message: "Current time: \(Date())")
+        LogManager.shared.log(category: .alarm, message: "Alarm start time: \(alarmStartTime?.description ?? "nil")")
+        LogManager.shared.log(category: .alarm, message: "AlarmSound.isPlaying: \(AlarmSound.isPlaying)")
 
         // Check if volume button silencing is enabled
         guard Storage.shared.alarmConfiguration.value.enableVolumeButtonSilence else {
@@ -295,6 +314,9 @@ class VolumeButtonHandler: NSObject {
 
                 // Start the volume monitoring timer now that the alarm is active
                 self.startVolumeMonitoringTimer()
+
+                // Mark that we're ready to receive volume button presses
+                self.hasReceivedFirstVolumeAfterAlarm = true
             }
         }
     }
