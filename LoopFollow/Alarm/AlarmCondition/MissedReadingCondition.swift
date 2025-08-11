@@ -9,7 +9,7 @@ struct MissedReadingCondition: AlarmCondition {
     static let type: AlarmType = .missedReading
     init() {}
 
-    func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now : Date) -> Bool {
         // ────────────────────────────────
         // 0. sanity checks
         // ────────────────────────────────
@@ -18,7 +18,7 @@ struct MissedReadingCondition: AlarmCondition {
         // Skip if we have *no* readings
         guard let last = data.bgReadings.last else { return false }
 
-        let secondsSinceLast = Date().timeIntervalSince(last.date)
+        let secondsSinceLast = now.timeIntervalSince(last.date)
         return secondsSinceLast >= thresholdMinutes * 60
     }
 }
