@@ -70,6 +70,21 @@ class VolumeButtonHandler: NSObject {
                 object: nil
             )
 
+            // Listen for app state changes to handle background/foreground transitions
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(appDidEnterBackground),
+                name: UIApplication.didEnterBackgroundNotification,
+                object: nil
+            )
+
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(appWillEnterForeground),
+                name: UIApplication.willEnterForegroundNotification,
+                object: nil
+            )
+
             LogManager.shared.log(category: .alarm, message: "Volume button monitoring started (waiting for alarm)")
         } catch {
             LogManager.shared.log(category: .alarm, message: "Failed to start volume monitoring: \(error)")
@@ -87,6 +102,8 @@ class VolumeButtonHandler: NSObject {
         // Remove notification observers
         NotificationCenter.default.removeObserver(self, name: .alarmStarted, object: nil)
         NotificationCenter.default.removeObserver(self, name: .alarmStopped, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
 
         LogManager.shared.log(category: .alarm, message: "Volume button monitoring stopped")
     }
@@ -339,6 +356,30 @@ class VolumeButtonHandler: NSObject {
         LogManager.shared.log(category: .alarm, message: "Alarm stopped - volume button silencing disabled")
     }
 
+    // MARK: - App State Change Handlers
+
+    @objc private func appDidEnterBackground() {
+        let backgroundType = Storage.shared.backgroundRefreshType.value
+        let volumeButtonEnabled = Storage.shared.alarmConfiguration.value.enableVolumeButtonSilence
+
+        if backgroundType.isBluetooth || backgroundType == .silentTune, volumeButtonEnabled {
+            let method = backgroundType == .silentTune ? "Silent Tune" : "Bluetooth"
+            LogManager.shared.log(category: .alarm, message: "App entered background with \(method) refresh and volume button snoozing enabled - maintaining volume monitoring for alarms")
+            // Keep volume monitoring active for Bluetooth/Silent Tune background refresh when volume button snoozing is enabled
+            // This allows volume button snoozing to work in the background
+        } else {
+            LogManager.shared.log(category: .alarm, message: "App entered background - volume monitoring may be limited or disabled")
+        }
+    }
+
+    @objc private func appWillEnterForeground() {
+        LogManager.shared.log(category: .alarm, message: "App will enter foreground - ensuring volume monitoring is active")
+        // Ensure volume monitoring is active when coming to foreground
+        if isMonitoring, volumeMonitoringTimer == nil {
+            startVolumeMonitoringTimer()
+        }
+    }
+
     // MARK: - Timer Management
 
     private func startVolumeMonitoringTimer() {
@@ -348,9 +389,17 @@ class VolumeButtonHandler: NSObject {
             return
         }
 
+        // Use a more background-compatible timer approach
         volumeMonitoringTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
             self.checkVolumeChange()
         }
+
+        // Ensure the timer works in background by adding it to the main run loop
+        // Use .common mode for better background compatibility
+        RunLoop.main.add(volumeMonitoringTimer!, forMode: .common)
+
+        // Also add to default mode as backup
+        RunLoop.main.add(volumeMonitoringTimer!, forMode: .default)
 
         LogManager.shared.log(category: .alarm, message: "Volume monitoring timer started")
     }

@@ -143,13 +143,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - App Lifecycle
 
     func applicationWillResignActive(_: UIApplication) {
-        // Note: Volume button monitoring may continue in background due to audio background mode
-        // This allows users to snooze alarms even when the app is not in foreground
-        VolumeButtonHandler.shared.stopMonitoring()
+        // Check if we should keep volume button monitoring active for Bluetooth background refresh
+        let backgroundType = Storage.shared.backgroundRefreshType.value
+        let volumeButtonEnabled = Storage.shared.alarmConfiguration.value.enableVolumeButtonSilence
+
+        if backgroundType.isBluetooth || backgroundType == .silentTune, volumeButtonEnabled {
+            // Keep volume button monitoring active when using Bluetooth/Silent Tune AND volume button snoozing is enabled
+            let method = backgroundType == .silentTune ? "Silent Tune" : "Bluetooth"
+            LogManager.shared.log(category: .alarm, message: "App going to background with \(method) refresh and volume button snoozing enabled - keeping volume button monitoring active")
+        } else {
+            // Stop volume button monitoring for other background refresh types or when volume button snoozing is disabled
+            LogManager.shared.log(category: .alarm, message: "App going to background - stopping volume button monitoring")
+            VolumeButtonHandler.shared.stopMonitoring()
+        }
     }
 
     func applicationDidBecomeActive(_: UIApplication) {
-        // Restart volume button monitoring when app comes to foreground
+        // Always restart volume button monitoring when app comes to foreground
+        LogManager.shared.log(category: .alarm, message: "App becoming active - starting volume button monitoring")
         VolumeButtonHandler.shared.startMonitoring()
     }
 }

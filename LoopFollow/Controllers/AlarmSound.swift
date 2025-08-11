@@ -134,9 +134,6 @@ class AlarmSound {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer!.delegate = audioPlayerDelegate
 
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playback)))
-            try AVAudioSession.sharedInstance().setActive(true)
-
             audioPlayer!.numberOfLoops = repeating ? -1 : 0
 
             // Store existing volume
@@ -177,12 +174,11 @@ class AlarmSound {
             return
         }
 
+        enableAudio()
+
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer!.delegate = audioPlayerDelegate
-
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playback)))
-            try AVAudioSession.sharedInstance().setActive(true)
 
             // Play endless loops
             audioPlayer!.numberOfLoops = 2
@@ -230,7 +226,8 @@ class AlarmSound {
 
     fileprivate static func enableAudio() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: .mixWithOthers)
+            // Use playback category with options that work well in background and with Bluetooth
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers, .allowBluetooth])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             LogManager.shared.log(category: .alarm, message: "Enable audio error: \(error)")
