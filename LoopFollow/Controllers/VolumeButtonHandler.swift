@@ -48,11 +48,6 @@ class VolumeButtonHandler: NSObject {
 
             LogManager.shared.log(category: .alarm, message: "Initial volume: \(lastVolume)")
 
-            // Start monitoring volume changes with a timer
-            volumeMonitoringTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-                self.checkVolumeChange()
-            }
-
             // Test volume monitoring after 2 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 let currentVol = AVAudioSession.sharedInstance().outputVolume
@@ -74,7 +69,7 @@ class VolumeButtonHandler: NSObject {
                 object: nil
             )
 
-            LogManager.shared.log(category: .alarm, message: "Volume button monitoring started")
+            LogManager.shared.log(category: .alarm, message: "Volume button monitoring started (waiting for alarm)")
         } catch {
             LogManager.shared.log(category: .alarm, message: "Failed to start volume monitoring: \(error)")
         }
@@ -84,8 +79,7 @@ class VolumeButtonHandler: NSObject {
         guard isMonitoring else { return }
 
         isMonitoring = false
-        volumeMonitoringTimer?.invalidate()
-        volumeMonitoringTimer = nil
+        stopVolumeMonitoringTimer()
         volumeChangeTimer?.invalidate()
         volumeChangeTimer = nil
 
@@ -293,12 +287,14 @@ class VolumeButtonHandler: NSObject {
 
         LogManager.shared.log(category: .alarm, message: "Alarm started - volume button silencing enabled after \(volumeButtonActivationDelay) seconds")
 
-        // Ignore volume changes for the first activation delay seconds after alarm starts
-        // This prevents false triggers from the alarm itself changing the volume
+        // Start volume monitoring after the activation delay
         DispatchQueue.main.asyncAfter(deadline: .now() + volumeButtonActivationDelay) {
             if let startTime = self.alarmStartTime {
                 let timeSince = Date().timeIntervalSince(startTime)
                 LogManager.shared.log(category: .alarm, message: "Alarm has been playing for \(timeSince)s - volume button silencing now active")
+
+                // Start the volume monitoring timer now that the alarm is active
+                self.startVolumeMonitoringTimer()
             }
         }
     }
@@ -310,12 +306,37 @@ class VolumeButtonHandler: NSObject {
         volumeChangeTimer?.invalidate()
         volumeChangeTimer = nil
 
+        // Stop the volume monitoring timer since no alarm is active
+        stopVolumeMonitoringTimer()
+
         // Reset improved button press detection
         recentVolumeChanges.removeAll()
         lastSignificantVolumeChange = nil
         volumeChangePattern.removeAll()
 
         LogManager.shared.log(category: .alarm, message: "Alarm stopped - volume button silencing disabled")
+    }
+
+    // MARK: - Timer Management
+
+    private func startVolumeMonitoringTimer() {
+        // Only start if not already running
+        guard volumeMonitoringTimer == nil else {
+            LogManager.shared.log(category: .alarm, message: "Volume monitoring timer already running")
+            return
+        }
+
+        volumeMonitoringTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            self.checkVolumeChange()
+        }
+
+        LogManager.shared.log(category: .alarm, message: "Volume monitoring timer started")
+    }
+
+    private func stopVolumeMonitoringTimer() {
+        volumeMonitoringTimer?.invalidate()
+        volumeMonitoringTimer = nil
+        LogManager.shared.log(category: .alarm, message: "Volume monitoring timer stopped")
     }
 
     // MARK: - Testing
