@@ -25,24 +25,7 @@ struct LoopAPNSCarbsView: View {
 
     // Computed property to check if TOTP should be blocked
     private var isTOTPBlocked: Bool {
-        guard Storage.shared.loopAPNSTOTPUsed.value else { return false }
-
-        // If we have a timestamp, check if 30 seconds have passed
-        if let lastUsed = Storage.shared.loopAPNSTOTPLastUsed.value {
-            let timeSinceLastUsed = Date().timeIntervalSince1970 - lastUsed
-            if timeSinceLastUsed >= 30 {
-                // 30 seconds have passed, unblock
-                Storage.shared.loopAPNSTOTPUsed.value = false
-                Storage.shared.loopAPNSTOTPLastUsed.value = nil
-                return false
-            }
-        } else {
-            // No timestamp but flag is set - this shouldn't happen, but let's clean it up
-            Storage.shared.loopAPNSTOTPUsed.value = false
-            return false
-        }
-
-        return true
+        TOTPService.shared.isTOTPBlocked(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
     }
 
     enum AlertType {
@@ -278,24 +261,13 @@ struct LoopAPNSCarbsView: View {
                    newOtpTimeRemaining > currentOtpTimeRemaining
                 {
                     // New TOTP code generated, reset the usage flag
-                    Storage.shared.loopAPNSTOTPUsed.value = false
-                    Storage.shared.loopAPNSTOTPLastUsed.value = nil
+                    TOTPService.shared.resetTOTPUsage()
                 }
 
                 // Also check if we're at the very beginning of a new period (when time remaining is close to 30)
                 if newOtpTimeRemaining >= 29 {
                     // We're at the start of a new TOTP period, reset the usage flag
-                    Storage.shared.loopAPNSTOTPUsed.value = false
-                    Storage.shared.loopAPNSTOTPLastUsed.value = nil
-                }
-
-                // Additional safety check: if we have a timestamp and 30+ seconds have passed, unblock
-                if let lastUsed = Storage.shared.loopAPNSTOTPLastUsed.value {
-                    let timeSinceLastUsed = now - lastUsed
-                    if timeSinceLastUsed >= 30 {
-                        Storage.shared.loopAPNSTOTPUsed.value = false
-                        Storage.shared.loopAPNSTOTPLastUsed.value = nil
-                    }
+                    TOTPService.shared.resetTOTPUsage()
                 }
 
                 otpTimeRemaining = newOtpTimeRemaining
@@ -419,9 +391,8 @@ struct LoopAPNSCarbsView: View {
                 DispatchQueue.main.async {
                     isLoading = false
                     if success {
-                        // Mark TOTP code as used with timestamp
-                        Storage.shared.loopAPNSTOTPUsed.value = true
-                        Storage.shared.loopAPNSTOTPLastUsed.value = Date().timeIntervalSince1970
+                        // Mark TOTP code as used
+                        TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
                         let timeFormatter = DateFormatter()
                         timeFormatter.timeStyle = .short
                         alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"

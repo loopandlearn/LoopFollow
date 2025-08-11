@@ -168,11 +168,6 @@ class Storage {
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 
-    // MARK: - Loop APNS TOTP Usage Tracking
-
-    var loopAPNSTOTPUsed = StorageValue<Bool>(key: "loopAPNSTOTPUsed", defaultValue: false)
-    var loopAPNSTOTPLastUsed = StorageValue<TimeInterval?>(key: "loopAPNSTOTPLastUsed", defaultValue: nil)
-
     static let shared = Storage()
     private init() {}
 }
