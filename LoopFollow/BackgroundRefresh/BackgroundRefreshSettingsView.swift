@@ -75,6 +75,24 @@ struct BackgroundRefreshSettingsView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            
+            // Warning about volume button snoozing with Bluetooth
+            if viewModel.backgroundRefreshType.isBluetooth {
+                Section {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("Volume Button Snoozing Limitation")
+                            .font(.headline)
+                            .foregroundColor(.orange)
+                    }
+                    
+                    Text("⚠️ When using Bluetooth devices for background refresh, volume button snoozing will NOT work while the app is in the background. You can still snooze alarms by opening the app or using push notifications.")
+                        .font(.footnote)
+                        .foregroundColor(.orange)
+                        .padding(.top, 4)
+                }
+            }
         }
     }
 
