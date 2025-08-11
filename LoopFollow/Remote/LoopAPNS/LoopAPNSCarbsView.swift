@@ -23,6 +23,28 @@ struct LoopAPNSCarbsView: View {
     @FocusState private var carbsFieldIsFocused: Bool
     @FocusState private var absorptionFieldIsFocused: Bool
 
+    // Computed property to check if TOTP should be blocked
+    private var isTOTPBlocked: Bool {
+        guard Storage.shared.loopAPNSTOTPUsed.value else { return false }
+
+        // If we have a timestamp, check if 30 seconds have passed
+        if let lastUsed = Storage.shared.loopAPNSTOTPLastUsed.value {
+            let timeSinceLastUsed = Date().timeIntervalSince1970 - lastUsed
+            if timeSinceLastUsed >= 30 {
+                // 30 seconds have passed, unblock
+                Storage.shared.loopAPNSTOTPUsed.value = false
+                Storage.shared.loopAPNSTOTPLastUsed.value = nil
+                return false
+            }
+        } else {
+            // No timestamp but flag is set - this shouldn't happen, but let's clean it up
+            Storage.shared.loopAPNSTOTPUsed.value = false
+            return false
+        }
+
+        return true
+    }
+
     enum AlertType {
         case success
         case error
@@ -169,8 +191,28 @@ struct LoopAPNSCarbsView: View {
                                 Text("Send Carbs")
                             }
                         }
-                        .disabled(carbsAmount.doubleValue(for: .gram()) <= 0 || isLoading)
+                        .disabled(carbsAmount.doubleValue(for: .gram()) <= 0 || isLoading || isTOTPBlocked)
                         .frame(maxWidth: .infinity)
+                    }
+
+                    // TOTP Blocking Warning Section
+                    if isTOTPBlocked {
+                        Section {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.orange)
+                                    Text("TOTP Code Already Used")
+                                        .font(.headline)
+                                        .foregroundColor(.orange)
+                                }
+                                Text("This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .padding(.vertical, 4)
+                        }
                     }
 
                     Section(header: Text("Security")) {
@@ -222,10 +264,41 @@ struct LoopAPNSCarbsView: View {
                 }
                 // Reset timer state so it shows '-' until first tick
                 otpTimeRemaining = nil
+                // Don't reset TOTP usage flag here - let the timer handle it
+
+                // Validate TOTP state when view appears
+                _ = isTOTPBlocked
             }
             .onReceive(otpTimer) { _ in
                 let now = Date().timeIntervalSince1970
-                otpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
+                let newOtpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
+
+                // Check if we've moved to a new TOTP period (when time remaining increases)
+                if let currentOtpTimeRemaining = otpTimeRemaining,
+                   newOtpTimeRemaining > currentOtpTimeRemaining
+                {
+                    // New TOTP code generated, reset the usage flag
+                    Storage.shared.loopAPNSTOTPUsed.value = false
+                    Storage.shared.loopAPNSTOTPLastUsed.value = nil
+                }
+
+                // Also check if we're at the very beginning of a new period (when time remaining is close to 30)
+                if newOtpTimeRemaining >= 29 {
+                    // We're at the start of a new TOTP period, reset the usage flag
+                    Storage.shared.loopAPNSTOTPUsed.value = false
+                    Storage.shared.loopAPNSTOTPLastUsed.value = nil
+                }
+
+                // Additional safety check: if we have a timestamp and 30+ seconds have passed, unblock
+                if let lastUsed = Storage.shared.loopAPNSTOTPLastUsed.value {
+                    let timeSinceLastUsed = now - lastUsed
+                    if timeSinceLastUsed >= 30 {
+                        Storage.shared.loopAPNSTOTPUsed.value = false
+                        Storage.shared.loopAPNSTOTPLastUsed.value = nil
+                    }
+                }
+
+                otpTimeRemaining = newOtpTimeRemaining
             }
             .alert(isPresented: $showAlert) {
                 switch alertType {
@@ -346,6 +419,9 @@ struct LoopAPNSCarbsView: View {
                 DispatchQueue.main.async {
                     isLoading = false
                     if success {
+                        // Mark TOTP code as used with timestamp
+                        Storage.shared.loopAPNSTOTPUsed.value = true
+                        Storage.shared.loopAPNSTOTPLastUsed.value = Date().timeIntervalSince1970
                         let timeFormatter = DateFormatter()
                         timeFormatter.timeStyle = .short
                         alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"
