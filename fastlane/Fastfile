@@ -1,260 +1,190 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
+# frozen_string_literal: true
 
 default_platform(:ios)
 
-TEAMID = ENV["TEAMID"]
-GH_PAT = ENV["GH_PAT"]
-GITHUB_WORKSPACE = ENV["GITHUB_WORKSPACE"]
-GITHUB_REPOSITORY_OWNER = ENV["GITHUB_REPOSITORY_OWNER"]
-FASTLANE_KEY_ID = ENV["FASTLANE_KEY_ID"]
-FASTLANE_ISSUER_ID = ENV["FASTLANE_ISSUER_ID"]
-FASTLANE_KEY = ENV["FASTLANE_KEY"]
-DEVICE_NAME = ENV["DEVICE_NAME"]
-DEVICE_ID = ENV["DEVICE_ID"]
-ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "120"
-
 platform :ios do
-  desc "Build Loop Follow"
-  lane :build_LoopFollow do
-    setup_ci if ENV['CI']
-    
-    update_project_team(
-      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
-      teamid: "#{TEAMID}"
-    )
+  ############################################################
+  # Felles helpers
+  ############################################################
 
-    api_key = app_store_connect_api_key(
-      key_id: "#{FASTLANE_KEY_ID}",
-      issuer_id: "#{FASTLANE_ISSUER_ID}",
-      key_content: "#{FASTLANE_KEY}"
-    )
+  before_all do
+    require 'base64'
+    issuer_id = ENV['FASTLANE_ISSUER_ID']
+    key_id    = ENV['FASTLANE_KEY_ID']
+    key_b64   = ENV['FASTLANE_KEY']
 
-    previous_build_number = latest_testflight_build_number(
-      app_identifier: "com.#{TEAMID}.LoopFollow",
-      api_key: api_key,
-    )
+    UI.user_error!("FASTLANE_ISSUER_ID is missing") if issuer_id.to_s.strip.empty?
+    UI.user_error!("FASTLANE_KEY_ID is missing")     if key_id.to_s.strip.empty?
+    UI.user_error!("FASTLANE_KEY (base64) is missing") if key_b64.to_s.strip.empty?
 
-    current_build_number = previous_build_number + 1
-
-    increment_build_number(
-      xcodeproj: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
-      build_number: current_build_number
-    )      
-    
-    match(
-      type: "appstore",
-      git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
-      app_identifier: [
-        "com.#{TEAMID}.LoopFollow"
-      ]
-    )
-
-    previous_build_number = latest_testflight_build_number(
-      app_identifier: "com.#{TEAMID}.LoopFollow",
-      api_key: api_key,
-    )
-
-    current_build_number = previous_build_number + 1
-
-    increment_build_number(
-      xcodeproj: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
-      build_number: current_build_number
-    )
-    
-    mapping = Actions.lane_context[
-      SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING
-    ]
-
-    update_code_signing_settings(
-      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
-      profile_name: mapping["com.#{TEAMID}.LoopFollow"],
-      code_sign_identity: "iPhone Distribution",
-      targets: ["LoopFollow"]
-    )
-
-    gym(
-      export_method: "app-store",
-      scheme: "LoopFollow",
-      output_name: "LoopFollow.ipa",
-      configuration: "Release",
-      destination: 'generic/platform=iOS',
-      buildlog_path: 'buildlog'
-    )
-
-    copy_artifacts(
-      target_path: "artifacts",
-      artifacts: ["*.mobileprovision", "*.ipa", "*.dSYM.zip"]
-    )
-  end
-
-  desc "Push to TestFlight"
-  lane :release do
-    api_key = app_store_connect_api_key(
-      key_id: "#{FASTLANE_KEY_ID}",
-      issuer_id: "#{FASTLANE_ISSUER_ID}",
-      key_content: "#{FASTLANE_KEY}"
-    )
-    
-    upload_to_testflight(
-      api_key: api_key,
-      skip_submission: false,
-      ipa: "LoopFollow.ipa",
-      skip_waiting_for_build_processing: true,
-    )
-  end
-
-  desc "Provision Identifiers and Certificates"
-  lane :identifiers do
-    setup_ci if ENV['CI']
-    ENV["MATCH_READONLY"] = false.to_s
-    
+    decoded = Base64.decode64(key_b64)
     app_store_connect_api_key(
-      key_id: "#{FASTLANE_KEY_ID}",
-      issuer_id: "#{FASTLANE_ISSUER_ID}",
-      key_content: "#{FASTLANE_KEY}"
+      key_id: key_id,
+      issuer_id: issuer_id,
+      key_content: decoded,
+      duration: 1200,
+      in_house: false
     )
-
-    def configure_bundle_id(name, identifier, capabilities)
-      bundle_id = Spaceship::ConnectAPI::BundleId.find(identifier) || Spaceship::ConnectAPI::BundleId.create(
-        name:       name,
-        identifier: identifier,
-        platform:   "IOS"
-      )
-      existing = bundle_id.get_capabilities.map(&:capability_type)
-      capabilities.reject { |c| existing.include?(c) }.each do |cap|
-        bundle_id.create_capability(cap)
-      end
-    end
-
-    configure_bundle_id("LoopFollow", "com.#{TEAMID}.LoopFollow", [
-    ])
-    
   end
 
-  desc "Provision Certificates"
+  private_lane :ensure_app_identifiers! do
+    ids = ENV['APP_IDENTIFIERS'].to_s.split(',').map(&:strip).reject(&:empty?)
+    if ids.empty?
+      UI.user_error!("APP_IDENTIFIERS is empty. Upstream step should auto-detect, or set a repo variable 'APP_IDENTIFIERS' with a comma-separated list of bundle identifiers.")
+    end
+    UI.message("Using APP_IDENTIFIERS: #{ids.join(', ')}")
+    ids
+  end
+
+  private_lane :setup_ci_keychain do
+    require 'securerandom'
+    keychain_name = ENV['MATCH_KEYCHAIN_NAME'] || "loopfollow_ci"
+    keychain_password = ENV['MATCH_KEYCHAIN_PASSWORD'] || ENV['CI_KEYCHAIN_PASSWORD'] || SecureRandom.hex(16)
+    UI.message("Using keychain '#{keychain_name}' for signing")
+    create_keychain(
+      name: keychain_name,
+      password: keychain_password,
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      lock_when_sleeps: false
+    )
+    ENV['CI_KEYCHAIN_PASSWORD'] = keychain_password
+  end
+
+  ############################################################
+  # Lanes
+  ############################################################
+
+  desc "Bootstrap certificates & provisioning profiles (App Store) via match"
   lane :certs do
-    setup_ci if ENV['CI']
-    ENV["MATCH_READONLY"] = false.to_s
-    
-    app_store_connect_api_key(
-      key_id: "#{FASTLANE_KEY_ID}",
-      issuer_id: "#{FASTLANE_ISSUER_ID}",
-      key_content: "#{FASTLANE_KEY}"
-    )
-    
+    app_ids = ensure_app_identifiers!
+    setup_ci_keychain
     match(
       type: "appstore",
-      force: false,
-      verbose: true,
-      git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
-      app_identifier: [
-        "com.#{TEAMID}.LoopFollow",
-      ]
+      app_identifier: app_ids,
+      readonly: false,
+      git_url: ENV['MATCH_REPO'],
+      git_basic_authorization: ENV['MATCH_GIT_BASIC_AUTHORIZATION'],
+      storage_mode: "git",
+      git_branch: ENV['MATCH_BRANCH'] || "main",
+      clone_branch_directly: true,
+      shallow_clone: true,
+      username: ENV['MATCH_USERNAME'],
+      team_id: ENV['TEAMID'],
+      keychain_name: ENV['MATCH_KEYCHAIN_NAME'] || "loopfollow_ci",
+      keychain_password: ENV['MATCH_KEYCHAIN_PASSWORD'] || ENV['CI_KEYCHAIN_PASSWORD'],
+      verbose: false
     )
   end
 
-  desc "Validate Secrets"
-  lane :validate_secrets do
-    setup_ci if ENV['CI']
-    ENV["MATCH_READONLY"] = true.to_s
-
-    app_store_connect_api_key(
-      key_id: "#{FASTLANE_KEY_ID}",
-      issuer_id: "#{FASTLANE_ISSUER_ID}",
-      key_content: "#{FASTLANE_KEY}"
-    )
-
-    def find_bundle_id(identifier)
-      bundle_id = Spaceship::ConnectAPI::BundleId.find(identifier)
-    end
-
-    find_bundle_id("com.#{TEAMID}.loopkit.LoopFollow")
-
-    match(
-      type: "appstore",
-      git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
-      app_identifier: [],
-    )
-  end
-
-  desc "Nuke Certs"
-  lane :nuke_certs do
-    setup_ci if ENV['CI']
-    ENV["MATCH_READONLY"] = false.to_s
-    
-    app_store_connect_api_key(
-      key_id: "#{FASTLANE_KEY_ID}",
-      issuer_id: "#{FASTLANE_ISSUER_ID}",
-      key_content: "#{FASTLANE_KEY}"
-    )
-    
-    match_nuke(
-      type: "appstore",
-      team_id: "#{TEAMID}",
-      skip_confirmation: true,
-      git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}")
-    )
-  end
-  
-  desc "Check Certificates and Trigger Workflow for Expired or Missing Certificates"
+  desc "Re-run match to renew/repair certs/profiles if needed"
   lane :check_and_renew_certificates do
-    setup_ci if ENV['CI']
-    ENV["MATCH_READONLY"] = false.to_s
-  
-    # Authenticate using App Store Connect API Key
-    api_key = app_store_connect_api_key(
-      key_id: ENV["FASTLANE_KEY_ID"],
-      issuer_id: ENV["FASTLANE_ISSUER_ID"],
-      key_content: ENV["FASTLANE_KEY"] # Ensure valid key content
+    app_ids = ensure_app_identifiers!
+    setup_ci_keychain
+    match(
+      type: "appstore",
+      app_identifier: app_ids,
+      readonly: false,
+      force_for_new_devices: false,
+      git_url: ENV['MATCH_REPO'],
+      git_basic_authorization: ENV['MATCH_GIT_BASIC_AUTHORIZATION'],
+      storage_mode: "git",
+      git_branch: ENV['MATCH_BRANCH'] || "main",
+      clone_branch_directly: true,
+      shallow_clone: true,
+      username: ENV['MATCH_USERNAME'],
+      team_id: ENV['TEAMID'],
+      keychain_name: ENV['MATCH_KEYCHAIN_NAME'] || "loopfollow_ci",
+      keychain_password: ENV['MATCH_KEYCHAIN_PASSWORD'] || ENV['CI_KEYCHAIN_PASSWORD']
     )
-  
-    # Initialize flag to track if renewal of certificates is needed
-    new_certificate_needed = false
-  
-    # Fetch all certificates
-    certificates = Spaceship::ConnectAPI::Certificate.all
-  
-    # Filter for Distribution Certificates
-    distribution_certs = certificates.select { |cert| cert.certificate_type == "DISTRIBUTION" }
-  
-    # Handle case where no distribution certificates are found
-    if distribution_certs.empty?
-      puts "No Distribution certificates found! Triggering action to create certificate."
-      new_certificate_needed = true
-    else
-      # Check for expiration
-      distribution_certs.each do |cert|
-        expiration_date = Time.parse(cert.expiration_date)
-  
-        puts "Current Distribution Certificate: #{cert.id}, Expiration date: #{expiration_date}"
-  
-        if expiration_date < Time.now
-          puts "Distribution Certificate #{cert.id} is expired! Triggering action to renew certificate."
-          new_certificate_needed = true
-        else
-          puts "Distribution certificate #{cert.id} is valid. No action required."
-        end
-      end
+  end
+
+  desc "Build LoopFollow (Release)"
+  lane :build_LoopFollow do
+    app_ids = ensure_app_identifiers!
+    setup_ci_keychain
+
+    # Hent profiler/certs i readonly for selve builden
+    match(
+      type: "appstore",
+      app_identifier: app_ids,
+      readonly: true,
+      git_url: ENV['MATCH_REPO'],
+      git_basic_authorization: ENV['MATCH_GIT_BASIC_AUTHORIZATION'],
+      storage_mode: "git",
+      git_branch: ENV['MATCH_BRANCH'] || "main",
+      clone_branch_directly: true,
+      shallow_clone: true,
+      username: ENV['MATCH_USERNAME'],
+      team_id: ENV['TEAMID'],
+      keychain_name: ENV['MATCH_KEYCHAIN_NAME'] || "loopfollow_ci",
+      keychain_password: ENV['MATCH_KEYCHAIN_PASSWORD'] || ENV['CI_KEYCHAIN_PASSWORD']
+    )
+
+    build_num = (ENV['GITHUB_RUN_NUMBER'] || Time.now.strftime("%Y%m%d%H%M")).to_s
+
+    ipa_path = build_app(
+      workspace: "LoopFollow.xcworkspace",
+      scheme: "LoopFollow",
+      configuration: "Release",
+      clean: true,
+      output_directory: "build",
+      output_name: "LoopFollow",
+      build_number: build_num,
+      export_method: "app-store",
+      include_symbols: true,
+      include_bitcode: false,
+      xcargs: "DEVELOPMENT_TEAM=#{ENV['TEAMID']}"
+    )
+    sh("ls -lah #{ipa_path}") # synlig i loggen
+    ipa_path
+  end
+
+  desc "Build + upload til intern TestFlight"
+  lane :release do
+    ipa = build_LoopFollow
+    upload_to_testflight(
+      ipa: ipa,
+      distribute_external: false,
+      skip_submission: true,
+      skip_waiting_for_build_processing: false,
+      changelog: ENV['TESTFLIGHT_CHANGELOG'] || "Automated internal build"
+    )
+  end
+
+  desc "Promoter til ekstern TestFlight (krever metadata)"
+  lane :release_external do
+    required = %w[
+      BETA_APP_DESCRIPTION
+      BETA_APP_FEEDBACK_EMAIL
+      BETA_CONTACT_FIRST_NAME
+      BETA_CONTACT_LAST_NAME
+      BETA_CONTACT_EMAIL
+      BETA_CONTACT_PHONE
+    ]
+    missing = required.select { |k| ENV[k].to_s.strip.empty? }
+    if missing.any?
+      UI.user_error!("Missing required env for external TestFlight: #{missing.join(', ')}. Add them as repository variables/secrets and re-run.")
     end
-  
-    # Write result to new_certificate_needed.txt
-    file_path = File.expand_path('new_certificate_needed.txt')
-    File.write(file_path, new_certificate_needed ? 'true' : 'false')  
-  
-    # Log the absolute path and contents of the new_certificate_needed.txt file
-    puts ""
-    puts "Absolute path of new_certificate_needed.txt: #{file_path}"
-    new_certificate_needed_content = File.read(file_path)
-    puts "Certificate creation or renewal needed: #{new_certificate_needed_content}"
+
+    ipa = build_LoopFollow
+    upload_to_testflight(
+      ipa: ipa,
+      distribute_external: true,
+      groups: (ENV['TESTFLIGHT_EXTERNAL_GROUPS'] || "").split(",").map(&:strip).reject(&:empty?),
+      beta_app_description: ENV['BETA_APP_DESCRIPTION'],
+      beta_app_feedback_email: ENV['BETA_APP_FEEDBACK_EMAIL'],
+      submit_for_beta_review: true,
+      demo_account_required: false,
+      beta_app_review_info: {
+        contact_first_name: ENV['BETA_CONTACT_FIRST_NAME'],
+        contact_last_name:  ENV['BETA_CONTACT_LAST_NAME'],
+        contact_email:      ENV['BETA_CONTACT_EMAIL'],
+        contact_phone:      ENV['BETA_CONTACT_PHONE'],
+        notes:              ENV['BETA_REVIEW_NOTES'] || ""
+      },
+      changelog: ENV['TESTFLIGHT_CHANGELOG'] || "Automated external build"
+    )
   end
 end
