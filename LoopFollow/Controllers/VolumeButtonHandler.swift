@@ -88,6 +88,8 @@ class VolumeButtonHandler: NSObject {
             LogManager.shared.log(category: .alarm, message: "Volume button monitoring started (waiting for alarm)")
         } catch {
             LogManager.shared.log(category: .alarm, message: "Failed to start volume monitoring: \(error)")
+            // Reset state on failure
+            isMonitoring = false
         }
     }
 
