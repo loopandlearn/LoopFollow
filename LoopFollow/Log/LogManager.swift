@@ -28,6 +28,7 @@ class LogManager {
         case alarm = "Alarm"
         case calendar = "Calendar"
         case deviceStatus = "Device Status"
+        case remote = "Remote"
     }
 
     init() {

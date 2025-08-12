@@ -30,6 +30,20 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var isShowingLoopAPNSScanner: Bool = false
     @Published var loopAPNSErrorMessage: String?
 
+    // MARK: - QR Code Sharing Properties
+
+    @Published var isShowingQRCodeScanner: Bool = false
+    @Published var isShowingQRCodeDisplay: Bool = false
+    @Published var qrCodeErrorMessage: String?
+
+    // MARK: - URL/Token Validation Properties
+
+    @Published var pendingSettings: RemoteCommandSettings?
+    @Published var showURLTokenValidation: Bool = false
+    @Published var validationMessage: String = ""
+    @Published var shouldPromptForURL: Bool = false
+    @Published var shouldPromptForToken: Bool = false
+
     // MARK: - Computed property for Loop APNS Setup validation
 
     var loopAPNSSetup: Bool {
@@ -158,11 +172,85 @@ class RemoteSettingsViewModel: ObservableObject {
             switch result {
             case let .success(code):
                 self.loopAPNSQrCodeURL = code
+                // Set device type and remote type for Loop APNS
+                Storage.shared.device.value = "Loop"
+                Storage.shared.remoteType.value = .loopAPNS
+                // Update view model properties
+                self.remoteType = .loopAPNS
+                self.isLoopDevice = true
+                self.isTrioDevice = false
                 LogManager.shared.log(category: .apns, message: "Loop APNS QR code scanned: \(code)")
             case let .failure(error):
                 self.loopAPNSErrorMessage = "Scanning failed: \(error.localizedDescription)"
             }
             self.isShowingLoopAPNSScanner = false
         }
+    }
+
+    // MARK: - QR Code Sharing Methods
+
+    func handleRemoteCommandQRCodeScanResult(_ result: Result<String, Error>) {
+        DispatchQueue.main.async {
+            switch result {
+            case let .success(jsonString):
+                if let settings = RemoteCommandSettings.decodeFromJSON(jsonString) {
+                    if settings.isValid() {
+                        // Check URL and token compatibility
+                        let validation = settings.validateCompatibilityWithCurrentStorage()
+
+                        if validation.isCompatible {
+                            // No conflicts, apply settings directly
+                            settings.applyToStorage()
+                            self.updateViewModelFromStorage()
+                            LogManager.shared.log(category: .remote, message: "Remote command settings imported from QR code")
+                        } else {
+                            // Conflicts detected, show validation view
+                            self.pendingSettings = settings
+                            self.validationMessage = validation.message
+                            self.shouldPromptForURL = validation.shouldPromptForURL
+                            self.shouldPromptForToken = validation.shouldPromptForToken
+                            self.showURLTokenValidation = true
+                        }
+                    } else {
+                        self.qrCodeErrorMessage = "Invalid remote command settings in QR code"
+                    }
+                } else {
+                    self.qrCodeErrorMessage = "Failed to decode remote command settings from QR code"
+                }
+            case let .failure(error):
+                self.qrCodeErrorMessage = "Scanning failed: \(error.localizedDescription)"
+            }
+            self.isShowingQRCodeScanner = false
+        }
+    }
+
+    func generateQRCodeForCurrentSettings() -> String? {
+        let settings = RemoteCommandSettings.fromCurrentStorage()
+        return settings.encodeToJSON()
+    }
+
+    // MARK: - Public Methods for View Access
+
+    /// Updates the view model properties from storage (accessible from view)
+    func updateViewModelFromStorage() {
+        let storage = Storage.shared
+        remoteType = storage.remoteType.value
+        user = storage.user.value
+        sharedSecret = storage.sharedSecret.value
+        apnsKey = storage.apnsKey.value
+        keyId = storage.keyId.value
+        maxBolus = storage.maxBolus.value
+        maxCarbs = storage.maxCarbs.value
+        maxProtein = storage.maxProtein.value
+        maxFat = storage.maxFat.value
+        mealWithBolus = storage.mealWithBolus.value
+        mealWithFatProtein = storage.mealWithFatProtein.value
+        loopDeveloperTeamId = storage.teamId.value ?? ""
+        loopAPNSQrCodeURL = storage.loopAPNSQrCodeURL.value
+        productionEnvironment = storage.productionEnvironment.value
+
+        // Update device-related properties
+        isTrioDevice = (storage.device.value == "Trio")
+        isLoopDevice = (storage.device.value == "Loop")
     }
 }

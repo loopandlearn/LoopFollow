@@ -67,6 +67,12 @@ struct SettingsMenuView: View {
                         {
                             settingsPath.value.append(Sheet.remote)
                         }
+                    } else {
+                        NavigationRow(title: "Import Settings",
+                                      icon: "square.and.arrow.down")
+                        {
+                            settingsPath.value.append(Sheet.remote)
+                        }
                     }
                 }
 
