@@ -36,6 +36,14 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var isShowingQRCodeDisplay: Bool = false
     @Published var qrCodeErrorMessage: String?
 
+    // MARK: - URL/Token Validation Properties
+
+    @Published var pendingSettings: RemoteCommandSettings?
+    @Published var showURLTokenValidation: Bool = false
+    @Published var validationMessage: String = ""
+    @Published var shouldPromptForURL: Bool = false
+    @Published var shouldPromptForToken: Bool = false
+
     // MARK: - Computed property for Loop APNS Setup validation
 
     var loopAPNSSetup: Bool {
@@ -180,10 +188,22 @@ class RemoteSettingsViewModel: ObservableObject {
             case let .success(jsonString):
                 if let settings = RemoteCommandSettings.decodeFromJSON(jsonString) {
                     if settings.isValid() {
-                        settings.applyToStorage()
-                        // Update the view model properties to reflect the new settings
-                        self.updateViewModelFromStorage()
-                        LogManager.shared.log(category: .remote, message: "Remote command settings imported from QR code")
+                        // Check URL and token compatibility
+                        let validation = settings.validateCompatibilityWithCurrentStorage()
+
+                        if validation.isCompatible {
+                            // No conflicts, apply settings directly
+                            settings.applyToStorage()
+                            self.updateViewModelFromStorage()
+                            LogManager.shared.log(category: .remote, message: "Remote command settings imported from QR code")
+                        } else {
+                            // Conflicts detected, show validation view
+                            self.pendingSettings = settings
+                            self.validationMessage = validation.message
+                            self.shouldPromptForURL = validation.shouldPromptForURL
+                            self.shouldPromptForToken = validation.shouldPromptForToken
+                            self.showURLTokenValidation = true
+                        }
                     } else {
                         self.qrCodeErrorMessage = "Invalid remote command settings in QR code"
                     }
@@ -197,7 +217,15 @@ class RemoteSettingsViewModel: ObservableObject {
         }
     }
 
-    private func updateViewModelFromStorage() {
+    func generateQRCodeForCurrentSettings() -> String? {
+        let settings = RemoteCommandSettings.fromCurrentStorage()
+        return settings.encodeToJSON()
+    }
+
+    // MARK: - Public Methods for View Access
+
+    /// Updates the view model properties from storage (accessible from view)
+    func updateViewModelFromStorage() {
         let storage = Storage.shared
         remoteType = storage.remoteType.value
         user = storage.user.value
@@ -213,10 +241,5 @@ class RemoteSettingsViewModel: ObservableObject {
         loopDeveloperTeamId = storage.teamId.value ?? ""
         loopAPNSQrCodeURL = storage.loopAPNSQrCodeURL.value
         productionEnvironment = storage.productionEnvironment.value
-    }
-
-    func generateQRCodeForCurrentSettings() -> String? {
-        let settings = RemoteCommandSettings.fromCurrentStorage()
-        return settings.encodeToJSON()
     }
 }

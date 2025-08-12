@@ -20,6 +20,8 @@ struct RemoteCommandSettings: Codable {
     let mealWithFatProtein: Bool
     let productionEnvironment: Bool
     let loopAPNSQrCodeURL: String
+    let url: String
+    let token: String
     let version: String
 
     init(
@@ -36,7 +38,9 @@ struct RemoteCommandSettings: Codable {
         mealWithBolus: Bool,
         mealWithFatProtein: Bool,
         productionEnvironment: Bool,
-        loopAPNSQrCodeURL: String
+        loopAPNSQrCodeURL: String,
+        url: String,
+        token: String
     ) {
         self.remoteType = remoteType
         self.user = user
@@ -52,6 +56,8 @@ struct RemoteCommandSettings: Codable {
         self.mealWithFatProtein = mealWithFatProtein
         self.productionEnvironment = productionEnvironment
         self.loopAPNSQrCodeURL = loopAPNSQrCodeURL
+        self.url = url
+        self.token = token
         version = "1.0"
     }
 
@@ -73,7 +79,9 @@ struct RemoteCommandSettings: Codable {
             mealWithBolus: storage.mealWithBolus.value,
             mealWithFatProtein: storage.mealWithFatProtein.value,
             productionEnvironment: storage.productionEnvironment.value,
-            loopAPNSQrCodeURL: storage.loopAPNSQrCodeURL.value
+            loopAPNSQrCodeURL: storage.loopAPNSQrCodeURL.value,
+            url: storage.url.value,
+            token: storage.token.value
         )
     }
 
@@ -95,6 +103,8 @@ struct RemoteCommandSettings: Codable {
         storage.mealWithFatProtein.value = mealWithFatProtein
         storage.productionEnvironment.value = productionEnvironment
         storage.loopAPNSQrCodeURL.value = loopAPNSQrCodeURL
+        storage.url.value = url
+        storage.token.value = token
     }
 
     /// Encodes the settings to a JSON string for QR code generation
@@ -132,5 +142,61 @@ struct RemoteCommandSettings: Codable {
         case .loopAPNS:
             return !keyId.isEmpty && !apnsKey.isEmpty && teamId != nil && !loopAPNSQrCodeURL.isEmpty
         }
+    }
+
+    /// Validates URL and token compatibility with current storage
+    /// Returns a tuple with (isCompatible, shouldPromptForURL, shouldPromptForToken, message)
+    func validateCompatibilityWithCurrentStorage() -> (isCompatible: Bool, shouldPromptForURL: Bool, shouldPromptForToken: Bool, message: String) {
+        let storage = Storage.shared
+        let currentURL = storage.url.value
+        let currentToken = storage.token.value
+
+        var shouldPromptForURL = false
+        var shouldPromptForToken = false
+        var message = ""
+
+        // Check if current user has URL set
+        let hasCurrentURL = !currentURL.isEmpty
+        let hasCurrentToken = !currentToken.isEmpty
+
+        // Check if scanned settings have URL/token
+        let hasScannedURL = !url.isEmpty
+        let hasScannedToken = !token.isEmpty
+
+        // If current user doesn't have URL but scanned settings do, prompt to set it
+        if !hasCurrentURL, hasScannedURL {
+            shouldPromptForURL = true
+            message = "The scanned settings include a Nightscout URL. Would you like to set this as your Nightscout address?"
+        }
+
+        // If current user doesn't have token but scanned settings do, prompt to set it
+        if !hasCurrentToken, hasScannedToken {
+            shouldPromptForToken = true
+            if !message.isEmpty {
+                message += "\n\nThe scanned settings also include a token. Would you like to set this as your access token?"
+            } else {
+                message = "The scanned settings include a token. Would you like to set this as your access token?"
+            }
+        }
+
+        // If both have URLs but they don't match, show warning
+        if hasCurrentURL, hasScannedURL, currentURL != url {
+            shouldPromptForURL = true
+            message = "The scanned Nightscout URL (\(url)) doesn't match your current Nightscout address (\(currentURL)). Would you like to change your Nightscout address to match the scanned settings?"
+        }
+
+        // If both have tokens but they don't match, show warning
+        if hasCurrentToken, hasScannedToken, currentToken != token {
+            shouldPromptForToken = true
+            if !message.isEmpty {
+                message += "\n\nThe scanned token doesn't match your current access token. Would you like to update your token?"
+            } else {
+                message = "The scanned token doesn't match your current access token. Would you like to update your token?"
+            }
+        }
+
+        let isCompatible = !shouldPromptForURL && !shouldPromptForToken
+
+        return (isCompatible, shouldPromptForURL, shouldPromptForToken, message)
     }
 }

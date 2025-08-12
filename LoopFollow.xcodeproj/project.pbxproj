@@ -16,6 +16,7 @@
 		656F8C102E49F36F0008DC1D /* QRCodeDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */; };
 		656F8C122E49F3780008DC1D /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */; };
 		656F8C142E49F3D20008DC1D /* RemoteCommandSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */; };
+		65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
 		DD0650A92DCA8A10004D3B41 /* AlarmBGSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */; };
@@ -402,6 +403,7 @@
 		656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeDisplayView.swift; sourceTree = "<group>"; };
 		656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommandSettings.swift; sourceTree = "<group>"; };
+		65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTokenValidationView.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
 		DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireCondition.swift; sourceTree = "<group>"; };
@@ -916,6 +918,7 @@
 		DD4878062C7B2E9E0048F05C /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */,
 				656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */,
 				DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */,
 				DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */,
@@ -2053,6 +2056,7 @@
 				DD0650EF2DCE96FF004D3B41 /* HighBGCondition.swift in Sources */,
 				DDC6CA472DD8D9010060EE25 /* PumpChangeAlarmEditor.swift in Sources */,
 				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
+				65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */,

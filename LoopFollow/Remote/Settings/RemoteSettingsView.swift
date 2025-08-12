@@ -12,6 +12,7 @@ struct RemoteSettingsView: View {
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
     @State private var alertMessage: String? = nil
+
     @State private var otpTimeRemaining: Int? = nil
     private let otpPeriod: TimeInterval = 30
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -19,6 +20,8 @@ struct RemoteSettingsView: View {
     enum AlertType {
         case validation
         case qrCodeError
+        case urlTokenValidation
+        case urlTokenUpdate
     }
 
     init(viewModel: RemoteSettingsViewModel) {
@@ -275,6 +278,22 @@ struct RemoteSettingsView: View {
                     message: Text(alertMessage ?? "An error occurred while processing the QR code."),
                     dismissButton: .default(Text("OK"))
                 )
+            case .urlTokenValidation:
+                return Alert(
+                    title: Text("URL/Token Validation"),
+                    message: Text(viewModel.validationMessage),
+                    dismissButton: .default(Text("OK")) {
+                        viewModel.showURLTokenValidation = false
+                    }
+                )
+            case .urlTokenUpdate:
+                return Alert(
+                    title: Text("URL/Token Update"),
+                    message: Text(viewModel.validationMessage),
+                    dismissButton: .default(Text("OK")) {
+                        viewModel.showURLTokenValidation = false
+                    }
+                )
             case .none:
                 return Alert(title: Text("Unknown Alert"))
             }
@@ -308,6 +327,27 @@ struct RemoteSettingsView: View {
                 })
             }
         }
+        .sheet(isPresented: $viewModel.showURLTokenValidation) {
+            NavigationView {
+                URLTokenValidationView(
+                    settings: viewModel.pendingSettings!,
+                    shouldPromptForURL: viewModel.shouldPromptForURL,
+                    shouldPromptForToken: viewModel.shouldPromptForToken,
+                    message: viewModel.validationMessage,
+                    onConfirm: { confirmedSettings in
+                        confirmedSettings.applyToStorage()
+                        viewModel.updateViewModelFromStorage()
+                        viewModel.showURLTokenValidation = false
+                        viewModel.pendingSettings = nil
+                        LogManager.shared.log(category: .remote, message: "Remote command settings imported from QR code with URL/token updates")
+                    },
+                    onCancel: {
+                        viewModel.showURLTokenValidation = false
+                        viewModel.pendingSettings = nil
+                    }
+                )
+            }
+        }
         .onAppear {
             // Reset timer state so it shows '-' until first tick
             otpTimeRemaining = nil
@@ -323,6 +363,11 @@ struct RemoteSettingsView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     viewModel.qrCodeErrorMessage = nil
                 }
+            }
+        }
+        .onReceive(viewModel.$showURLTokenValidation) { showValidation in
+            if showValidation {
+                // The sheet will be shown automatically due to the binding
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
