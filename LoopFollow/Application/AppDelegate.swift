@@ -40,8 +40,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         _ = BLEManager.shared
 
-        // Start volume button monitoring
-        VolumeButtonHandler.shared.startMonitoring()
+        // Ensure VolumeButtonHandler is initialized so it can receive alarm notifications
+        _ = VolumeButtonHandler.shared
 
         return true
     }
@@ -139,7 +139,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return .all
         }
     }
-
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
