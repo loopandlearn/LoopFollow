@@ -71,9 +71,24 @@ class VolumeButtonHandler: NSObject {
     func startMonitoring() {
         guard !isMonitoring else { return }
 
+        // Try to get volume without activating audio session first
+        let audioSession = AVAudioSession.sharedInstance()
+        let currentVolume = audioSession.outputVolume
+
+        // If we can get volume without activation, use that approach
+        if currentVolume > 0 {
+            lastVolume = currentVolume
+            isMonitoring = true
+            startVolumeMonitoringTimer()
+            return
+        }
+
+        // Only activate audio session if we can't get volume passively
         do {
-            try AVAudioSession.sharedInstance().setActive(true)
-            lastVolume = AVAudioSession.sharedInstance().outputVolume
+            try audioSession.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+
+            lastVolume = audioSession.outputVolume
             isMonitoring = true
             startVolumeMonitoringTimer()
         } catch {
@@ -89,6 +104,15 @@ class VolumeButtonHandler: NSObject {
         stopVolumeMonitoringTimer()
         volumeChangeTimer?.invalidate()
         volumeChangeTimer = nil
+
+        // Only deactivate audio session if we activated it
+        if AVAudioSession.sharedInstance().isOtherAudioPlaying == false {
+            do {
+                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            } catch {
+                LogManager.shared.log(category: .alarm, message: "Failed to deactivate audio session: \(error)")
+            }
+        }
     }
 
     private func checkVolumeChange() {
