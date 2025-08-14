@@ -187,7 +187,7 @@ class VolumeButtonHandler: NSObject {
     }
 
     private func handleVolumeButtonPress() {
-        guard Storage.shared.alarmConfiguration.value.enableVolumeButtonSilence else { return }
+        guard Storage.shared.alarmConfiguration.value.enableVolumeButtonSnooze else { return }
         guard AlarmSound.isPlaying else { return }
         guard volumeChangeTimer == nil else { return }
 
@@ -239,7 +239,7 @@ class VolumeButtonHandler: NSObject {
 
     @objc private func appDidEnterBackground() {
         let backgroundType = Storage.shared.backgroundRefreshType.value
-        let volumeButtonEnabled = Storage.shared.alarmConfiguration.value.enableVolumeButtonSilence
+        let volumeButtonEnabled = Storage.shared.alarmConfiguration.value.enableVolumeButtonSnooze
 
         if backgroundType.isBluetooth || backgroundType == .silentTune, volumeButtonEnabled {
             // Keep volume monitoring active for background refresh

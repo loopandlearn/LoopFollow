@@ -140,10 +140,7 @@ struct AlarmSettingsView: View {
                     .datePickerStyle(.compact)
                 }
 
-                Section(
-                    header: Text("Alarm Settings"),
-                    footer: Text("When enabled, pressing the volume buttons will silence active alarms and snooze them.")
-                ) {
+                Section(header: Text("Alarm Settings")) {
                     Toggle(
                         "Override System Volume",
                         isOn: Binding(
@@ -189,10 +186,10 @@ struct AlarmSettingsView: View {
                     )
 
                     Toggle(
-                        "Volume Buttons Silence Alarms",
+                        "Volume Buttons Snooze Alarms",
                         isOn: Binding(
-                            get: { cfgStore.value.enableVolumeButtonSilence },
-                            set: { cfgStore.value.enableVolumeButtonSilence = $0 }
+                            get: { cfgStore.value.enableVolumeButtonSnooze },
+                            set: { cfgStore.value.enableVolumeButtonSnooze = $0 }
                         )
                     )
                 }

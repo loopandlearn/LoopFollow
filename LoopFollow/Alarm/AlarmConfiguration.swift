@@ -19,7 +19,7 @@ struct AlarmConfiguration: Codable, Equatable {
     var audioDuringCalls: Bool
     var ignoreZeroBG: Bool
     var autoSnoozeCGMStart: Bool
-    var enableVolumeButtonSilence: Bool
+    var enableVolumeButtonSnooze: Bool
 
     static let `default` = AlarmConfiguration(
         muteUntil: nil,
@@ -30,6 +30,6 @@ struct AlarmConfiguration: Codable, Equatable {
         audioDuringCalls: true,
         ignoreZeroBG: true,
         autoSnoozeCGMStart: false,
-        enableVolumeButtonSilence: true
+        enableVolumeButtonSnooze: true
     )
 }
