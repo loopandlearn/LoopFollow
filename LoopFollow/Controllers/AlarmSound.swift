@@ -7,11 +7,6 @@ import Foundation
 import MediaPlayer
 import UIKit
 
-extension Notification.Name {
-    static let alarmStarted = Notification.Name("alarmStarted")
-    static let alarmStopped = Notification.Name("alarmStopped")
-}
-
 /*
  * Class that handles the playing and the volume of the alarm sound.
  */
@@ -83,9 +78,6 @@ class AlarmSound {
         audioPlayer = nil
 
         restoreSystemOutputVolume()
-
-        // Notify that alarm has stopped
-        NotificationCenter.default.post(name: .alarmStopped, object: nil)
     }
 
     static func playTest() {
@@ -127,12 +119,12 @@ class AlarmSound {
 
         enableAudio()
 
-        // Notify that alarm is starting
-        NotificationCenter.default.post(name: .alarmStarted, object: nil)
-
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer!.delegate = audioPlayerDelegate
+
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playback)))
+            try AVAudioSession.sharedInstance().setActive(true)
 
             audioPlayer!.numberOfLoops = repeating ? -1 : 0
 
@@ -155,14 +147,7 @@ class AlarmSound {
             }
 
             if Storage.shared.alarmConfiguration.value.overrideSystemOutputVolume {
-                let targetVolume = Storage.shared.alarmConfiguration.value.forcedOutputVolume
-                LogManager.shared.log(category: .alarm, message: "Setting system volume to \(targetVolume) (was \(AVAudioSession.sharedInstance().outputVolume))")
-
-                // Add a small delay to ensure the audio session is fully established
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    MPVolumeView.setVolume(targetVolume)
-                    LogManager.shared.log(category: .alarm, message: "System volume set to \(targetVolume)")
-                }
+                MPVolumeView.setVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
             }
         } catch {
             LogManager.shared.log(category: .alarm, message: "AlarmSound - unable to play sound; error: \(error)")
@@ -174,11 +159,12 @@ class AlarmSound {
             return
         }
 
-        enableAudio()
-
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer!.delegate = audioPlayerDelegate
+
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playback)))
+            try AVAudioSession.sharedInstance().setActive(true)
 
             // Play endless loops
             audioPlayer!.numberOfLoops = 2
@@ -226,8 +212,7 @@ class AlarmSound {
 
     fileprivate static func enableAudio() {
         do {
-            // Use playback category with options that work well in background and with Bluetooth
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers, .allowBluetooth])
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: .mixWithOthers)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             LogManager.shared.log(category: .alarm, message: "Enable audio error: \(error)")

@@ -3,6 +3,7 @@
 // Created by codebymini.
 
 import AVFoundation
+import Combine
 import Foundation
 import UIKit
 
@@ -20,99 +21,32 @@ class VolumeButtonHandler: NSObject {
     private var lastVolume: Float = 0.0
     private var isMonitoring = false
     private var volumeMonitoringTimer: Timer?
-    private var volumeChangeTimer: Timer?
     private var alarmStartTime: Date?
-    private var hasReceivedFirstVolumeAfterAlarm: Bool = false
     private var lastVolumeButtonPressTime: Date?
-    private var consecutiveVolumeChanges: Int = 0
-    private var isAlarmSystemChangingVolume: Bool = false
 
     // Button press detection
     private var recentVolumeChanges: [(volume: Float, timestamp: Date)] = []
     private var lastSignificantVolumeChange: Date?
     private var volumeChangePattern: [TimeInterval] = []
 
+    private var cancellables = Set<AnyCancellable>()
+    private var isAlarmActive = false
+
     override private init() {
         super.init()
 
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(alarmStarted),
-            name: .alarmStarted,
-            object: nil
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(alarmStopped),
-            name: .alarmStopped,
-            object: nil
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appDidEnterBackground),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appWillEnterForeground),
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil
-        )
-    }
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-
-    func startMonitoring() {
-        guard !isMonitoring else { return }
-
-        // Try to get volume without activating audio session first
-        let audioSession = AVAudioSession.sharedInstance()
-        let currentVolume = audioSession.outputVolume
-
-        // If we can get volume without activation, use that approach
-        if currentVolume > 0 {
-            lastVolume = currentVolume
-            isMonitoring = true
-            startVolumeMonitoringTimer()
-            return
-        }
-
-        // Only activate audio session if we can't get volume passively
-        do {
-            try audioSession.setCategory(.playback, mode: .default, options: [.mixWithOthers])
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-
-            lastVolume = audioSession.outputVolume
-            isMonitoring = true
-            startVolumeMonitoringTimer()
-        } catch {
-            LogManager.shared.log(category: .alarm, message: "Failed to start volume monitoring: \(error)")
-            isMonitoring = false
-        }
-    }
-
-    func stopMonitoring() {
-        guard isMonitoring else { return }
-
-        isMonitoring = false
-        stopVolumeMonitoringTimer()
-        volumeChangeTimer?.invalidate()
-        volumeChangeTimer = nil
-
-        // Only deactivate audio session if we activated it
-        if AVAudioSession.sharedInstance().isOtherAudioPlaying == false {
-            do {
-                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-            } catch {
-                LogManager.shared.log(category: .alarm, message: "Failed to deactivate audio session: \(error)")
+        Observable.shared.currentAlarm.$value
+            .sink { [weak self] alarmID in
+                guard let self = self else { return }
+                let nowActive = alarmID != nil
+                if !self.isAlarmActive && nowActive {
+                    self.alarmStarted()
+                } else if self.isAlarmActive && !nowActive {
+                    self.alarmStopped()
+                }
+                self.isAlarmActive = nowActive
             }
-        }
+            .store(in: &cancellables)
     }
 
     private func checkVolumeChange() {
@@ -187,48 +121,64 @@ class VolumeButtonHandler: NSObject {
     }
 
     private func handleVolumeButtonPress() {
-        guard Storage.shared.alarmConfiguration.value.enableVolumeButtonSnooze else { return }
-        guard AlarmSound.isPlaying else { return }
-        guard volumeChangeTimer == nil else { return }
-
-        silenceActiveAlarm()
+        snoozeActiveAlarm()
     }
 
-    private func silenceActiveAlarm() {
+    private func snoozeActiveAlarm() {
+        LogManager.shared.log(category: .volumeButtonSnooze, message: "Snoozing alarm")
+
         lastVolumeButtonPressTime = Date()
-        AlarmSound.stop()
         AlarmManager.shared.performSnooze()
 
-        if #available(iOS 10.0, *) {
-            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-            impactFeedback.impactOccurred()
-        }
+        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+        impactFeedback.impactOccurred()
     }
 
-    @objc private func alarmStarted() {
+    private func alarmStarted() {
+        guard Storage.shared.alarmConfiguration.value.enableVolumeButtonSnooze else { return }
+
+        LogManager.shared.log(category: .volumeButtonSnooze, message: "Alarm start detected")
         alarmStartTime = Date()
-        hasReceivedFirstVolumeAfterAlarm = false
-        consecutiveVolumeChanges = 0
 
         recentVolumeChanges.removeAll()
         lastSignificantVolumeChange = nil
         volumeChangePattern.removeAll()
 
         startMonitoring()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + volumeButtonActivationDelay) {
-            if let startTime = self.alarmStartTime {
-                self.hasReceivedFirstVolumeAfterAlarm = true
-            }
-        }
     }
 
-    @objc private func alarmStopped() {
+    func startMonitoring() {
+        guard !isMonitoring else { return }
+
+        let audioSession = AVAudioSession.sharedInstance()
+        let currentVolume = audioSession.outputVolume
+
+        if currentVolume > 0 {
+            lastVolume = currentVolume
+            isMonitoring = true
+            startVolumeMonitoringTimer()
+            return
+        }
+
+        LogManager.shared.log(category: .volumeButtonSnooze, message: "Did not get a valid volume, not monitoring")
+    }
+
+    private func startVolumeMonitoringTimer() {
+        guard volumeMonitoringTimer == nil else { return }
+
+        let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
+            self?.checkVolumeChange()
+        }
+
+        volumeMonitoringTimer = timer
+
+        RunLoop.main.add(timer, forMode: .common)
+    }
+
+    private func alarmStopped() {
+        LogManager.shared.log(category: .volumeButtonSnooze, message: "Alarm stop detected")
+
         alarmStartTime = nil
-        hasReceivedFirstVolumeAfterAlarm = false
-        consecutiveVolumeChanges = 0
-        volumeChangeTimer?.invalidate()
-        volumeChangeTimer = nil
 
         stopMonitoring()
 
@@ -237,38 +187,12 @@ class VolumeButtonHandler: NSObject {
         volumeChangePattern.removeAll()
     }
 
-    @objc private func appDidEnterBackground() {
-        let backgroundType = Storage.shared.backgroundRefreshType.value
-        let volumeButtonEnabled = Storage.shared.alarmConfiguration.value.enableVolumeButtonSnooze
+    func stopMonitoring() {
+        guard isMonitoring else { return }
 
-        if backgroundType.isBluetooth || backgroundType == .silentTune, volumeButtonEnabled {
-            // Keep volume monitoring active for background refresh
-        }
-    }
+        isMonitoring = false
 
-    @objc private func appWillEnterForeground() {
-        if let startTime = alarmStartTime, isMonitoring, volumeMonitoringTimer == nil {
-            startVolumeMonitoringTimer()
-        }
-    }
-
-    private func startVolumeMonitoringTimer() {
-        guard volumeMonitoringTimer == nil else { return }
-
-        volumeMonitoringTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            self.checkVolumeChange()
-        }
-
-        RunLoop.main.add(volumeMonitoringTimer!, forMode: .common)
-        RunLoop.main.add(volumeMonitoringTimer!, forMode: .default)
-    }
-
-    private func stopVolumeMonitoringTimer() {
         volumeMonitoringTimer?.invalidate()
         volumeMonitoringTimer = nil
-    }
-
-    func testSnoozeFunctionality() {
-        silenceActiveAlarm()
     }
 }
