@@ -79,7 +79,7 @@ class VolumeButtonHandler: NSObject {
                     }
 
                     if isLikelyVolumeButtonPress(volumeDifference: volumeDifference, timestamp: now) {
-                        handleVolumeButtonPress()
+                        snoozeActiveAlarm()
                     }
                 }
             }
@@ -118,10 +118,6 @@ class VolumeButtonHandler: NSObject {
                 })
 
         return isReasonableChange && isDiscreteChange && hasConsistentTiming && isNotRapidSequence
-    }
-
-    private func handleVolumeButtonPress() {
-        snoozeActiveAlarm()
     }
 
     private func snoozeActiveAlarm() {
