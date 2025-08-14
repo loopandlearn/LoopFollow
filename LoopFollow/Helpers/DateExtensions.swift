@@ -1,6 +1,5 @@
 // LoopFollow
 // DateExtensions.swift
-// Created by codebymini.
 
 import Foundation
 

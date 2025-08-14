@@ -1,6 +1,5 @@
 // LoopFollow
 // BackgroundRefreshType.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

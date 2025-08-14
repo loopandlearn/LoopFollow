@@ -1,6 +1,5 @@
 // LoopFollow
 // AppDelegate.swift
-// Created by Jon Fawcett.
 
 import CoreData
 import EventKit

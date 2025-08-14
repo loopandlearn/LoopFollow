@@ -1,6 +1,5 @@
 // LoopFollow
 // ContactColorOption.swift
-// Created by Jonas Björkert.
 
 import UIKit
 

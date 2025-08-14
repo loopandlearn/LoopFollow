@@ -1,6 +1,5 @@
 // LoopFollow
 // SettingsViewController.swift
-// Created by Jon Fawcett.
 
 import SwiftUI
 import UIKit

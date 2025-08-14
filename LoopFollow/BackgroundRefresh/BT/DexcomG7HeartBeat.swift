@@ -1,6 +1,5 @@
 // LoopFollow
 // DexcomG7HeartBeat.swift
-// Created by Jonas Björkert.
 
 // Denna behövs
 

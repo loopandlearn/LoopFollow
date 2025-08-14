@@ -1,6 +1,5 @@
 // LoopFollow
 // DataStructs.swift
-// Created by Jon Fawcett.
 
 import Foundation
 

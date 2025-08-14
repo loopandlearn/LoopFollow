@@ -1,6 +1,5 @@
 // LoopFollow
 // MealView.swift
-// Created by Jonas Björkert.
 
 import HealthKit
 import LocalAuthentication

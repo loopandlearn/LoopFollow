@@ -1,6 +1,5 @@
 // LoopFollow
 // OverridePresetsView.swift
-// Created by codebymini.
 
 import SwiftUI
 

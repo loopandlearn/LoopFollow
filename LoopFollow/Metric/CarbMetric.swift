@@ -1,6 +1,5 @@
 // LoopFollow
 // CarbMetric.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

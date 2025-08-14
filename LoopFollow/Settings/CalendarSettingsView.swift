@@ -1,6 +1,5 @@
 // LoopFollow
 // CalendarSettingsView.swift
-// Created by Jonas Björkert.
 
 import EventKit
 import SwiftUI

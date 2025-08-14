@@ -1,6 +1,5 @@
 // LoopFollow
 // BLEManager.swift
-// Created by Jonas Björkert.
 
 import Combine
 import CoreBluetooth

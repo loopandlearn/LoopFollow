@@ -1,6 +1,5 @@
 // LoopFollow
 // TextFieldWithToolBar.swift
-// Created by Jonas Björkert.
 
 import HealthKit
 import SwiftUI

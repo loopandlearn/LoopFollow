@@ -1,6 +1,5 @@
 // LoopFollow
 // CAge.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

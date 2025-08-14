@@ -1,6 +1,5 @@
 // LoopFollow
 // RecBolusAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // GlucoseValue.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

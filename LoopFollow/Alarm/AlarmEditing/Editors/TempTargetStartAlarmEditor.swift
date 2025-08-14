@@ -1,6 +1,5 @@
 // LoopFollow
 // TempTargetStartAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

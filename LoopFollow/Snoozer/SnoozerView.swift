@@ -1,6 +1,5 @@
 // LoopFollow
 // SnoozerView.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 
