@@ -1,6 +1,5 @@
 // LoopFollow
 // MissedReadingCondition.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

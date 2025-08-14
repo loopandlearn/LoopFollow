@@ -1,6 +1,5 @@
 // LoopFollow
 // PumpVolumeCondition.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

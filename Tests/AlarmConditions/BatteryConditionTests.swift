@@ -1,6 +1,5 @@
 // LoopFollow
 // BatteryConditionTests.swift
-// Created by Jonas Björkert.
 
 @testable import LoopFollow
 import Testing

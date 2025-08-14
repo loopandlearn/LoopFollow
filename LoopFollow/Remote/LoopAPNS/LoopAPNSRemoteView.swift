@@ -1,6 +1,5 @@
 // LoopFollow
 // LoopAPNSRemoteView.swift
-// Created by codebymini.
 
 import SwiftUI
 

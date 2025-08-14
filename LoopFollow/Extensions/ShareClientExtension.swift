@@ -1,6 +1,5 @@
 // LoopFollow
 // ShareClientExtension.swift
-// Created by Jose Paredes.
 
 import Foundation
 import ShareClient

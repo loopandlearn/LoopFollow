@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmConfiguration.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // UUID+Identifiable.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

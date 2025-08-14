@@ -1,6 +1,5 @@
 // LoopFollow
 // AppConstants.swift
-// Created by Jon Fawcett.
 
 import Foundation
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmType+canAcknowledge.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

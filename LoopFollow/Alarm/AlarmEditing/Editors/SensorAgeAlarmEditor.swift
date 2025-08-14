@@ -1,6 +1,5 @@
 // LoopFollow
 // SensorAgeAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // DeleteAlarmSection.swift
-// Created by Jonas Björkert.
 
 //
 //  DeleteAlarmSection.swift

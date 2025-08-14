@@ -1,6 +1,5 @@
 // LoopFollow
 // PushMessage.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

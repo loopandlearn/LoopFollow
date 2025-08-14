@@ -1,6 +1,5 @@
 // LoopFollow
 // Mobileprovision.swift
-// Created by Jon Fawcett.
 
 //
 //  MobileProvision.swift

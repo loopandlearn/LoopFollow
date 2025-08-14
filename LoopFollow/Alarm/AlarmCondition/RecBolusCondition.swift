@@ -1,6 +1,5 @@
 // LoopFollow
 // RecBolusCondition.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

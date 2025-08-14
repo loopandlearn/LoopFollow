@@ -1,6 +1,5 @@
 // LoopFollow
 // AdvancedSettingsViewModel.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // TaskScheduler.swift
-// Created by Jonas Björkert.
 
 import Foundation
 import UIKit

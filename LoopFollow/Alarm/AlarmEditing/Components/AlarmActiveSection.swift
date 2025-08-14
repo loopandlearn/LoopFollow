@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmActiveSection.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 
