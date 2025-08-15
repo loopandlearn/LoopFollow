@@ -1,6 +1,5 @@
 // LoopFollow
 // Graphs.swift
-// Created by Jon Fawcett.
 
 import Charts
 import Foundation

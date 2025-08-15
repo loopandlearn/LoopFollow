@@ -1,6 +1,5 @@
 // LoopFollow
 // SettingsStepperRow.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

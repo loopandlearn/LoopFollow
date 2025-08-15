@@ -1,6 +1,5 @@
 // LoopFollow
 // EKEventStore+Extensions.swift
-// Created by Jonas Björkert.
 
 import EventKit
 import Foundation

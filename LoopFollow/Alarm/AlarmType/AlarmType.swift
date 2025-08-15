@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmType.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

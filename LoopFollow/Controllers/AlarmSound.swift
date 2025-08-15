@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmSound.swift
-// Created by Jon Fawcett.
 
 import AVFoundation
 import Foundation

@@ -1,6 +1,5 @@
 // LoopFollow
 // Observable.swift
-// Created by Jonas Björkert.
 
 import Foundation
 import HealthKit
@@ -35,6 +34,8 @@ class Observable {
     var deviceBatteryLevel = ObservableValue<Double?>(default: nil)
 
     var settingsPath = ObservableValue<NavigationPath>(default: NavigationPath())
+
+    var lastSentTOTP = ObservableValue<String?>(default: nil)
 
     var loopFollowDeviceToken = ObservableValue<String>(default: "")
 

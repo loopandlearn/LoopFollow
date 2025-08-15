@@ -1,6 +1,5 @@
 // LoopFollow
 // DexcomHeartbeatBluetoothDevice.swift
-// Created by Jonas Björkert.
 
 import AVFoundation
 import CoreBluetooth

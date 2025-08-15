@@ -1,6 +1,5 @@
 // LoopFollow
 // NotLoopingAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

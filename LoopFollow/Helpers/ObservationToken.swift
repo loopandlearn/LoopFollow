@@ -1,6 +1,5 @@
 // LoopFollow
 // ObservationToken.swift
-// Created by Jon Fawcett.
 
 import Foundation
 

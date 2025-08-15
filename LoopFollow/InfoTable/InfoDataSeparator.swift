@@ -1,6 +1,5 @@
 // LoopFollow
 // InfoDataSeparator.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

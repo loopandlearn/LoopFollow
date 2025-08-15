@@ -1,6 +1,5 @@
 // LoopFollow
 // PumpChangeCondition.swift
-// Created by Jonas Björkert.
 
 //
 //  PumpChangeCondition.swift

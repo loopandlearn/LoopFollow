@@ -1,6 +1,5 @@
 // LoopFollow
 // PushNotificationManager.swift
-// Created by Jonas Björkert.
 
 import Foundation
 import HealthKit

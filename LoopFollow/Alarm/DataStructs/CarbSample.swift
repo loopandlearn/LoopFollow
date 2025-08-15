@@ -1,6 +1,5 @@
 // LoopFollow
 // CarbSample.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

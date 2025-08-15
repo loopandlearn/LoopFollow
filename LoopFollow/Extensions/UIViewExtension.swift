@@ -1,6 +1,5 @@
 // LoopFollow
 // UIViewExtension.swift
-// Created by Jose Paredes.
 
 import Foundation
 import UIKit

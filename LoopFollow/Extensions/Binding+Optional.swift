@@ -1,6 +1,5 @@
 // LoopFollow
 // Binding+Optional.swift
-// Created by Jonas Björkert.
 
 import Foundation
 import SwiftUI

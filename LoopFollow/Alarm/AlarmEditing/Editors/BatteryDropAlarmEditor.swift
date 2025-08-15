@@ -1,6 +1,5 @@
 // LoopFollow
 // BatteryDropAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

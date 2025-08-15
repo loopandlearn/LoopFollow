@@ -1,6 +1,5 @@
 // LoopFollow
 // SecureMessenger.swift
-// Created by Jonas Björkert.
 
 import CryptoSwift
 import Foundation
