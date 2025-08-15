@@ -8,7 +8,7 @@ struct MissedReadingCondition: AlarmCondition {
     static let type: AlarmType = .missedReading
     init() {}
 
-    func evaluate(alarm: Alarm, data: AlarmData, now : Date) -> Bool {
+    func evaluate(alarm: Alarm, data: AlarmData, now: Date) -> Bool {
         // ────────────────────────────────
         // 0. sanity checks
         // ────────────────────────────────
