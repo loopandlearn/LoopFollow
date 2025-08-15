@@ -1,6 +1,5 @@
 // LoopFollow
 // SoundFile.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

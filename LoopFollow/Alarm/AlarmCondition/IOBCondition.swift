@@ -1,6 +1,5 @@
 // LoopFollow
 // IOBCondition.swift
-// Created by Jonas Björkert.
 
 //
 //  IOBCondition.swift

@@ -1,6 +1,5 @@
 // LoopFollow
 // ContactSettingsViewModel.swift
-// Created by Jonas Björkert.
 
 import Combine
 import Foundation

@@ -1,6 +1,5 @@
 // LoopFollow
 // SAge.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // OverridePresetData.swift
-// Created by codebymini.
 
 import Foundation
 

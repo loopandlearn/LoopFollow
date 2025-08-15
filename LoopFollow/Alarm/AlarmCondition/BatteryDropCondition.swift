@@ -1,6 +1,5 @@
 // LoopFollow
 // BatteryDropCondition.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

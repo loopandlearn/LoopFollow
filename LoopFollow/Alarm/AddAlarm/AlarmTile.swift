@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmTile.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

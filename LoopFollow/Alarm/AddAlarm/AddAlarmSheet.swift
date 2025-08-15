@@ -1,6 +1,5 @@
 // LoopFollow
 // AddAlarmSheet.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

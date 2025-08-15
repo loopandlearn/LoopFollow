@@ -1,6 +1,5 @@
 // LoopFollow
 // Treatments.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

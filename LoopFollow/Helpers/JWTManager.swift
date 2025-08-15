@@ -1,6 +1,5 @@
 // LoopFollow
 // JWTManager.swift
-// Created by Jonas Björkert.
 
 import Foundation
 import SwiftJWT

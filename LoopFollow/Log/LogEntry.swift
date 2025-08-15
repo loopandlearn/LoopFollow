@@ -1,6 +1,5 @@
 // LoopFollow
 // LogEntry.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

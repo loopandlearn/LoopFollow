@@ -1,6 +1,5 @@
 // LoopFollow
 // TabCustomizationModal.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

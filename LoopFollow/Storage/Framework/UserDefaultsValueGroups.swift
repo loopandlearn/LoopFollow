@@ -1,6 +1,5 @@
 // LoopFollow
 // UserDefaultsValueGroups.swift
-// Created by Jon Fawcett.
 
 import Foundation
 

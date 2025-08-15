@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmSettingsView.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

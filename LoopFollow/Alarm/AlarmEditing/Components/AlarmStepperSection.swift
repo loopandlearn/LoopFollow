@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmStepperSection.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // NightScout.swift
-// Created by Jon Fawcett.
 
 import Foundation
 import UIKit

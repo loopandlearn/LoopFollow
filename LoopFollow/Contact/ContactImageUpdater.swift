@@ -1,6 +1,5 @@
 // LoopFollow
 // ContactImageUpdater.swift
-// Created by Jonas Björkert.
 
 import Contacts
 import Foundation
