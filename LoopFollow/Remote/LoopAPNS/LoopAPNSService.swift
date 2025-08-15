@@ -1,6 +1,5 @@
 // LoopFollow
 // LoopAPNSService.swift
-// Created by Daniel Mini Johansson.
 
 import CryptoKit
 import Foundation
@@ -147,10 +146,10 @@ class LoopAPNSService {
         ] as [String: Any]
 
         /* Let's wait with this until we have an encryption solution for LRC
-        if let returnInfo = createReturnNotificationInfo() {
-            finalPayload["return_notification"] = returnInfo
-        }
-        */
+         if let returnInfo = createReturnNotificationInfo() {
+             finalPayload["return_notification"] = returnInfo
+         }
+         */
 
         // Log the exact carbs amount for debugging precision issues
         LogManager.shared.log(category: .apns, message: "Carbs amount - Raw: \(payload.carbsAmount ?? 0.0), Formatted: \(String(format: "%.1f", carbsAmount)), JSON: \(carbsAmount)")

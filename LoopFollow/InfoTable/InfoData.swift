@@ -1,6 +1,5 @@
 // LoopFollow
 // InfoData.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

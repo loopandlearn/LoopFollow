@@ -1,6 +1,5 @@
 // LoopFollow
 // NightScoutViewController.swift
-// Created by Jon Fawcett.
 
 import UIKit
 import WebKit

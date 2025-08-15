@@ -1,6 +1,5 @@
 // LoopFollow
 // SMB.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

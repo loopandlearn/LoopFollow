@@ -1,6 +1,5 @@
 // LoopFollow
 // NightscoutUtils.swift
-// Created by bjorkert.
 
 import Foundation
 

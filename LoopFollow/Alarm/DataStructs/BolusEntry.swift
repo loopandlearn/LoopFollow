@@ -1,6 +1,5 @@
 // LoopFollow
 // BolusEntry.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

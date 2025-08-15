@@ -1,6 +1,5 @@
 // LoopFollow
 // GitHubService.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

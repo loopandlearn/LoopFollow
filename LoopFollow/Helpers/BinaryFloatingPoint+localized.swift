@@ -1,6 +1,5 @@
 // LoopFollow
 // BinaryFloatingPoint+localized.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

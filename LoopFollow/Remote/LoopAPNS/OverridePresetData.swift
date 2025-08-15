@@ -1,6 +1,5 @@
 // LoopFollow
 // OverridePresetData.swift
-// Created by Daniel Mini Johansson.
 
 import Foundation
 

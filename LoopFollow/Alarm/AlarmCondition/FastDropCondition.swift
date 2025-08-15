@@ -1,6 +1,5 @@
 // LoopFollow
 // FastDropCondition.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

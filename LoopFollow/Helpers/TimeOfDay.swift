@@ -1,6 +1,5 @@
 // LoopFollow
 // TimeOfDay.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

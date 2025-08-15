@@ -1,6 +1,5 @@
 // LoopFollow
 // TRCCommandType.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

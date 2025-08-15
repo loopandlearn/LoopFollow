@@ -1,6 +1,5 @@
 // LoopFollow
 // BackgroundAlertManager.swift
-// Created by Jonas Björkert.
 
 import Foundation
 import UserNotifications

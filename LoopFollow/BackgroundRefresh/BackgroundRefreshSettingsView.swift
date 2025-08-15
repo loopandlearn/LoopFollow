@@ -1,6 +1,5 @@
 // LoopFollow
 // BackgroundRefreshSettingsView.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 
