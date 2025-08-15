@@ -25,8 +25,6 @@ class AlarmSound {
 
     fileprivate static var systemOutputVolumeBeforeOverride: Float?
 
-    fileprivate static var playingTimer: Timer?
-
     fileprivate static var soundURL = Bundle.main.url(forResource: "Indeed", withExtension: "caf")!
     fileprivate static var audioPlayer: AVAudioPlayer?
     fileprivate static let audioPlayerDelegate = AudioPlayerDelegate()
@@ -71,8 +69,7 @@ class AlarmSound {
     }
 
     static func stop() {
-        playingTimer?.invalidate()
-        playingTimer = nil
+        Observable.shared.alarmSoundPlaying.value = false
 
         audioPlayer?.stop()
         audioPlayer = nil
@@ -226,6 +223,7 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
     /* audioPlayerDidFinishPlaying:successfully: is called when a sound has finished playing. This method is NOT called if the player is stopped due to an interruption. */
     func audioPlayerDidFinishPlaying(_: AVAudioPlayer, successfully flag: Bool) {
         LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerDidFinishPlaying (\(flag))", isDebug: true)
+        Observable.shared.alarmSoundPlaying.value = false
     }
 
     /* if an error occurs while decoding it will be reported to the delegate. */
@@ -242,12 +240,14 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
     /* audioPlayerBeginInterruption: is called when the audio session has been interrupted while the player was playing. The player will have been paused. */
     func audioPlayerBeginInterruption(_: AVAudioPlayer) {
         LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerBeginInterruption")
+        Observable.shared.alarmSoundPlaying.value = false
     }
 
     /* audioPlayerEndInterruption:withOptions: is called when the audio session interruption has ended and this player had been interrupted while playing. */
     /* Currently the only flag is AVAudioSessionInterruptionFlags_ShouldResume. */
     func audioPlayerEndInterruption(_: AVAudioPlayer, withOptions flags: Int) {
         LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerEndInterruption withOptions: \(flags)")
+        Observable.shared.alarmSoundPlaying.value = false
     }
 }
 
