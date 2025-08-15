@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmManager.swift
-// Created by Jonas Björkert.
 
 import Foundation
 import UserNotifications
@@ -70,8 +69,10 @@ class AlarmManager {
                 continue
             }
 
-            // If the alarm is based on bg values, and the value isnt recent, skip to next
-            if alarm.type.isBGBased, !isLatestReadingRecent {
+            // If an alarm is BG-based, it usually requires recent data.
+            // We make a specific exception for .missedReading, whose entire
+            // purpose is to fire when recent BG data is NOT recent.
+            if alarm.type.isBGBased, alarm.type != .missedReading, !isLatestReadingRecent {
                 continue
             }
 

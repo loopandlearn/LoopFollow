@@ -1,6 +1,5 @@
 // LoopFollow
 // LoopAPNSService.swift
-// Created by Daniel Mini Johansson.
 
 import CryptoKit
 import Foundation

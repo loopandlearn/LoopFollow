@@ -13,6 +13,7 @@
 		654134182E1DC09700BDBE08 /* OverridePresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654134172E1DC09700BDBE08 /* OverridePresetsView.swift */; };
 		6541341A2E1DC27900BDBE08 /* OverridePresetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654134192E1DC27900BDBE08 /* OverridePresetData.swift */; };
 		6541341C2E1DC28000BDBE08 /* DateExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6541341B2E1DC28000BDBE08 /* DateExtensions.swift */; };
+		6584B1012E4A263900135D4D /* TOTPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6584B1002E4A263900135D4D /* TOTPService.swift */; };
 		65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
@@ -397,6 +398,7 @@
 		654134172E1DC09700BDBE08 /* OverridePresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetsView.swift; sourceTree = "<group>"; };
 		654134192E1DC27900BDBE08 /* OverridePresetData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetData.swift; sourceTree = "<group>"; };
 		6541341B2E1DC28000BDBE08 /* DateExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtensions.swift; sourceTree = "<group>"; };
+		6584B1002E4A263900135D4D /* TOTPService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPService.swift; sourceTree = "<group>"; };
 		65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonHandler.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
@@ -1193,6 +1195,7 @@
 		DDEF503E2D479B8A00884336 /* LoopAPNS */ = {
 			isa = PBXGroup;
 			children = (
+				6584B1002E4A263900135D4D /* TOTPService.swift */,
 				DDEF503F2D479B8A00884336 /* LoopAPNSService.swift */,
 				DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */,
 				DDEF50422D479BBA00884336 /* LoopAPNSBolusView.swift */,
@@ -1939,6 +1942,7 @@
 				DD5334272C61668800062F9D /* InfoDisplaySettingsViewModel.swift in Sources */,
 				DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */,
 				DD0650F32DCE9B3D004D3B41 /* MissedReadingEditor.swift in Sources */,
+				6584B1012E4A263900135D4D /* TOTPService.swift in Sources */,
 				DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */,
 				DDEF503A2D31615000999A5D /* LogManager.swift in Sources */,
 				DD4878172C7B75350048F05C /* BolusView.swift in Sources */,

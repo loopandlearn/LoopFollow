@@ -1,6 +1,5 @@
 // LoopFollow
 // BuildExpireAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

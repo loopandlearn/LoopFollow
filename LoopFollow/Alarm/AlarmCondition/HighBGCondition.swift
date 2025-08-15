@@ -1,6 +1,5 @@
 // LoopFollow
 // HighBGCondition.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

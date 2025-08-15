@@ -1,6 +1,5 @@
 // LoopFollow
 // VolumeButtonHandler.swift
-// Created by codebymini.
 
 import AVFoundation
 import Combine

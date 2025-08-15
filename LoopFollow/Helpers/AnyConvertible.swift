@@ -1,6 +1,5 @@
 // LoopFollow
 // AnyConvertible.swift
-// Created by Jon Fawcett.
 
 import Foundation
 

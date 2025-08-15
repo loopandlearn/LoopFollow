@@ -1,6 +1,5 @@
 // LoopFollow
 // LoadingButtonView.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

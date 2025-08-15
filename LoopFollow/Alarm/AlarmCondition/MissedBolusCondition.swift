@@ -1,6 +1,5 @@
 // LoopFollow
 // MissedBolusCondition.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

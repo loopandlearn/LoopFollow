@@ -1,6 +1,5 @@
 // LoopFollow
 // DeviceStatus.swift
-// Created by Jonas Björkert.
 
 import Charts
 import Foundation
