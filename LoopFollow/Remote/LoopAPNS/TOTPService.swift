@@ -1,6 +1,5 @@
 // LoopFollow
 // TOTPService.swift
-// Created by codebymini.
 
 import Foundation
 
