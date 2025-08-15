@@ -1,6 +1,5 @@
 // LoopFollow
 // LoopAPNSService.swift
-// Created by codebymini.
 
 import CryptoKit
 import Foundation

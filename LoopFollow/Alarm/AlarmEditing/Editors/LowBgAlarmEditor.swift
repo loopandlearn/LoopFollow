@@ -1,6 +1,5 @@
 // LoopFollow
 // LowBgAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

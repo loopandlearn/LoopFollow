@@ -1,6 +1,5 @@
 // LoopFollow
 // SceneDelegate.swift
-// Created by Jon Fawcett.
 
 import AVFoundation
 import UIKit

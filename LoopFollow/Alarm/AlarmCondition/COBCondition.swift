@@ -1,6 +1,5 @@
 // LoopFollow
 // COBCondition.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // SensorStart.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

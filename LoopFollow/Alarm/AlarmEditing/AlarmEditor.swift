@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

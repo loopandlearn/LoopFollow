@@ -1,6 +1,5 @@
 // LoopFollow
 // TabPosition.swift
-// Created by Jonas Björkert.
 
 enum TabPosition: String, CaseIterable, Codable {
     case position2

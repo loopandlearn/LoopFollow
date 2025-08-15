@@ -1,6 +1,5 @@
 // LoopFollow
 // LoopAPNSCarbsView.swift
-// Created by codebymini.
 
 import HealthKit
 import SwiftUI

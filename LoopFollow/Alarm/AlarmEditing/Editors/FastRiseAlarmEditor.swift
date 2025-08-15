@@ -1,6 +1,5 @@
 // LoopFollow
 // FastRiseAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

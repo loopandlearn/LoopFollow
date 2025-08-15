@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmsContainerView.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

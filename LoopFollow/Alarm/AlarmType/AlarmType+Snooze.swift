@@ -1,6 +1,5 @@
 // LoopFollow
 // AlarmType+Snooze.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

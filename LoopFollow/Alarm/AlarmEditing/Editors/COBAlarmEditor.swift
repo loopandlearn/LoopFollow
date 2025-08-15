@@ -1,6 +1,5 @@
 // LoopFollow
 // COBAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

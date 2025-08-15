@@ -1,6 +1,5 @@
 // LoopFollow
 // SnoozeState.swift
-// Created by Jonas Björkert.
 
 import Foundation
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // BluetoothDevice.swift
-// Created by Jonas Björkert.
 
 import CoreBluetooth
 import Foundation

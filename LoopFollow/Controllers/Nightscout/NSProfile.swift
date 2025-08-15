@@ -1,6 +1,5 @@
 // LoopFollow
 // NSProfile.swift
-// Created by Jonas Björkert.
 
 import Foundation
 
