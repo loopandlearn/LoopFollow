@@ -30,6 +30,6 @@ struct AlarmConfiguration: Codable, Equatable {
         audioDuringCalls: true,
         ignoreZeroBG: true,
         autoSnoozeCGMStart: false,
-        enableVolumeButtonSnooze: true
+        enableVolumeButtonSnooze: false
     )
 }

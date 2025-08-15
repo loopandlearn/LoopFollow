@@ -30,21 +30,19 @@ class VolumeButtonHandler: NSObject {
     private var volumeChangePattern: [TimeInterval] = []
 
     private var cancellables = Set<AnyCancellable>()
-    private var isAlarmActive = false
 
     override private init() {
         super.init()
 
-        Observable.shared.currentAlarm.$value
-            .sink { [weak self] alarmID in
+        Observable.shared.alarmSoundPlaying.$value
+            .removeDuplicates()
+            .sink { [weak self] alarmSoundPlaying in
                 guard let self = self else { return }
-                let nowActive = alarmID != nil
-                if !self.isAlarmActive && nowActive {
+                if alarmSoundPlaying {
                     self.alarmStarted()
-                } else if self.isAlarmActive && !nowActive {
+                } else {
                     self.alarmStopped()
                 }
-                self.isAlarmActive = nowActive
             }
             .store(in: &cancellables)
     }

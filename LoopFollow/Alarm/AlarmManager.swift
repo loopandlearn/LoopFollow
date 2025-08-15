@@ -162,6 +162,7 @@ class AlarmManager {
                 alarms[idx].snoozedUntil = Date().addingTimeInterval(snoozeSeconds)
                 Storage.shared.alarms.value = alarms
             }
+            Observable.shared.alarmSoundPlaying.value = false
             stopAlarm()
         }
     }

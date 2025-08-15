@@ -141,6 +141,8 @@ class AlarmSound {
                 if !isPlaying {
                     LogManager.shared.log(category: .alarm, message: "AlarmSound - not playing after calling play")
                     LogManager.shared.log(category: .alarm, message: "AlarmSound - rate value: \(audioPlayer!.rate)")
+                } else {
+                    Observable.shared.alarmSoundPlaying.value = true
                 }
             } else {
                 LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed to play")
