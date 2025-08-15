@@ -35,5 +35,9 @@ class Observable {
 
     var settingsPath = ObservableValue<NavigationPath>(default: NavigationPath())
 
+    // MARK: - Loop APNS TOTP Tracking
+
+    var lastSentTOTP = ObservableValue<String?>(default: nil)
+
     private init() {}
 }
