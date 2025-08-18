@@ -17,9 +17,11 @@ class VolumeButtonHandler: NSObject {
     private let volumeButtonPressTimeWindow: TimeInterval = 0.3
     private let volumeButtonCooldown: TimeInterval = 0.5
 
+    // KVO observer for system volume
+    private var volumeObserver: NSKeyValueObservation?
+
     private var lastVolume: Float = 0.0
     private var isMonitoring = false
-    private var volumeMonitoringTimer: Timer?
     private var alarmStartTime: Date?
     private var lastVolumeButtonPressTime: Date?
 
@@ -46,45 +48,6 @@ class VolumeButtonHandler: NSObject {
             .store(in: &cancellables)
     }
 
-    private func checkVolumeChange() {
-        let currentVolume = AVAudioSession.sharedInstance().outputVolume
-        let volumeDifference = abs(currentVolume - lastVolume)
-        let now = Date()
-
-        if volumeDifference > volumeButtonPressThreshold {
-            if let startTime = alarmStartTime {
-                let timeSinceAlarmStart = now.timeIntervalSince(startTime)
-
-                // Ignore volume changes from alarm system
-                if timeSinceAlarmStart < 2.0, currentVolume > lastVolume {
-                    if volumeDifference <= 0.15, timeSinceAlarmStart < 1.5 {
-                        lastVolume = currentVolume
-                        return
-                    }
-                }
-            }
-
-            recordVolumeChange(currentVolume: currentVolume, timestamp: now)
-
-            if lastVolume > 0, let startTime = alarmStartTime {
-                let timeSinceAlarmStart = now.timeIntervalSince(startTime)
-
-                if timeSinceAlarmStart > volumeButtonActivationDelay {
-                    if let lastPress = lastVolumeButtonPressTime {
-                        let timeSinceLastPress = now.timeIntervalSince(lastPress)
-                        if timeSinceLastPress < volumeButtonCooldown { return }
-                    }
-
-                    if isLikelyVolumeButtonPress(volumeDifference: volumeDifference, timestamp: now) {
-                        snoozeActiveAlarm()
-                    }
-                }
-            }
-        }
-
-        lastVolume = currentVolume
-    }
-
     private func recordVolumeChange(currentVolume: Float, timestamp: Date) {
         recentVolumeChanges.append((volume: currentVolume, timestamp: timestamp))
 
@@ -99,7 +62,6 @@ class VolumeButtonHandler: NSObject {
                 volumeChangePattern.removeFirst()
             }
         }
-
         lastSignificantVolumeChange = timestamp
     }
 
@@ -129,10 +91,9 @@ class VolumeButtonHandler: NSObject {
 
     private func alarmStarted() {
         guard Storage.shared.alarmConfiguration.value.enableVolumeButtonSnooze else { return }
+        LogManager.shared.log(category: .volumeButtonSnooze, message: "Alarm start detected, setting up volume observer.")
 
-        LogManager.shared.log(category: .volumeButtonSnooze, message: "Alarm start detected")
         alarmStartTime = Date()
-
         recentVolumeChanges.removeAll()
         lastSignificantVolumeChange = nil
         volumeChangePattern.removeAll()
@@ -140,51 +101,10 @@ class VolumeButtonHandler: NSObject {
         startMonitoring()
     }
 
-    func startMonitoring(retryCount: Int = 0) {
-        guard !isMonitoring else { return }
-
-        let audioSession = AVAudioSession.sharedInstance()
-        let currentVolume = audioSession.outputVolume
-
-        if currentVolume > 0 {
-            LogManager.shared.log(category: .volumeButtonSnooze, message: "Successfully started volume monitoring.")
-            lastVolume = currentVolume
-            isMonitoring = true
-            startVolumeMonitoringTimer()
-            return
-        }
-
-        // Failure case: Volume is still 0. Let's retry if we can.
-        let maxRetries = 5
-        if retryCount < maxRetries {
-            LogManager.shared.log(category: .volumeButtonSnooze, message: "Did not get a valid volume, retrying... (Attempt \(retryCount + 1)/\(maxRetries))")
-            let delay = 0.2 // 200ms delay between retries
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                self?.startMonitoring(retryCount: retryCount + 1)
-            }
-        } else {
-            // We've exhausted all retries, log the final failure.
-            LogManager.shared.log(category: .volumeButtonSnooze, message: "Did not get a valid volume after \(maxRetries) retries, not monitoring.")
-        }
-    }
-
-    private func startVolumeMonitoringTimer() {
-        guard volumeMonitoringTimer == nil else { return }
-
-        let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
-            self?.checkVolumeChange()
-        }
-
-        volumeMonitoringTimer = timer
-
-        RunLoop.main.add(timer, forMode: .common)
-    }
-
     private func alarmStopped() {
         LogManager.shared.log(category: .volumeButtonSnooze, message: "Alarm stop detected")
 
         alarmStartTime = nil
-
         stopMonitoring()
 
         recentVolumeChanges.removeAll()
@@ -192,12 +112,71 @@ class VolumeButtonHandler: NSObject {
         volumeChangePattern.removeAll()
     }
 
+    func startMonitoring() {
+        guard !isMonitoring else { return }
+
+        isMonitoring = true
+
+        volumeObserver = AVAudioSession.sharedInstance().observe(\.outputVolume, options: [.new]) { [weak self] session, _ in
+            guard let self = self, let alarmStartTime = self.alarmStartTime else { return }
+
+            let currentVolume = session.outputVolume
+            let now = Date()
+
+            // On the first observation, capture the initial volume when the audio session
+            // becomes active. This solves the race condition. We then return to avoid
+            // treating this initial setup as a user-initiated button press.
+            if self.lastVolume == 0.0, currentVolume > 0.0 {
+                LogManager.shared.log(category: .volumeButtonSnooze, message: "Observer received initial valid volume: \(currentVolume)")
+                self.lastVolume = currentVolume
+                return
+            }
+
+            guard self.lastVolume > 0.0 else { return }
+
+            let volumeDifference = abs(currentVolume - self.lastVolume)
+
+            if volumeDifference > self.volumeButtonPressThreshold {
+                let timeSinceAlarmStart = now.timeIntervalSince(alarmStartTime)
+
+                // Ignore volume changes from the alarm system's own ramp-up.
+                if timeSinceAlarmStart < 2.0, currentVolume > self.lastVolume {
+                    if volumeDifference <= 0.15, timeSinceAlarmStart < 1.5 {
+                        self.lastVolume = currentVolume
+                        return
+                    }
+                }
+
+                self.recordVolumeChange(currentVolume: currentVolume, timestamp: now)
+
+                if timeSinceAlarmStart > self.volumeButtonActivationDelay {
+                    if let lastPress = self.lastVolumeButtonPressTime {
+                        let timeSinceLastPress = now.timeIntervalSince(lastPress)
+                        if timeSinceLastPress < self.volumeButtonCooldown {
+                            self.lastVolume = currentVolume
+                            return
+                        }
+                    }
+
+                    if self.isLikelyVolumeButtonPress(volumeDifference: volumeDifference, timestamp: now) {
+                        self.snoozeActiveAlarm()
+                    }
+                }
+            }
+            self.lastVolume = currentVolume
+        }
+    }
+
     func stopMonitoring() {
         guard isMonitoring else { return }
 
-        isMonitoring = false
+        LogManager.shared.log(category: .volumeButtonSnooze, message: "Invalidating volume observer.")
 
-        volumeMonitoringTimer?.invalidate()
-        volumeMonitoringTimer = nil
+        // Invalidate the observer to stop receiving notifications and prevent memory leaks.
+        volumeObserver?.invalidate()
+        volumeObserver = nil
+
+        isMonitoring = false
+        lastVolume = 0.0 // Reset for the next alarm.
     }
 }
