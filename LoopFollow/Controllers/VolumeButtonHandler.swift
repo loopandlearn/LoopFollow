@@ -140,20 +140,32 @@ class VolumeButtonHandler: NSObject {
         startMonitoring()
     }
 
-    func startMonitoring() {
+    func startMonitoring(retryCount: Int = 0) {
         guard !isMonitoring else { return }
 
         let audioSession = AVAudioSession.sharedInstance()
         let currentVolume = audioSession.outputVolume
 
         if currentVolume > 0 {
+            LogManager.shared.log(category: .volumeButtonSnooze, message: "Successfully started volume monitoring.")
             lastVolume = currentVolume
             isMonitoring = true
             startVolumeMonitoringTimer()
             return
         }
 
-        LogManager.shared.log(category: .volumeButtonSnooze, message: "Did not get a valid volume, not monitoring")
+        // Failure case: Volume is still 0. Let's retry if we can.
+        let maxRetries = 5
+        if retryCount < maxRetries {
+            LogManager.shared.log(category: .volumeButtonSnooze, message: "Did not get a valid volume, retrying... (Attempt \(retryCount + 1)/\(maxRetries))")
+            let delay = 0.2 // 200ms delay between retries
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.startMonitoring(retryCount: retryCount + 1)
+            }
+        } else {
+            // We've exhausted all retries, log the final failure.
+            LogManager.shared.log(category: .volumeButtonSnooze, message: "Did not get a valid volume after \(maxRetries) retries, not monitoring.")
+        }
     }
 
     private func startVolumeMonitoringTimer() {
