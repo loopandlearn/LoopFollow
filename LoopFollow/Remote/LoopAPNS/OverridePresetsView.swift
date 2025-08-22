@@ -67,8 +67,7 @@ struct OverridePresetsView: View {
                                     isActivating: viewModel.isActivating && viewModel.selectedPreset?.name == preset.name,
                                     onActivate: {
                                         viewModel.selectedPreset = preset
-                                        viewModel.alertType = .confirmActivation
-                                        viewModel.showAlert = true
+                                        viewModel.showOverrideModal = true
                                     }
                                 )
                             }
@@ -87,21 +86,24 @@ struct OverridePresetsView: View {
                     await viewModel.loadOverridePresets()
                 }
             }
+            .sheet(isPresented: $viewModel.showOverrideModal) {
+                if let preset = viewModel.selectedPreset {
+                    OverrideActivationModal(
+                        preset: preset,
+                        onActivate: { duration in
+                            viewModel.showOverrideModal = false
+                            Task {
+                                await viewModel.activateOverride(preset: preset, duration: duration)
+                            }
+                        },
+                        onCancel: {
+                            viewModel.showOverrideModal = false
+                        }
+                    )
+                }
+            }
             .alert(isPresented: $viewModel.showAlert) {
                 switch viewModel.alertType {
-                case .confirmActivation:
-                    return Alert(
-                        title: Text("Activate Override"),
-                        message: Text("Do you want to activate the override '\(viewModel.selectedPreset?.name ?? "")'?"),
-                        primaryButton: .default(Text("Confirm"), action: {
-                            if let preset = viewModel.selectedPreset {
-                                Task {
-                                    await viewModel.activateOverride(preset: preset)
-                                }
-                            }
-                        }),
-                        secondaryButton: .cancel()
-                    )
                 case .confirmCancellation:
                     return Alert(
                         title: Text("Cancel Override"),
@@ -191,6 +193,179 @@ struct OverridePresetRow: View {
     }
 }
 
+struct OverrideActivationModal: View {
+    let preset: OverridePreset
+    let onActivate: (TimeInterval?) -> Void
+    let onCancel: () -> Void
+
+    @State private var enableIndefinitely: Bool
+    @State private var durationHours: Double = 1.0
+
+    init(preset: OverridePreset, onActivate: @escaping (TimeInterval?) -> Void, onCancel: @escaping () -> Void) {
+        self.preset = preset
+        self.onActivate = onActivate
+        self.onCancel = onCancel
+
+        // Initialize state based on preset duration
+        if preset.duration == 0 {
+            // Indefinite override
+            _enableIndefinitely = State(initialValue: true)
+        } else {
+            // Override with default duration
+            _enableIndefinitely = State(initialValue: false)
+            _durationHours = State(initialValue: preset.duration / 3600)
+        }
+    }
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Preset Info
+                VStack(spacing: 12) {
+                    if let symbol = preset.symbol {
+                        Text(symbol)
+                            .font(.largeTitle)
+                    }
+
+                    Text(preset.name)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .multilineTextAlignment(.center)
+
+                    if let targetRange = preset.targetRange {
+                        Text("Target: \(Int(targetRange.lowerBound))-\(Int(targetRange.upperBound))")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+
+                    if let insulinNeedsScaleFactor = preset.insulinNeedsScaleFactor {
+                        Text("Insulin: \(Int(insulinNeedsScaleFactor * 100))%")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.top)
+
+                Spacer()
+
+                // Duration Settings (moved to bottom for easier access)
+                VStack(spacing: 16) {
+                    // Warning for overrides with default durations
+                    if preset.duration != 0 {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text("Overrides with default durations can't be set to indefinite")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                        .padding(.horizontal)
+                    }
+
+                    // Duration Input (shown when not indefinite or when override has default duration)
+                    if !enableIndefinitely || preset.duration != 0 {
+                        VStack(spacing: 8) {
+                            HStack {
+                                Text("Duration")
+                                    .font(.headline)
+                                Spacer()
+                                Text(formatDuration(durationHours))
+                                    .font(.headline)
+                                    .foregroundColor(preset.duration != 0 ? .secondary : .blue)
+                            }
+
+                            Slider(value: $durationHours, in: 0.25 ... max(24.0, preset.duration / 3600), step: 0.25)
+                                .accentColor(.blue)
+                                .disabled(preset.duration != 0) // Disable slider for overrides with default durations
+
+                            if preset.duration != 0 {
+                                Text("Using preset's default duration")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .italic()
+                            } else {
+                                HStack {
+                                    Text("15m")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 80, alignment: .leading)
+                                    Spacer()
+                                    Text("24h")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 80, alignment: .trailing)
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+
+                    // Indefinitely Toggle
+                    HStack {
+                        Toggle("Enable indefinitely", isOn: $enableIndefinitely)
+                            .disabled(preset.duration != 0) // Disable for overrides with default durations
+
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                }
+
+                // Action Buttons
+                VStack(spacing: 12) {
+                    Button(action: {
+                        let duration: TimeInterval? = enableIndefinitely ? nil : (durationHours * 3600)
+                        onActivate(duration)
+                    }) {
+                        Text("Activate Override")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    }
+
+                    Button(action: onCancel) {
+                        Text("Cancel")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(10)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom)
+            }
+            .navigationBarTitle("Activate Override", displayMode: .inline)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        onCancel()
+                    }
+                }
+            }
+        }
+    }
+
+    // Helper function to format duration in hours and minutes
+    private func formatDuration(_ hours: Double) -> String {
+        let totalMinutes = Int(hours * 60)
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+
+        if hours > 0 && minutes > 0 {
+            return "\(hours)h \(minutes)m"
+        } else if hours > 0 {
+            return "\(hours)h"
+        } else {
+            return "\(minutes)m"
+        }
+    }
+}
+
 class OverridePresetsViewModel: ObservableObject {
     @Published var overridePresets: [OverridePreset] = []
     @Published var isLoading = false
@@ -199,9 +374,9 @@ class OverridePresetsViewModel: ObservableObject {
     @Published var alertType: AlertType? = nil
     @Published var statusMessage: String? = nil
     @Published var selectedPreset: OverridePreset? = nil
+    @Published var showOverrideModal = false
 
     enum AlertType {
-        case confirmActivation
         case confirmCancellation
         case statusSuccess
         case statusFailure
@@ -228,13 +403,13 @@ class OverridePresetsViewModel: ObservableObject {
         }
     }
 
-    func activateOverride(preset: OverridePreset) async {
+    func activateOverride(preset: OverridePreset, duration: TimeInterval?) async {
         await MainActor.run {
             isActivating = true
         }
 
         do {
-            try await sendOverrideNotification(preset: preset)
+            try await sendOverrideNotification(preset: preset, duration: duration)
             await MainActor.run {
                 self.isActivating = false
                 self.statusMessage = "\(preset.name) override activated successfully."
@@ -298,11 +473,11 @@ class OverridePresetsViewModel: ObservableObject {
         }
     }
 
-    private func sendOverrideNotification(preset: OverridePreset) async throws {
+    private func sendOverrideNotification(preset: OverridePreset, duration: TimeInterval?) async throws {
         let apnsService = LoopAPNSService()
         try await apnsService.sendOverrideNotification(
             presetName: preset.name,
-            duration: preset.duration
+            duration: duration
         )
     }
 
