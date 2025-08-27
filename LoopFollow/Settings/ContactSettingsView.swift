@@ -1,6 +1,5 @@
 // LoopFollow
 // ContactSettingsView.swift
-// Created by Jonas Björkert.
 
 import Contacts
 import SwiftUI

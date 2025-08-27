@@ -1,6 +1,5 @@
 // LoopFollow
 // TOTPGenerator.swift
-// Created by codebymini.
 
 import CommonCrypto
 import Foundation

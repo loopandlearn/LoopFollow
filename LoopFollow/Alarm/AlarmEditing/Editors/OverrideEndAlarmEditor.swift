@@ -1,6 +1,5 @@
 // LoopFollow
 // OverrideEndAlarmEditor.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

@@ -1,6 +1,5 @@
 // LoopFollow
 // InfoDisplaySettingsView.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

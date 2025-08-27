@@ -1,6 +1,5 @@
 // LoopFollow
 // ErrorMessageView.swift
-// Created by Jonas Björkert.
 
 import Foundation
 import SwiftUI

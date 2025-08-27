@@ -1,6 +1,5 @@
 // LoopFollow
 // MainViewController.swift
-// Created by Jon Fawcett.
 
 import AVFAudio
 import Charts

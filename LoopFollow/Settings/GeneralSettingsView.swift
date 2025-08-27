@@ -1,6 +1,5 @@
 // LoopFollow
 // GeneralSettingsView.swift
-// Created by Jonas Björkert.
 
 import SwiftUI
 

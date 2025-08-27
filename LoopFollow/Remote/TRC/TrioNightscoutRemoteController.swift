@@ -1,6 +1,5 @@
 // LoopFollow
 // TrioNightscoutRemoteController.swift
-// Created by Jonas Björkert.
 
 import Foundation
 import HealthKit

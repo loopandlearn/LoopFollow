@@ -1,6 +1,5 @@
 // LoopFollow
 // LoopAPNSCarbsView.swift
-// Created by codebymini.
 
 import HealthKit
 import SwiftUI
@@ -22,6 +21,11 @@ struct LoopAPNSCarbsView: View {
 
     @FocusState private var carbsFieldIsFocused: Bool
     @FocusState private var absorptionFieldIsFocused: Bool
+
+    // Computed property to check if TOTP should be blocked
+    private var isTOTPBlocked: Bool {
+        TOTPService.shared.isTOTPBlocked(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
+    }
 
     enum AlertType {
         case success
@@ -169,8 +173,28 @@ struct LoopAPNSCarbsView: View {
                                 Text("Send Carbs")
                             }
                         }
-                        .disabled(carbsAmount.doubleValue(for: .gram()) <= 0 || isLoading)
+                        .disabled(carbsAmount.doubleValue(for: .gram()) <= 0 || isLoading || isTOTPBlocked)
                         .frame(maxWidth: .infinity)
+                    }
+
+                    // TOTP Blocking Warning Section
+                    if isTOTPBlocked {
+                        Section {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.orange)
+                                    Text("TOTP Code Already Used")
+                                        .font(.headline)
+                                        .foregroundColor(.orange)
+                                }
+                                Text("This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .padding(.vertical, 4)
+                        }
                     }
 
                     Section(header: Text("Security")) {
@@ -222,10 +246,30 @@ struct LoopAPNSCarbsView: View {
                 }
                 // Reset timer state so it shows '-' until first tick
                 otpTimeRemaining = nil
+                // Don't reset TOTP usage flag here - let the timer handle it
+
+                // Validate TOTP state when view appears
+                _ = isTOTPBlocked
             }
             .onReceive(otpTimer) { _ in
                 let now = Date().timeIntervalSince1970
-                otpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
+                let newOtpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
+
+                // Check if we've moved to a new TOTP period (when time remaining increases)
+                if let currentOtpTimeRemaining = otpTimeRemaining,
+                   newOtpTimeRemaining > currentOtpTimeRemaining
+                {
+                    // New TOTP code generated, reset the usage flag
+                    TOTPService.shared.resetTOTPUsage()
+                }
+
+                // Also check if we're at the very beginning of a new period (when time remaining is close to 30)
+                if newOtpTimeRemaining >= 29 {
+                    // We're at the start of a new TOTP period, reset the usage flag
+                    TOTPService.shared.resetTOTPUsage()
+                }
+
+                otpTimeRemaining = newOtpTimeRemaining
             }
             .alert(isPresented: $showAlert) {
                 switch alertType {
@@ -346,6 +390,8 @@ struct LoopAPNSCarbsView: View {
                 DispatchQueue.main.async {
                     isLoading = false
                     if success {
+                        // Mark TOTP code as used
+                        TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
                         let timeFormatter = DateFormatter()
                         timeFormatter.timeStyle = .short
                         alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"

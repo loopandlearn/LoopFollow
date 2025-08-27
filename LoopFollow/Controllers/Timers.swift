@@ -1,6 +1,5 @@
 // LoopFollow
 // Timers.swift
-// Created by Jon Fawcett.
 
 import Foundation
 import UIKit

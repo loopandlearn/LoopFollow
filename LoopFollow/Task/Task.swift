@@ -1,6 +1,5 @@
 // LoopFollow
 // Task.swift
-// Created by Jonas Björkert.
 
 import Foundation
 
