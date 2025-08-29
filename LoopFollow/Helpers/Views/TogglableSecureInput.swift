@@ -82,13 +82,19 @@ struct TogglableSecureInput: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            if style == .multiLine && !isVisible {
+            if !isVisible {
                 isVisible = true
-                isMultilineFocused = true
-            } else if style == .singleLine {
-                isFocused = true
-            } else if style == .multiLine && isVisible {
-                isMultilineFocused = true
+                if style == .singleLine {
+                    isFocused = true
+                } else if style == .multiLine {
+                    isMultilineFocused = true
+                }
+            } else {
+                if style == .singleLine {
+                    isFocused = true
+                } else if style == .multiLine {
+                    isMultilineFocused = true
+                }
             }
         }
     }
