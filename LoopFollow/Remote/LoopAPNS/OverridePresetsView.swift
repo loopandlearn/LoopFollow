@@ -255,7 +255,7 @@ struct OverrideActivationModal: View {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.orange)
-                            Text("Overrides with default durations can't be set to indefinite")
+                            Text("Overrides with a defined duration in Loop cannot be changed")
                                 .font(.caption)
                                 .foregroundColor(.orange)
                         }
@@ -268,6 +268,7 @@ struct OverrideActivationModal: View {
                             HStack {
                                 Text("Duration")
                                     .font(.headline)
+                                    .foregroundColor(preset.duration != 0 ? .secondary : .primary)
                                 Spacer()
                                 Text(formatDuration(durationHours))
                                     .font(.headline)
@@ -304,6 +305,7 @@ struct OverrideActivationModal: View {
                     HStack {
                         Toggle("Enable indefinitely", isOn: $enableIndefinitely)
                             .disabled(preset.duration != 0) // Disable for overrides with default durations
+                            .foregroundColor(preset.duration != 0 ? .secondary : .primary)
 
                         Spacer()
                     }
@@ -388,7 +390,7 @@ class OverridePresetsViewModel: ObservableObject {
         }
 
         do {
-            let presets = try await fetchOverridePresetsFromNightscout()
+            let presets = try await fetchOverridePresetsFromStorage()
             await MainActor.run {
                 self.overridePresets = presets
                 self.isLoading = false
@@ -449,8 +451,7 @@ class OverridePresetsViewModel: ObservableObject {
         }
     }
 
-    private func fetchOverridePresetsFromNightscout() async throws -> [OverridePreset] {
-        // Use ProfileManager's already loaded overrides instead of fetching from Nightscout
+    private func fetchOverridePresetsFromStorage() async throws -> [OverridePreset] {
         let loopOverrides = ProfileManager.shared.loopOverrides
 
         return loopOverrides.map { override in
