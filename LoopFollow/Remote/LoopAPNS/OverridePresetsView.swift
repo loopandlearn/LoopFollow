@@ -157,7 +157,7 @@ struct OverridePresetRow: View {
 
                     HStack(spacing: 8) {
                         if let targetRange = preset.targetRange {
-                            Text("Target: \(Int(targetRange.lowerBound))-\(Int(targetRange.upperBound))")
+                            Text("Target: \(Localizer.formatLocalDouble(targetRange.lowerBound))-\(Localizer.formatLocalDouble(targetRange.upperBound))")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -233,7 +233,7 @@ struct OverrideActivationModal: View {
                         .multilineTextAlignment(.center)
 
                     if let targetRange = preset.targetRange {
-                        Text("Target: \(Int(targetRange.lowerBound))-\(Int(targetRange.upperBound))")
+                        Text("Target: \(Localizer.formatLocalDouble(targetRange.lowerBound))-\(Localizer.formatLocalDouble(targetRange.upperBound))")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
