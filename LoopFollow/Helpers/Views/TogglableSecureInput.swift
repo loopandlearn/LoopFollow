@@ -20,18 +20,22 @@ struct TogglableSecureInput: View {
             Group {
                 switch style {
                 case .singleLine:
-                    if isVisible {
-                        TextField(placeholder, text: $text)
-                            .multilineTextAlignment(.trailing)
-                            .textContentType(textContentType)
-                            .submitLabel(.done)
-                            .focused($isFocused)
-                    } else {
-                        SecureField(placeholder, text: $text)
-                            .multilineTextAlignment(.trailing)
-                            .textContentType(textContentType)
-                            .submitLabel(.done)
-                            .focused($isFocused)
+                    ZStack(alignment: .trailing) {
+                        if isVisible {
+                            TextField(placeholder, text: $text)
+                                .multilineTextAlignment(.trailing)
+                                .textContentType(textContentType)
+                                .submitLabel(.done)
+                                .focused($isFocused)
+                        } else {
+                            HStack {
+                                Spacer()
+                                Text(maskString)
+                                    .font(.body.monospaced())
+                                    .foregroundColor(.primary)
+                                    .allowsHitTesting(false)
+                            }
+                        }
                     }
 
                 case .multiLine:
@@ -53,15 +57,13 @@ struct TogglableSecureInput: View {
                             }
 
                         if !isVisible {
-                            Text(maskString)
-                                .font(.body.monospaced())
-                                .foregroundColor(.primary)
-                                .frame(maxWidth: .infinity,
-                                       maxHeight: .infinity,
-                                       alignment: .topLeading)
-                                .padding(.top, 8)
-                                .padding(.leading, 5)
-                                .allowsHitTesting(false)
+                            HStack {
+                                Spacer()
+                                Text(maskString)
+                                    .font(.body.monospaced())
+                                    .foregroundColor(.primary)
+                                    .allowsHitTesting(false)
+                            }
                         }
                     }
                     .frame(minHeight: 100)
@@ -80,13 +82,19 @@ struct TogglableSecureInput: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            if style == .multiLine && !isVisible {
+            if !isVisible {
                 isVisible = true
-                isMultilineFocused = true
-            } else if style == .singleLine {
-                isFocused = true
-            } else if style == .multiLine && isVisible {
-                isMultilineFocused = true
+                if style == .singleLine {
+                    isFocused = true
+                } else if style == .multiLine {
+                    isMultilineFocused = true
+                }
+            } else {
+                if style == .singleLine {
+                    isFocused = true
+                } else if style == .multiLine {
+                    isMultilineFocused = true
+                }
             }
         }
     }
