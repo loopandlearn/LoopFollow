@@ -103,8 +103,11 @@ struct SnoozerView: View {
     // MARK: - Columns
 
     private func leftColumn(isLandscape: Bool, barShowing: Bool) -> some View {
-        let topPad: CGFloat = (isLandscape && barShowing) ? 4 : 16
-        let bigMaxH: CGFloat = (isLandscape && barShowing) ? 210 : 240
+        let topPad: CGFloat = barShowing ? 0 : 16
+        let bigMaxH: CGFloat = barShowing ? (isLandscape ? 210 : 220) : 240
+        let dirMaxH: CGFloat = barShowing ? (isLandscape ? 72 : 72) : 80
+        let deltaMaxH: CGFloat = barShowing ? (isLandscape ? 60 : 60) : 68
+        let ageMaxH: CGFloat = barShowing ? 36 : 40
 
         return VStack(spacing: 0) {
             if !isLandscape && showDisplayName.value {
@@ -133,26 +136,26 @@ struct SnoozerView: View {
                 }
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white)
-                .frame(maxWidth: .infinity, maxHeight: 80)
+                .frame(maxWidth: .infinity, maxHeight: dirMaxH)
             } else {
                 Text(directionText.value)
                     .font(.system(size: 110, weight: .black))
                     .minimumScaleFactor(0.5)
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, maxHeight: 80)
+                    .frame(maxWidth: .infinity, maxHeight: dirMaxH)
 
                 Text(deltaText.value)
                     .font(.system(size: 70))
                     .minimumScaleFactor(0.5)
                     .foregroundColor(.white.opacity(0.8))
-                    .frame(maxWidth: .infinity, maxHeight: 68)
+                    .frame(maxWidth: .infinity, maxHeight: deltaMaxH)
             }
 
             Text(minAgoText.value)
                 .font(.system(size: 60))
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white.opacity(0.6))
-                .frame(maxWidth: .infinity, maxHeight: 40)
+                .frame(maxWidth: .infinity, maxHeight: ageMaxH)
         }
         .padding(.top, topPad)
         .padding(.horizontal, 16)
