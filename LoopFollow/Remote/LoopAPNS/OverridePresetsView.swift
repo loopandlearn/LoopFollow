@@ -208,10 +208,10 @@ struct OverrideActivationModal: View {
 
         // Initialize state based on preset duration
         if preset.duration == 0 {
-            // Indefinite override
+            // Indefinite override - allow user to choose
             _enableIndefinitely = State(initialValue: true)
         } else {
-            // Override with default duration
+            // Override with predefined duration - use preset duration
             _enableIndefinitely = State(initialValue: false)
             _durationHours = State(initialValue: preset.duration / 3600)
         }
@@ -243,48 +243,35 @@ struct OverrideActivationModal: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
+
+                    // Only show duration for overrides with predefined duration
+                    if preset.duration != 0 {
+                        Text("Duration: \(preset.durationDescription)")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 .padding(.top)
 
                 Spacer()
 
-                // Duration Settings (moved to bottom for easier access)
-                VStack(spacing: 16) {
-                    // Warning for overrides with default durations
-                    if preset.duration != 0 {
-                        HStack {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                            Text("Overrides with a defined duration in Loop cannot be changed")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                        }
-                        .padding(.horizontal)
-                    }
+                // Duration Settings (only show for overrides without predefined duration)
+                if preset.duration == 0 {
+                    VStack(spacing: 16) {
+                        // Duration Input (only show when not indefinite)
+                        if !enableIndefinitely {
+                            VStack(spacing: 8) {
+                                HStack {
+                                    Text("Duration")
+                                        .font(.headline)
+                                    Spacer()
+                                    Text(formatDuration(durationHours))
+                                        .font(.headline)
+                                        .foregroundColor(.blue)
+                                }
 
-                    // Duration Input (shown when not indefinite or when override has default duration)
-                    if !enableIndefinitely || preset.duration != 0 {
-                        VStack(spacing: 8) {
-                            HStack {
-                                Text("Duration")
-                                    .font(.headline)
-                                    .foregroundColor(preset.duration != 0 ? .secondary : .primary)
-                                Spacer()
-                                Text(formatDuration(durationHours))
-                                    .font(.headline)
-                                    .foregroundColor(preset.duration != 0 ? .secondary : .blue)
-                            }
-
-                            Slider(value: $durationHours, in: 0.25 ... max(24.0, preset.duration / 3600), step: 0.25)
-                                .accentColor(.blue)
-                                .disabled(preset.duration != 0) // Disable slider for overrides with default durations
-
-                            if preset.duration != 0 {
-                                Text("Using preset's default duration")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .italic()
-                            } else {
+                                Slider(value: $durationHours, in: 0.25 ... 24.0, step: 0.25)
+                                    .accentColor(.blue)
                                 HStack {
                                     Text("15m")
                                         .font(.caption)
@@ -297,25 +284,29 @@ struct OverrideActivationModal: View {
                                         .frame(width: 80, alignment: .trailing)
                                 }
                             }
+                            .padding(.horizontal)
+                        }
+
+                        // Indefinitely Toggle
+                        HStack {
+                            Toggle("Enable indefinitely", isOn: $enableIndefinitely)
+                            Spacer()
                         }
                         .padding(.horizontal)
                     }
-
-                    // Indefinitely Toggle
-                    HStack {
-                        Toggle("Enable indefinitely", isOn: $enableIndefinitely)
-                            .disabled(preset.duration != 0) // Disable for overrides with default durations
-                            .foregroundColor(preset.duration != 0 ? .secondary : .primary)
-
-                        Spacer()
-                    }
-                    .padding(.horizontal)
                 }
 
                 // Action Buttons
                 VStack(spacing: 12) {
                     Button(action: {
-                        let duration: TimeInterval? = enableIndefinitely ? nil : (durationHours * 3600)
+                        let duration: TimeInterval?
+                        if preset.duration == 0 {
+                            // For indefinite overrides, use user selection
+                            duration = enableIndefinitely ? nil : (durationHours * 3600)
+                        } else {
+                            // For overrides with predefined duration, use preset duration
+                            duration = preset.duration
+                        }
                         onActivate(duration)
                     }) {
                         Text("Activate Override")
