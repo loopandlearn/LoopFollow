@@ -304,16 +304,31 @@ struct MealView: View {
     private func authenticateUser(completion: @escaping (Bool) -> Void) {
         let context = LAContext()
         var error: NSError?
-
         let reason = "Confirm your identity to send bolus."
 
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
             context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, _ in
                 DispatchQueue.main.async {
-                    completion(success)
+                    if success {
+                        completion(true)
+                    } else {
+                        // Biometric failed, try passcode
+                        self.tryPasscode(completion: completion)
+                    }
                 }
             }
-        } else if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+        } else {
+            // No biometrics available, try passcode directly
+            tryPasscode(completion: completion)
+        }
+    }
+    
+    private func tryPasscode(completion: @escaping (Bool) -> Void) {
+        let context = LAContext()
+        var error: NSError?
+        let reason = "Confirm your identity to send bolus."
+
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
             context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
                 DispatchQueue.main.async {
                     completion(success)
