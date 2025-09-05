@@ -71,8 +71,8 @@ struct BolusView: View {
                         title: Text("Confirm Bolus"),
                         message: Text("Are you sure you want to send \(bolusAmount.doubleValue(for: HKUnit.internationalUnit()), specifier: "%.2f") U?"),
                         primaryButton: .default(Text("Confirm"), action: {
-                            authenticateUser { success in
-                                if success {
+                            AuthService.authenticate(reason: "Confirm your identity to send bolus.") { result in
+                                if case .success = result {
                                     sendBolus()
                                 }
                             }
@@ -123,46 +123,6 @@ struct BolusView: View {
                     alertType = .statusFailure
                 }
                 showAlert = true
-            }
-        }
-    }
-
-    private func authenticateUser(completion: @escaping (Bool) -> Void) {
-        let context = LAContext()
-        var error: NSError?
-        let reason = "Confirm your identity to send bolus."
-
-        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, _ in
-                DispatchQueue.main.async {
-                    if success {
-                        completion(true)
-                    } else {
-                        // Biometric failed, try passcode
-                        self.tryPasscode(completion: completion)
-                    }
-                }
-            }
-        } else {
-            // No biometrics available, try passcode directly
-            tryPasscode(completion: completion)
-        }
-    }
-    
-    private func tryPasscode(completion: @escaping (Bool) -> Void) {
-        let context = LAContext()
-        var error: NSError?
-        let reason = "Confirm your identity to send bolus."
-
-        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-                DispatchQueue.main.async {
-                    completion(success)
-                }
-            }
-        } else {
-            DispatchQueue.main.async {
-                completion(false)
             }
         }
     }
