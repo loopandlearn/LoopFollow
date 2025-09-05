@@ -326,13 +326,28 @@ struct LoopAPNSBolusView: View {
                     if success {
                         sendInsulinConfirmed()
                     } else {
-                        alertMessage = "Authentication failed"
-                        alertType = .error
-                        showAlert = true
+                        // Biometric authentication failed, try passcode fallback
+                        self.authenticateWithPasscode()
                     }
                 }
             }
         } else if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+            // No biometrics available, go directly to passcode
+            authenticateWithPasscode()
+        } else {
+            alertMessage = "Authentication not available"
+            alertType = .error
+            showAlert = true
+        }
+    }
+
+    private func authenticateWithPasscode() {
+        let context = LAContext()
+        var error: NSError?
+
+        let reason = "Confirm your identity to send insulin."
+
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
             context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
                 DispatchQueue.main.async {
                     if success {
@@ -345,7 +360,7 @@ struct LoopAPNSBolusView: View {
                 }
             }
         } else {
-            alertMessage = "Biometric authentication not available"
+            alertMessage = "Authentication not available"
             alertType = .error
             showAlert = true
         }
