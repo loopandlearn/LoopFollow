@@ -53,14 +53,16 @@
 	<string>Loop Follow would like to access your calendar to update BG readings</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Loop Follow would like to access your calendar to save BG readings</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Used for scanning QR codes for remote authentication</string>
 	<key>NSContactsUsageDescription</key>
 	<string>This app requires access to contacts to update a contact image with real-time blood glucose information.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>This app requires Face ID for secure authentication.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Used for scanning QR codes for remote authentication</string>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

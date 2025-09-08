@@ -1,6 +1,7 @@
 // LoopFollow
 // MainViewController.swift
 
+import ActivityKit
 import AVFAudio
 import Charts
 import Combine
@@ -118,6 +119,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     private var cancellables = Set<AnyCancellable>()
 
+    private var liveActivity: Activity<LoopFollowWidgetAttributes>?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -207,6 +210,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] newValue in
                 self?.BGText.text = newValue
+                self?.updateLiveActivityIfRunning()
             }
             .store(in: &cancellables)
 
@@ -533,6 +537,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         currentSage = nil
         currentIage = nil
         refreshControl.endRefreshing()
+        startLiveActivityIfNeeded()
     }
 
     // Scroll down BGText when refreshing
@@ -944,6 +949,37 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         Storage.shared.infoSort.value = sortArray
         Storage.shared.infoVisible.value = visibleArray
+    }
+
+    private func currentEmoji() -> String {
+        guard let last = bgData.last else { return "⌛️" }
+        let v = Double(last.sgv)
+        if v >= Storage.shared.highLine.value { return "🟡" }
+        if v <= Storage.shared.lowLine.value { return "🔴" }
+        return "🟢"
+    }
+
+    private func startLiveActivityIfNeeded() {
+        guard liveActivity == nil else { return }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        do {
+            liveActivity = try LiveActivityManager.start(emoji: currentEmoji(), name: "LoopFollow", staleAfter: 3600)
+        } catch {
+            print("LiveActivity start failed:", error)
+        }
+    }
+
+    private func endLiveActivityIfRunning(finalEmoji: String? = nil) {
+        guard let act = liveActivity else { return }
+        Task {
+            await LiveActivityManager.end(act, finalEmoji: finalEmoji ?? currentEmoji(), dismissalPolicy: .immediate)
+            liveActivity = nil
+        }
+    }
+
+    private func updateLiveActivityIfRunning() {
+        guard let act = liveActivity else { return }
+        Task { await LiveActivityManager.update(act, emoji: currentEmoji(), staleAfter: 3600) }
     }
 }
 
