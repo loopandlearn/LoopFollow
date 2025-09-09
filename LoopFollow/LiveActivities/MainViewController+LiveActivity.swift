@@ -13,6 +13,52 @@ extension MainViewController {
         return "🟢"
     }
 
+    private func currentLAState() -> LoopFollowWidgetAttributes.ContentState {
+        let bgString: String
+        let dirString: String
+        let deltaString: String
+        let minAgo: String
+        let zone: Int
+
+        if let last = bgData.last {
+            bgString = Localizer.toDisplayUnits(String(last.sgv))
+            let v = Double(last.sgv)
+            if v >= Storage.shared.highLine.value { zone = 1 }
+            else if v <= Storage.shared.lowLine.value { zone = -1 }
+            else { zone = 0 }
+
+            dirString = bgDirectionGraphic(last.direction ?? "")
+
+            var deltaBG = 0
+            if bgData.count > 1 { deltaBG = last.sgv - bgData[bgData.count - 2].sgv }
+            if deltaBG < 0 { deltaString = Localizer.toDisplayUnits(String(deltaBG)) }
+            else if deltaBG > 0 { deltaString = "+" + Localizer.toDisplayUnits(String(deltaBG)) }
+            else { deltaString = "0" }
+
+            let minutes = max(0, Int(Date().timeIntervalSince1970 - last.date) / 60)
+            minAgo = minutes == 0 ? "now" : "\(minutes)m"
+        } else {
+            bgString = "–"
+            dirString = "-"
+            deltaString = "–"
+            minAgo = "–"
+            zone = 0
+        }
+
+        let iobString = latestIOB?.formattedValue() ?? "0"
+        let cobString = latestCOB?.formattedValue() ?? "0"
+        let emoji = (zone == 1 ? "🟡" : (zone == -1 ? "🔴" : "🟢"))
+
+        return .init(emoji: emoji,
+                     bg: bgString,
+                     direction: dirString,
+                     delta: deltaString,
+                     minAgo: minAgo,
+                     iob: iobString,
+                     cob: cobString,
+                     zone: zone)
+    }
+
     func attachExistingLiveActivityIfAny() {
         if liveActivity == nil {
             liveActivity = Activity<LoopFollowWidgetAttributes>.activities.first
@@ -21,12 +67,13 @@ extension MainViewController {
 
     func updateLiveActivity() {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        let state = currentLAState()
 
         if liveActivity == nil {
             attachExistingLiveActivityIfAny()
             if liveActivity == nil {
                 do {
-                    liveActivity = try LiveActivityManager.start(emoji: currentEmoji(), name: "LoopFollow", staleAfter: 60*12)
+                    liveActivity = try LiveActivityManager.start(state: state, name: "LoopFollow", staleAfter: 15 * 60)
                 } catch {
                     print("LiveActivity start failed:", error)
                 }
@@ -34,13 +81,15 @@ extension MainViewController {
         }
 
         guard let act = liveActivity else { return }
-        Task { await LiveActivityManager.update(act, emoji: currentEmoji(), staleAfter: 3600) }
+        Task { await LiveActivityManager.update(act, state: state, staleAfter: 15 * 60) }
     }
 
     func endLiveActivityIfRunning(finalEmoji: String? = nil) {
         guard let act = liveActivity else { return }
+        var endState = currentLAState()
+        if let e = finalEmoji { endState.emoji = e }
         Task {
-            await LiveActivityManager.end(act, finalEmoji: finalEmoji ?? currentEmoji(), dismissalPolicy: .immediate)
+            await LiveActivityManager.end(act, finalState: endState, dismissalPolicy: .immediate)
             liveActivity = nil
         }
     }
