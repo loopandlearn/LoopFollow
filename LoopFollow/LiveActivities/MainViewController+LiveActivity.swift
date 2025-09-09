@@ -26,7 +26,7 @@ extension MainViewController {
             attachExistingLiveActivityIfAny()
             if liveActivity == nil {
                 do {
-                    liveActivity = try LiveActivityManager.start(emoji: currentEmoji(), name: "LoopFollow", staleAfter: 3600)
+                    liveActivity = try LiveActivityManager.start(emoji: currentEmoji(), name: "LoopFollow", staleAfter: 60*12)
                 } catch {
                     print("LiveActivity start failed:", error)
                 }
