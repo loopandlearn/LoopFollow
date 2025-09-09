@@ -13,12 +13,24 @@ extension MainViewController {
         return "🟢"
     }
 
+    func attachExistingLiveActivityIfAny() {
+        if liveActivity == nil {
+            liveActivity = Activity<LoopFollowWidgetAttributes>.activities.first
+        }
+    }
+
     func updateLiveActivity() {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        do {
-            liveActivity = try LiveActivityManager.start(emoji: currentEmoji(), name: "LoopFollow", staleAfter: 3600)
-        } catch {
-            print("LiveActivity start failed:", error)
+
+        if liveActivity == nil {
+            attachExistingLiveActivityIfAny()
+            if liveActivity == nil {
+                do {
+                    liveActivity = try LiveActivityManager.start(emoji: currentEmoji(), name: "LoopFollow", staleAfter: 3600)
+                } catch {
+                    print("LiveActivity start failed:", error)
+                }
+            }
         }
 
         guard let act = liveActivity else { return }
