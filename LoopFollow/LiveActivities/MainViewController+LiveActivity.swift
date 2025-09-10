@@ -4,6 +4,7 @@
 import ActivityKit
 import Foundation
 import QuartzCore
+
 // MARK: - Throttle/dedupe gate for Live Activity updates
 
 private final class LAUpdateGate {
@@ -14,7 +15,7 @@ private final class LAUpdateGate {
     private var lastUpdateAt: CFTimeInterval = 0
     private var pendingWorkItem: DispatchWorkItem?
 
-    /// Minimum time between updates pushed to the system (1.0–2.0s is sensible).
+    /// Minimum time between updates pushed to the system
     var minInterval: TimeInterval = 1.5
 
     func schedule(
@@ -49,7 +50,6 @@ private final class LAUpdateGate {
 }
 
 extension MainViewController {
-    // Persist key (scoped to this bundle id automatically by your Storage wrapper)
     private var liveActivityIdStorage: StorageValue<String?> { Storage.shared.liveActivityId }
 
     func currentEmoji() -> String {
@@ -96,7 +96,6 @@ extension MainViewController {
         let cobString = latestCOB?.formattedValue() ?? "0"
         let emoji = (zone == 1 ? "🟡" : (zone == -1 ? "🔴" : "🟢"))
 
-        // Optional app display name (only if user enabled it)
         let resolvedDisplayName: String? = Storage.shared.showDisplayName.value ? Bundle.main.displayName : nil
 
         return .init(
@@ -125,14 +124,13 @@ extension MainViewController {
             return
         }
 
-        // Fallback: grab the first if it exists (dev-safety).
+        // Fallback: grab the first if it exists.
         liveActivity = activities.first
         if let id = liveActivity?.id {
             liveActivityIdStorage.value = id
         }
     }
 
-    /// Call this anywhere (BG/IOB/COB/minute tick). It’s throttled + deduped.
     func updateLiveActivity() {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let state = currentLAState()
@@ -140,7 +138,6 @@ extension MainViewController {
         LAUpdateGate.shared.schedule(state: state) { [weak self] scheduledState in
             guard let self else { return }
 
-            // Ensure we’re attached or create once.
             if self.liveActivity == nil {
                 self.attachExistingLiveActivityIfAny()
                 if self.liveActivity == nil {

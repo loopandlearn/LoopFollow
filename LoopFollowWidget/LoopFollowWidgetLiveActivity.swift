@@ -102,6 +102,7 @@ struct LoopFollowWidgetLiveActivity: Widget {
             .frame(maxWidth: .infinity)
             .layoutPriority(2)
 
+            // RIGHT: IOB / COB — tighter fixed width
             VStack(alignment: .trailing, spacing: 6) {
                 HStack(spacing: 6) {
                     Image(systemName: "drop.fill")
