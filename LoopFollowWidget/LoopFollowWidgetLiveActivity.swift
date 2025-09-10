@@ -54,30 +54,34 @@ struct LoopFollowWidgetLiveActivity: Widget {
         }
     }
 
-    // MARK: - Lock Screen three-column layout
+    // MARK: - Lock Screen (three columns: left BG, middle stack, right IOB/COB)
 
     @ViewBuilder
     private func lockScreenView(context: ActivityViewContext<LoopFollowWidgetAttributes>) -> some View {
-        HStack(alignment: .center, spacing: 16) {
-            // LEFT: BG + time-ago
-            VStack(alignment: .leading, spacing: 6) {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(context.state.bg)
-                    .font(.system(size: 64, weight: .black, design: .rounded))
+                    .font(.system(size: 60, weight: .black, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(colorFor(zone: context.state.zone))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-
-                Text(formatMinAgo(context.state.minAgo))
-                    .font(.caption2)
-                    .foregroundStyle(.white.opacity(0.55))
-                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: true, vertical: false)
             }
-            .layoutPriority(2) // let BG keep space
+            .layoutPriority(4)
 
-            // MIDDLE: Trend + Delta (centered)
-            VStack(spacing: 6) {
-                HStack(spacing: 10) {
+            // MIDDLE: [DisplayName?] + Trend/Delta + Min-ago
+            VStack(alignment: .center, spacing: 6) {
+                if let name = context.state.displayName, !name.isEmpty {
+                    Text(name)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.9))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .allowsTightening(true)
+                }
+
+                HStack(spacing: 8) {
                     Text(context.state.direction)
                         .font(.system(size: 26, weight: .heavy))
                     Text(context.state.delta)
@@ -86,31 +90,45 @@ struct LoopFollowWidgetLiveActivity: Widget {
                 }
                 .foregroundStyle(.white)
                 .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity) // flex column
-            .layoutPriority(1)
+                .minimumScaleFactor(0.6)
+                .allowsTightening(true)
 
-            // RIGHT: IOB / COB (stacked with colored icons)
-            VStack(alignment: .trailing, spacing: 8) {
+                Text(formatMinAgo(context.state.minAgo))
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.55))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity)
+            .layoutPriority(2)
+
+            VStack(alignment: .trailing, spacing: 6) {
                 HStack(spacing: 6) {
                     Image(systemName: "drop.fill")
                         .font(.caption)
                         .foregroundStyle(.blue)
                     Text("IOB \(context.state.iob)")
                 }
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .allowsTightening(true)
+
                 HStack(spacing: 6) {
                     Image(systemName: "fork.knife")
                         .font(.caption)
                         .foregroundStyle(.orange)
                     Text("COB \(context.state.cob)")
                 }
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .allowsTightening(true)
             }
             .font(.footnote)
             .foregroundStyle(.white.opacity(0.9))
-            .lineLimit(1)
-            .frame(width: 120, alignment: .trailing) // keep right column tidy
+            .frame(width: 96, alignment: .trailing)
+            .layoutPriority(0)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 14)
         .padding(.vertical, 12)
     }
 }

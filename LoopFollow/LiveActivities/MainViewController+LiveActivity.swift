@@ -49,14 +49,20 @@ extension MainViewController {
         let cobString = latestCOB?.formattedValue() ?? "0"
         let emoji = (zone == 1 ? "🟡" : (zone == -1 ? "🔴" : "🟢"))
 
-        return .init(emoji: emoji,
-                     bg: bgString,
-                     direction: dirString,
-                     delta: deltaString,
-                     minAgo: minAgo,
-                     iob: iobString,
-                     cob: cobString,
-                     zone: zone)
+        // Resolve display name in the app target; pass it to the widget (or nil if hidden)
+        let resolvedDisplayName: String? = Storage.shared.showDisplayName.value ? Bundle.main.displayName : nil
+
+        return .init(
+            emoji: emoji,
+            bg: bgString,
+            direction: dirString,
+            delta: deltaString,
+            minAgo: minAgo,
+            iob: iobString,
+            cob: cobString,
+            zone: zone,
+            displayName: resolvedDisplayName
+        )
     }
 
     func attachExistingLiveActivityIfAny() {
@@ -73,7 +79,9 @@ extension MainViewController {
             attachExistingLiveActivityIfAny()
             if liveActivity == nil {
                 do {
-                    liveActivity = try LiveActivityManager.start(state: state, name: "LoopFollow", staleAfter: 15 * 60)
+                    liveActivity = try LiveActivityManager.start(state: state,
+                                                                 name: "LoopFollow",
+                                                                 staleAfter: 15 * 60)
                 } catch {
                     print("LiveActivity start failed:", error)
                 }

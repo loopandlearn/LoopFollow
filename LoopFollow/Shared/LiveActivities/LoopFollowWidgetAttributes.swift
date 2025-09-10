@@ -14,7 +14,6 @@ struct LoopFollowWidgetAttributes: ActivityAttributes {
         var iob: String
         var cob: String
         var zone: Int
+        var displayName: String?
     }
-
-    var name: String
 }
