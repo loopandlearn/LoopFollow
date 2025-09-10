@@ -206,6 +206,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         refreshScrollView.delegate = self
         NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
 
+        Observable.shared.minAgoText.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.updateLiveActivity()
+            }
+            .store(in: &cancellables)
+
         Observable.shared.bgText.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] newValue in
@@ -218,6 +225,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] newValue in
                 self?.DirectionText.text = newValue
+                self?.updateLiveActivity()
             }
             .store(in: &cancellables)
 
@@ -225,6 +233,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] newValue in
                 self?.DeltaText.text = newValue
+                self?.updateLiveActivity()
             }
             .store(in: &cancellables)
 
@@ -278,6 +287,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateServerText()
+                self?.updateLiveActivity()
             }
             .store(in: &cancellables)
 

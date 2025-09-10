@@ -37,7 +37,7 @@ struct LoopFollowWidgetLiveActivity: Widget {
                     HStack(spacing: 10) {
                         Text(context.state.direction).font(.headline).bold()
                         Text(context.state.delta).font(.headline).monospacedDigit()
-                        Text(formatMinAgo(context.state.minAgo))
+                        Text(context.state.minAgo)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
@@ -93,7 +93,7 @@ struct LoopFollowWidgetLiveActivity: Widget {
                 .minimumScaleFactor(0.6)
                 .allowsTightening(true)
 
-                Text(formatMinAgo(context.state.minAgo))
+                Text(context.state.minAgo)
                     .font(.caption2)
                     .foregroundStyle(.white.opacity(0.55))
                     .lineLimit(1)
@@ -135,10 +135,6 @@ struct LoopFollowWidgetLiveActivity: Widget {
 }
 
 // MARK: - Helpers
-
-private func formatMinAgo(_ minAgo: String) -> String {
-    minAgo == "now" ? "now" : "\(minAgo) ago"
-}
 
 private func colorFor(zone: Int) -> Color {
     switch zone {
