@@ -167,6 +167,8 @@ class Storage {
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 
+    var liveActivityId = StorageValue<String?>(key: "liveActivityId", defaultValue: nil)
+
     static let shared = Storage()
     private init() {}
 }

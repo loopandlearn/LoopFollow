@@ -3,8 +3,55 @@
 
 import ActivityKit
 import Foundation
+import QuartzCore
+// MARK: - Throttle/dedupe gate for Live Activity updates
+
+private final class LAUpdateGate {
+    static let shared = LAUpdateGate()
+    private init() {}
+
+    private var lastSentState: LoopFollowWidgetAttributes.ContentState?
+    private var lastUpdateAt: CFTimeInterval = 0
+    private var pendingWorkItem: DispatchWorkItem?
+
+    /// Minimum time between updates pushed to the system (1.0–2.0s is sensible).
+    var minInterval: TimeInterval = 1.5
+
+    func schedule(
+        state: LoopFollowWidgetAttributes.ContentState,
+        perform: @escaping (LoopFollowWidgetAttributes.ContentState) -> Void
+    ) {
+        // Dedupe identical visible state
+        if let last = lastSentState, last == state {
+            return
+        }
+
+        let now = CACurrentMediaTime()
+        let wait = max(0, minInterval - (now - lastUpdateAt))
+
+        pendingWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            perform(state)
+            self.lastSentState = state
+            self.lastUpdateAt = CACurrentMediaTime()
+        }
+        pendingWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + wait, execute: work)
+    }
+
+    func reset() {
+        pendingWorkItem?.cancel()
+        pendingWorkItem = nil
+        lastSentState = nil
+        lastUpdateAt = 0
+    }
+}
 
 extension MainViewController {
+    // Persist key (scoped to this bundle id automatically by your Storage wrapper)
+    private var liveActivityIdStorage: StorageValue<String?> { Storage.shared.liveActivityId }
+
     func currentEmoji() -> String {
         guard let last = bgData.last else { return "⌛️" }
         let v = Double(last.sgv)
@@ -49,7 +96,7 @@ extension MainViewController {
         let cobString = latestCOB?.formattedValue() ?? "0"
         let emoji = (zone == 1 ? "🟡" : (zone == -1 ? "🔴" : "🟢"))
 
-        // Resolve display name in the app target; pass it to the widget (or nil if hidden)
+        // Optional app display name (only if user enabled it)
         let resolvedDisplayName: String? = Storage.shared.showDisplayName.value ? Bundle.main.displayName : nil
 
         return .init(
@@ -65,31 +112,57 @@ extension MainViewController {
         )
     }
 
+    /// Try to attach to a previously-started LA (ID first, then any first).
     func attachExistingLiveActivityIfAny() {
-        if liveActivity == nil {
-            liveActivity = Activity<LoopFollowWidgetAttributes>.activities.first
+        if liveActivity != nil { return }
+
+        let activities = Activity<LoopFollowWidgetAttributes>.activities
+
+        if let savedId = liveActivityIdStorage.value,
+           let exact = activities.first(where: { $0.id == savedId })
+        {
+            liveActivity = exact
+            return
+        }
+
+        // Fallback: grab the first if it exists (dev-safety).
+        liveActivity = activities.first
+        if let id = liveActivity?.id {
+            liveActivityIdStorage.value = id
         }
     }
 
+    /// Call this anywhere (BG/IOB/COB/minute tick). It’s throttled + deduped.
     func updateLiveActivity() {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let state = currentLAState()
 
-        if liveActivity == nil {
-            attachExistingLiveActivityIfAny()
-            if liveActivity == nil {
-                do {
-                    liveActivity = try LiveActivityManager.start(state: state,
-                                                                 name: "LoopFollow",
-                                                                 staleAfter: 15 * 60)
-                } catch {
-                    print("LiveActivity start failed:", error)
+        LAUpdateGate.shared.schedule(state: state) { [weak self] scheduledState in
+            guard let self else { return }
+
+            // Ensure we’re attached or create once.
+            if self.liveActivity == nil {
+                self.attachExistingLiveActivityIfAny()
+                if self.liveActivity == nil {
+                    do {
+                        let act = try LiveActivityManager.start(
+                            state: scheduledState,
+                            staleAfter: 15 * 60
+                        )
+                        self.liveActivity = act
+                        self.liveActivityIdStorage.value = act.id
+                    } catch {
+                        print("LiveActivity start failed:", error)
+                        return
+                    }
                 }
             }
-        }
 
-        guard let act = liveActivity else { return }
-        Task { await LiveActivityManager.update(act, state: state, staleAfter: 15 * 60) }
+            guard let act = self.liveActivity else { return }
+            Task {
+                await LiveActivityManager.update(act, state: scheduledState, staleAfter: 15 * 60)
+            }
+        }
     }
 
     func endLiveActivityIfRunning(finalEmoji: String? = nil) {
@@ -99,6 +172,8 @@ extension MainViewController {
         Task {
             await LiveActivityManager.end(act, finalState: endState, dismissalPolicy: .immediate)
             liveActivity = nil
+            liveActivityIdStorage.value = nil
+            LAUpdateGate.shared.reset()
         }
     }
 }
