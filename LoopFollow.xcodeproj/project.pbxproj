@@ -77,6 +77,7 @@
 		DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE42ACF2383009A6922 /* Treatments.swift */; };
 		DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */; };
 		DD493AE92ACF2445009A6922 /* BGData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE82ACF2445009A6922 /* BGData.swift */; };
+		DD4A407E2E6AFEE6007B318B /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4A407D2E6AFEE6007B318B /* AuthService.swift */; };
 		DD4AFB3B2DB55CB600BB593F /* TimeOfDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */; };
 		DD4AFB3D2DB55D2900BB593F /* AlarmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB3C2DB55D2900BB593F /* AlarmConfiguration.swift */; };
 		DD4AFB492DB576C200BB593F /* AlarmSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB482DB576C200BB593F /* AlarmSettingsView.swift */; };
@@ -461,6 +462,7 @@
 		DD493AE42ACF2383009A6922 /* Treatments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Treatments.swift; sourceTree = "<group>"; };
 		DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatus.swift; sourceTree = "<group>"; };
 		DD493AE82ACF2445009A6922 /* BGData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGData.swift; sourceTree = "<group>"; };
+		DD4A407D2E6AFEE6007B318B /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeOfDay.swift; sourceTree = "<group>"; };
 		DD4AFB3C2DB55D2900BB593F /* AlarmConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmConfiguration.swift; sourceTree = "<group>"; };
 		DD4AFB482DB576C200BB593F /* AlarmSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSettingsView.swift; sourceTree = "<group>"; };
@@ -1484,6 +1486,7 @@
 		FCC688542489367300A0279D /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				DD4A407D2E6AFEE6007B318B /* AuthService.swift */,
 				DD1D52B82E1EB5DC00432050 /* TabPosition.swift */,
 				DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */,
 				DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */,
@@ -2013,6 +2016,7 @@
 				DD493AD72ACF2139009A6922 /* SuspendPump.swift in Sources */,
 				DDB9FC7F2DDB584500EFAA76 /* BolusEntry.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
+				DD4A407E2E6AFEE6007B318B /* AuthService.swift in Sources */,
 				654134182E1DC09700BDBE08 /* OverridePresetsView.swift in Sources */,
 				DDDC01DD2E244B3100D9975C /* JWTManager.swift in Sources */,
 				DDD10F072C529DE800D76A8E /* Observable.swift in Sources */,
