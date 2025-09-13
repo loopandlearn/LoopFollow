@@ -217,6 +217,30 @@ class LoopAPNSService {
 
     /// Provides environment-specific guidance for APNS configuration
     /// - Returns: String with guidance based on build configuration
+    private func getEnvironmentGuidance() -> String {
+        #if DEBUG
+            let buildType = "Xcode"
+            let recommendedEnvironment = "Development"
+            let environmentSetting = "Production Environment: OFF"
+        #else
+            let buildType = "Browser/TestFlight"
+            let recommendedEnvironment = "Production"
+            let environmentSetting = "Production Environment: ON"
+        #endif
+
+        let currentEnvironment = storage.productionEnvironment.value ? "Production" : "Development"
+
+        return """
+        Environment Configuration Help:
+
+        Build Type: \(buildType)
+        Current Setting: \(currentEnvironment)
+        Recommended Setting: \(recommendedEnvironment)
+
+        Please check your Loop Remote control settings:
+        • If you built with Xcode: Set "\(environmentSetting)"
+        • If you built with Browser/TestFlight: Set "Production Environment: ON"
+        """
     }
 
     /// Sends an APNS notification
@@ -321,19 +345,10 @@ class LoopAPNSService {
                         LogManager.shared.log(category: .apns, message: "APNS notification sent successfully")
                         completion(true, nil)
                     case 400:
-                    let errorResponse = String(data: data, encoding: .utf8) ?? "Unknown error"
-                    LogManager.shared.log(category: .apns, message: "APNS error 400: \(errorResponse)")
-                    LogManager.shared.log(category: .apns, message: "BadDeviceToken error - this usually means:")
-                    LogManager.shared.log(category: .apns, message: "1. Device token is expired or invalid")
-                    LogManager.shared.log(category: .apns, message: "2. Device token is from different environment (dev vs prod)")
-                    LogManager.shared.log(category: .apns, message: "3. Device token is not registered for this bundle identifier")
-                    LogManager.shared.log(category: .apns, message: "Troubleshooting steps:")
-                    LogManager.shared.log(category: .apns, message: "1. Refresh device token from Loop app")
-                    LogManager.shared.log(category: .apns, message: "2. Check if Loop app is using same environment (dev/prod)")
-                    LogManager.shared.log(category: .apns, message: "3. Verify device token is for bundle ID: \(bundleIdentifier)")
-                    LogManager.shared.log(category: .apns, message: "4. Check if device token is from production environment")
-                    LogManager.shared.log(category: .apns, message: "Current environment: \(storage.productionEnvironment.value ? "Production" : "Development")")
-                    throw LoopAPNSError.invalidResponse
+                        let environmentGuidance = self.getEnvironmentGuidance()
+                        let errorMessage = "Bad request. The request was invalid or malformed. \(responseBodyMessage)\n\n\(environmentGuidance)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 400: \(responseBodyMessage) - Check device token and environment settings")
+                        completion(false, errorMessage)
                     case 403:
                         let errorMessage = "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)"
                         LogManager.shared.log(category: .apns, message: "APNS error 403: \(responseBodyMessage) - Check APNS key permissions for bundle ID")
