@@ -287,7 +287,8 @@ class PushNotificationManager {
                     case 200:
                         completion(true, nil)
                     case 400:
-                        completion(false, "Bad request. The request was invalid or malformed. \(responseBodyMessage)")
+                        let environmentGuidance = self.getEnvironmentGuidance()
+                        completion(false, "Bad request. The request was invalid or malformed. \(responseBodyMessage)\n\n\(environmentGuidance)")
                     case 403:
                         completion(false, "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)")
                     case 404:
@@ -324,5 +325,33 @@ class PushNotificationManager {
         let host = productionEnvironment ? "api.push.apple.com" : "api.sandbox.push.apple.com"
         let urlString = "https://\(host)/3/device/\(deviceToken)"
         return URL(string: urlString)
+    }
+
+    /// Provides environment-specific guidance for APNS configuration
+    /// - Returns: String with guidance based on build configuration
+    private func getEnvironmentGuidance() -> String {
+        #if DEBUG
+            let buildType = "Xcode"
+            let recommendedEnvironment = "Development"
+            let environmentSetting = "Production Environment: OFF"
+        #else
+            let buildType = "Browser/TestFlight"
+            let recommendedEnvironment = "Production"
+            let environmentSetting = "Production Environment: ON"
+        #endif
+
+        let currentEnvironment = productionEnvironment ? "Production" : "Development"
+
+        return """
+        Environment Configuration Help:
+
+        Build Type: \(buildType)
+        Current Setting: \(currentEnvironment)
+        Recommended Setting: \(recommendedEnvironment)
+
+        Please check your Trio Remote control settings:
+        • If you built with Xcode: Set "\(environmentSetting)"
+        • If you built with Browser/TestFlight: Set "Production Environment: ON"
+        """
     }
 }
