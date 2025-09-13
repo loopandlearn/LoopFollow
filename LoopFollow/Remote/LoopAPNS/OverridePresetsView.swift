@@ -228,48 +228,38 @@ class OverridePresetsViewModel: ObservableObject {
         }
     }
 
-    func activateOverride(preset: OverridePreset) async {
-        await MainActor.run {
-            isActivating = true
-        }
+    func activateOverride(preset: OverridePreset) {
+        isActivating = true
 
-        do {
-            try await sendOverrideNotification(preset: preset)
-            await MainActor.run {
+        sendOverrideNotification(preset: preset) { success, errorMessage in
+            DispatchQueue.main.async {
                 self.isActivating = false
-                self.statusMessage = "\(preset.name) override activated successfully."
-                self.alertType = .statusSuccess
+                if success {
+                    self.statusMessage = "\(preset.name) override activated successfully."
+                    self.alertType = .statusSuccess
+                } else {
+                    self.statusMessage = errorMessage ?? "Failed to activate override."
+                    self.alertType = .statusFailure
+                }
                 self.showAlert = true
-            }
-        } catch {
-            await MainActor.run {
-                self.statusMessage = "Failed to activate override: \(error.localizedDescription)"
-                self.alertType = .statusFailure
-                self.showAlert = true
-                self.isActivating = false
             }
         }
     }
 
-    func cancelOverride() async {
-        await MainActor.run {
-            isActivating = true
-        }
+    func cancelOverride() {
+        isActivating = true
 
-        do {
-            try await sendCancelOverrideNotification()
-            await MainActor.run {
+        sendCancelOverrideNotification { success, errorMessage in
+            DispatchQueue.main.async {
                 self.isActivating = false
-                self.statusMessage = "Active override cancelled successfully."
-                self.alertType = .statusSuccess
+                if success {
+                    self.statusMessage = "Active override cancelled successfully."
+                    self.alertType = .statusSuccess
+                } else {
+                    self.statusMessage = errorMessage ?? "Failed to cancel override."
+                    self.alertType = .statusFailure
+                }
                 self.showAlert = true
-            }
-        } catch {
-            await MainActor.run {
-                self.statusMessage = "Failed to cancel override: \(error.localizedDescription)"
-                self.alertType = .statusFailure
-                self.showAlert = true
-                self.isActivating = false
             }
         }
     }
@@ -298,17 +288,18 @@ class OverridePresetsViewModel: ObservableObject {
         }
     }
 
-    private func sendOverrideNotification(preset: OverridePreset) async throws {
+    private func sendOverrideNotification(preset: OverridePreset, completion: @escaping (Bool, String?) -> Void) {
         let apnsService = LoopAPNSService()
-        try await apnsService.sendOverrideNotification(
+        apnsService.sendOverrideNotification(
             presetName: preset.name,
-            duration: preset.duration
+            duration: preset.duration,
+            completion: completion
         )
     }
 
-    private func sendCancelOverrideNotification() async throws {
+    private func sendCancelOverrideNotification(completion: @escaping (Bool, String?) -> Void) {
         let apnsService = LoopAPNSService()
-        try await apnsService.sendCancelOverrideNotification()
+        apnsService.sendCancelOverrideNotification(completion: completion)
     }
 }
 
