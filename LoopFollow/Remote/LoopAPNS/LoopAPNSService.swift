@@ -215,32 +215,13 @@ class LoopAPNSService {
         return regex?.firstMatch(in: text, options: [], range: range) != nil
     }
 
-    /// Provides environment-specific guidance for APNS configuration
-    /// - Returns: String with guidance based on build configuration
+    /// Provides simple environment guidance for APNS configuration
+    /// - Returns: String with simple guidance to try opposite setting
     private func getEnvironmentGuidance() -> String {
-        #if DEBUG
-            let buildType = "Xcode"
-            let recommendedEnvironment = "Development"
-            let environmentSetting = "Production Environment: OFF"
-        #else
-            let buildType = "Browser/TestFlight"
-            let recommendedEnvironment = "Production"
-            let environmentSetting = "Production Environment: ON"
-        #endif
-
-        let currentEnvironment = storage.productionEnvironment.value ? "Production" : "Development"
-
-        return """
-        Environment Configuration Help:
-
-        Build Type: \(buildType)
-        Current Setting: \(currentEnvironment)
-        Recommended Setting: \(recommendedEnvironment)
-
-        Please check your Loop Remote control settings:
-        • If you built with Xcode: Set "\(environmentSetting)"
-        • If you built with Browser/TestFlight: Set "Production Environment: ON"
-        """
+        let currentSetting = storage.productionEnvironment.value ? "ON" : "OFF"
+        let trySetting = storage.productionEnvironment.value ? "OFF" : "ON"
+        
+        return "Try changing Production Environment from \(currentSetting) to \(trySetting) in your Loop APNS settings."
     }
 
     /// Sends an APNS notification
