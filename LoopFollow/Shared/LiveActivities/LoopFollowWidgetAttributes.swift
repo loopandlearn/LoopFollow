@@ -4,6 +4,13 @@
 import ActivityKit
 import Foundation
 
+enum Palette: String, Codable, Hashable {
+    case primary
+    case green
+    case yellow
+    case red
+}
+
 struct LoopFollowWidgetAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         var emoji: String
@@ -15,5 +22,7 @@ struct LoopFollowWidgetAttributes: ActivityAttributes {
         var cob: String
         var zone: Int
         var displayName: String?
+        var stale: Bool
+        var bgTextColor: Palette
     }
 }

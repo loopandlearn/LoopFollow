@@ -208,7 +208,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         Observable.shared.minAgoText.$value
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] newValue in
+            .sink { [weak self] _ in
+                self?.updateLiveActivity()
+            }
+            .store(in: &cancellables)
+
+        Observable.shared.bgStale.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
                 self?.updateLiveActivity()
             }
             .store(in: &cancellables)
@@ -252,6 +259,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.setBGTextColor()
+                self?.updateLiveActivity()
             }
             .store(in: &cancellables)
 

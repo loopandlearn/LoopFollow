@@ -3,53 +3,10 @@
 
 import ActivityKit
 import Foundation
-import QuartzCore
-
-// MARK: - Throttle/dedupe gate for Live Activity updates
-
-private final class LAUpdateGate {
-    static let shared = LAUpdateGate()
-    private init() {}
-
-    private var lastSentState: LoopFollowWidgetAttributes.ContentState?
-    private var lastUpdateAt: CFTimeInterval = 0
-    private var pendingWorkItem: DispatchWorkItem?
-
-    /// Minimum time between updates pushed to the system
-    var minInterval: TimeInterval = 1.5
-
-    func schedule(
-        state: LoopFollowWidgetAttributes.ContentState,
-        perform: @escaping (LoopFollowWidgetAttributes.ContentState) -> Void
-    ) {
-        // Dedupe identical visible state
-        if let last = lastSentState, last == state {
-            return
-        }
-
-        let now = CACurrentMediaTime()
-        let wait = max(0, minInterval - (now - lastUpdateAt))
-
-        pendingWorkItem?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            guard let self else { return }
-            perform(state)
-            self.lastSentState = state
-            self.lastUpdateAt = CACurrentMediaTime()
-        }
-        pendingWorkItem = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + wait, execute: work)
-    }
-
-    func reset() {
-        pendingWorkItem?.cancel()
-        pendingWorkItem = nil
-        lastSentState = nil
-        lastUpdateAt = 0
-    }
-}
+import SwiftUI
 
 extension MainViewController {
+    // Persist key (scoped to this bundle id via Storage wrapper)
     private var liveActivityIdStorage: StorageValue<String?> { Storage.shared.liveActivityId }
 
     func currentEmoji() -> String {
@@ -60,23 +17,27 @@ extension MainViewController {
         return "🟢"
     }
 
+    private func paletteFromObservableColor() -> Palette {
+        let c = Observable.shared.bgTextColor.value
+        if c == .yellow { return .yellow }
+        if c == .red { return .red }
+        if c == .green { return .green }
+        return .primary
+    }
+
     private func currentLAState() -> LoopFollowWidgetAttributes.ContentState {
-        let zone: Int
-
-        if let last = bgData.last {
+        // Determine zone from latest BG numeric value (for emoji & island color)
+        let zone: Int = {
+            guard let last = bgData.last else { return 0 }
             let v = Double(last.sgv)
-            if v >= Storage.shared.highLine.value { zone = 1 }
-            else if v <= Storage.shared.lowLine.value { zone = -1 }
-            else { zone = 0 }
-
-        } else {
-            zone = 0
-        }
+            if v >= Storage.shared.highLine.value { return 1 }
+            if v <= Storage.shared.lowLine.value { return -1 }
+            return 0
+        }()
 
         let iobString = latestIOB?.formattedValue() ?? "0"
         let cobString = latestCOB?.formattedValue() ?? "0"
         let emoji = (zone == 1 ? "🟡" : (zone == -1 ? "🔴" : "🟢"))
-
         let resolvedDisplayName: String? = Storage.shared.showDisplayName.value ? Bundle.main.displayName : nil
 
         return .init(
@@ -88,7 +49,9 @@ extension MainViewController {
             iob: iobString,
             cob: cobString,
             zone: zone,
-            displayName: resolvedDisplayName
+            displayName: resolvedDisplayName,
+            stale: Observable.shared.bgStale.value,
+            bgTextColor: paletteFromObservableColor()
         )
     }
 
@@ -112,34 +75,34 @@ extension MainViewController {
         }
     }
 
+    /// Unconditionally start (if needed) and update the Live Activity.
     func updateLiveActivity() {
+        print("LiveActivity updateLiveActivity()")
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let state = currentLAState()
 
-        LAUpdateGate.shared.schedule(state: state) { [weak self] scheduledState in
-            guard let self else { return }
-
-            if self.liveActivity == nil {
-                self.attachExistingLiveActivityIfAny()
-                if self.liveActivity == nil {
-                    do {
-                        let act = try LiveActivityManager.start(
-                            state: scheduledState,
-                            staleAfter: 15 * 60
-                        )
-                        self.liveActivity = act
-                        self.liveActivityIdStorage.value = act.id
-                    } catch {
-                        print("LiveActivity start failed:", error)
-                        return
-                    }
+        // Ensure we’re attached or create once.
+        if liveActivity == nil {
+            attachExistingLiveActivityIfAny()
+            if liveActivity == nil {
+                do {
+                    let act = try LiveActivityManager.start(
+                        state: state,
+                        staleAfter: 15 * 60
+                    )
+                    liveActivity = act
+                    liveActivityIdStorage.value = act.id
+                } catch {
+                    print("LiveActivity start failed:", error)
+                    return
                 }
             }
+        }
 
-            guard let act = self.liveActivity else { return }
-            Task {
-                await LiveActivityManager.update(act, state: scheduledState, staleAfter: 15 * 60)
-            }
+        guard let act = liveActivity else { return }
+        Task {
+            print("LiveActivity updating")
+            await LiveActivityManager.update(act, state: state, staleAfter: 15 * 60)
         }
     }
 
@@ -151,7 +114,6 @@ extension MainViewController {
             await LiveActivityManager.end(act, finalState: endState, dismissalPolicy: .immediate)
             liveActivity = nil
             liveActivityIdStorage.value = nil
-            LAUpdateGate.shared.reset()
         }
     }
 }

@@ -87,6 +87,7 @@
 		<string>audio</string>
 		<string>processing</string>
 		<string>bluetooth-central</string>
+		<string>fetch</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>
