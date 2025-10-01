@@ -1,6 +1,5 @@
 // LoopFollow
 // QRCodeGenerator.swift
-// Created by codebymini.
 
 import CoreImage
 import UIKit
