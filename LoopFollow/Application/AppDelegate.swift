@@ -38,12 +38,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
 
         _ = BLEManager.shared
+        // Ensure VolumeButtonHandler is initialized so it can receive alarm notifications
+        _ = VolumeButtonHandler.shared
 
         // Register for remote notifications
         DispatchQueue.main.async {
             UIApplication.shared.registerForRemoteNotifications()
         }
-
         return true
     }
 
