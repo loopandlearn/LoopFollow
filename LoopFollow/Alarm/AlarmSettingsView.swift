@@ -177,10 +177,18 @@ struct AlarmSettingsView: View {
                     )
 
                     Toggle(
-                        "Auto‑Snooze CGM Start",
+                        "Auto‑Snooze CGM Start",
                         isOn: Binding(
                             get: { cfgStore.value.autoSnoozeCGMStart },
                             set: { cfgStore.value.autoSnoozeCGMStart = $0 }
+                        )
+                    )
+
+                    Toggle(
+                        "Volume Buttons Snooze Alarms",
+                        isOn: Binding(
+                            get: { cfgStore.value.enableVolumeButtonSnooze },
+                            set: { cfgStore.value.enableVolumeButtonSnooze = $0 }
                         )
                     )
                 }
