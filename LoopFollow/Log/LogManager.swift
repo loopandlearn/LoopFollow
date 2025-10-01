@@ -28,6 +28,7 @@ class LogManager {
         case volumeButtonSnooze = "Volume Button Snooze"
         case calendar = "Calendar"
         case deviceStatus = "Device Status"
+        case remote = "Remote"
     }
 
     init() {
