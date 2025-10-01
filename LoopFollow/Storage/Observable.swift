@@ -24,6 +24,7 @@ class Observable {
     var deltaText = ObservableValue<String>(default: "+0")
 
     var currentAlarm = ObservableValue<UUID?>(default: nil)
+    var alarmSoundPlaying = ObservableValue<Bool>(default: false)
 
     var debug = ObservableValue<Bool>(default: false)
 
