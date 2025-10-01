@@ -396,45 +396,48 @@ class OverridePresetsViewModel: ObservableObject {
         }
     }
 
-    func activateOverride(preset: OverridePreset, duration: TimeInterval?) {
-        isActivating = true
+    func activateOverride(preset: OverridePreset, duration: TimeInterval?) async {
+        await MainActor.run {
+            isActivating = true
+        }
 
-        sendOverrideNotification(preset: preset, duration: duration) { success, errorMessage in
-            DispatchQueue.main.async {
+        do {
+            try await sendOverrideNotification(preset: preset, duration: duration)
+            await MainActor.run {
                 self.isActivating = false
-                if success {
-                    self.statusMessage = "\(preset.name) override activated successfully."
-                    self.alertType = .statusSuccess
-                } else {
-                    self.statusMessage = errorMessage ?? "Failed to activate override."
-                    self.alertType = .statusFailure
-                }
+                self.statusMessage = "\(preset.name) override activated successfully."
+                self.alertType = .statusSuccess
+                self.showAlert = true
+            }
+        } catch {
+            await MainActor.run {
+                self.isActivating = false
+                self.statusMessage = "Failed to activate override: \(error.localizedDescription)"
+                self.alertType = .statusFailure
                 self.showAlert = true
             }
         }
     }
 
-    func cancelOverride() {
-        isActivating = true
+    func cancelOverride() async {
+        await MainActor.run {
+            isActivating = true
+        }
 
-        sendCancelOverrideNotification { success, errorMessage in
-            DispatchQueue.main.async {
+        do {
+            try await sendCancelOverrideNotification()
+            await MainActor.run {
                 self.isActivating = false
-                if success {
-                    self.statusMessage = "Active override cancelled successfully."
-                    self.alertType = .statusSuccess
-                } else {
-                    self.statusMessage = errorMessage ?? "Failed to cancel override."
-                    self.alertType = .statusFailure
-                }
+                self.statusMessage = "Active override cancelled successfully."
+                self.alertType = .statusSuccess
                 self.showAlert = true
             }
         } catch {
             await MainActor.run {
+                self.isActivating = false
                 self.statusMessage = "Failed to cancel override: \(error.localizedDescription)"
                 self.alertType = .statusFailure
                 self.showAlert = true
-                self.isActivating = false
             }
         }
     }
@@ -462,18 +465,33 @@ class OverridePresetsViewModel: ObservableObject {
         }
     }
 
-    private func sendOverrideNotification(preset: OverridePreset, duration: TimeInterval?, completion: @escaping (Bool, String?) -> Void) {
-        let apnsService = LoopAPNSService()
-        apnsService.sendOverrideNotification(
-            presetName: preset.name,
-            duration: duration,
-            completion: completion
-        )
+    private func sendOverrideNotification(preset: OverridePreset, duration: TimeInterval?) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            let apnsService = LoopAPNSService()
+            apnsService.sendOverrideNotification(
+                presetName: preset.name,
+                duration: duration
+            ) { success, errorMessage in
+                if success {
+                    continuation.resume()
+                } else {
+                    continuation.resume(throwing: NSError(domain: "OverrideError", code: 0, userInfo: [NSLocalizedDescriptionKey: errorMessage ?? "Unknown error"]))
+                }
+            }
+        }
     }
 
-    private func sendCancelOverrideNotification(completion: @escaping (Bool, String?) -> Void) {
-        let apnsService = LoopAPNSService()
-        apnsService.sendCancelOverrideNotification(completion: completion)
+    private func sendCancelOverrideNotification() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            let apnsService = LoopAPNSService()
+            apnsService.sendCancelOverrideNotification { success, errorMessage in
+                if success {
+                    continuation.resume()
+                } else {
+                    continuation.resume(throwing: NSError(domain: "OverrideError", code: 0, userInfo: [NSLocalizedDescriptionKey: errorMessage ?? "Unknown error"]))
+                }
+            }
+        }
     }
 }
 

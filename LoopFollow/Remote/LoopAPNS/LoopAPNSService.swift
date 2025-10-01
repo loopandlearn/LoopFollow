@@ -220,7 +220,7 @@ class LoopAPNSService {
     private func getEnvironmentGuidance() -> String {
         let currentSetting = storage.productionEnvironment.value ? "ON" : "OFF"
         let trySetting = storage.productionEnvironment.value ? "OFF" : "ON"
-        
+
         return "Try changing Production Environment from \(currentSetting) to \(trySetting) in your Loop APNS settings."
     }
 
