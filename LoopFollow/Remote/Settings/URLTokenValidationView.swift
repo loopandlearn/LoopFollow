@@ -1,6 +1,5 @@
 // LoopFollow
 // URLTokenValidationView.swift
-// Created by codebymini.
 
 import SwiftUI
 

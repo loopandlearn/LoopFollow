@@ -1,6 +1,5 @@
 // LoopFollow
 // RemoteCommandSettings.swift
-// Created by codebymini.
 
 import Foundation
 import HealthKit

@@ -1,6 +1,5 @@
 // LoopFollow
 // QRCodeDisplayView.swift
-// Created by codebymini.
 
 import SwiftUI
 import UIKit
