@@ -33,8 +33,8 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var productionEnvironment: Bool
     @Published var isShowingLoopAPNSScanner: Bool = false
     @Published var loopAPNSErrorMessage: String?
-  
-      // MARK: - QR Code Sharing Properties
+
+    // MARK: - QR Code Sharing Properties
 
     @Published var isShowingQRCodeScanner: Bool = false
     @Published var isShowingQRCodeDisplay: Bool = false

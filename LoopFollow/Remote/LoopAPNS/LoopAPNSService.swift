@@ -150,7 +150,6 @@ class LoopAPNSService {
             "alert": "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
         ] as [String: Any]
 
-
         /* Let's wait with this until we have an encryption solution for LRC
          if let returnInfo = createReturnNotificationInfo() {
              finalPayload["return_notification"] = returnInfo
@@ -163,7 +162,6 @@ class LoopAPNSService {
 
         // Log carbs entry attempt
         LogManager.shared.log(category: .apns, message: "Sending carbs: \(String(format: "%.1f", carbsAmount))g, absorption: \(String(format: "%.1f", absorptionTime))h")
-
 
         sendAPNSNotification(
             deviceToken: deviceToken,
@@ -210,23 +208,17 @@ class LoopAPNSService {
             "alert": "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U",
         ] as [String: Any]
 
-         /* Let's wait with this until we have an encryption solution for LRC
+        /* Let's wait with this until we have an encryption solution for LRC
          if let returnInfo = createReturnNotificationInfo() {
              finalPayload["return_notification"] = returnInfo
          }
          */
-
-        // Log the exact carbs amount for debugging precision issues
-        LogManager.shared.log(category: .apns, message: "Carbs amount - Raw: \(payload.carbsAmount ?? 0.0), Formatted: \(String(format: "%.1f", carbsAmount)), JSON: \(carbsAmount)")
-        LogManager.shared.log(category: .apns, message: "Absorption time - Raw: \(payload.absorptionTime ?? 3.0), Formatted: \(String(format: "%.1f", absorptionTime)), JSON: \(absorptionTime)")
-
 
         // Log the exact bolus amount for debugging precision issues
         LogManager.shared.log(category: .apns, message: "Bolus amount - Raw: \(payload.bolusAmount ?? 0.0), Formatted: \(String(format: "%.2f", bolusAmount)), JSON: \(bolusAmount)")
 
         // Log bolus entry attempt
         LogManager.shared.log(category: .apns, message: "Sending bolus: \(String(format: "%.2f", bolusAmount))U")
-
 
         sendAPNSNotification(
             deviceToken: deviceToken,
