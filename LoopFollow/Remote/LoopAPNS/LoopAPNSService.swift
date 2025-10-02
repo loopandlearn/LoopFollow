@@ -112,12 +112,17 @@ class LoopAPNSService {
     }
 
     /// Sends carbs via APNS push notification
-    /// - Parameter payload: The carbs payload to send
-    /// - Returns: True if successful, false otherwise
-    func sendCarbsViaAPNS(payload: LoopAPNSPayload) async throws -> Bool {
+    /// - Parameters:
+    ///   - payload: The carbs payload to send
+    ///   - completion: Completion handler with success status and error message
+    func sendCarbsViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
         guard validateSetup() else {
-            throw LoopAPNSError.invalidConfiguration
+            let errorMessage = "Loop APNS Configuration not valid"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
         }
+
         let deviceToken = Storage.shared.deviceToken.value
         let bundleIdentifier = Storage.shared.bundleId.value
         let keyId = storage.keyId.value
@@ -145,6 +150,7 @@ class LoopAPNSService {
             "alert": "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
         ] as [String: Any]
 
+
         /* Let's wait with this until we have an encryption solution for LRC
          if let returnInfo = createReturnNotificationInfo() {
              finalPayload["return_notification"] = returnInfo
@@ -155,28 +161,32 @@ class LoopAPNSService {
         LogManager.shared.log(category: .apns, message: "Carbs amount - Raw: \(payload.carbsAmount ?? 0.0), Formatted: \(String(format: "%.1f", carbsAmount)), JSON: \(carbsAmount)")
         LogManager.shared.log(category: .apns, message: "Absorption time - Raw: \(payload.absorptionTime ?? 3.0), Formatted: \(String(format: "%.1f", absorptionTime)), JSON: \(absorptionTime)")
 
-        // Log the final payload for debugging
-        if let payloadData = try? JSONSerialization.data(withJSONObject: finalPayload),
-           let payloadString = String(data: payloadData, encoding: .utf8)
-        {
-            LogManager.shared.log(category: .apns, message: "Final payload being sent: \(payloadString)")
-        }
-        return try await sendAPNSNotification(
+        // Log carbs entry attempt
+        LogManager.shared.log(category: .apns, message: "Sending carbs: \(String(format: "%.1f", carbsAmount))g, absorption: \(String(format: "%.1f", absorptionTime))h")
+
+
+        sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
             keyId: keyId,
             apnsKey: apnsKey,
-            payload: finalPayload
+            payload: finalPayload,
+            completion: completion
         )
     }
 
     /// Sends bolus via APNS push notification
-    /// - Parameter payload: The bolus payload to send
-    /// - Returns: True if successful, false otherwise
-    func sendBolusViaAPNS(payload: LoopAPNSPayload) async throws -> Bool {
+    /// - Parameters:
+    ///   - payload: The bolus payload to send
+    ///   - completion: Completion handler with success status and error message
+    func sendBolusViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
         guard validateSetup() else {
-            throw LoopAPNSError.invalidConfiguration
+            let errorMessage = "Loop APNS Configuration not valid"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
         }
+
         let deviceToken = Storage.shared.deviceToken.value
         let bundleIdentifier = Storage.shared.bundleId.value
         let keyId = storage.keyId.value
@@ -200,26 +210,90 @@ class LoopAPNSService {
             "alert": "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U",
         ] as [String: Any]
 
-        if let returnInfo = createReturnNotificationInfo() {
-            finalPayload["return_notification"] = returnInfo
-        }
+         /* Let's wait with this until we have an encryption solution for LRC
+         if let returnInfo = createReturnNotificationInfo() {
+             finalPayload["return_notification"] = returnInfo
+         }
+         */
+
+        // Log the exact carbs amount for debugging precision issues
+        LogManager.shared.log(category: .apns, message: "Carbs amount - Raw: \(payload.carbsAmount ?? 0.0), Formatted: \(String(format: "%.1f", carbsAmount)), JSON: \(carbsAmount)")
+        LogManager.shared.log(category: .apns, message: "Absorption time - Raw: \(payload.absorptionTime ?? 3.0), Formatted: \(String(format: "%.1f", absorptionTime)), JSON: \(absorptionTime)")
+
 
         // Log the exact bolus amount for debugging precision issues
         LogManager.shared.log(category: .apns, message: "Bolus amount - Raw: \(payload.bolusAmount ?? 0.0), Formatted: \(String(format: "%.2f", bolusAmount)), JSON: \(bolusAmount)")
 
-        // Log the final payload for debugging
-        if let payloadData = try? JSONSerialization.data(withJSONObject: finalPayload),
-           let payloadString = String(data: payloadData, encoding: .utf8)
-        {
-            LogManager.shared.log(category: .apns, message: "Final payload being sent: \(payloadString)")
-        }
-        return try await sendAPNSNotification(
+        // Log bolus entry attempt
+        LogManager.shared.log(category: .apns, message: "Sending bolus: \(String(format: "%.2f", bolusAmount))U")
+
+
+        sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
             keyId: keyId,
             apnsKey: apnsKey,
-            payload: finalPayload
+            payload: finalPayload,
+            completion: completion
         )
+    }
+
+    /// Validates APNS credentials similar to PushNotificationManager
+    /// - Returns: Array of validation error messages, or nil if valid
+    private func validateCredentials() -> [String]? {
+        var errors = [String]()
+
+        let keyId = storage.keyId.value
+        let teamId = Storage.shared.teamId.value ?? ""
+        let apnsKey = storage.apnsKey.value
+
+        // Validate keyId (should be 10 alphanumeric characters)
+        let keyIdPattern = "^[A-Z0-9]{10}$"
+        if !matchesRegex(keyId, pattern: keyIdPattern) {
+            errors.append("APNS Key ID (\(keyId)) must be 10 uppercase alphanumeric characters.")
+        }
+
+        // Validate teamId (should be 10 alphanumeric characters)
+        let teamIdPattern = "^[A-Z0-9]{10}$"
+        if !matchesRegex(teamId, pattern: teamIdPattern) {
+            errors.append("Team ID (\(teamId)) must be 10 uppercase alphanumeric characters.")
+        }
+
+        // Validate apnsKey (should contain the BEGIN and END PRIVATE KEY markers)
+        if !apnsKey.contains("-----BEGIN PRIVATE KEY-----") || !apnsKey.contains("-----END PRIVATE KEY-----") {
+            errors.append("APNS Key must be a valid PEM-formatted private key.")
+        } else {
+            // Validate that the key data between the markers is valid Base64
+            if let keyData = extractKeyData(from: apnsKey) {
+                if Data(base64Encoded: keyData) == nil {
+                    errors.append("APNS Key contains invalid Base64 key data.")
+                }
+            } else {
+                errors.append("APNS Key has invalid formatting.")
+            }
+        }
+
+        return errors.isEmpty ? nil : errors
+    }
+
+    /// Helper method to match regex patterns
+    /// - Parameters:
+    ///   - text: Text to match
+    ///   - pattern: Regex pattern
+    /// - Returns: True if pattern matches
+    private func matchesRegex(_ text: String, pattern: String) -> Bool {
+        let regex = try? NSRegularExpression(pattern: pattern)
+        let range = NSRange(location: 0, length: text.utf16.count)
+        return regex?.firstMatch(in: text, options: [], range: range) != nil
+    }
+
+    /// Provides simple environment guidance for APNS configuration
+    /// - Returns: String with simple guidance to try opposite setting
+    private func getEnvironmentGuidance() -> String {
+        let currentSetting = storage.productionEnvironment.value ? "ON" : "OFF"
+        let trySetting = storage.productionEnvironment.value ? "OFF" : "ON"
+
+        return "Try changing Production Environment from \(currentSetting) to \(trySetting) in your Loop APNS settings."
     }
 
     /// Sends an APNS notification
@@ -229,24 +303,41 @@ class LoopAPNSService {
     ///   - keyId: The APNS key ID
     ///   - apnsKey: The APNS key
     ///   - payload: The notification payload
-    /// - Returns: True if successful, false otherwise
+    ///   - completion: Completion handler with success status and error message
     private func sendAPNSNotification(
         deviceToken: String,
         bundleIdentifier: String,
         keyId: String,
         apnsKey: String,
-        payload: [String: Any]
-    ) async throws -> Bool {
+        payload: [String: Any],
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        // Validate credentials first
+        if let validationErrors = validateCredentials() {
+            let errorMessage = "Credential validation failed: \(validationErrors.joined(separator: ", "))"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
+        }
+
         // Create JWT token for APNS authentication
         guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: Storage.shared.teamId.value ?? "", apnsKey: apnsKey) else {
-            LogManager.shared.log(category: .apns, message: "Failed to create JWT using JWTManager. Check APNS credentials.")
-            throw LoopAPNSError.jwtError
+            let errorMessage = "Failed to generate JWT, please check that the APNS Key ID, APNS Key and Team ID are correct."
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
         }
 
         // Determine APNS environment
         let isProduction = storage.productionEnvironment.value
         let apnsURL = isProduction ? "https://api.push.apple.com" : "https://api.sandbox.push.apple.com"
-        let requestURL = URL(string: "\(apnsURL)/3/device/\(deviceToken)")!
+        guard let requestURL = URL(string: "\(apnsURL)/3/device/\(deviceToken)") else {
+            let errorMessage = "Failed to construct APNs URL"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
+        }
+
         var request = URLRequest(url: requestURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "content-type")
@@ -255,19 +346,10 @@ class LoopAPNSService {
         request.setValue("alert", forHTTPHeaderField: "apns-push-type")
         request.setValue("10", forHTTPHeaderField: "apns-priority") // High priority
 
-        // Log request details for debugging
-        LogManager.shared.log(category: .apns, message: "APNS Request URL: \(requestURL)")
-        LogManager.shared.log(category: .apns, message: "APNS Request Headers - Authorization: Bearer \(jwt.prefix(50))..., Topic: \(bundleIdentifier)")
-
         // Validate bundle identifier format
         if !bundleIdentifier.contains(".") {
             LogManager.shared.log(category: .apns, message: "Warning: Bundle identifier may be in wrong format: \(bundleIdentifier)")
         }
-
-        // Validate device token format (should be 64 hex characters)
-        let deviceTokenLength = deviceToken.count
-        let isHexToken = deviceToken.range(of: "^[0-9A-Fa-f]{64}$", options: .regularExpression) != nil
-        LogManager.shared.log(category: .apns, message: "Device token validation - Length: \(deviceTokenLength), Is hex: \(isHexToken)")
 
         // Create the proper APNS payload structure (matching @parse/node-apn format)
         var apnsPayload: [String: Any] = [
@@ -280,7 +362,7 @@ class LoopAPNSService {
 
         // Add all the custom payload fields (excluding APNS-specific fields)
         for (key, value) in payload {
-            if key != "alert" && key != "content-available" && key != "interruption-level" {
+            if key != "alert", key != "content-available", key != "interruption-level" {
                 apnsPayload[key] = value
             }
         }
@@ -288,75 +370,87 @@ class LoopAPNSService {
         // Remove nil values to clean up the payload
         let cleanPayload = apnsPayload.compactMapValues { $0 }
 
-        let jsonData: Data
         do {
-            jsonData = try JSONSerialization.data(withJSONObject: cleanPayload)
-            LogManager.shared.log(category: .apns, message: "APNS payload serialized successfully, size: \(jsonData.count) bytes")
+            let jsonData = try JSONSerialization.data(withJSONObject: cleanPayload)
 
-            // Log the actual payload being sent
-            if let payloadString = String(data: jsonData, encoding: .utf8) {
-                LogManager.shared.log(category: .apns, message: "APNS payload being sent: \(payloadString)")
-            }
-        } catch {
-            LogManager.shared.log(category: .apns, message: "Failed to serialize APNS payload: \(error.localizedDescription)")
-            throw LoopAPNSError.invalidConfiguration
-        }
-        request.httpBody = jsonData
+            request.httpBody = jsonData
 
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-
-            if let httpResponse = response as? HTTPURLResponse {
-                switch httpResponse.statusCode {
-                case 200:
-                    LogManager.shared.log(category: .apns, message: "APNS notification sent successfully")
-                    return true
-                case 400:
-                    let errorResponse = String(data: data, encoding: .utf8) ?? "Unknown error"
-                    LogManager.shared.log(category: .apns, message: "APNS error 400: \(errorResponse)")
-                    LogManager.shared.log(category: .apns, message: "BadDeviceToken error - this usually means:")
-                    LogManager.shared.log(category: .apns, message: "1. Device token is expired or invalid")
-                    LogManager.shared.log(category: .apns, message: "2. Device token is from different environment (dev vs prod)")
-                    LogManager.shared.log(category: .apns, message: "3. Device token is not registered for this bundle identifier")
-                    LogManager.shared.log(category: .apns, message: "Troubleshooting steps:")
-                    LogManager.shared.log(category: .apns, message: "1. Refresh device token from Loop app")
-                    LogManager.shared.log(category: .apns, message: "2. Check if Loop app is using same environment (dev/prod)")
-                    LogManager.shared.log(category: .apns, message: "3. Verify device token is for bundle ID: \(bundleIdentifier)")
-                    LogManager.shared.log(category: .apns, message: "4. Check if device token is from production environment")
-                    LogManager.shared.log(category: .apns, message: "Current environment: \(storage.productionEnvironment.value ? "Production" : "Development")")
-                    throw LoopAPNSError.invalidResponse
-                case 403:
-                    let errorResponse = String(data: data, encoding: .utf8) ?? "Unknown error"
-                    LogManager.shared.log(category: .apns, message: "APNS error 403: Forbidden - \(errorResponse)")
-                    LogManager.shared.log(category: .apns, message: "This usually means the APNS key doesn't have permissions for this bundle ID")
-                    LogManager.shared.log(category: .apns, message: "Troubleshooting steps:")
-                    LogManager.shared.log(category: .apns, message: "1. Check that APNS key \(keyId) has 'Apple Push Notifications service (APNs)' capability enabled")
-                    LogManager.shared.log(category: .apns, message: "2. Check that bundle ID \(bundleIdentifier) has 'Push Notifications' capability enabled")
-                    LogManager.shared.log(category: .apns, message: "3. Verify the APNS key is associated with the bundle ID in Apple Developer account")
-                    throw LoopAPNSError.unauthorized
-                case 410:
-                    LogManager.shared.log(category: .apns, message: "APNS error 410: Device token is invalid or expired")
-                    throw LoopAPNSError.noDeviceToken
-                case 429:
-                    let errorResponse = String(data: data, encoding: .utf8) ?? "Unknown error"
-                    LogManager.shared.log(category: .apns, message: "APNS error 429: Too Many Requests - \(errorResponse)")
-                    LogManager.shared.log(category: .apns, message: "Rate limiting error - Apple is throttling APNS requests")
-                    LogManager.shared.log(category: .apns, message: "Troubleshooting steps:")
-                    LogManager.shared.log(category: .apns, message: "1. Wait a few minutes before trying again")
-                    LogManager.shared.log(category: .apns, message: "2. Check if you're sending too many notifications too quickly")
-                    LogManager.shared.log(category: .apns, message: "3. Consider implementing exponential backoff")
-                    throw LoopAPNSError.rateLimited
-                default:
-                    let errorResponse = String(data: data, encoding: .utf8) ?? "Unknown error"
-                    LogManager.shared.log(category: .apns, message: "APNS error \(httpResponse.statusCode): \(errorResponse)")
-                    throw LoopAPNSError.networkError
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    let errorMessage = "Failed to send push notification: \(error.localizedDescription)"
+                    LogManager.shared.log(category: .apns, message: errorMessage)
+                    completion(false, errorMessage)
+                    return
                 }
-            } else {
-                throw LoopAPNSError.networkError
+
+                if let httpResponse = response as? HTTPURLResponse {
+                    var responseBodyMessage = ""
+                    if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                        if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                           let reason = json["reason"] as? String
+                        {
+                            responseBodyMessage = reason
+                        }
+                    }
+
+                    switch httpResponse.statusCode {
+                    case 200:
+                        LogManager.shared.log(category: .apns, message: "APNS notification sent successfully")
+                        completion(true, nil)
+                    case 400:
+                        let environmentGuidance = self.getEnvironmentGuidance()
+                        let errorMessage = "Bad request. The request was invalid or malformed. \(responseBodyMessage)\n\n\(environmentGuidance)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 400: \(responseBodyMessage) - Check device token and environment settings")
+                        completion(false, errorMessage)
+                    case 403:
+                        let errorMessage = "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 403: \(responseBodyMessage) - Check APNS key permissions for bundle ID")
+                        completion(false, errorMessage)
+                    case 404:
+                        let errorMessage = "Invalid request: The :path value was incorrect. \(responseBodyMessage)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 404: \(responseBodyMessage)")
+                        completion(false, errorMessage)
+                    case 405:
+                        let errorMessage = "Invalid request: Only POST requests are supported. \(responseBodyMessage)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 405: \(responseBodyMessage)")
+                        completion(false, errorMessage)
+                    case 410:
+                        let errorMessage = "The device token is no longer active for the topic. \(responseBodyMessage)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 410: Device token is invalid or expired")
+                        completion(false, errorMessage)
+                    case 413:
+                        let errorMessage = "Payload too large. The notification payload exceeded the size limit. \(responseBodyMessage)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 413: \(responseBodyMessage)")
+                        completion(false, errorMessage)
+                    case 429:
+                        let errorMessage = "Too many requests. \(responseBodyMessage)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 429: Rate limited - wait before retrying")
+                        completion(false, errorMessage)
+                    case 500:
+                        let errorMessage = "Internal server error at APNs. \(responseBodyMessage)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 500: \(responseBodyMessage)")
+                        completion(false, errorMessage)
+                    case 503:
+                        let errorMessage = "Service unavailable. The server is temporarily unavailable. Try again later. \(responseBodyMessage)"
+                        LogManager.shared.log(category: .apns, message: "APNS error 503: \(responseBodyMessage)")
+                        completion(false, errorMessage)
+                    default:
+                        let errorMessage = "Unexpected status code: \(httpResponse.statusCode). \(responseBodyMessage)"
+                        LogManager.shared.log(category: .apns, message: "APNS error \(httpResponse.statusCode): \(responseBodyMessage)")
+                        completion(false, errorMessage)
+                    }
+                } else {
+                    let errorMessage = "Failed to get a valid HTTP response."
+                    LogManager.shared.log(category: .apns, message: errorMessage)
+                    completion(false, errorMessage)
+                }
             }
+            task.resume()
+
         } catch {
-            LogManager.shared.log(category: .apns, message: "APNS request failed: \(error.localizedDescription)")
-            throw LoopAPNSError.networkError
+            let errorMessage = "Failed to serialize APNS payload: \(error.localizedDescription)"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
         }
     }
 
@@ -519,15 +613,21 @@ class LoopAPNSService {
 
     // MARK: - Override Methods
 
-    func sendOverrideNotification(presetName: String, duration: TimeInterval? = nil) async throws {
+    func sendOverrideNotification(presetName: String, duration: TimeInterval? = nil, completion: @escaping (Bool, String?) -> Void) {
         let deviceToken = Storage.shared.deviceToken.value
         guard !deviceToken.isEmpty else {
-            throw LoopAPNSError.deviceTokenNotConfigured
+            let errorMessage = "Device token not configured"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
         }
 
         let bundleIdentifier = Storage.shared.bundleId.value
         guard !bundleIdentifier.isEmpty else {
-            throw LoopAPNSError.bundleIdentifierNotConfigured
+            let errorMessage = "Bundle identifier not configured"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
         }
 
         // Create APNS notification payload (matching Loop's expected format)
@@ -564,24 +664,31 @@ class LoopAPNSService {
         }
 
         // Send the notification using the existing APNS infrastructure
-        try await sendAPNSNotification(
+        sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
             keyId: storage.keyId.value,
             apnsKey: storage.apnsKey.value,
-            payload: payload
+            payload: payload,
+            completion: completion
         )
     }
 
-    func sendCancelOverrideNotification() async throws {
+    func sendCancelOverrideNotification(completion: @escaping (Bool, String?) -> Void) {
         let deviceToken = Storage.shared.deviceToken.value
         guard !deviceToken.isEmpty else {
-            throw LoopAPNSError.deviceTokenNotConfigured
+            let errorMessage = "Device token not configured"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
         }
 
         let bundleIdentifier = Storage.shared.bundleId.value
         guard !bundleIdentifier.isEmpty else {
-            throw LoopAPNSError.bundleIdentifierNotConfigured
+            let errorMessage = "Bundle identifier not configured"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
         }
 
         // Create APNS notification payload (matching Loop's expected format)
@@ -602,12 +709,13 @@ class LoopAPNSService {
         }
 
         // Send the notification using the existing APNS infrastructure
-        try await sendAPNSNotification(
+        sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
             keyId: storage.keyId.value,
             apnsKey: storage.apnsKey.value,
-            payload: payload
+            payload: payload,
+            completion: completion
         )
     }
 }
