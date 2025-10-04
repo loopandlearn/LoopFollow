@@ -45,6 +45,7 @@ extension MainViewController {
                 updatedTime = parsedTime
                 let formattedTime = Localizer.formatTimestampToLocalString(parsedTime)
                 infoManager.updateInfoData(type: .updated, value: formattedTime)
+                Observable.shared.enactedOrSuggested.value = updatedTime
             }
 
             // ISF
