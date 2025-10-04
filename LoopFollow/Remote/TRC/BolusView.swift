@@ -80,8 +80,10 @@ struct BolusView: View {
                         title: Text("Confirm Bolus"),
                         message: Text("Are you sure you want to send \(bolusAmount.doubleValue(for: .internationalUnit()), specifier: "%.2f") U?"),
                         primaryButton: .default(Text("Confirm"), action: {
-                            authenticateUser { success in
-                                if success { sendBolus() }
+                            AuthService.authenticate(reason: "Confirm your identity to send bolus.") { result in
+                                if case .success = result {
+                                    sendBolus()
+                                }
                             }
                         }),
                         secondaryButton: .cancel()
@@ -225,24 +227,6 @@ struct BolusView: View {
                 }
                 showAlert = true
             }
-        }
-    }
-
-    private func authenticateUser(completion: @escaping (Bool) -> Void) {
-        let context = LAContext()
-        var error: NSError?
-        let reason = "Confirm your identity to send bolus."
-
-        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, _ in
-                DispatchQueue.main.async { completion(success) }
-            }
-        } else if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-                DispatchQueue.main.async { completion(success) }
-            }
-        } else {
-            DispatchQueue.main.async { completion(false) }
         }
     }
 

@@ -315,39 +315,22 @@ struct LoopAPNSBolusView: View {
     }
 
     private func authenticateAndSendInsulin() {
-        let context = LAContext()
-        var error: NSError?
-
-        let reason = "Confirm your identity to send insulin."
-
-        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, _ in
-                DispatchQueue.main.async {
-                    if success {
-                        sendInsulinConfirmed()
-                    } else {
-                        alertMessage = "Authentication failed"
-                        alertType = .error
-                        showAlert = true
-                    }
-                }
+        AuthService.authenticate(reason: "Confirm your identity to send insulin.") { result in
+            switch result {
+            case .success:
+                sendInsulinConfirmed()
+            case .unavailable:
+                alertMessage = "Authentication not available"
+                alertType = .error
+                showAlert = true
+            case .failed:
+                alertMessage = "Authentication failed"
+                alertType = .error
+                showAlert = true
+            case .canceled:
+                // User canceled: no alert to avoid spammy UX
+                break
             }
-        } else if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-                DispatchQueue.main.async {
-                    if success {
-                        sendInsulinConfirmed()
-                    } else {
-                        alertMessage = "Authentication failed"
-                        alertType = .error
-                        showAlert = true
-                    }
-                }
-            }
-        } else {
-            alertMessage = "Biometric authentication not available"
-            alertType = .error
-            showAlert = true
         }
     }
 
@@ -369,43 +352,28 @@ struct LoopAPNSBolusView: View {
             otp: otpCode
         )
 
-        Task {
-            do {
-                let apnsService = LoopAPNSService()
-                let success = try await apnsService.sendBolusViaAPNS(payload: payload)
-
-                DispatchQueue.main.async {
-                    isLoading = false
-                    if success {
-                        // Mark TOTP code as used
-                        TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
-                        alertMessage = "Insulin sent successfully!"
-                        alertType = .success
-                        LogManager.shared.log(
-                            category: .apns,
-                            message: "Insulin sent - Amount: \(insulinAmount.doubleValue(for: .internationalUnit()))U"
-                        )
-                    } else {
-                        alertMessage = "Failed to send insulin. Check your Loop APNS configuration."
-                        alertType = .error
-                        LogManager.shared.log(
-                            category: .apns,
-                            message: "Failed to send insulin"
-                        )
-                    }
-                    showAlert = true
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    isLoading = false
-                    alertMessage = "Error sending insulin: \(error.localizedDescription)"
-                    alertType = .error
+        let apnsService = LoopAPNSService()
+        apnsService.sendBolusViaAPNS(payload: payload) { success, errorMessage in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if success {
+                    // Mark TOTP code as used
+                    TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
+                    self.alertMessage = "Insulin sent successfully!"
+                    self.alertType = .success
                     LogManager.shared.log(
                         category: .apns,
-                        message: "APNS insulin error: \(error.localizedDescription)"
+                        message: "Insulin sent - Amount: \(insulinAmount.doubleValue(for: .internationalUnit()))U"
                     )
-                    showAlert = true
+                } else {
+                    self.alertMessage = errorMessage ?? "Failed to send insulin. Check your Loop APNS configuration."
+                    self.alertType = .error
+                    LogManager.shared.log(
+                        category: .apns,
+                        message: "Failed to send insulin: \(errorMessage ?? "unknown error")"
+                    )
                 }
+                self.showAlert = true
             }
         }
     }
