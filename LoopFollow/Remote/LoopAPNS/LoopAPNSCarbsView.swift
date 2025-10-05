@@ -16,6 +16,7 @@ struct LoopAPNSCarbsView: View {
     @State private var alertMessage = ""
     @State private var alertType: AlertType = .success
     @State private var otpTimeRemaining: Int? = nil
+    @State private var showTOTPWarning = false
     private let otpPeriod: TimeInterval = 30
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -178,7 +179,7 @@ struct LoopAPNSCarbsView: View {
                     }
 
                     // TOTP Blocking Warning Section
-                    if isTOTPBlocked {
+                    if isTOTPBlocked && showTOTPWarning {
                         Section {
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
@@ -250,6 +251,15 @@ struct LoopAPNSCarbsView: View {
 
                 // Validate TOTP state when view appears
                 _ = isTOTPBlocked
+
+                // Add delay before showing TOTP warning to prevent flash after successful send
+                if isTOTPBlocked {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showTOTPWarning = true
+                    }
+                } else {
+                    showTOTPWarning = false
+                }
             }
             .onReceive(otpTimer) { _ in
                 let now = Date().timeIntervalSince1970
