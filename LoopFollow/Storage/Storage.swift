@@ -167,6 +167,9 @@ class Storage {
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 
+    var returnApnsKey = StorageValue<String>(key: "returnApnsKey", defaultValue: "")
+    var returnKeyId = StorageValue<String>(key: "returnKeyId", defaultValue: "")
+
     static let shared = Storage()
     private init() {}
 }

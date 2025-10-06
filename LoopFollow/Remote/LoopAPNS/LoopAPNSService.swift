@@ -47,6 +47,51 @@ class LoopAPNSService {
         }
     }
 
+    private func createReturnNotificationInfo() -> [String: Any]? {
+        let loopFollowDeviceToken = Observable.shared.loopFollowDeviceToken.value
+        guard !loopFollowDeviceToken.isEmpty else { return nil }
+
+        // Get LoopFollow's own Team ID from BuildDetails.
+        guard let loopFollowTeamID = BuildDetails.default.teamID, !loopFollowTeamID.isEmpty else {
+            LogManager.shared.log(category: .apns, message: "LoopFollow Team ID not found in BuildDetails.plist. Cannot create return notification info.")
+            return nil
+        }
+
+        // Get the target Loop app's Team ID from storage.
+        let targetTeamId = storage.teamId.value ?? ""
+        let teamIdsAreDifferent = loopFollowTeamID != targetTeamId
+
+        let keyIdForReturn: String
+        let apnsKeyForReturn: String
+
+        if teamIdsAreDifferent {
+            // Team IDs differ, use the separate return credentials.
+            keyIdForReturn = storage.returnKeyId.value
+            apnsKeyForReturn = storage.returnApnsKey.value
+        } else {
+            // Team IDs are the same, use the primary credentials.
+            keyIdForReturn = storage.keyId.value
+            apnsKeyForReturn = storage.apnsKey.value
+        }
+
+        // Ensure we have the necessary credentials.
+        guard !keyIdForReturn.isEmpty, !apnsKeyForReturn.isEmpty else {
+            LogManager.shared.log(category: .apns, message: "Missing required return APNS credentials. Check Remote Settings.")
+            return nil
+        }
+
+        let returnInfo: [String: Any] = [
+            "production_environment": BuildDetails.default.isTestFlightBuild(),
+            "device_token": loopFollowDeviceToken,
+            "bundle_id": Bundle.main.bundleIdentifier ?? "",
+            "team_id": loopFollowTeamID,
+            "key_id": keyIdForReturn,
+            "apns_key": apnsKeyForReturn,
+        ]
+
+        return returnInfo
+    }
+
     /// Validates the Loop APNS setup by checking all required fields
     /// - Returns: True if setup is valid, false otherwise
     func validateSetup() -> Bool {
@@ -92,7 +137,7 @@ class LoopAPNSService {
         let carbsAmount = payload.carbsAmount ?? 0.0
         let absorptionTime = payload.absorptionTime ?? 3.0
         let startTime = payload.consumedDate ?? now
-        let finalPayload = [
+        var finalPayload = [
             "carbs-entry": carbsAmount,
             "absorption-time": absorptionTime,
             "otp": String(payload.otp),
@@ -104,6 +149,16 @@ class LoopAPNSService {
             "start-time": formatDateForAPNS(startTime),
             "alert": "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
         ] as [String: Any]
+
+        /* Let's wait with this until we have an encryption solution for LRC
+         if let returnInfo = createReturnNotificationInfo() {
+             finalPayload["return_notification"] = returnInfo
+         }
+         */
+
+        // Log the exact carbs amount for debugging precision issues
+        LogManager.shared.log(category: .apns, message: "Carbs amount - Raw: \(payload.carbsAmount ?? 0.0), Formatted: \(String(format: "%.1f", carbsAmount)), JSON: \(carbsAmount)")
+        LogManager.shared.log(category: .apns, message: "Absorption time - Raw: \(payload.absorptionTime ?? 3.0), Formatted: \(String(format: "%.1f", absorptionTime)), JSON: \(absorptionTime)")
 
         // Log carbs entry attempt
         LogManager.shared.log(category: .apns, message: "Sending carbs: \(String(format: "%.1f", carbsAmount))g, absorption: \(String(format: "%.1f", absorptionTime))h")
@@ -142,7 +197,7 @@ class LoopAPNSService {
         // Create the complete notification payload (matching Nightscout's exact format)
         // Based on Nightscout's loop.js implementation
         let bolusAmount = payload.bolusAmount ?? 0.0
-        let finalPayload = [
+        var finalPayload = [
             "bolus-entry": bolusAmount,
             "otp": String(payload.otp),
             "remote-address": "LoopFollow",
@@ -152,6 +207,15 @@ class LoopAPNSService {
             "expiration": formatDateForAPNS(expiration),
             "alert": "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U",
         ] as [String: Any]
+
+        /* Let's wait with this until we have an encryption solution for LRC
+         if let returnInfo = createReturnNotificationInfo() {
+             finalPayload["return_notification"] = returnInfo
+         }
+         */
+
+        // Log the exact bolus amount for debugging precision issues
+        LogManager.shared.log(category: .apns, message: "Bolus amount - Raw: \(payload.bolusAmount ?? 0.0), Formatted: \(String(format: "%.2f", bolusAmount)), JSON: \(bolusAmount)")
 
         // Log bolus entry attempt
         LogManager.shared.log(category: .apns, message: "Sending bolus: \(String(format: "%.2f", bolusAmount))U")
@@ -587,6 +651,10 @@ class LoopAPNSService {
             payload["override-duration-minutes"] = Int(duration / 60)
         }
 
+        if let returnInfo = createReturnNotificationInfo() {
+            payload["return_notification"] = returnInfo
+        }
+
         // Send the notification using the existing APNS infrastructure
         sendAPNSNotification(
             deviceToken: deviceToken,
@@ -619,7 +687,7 @@ class LoopAPNSService {
         let now = Date()
         let expiration = Date(timeIntervalSinceNow: 5 * 60) // 5 minutes from now
 
-        let payload: [String: Any] = [
+        var payload: [String: Any] = [
             "cancel-temporary-override": "true",
             "remote-address": "LoopFollow",
             "entered-by": "LoopFollow",
@@ -627,6 +695,10 @@ class LoopAPNSService {
             "expiration": formatDateForAPNS(expiration),
             "alert": "Cancel Temporary Override",
         ]
+
+        if let returnInfo = createReturnNotificationInfo() {
+            payload["return_notification"] = returnInfo
+        }
 
         // Send the notification using the existing APNS infrastructure
         sendAPNSNotification(

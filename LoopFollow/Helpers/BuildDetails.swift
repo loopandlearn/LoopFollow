@@ -19,6 +19,10 @@ class BuildDetails {
         dict = parsed
     }
 
+    var teamID: String? {
+        dict["com-LoopFollow-development-team"] as? String
+    }
+
     var buildDateString: String? {
         return dict["com-LoopFollow-build-date"] as? String
     }

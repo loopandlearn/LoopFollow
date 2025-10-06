@@ -38,14 +38,64 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
 
         _ = BLEManager.shared
-
         // Ensure VolumeButtonHandler is initialized so it can receive alarm notifications
         _ = VolumeButtonHandler.shared
 
+        // Register for remote notifications
+        DispatchQueue.main.async {
+            UIApplication.shared.registerForRemoteNotifications()
+        }
         return true
     }
 
     func applicationWillTerminate(_: UIApplication) {}
+
+    // MARK: - Remote Notifications
+
+    // Called when successfully registered for remote notifications
+    func application(_: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+
+        Observable.shared.loopFollowDeviceToken.value = tokenString
+
+        LogManager.shared.log(category: .general, message: "Successfully registered for remote notifications with token: \(tokenString)")
+    }
+
+    // Called when failed to register for remote notifications
+    func application(_: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        LogManager.shared.log(category: .general, message: "Failed to register for remote notifications: \(error.localizedDescription)")
+    }
+
+    // Called when a remote notification is received
+    func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        LogManager.shared.log(category: .general, message: "Received remote notification: \(userInfo)")
+
+        // Check if this is a notification from Trio with status update
+        if let aps = userInfo["aps"] as? [String: Any] {
+            // Handle visible notification (alert, sound, badge)
+            if let alert = aps["alert"] as? [String: Any] {
+                let title = alert["title"] as? String ?? ""
+                let body = alert["body"] as? String ?? ""
+                LogManager.shared.log(category: .general, message: "Notification - Title: \(title), Body: \(body)")
+            }
+
+            // Handle silent notification (content-available)
+            if let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 {
+                // This is a silent push, nothing implemented but logging for now
+
+                if let commandStatus = userInfo["command_status"] as? String {
+                    LogManager.shared.log(category: .general, message: "Command status: \(commandStatus)")
+                }
+
+                if let commandType = userInfo["command_type"] as? String {
+                    LogManager.shared.log(category: .general, message: "Command type: \(commandType)")
+                }
+            }
+        }
+
+        // Call completion handler
+        completionHandler(.newData)
+    }
 
     // MARK: UISceneSession Lifecycle
 
@@ -142,9 +192,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_: UNUserNotificationCenter,
-                                willPresent _: UNNotification,
+                                willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
     {
-        completionHandler(.alert)
+        // Log the notification
+        let userInfo = notification.request.content.userInfo
+        LogManager.shared.log(category: .general, message: "Will present notification: \(userInfo)")
+
+        // Show the notification even when app is in foreground
+        completionHandler([.banner, .sound, .badge])
     }
 }

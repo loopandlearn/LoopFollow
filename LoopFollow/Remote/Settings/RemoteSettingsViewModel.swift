@@ -21,6 +21,11 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var isTrioDevice: Bool = (Storage.shared.device.value == "Trio")
     @Published var isLoopDevice: Bool = (Storage.shared.device.value == "Loop")
 
+    // MARK: - Return Notification Properties
+
+    @Published var returnApnsKey: String
+    @Published var returnKeyId: String
+
     // MARK: - Loop APNS Setup Properties
 
     @Published var loopDeveloperTeamId: String
@@ -42,6 +47,35 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var validationMessage: String = ""
     @Published var shouldPromptForURL: Bool = false
     @Published var shouldPromptForToken: Bool = false
+
+    let loopFollowTeamId: String = BuildDetails.default.teamID ?? "Unknown"
+
+    /// Determines if the target app's Team ID is different from this app's build Team ID.
+    var areTeamIdsDifferent: Bool {
+        // Get LoopFollow's own Team ID from the build details.
+        guard let loopFollowTeamID = BuildDetails.default.teamID, !loopFollowTeamID.isEmpty, loopFollowTeamID != "Unknown" else {
+            return false
+        }
+
+        // The property `loopDeveloperTeamId` holds the value from `Storage.shared.teamId`
+        let targetTeamId = loopDeveloperTeamId
+
+        // Determine if a comparison is needed and perform it.
+        switch remoteType {
+        case .loopAPNS, .trc:
+            // For both Loop and TRC, the target Team ID is in the same storage location.
+            // If the target ID is empty, there's nothing to compare.
+            guard !targetTeamId.isEmpty else {
+                return false
+            }
+            // Return true if the IDs are different.
+            return loopFollowTeamID != targetTeamId
+
+        case .none, .nightscout:
+            // For other remote types, this check is not applicable.
+            return false
+        }
+    }
 
     // MARK: - Computed property for Loop APNS Setup validation
 
@@ -74,6 +108,9 @@ class RemoteSettingsViewModel: ObservableObject {
         loopDeveloperTeamId = storage.teamId.value ?? ""
         loopAPNSQrCodeURL = storage.loopAPNSQrCodeURL.value
         productionEnvironment = storage.productionEnvironment.value
+
+        returnApnsKey = storage.returnApnsKey.value
+        returnKeyId = storage.returnKeyId.value
 
         setupBindings()
     }
@@ -163,6 +200,17 @@ class RemoteSettingsViewModel: ObservableObject {
         $productionEnvironment
             .dropFirst()
             .sink { [weak self] in self?.storage.productionEnvironment.value = $0 }
+            .store(in: &cancellables)
+
+        // Return notification bindings
+        $returnApnsKey
+            .dropFirst()
+            .sink { [weak self] in self?.storage.returnApnsKey.value = $0 }
+            .store(in: &cancellables)
+
+        $returnKeyId
+            .dropFirst()
+            .sink { [weak self] in self?.storage.returnKeyId.value = $0 }
             .store(in: &cancellables)
     }
 
