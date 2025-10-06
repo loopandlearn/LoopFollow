@@ -58,6 +58,8 @@
 		DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */; };
 		DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */; };
 		DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */; };
+		DD485F142E454B2600CE8CBF /* SecureMessenger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD485F132E454B2600CE8CBF /* SecureMessenger.swift */; };
+		DD485F162E46631000CE8CBF /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DD485F152E46631000CE8CBF /* CryptoSwift */; };
 		DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878022C7B297E0048F05C /* StorageValue.swift */; };
 		DD4878052C7B2C970048F05C /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878042C7B2C970048F05C /* Storage.swift */; };
 		DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */; };
@@ -449,6 +451,7 @@
 		DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsViewModel.swift; sourceTree = "<group>"; };
 		DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsViewModel.swift; sourceTree = "<group>"; };
 		DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsView.swift; sourceTree = "<group>"; };
+		DD485F132E454B2600CE8CBF /* SecureMessenger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureMessenger.swift; sourceTree = "<group>"; };
 		DD4878022C7B297E0048F05C /* StorageValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageValue.swift; sourceTree = "<group>"; };
 		DD4878042C7B2C970048F05C /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsView.swift; sourceTree = "<group>"; };
@@ -801,6 +804,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */,
+				DD485F162E46631000CE8CBF /* CryptoSwift in Frameworks */,
 				3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */,
 				DD48781C2C7DAF140048F05C /* SwiftJWT in Frameworks */,
 			);
@@ -935,6 +939,7 @@
 		DD4878112C7B74F90048F05C /* TRC */ = {
 			isa = PBXGroup;
 			children = (
+				DD485F132E454B2600CE8CBF /* SecureMessenger.swift */,
 				DD48781F2C7DAF890048F05C /* PushMessage.swift */,
 				DD4878122C7B750D0048F05C /* TempTargetView.swift */,
 				DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */,
@@ -1590,6 +1595,7 @@
 			name = LoopFollow;
 			packageProductDependencies = (
 				DD48781B2C7DAF140048F05C /* SwiftJWT */,
+				DD485F152E46631000CE8CBF /* CryptoSwift */,
 			);
 			productName = LoopFollow;
 			productReference = FC9788142485969B00A7906C /* Loop Follow.app */;
@@ -1626,6 +1632,7 @@
 			packageReferences = (
 				DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */,
 				654132E82E19F0B800BDBE08 /* XCRemoteSwiftPackageReference "swift-crypto" */,
+				DD485F0B2E4547C800CE8CBF /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 			);
 			productRefGroup = FC9788152485969B00A7906C /* Products */;
 			projectDirPath = "";
@@ -2120,6 +2127,7 @@
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 				DDCC3A582DDC9655006F1C10 /* MissedBolusAlarmEditor.swift in Sources */,
 				DDEF50402D479B8A00884336 /* LoopAPNSService.swift in Sources */,
+				DD485F142E454B2600CE8CBF /* SecureMessenger.swift in Sources */,
 				DDEF50422D479BAA00884336 /* LoopAPNSCarbsView.swift in Sources */,
 				DDEF50432D479BBA00884336 /* LoopAPNSBolusView.swift in Sources */,
 				DDEF50452D479BDA00884336 /* LoopAPNSRemoteView.swift in Sources */,
@@ -2416,6 +2424,14 @@
 				minimumVersion = 3.12.3;
 			};
 		};
+		DD485F0B2E4547C800CE8CBF /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/krzyzanowskim/CryptoSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.0;
+			};
+		};
 		DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Kitura/Swift-JWT.git";
@@ -2427,6 +2443,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DD485F152E46631000CE8CBF /* CryptoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CryptoSwift;
+		};
 		DD48781B2C7DAF140048F05C /* SwiftJWT */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */;
