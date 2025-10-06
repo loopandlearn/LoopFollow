@@ -116,14 +116,6 @@ extension MainViewController {
                 }
             }
 
-            // Insulin Required
-            if let insulinReqMetric = InsulinMetric(from: enactedOrSuggested, key: "insulinReq") {
-                infoManager.updateInfoData(type: .recBolus, value: insulinReqMetric)
-                Observable.shared.deviceRecBolus.value = insulinReqMetric.value
-            } else {
-                Observable.shared.deviceRecBolus.value = 0
-            }
-
             // Autosens
             if let sens = enactedOrSuggested["sensitivityRatio"] as? Double {
                 let formattedSens = String(format: "%.0f", sens * 100.0) + "%"
