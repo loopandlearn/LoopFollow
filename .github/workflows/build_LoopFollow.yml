@@ -217,7 +217,7 @@ jobs:
       |
       github.event_name == 'workflow_dispatch' ||
       (needs.check_alive_and_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
-        (vars.SCHEDULED_BUILD != 'false' && vars.IS_SECOND_IN_MONTH) ||
+        (vars.SCHEDULED_BUILD != 'false' && needs.check_latest_from_upstream.outputs.IS_SECOND_IN_MONTH == 'true' ||
         (vars.SCHEDULED_SYNC != 'false' && needs.check_latest_from_upstream.outputs.NEW_COMMITS == 'true' )
       )
     steps:
