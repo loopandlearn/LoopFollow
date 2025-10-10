@@ -2,10 +2,6 @@ name: 4. Build LoopFollow
 run-name: Build LoopFollow (${{ github.ref_name }})
 on:
   workflow_dispatch:
-
-  ## Remove the "#" sign from the beginning of the line below to get automated builds on push (code changes in your repository)
-  #push:
-
   schedule:
     # Check for updates every Sunday
     #   Later logic builds if there are updates or if it is the 2nd Sunday of the month
@@ -214,11 +210,8 @@ jobs:
     runs-on: macos-15
     permissions:
       contents: write
-    # runs when started manually,
-    #   or ((SCHEDULED_BUILD missing or enabled) and (day consistent with 2nd time in the month)),
-    #   or ((SCHEDULED_SYNC missing or enabled) and (new commits were found))
     if:
-      |
+      | # builds with manual start; if automatic: once a month or when new commits are found
       github.event_name == 'workflow_dispatch' ||
       (needs.check_alive_and_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
         (vars.SCHEDULED_BUILD != 'false' && needs.day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
