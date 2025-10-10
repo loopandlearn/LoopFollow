@@ -106,7 +106,7 @@ jobs:
     outputs:
       NEW_COMMITS: ${{ steps.sync.outputs.has_new_commits }}
       ABORT_SYNC: ${{ steps.check_branch.outputs.ABORT_SYNC }}
-      IS_SECOND_IN_MONTH: ${{ steps.check_branch.outputs.is_second_instance }}
+      IS_SECOND_IN_MONTH: ${{ steps.date-check.outputs.is_second_instance }}
 
     steps:
       - id: date-check
