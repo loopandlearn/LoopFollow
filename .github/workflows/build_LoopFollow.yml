@@ -19,6 +19,26 @@ env:
   ALIVE_BRANCH_DEV: alive-dev
 
 jobs:
+
+  # Set a logic flag if this is the second instance of this day-of-week in this month
+  day_in_month:
+    runs-on: ubuntu-latest
+    name: Check day in month
+    outputs:
+      IS_SECOND_IN_MONTH: ${{ steps.date-check.outputs.is_second_instance }}
+
+    steps:
+      - id: date-check
+        name: Check if this is the second time this day-of-week happens this month
+        run: |
+          DAY_OF_MONTH=$(date +%-d)
+          WEEK_OF_MONTH=$(( ($(date +%-d) - 1) / 7 + 1 ))
+          if [[ $WEEK_OF_MONTH -eq 2 ]]; then
+            echo "is_second_instance=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_second_instance=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # Checks if Distribution certificate is present and valid, optionally nukes and
   # creates new certs if the repository variable ENABLE_NUKE_CERTS == 'true'
   check_certs: 
@@ -95,26 +115,6 @@ jobs:
             /repos/${{ github.repository_owner }}/LoopFollow/git/refs \
             -f ref='refs/heads/alive-dev' \
             -f sha=$SHA_DEV
-
-  # Checks if this is the second instance of this day-of-week in this month
-  check_day_in_month:
-    runs-on: ubuntu-latest
-    name: Check day in month
-    outputs:
-      IS_SECOND_IN_MONTH: ${{ steps.date-check.outputs.is_second_instance }}
-
-    steps:
-      - id: date-check
-        name: Check if this is the second time this day-of-week happens this month
-        run: |
-          DAY_OF_MONTH=$(date +%-d)
-          WEEK_OF_MONTH=$(( ($(date +%-d) - 1) / 7 + 1 ))
-          if [[ $WEEK_OF_MONTH -eq 2 ]]; then
-            echo "is_second_instance=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_second_instance=false" >> "$GITHUB_OUTPUT"
-          fi
-
 
   # Checks for changes in upstream repository; if changes exist prompts sync for build
   # Performs keepalive to avoid stale fork
@@ -210,7 +210,7 @@ jobs:
   # Builds LoopFollow
   build:
     name: Build
-    needs: [check_certs, check_alive_and_permissions, check_latest_from_upstream, check_day_in_month]
+    needs: [check_certs, check_alive_and_permissions, check_latest_from_upstream, day_in_month]
     runs-on: macos-15
     permissions:
       contents: write
@@ -221,7 +221,7 @@ jobs:
       |
       github.event_name == 'workflow_dispatch' ||
       (needs.check_alive_and_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
-        (vars.SCHEDULED_BUILD != 'false' && needs.check_day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
+        (vars.SCHEDULED_BUILD != 'false' && needs.day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
         (vars.SCHEDULED_SYNC != 'false' && needs.check_latest_from_upstream.outputs.NEW_COMMITS == 'true' )
       )
     steps:
