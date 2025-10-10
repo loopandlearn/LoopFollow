@@ -98,6 +98,7 @@ jobs:
 
   # Checks for changes in upstream repository; if changes exist prompts sync for build
   # Performs keepalive to avoid stale fork
+  # Also checks if this is the second instance of this day-of-week in this month
   check_latest_from_upstream:
     needs: [check_certs, check_alive_and_permissions]
     runs-on: ubuntu-latest
@@ -105,8 +106,23 @@ jobs:
     outputs:
       NEW_COMMITS: ${{ steps.sync.outputs.has_new_commits }}
       ABORT_SYNC: ${{ steps.check_branch.outputs.ABORT_SYNC }}
+      IS_SECOND_IN_MONTH: ${{ steps.check_branch.outputs.is_second_instance }}
 
     steps:
+      - id: date-check
+        name: Check if this is the second time this day-of-week happens this month
+        run: |
+          DAY_OF_MONTH=$(date +%-d)
+          WEEK_OF_MONTH=$(( ($(date +%-d) - 1) / 7 + 1 ))
+          # The second Sunday will fall on a date between the 8th and 14th
+          if [[ $WEEK_OF_MONTH -eq 2 ]]; then
+            echo "Today is the second time this day of week happens this month."
+            echo "is_second_instance=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Today is not the second time this day of week happens this month."
+            echo "is_second_instance=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Check if running on main or dev branch
         if: |
           needs.check_alive_and_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
@@ -201,7 +217,7 @@ jobs:
       |
       github.event_name == 'workflow_dispatch' ||
       (needs.check_alive_and_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
-        (vars.SCHEDULED_BUILD != 'false' && github.event.schedule == '* * 8-14 * *') ||
+        (vars.SCHEDULED_BUILD != 'false' && vars.IS_SECOND_IN_MONTH) ||
         (vars.SCHEDULED_SYNC != 'false' && needs.check_latest_from_upstream.outputs.NEW_COMMITS == 'true' )
       )
     steps:
