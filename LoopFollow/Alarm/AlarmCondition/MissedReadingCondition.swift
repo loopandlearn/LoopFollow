@@ -17,6 +17,17 @@ struct MissedReadingCondition: AlarmCondition {
         // Skip if we have *no* readings
         guard let last = data.bgReadings.last else { return false }
 
+        guard let lastChecked = Storage.shared.lastBGChecked.value else {
+            // Never checked, so don't alarm.
+            return false
+        }
+
+        let checkedAgeSeconds = now.timeIntervalSince(lastChecked)
+        if checkedAgeSeconds > 360 { // 6 minutes
+            // The check itself is stale, so the data is unreliable. Don't alarm.
+            return false
+        }
+
         let secondsSinceLast = now.timeIntervalSince(last.date)
         return secondsSinceLast >= thresholdMinutes * 60
     }
