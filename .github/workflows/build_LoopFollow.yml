@@ -195,8 +195,8 @@ jobs:
     permissions:
       contents: write
     # runs when started manually,
-    #   or SCHEDULED_BUILD missing or enabled and day consistent with 2nd one in the month,
-    #   or SCHEDULED_SYNC missing or enabled and new commits were found
+    #   or ((SCHEDULED_BUILD missing or enabled) and (day consistent with 2nd time in the month)),
+    #   or ((SCHEDULED_SYNC missing or enabled) and (new commits were found))
     if:
       |
       github.event_name == 'workflow_dispatch' ||
