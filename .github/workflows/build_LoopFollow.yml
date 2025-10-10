@@ -96,16 +96,11 @@ jobs:
             -f ref='refs/heads/alive-dev' \
             -f sha=$SHA_DEV
 
-  # Checks for changes in upstream repository; if changes exist prompts sync for build
-  # Performs keepalive to avoid stale fork
-  # Also checks if this is the second instance of this day-of-week in this month
-  check_latest_from_upstream:
-    needs: [check_certs, check_alive_and_permissions]
+  # Checks if this is the second instance of this day-of-week in this month
+  check_day_in_month:
     runs-on: ubuntu-latest
-    name: Check upstream and keep alive
+    name: Check day in month
     outputs:
-      NEW_COMMITS: ${{ steps.sync.outputs.has_new_commits }}
-      ABORT_SYNC: ${{ steps.check_branch.outputs.ABORT_SYNC }}
       IS_SECOND_IN_MONTH: ${{ steps.date-check.outputs.is_second_instance }}
 
     steps:
@@ -114,15 +109,24 @@ jobs:
         run: |
           DAY_OF_MONTH=$(date +%-d)
           WEEK_OF_MONTH=$(( ($(date +%-d) - 1) / 7 + 1 ))
-          # The second Sunday will fall on a date between the 8th and 14th
           if [[ $WEEK_OF_MONTH -eq 2 ]]; then
-            echo "Today is the second time this day of week happens this month."
             echo "is_second_instance=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Today is not the second time this day of week happens this month."
             echo "is_second_instance=false" >> "$GITHUB_OUTPUT"
           fi
 
+
+  # Checks for changes in upstream repository; if changes exist prompts sync for build
+  # Performs keepalive to avoid stale fork
+  check_latest_from_upstream:
+    needs: [check_certs, check_alive_and_permissions]
+    runs-on: ubuntu-latest
+    name: Check upstream and keep alive
+    outputs:
+      NEW_COMMITS: ${{ steps.sync.outputs.has_new_commits }}
+      ABORT_SYNC: ${{ steps.check_branch.outputs.ABORT_SYNC }}
+
+    steps:
       - name: Check if running on main or dev branch
         if: |
           needs.check_alive_and_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
@@ -217,7 +221,7 @@ jobs:
       |
       github.event_name == 'workflow_dispatch' ||
       (needs.check_alive_and_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
-        (vars.SCHEDULED_BUILD != 'false' && needs.check_latest_from_upstream.outputs.IS_SECOND_IN_MONTH == 'true') ||
+        (vars.SCHEDULED_BUILD != 'false' && needs.check_day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
         (vars.SCHEDULED_SYNC != 'false' && needs.check_latest_from_upstream.outputs.NEW_COMMITS == 'true' )
       )
     steps:
