@@ -210,7 +210,7 @@ jobs:
   # Builds LoopFollow
   build:
     name: Build
-    needs: [check_certs, check_alive_and_permissions, check_latest_from_upstream]
+    needs: [check_certs, check_alive_and_permissions, check_latest_from_upstream, check_day_in_month]
     runs-on: macos-15
     permissions:
       contents: write
