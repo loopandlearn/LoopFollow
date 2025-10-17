@@ -42,12 +42,6 @@ struct QRCodeDisplayView: View {
                             .scaleEffect(1.5)
                     )
             }
-
-            Text("Scan this QR code with another LoopFollow app to import remote command settings")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
         }
         .onAppear {
             generateQRCode()

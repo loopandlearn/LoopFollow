@@ -34,12 +34,6 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var isShowingLoopAPNSScanner: Bool = false
     @Published var loopAPNSErrorMessage: String?
 
-    // MARK: - QR Code Sharing Properties
-
-    @Published var isShowingQRCodeScanner: Bool = false
-    @Published var isShowingQRCodeDisplay: Bool = false
-    @Published var qrCodeErrorMessage: String?
-
     // MARK: - URL/Token Validation Properties
 
     @Published var pendingSettings: RemoteCommandSettings?
@@ -232,48 +226,6 @@ class RemoteSettingsViewModel: ObservableObject {
             }
             self.isShowingLoopAPNSScanner = false
         }
-    }
-
-    // MARK: - QR Code Sharing Methods
-
-    func handleRemoteCommandQRCodeScanResult(_ result: Result<String, Error>) {
-        DispatchQueue.main.async {
-            switch result {
-            case let .success(jsonString):
-                if let settings = RemoteCommandSettings.decodeFromJSON(jsonString) {
-                    if settings.isValid() {
-                        // Check URL and token compatibility
-                        let validation = settings.validateCompatibilityWithCurrentStorage()
-
-                        if validation.isCompatible {
-                            // No conflicts, apply settings directly
-                            settings.applyToStorage()
-                            self.updateViewModelFromStorage()
-                            LogManager.shared.log(category: .remote, message: "Remote command settings imported from QR code")
-                        } else {
-                            // Conflicts detected, show validation view
-                            self.pendingSettings = settings
-                            self.validationMessage = validation.message
-                            self.shouldPromptForURL = validation.shouldPromptForURL
-                            self.shouldPromptForToken = validation.shouldPromptForToken
-                            self.showURLTokenValidation = true
-                        }
-                    } else {
-                        self.qrCodeErrorMessage = "Invalid remote command settings in QR code"
-                    }
-                } else {
-                    self.qrCodeErrorMessage = "Failed to decode remote command settings from QR code"
-                }
-            case let .failure(error):
-                self.qrCodeErrorMessage = "Scanning failed: \(error.localizedDescription)"
-            }
-            self.isShowingQRCodeScanner = false
-        }
-    }
-
-    func generateQRCodeForCurrentSettings() -> String? {
-        let settings = RemoteCommandSettings.fromCurrentStorage()
-        return settings.encodeToJSON()
     }
 
     // MARK: - Public Methods for View Access
