@@ -170,6 +170,9 @@ class Storage {
     var returnApnsKey = StorageValue<String>(key: "returnApnsKey", defaultValue: "")
     var returnKeyId = StorageValue<String>(key: "returnKeyId", defaultValue: "")
 
+    var bolusIncrement = SecureStorageValue<HKQuantity>(key: "bolusIncrement", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05))
+    var bolusIncrementDetected = StorageValue<Bool>(key: "bolusIncrementDetected", defaultValue: false)
+
     static let shared = Storage()
     private init() {}
 }
