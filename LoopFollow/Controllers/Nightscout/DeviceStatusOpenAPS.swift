@@ -123,6 +123,14 @@ extension MainViewController {
                 infoManager.updateInfoData(type: .autosens, value: formattedSens)
             }
 
+            // Recommended Bolus
+            if let rec = InsulinMetric(from: lastLoopRecord, key: "recommendedBolus") {
+                infoManager.updateInfoData(type: .recBolus, value: rec)
+                Observable.shared.deviceRecBolus.value = rec.value
+            } else {
+                Observable.shared.deviceRecBolus.value = nil
+            }
+
             // Eventual BG
             if let eventualBGValue = enactedOrSuggested["eventualBG"] as? Double {
                 let eventualBGQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: eventualBGValue)

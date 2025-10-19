@@ -10,6 +10,7 @@ struct BolusView: View {
 
     @State private var bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
     @ObservedObject private var maxBolus = Storage.shared.maxBolus
+    @ObservedObject private var bolusIncrement = Storage.shared.bolusIncrement
 
     @ObservedObject private var deviceRecBolus = Observable.shared.deviceRecBolus
     @ObservedObject private var enactedOrSuggested = Observable.shared.enactedOrSuggested
@@ -22,7 +23,6 @@ struct BolusView: View {
     @State private var statusMessage: String? = nil
 
     private let pushNotificationManager = PushNotificationManager()
-    private let minDeliverableU: Double = 0.05 // hides negative/zero/tiny recs
 
     enum AlertType {
         case confirmBolus
@@ -32,9 +32,34 @@ struct BolusView: View {
         case oldCalculationWarning
     }
 
+    // MARK: - Step/precision helpers driven by stored increment
+
+    private var stepU: Double {
+        max(0.001, bolusIncrement.value.doubleValue(for: .internationalUnit()))
+    }
+
+    private var stepFractionDigits: Int {
+        let inc = stepU
+        if inc >= 1 { return 0 }
+        var v = inc
+        var digits = 0
+        while digits < 6 && abs(round(v) - v) > 1e-10 {
+            v *= 10; digits += 1
+        }
+        return min(max(digits, 0), 5)
+    }
+
+    private func roundedToStep(_ value: Double) -> Double {
+        guard stepU > 0 else { return value }
+        let stepped = (value / stepU).rounded() * stepU
+        let p = pow(10.0, Double(stepFractionDigits))
+        return (stepped * p).rounded() / p
+    }
+
+    // MARK: - View
+
     var body: some View {
         NavigationView {
-            // Updates once per second so the "X minutes ago" label stays fresh
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 Form {
                     recommendedBlocks(now: context.date)
@@ -44,8 +69,8 @@ struct BolusView: View {
                             label: "Bolus Amount",
                             quantity: $bolusAmount,
                             unit: .internationalUnit(),
-                            maxLength: 4,
-                            minValue: HKQuantity(unit: .internationalUnit(), doubleValue: minDeliverableU),
+                            maxLength: 5,
+                            minValue: HKQuantity(unit: .internationalUnit(), doubleValue: stepU),
                             maxValue: maxBolus.value,
                             isFocused: $bolusFieldIsFocused,
                             onValidationError: { message in
@@ -78,7 +103,7 @@ struct BolusView: View {
                 case .confirmBolus:
                     return Alert(
                         title: Text("Confirm Bolus"),
-                        message: Text("Are you sure you want to send \(bolusAmount.doubleValue(for: .internationalUnit()), specifier: "%.2f") U?"),
+
                         primaryButton: .default(Text("Confirm"), action: {
                             AuthService.authenticate(reason: "Confirm your identity to send bolus.") { result in
                                 if case .success = result {
@@ -113,7 +138,7 @@ struct BolusView: View {
                         title: Text("Old Calculation Warning"),
                         message: Text(alertMessage ?? ""),
                         primaryButton: .default(Text("Use Anyway")) {
-                            if let rec = deviceRecBolus.value, rec >= minDeliverableU {
+                            if let rec = deviceRecBolus.value, rec >= stepU {
                                 applyRecommendedBolus(rec)
                             }
                         },
@@ -131,7 +156,7 @@ struct BolusView: View {
     @ViewBuilder
     private func recommendedBlocks(now: Date) -> some View {
         if let rec = deviceRecBolus.value,
-           rec >= minDeliverableU, // hides negative/zero/smalls
+           rec >= stepU,
            let t = enactedOrSuggested.value
         {
             let ageSec = max(0, now.timeIntervalSince1970 - t)
@@ -145,7 +170,7 @@ struct BolusView: View {
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("\(String(format: "%.2f", rec))U")
+                                Text("\(String(format: "%.\(stepFractionDigits)f", rec))U")
                                     .font(.headline)
                                 Text("Calculated \(mins) minute\(mins == 1 ? "" : "s") ago")
                                     .font(.caption)
@@ -190,9 +215,11 @@ struct BolusView: View {
     }
 
     private func applyRecommendedBolus(_ rec: Double) {
-        guard rec >= minDeliverableU else { return }
-        let clamped = min(rec, maxBolus.value.doubleValue(for: .internationalUnit()))
-        bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: clamped)
+        guard rec >= stepU else { return }
+        let maxU = maxBolus.value.doubleValue(for: .internationalUnit())
+        let clamped = min(rec, maxU)
+        let stepped = roundedToStep(clamped)
+        bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: stepped)
     }
 
     private func presentableMinutesFormat(timeInterval: TimeInterval) -> String {

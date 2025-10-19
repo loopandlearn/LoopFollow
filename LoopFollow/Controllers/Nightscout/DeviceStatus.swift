@@ -3,6 +3,7 @@
 
 import Charts
 import Foundation
+import HealthKit
 import UIKit
 
 extension MainViewController {
@@ -96,6 +97,13 @@ extension MainViewController {
                                    .withDashSeparatorInDate,
                                    .withColonSeparatorInTime]
         if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String: AnyObject]? {
+            if let bolusIncrement = lastPumpRecord["bolusIncrement"] as? Double, bolusIncrement > 0 {
+                Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: bolusIncrement)
+                Storage.shared.bolusIncrementDetected.value = true
+            } else {
+                Storage.shared.bolusIncrementDetected.value = false
+            }
+
             if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970 {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
