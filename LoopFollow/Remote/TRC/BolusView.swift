@@ -67,7 +67,17 @@ struct BolusView: View {
                     Section {
                         HKQuantityInputView(
                             label: "Bolus Amount",
-                            quantity: $bolusAmount,
+                            quantity: Binding(
+                                get: { bolusAmount },
+                                set: { q in
+                                    let v = q.doubleValue(for: .internationalUnit())
+                                    let minU = stepU
+                                    let maxU = maxBolus.value.doubleValue(for: .internationalUnit())
+                                    let clamped = min(max(v, minU), maxU)
+                                    let stepped = roundedToStep(clamped)
+                                    bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: stepped)
+                                }
+                            ),
                             unit: .internationalUnit(),
                             maxLength: 5,
                             minValue: HKQuantity(unit: .internationalUnit(), doubleValue: stepU),
@@ -240,7 +250,7 @@ struct BolusView: View {
                     statusMessage = "Bolus command sent successfully."
                     LogManager.shared.log(
                         category: .apns,
-                        message: "sendBolusPushNotification succeeded - Bolus: \(bolusAmount.doubleValue(for: .internationalUnit())) U"
+                        message: "sendBolusPushNotification succeeded - Bolus: \(bolusAmount.doubleValue(for: .internationalUnit()), specifier: "%.\(stepFractionDigits)f") U"
                     )
                     bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
                     alertType = .statusSuccess
