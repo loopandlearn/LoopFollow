@@ -67,20 +67,10 @@ struct BolusView: View {
                     Section {
                         HKQuantityInputView(
                             label: "Bolus Amount",
-                            quantity: Binding(
-                                get: { bolusAmount },
-                                set: { q in
-                                    let v = q.doubleValue(for: .internationalUnit())
-                                    let minU = stepU
-                                    let maxU = maxBolus.value.doubleValue(for: .internationalUnit())
-                                    let clamped = min(max(v, minU), maxU)
-                                    let stepped = roundedToStep(clamped)
-                                    bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: stepped)
-                                }
-                            ),
+                            quantity: $bolusAmount,
                             unit: .internationalUnit(),
                             maxLength: 5,
-                            minValue: HKQuantity(unit: .internationalUnit(), doubleValue: stepU),
+                            minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0),
                             maxValue: maxBolus.value,
                             isFocused: $bolusFieldIsFocused,
                             onValidationError: { message in
@@ -113,7 +103,7 @@ struct BolusView: View {
                 case .confirmBolus:
                     return Alert(
                         title: Text("Confirm Bolus"),
-
+                        message: Text("Are you sure you want to send \(InsulinFormatter.shared.string(bolusAmount)) U?"),
                         primaryButton: .default(Text("Confirm"), action: {
                             AuthService.authenticate(reason: "Confirm your identity to send bolus.") { result in
                                 if case .success = result {
@@ -180,8 +170,7 @@ struct BolusView: View {
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("\(String(format: "%.\(stepFractionDigits)f", rec))U")
-                                    .font(.headline)
+                                Text("\(InsulinFormatter.shared.string(rec))U")
                                 Text("Calculated \(mins) minute\(mins == 1 ? "" : "s") ago")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
@@ -250,7 +239,7 @@ struct BolusView: View {
                     statusMessage = "Bolus command sent successfully."
                     LogManager.shared.log(
                         category: .apns,
-                        message: "sendBolusPushNotification succeeded - Bolus: \(bolusAmount.doubleValue(for: .internationalUnit()), specifier: "%.\(stepFractionDigits)f") U"
+                        message: "sendBolusPushNotification succeeded - Bolus: \(InsulinFormatter.shared.string(bolusAmount)) U"
                     )
                     bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
                     alertType = .statusSuccess
