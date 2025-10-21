@@ -77,6 +77,23 @@ jobs:
       ABORT_SYNC: ${{ steps.check_branch.outputs.ABORT_SYNC }}
 
     steps:
+      - name: Check if running on main or dev branch
+        if: |
+          needs.check_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
+          (vars.SCHEDULED_BUILD != 'false' || vars.SCHEDULED_SYNC != 'false')
+        id: check_branch
+        run: |
+          if [ "${GITHUB_REF##*/}" = "main" ]; then
+            echo "Running on main branch"
+            echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
+          elif [ "${GITHUB_REF##*/}" = "dev" ]; then
+            echo "Running on dev branch"
+            echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
+          else
+            echo "Not running on main or dev branch"
+            echo "ABORT_SYNC=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout target repo
         if: |
           needs.check_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
