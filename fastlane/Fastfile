@@ -59,18 +59,6 @@ platform :ios do
       ]
     )
 
-    previous_build_number = latest_testflight_build_number(
-      app_identifier: "com.#{TEAMID}.LoopFollow",
-      api_key: api_key,
-    )
-
-    current_build_number = previous_build_number + 1
-
-    increment_build_number(
-      xcodeproj: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
-      build_number: current_build_number
-    )
-    
     mapping = Actions.lane_context[
       SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING
     ]
