@@ -146,17 +146,15 @@ jobs:
   # Builds LoopFollow
   build:
     name: Build
-    needs: [check_certs, check_permissions, check_latest_from_upstream, day_in_month]
+    needs: [check_certs, check_latest_from_upstream, day_in_month]
     runs-on: macos-15
     permissions:
       contents: write
     if:
-      | # builds with manual start; if automatic: once a month or when new commits are found
+      | # builds with manual start; if scheduled: once a month or when new commits are found
       github.event_name == 'workflow_dispatch' ||
-      (needs.check_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
         (vars.SCHEDULED_BUILD != 'false' && needs.day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
         (vars.SCHEDULED_SYNC != 'false' && needs.check_latest_from_upstream.outputs.NEW_COMMITS == 'true' )
-      )
     steps:
       - name: Select Xcode version
         run: "sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer"
