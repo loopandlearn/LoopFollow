@@ -175,11 +175,13 @@
 		DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */; };
 		DDC6CA412DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */; };
 		DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */; };
-		DDC6CA452DD8D8E60060EE25 /* PumpChangeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */; };
-		DDC6CA472DD8D9010060EE25 /* PumpChangeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */; };
-		DDC6CA492DD8E47A0060EE25 /* PumpVolumeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */; };
-		DDC6CA4B2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */; };
-		DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */; };
+                DDC6CA452DD8D8E60060EE25 /* PumpChangeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */; };
+                DDC6CA472DD8D9010060EE25 /* PumpChangeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */; };
+                DDC6CA492DD8E47A0060EE25 /* PumpVolumeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */; };
+                DDC6CA4D2DD8E9990060EE25 /* PumpBatteryCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA4C2DD8E9990060EE25 /* PumpBatteryCondition.swift */; };
+                DDC6CA4B2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */; };
+                DDC6CA4F2DD8E9990060EE25 /* PumpBatteryAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC6CA4E2DD8E9990060EE25 /* PumpBatteryAlarmEditor.swift */; };
+                DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */; };
 		DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */; };
 		DDC7E5382DBD887400EB1127 /* isOnPhoneCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */; };
 		DDC7E5422DBD8A1600EB1127 /* AlarmGeneralSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5392DBD8A1600EB1127 /* AlarmGeneralSection.swift */; };
@@ -567,11 +569,13 @@
 		DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorAgeAlarmEditor.swift; sourceTree = "<group>"; };
 		DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorAgeCondition.swift; sourceTree = "<group>"; };
-		DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpChangeCondition.swift; sourceTree = "<group>"; };
-		DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpChangeAlarmEditor.swift; sourceTree = "<group>"; };
-		DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpVolumeCondition.swift; sourceTree = "<group>"; };
-		DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpVolumeAlarmEditor.swift; sourceTree = "<group>"; };
-		DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerView.swift; sourceTree = "<group>"; };
+                DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpChangeCondition.swift; sourceTree = "<group>"; };
+                DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpChangeAlarmEditor.swift; sourceTree = "<group>"; };
+                DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpVolumeCondition.swift; sourceTree = "<group>"; };
+                DDC6CA4C2DD8E9990060EE25 /* PumpBatteryCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpBatteryCondition.swift; sourceTree = "<group>"; };
+                DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpVolumeAlarmEditor.swift; sourceTree = "<group>"; };
+                DDC6CA4E2DD8E9990060EE25 /* PumpBatteryAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpBatteryAlarmEditor.swift; sourceTree = "<group>"; };
+                DDC7E5122DBCE1B900EB1127 /* SnoozerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerView.swift; sourceTree = "<group>"; };
 		DDC7E5132DBCE1B900EB1127 /* SnoozerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewController.swift; sourceTree = "<group>"; };
 		DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = isOnPhoneCall.swift; sourceTree = "<group>"; };
 		DDC7E5392DBD8A1600EB1127 /* AlarmGeneralSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmGeneralSection.swift; sourceTree = "<group>"; };
@@ -840,8 +844,9 @@
 				DDCC3A4E2DDC5B54006F1C10 /* BatteryDropCondition.swift */,
 				DDCC3A4A2DDBB5E4006F1C10 /* BatteryCondition.swift */,
 				DDB9FC7A2DDB573F00EFAA76 /* IOBCondition.swift */,
-				DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */,
-				DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */,
+                                DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */,
+                                DDC6CA4C2DD8E9990060EE25 /* PumpBatteryCondition.swift */,
+                                DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */,
 				DDC6CA422DD8CED20060EE25 /* SensorAgeCondition.swift */,
 				DDC6CA3C2DD7C6090060EE25 /* TemporaryCondition.swift */,
 				DD7F4C1E2DD6648B00D449E9 /* FastRiseCondition.swift */,
@@ -1103,8 +1108,9 @@
 				DDCC3A532DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift */,
 				DDCC3A4C2DDBB77C006F1C10 /* BatteryAlarmEditor.swift */,
 				DDB9FC7C2DDB575300EFAA76 /* IOBAlarmEditor.swift */,
-				DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */,
-				DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */,
+                                DDC6CA4A2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift */,
+                                DDC6CA4E2DD8E9990060EE25 /* PumpBatteryAlarmEditor.swift */,
+                                DDC6CA462DD8D9010060EE25 /* PumpChangeAlarmEditor.swift */,
 				DDC6CA402DD8CCCE0060EE25 /* SensorAgeAlarmEditor.swift */,
 				DDC6CA3E2DD7C6340060EE25 /* TemporaryAlarmEditor.swift */,
 				DD7F4C202DD66BB100D449E9 /* FastRiseAlarmEditor.swift */,
@@ -1939,10 +1945,11 @@
 				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
 				DDB9FC7B2DDB573F00EFAA76 /* IOBCondition.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
-				DDCC3A5A2DDC988F006F1C10 /* CarbSample.swift in Sources */,
-				DD0650F12DCE9A9E004D3B41 /* MissedReadingCondition.swift in Sources */,
-				DDC6CA4B2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift in Sources */,
-				DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */,
+                                DDCC3A5A2DDC988F006F1C10 /* CarbSample.swift in Sources */,
+                                DD0650F12DCE9A9E004D3B41 /* MissedReadingCondition.swift in Sources */,
+                                DDC6CA4B2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift in Sources */,
+                                DDC6CA4F2DD8E9990060EE25 /* PumpBatteryAlarmEditor.swift in Sources */,
+                                DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */,
 				DDFF3D7F2D1414A200BF9D9E /* BLEDevice.swift in Sources */,
 				DD9ACA042D32821400415D8A /* DeviceStatusTask.swift in Sources */,
 				FC16A97D24996747003D6245 /* SpeakBG.swift in Sources */,
@@ -2020,9 +2027,10 @@
 				DDCC3A542DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift in Sources */,
 				DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */,
 				DD13BC752C3FD6210062313B /* InfoType.swift in Sources */,
-				DDCC3A4D2DDBB77C006F1C10 /* BatteryAlarmEditor.swift in Sources */,
-				DDC6CA492DD8E47A0060EE25 /* PumpVolumeCondition.swift in Sources */,
-				DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */,
+                                DDCC3A4D2DDBB77C006F1C10 /* BatteryAlarmEditor.swift in Sources */,
+                                DDC6CA492DD8E47A0060EE25 /* PumpVolumeCondition.swift in Sources */,
+                                DDC6CA4D2DD8E9990060EE25 /* PumpBatteryCondition.swift in Sources */,
+                                DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */,
 				DD9ACA0A2D33095600415D8A /* MinAgoTask.swift in Sources */,
 				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
 				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
