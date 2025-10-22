@@ -24,6 +24,7 @@ extension MainViewController {
             let sensorInsertedAt = Storage.shared.sageInsertTime.value
             let pumpInsertTime = Storage.shared.cageInsertTime.value
             let latestPumpVol = self.latestPumpVolume
+            let latestPumpBattery = self.latestPumpBattery
             let bolusEntries = self.bolusData.map { BolusEntry(units: $0.value, date: Date(timeIntervalSince1970: $0.date)) }
             let latestBattery = Observable.shared.deviceBatteryLevel.value
             let recentCarbs: [CarbSample] = self.carbData.map { CarbSample(grams: $0.value, date: Date(timeIntervalSince1970: $0.date)) }
@@ -46,6 +47,7 @@ extension MainViewController {
                 sageInsertTime: sensorInsertedAt,
                 pumpInsertTime: pumpInsertTime,
                 latestPumpVolume: latestPumpVol,
+                latestPumpBattery: latestPumpBattery,
                 IOB: self.latestIOB?.value,
                 recentBoluses: bolusEntries,
                 latestBattery: latestBattery,
