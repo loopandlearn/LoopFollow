@@ -73,7 +73,11 @@ extension MainViewController {
 
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
-        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
+        infoManager.clearInfoData(
+            types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd]
+        )
+        latestPumpBattery = nil
+        Observable.shared.pumpBatteryLevel.value = nil
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
         if Storage.shared.device.value == "Loop" {
@@ -103,6 +107,32 @@ extension MainViewController {
                 } else {
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U")
+                }
+
+                if let batteryInfo = lastPumpRecord["battery"] as? [String: AnyObject] {
+                    var pumpBatteryPercent: Double?
+
+                    if let percent = batteryInfo["percent"] as? Double {
+                        pumpBatteryPercent = percent
+                    } else if let percentInt = batteryInfo["percent"] as? Int {
+                        pumpBatteryPercent = Double(percentInt)
+                    } else if let percentNumber = batteryInfo["percent"] as? NSNumber {
+                        pumpBatteryPercent = percentNumber.doubleValue
+                    } else if let percentString = batteryInfo["percent"] as? String {
+                        let sanitized = percentString
+                            .replacingOccurrences(of: "%", with: "")
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                        pumpBatteryPercent = Double(sanitized)
+                    }
+
+                    if let pumpBatteryPercent {
+                        latestPumpBattery = pumpBatteryPercent
+                        Observable.shared.pumpBatteryLevel.value = pumpBatteryPercent
+                        infoManager.updateInfoData(
+                            type: .pumpBattery,
+                            value: String(format: "%.0f%%", pumpBatteryPercent)
+                        )
+                    }
                 }
 
                 if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
