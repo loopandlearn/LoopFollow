@@ -87,7 +87,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var latestCOB: CarbMetric?
     var latestBasal = ""
     var latestPumpVolume: Double = 50.0
-    var latestPumpBattery: Double?
+    var latestPumpBattery: Double? {
+        didSet {
+            Observable.shared.pumpBatteryLevel.value = latestPumpBattery
+        }
+    }
     var latestIOB: InsulinMetric?
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0

@@ -77,7 +77,6 @@ extension MainViewController {
             types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd]
         )
         latestPumpBattery = nil
-        Observable.shared.pumpBatteryLevel.value = nil
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
         if Storage.shared.device.value == "Loop" {
@@ -127,7 +126,6 @@ extension MainViewController {
 
                     if let pumpBatteryPercent {
                         latestPumpBattery = pumpBatteryPercent
-                        Observable.shared.pumpBatteryLevel.value = pumpBatteryPercent
                         infoManager.updateInfoData(
                             type: .pumpBattery,
                             value: String(format: "%.0f%%", pumpBatteryPercent)

@@ -19,6 +19,7 @@ enum AlarmType: String, CaseIterable, Codable {
     case sensorChange = "Sensor Change Alert"
     case pumpChange = "Pump Change Alert"
     case pump = "Pump Insulin Alert"
+    case pumpBattery = "Pump Battery Alert"
     case battery = "Low Battery"
     case batteryDrop = "Battery Drop"
     case recBolus = "Rec. Bolus"
