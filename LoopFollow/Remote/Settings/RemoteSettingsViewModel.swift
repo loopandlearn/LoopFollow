@@ -63,7 +63,6 @@ class RemoteSettingsViewModel: ObservableObject {
         // Determine if a comparison is needed and perform it.
         switch remoteType {
         case .trc:
-            // For both Loop and TRC, the target Team ID is in the same storage location.
             // If the target ID is empty, there's nothing to compare.
             guard !targetTeamId.isEmpty else {
                 return false
