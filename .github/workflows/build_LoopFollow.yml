@@ -27,7 +27,7 @@ jobs:
     # Check GH_PAT, sync repository, check day in month
     steps:
 
-      - name: Validate GH_PAT
+      - name: Access
         id: workflow-permission
         run: |
           # Validate Access Token
