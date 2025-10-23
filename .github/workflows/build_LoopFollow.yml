@@ -13,43 +13,17 @@ env:
   TARGET_BRANCH: ${{ github.ref_name }} # target branch on fork to be kept in sync
 
 jobs:
-
-  # Set a logic flag if this is the second instance of this day-of-week in this month
-  day_in_month:
+  # use a single runner for these sequential steps
+  check_status:
     runs-on: ubuntu-latest
-    name: Check day in month
-    outputs:
-      IS_SECOND_IN_MONTH: ${{ steps.date-check.outputs.is_second_instance }}
-
-    steps:
-      - id: date-check
-        name: Check if this is the second time this day-of-week happens this month
-        run: |
-          DAY_OF_MONTH=$(date +%-d)
-          WEEK_OF_MONTH=$(( ($(date +%-d) - 1) / 7 + 1 ))
-          if [[ $WEEK_OF_MONTH -eq 2 ]]; then
-            echo "is_second_instance=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_second_instance=false" >> "$GITHUB_OUTPUT"
-          fi
-
-  # Checks if Distribution certificate is present and valid, optionally nukes and
-  # creates new certs if the repository variable ENABLE_NUKE_CERTS == 'true'
-  check_certs: 
-      name: Check certificates
-      uses: ./.github/workflows/create_certs.yml
-      secrets: inherit
-
-  # Checks if GH_PAT holds workflow permissions
-  check_permissions:
-    needs: check_certs
-    runs-on: ubuntu-latest
-    name: Check permissions
+    name: Check Repository
     permissions:
       contents: write
     outputs:
-      WORKFLOW_PERMISSION: ${{ steps.workflow-permission.outputs.has_permission }}
+      NEW_COMMITS: ${{ steps.sync.outputs.has_new_commits }}
+      IS_SECOND_IN_MONTH: ${{ steps.date-check.outputs.is_second_instance }}
 
+    # Checks if GH_PAT holds workflow permissions
     steps:
       - name: Check for workflow permissions
         id: workflow-permission
@@ -60,52 +34,26 @@ jobs:
 
           if [[ $PERMISSIONS =~ "workflow" || $PERMISSIONS == "" ]]; then
             echo "GH_PAT holds workflow permissions or is fine-grained PAT."
-            echo "has_permission=true" >> $GITHUB_OUTPUT # Set WORKFLOW_PERMISSION to false.
+            echo "has_permission=true" >> $GITHUB_OUTPUT
           else 
             echo "GH_PAT lacks workflow permissions."
             echo "Automated build features will be skipped!"
-            echo "has_permission=false" >> $GITHUB_OUTPUT # Set WORKFLOW_PERMISSION to false.
-          fi
-
-  # Checks for changes in upstream repository; if changes exist prompts sync for build
-  check_latest_from_upstream:
-    needs: [check_certs, check_permissions]
-    runs-on: ubuntu-latest
-    name: Check upstream
-    outputs:
-      NEW_COMMITS: ${{ steps.sync.outputs.has_new_commits }}
-      ABORT_SYNC: ${{ steps.check_branch.outputs.ABORT_SYNC }}
-
-    steps:
-      - name: Check if running on main or dev branch
-        if: |
-          needs.check_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
-          (vars.SCHEDULED_BUILD != 'false' || vars.SCHEDULED_SYNC != 'false')
-        id: check_branch
-        run: |
-          if [ "${GITHUB_REF##*/}" = "main" ]; then
-            echo "Running on main branch"
-            echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
-          elif [ "${GITHUB_REF##*/}" = "dev" ]; then
-            echo "Running on dev branch"
-            echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
-          else
-            echo "Not running on main or dev branch"
-            echo "ABORT_SYNC=true" >> $GITHUB_OUTPUT
+            echo "has_permission=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Checkout target repo
         if: |
-          needs.check_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
+          steps.workflow-permission.outputs.has_permission == 'true' &&
           (vars.SCHEDULED_BUILD != 'false' || vars.SCHEDULED_SYNC != 'false')
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT }}
 
+      # This syncs any target branch to upstream branch of the same name
       - name: Sync upstream changes
         if: | # do not run the upstream sync action on the upstream repository
-          needs.check_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
-          vars.SCHEDULED_SYNC != 'false' && github.repository_owner != 'loopandlearn' && steps.check_branch.outputs.ABORT_SYNC == 'false'
+          steps.workflow-permission.outputs.has_permission == 'true' &&
+          vars.SCHEDULED_SYNC != 'false' && github.repository_owner != 'loopandlearn'
         id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
         with:
@@ -118,35 +66,60 @@ jobs:
       # Display a sample message based on the sync output var 'has_new_commits'
       - name: New commits found
         if: |
-          needs.check_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
+          steps.workflow-permission.outputs.has_permission == 'true' &&
           vars.SCHEDULED_SYNC != 'false' && steps.sync.outputs.has_new_commits == 'true'
         run: echo "New commits were found to sync."
 
       - name: No new commits
         if: |
-          needs.check_permissions.outputs.WORKFLOW_PERMISSION == 'true' &&
+          steps.workflow-permission.outputs.has_permission == 'true' &&
           vars.SCHEDULED_SYNC != 'false' && steps.sync.outputs.has_new_commits == 'false'
         run: echo "There were no new commits."
 
       - name: Show value of 'has_new_commits'
-        if: needs.check_permissions.outputs.WORKFLOW_PERMISSION == 'true' && vars.SCHEDULED_SYNC != 'false' && steps.check_branch.outputs.ABORT_SYNC == 'false'
+        if: steps.workflow-permission.outputs.has_permission == 'true' && vars.SCHEDULED_SYNC != 'false'
         run: |
           echo ${{ steps.sync.outputs.has_new_commits }}
           echo "NEW_COMMITS=${{ steps.sync.outputs.has_new_commits }}" >> $GITHUB_OUTPUT
 
       - name: Show scheduled build configuration message
-        if: needs.check_permissions.outputs.WORKFLOW_PERMISSION != 'true'
+        if: steps.workflow-permission.outputs.has_permission != 'true'
         run: |
           echo "### :calendar: Scheduled Sync and Build Disabled :mobile_phone_off:" >> $GITHUB_STEP_SUMMARY
           echo "You have not yet configured the scheduled sync and build for LoopFollow's browser build." >> $GITHUB_STEP_SUMMARY
           echo "Synchronizing your fork of <code>LoopFollow</code> with the upstream repository <code>loopandlearn/LoopFollow</code> will be skipped." >> $GITHUB_STEP_SUMMARY
           echo "If you want to enable automatic builds and updates for your LoopFollow, please follow the instructions \
               under the following path <code>LoopFollow/fastlane/testflight.md</code>." >> $GITHUB_STEP_SUMMARY
-  
+
+      # Set a logic flag if this is the second instance of this day-of-week in this month
+      - name: Check if this is the second time this day-of-week happens this month
+        id: date-check
+        run: |
+          DAY_OF_MONTH=$(date +%-d)
+          WEEK_OF_MONTH=$(( ($(date +%-d) - 1) / 7 + 1 ))
+          if [[ $WEEK_OF_MONTH -eq 2 ]]; then
+            echo "is_second_instance=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_second_instance=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Checks if Distribution certificate is present and valid, optionally nukes and
+  # creates new certs if the repository variable ENABLE_NUKE_CERTS == 'true'
+  # only run if a build is planned
+  check_certs:
+      needs: [check_status]
+      name: Check certificates
+      uses: ./.github/workflows/create_certs.yml
+      secrets: inherit
+      if: |
+        github.event_name == 'workflow_dispatch' ||
+          (vars.SCHEDULED_BUILD != 'false' && needs.day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
+          (vars.SCHEDULED_SYNC != 'false' && needs.check_status.outputs.NEW_COMMITS == 'true' )
+
   # Builds LoopFollow
   build:
     name: Build
-    needs: [check_certs, check_latest_from_upstream, day_in_month]
+    needs: [check_certs, check_status]
     runs-on: macos-15
     permissions:
       contents: write
@@ -154,7 +127,7 @@ jobs:
       | # builds with manual start; if scheduled: once a month or when new commits are found
       github.event_name == 'workflow_dispatch' ||
         (vars.SCHEDULED_BUILD != 'false' && needs.day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
-        (vars.SCHEDULED_SYNC != 'false' && needs.check_latest_from_upstream.outputs.NEW_COMMITS == 'true' )
+        (vars.SCHEDULED_SYNC != 'false' && needs.check_status.outputs.NEW_COMMITS == 'true' )
     steps:
       - name: Select Xcode version
         run: "sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer"
