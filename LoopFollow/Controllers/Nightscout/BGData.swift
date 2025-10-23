@@ -46,6 +46,7 @@ extension MainViewController {
     func webLoadNSBGData(dexData: [ShareGlucoseData] = []) {
         // This kicks it out in the instance where dexcom fails but they aren't using NS &&
         if !IsNightscoutEnabled() {
+            Storage.shared.lastBGChecked.value = Date()
             return
         }
 
@@ -109,6 +110,8 @@ extension MainViewController {
                 // if we have Dex data, use it
                 if !dexData.isEmpty {
                     self.ProcessDexBGData(data: dexData, sourceName: "Dexcom")
+                } else {
+                    Storage.shared.lastBGChecked.value = Date()
                 }
                 return
             }
@@ -121,6 +124,7 @@ extension MainViewController {
 
         guard !data.isEmpty else {
             LogManager.shared.log(category: .nightscout, message: "No bg data received. Skipping processing.", limitIdentifier: "No bg data received. Skipping processing.")
+            Storage.shared.lastBGChecked.value = Date()
             return
         }
 
@@ -221,7 +225,10 @@ extension MainViewController {
             TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date())
 
             let entries = self.bgData
-            if entries.count < 2 { return } // Protect index out of bounds
+            if entries.count < 2 { // Protect index out of bounds
+                Storage.shared.lastBGChecked.value = Date()
+                return
+            }
 
             self.updateBGGraph()
             self.updateStats()
@@ -264,6 +271,7 @@ extension MainViewController {
                         stale: Observable.shared.bgStale.value
                     )
             }
+            Storage.shared.lastBGChecked.value = Date()
         }
     }
 }
