@@ -54,18 +54,7 @@ struct ImportExportSettingsView: View {
 
                 // MARK: - iCloud Section
 
-                Section("iCloud Backup") {
-                    Button(action: {
-                        viewModel.exportToiCloud()
-                    }) {
-                        HStack {
-                            Image(systemName: "icloud.and.arrow.up")
-                                .foregroundColor(.blue)
-                            Text("Export All Settings to iCloud")
-                        }
-                    }
-                    .buttonStyle(.plain)
-
+                Section("iCloud Import") {
                     Button(action: {
                         viewModel.importFromiCloud()
                     }) {
@@ -73,6 +62,19 @@ struct ImportExportSettingsView: View {
                             Image(systemName: "icloud.and.arrow.down")
                                 .foregroundColor(.green)
                             Text("Import Settings from iCloud")
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Section("iCloud Export") {
+                    Button(action: {
+                        viewModel.exportToiCloud()
+                    }) {
+                        HStack {
+                            Image(systemName: "icloud.and.arrow.up")
+                                .foregroundColor(.blue)
+                            Text("Export All Settings to iCloud")
                         }
                     }
                     .buttonStyle(.plain)
@@ -141,6 +143,171 @@ struct ImportExportSettingsView: View {
         .onDisappear {
             viewModel.resetExportedAlarms()
         }
+        .sheet(isPresented: $viewModel.showImportConfirmation) {
+            ImportConfirmationView(viewModel: viewModel)
+        }
+    }
+}
+
+struct ImportConfirmationView: View {
+    @ObservedObject var viewModel: ImportExportSettingsViewModel
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Header
+                VStack(spacing: 8) {
+                    Image(systemName: "square.and.arrow.down")
+                        .font(.system(size: 50))
+                        .foregroundColor(.blue)
+
+                    Text("Import Settings")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+
+                    Text("Review the settings that will be imported")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 20)
+
+                // Settings Preview
+                if let preview = viewModel.importPreview {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Settings to Import")
+                            .font(.headline)
+                            .padding(.horizontal)
+
+                        VStack(spacing: 12) {
+                            if let url = preview.nightscoutURL, !url.isEmpty {
+                                SettingRowView(
+                                    icon: "network",
+                                    title: "Nightscout URL",
+                                    value: url,
+                                    color: .blue
+                                )
+                            }
+
+                            if let username = preview.dexcomUsername, !username.isEmpty {
+                                SettingRowView(
+                                    icon: "person.circle",
+                                    title: "Dexcom Username",
+                                    value: username,
+                                    color: .green
+                                )
+                            }
+
+                            if let remoteType = preview.remoteType, !remoteType.isEmpty, remoteType != "None" {
+                                SettingRowView(
+                                    icon: "antenna.radiowaves.left.and.right",
+                                    title: "Remote Type",
+                                    value: remoteType,
+                                    color: .orange
+                                )
+                            }
+
+                            if preview.alarmCount > 0 {
+                                SettingRowView(
+                                    icon: "bell",
+                                    title: "Alarms",
+                                    value: "\(preview.alarmCount) alarm(s): \(preview.alarmNames.joined(separator: ", "))",
+                                    color: .red
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+
+                // Warning
+                VStack(spacing: 8) {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle")
+                            .foregroundColor(.orange)
+                        Text("Warning")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.orange)
+                    }
+
+                    Text("This will overwrite your current settings")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal)
+
+                Spacer()
+
+                // Action Buttons
+                VStack(spacing: 12) {
+                    Button(action: {
+                        viewModel.confirmImport()
+                    }) {
+                        HStack {
+                            Image(systemName: "checkmark")
+                            Text("Import Settings")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(12)
+                    }
+
+                    Button(action: {
+                        viewModel.cancelImport()
+                    }) {
+                        HStack {
+                            Image(systemName: "xmark")
+                            Text("Cancel")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 20)
+            }
+            .navigationBarHidden(true)
+        }
+    }
+}
+
+struct SettingRowView: View {
+    let icon: String
+    let title: String
+    let value: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(color)
+                .frame(width: 30)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                Text(value)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+
+            Spacer()
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
     }
 }
 

@@ -45,6 +45,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var refreshScrollView: UIScrollView!
     var refreshControl: UIRefreshControl!
 
+    // Setup buttons for first-time configuration
+    private var setupNightscoutButton: UIButton!
+    private var setupDexcomButton: UIButton!
+
     let speechSynthesizer = AVSpeechSynthesizer()
 
     // Variables for BG Charts
@@ -153,7 +157,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer)
 
         // setup show/hide small graph and stats
-        BGChartFull.isHidden = !Storage.shared.showSmallGraph.value
+        updateGraphVisibility()
         statsView.isHidden = !Storage.shared.showStats.value
 
         BGChart.delegate = self
@@ -259,7 +263,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         Storage.shared.showSmallGraph.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.BGChartFull.isHidden = !Storage.shared.showSmallGraph.value
+                self?.updateGraphVisibility()
             }
             .store(in: &cancellables)
 
@@ -309,6 +313,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateNightscoutTabState()
+                self?.checkAndShowImportButtonIfNeeded()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.token.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.checkAndShowImportButtonIfNeeded()
             }
             .store(in: &cancellables)
 
@@ -361,6 +373,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         setupTabBar()
 
         speechSynthesizer.delegate = self
+
+        // Check if this is first-time setup and show import button
+        checkAndShowImportButtonIfNeeded()
     }
 
     private func setupTabBar() {
@@ -944,6 +959,130 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         Storage.shared.infoSort.value = sortArray
         Storage.shared.infoVisible.value = visibleArray
+    }
+
+    // MARK: - First Time Setup
+
+    private func checkAndShowImportButtonIfNeeded() {
+        // Check if this is first-time setup (no Nightscout URL configured)
+        let isFirstTimeSetup = Storage.shared.url.value.isEmpty && Storage.shared.token.value.isEmpty
+
+        if isFirstTimeSetup {
+            setupFirstTimeButtons()
+            hideGraphs()
+        } else {
+            hideFirstTimeButtons()
+            showGraphs()
+        }
+    }
+
+    private func setupFirstTimeButtons() {
+        // Create Setup Nightscout button
+        if setupNightscoutButton == nil {
+            setupNightscoutButton = UIButton(type: .system)
+            setupNightscoutButton.setTitle("Setup Nightscout", for: .normal)
+            setupNightscoutButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+            setupNightscoutButton.backgroundColor = UIColor.systemBlue
+            setupNightscoutButton.setTitleColor(.white, for: .normal)
+            setupNightscoutButton.layer.cornerRadius = 12
+            setupNightscoutButton.layer.shadowColor = UIColor.black.cgColor
+            setupNightscoutButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+            setupNightscoutButton.layer.shadowOpacity = 0.3
+            setupNightscoutButton.layer.shadowRadius = 4
+            setupNightscoutButton.addTarget(self, action: #selector(setupNightscoutTapped), for: .touchUpInside)
+
+            view.addSubview(setupNightscoutButton)
+            setupNightscoutButton.translatesAutoresizingMaskIntoConstraints = false
+
+            NSLayoutConstraint.activate([
+                setupNightscoutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                setupNightscoutButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -30),
+                setupNightscoutButton.widthAnchor.constraint(equalToConstant: 200),
+                setupNightscoutButton.heightAnchor.constraint(equalToConstant: 50),
+            ])
+        }
+
+        // Create Setup Dexcom Share button
+        if setupDexcomButton == nil {
+            setupDexcomButton = UIButton(type: .system)
+            setupDexcomButton.setTitle("Setup Dexcom Share", for: .normal)
+            setupDexcomButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+            setupDexcomButton.backgroundColor = UIColor.systemGreen
+            setupDexcomButton.setTitleColor(.white, for: .normal)
+            setupDexcomButton.layer.cornerRadius = 12
+            setupDexcomButton.layer.shadowColor = UIColor.black.cgColor
+            setupDexcomButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+            setupDexcomButton.layer.shadowOpacity = 0.3
+            setupDexcomButton.layer.shadowRadius = 4
+            setupDexcomButton.addTarget(self, action: #selector(setupDexcomTapped), for: .touchUpInside)
+
+            view.addSubview(setupDexcomButton)
+            setupDexcomButton.translatesAutoresizingMaskIntoConstraints = false
+
+            NSLayoutConstraint.activate([
+                setupDexcomButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                setupDexcomButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 30),
+                setupDexcomButton.widthAnchor.constraint(equalToConstant: 200),
+                setupDexcomButton.heightAnchor.constraint(equalToConstant: 50),
+            ])
+        }
+
+        setupNightscoutButton.isHidden = false
+        setupDexcomButton.isHidden = false
+    }
+
+    private func hideFirstTimeButtons() {
+        setupNightscoutButton?.isHidden = true
+        setupDexcomButton?.isHidden = true
+    }
+
+    @objc private func setupNightscoutTapped() {
+        let nightscoutSettingsView = NightscoutSettingsView(viewModel: .init())
+        let hostingController = UIHostingController(rootView: nightscoutSettingsView)
+        hostingController.modalPresentationStyle = .pageSheet
+
+        present(hostingController, animated: true)
+    }
+
+    @objc private func setupDexcomTapped() {
+        let dexcomSettingsView = DexcomSettingsView(viewModel: .init())
+        let hostingController = UIHostingController(rootView: dexcomSettingsView)
+        hostingController.modalPresentationStyle = .pageSheet
+
+        present(hostingController, animated: true)
+    }
+
+    private func hideGraphs() {
+        BGChart.isHidden = true
+        BGChartFull.isHidden = true
+    }
+
+    private func showGraphs() {
+        updateGraphVisibility()
+    }
+
+    private func updateGraphVisibility() {
+        let isFirstTimeSetup = Storage.shared.url.value.isEmpty && Storage.shared.token.value.isEmpty
+
+        if isFirstTimeSetup {
+            BGChart.isHidden = true
+            BGChartFull.isHidden = true
+        } else {
+            BGChart.isHidden = false
+            BGChartFull.isHidden = !Storage.shared.showSmallGraph.value
+        }
+    }
+
+    @objc private func importSettingsButtonTapped() {
+        presentImportSettingsView()
+    }
+
+    private func presentImportSettingsView() {
+        let importExportView = ImportExportSettingsView()
+        let hostingController = UIHostingController(rootView: importExportView)
+        hostingController.modalPresentationStyle = .pageSheet
+
+        present(hostingController, animated: true)
     }
 }
 

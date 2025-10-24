@@ -4,6 +4,14 @@
 import Foundation
 import SwiftUI
 
+struct ImportPreview {
+    let nightscoutURL: String?
+    let dexcomUsername: String?
+    let remoteType: String?
+    let alarmCount: Int
+    let alarmNames: [String]
+}
+
 class ImportExportSettingsViewModel: ObservableObject {
     // MARK: - Published Properties
 
@@ -14,6 +22,10 @@ class ImportExportSettingsViewModel: ObservableObject {
     @Published var qrCodeString = ""
     @Published var exportType: ExportType = .nightscout
     @Published var exportedAlarmIds: Set<UUID> = []
+    @Published var importPreview: ImportPreview?
+    @Published var showImportConfirmation = false
+    @Published var pendingImportSettings: CombinedSettingsExport?
+    @Published var pendingImportSource: String = ""
 
     // MARK: - Export Types
 
@@ -80,7 +92,10 @@ class ImportExportSettingsViewModel: ObservableObject {
                 // Still try to apply settings, but warn user
             }
 
-            try applyImportedSettings(settings, source: "QR code")
+            // Store settings and create preview for confirmation
+            pendingImportSettings = settings
+            pendingImportSource = "QR code"
+            createImportPreview(from: settings)
 
         } catch {
             let currentVersion = AppVersionManager().version()
@@ -271,12 +286,76 @@ class ImportExportSettingsViewModel: ObservableObject {
                 // Still try to apply settings, but warn user
             }
 
-            try applyImportedSettings(settings, source: "iCloud")
+            // Store settings and create preview for confirmation
+            pendingImportSettings = settings
+            pendingImportSource = "iCloud"
+            createImportPreview(from: settings)
 
         } catch {
             let currentVersion = AppVersionManager().version()
             qrCodeErrorMessage = "iCloud import failed. This might be due to a version change (current: \(currentVersion)). Please try exporting settings to iCloud again."
             LogManager.shared.log(category: .general, message: "iCloud import failed: \(error.localizedDescription)")
         }
+    }
+
+    private func createImportPreview(from settings: CombinedSettingsExport) {
+        let nightscoutURL = settings.nightscout?.url.isEmpty == false ? settings.nightscout?.url : nil
+        let dexcomUsername: String? = nil // Dexcom settings are not part of the export structure
+        let remoteType = settings.remote?.remoteType != .none ? settings.remote?.remoteType.rawValue : nil
+        let alarmCount = settings.alarms?.alarms.count ?? 0
+        let alarmNames = settings.alarms?.alarms.map { $0.name } ?? []
+
+        // Check if any settings are actually present
+        let hasAnySettings = (nightscoutURL != nil && !nightscoutURL!.isEmpty) ||
+            (remoteType != nil && !remoteType!.isEmpty && remoteType != "None") ||
+            alarmCount > 0
+
+        LogManager.shared.log(category: .general, message: "Import preview check - nightscoutURL: \(nightscoutURL ?? "nil"), remoteType: \(remoteType ?? "nil"), alarmCount: \(alarmCount), hasAnySettings: \(hasAnySettings)")
+
+        if hasAnySettings {
+            LogManager.shared.log(category: .general, message: "Creating import preview with settings")
+            importPreview = ImportPreview(
+                nightscoutURL: nightscoutURL,
+                dexcomUsername: dexcomUsername,
+                remoteType: remoteType,
+                alarmCount: alarmCount,
+                alarmNames: alarmNames
+            )
+            LogManager.shared.log(category: .general, message: "Created importPreview - nightscoutURL: \(importPreview?.nightscoutURL ?? "nil"), remoteType: \(importPreview?.remoteType ?? "nil"), alarmCount: \(importPreview?.alarmCount ?? 0)")
+            showImportConfirmation = true
+            LogManager.shared.log(category: .general, message: "Set showImportConfirmation = true")
+        } else {
+            LogManager.shared.log(category: .general, message: "No settings found, clearing import data")
+            // No settings found, show error message and clear any pending data
+            qrCodeErrorMessage = "No settings found in import data"
+            showImportConfirmation = false
+            importPreview = nil
+            pendingImportSettings = nil
+            pendingImportSource = ""
+            LogManager.shared.log(category: .general, message: "Set showImportConfirmation = false")
+        }
+    }
+
+    func confirmImport() {
+        guard let settings = pendingImportSettings else { return }
+
+        do {
+            try applyImportedSettings(settings, source: pendingImportSource)
+        } catch {
+            qrCodeErrorMessage = "Import failed: \(error.localizedDescription)"
+        }
+
+        // Reset confirmation state
+        showImportConfirmation = false
+        importPreview = nil
+        pendingImportSettings = nil
+        pendingImportSource = ""
+    }
+
+    func cancelImport() {
+        showImportConfirmation = false
+        importPreview = nil
+        pendingImportSettings = nil
+        pendingImportSource = ""
     }
 }
