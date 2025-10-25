@@ -324,6 +324,20 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
+        Storage.shared.shareUserName.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.checkAndShowImportButtonIfNeeded()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.sharePassword.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.checkAndShowImportButtonIfNeeded()
+            }
+            .store(in: &cancellables)
+
         Storage.shared.apnsKey.$value
             .receive(on: DispatchQueue.main)
             .removeDuplicates()
@@ -964,8 +978,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // MARK: - First Time Setup
 
     private func checkAndShowImportButtonIfNeeded() {
-        // Check if this is first-time setup (no Nightscout URL configured)
-        let isFirstTimeSetup = Storage.shared.url.value.isEmpty && Storage.shared.token.value.isEmpty
+        // Check if this is first-time setup (no Nightscout URL configured AND no Dexcom configured)
+        let isNightscoutConfigured = !Storage.shared.url.value.isEmpty && !Storage.shared.token.value.isEmpty
+        let isDexcomConfigured = !Storage.shared.shareUserName.value.isEmpty && !Storage.shared.sharePassword.value.isEmpty
+        let isFirstTimeSetup = !isNightscoutConfigured && !isDexcomConfigured
 
         if isFirstTimeSetup {
             setupFirstTimeButtons()
@@ -1039,17 +1055,45 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @objc private func setupNightscoutTapped() {
         let nightscoutSettingsView = NightscoutSettingsView(viewModel: .init())
         let hostingController = UIHostingController(rootView: nightscoutSettingsView)
-        hostingController.modalPresentationStyle = .pageSheet
+        let navController = UINavigationController(rootViewController: hostingController)
 
-        present(hostingController, animated: true)
+        // Apply dark mode if needed
+        if Storage.shared.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+            navController.overrideUserInterfaceStyle = .dark
+        }
+
+        // Add a Done button
+        hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .pageSheet
+        present(navController, animated: true)
     }
 
     @objc private func setupDexcomTapped() {
         let dexcomSettingsView = DexcomSettingsView(viewModel: .init())
         let hostingController = UIHostingController(rootView: dexcomSettingsView)
-        hostingController.modalPresentationStyle = .pageSheet
+        let navController = UINavigationController(rootViewController: hostingController)
 
-        present(hostingController, animated: true)
+        // Apply dark mode if needed
+        if Storage.shared.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+            navController.overrideUserInterfaceStyle = .dark
+        }
+
+        // Add a Done button
+        hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .pageSheet
+        present(navController, animated: true)
     }
 
     private func hideGraphs() {
@@ -1083,6 +1127,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         hostingController.modalPresentationStyle = .pageSheet
 
         present(hostingController, animated: true)
+    }
+
+    @objc private func dismissModal() {
+        dismiss(animated: true)
     }
 }
 
