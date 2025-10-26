@@ -73,7 +73,7 @@ extension MainViewController {
 
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
-        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
+        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pumpBattery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
         if Storage.shared.device.value == "Loop" {
@@ -103,6 +103,15 @@ extension MainViewController {
                 } else {
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U")
+                }
+
+                // Parse pump battery level
+                if let pumpBattery = lastPumpRecord["battery"] as? [String: AnyObject],
+                   let percent = pumpBattery["percent"] as? Double
+                {
+                    let pumpBatteryText = String(format: "%.0f", percent) + "%"
+                    infoManager.updateInfoData(type: .pumpBattery, value: pumpBatteryText)
+                    Observable.shared.pumpBatteryLevel.value = percent
                 }
 
                 if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],

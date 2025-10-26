@@ -33,6 +33,7 @@ class Observable {
     var alertLastLoopTime = ObservableValue<TimeInterval?>(default: nil)
     var deviceRecBolus = ObservableValue<Double?>(default: nil)
     var deviceBatteryLevel = ObservableValue<Double?>(default: nil)
+    var pumpBatteryLevel = ObservableValue<Double?>(default: nil)
 
     var settingsPath = ObservableValue<NavigationPath>(default: NavigationPath())
 
