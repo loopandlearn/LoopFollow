@@ -4,7 +4,7 @@
 import Foundation
 
 enum InfoType: Int, CaseIterable {
-    case iob, cob, basal, override, battery, pump, sage, cage, recBolus, minMax, carbsToday, autosens, profile, target, isf, carbRatio, updated, tdd, iage
+    case iob, cob, basal, override, battery, pumpBattery, pump, sage, cage, recBolus, minMax, carbsToday, autosens, profile, target, isf, carbRatio, updated, tdd, iage
 
     var name: String {
         switch self {
@@ -13,6 +13,7 @@ enum InfoType: Int, CaseIterable {
         case .basal: return "Basal"
         case .override: return "Override"
         case .battery: return "Battery"
+        case .pumpBattery: return "Pump Battery"
         case .pump: return "Pump"
         case .sage: return "SAGE"
         case .cage: return "CAGE"
