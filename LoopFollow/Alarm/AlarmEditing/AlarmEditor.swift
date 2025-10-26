@@ -80,6 +80,7 @@ struct AlarmEditor: View {
         case .iob: IOBAlarmEditor(alarm: $alarm)
         case .battery: BatteryAlarmEditor(alarm: $alarm)
         case .batteryDrop: BatteryDropAlarmEditor(alarm: $alarm)
+        case .pumpBattery: PumpBatteryAlarmEditor(alarm: $alarm)
         case .missedBolus: MissedBolusAlarmEditor(alarm: $alarm)
         }
     }

@@ -249,6 +249,9 @@ struct Alarm: Identifiable, Codable, Equatable {
             soundFile = .machineCharge
             delta = 10
             monitoringWindow = 15
+        case .pumpBattery:
+            soundFile = .machineCharge
+            threshold = 20
         case .recBolus:
             soundFile = .dholShuffleloop
             threshold = 1
@@ -287,7 +290,7 @@ extension AlarmType {
             return .glucose
         case .iob, .cob, .missedBolus, .recBolus:
             return .insulin
-        case .battery, .batteryDrop, .pump, .pumpChange,
+        case .battery, .batteryDrop, .pumpBattery, .pump, .pumpChange,
              .sensorChange, .notLooping, .buildExpire:
             return .device
         case .overrideStart, .overrideEnd, .tempTargetStart, .tempTargetEnd:
@@ -308,6 +311,7 @@ extension AlarmType {
         case .recBolus: return "bolt.horizontal"
         case .battery: return "battery.25"
         case .batteryDrop: return "battery.100.bolt"
+        case .pumpBattery: return "battery.25"
         case .pump: return "drop"
         case .pumpChange: return "arrow.triangle.2.circlepath"
         case .sensorChange: return "sensor.tag.radiowaves.forward"
@@ -334,6 +338,7 @@ extension AlarmType {
         case .recBolus: return "Recommended bolus issued."
         case .battery: return "Phone battery low."
         case .batteryDrop: return "Battery drops quickly."
+        case .pumpBattery: return "Pump battery low."
         case .pump: return "Reservoir level low."
         case .pumpChange: return "Pump change due."
         case .sensorChange: return "Sensor change due."
