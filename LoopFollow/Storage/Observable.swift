@@ -24,6 +24,7 @@ class Observable {
     var deltaText = ObservableValue<String>(default: "+0")
 
     var currentAlarm = ObservableValue<UUID?>(default: nil)
+    var alarmSoundPlaying = ObservableValue<Bool>(default: false)
 
     var debug = ObservableValue<Bool>(default: false)
 
@@ -35,9 +36,9 @@ class Observable {
 
     var settingsPath = ObservableValue<NavigationPath>(default: NavigationPath())
 
-    // MARK: - Loop APNS TOTP Tracking
-
     var lastSentTOTP = ObservableValue<String?>(default: nil)
+
+    var loopFollowDeviceToken = ObservableValue<String>(default: "")
 
     private init() {}
 }

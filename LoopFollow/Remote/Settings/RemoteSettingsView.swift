@@ -1,8 +1,10 @@
 // LoopFollow
 // RemoteSettingsView.swift
 
+import AVFoundation
 import HealthKit
 import SwiftUI
+import UIKit
 
 struct RemoteSettingsView: View {
     @ObservedObject var viewModel: RemoteSettingsViewModel
@@ -11,12 +13,15 @@ struct RemoteSettingsView: View {
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
     @State private var alertMessage: String? = nil
+
     @State private var otpTimeRemaining: Int? = nil
     private let otpPeriod: TimeInterval = 30
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     enum AlertType {
         case validation
+        case urlTokenValidation
+        case urlTokenUpdate
     }
 
     init(viewModel: RemoteSettingsViewModel) {
@@ -55,6 +60,23 @@ struct RemoteSettingsView: View {
                 Text("Nightscout should be used for Trio 0.2.x.")
                     .font(.footnote)
                     .foregroundColor(.secondary)
+            }
+
+            // MARK: - Import/Export Settings Section
+
+            Section {
+                NavigationLink(destination: ImportExportSettingsView()) {
+                    HStack {
+                        Image(systemName: "square.and.arrow.down")
+                            .foregroundColor(.blue)
+                        Text("Import/Export Settings")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
+                }
+                .buttonStyle(.plain)
             }
 
             // MARK: - Meal Section (for TRC only)
@@ -227,6 +249,29 @@ struct RemoteSettingsView: View {
                             .foregroundColor(.red)
                     }
                 }
+
+                if viewModel.areTeamIdsDifferent {
+                    Section(header: Text("Return Notification Settings"), footer: Text("Because LoopFollow and the target app were built with different Team IDs, you must provide the APNS credentials for LoopFollow below.").font(.caption)) {
+                        HStack {
+                            Text("Return APNS Key ID")
+                            TogglableSecureInput(
+                                placeholder: "Enter Key ID for LoopFollow",
+                                text: $viewModel.returnKeyId,
+                                style: .singleLine
+                            )
+                        }
+
+                        VStack(alignment: .leading) {
+                            Text("Return APNS Key")
+                            TogglableSecureInput(
+                                placeholder: "Paste APNS Key for LoopFollow",
+                                text: $viewModel.returnApnsKey,
+                                style: .multiLine
+                            )
+                            .frame(minHeight: 110)
+                        }
+                    }
+                }
             }
         }
         .alert(isPresented: $showAlert) {
@@ -237,6 +282,22 @@ struct RemoteSettingsView: View {
                     message: Text(alertMessage ?? "Invalid input."),
                     dismissButton: .default(Text("OK"))
                 )
+            case .urlTokenValidation:
+                return Alert(
+                    title: Text("URL/Token Validation"),
+                    message: Text(viewModel.validationMessage),
+                    dismissButton: .default(Text("OK")) {
+                        viewModel.showURLTokenValidation = false
+                    }
+                )
+            case .urlTokenUpdate:
+                return Alert(
+                    title: Text("URL/Token Update"),
+                    message: Text(viewModel.validationMessage),
+                    dismissButton: .default(Text("OK")) {
+                        viewModel.showURLTokenValidation = false
+                    }
+                )
             case .none:
                 return Alert(title: Text("Unknown Alert"))
             }
@@ -246,13 +307,41 @@ struct RemoteSettingsView: View {
                 viewModel.handleLoopAPNSQRCodeScanResult(result)
             }
         }
+        .sheet(isPresented: $viewModel.showURLTokenValidation) {
+            NavigationView {
+                URLTokenValidationView(
+                    settings: viewModel.pendingSettings!,
+                    shouldPromptForURL: viewModel.shouldPromptForURL,
+                    shouldPromptForToken: viewModel.shouldPromptForToken,
+                    message: viewModel.validationMessage,
+                    onConfirm: { confirmedSettings in
+                        confirmedSettings.applyToStorage()
+                        viewModel.updateViewModelFromStorage()
+                        viewModel.showURLTokenValidation = false
+                        viewModel.pendingSettings = nil
+                        LogManager.shared.log(category: .remote, message: "Remote command settings imported from QR code with URL/token updates")
+                    },
+                    onCancel: {
+                        viewModel.showURLTokenValidation = false
+                        viewModel.pendingSettings = nil
+                    }
+                )
+            }
+        }
         .onAppear {
             // Reset timer state so it shows '-' until first tick
             otpTimeRemaining = nil
+            // Update view model from storage to ensure UI is current
+            viewModel.updateViewModelFromStorage()
         }
         .onReceive(otpTimer) { _ in
             let now = Date().timeIntervalSince1970
             otpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
+        }
+        .onReceive(viewModel.$showURLTokenValidation) { showValidation in
+            if showValidation {
+                // The sheet will be shown automatically due to the binding
+            }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
         .navigationTitle("Remote Settings")

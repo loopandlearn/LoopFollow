@@ -13,7 +13,28 @@
 		654134182E1DC09700BDBE08 /* OverridePresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654134172E1DC09700BDBE08 /* OverridePresetsView.swift */; };
 		6541341A2E1DC27900BDBE08 /* OverridePresetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654134192E1DC27900BDBE08 /* OverridePresetData.swift */; };
 		6541341C2E1DC28000BDBE08 /* DateExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6541341B2E1DC28000BDBE08 /* DateExtensions.swift */; };
+		656F8C102E49F36F0008DC1D /* QRCodeDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */; };
+		656F8C122E49F3780008DC1D /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */; };
+		656F8C142E49F3D20008DC1D /* RemoteCommandSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */; };
 		6584B1012E4A263900135D4D /* TOTPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6584B1002E4A263900135D4D /* TOTPService.swift */; };
+		6589CC622E9E7D1600BB18FE /* ImportExportSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC532E9E7D1600BB18FE /* ImportExportSettingsView.swift */; };
+		6589CC632E9E7D1600BB18FE /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC5D2E9E7D1600BB18FE /* GeneralSettingsView.swift */; };
+		6589CC642E9E7D1600BB18FE /* ContactSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC592E9E7D1600BB18FE /* ContactSettingsView.swift */; };
+		6589CC652E9E7D1600BB18FE /* DexcomSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC5C2E9E7D1600BB18FE /* DexcomSettingsViewModel.swift */; };
+		6589CC662E9E7D1600BB18FE /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC562E9E7D1600BB18FE /* AdvancedSettingsView.swift */; };
+		6589CC672E9E7D1600BB18FE /* ImportExportSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC542E9E7D1600BB18FE /* ImportExportSettingsViewModel.swift */; };
+		6589CC682E9E7D1600BB18FE /* ExportableSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC522E9E7D1600BB18FE /* ExportableSettings.swift */; };
+		6589CC692E9E7D1600BB18FE /* ContactSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC5A2E9E7D1600BB18FE /* ContactSettingsViewModel.swift */; };
+		6589CC6A2E9E7D1600BB18FE /* DexcomSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC5B2E9E7D1600BB18FE /* DexcomSettingsView.swift */; };
+		6589CC6B2E9E7D1600BB18FE /* TabCustomizationModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC602E9E7D1600BB18FE /* TabCustomizationModal.swift */; };
+		6589CC6C2E9E7D1600BB18FE /* GraphSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC5E2E9E7D1600BB18FE /* GraphSettingsView.swift */; };
+		6589CC6D2E9E7D1600BB18FE /* CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC582E9E7D1600BB18FE /* CalendarSettingsView.swift */; };
+		6589CC6E2E9E7D1600BB18FE /* SettingsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC5F2E9E7D1600BB18FE /* SettingsMenuView.swift */; };
+		6589CC6F2E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC572E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift */; };
+		6589CC712E9E814F00BB18FE /* AlarmSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC702E9E814F00BB18FE /* AlarmSelectionView.swift */; };
+		6589CC752E9EAFB700BB18FE /* SettingsMigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC742E9EAFB700BB18FE /* SettingsMigrationManager.swift */; };
+		65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */; };
+		65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
 		DD0650A92DCA8A10004D3B41 /* AlarmBGSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */; };
@@ -45,14 +66,12 @@
 		DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF0C2C98485400FB655A /* SecureStorageValue.swift */; };
 		DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */; };
 		DD16AF112C997B4600FB655A /* LoadingButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD16AF102C997B4600FB655A /* LoadingButtonView.swift */; };
-		DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */; };
-		DD1A97162D4294B3000DDC11 /* AdvancedSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */; };
 		DD1D52B92E1EB5DC00432050 /* TabPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52B82E1EB5DC00432050 /* TabPosition.swift */; };
 		DD1D52BB2E1EB60B00432050 /* MoreMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52BA2E1EB60B00432050 /* MoreMenuViewController.swift */; };
 		DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */; };
 		DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */; };
-		DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */; };
-		DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */; };
+		DD485F142E454B2600CE8CBF /* SecureMessenger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD485F132E454B2600CE8CBF /* SecureMessenger.swift */; };
+		DD485F162E46631000CE8CBF /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DD485F152E46631000CE8CBF /* CryptoSwift */; };
 		DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878022C7B297E0048F05C /* StorageValue.swift */; };
 		DD4878052C7B2C970048F05C /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878042C7B2C970048F05C /* Storage.swift */; };
 		DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */; };
@@ -77,14 +96,13 @@
 		DD493AE52ACF2383009A6922 /* Treatments.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE42ACF2383009A6922 /* Treatments.swift */; };
 		DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */; };
 		DD493AE92ACF2445009A6922 /* BGData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AE82ACF2445009A6922 /* BGData.swift */; };
+		DD4A407E2E6AFEE6007B318B /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4A407D2E6AFEE6007B318B /* AuthService.swift */; };
 		DD4AFB3B2DB55CB600BB593F /* TimeOfDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */; };
 		DD4AFB3D2DB55D2900BB593F /* AlarmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB3C2DB55D2900BB593F /* AlarmConfiguration.swift */; };
 		DD4AFB492DB576C200BB593F /* AlarmSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB482DB576C200BB593F /* AlarmSettingsView.swift */; };
 		DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */; };
 		DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB662DB68C5500BB593F /* UUID+Identifiable.swift */; };
 		DD4AFB6B2DB6BF2A00BB593F /* Binding+Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB6A2DB6BF2A00BB593F /* Binding+Optional.swift */; };
-		DD50C7502D0828800057AE6F /* ContactSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */; };
-		DD50C7532D0828D10057AE6F /* ContactSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */; };
 		DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */; };
 		DD5334212C60EBEE00062F9D /* InsulinCartridgeChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334202C60EBEE00062F9D /* InsulinCartridgeChange.swift */; };
 		DD5334232C60ED3600062F9D /* IAge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5334222C60ED3600062F9D /* IAge.swift */; };
@@ -129,15 +147,10 @@
 		DD7F4C232DD7A62200D449E9 /* AlarmType+SortDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C222DD7A62200D449E9 /* AlarmType+SortDirection.swift */; };
 		DD7F4C252DD7B20700D449E9 /* AlarmType+timeUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7F4C242DD7B20700D449E9 /* AlarmType+timeUnit.swift */; };
 		DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */; };
-		DD8060DB2E2ACE5900626B91 /* TabCustomizationModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8060DA2E2ACE5900626B91 /* TabCustomizationModal.swift */; };
-		DD8316182DE3633D004467AA /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316172DE3633D004467AA /* GeneralSettingsView.swift */; };
 		DD8316442DE47CA9004467AA /* BGPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316432DE47CA9004467AA /* BGPicker.swift */; };
-		DD8316462DE49B09004467AA /* GraphSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316452DE49B09004467AA /* GraphSettingsView.swift */; };
 		DD8316482DE49EE5004467AA /* Storage+Migrate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316472DE49EE5004467AA /* Storage+Migrate.swift */; };
 		DD83164A2DE4C504004467AA /* SettingsStepperRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8316492DE4C504004467AA /* SettingsStepperRow.swift */; };
 		DD83164C2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */; };
-		DD83164E2DE4E093004467AA /* CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164D2DE4E093004467AA /* CalendarSettingsView.swift */; };
-		DD8316502DE4E635004467AA /* SettingsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD83164F2DE4E635004467AA /* SettingsMenuView.swift */; };
 		DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */; };
 		DD91E4DD2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */; };
 		DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */; };
@@ -397,7 +410,28 @@
 		654134172E1DC09700BDBE08 /* OverridePresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetsView.swift; sourceTree = "<group>"; };
 		654134192E1DC27900BDBE08 /* OverridePresetData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetData.swift; sourceTree = "<group>"; };
 		6541341B2E1DC28000BDBE08 /* DateExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtensions.swift; sourceTree = "<group>"; };
+		656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeDisplayView.swift; sourceTree = "<group>"; };
+		656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
+		656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommandSettings.swift; sourceTree = "<group>"; };
 		6584B1002E4A263900135D4D /* TOTPService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPService.swift; sourceTree = "<group>"; };
+		6589CC522E9E7D1600BB18FE /* ExportableSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportableSettings.swift; sourceTree = "<group>"; };
+		6589CC532E9E7D1600BB18FE /* ImportExportSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportExportSettingsView.swift; sourceTree = "<group>"; };
+		6589CC542E9E7D1600BB18FE /* ImportExportSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportExportSettingsViewModel.swift; sourceTree = "<group>"; };
+		6589CC562E9E7D1600BB18FE /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
+		6589CC572E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsViewModel.swift; sourceTree = "<group>"; };
+		6589CC582E9E7D1600BB18FE /* CalendarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingsView.swift; sourceTree = "<group>"; };
+		6589CC592E9E7D1600BB18FE /* ContactSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSettingsView.swift; sourceTree = "<group>"; };
+		6589CC5A2E9E7D1600BB18FE /* ContactSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSettingsViewModel.swift; sourceTree = "<group>"; };
+		6589CC5B2E9E7D1600BB18FE /* DexcomSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsView.swift; sourceTree = "<group>"; };
+		6589CC5C2E9E7D1600BB18FE /* DexcomSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsViewModel.swift; sourceTree = "<group>"; };
+		6589CC5D2E9E7D1600BB18FE /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		6589CC5E2E9E7D1600BB18FE /* GraphSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsView.swift; sourceTree = "<group>"; };
+		6589CC5F2E9E7D1600BB18FE /* SettingsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMenuView.swift; sourceTree = "<group>"; };
+		6589CC602E9E7D1600BB18FE /* TabCustomizationModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCustomizationModal.swift; sourceTree = "<group>"; };
+		6589CC702E9E814F00BB18FE /* AlarmSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSelectionView.swift; sourceTree = "<group>"; };
+		6589CC742E9EAFB700BB18FE /* SettingsMigrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMigrationManager.swift; sourceTree = "<group>"; };
+		65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTokenValidationView.swift; sourceTree = "<group>"; };
+		65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonHandler.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
 		DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireCondition.swift; sourceTree = "<group>"; };
@@ -430,14 +464,11 @@
 		DD16AF0C2C98485400FB655A /* SecureStorageValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureStorageValue.swift; sourceTree = "<group>"; };
 		DD16AF0E2C99592F00FB655A /* HKQuantityInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HKQuantityInputView.swift; sourceTree = "<group>"; };
 		DD16AF102C997B4600FB655A /* LoadingButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingButtonView.swift; sourceTree = "<group>"; };
-		DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
-		DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsViewModel.swift; sourceTree = "<group>"; };
 		DD1D52B82E1EB5DC00432050 /* TabPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPosition.swift; sourceTree = "<group>"; };
 		DD1D52BA2E1EB60B00432050 /* MoreMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreMenuViewController.swift; sourceTree = "<group>"; };
 		DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsView.swift; sourceTree = "<group>"; };
 		DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsViewModel.swift; sourceTree = "<group>"; };
-		DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsViewModel.swift; sourceTree = "<group>"; };
-		DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomSettingsView.swift; sourceTree = "<group>"; };
+		DD485F132E454B2600CE8CBF /* SecureMessenger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureMessenger.swift; sourceTree = "<group>"; };
 		DD4878022C7B297E0048F05C /* StorageValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageValue.swift; sourceTree = "<group>"; };
 		DD4878042C7B2C970048F05C /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsView.swift; sourceTree = "<group>"; };
@@ -461,14 +492,13 @@
 		DD493AE42ACF2383009A6922 /* Treatments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Treatments.swift; sourceTree = "<group>"; };
 		DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatus.swift; sourceTree = "<group>"; };
 		DD493AE82ACF2445009A6922 /* BGData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGData.swift; sourceTree = "<group>"; };
+		DD4A407D2E6AFEE6007B318B /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeOfDay.swift; sourceTree = "<group>"; };
 		DD4AFB3C2DB55D2900BB593F /* AlarmConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmConfiguration.swift; sourceTree = "<group>"; };
 		DD4AFB482DB576C200BB593F /* AlarmSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSettingsView.swift; sourceTree = "<group>"; };
 		DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmListView.swift; sourceTree = "<group>"; };
 		DD4AFB662DB68C5500BB593F /* UUID+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UUID+Identifiable.swift"; sourceTree = "<group>"; };
 		DD4AFB6A2DB6BF2A00BB593F /* Binding+Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Binding+Optional.swift"; sourceTree = "<group>"; };
-		DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSettingsViewModel.swift; sourceTree = "<group>"; };
-		DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSettingsView.swift; sourceTree = "<group>"; };
 		DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImageUpdater.swift; sourceTree = "<group>"; };
 		DD5334202C60EBEE00062F9D /* InsulinCartridgeChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinCartridgeChange.swift; sourceTree = "<group>"; };
 		DD5334222C60ED3600062F9D /* IAge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAge.swift; sourceTree = "<group>"; };
@@ -513,15 +543,10 @@
 		DD7F4C222DD7A62200D449E9 /* AlarmType+SortDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlarmType+SortDirection.swift"; sourceTree = "<group>"; };
 		DD7F4C242DD7B20700D449E9 /* AlarmType+timeUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlarmType+timeUnit.swift"; sourceTree = "<group>"; };
 		DD7FFAFC2A72953000C3A304 /* EKEventStore+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKEventStore+Extensions.swift"; sourceTree = "<group>"; };
-		DD8060DA2E2ACE5900626B91 /* TabCustomizationModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCustomizationModal.swift; sourceTree = "<group>"; };
-		DD8316172DE3633D004467AA /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		DD8316432DE47CA9004467AA /* BGPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGPicker.swift; sourceTree = "<group>"; };
-		DD8316452DE49B09004467AA /* GraphSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsView.swift; sourceTree = "<group>"; };
 		DD8316472DE49EE5004467AA /* Storage+Migrate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Storage+Migrate.swift"; sourceTree = "<group>"; };
 		DD8316492DE4C504004467AA /* SettingsStepperRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStepperRow.swift; sourceTree = "<group>"; };
 		DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BinaryFloatingPoint+localized.swift"; sourceTree = "<group>"; };
-		DD83164D2DE4E093004467AA /* CalendarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingsView.swift; sourceTree = "<group>"; };
-		DD83164F2DE4E635004467AA /* SettingsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMenuView.swift; sourceTree = "<group>"; };
 		DD85E9942D739CED001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmnipodDashHeartbeatBluetoothTransmitter.swift; sourceTree = "<group>"; };
 		DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseConversion.swift; sourceTree = "<group>"; };
 		DD98F54324BCEFEE0007425A /* ShareClientExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareClientExtension.swift; sourceTree = "<group>"; };
@@ -789,6 +814,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */,
+				DD485F162E46631000CE8CBF /* CryptoSwift in Frameworks */,
 				3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */,
 				DD48781C2C7DAF140048F05C /* SwiftJWT in Frameworks */,
 			);
@@ -797,6 +823,37 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6589CC552E9E7D1600BB18FE /* ImportExport */ = {
+			isa = PBXGroup;
+			children = (
+				6589CC742E9EAFB700BB18FE /* SettingsMigrationManager.swift */,
+				6589CC702E9E814F00BB18FE /* AlarmSelectionView.swift */,
+				6589CC522E9E7D1600BB18FE /* ExportableSettings.swift */,
+				6589CC532E9E7D1600BB18FE /* ImportExportSettingsView.swift */,
+				6589CC542E9E7D1600BB18FE /* ImportExportSettingsViewModel.swift */,
+			);
+			path = ImportExport;
+			sourceTree = "<group>";
+		};
+		6589CC612E9E7D1600BB18FE /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				6589CC552E9E7D1600BB18FE /* ImportExport */,
+				6589CC562E9E7D1600BB18FE /* AdvancedSettingsView.swift */,
+				6589CC572E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift */,
+				6589CC582E9E7D1600BB18FE /* CalendarSettingsView.swift */,
+				6589CC592E9E7D1600BB18FE /* ContactSettingsView.swift */,
+				6589CC5A2E9E7D1600BB18FE /* ContactSettingsViewModel.swift */,
+				6589CC5B2E9E7D1600BB18FE /* DexcomSettingsView.swift */,
+				6589CC5C2E9E7D1600BB18FE /* DexcomSettingsViewModel.swift */,
+				6589CC5D2E9E7D1600BB18FE /* GeneralSettingsView.swift */,
+				6589CC5E2E9E7D1600BB18FE /* GraphSettingsView.swift */,
+				6589CC5F2E9E7D1600BB18FE /* SettingsMenuView.swift */,
+				6589CC602E9E7D1600BB18FE /* TabCustomizationModal.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		6A5880E0B811AF443B05AB02 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -882,24 +939,6 @@
 			path = InfoTable;
 			sourceTree = "<group>";
 		};
-		DD1A97122D429495000DDC11 /* Settings */ = {
-			isa = PBXGroup;
-			children = (
-				DD8060DA2E2ACE5900626B91 /* TabCustomizationModal.swift */,
-				DD83164F2DE4E635004467AA /* SettingsMenuView.swift */,
-				DD2C2E552D3C3913006413A5 /* DexcomSettingsView.swift */,
-				DD2C2E532D3C37D7006413A5 /* DexcomSettingsViewModel.swift */,
-				DD83164D2DE4E093004467AA /* CalendarSettingsView.swift */,
-				DD8316452DE49B09004467AA /* GraphSettingsView.swift */,
-				DD1A97152D4294B2000DDC11 /* AdvancedSettingsViewModel.swift */,
-				DD1A97132D4294A4000DDC11 /* AdvancedSettingsView.swift */,
-				DD8316172DE3633D004467AA /* GeneralSettingsView.swift */,
-				DD50C74F2D0828800057AE6F /* ContactSettingsViewModel.swift */,
-				DD50C7522D0828D10057AE6F /* ContactSettingsView.swift */,
-			);
-			path = Settings;
-			sourceTree = "<group>";
-		};
 		DD2C2E4D2D3B8ACF006413A5 /* Nightscout */ = {
 			isa = PBXGroup;
 			children = (
@@ -912,6 +951,8 @@
 		DD4878062C7B2E9E0048F05C /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */,
+				656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */,
 				DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */,
 				DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */,
 			);
@@ -921,6 +962,7 @@
 		DD4878112C7B74F90048F05C /* TRC */ = {
 			isa = PBXGroup;
 			children = (
+				DD485F132E454B2600CE8CBF /* SecureMessenger.swift */,
 				DD48781F2C7DAF890048F05C /* PushMessage.swift */,
 				DD4878122C7B750D0048F05C /* TempTargetView.swift */,
 				DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */,
@@ -1216,6 +1258,7 @@
 		DDF6999C2C5AAA4C0058A8D9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */,
 				DDE75D2C2DE71401007C1FC1 /* TogglableSecureInput.swift */,
 				DDE75D222DE5E505007C1FC1 /* Glyph.swift */,
 				DD8316492DE4C504004467AA /* SettingsStepperRow.swift */,
@@ -1278,6 +1321,7 @@
 				FC1BDD2C24A23204001B652C /* MainViewController+updateStats.swift */,
 				FCA2DDE52501095000254A8C /* Timers.swift */,
 				DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */,
+				65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -1417,6 +1461,7 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				6589CC612E9E7D1600BB18FE /* Settings */,
 				DDCF9A7E2D85FCE6004DF4DD /* Alarm */,
 				FC16A97624995FEE003D6245 /* Application */,
 				DDFF3D792D140F1800BF9D9E /* BackgroundRefresh */,
@@ -1433,7 +1478,6 @@
 				DD2C2E4D2D3B8ACF006413A5 /* Nightscout */,
 				DD0C0C6E2C4AFFB800DBADDF /* Remote */,
 				FC7CE59A248D334B001F83B8 /* Resources */,
-				DD1A97122D429495000DDC11 /* Settings */,
 				DDC7E5142DBCE1B900EB1127 /* Snoozer */,
 				DDC7E5CD2DC6637800EB1127 /* Storage */,
 				DDEF503D2D32753A00999A5D /* Task */,
@@ -1484,6 +1528,8 @@
 		FCC688542489367300A0279D /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */,
+				DD4A407D2E6AFEE6007B318B /* AuthService.swift */,
 				DD1D52B82E1EB5DC00432050 /* TabPosition.swift */,
 				DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */,
 				DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */,
@@ -1572,6 +1618,7 @@
 			name = LoopFollow;
 			packageProductDependencies = (
 				DD48781B2C7DAF140048F05C /* SwiftJWT */,
+				DD485F152E46631000CE8CBF /* CryptoSwift */,
 			);
 			productName = LoopFollow;
 			productReference = FC9788142485969B00A7906C /* Loop Follow.app */;
@@ -1608,6 +1655,7 @@
 			packageReferences = (
 				DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */,
 				654132E82E19F0B800BDBE08 /* XCRemoteSwiftPackageReference "swift-crypto" */,
+				DD485F0B2E4547C800CE8CBF /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 			);
 			productRefGroup = FC9788152485969B00A7906C /* Products */;
 			projectDirPath = "";
@@ -1857,9 +1905,7 @@
 				DD5334292C6166A500062F9D /* InfoDisplaySettingsView.swift in Sources */,
 				DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */,
 				DD0B9D582DE1F3B20090C337 /* AlarmType+canAcknowledge.swift in Sources */,
-				DD2C2E562D3C3917006413A5 /* DexcomSettingsView.swift in Sources */,
 				DD7F4BC52DD3CE0700D449E9 /* AlarmBGLimitSection.swift in Sources */,
-				DD8060DB2E2ACE5900626B91 /* TabCustomizationModal.swift in Sources */,
 				DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */,
 				DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */,
 				DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */,
@@ -1874,10 +1920,12 @@
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
 				DD7F4C0F2DD51EC200D449E9 /* TempTargetStartCondition.swift in Sources */,
 				DDBD19962DFB44B0005C2D69 /* Alarm+byPriorityThenSpec.swift in Sources */,
+				656F8C102E49F36F0008DC1D /* QRCodeDisplayView.swift in Sources */,
 				DDC6CA3D2DD7C6090060EE25 /* TemporaryCondition.swift in Sources */,
 				DD9ACA0E2D340BFF00415D8A /* AlarmTask.swift in Sources */,
 				DDCF9A822D85FD15004DF4DD /* AlarmType.swift in Sources */,
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
+				656F8C122E49F3780008DC1D /* QRCodeGenerator.swift in Sources */,
 				6541341A2E1DC27900BDBE08 /* OverridePresetData.swift in Sources */,
 				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				DD7F4C092DD504A700D449E9 /* OverrideStartCondition.swift in Sources */,
@@ -1894,6 +1942,7 @@
 				DD7F4C072DD5042F00D449E9 /* OverrideStartAlarmEditor.swift in Sources */,
 				DDCC3A4B2DDBB5E4006F1C10 /* BatteryCondition.swift in Sources */,
 				DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */,
+				656F8C142E49F3D20008DC1D /* RemoteCommandSettings.swift in Sources */,
 				DD12D4872E1705E6004E0112 /* AlarmsContainerView.swift in Sources */,
 				DD83164A2DE4C504004467AA /* SettingsStepperRow.swift in Sources */,
 				DD0650ED2DCE9371004D3B41 /* HighBgAlarmEditor.swift in Sources */,
@@ -1914,6 +1963,7 @@
 				DDCC3A5A2DDC988F006F1C10 /* CarbSample.swift in Sources */,
 				DD0650F12DCE9A9E004D3B41 /* MissedReadingCondition.swift in Sources */,
 				DDC6CA4B2DD8E4960060EE25 /* PumpVolumeAlarmEditor.swift in Sources */,
+				6589CC752E9EAFB700BB18FE /* SettingsMigrationManager.swift in Sources */,
 				DD16AF0F2C99592F00FB655A /* HKQuantityInputView.swift in Sources */,
 				DDFF3D7F2D1414A200BF9D9E /* BLEDevice.swift in Sources */,
 				DD9ACA042D32821400415D8A /* DeviceStatusTask.swift in Sources */,
@@ -1930,7 +1980,6 @@
 				DD7F4C1D2DD650D500D449E9 /* COBAlarmEditor.swift in Sources */,
 				DDE75D272DE5E539007C1FC1 /* ActionRow.swift in Sources */,
 				DD0C0C622C4175FD00DBADDF /* NSProfile.swift in Sources */,
-				DD8316182DE3633D004467AA /* GeneralSettingsView.swift in Sources */,
 				DD58171E2D299FCA0041FB98 /* BluetoothDeviceDelegate.swift in Sources */,
 				DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */,
 				DDD10F032C518A6500D76A8E /* TreatmentResponse.swift in Sources */,
@@ -1947,6 +1996,7 @@
 				DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
 				DD7F4C232DD7A62200D449E9 /* AlarmType+SortDirection.swift in Sources */,
+				65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */,
 				DD0650F72DCFDA26004D3B41 /* InfoBanner.swift in Sources */,
 				DDE75D292DE5E56C007C1FC1 /* LinkRow.swift in Sources */,
 				DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */,
@@ -1981,6 +2031,20 @@
 				FC8589BF252B54F500C8FC73 /* Mobileprovision.swift in Sources */,
 				DD4878052C7B2C970048F05C /* Storage.swift in Sources */,
 				DD493AE12ACF22FE009A6922 /* Profile.swift in Sources */,
+				6589CC622E9E7D1600BB18FE /* ImportExportSettingsView.swift in Sources */,
+				6589CC632E9E7D1600BB18FE /* GeneralSettingsView.swift in Sources */,
+				6589CC642E9E7D1600BB18FE /* ContactSettingsView.swift in Sources */,
+				6589CC652E9E7D1600BB18FE /* DexcomSettingsViewModel.swift in Sources */,
+				6589CC662E9E7D1600BB18FE /* AdvancedSettingsView.swift in Sources */,
+				6589CC672E9E7D1600BB18FE /* ImportExportSettingsViewModel.swift in Sources */,
+				6589CC682E9E7D1600BB18FE /* ExportableSettings.swift in Sources */,
+				6589CC692E9E7D1600BB18FE /* ContactSettingsViewModel.swift in Sources */,
+				6589CC6A2E9E7D1600BB18FE /* DexcomSettingsView.swift in Sources */,
+				6589CC6B2E9E7D1600BB18FE /* TabCustomizationModal.swift in Sources */,
+				6589CC6C2E9E7D1600BB18FE /* GraphSettingsView.swift in Sources */,
+				6589CC6D2E9E7D1600BB18FE /* CalendarSettingsView.swift in Sources */,
+				6589CC6E2E9E7D1600BB18FE /* SettingsMenuView.swift in Sources */,
+				6589CC6F2E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift in Sources */,
 				DD493ADF2ACF22BB009A6922 /* SAge.swift in Sources */,
 				DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */,
 				DDF699992C5AA3060058A8D9 /* TempTargetPresetManager.swift in Sources */,
@@ -1993,7 +2057,6 @@
 				DD13BC752C3FD6210062313B /* InfoType.swift in Sources */,
 				DDCC3A4D2DDBB77C006F1C10 /* BatteryAlarmEditor.swift in Sources */,
 				DDC6CA492DD8E47A0060EE25 /* PumpVolumeCondition.swift in Sources */,
-				DD1A97142D4294A5000DDC11 /* AdvancedSettingsView.swift in Sources */,
 				DD9ACA0A2D33095600415D8A /* MinAgoTask.swift in Sources */,
 				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
 				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
@@ -2001,8 +2064,8 @@
 				DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */,
 				DD7F4C0B2DD51C5500D449E9 /* OverrideEndCondition.swift in Sources */,
 				DDFF3D872D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift in Sources */,
+				6589CC712E9E814F00BB18FE /* AlarmSelectionView.swift in Sources */,
 				DD7F4C192DD63FD500D449E9 /* RecBolusAlarmEditor.swift in Sources */,
-				DD50C7502D0828800057AE6F /* ContactSettingsViewModel.swift in Sources */,
 				DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
 				DD6A935E2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift in Sources */,
@@ -2013,13 +2076,13 @@
 				DD493AD72ACF2139009A6922 /* SuspendPump.swift in Sources */,
 				DDB9FC7F2DDB584500EFAA76 /* BolusEntry.swift in Sources */,
 				FC9788182485969B00A7906C /* AppDelegate.swift in Sources */,
+				DD4A407E2E6AFEE6007B318B /* AuthService.swift in Sources */,
 				654134182E1DC09700BDBE08 /* OverridePresetsView.swift in Sources */,
 				DDDC01DD2E244B3100D9975C /* JWTManager.swift in Sources */,
 				DDD10F072C529DE800D76A8E /* Observable.swift in Sources */,
 				DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */,
 				DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */,
 				DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */,
-				DD50C7532D0828D10057AE6F /* ContactSettingsView.swift in Sources */,
 				DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */,
 				DDE75D2B2DE5E613007C1FC1 /* NavigationRow.swift in Sources */,
 				DD4AFB3B2DB55CB600BB593F /* TimeOfDay.swift in Sources */,
@@ -2045,12 +2108,12 @@
 				DD0650EF2DCE96FF004D3B41 /* HighBGCondition.swift in Sources */,
 				DDC6CA472DD8D9010060EE25 /* PumpChangeAlarmEditor.swift in Sources */,
 				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
+				65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
 				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */,
 				DD7F4C212DD66BB200D449E9 /* FastRiseAlarmEditor.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
-				DD83164E2DE4E093004467AA /* CalendarSettingsView.swift in Sources */,
 				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
 				DD58171C2D299F940041FB98 /* BluetoothDevice.swift in Sources */,
 				DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */,
@@ -2063,9 +2126,7 @@
 				FC1BDD2D24A23204001B652C /* MainViewController+updateStats.swift in Sources */,
 				DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */,
 				DD7F4C152DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift in Sources */,
-				DD2C2E542D3C37DC006413A5 /* DexcomSettingsViewModel.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
-				DD8316462DE49B09004467AA /* GraphSettingsView.swift in Sources */,
 				DD5334232C60ED3600062F9D /* IAge.swift in Sources */,
 				FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */,
 				DD0C0C642C45A59400DBADDF /* HKUnit+Extensions.swift in Sources */,
@@ -2081,11 +2142,9 @@
 				DD7F4C132DD51FD500D449E9 /* TempTargetEndCondition.swift in Sources */,
 				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
-				DD8316502DE4E635004467AA /* SettingsMenuView.swift in Sources */,
 				DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */,
 				DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */,
 				DD8316482DE49EE5004467AA /* Storage+Migrate.swift in Sources */,
-				DD1A97162D4294B3000DDC11 /* AdvancedSettingsViewModel.swift in Sources */,
 				FCA2DDE62501095000254A8C /* Timers.swift in Sources */,
 				DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */,
 				DD9ED0C82D355244000D2A63 /* LogViewModel.swift in Sources */,
@@ -2096,6 +2155,7 @@
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
 				DDCC3A582DDC9655006F1C10 /* MissedBolusAlarmEditor.swift in Sources */,
 				DDEF50402D479B8A00884336 /* LoopAPNSService.swift in Sources */,
+				DD485F142E454B2600CE8CBF /* SecureMessenger.swift in Sources */,
 				DDEF50422D479BAA00884336 /* LoopAPNSCarbsView.swift in Sources */,
 				DDEF50432D479BBA00884336 /* LoopAPNSBolusView.swift in Sources */,
 				DDEF50452D479BDA00884336 /* LoopAPNSRemoteView.swift in Sources */,
@@ -2392,6 +2452,14 @@
 				minimumVersion = 3.12.3;
 			};
 		};
+		DD485F0B2E4547C800CE8CBF /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/krzyzanowskim/CryptoSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.0;
+			};
+		};
 		DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Kitura/Swift-JWT.git";
@@ -2403,6 +2471,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DD485F152E46631000CE8CBF /* CryptoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CryptoSwift;
+		};
 		DD48781B2C7DAF140048F05C /* SwiftJWT */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DD48781A2C7DAF140048F05C /* XCRemoteSwiftPackageReference "Swift-JWT" */;

@@ -16,6 +16,7 @@ struct LoopAPNSCarbsView: View {
     @State private var alertMessage = ""
     @State private var alertType: AlertType = .success
     @State private var otpTimeRemaining: Int? = nil
+    @State private var showTOTPWarning = false
     private let otpPeriod: TimeInterval = 30
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -178,7 +179,7 @@ struct LoopAPNSCarbsView: View {
                     }
 
                     // TOTP Blocking Warning Section
-                    if isTOTPBlocked {
+                    if isTOTPBlocked && showTOTPWarning {
                         Section {
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
@@ -250,6 +251,15 @@ struct LoopAPNSCarbsView: View {
 
                 // Validate TOTP state when view appears
                 _ = isTOTPBlocked
+
+                // Add delay before showing TOTP warning to prevent flash after successful send
+                if isTOTPBlocked {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showTOTPWarning = true
+                    }
+                } else {
+                    showTOTPWarning = false
+                }
             }
             .onReceive(otpTimer) { _ in
                 let now = Date().timeIntervalSince1970
@@ -382,45 +392,30 @@ struct LoopAPNSCarbsView: View {
             otp: otpCode
         )
 
-        Task {
-            do {
-                let apnsService = LoopAPNSService()
-                let success = try await apnsService.sendCarbsViaAPNS(payload: payload)
-
-                DispatchQueue.main.async {
-                    isLoading = false
-                    if success {
-                        // Mark TOTP code as used
-                        TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
-                        let timeFormatter = DateFormatter()
-                        timeFormatter.timeStyle = .short
-                        alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"
-                        alertType = .success
-                        LogManager.shared.log(
-                            category: .apns,
-                            message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionTimeString)h, Time: \(adjustedConsumedDate)"
-                        )
-                    } else {
-                        alertMessage = "Failed to send carbs. Check your Loop APNS configuration."
-                        alertType = .error
-                        LogManager.shared.log(
-                            category: .apns,
-                            message: "Failed to send carbs"
-                        )
-                    }
-                    showAlert = true
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    isLoading = false
-                    alertMessage = "Error sending carbs: \(error.localizedDescription)"
-                    alertType = .error
+        let apnsService = LoopAPNSService()
+        apnsService.sendCarbsViaAPNS(payload: payload) { success, errorMessage in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if success {
+                    // Mark TOTP code as used
+                    TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
+                    let timeFormatter = DateFormatter()
+                    timeFormatter.timeStyle = .short
+                    self.alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"
+                    self.alertType = .success
                     LogManager.shared.log(
                         category: .apns,
-                        message: "APNS carbs error: \(error.localizedDescription)"
+                        message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionTimeString)h, Time: \(adjustedConsumedDate)"
                     )
-                    showAlert = true
+                } else {
+                    self.alertMessage = errorMessage ?? "Failed to send carbs. Check your Loop APNS configuration."
+                    self.alertType = .error
+                    LogManager.shared.log(
+                        category: .apns,
+                        message: "Failed to send carbs: \(errorMessage ?? "unknown error")"
+                    )
                 }
+                self.showAlert = true
             }
         }
     }
