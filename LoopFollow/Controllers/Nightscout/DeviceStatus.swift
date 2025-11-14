@@ -8,8 +8,6 @@ import UIKit
 
 extension MainViewController {
     func webLoadNSDeviceStatus() {
-        Storage.shared.lastLoopingChecked.value = Date()
-
         let parameters = ["count": "1"]
         NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
             switch result {
@@ -17,6 +15,7 @@ extension MainViewController {
                 if let jsonDeviceStatus = json as? [[String: AnyObject]] {
                     DispatchQueue.main.async {
                         self.updateDeviceStatusDisplay(jsonDeviceStatus: jsonDeviceStatus)
+                        Storage.shared.lastLoopingChecked.value = Date()
                     }
                 } else {
                     self.handleDeviceStatusError()
@@ -30,6 +29,7 @@ extension MainViewController {
     private func handleDeviceStatusError() {
         LogManager.shared.log(category: .deviceStatus, message: "Device status fetch failed!", limitIdentifier: "Device status fetch failed!")
         DispatchQueue.main.async {
+            Storage.shared.lastLoopingChecked.value = Date()
             TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(10))
             self.evaluateNotLooping()
         }

@@ -160,6 +160,7 @@ class Storage {
     var persistentNotificationLastBGTime = StorageValue<Date>(key: "persistentNotificationLastBGTime", defaultValue: .distantPast)
 
     var lastLoopingChecked = StorageValue<Date?>(key: "lastLoopingChecked", defaultValue: nil)
+    var lastBGChecked = StorageValue<Date?>(key: "lastBGChecked", defaultValue: nil)
 
     var alarmsPosition = StorageValue<TabPosition>(key: "alarmsPosition", defaultValue: .position2)
     var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .more)
