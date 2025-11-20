@@ -96,15 +96,28 @@ extension MainViewController {
                                    .withTime,
                                    .withDashSeparatorInDate,
                                    .withColonSeparatorInTime]
+
+        Observable.shared.previousAlertLastLoopTime.value = Observable.shared.alertLastLoopTime.value
+
         if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String: AnyObject]? {
             if let bolusIncrement = lastPumpRecord["bolusIncrement"] as? Double, bolusIncrement > 0 {
                 Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: bolusIncrement)
+                Storage.shared.bolusIncrementDetected.value = true
+            } else if let model = lastPumpRecord["model"] as? String, model == "Dash" {
+                Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: 0.05)
                 Storage.shared.bolusIncrementDetected.value = true
             } else {
                 Storage.shared.bolusIncrementDetected.value = false
             }
 
-            if let lastPumpTime = formatter.date(from: (lastPumpRecord["clock"] as! String))?.timeIntervalSince1970 {
+            if let clockString = lastPumpRecord["clock"] as? String,
+               let lastPumpTime = formatter.date(from: clockString)?.timeIntervalSince1970
+            {
+                let storedTime = Observable.shared.alertLastLoopTime.value ?? 0
+                if lastPumpTime > storedTime {
+                    Observable.shared.alertLastLoopTime.value = lastPumpTime
+                }
+
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
                     infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U")
@@ -112,27 +125,27 @@ extension MainViewController {
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U")
                 }
+            }
 
-                if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
-                   let upbat = uploader["battery"] as? Double
-                {
-                    let batteryText: String
-                    if let isCharging = uploader["isCharging"] as? Bool, isCharging {
-                        batteryText = "⚡️ " + String(format: "%.0f", upbat) + "%"
-                    } else {
-                        batteryText = String(format: "%.0f", upbat) + "%"
-                    }
-                    infoManager.updateInfoData(type: .battery, value: batteryText)
-                    Observable.shared.deviceBatteryLevel.value = upbat
+            if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
+               let upbat = uploader["battery"] as? Double
+            {
+                let batteryText: String
+                if let isCharging = uploader["isCharging"] as? Bool, isCharging {
+                    batteryText = "⚡️ " + String(format: "%.0f", upbat) + "%"
+                } else {
+                    batteryText = String(format: "%.0f", upbat) + "%"
+                }
+                infoManager.updateInfoData(type: .battery, value: batteryText)
+                Observable.shared.deviceBatteryLevel.value = upbat
 
-                    let timestamp = uploader["timestamp"] as? Date ?? Date()
-                    let currentBattery = DataStructs.batteryStruct(batteryLevel: upbat, timestamp: timestamp)
-                    deviceBatteryData.append(currentBattery)
+                let timestamp = uploader["timestamp"] as? Date ?? Date()
+                let currentBattery = DataStructs.batteryStruct(batteryLevel: upbat, timestamp: timestamp)
+                deviceBatteryData.append(currentBattery)
 
-                    // store only the last 30 battery readings
-                    if deviceBatteryData.count > 30 {
-                        deviceBatteryData.removeFirst()
-                    }
+                // store only the last 30 battery readings
+                if deviceBatteryData.count > 30 {
+                    deviceBatteryData.removeFirst()
                 }
             }
         }

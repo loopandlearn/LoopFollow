@@ -18,25 +18,6 @@ extension MainViewController {
                 return
             }
 
-            var wasEnacted: Bool
-            if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] {
-                wasEnacted = true
-                if let timestampString = enacted["timestamp"] as? String,
-                   let lastLoopTime = formatter.date(from: timestampString)?.timeIntervalSince1970
-                {
-                    let storedTime = Observable.shared.alertLastLoopTime.value ?? 0
-                    if lastLoopTime < storedTime {
-                        LogManager.shared.log(category: .deviceStatus, message: "Received an old timestamp for enacted: \(lastLoopTime) is older than last stored time \(storedTime), ignoring update.", isDebug: false)
-                    } else {
-                        Observable.shared.alertLastLoopTime.value = lastLoopTime
-                        LogManager.shared.log(category: .deviceStatus, message: "New LastLoopTime: \(lastLoopTime)", isDebug: true)
-                    }
-                }
-            } else {
-                wasEnacted = false
-                LogManager.shared.log(category: .deviceStatus, message: "Last devicestatus is missing enacted")
-            }
-
             var updatedTime: TimeInterval?
 
             if let timestamp = enactedOrSuggested["timestamp"] as? String,
@@ -235,7 +216,7 @@ extension MainViewController {
                     if bgData.count > 0 {
                         lastBGTime = bgData[bgData.count - 1].date
                     }
-                    if tempBasalTime > lastBGTime, !wasEnacted {
+                    if tempBasalTime > lastBGTime {
                         LoopStatusLabel.text = "⏀"
                         latestLoopStatusString = "⏀"
                     } else {
