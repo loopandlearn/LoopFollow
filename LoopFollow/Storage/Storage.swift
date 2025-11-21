@@ -171,6 +171,11 @@ class Storage {
     var returnApnsKey = StorageValue<String>(key: "returnApnsKey", defaultValue: "")
     var returnKeyId = StorageValue<String>(key: "returnKeyId", defaultValue: "")
 
+    // Statistics display preferences
+    var showGMI = StorageValue<Bool>(key: "showGMI", defaultValue: true)
+    var showStdDev = StorageValue<Bool>(key: "showStdDev", defaultValue: true)
+    var showTITR = StorageValue<Bool>(key: "showTITR", defaultValue: false)
+
     static let shared = Storage()
     private init() {}
 }
