@@ -103,13 +103,9 @@ extension MainViewController {
             if let bolusIncrement = lastPumpRecord["bolusIncrement"] as? Double, bolusIncrement > 0 {
                 Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: bolusIncrement)
                 Storage.shared.bolusIncrementDetected.value = true
-
-            } else if let model = lastPumpRecord["model"] as? String,
-                      ["Dash", "723", "722"].contains(model)
-            {
+            } else if let model = lastPumpRecord["model"] as? String, model == "Dash" {
                 Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: 0.05)
                 Storage.shared.bolusIncrementDetected.value = true
-
             } else {
                 Storage.shared.bolusIncrementDetected.value = false
             }
