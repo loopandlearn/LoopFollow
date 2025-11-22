@@ -15,7 +15,7 @@ extension AlarmType {
              .overrideStart, .overrideEnd, .tempTargetStart,
              .tempTargetEnd:
             return .minute
-        case .battery, .batteryDrop, .sensorChange, .pumpChange, .cob, .iob,
+        case .battery, .batteryDrop, .pumpBattery, .sensorChange, .pumpChange, .cob, .iob,
              .pump:
             return .hour
         case .temporary:
