@@ -813,6 +813,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		65AC25F52ECFD5E800421360 /* Stats */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Stats; sourceTree = "<group>"; };
+		65AC26702ED245DF00421360 /* Treatments */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Treatments; sourceTree = "<group>"; };
 		DDCC3AD72DDE1790006F1C10 /* Tests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Tests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -1480,6 +1481,7 @@
 			isa = PBXGroup;
 			children = (
 				6589CC612E9E7D1600BB18FE /* Settings */,
+				65AC26702ED245DF00421360 /* Treatments */,
 				65AC25F52ECFD5E800421360 /* Stats */,
 				DDCF9A7E2D85FCE6004DF4DD /* Alarm */,
 				FC16A97624995FEE003D6245 /* Application */,
@@ -1639,6 +1641,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				65AC25F52ECFD5E800421360 /* Stats */,
+				65AC26702ED245DF00421360 /* Treatments */,
 			);
 			name = LoopFollow;
 			packageProductDependencies = (

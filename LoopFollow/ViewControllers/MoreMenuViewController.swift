@@ -237,6 +237,27 @@ class MoreMenuViewController: UIViewController {
         }
 
         snoozerVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
+    private func openTreatments() {
+        let treatmentsVC = UIHostingController(rootView: TreatmentsView())
+        let navController = UINavigationController(rootViewController: treatmentsVC)
+
+        // Apply dark mode if needed
+        if Storage.shared.forceDarkMode.value {
+            treatmentsVC.overrideUserInterfaceStyle = .dark
+            navController.overrideUserInterfaceStyle = .dark
+        }
+
+        // Add a close button
+        treatmentsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
+    }
+
     private func openAggregatedStats() {
         guard let mainVC = getMainViewController() else {
             presentSimpleAlert(title: "Error", message: "Unable to access data")
