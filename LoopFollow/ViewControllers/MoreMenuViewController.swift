@@ -66,6 +66,15 @@ class MoreMenuViewController: UIViewController {
             }
         ))
 
+        // Always add Treatments
+        menuItems.append(MenuItem(
+            title: "Treatments",
+            icon: "cross.case.fill",
+            action: { [weak self] in
+                self?.openTreatments()
+            }
+        ))
+
         // Always add Statistics
         menuItems.append(MenuItem(
             title: "Statistics",
@@ -185,6 +194,27 @@ class MoreMenuViewController: UIViewController {
 
         // Add a close button
         nightscoutVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
+    }
+
+    private func openTreatments() {
+        let treatmentsVC = UIHostingController(rootView: TreatmentsView())
+        let navController = UINavigationController(rootViewController: treatmentsVC)
+
+        // Apply dark mode if needed
+        if Storage.shared.forceDarkMode.value {
+            treatmentsVC.overrideUserInterfaceStyle = .dark
+            navController.overrideUserInterfaceStyle = .dark
+        }
+
+        // Add a close button
+        treatmentsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
             action: #selector(dismissModal)
