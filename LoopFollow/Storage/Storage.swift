@@ -178,6 +178,10 @@ class Storage {
 
     var bolusIncrement = SecureStorageValue<HKQuantity>(key: "bolusIncrement", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05))
     var bolusIncrementDetected = StorageValue<Bool>(key: "bolusIncrementDetected", defaultValue: false)
+    // Statistics display preferences
+    var showGMI = StorageValue<Bool>(key: "showGMI", defaultValue: true)
+    var showStdDev = StorageValue<Bool>(key: "showStdDev", defaultValue: true)
+    var showTITR = StorageValue<Bool>(key: "showTITR", defaultValue: false)
 
     static let shared = Storage()
     private init() {}

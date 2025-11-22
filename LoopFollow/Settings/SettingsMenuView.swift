@@ -243,6 +243,7 @@ private enum Sheet: Hashable, Identifiable {
     case calendar, contact
     case advanced
     case viewLog
+    case aggregatedStats
 
     var id: Self { self }
 
@@ -262,7 +263,61 @@ private enum Sheet: Hashable, Identifiable {
         case .contact: ContactSettingsView(viewModel: .init())
         case .advanced: AdvancedSettingsView(viewModel: .init())
         case .viewLog: LogView(viewModel: .init())
+        case .aggregatedStats:
+            AggregatedStatsViewWrapper()
         }
+    }
+}
+
+// Helper view to access MainViewController
+struct AggregatedStatsViewWrapper: View {
+    @State private var mainViewController: MainViewController?
+
+    var body: some View {
+        Group {
+            if let mainVC = mainViewController {
+                AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
+            } else {
+                Text("Loading stats...")
+                    .onAppear {
+                        mainViewController = getMainViewController()
+                    }
+            }
+        }
+    }
+
+    private func getMainViewController() -> MainViewController? {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController
+        else {
+            return nil
+        }
+
+        if let mainVC = rootVC as? MainViewController {
+            return mainVC
+        }
+
+        if let navVC = rootVC as? UINavigationController,
+           let mainVC = navVC.viewControllers.first as? MainViewController
+        {
+            return mainVC
+        }
+
+        if let tabVC = rootVC as? UITabBarController {
+            for vc in tabVC.viewControllers ?? [] {
+                if let mainVC = vc as? MainViewController {
+                    return mainVC
+                }
+                if let navVC = vc as? UINavigationController,
+                   let mainVC = navVC.viewControllers.first as? MainViewController
+                {
+                    return mainVC
+                }
+            }
+        }
+
+        return nil
     }
 }
 

@@ -73,6 +73,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var bolusData: [bolusGraphStruct] = []
     var smbData: [bolusGraphStruct] = []
     var carbData: [carbGraphStruct] = []
+
+    // Stats-specific data storage (can hold up to 30 days)
+    var statsBGData: [ShareGlucoseData] = []
+    var statsBolusData: [bolusGraphStruct] = []
+    var statsSMBData: [bolusGraphStruct] = []
+    var statsCarbData: [carbGraphStruct] = []
+    var statsBasalData: [basalGraphStruct] = []
     var overrideGraphData: [DataStructs.overrideStruct] = []
     var tempTargetGraphData: [DataStructs.tempTargetStruct] = []
     var predictionData: [ShareGlucoseData] = []

@@ -237,6 +237,25 @@ class MoreMenuViewController: UIViewController {
         }
 
         snoozerVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
+    private func openAggregatedStats() {
+        guard let mainVC = getMainViewController() else {
+            presentSimpleAlert(title: "Error", message: "Unable to access data")
+            return
+        }
+
+        let statsVC = UIHostingController(
+            rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
+        )
+        let navController = UINavigationController(rootViewController: statsVC)
+
+        // Apply dark mode if needed
+        if Storage.shared.forceDarkMode.value {
+            statsVC.overrideUserInterfaceStyle = .dark
+            navController.overrideUserInterfaceStyle = .dark
+        }
+
+        // Add a close button
+        statsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
             action: #selector(dismissModal)
@@ -281,6 +300,22 @@ class MoreMenuViewController: UIViewController {
             // Rebuild tabs after settings is dismissed to apply any tab order changes
             MainViewController.rebuildTabsIfNeeded()
         }
+    private func getMainViewController() -> MainViewController? {
+        // Try to find MainViewController in the view hierarchy
+        guard let tabBarController = tabBarController else { return nil }
+
+        for vc in tabBarController.viewControllers ?? [] {
+            if let mainVC = vc as? MainViewController {
+                return mainVC
+            }
+            if let navVC = vc as? UINavigationController,
+               let mainVC = navVC.viewControllers.first as? MainViewController
+            {
+                return mainVC
+            }
+        }
+
+        return nil
     }
 
     @objc private func dismissModal() {

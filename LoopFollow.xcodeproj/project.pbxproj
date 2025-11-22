@@ -34,6 +34,7 @@
 		6589CC6F2E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC572E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift */; };
 		6589CC712E9E814F00BB18FE /* AlarmSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC702E9E814F00BB18FE /* AlarmSelectionView.swift */; };
 		6589CC752E9EAFB700BB18FE /* SettingsMigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC742E9EAFB700BB18FE /* SettingsMigrationManager.swift */; };
+		6584B1012E4A263900135D4D /* TOTPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6584B1002E4A263900135D4D /* TOTPService.swift */; };
 		65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */; };
 		65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
@@ -437,6 +438,7 @@
 		6589CC602E9E7D1600BB18FE /* TabCustomizationModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCustomizationModal.swift; sourceTree = "<group>"; };
 		6589CC702E9E814F00BB18FE /* AlarmSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSelectionView.swift; sourceTree = "<group>"; };
 		6589CC742E9EAFB700BB18FE /* SettingsMigrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMigrationManager.swift; sourceTree = "<group>"; };
+		6584B1002E4A263900135D4D /* TOTPService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPService.swift; sourceTree = "<group>"; };
 		65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTokenValidationView.swift; sourceTree = "<group>"; };
 		65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonHandler.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -810,6 +812,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		65AC25F52ECFD5E800421360 /* Stats */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Stats; sourceTree = "<group>"; };
 		DDCC3AD72DDE1790006F1C10 /* Tests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Tests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -1477,6 +1480,7 @@
 			isa = PBXGroup;
 			children = (
 				6589CC612E9E7D1600BB18FE /* Settings */,
+				65AC25F52ECFD5E800421360 /* Stats */,
 				DDCF9A7E2D85FCE6004DF4DD /* Alarm */,
 				FC16A97624995FEE003D6245 /* Application */,
 				DDFF3D792D140F1800BF9D9E /* BackgroundRefresh */,
@@ -1632,6 +1636,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				65AC25F52ECFD5E800421360 /* Stats */,
 			);
 			name = LoopFollow;
 			packageProductDependencies = (
