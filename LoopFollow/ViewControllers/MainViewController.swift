@@ -122,6 +122,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     private var cancellables = Set<AnyCancellable>()
 
+    // Loading state management
+    private var loadingOverlay: UIView?
+    private var isInitialLoad = true
+    private var loadingStates: [String: Bool] = [
+        "bg": false,
+        "profile": false,
+        "deviceStatus": false,
+    ]
+    private var loadingTimeoutTimer: Timer?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -388,8 +398,114 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         speechSynthesizer.delegate = self
 
-        // Check if this is first-time setup and show import button
+        // Check configuration and show appropriate UI
+        if isDataSourceConfigured() {
+            // Data source configured - show loading overlay
+            setupLoadingState()
+            showLoadingOverlay()
+        } else {
+            // No data source - hide all data UI and show setup buttons
+            hideAllDataUI()
+            isInitialLoad = false
+        }
+
         checkAndShowImportButtonIfNeeded()
+    }
+
+    // MARK: - Loading Overlay
+
+    private func isDataSourceConfigured() -> Bool {
+        let isNightscoutConfigured = !Storage.shared.url.value.isEmpty
+        let isDexcomConfigured = !Storage.shared.shareUserName.value.isEmpty && !Storage.shared.sharePassword.value.isEmpty
+        return isNightscoutConfigured || isDexcomConfigured
+    }
+
+    private func setupLoadingState() {
+        // If Nightscout is not enabled, mark profile and deviceStatus as loaded
+        // since we only need BG data from Dexcom Share
+        if !IsNightscoutEnabled() {
+            loadingStates["profile"] = true
+            loadingStates["deviceStatus"] = true
+        }
+    }
+
+    private func showLoadingOverlay() {
+        guard loadingOverlay == nil else { return }
+
+        // Hide all data UI while loading
+        hideAllDataUI()
+
+        let overlay = UIView(frame: view.bounds)
+        overlay.backgroundColor = UIColor.systemBackground
+        overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.startAnimating()
+
+        let loadingLabel = UILabel()
+        loadingLabel.translatesAutoresizingMaskIntoConstraints = false
+        loadingLabel.text = "Loading..."
+        loadingLabel.textAlignment = .center
+        loadingLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        loadingLabel.textColor = UIColor.secondaryLabel
+
+        overlay.addSubview(activityIndicator)
+        overlay.addSubview(loadingLabel)
+
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: overlay.centerYAnchor, constant: -20),
+
+            loadingLabel.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            loadingLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 16),
+        ])
+
+        view.addSubview(overlay)
+        loadingOverlay = overlay
+
+        // Set a timeout to hide the loading overlay if data takes too long
+        loadingTimeoutTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: false) { [weak self] _ in
+            guard let self = self else { return }
+            if self.isInitialLoad {
+                LogManager.shared.log(category: .general, message: "Loading timeout reached, hiding overlay")
+                self.isInitialLoad = false
+                self.hideLoadingOverlay()
+            }
+        }
+    }
+
+    private func hideLoadingOverlay() {
+        guard let overlay = loadingOverlay else { return }
+
+        // Cancel the timeout timer
+        loadingTimeoutTimer?.invalidate()
+        loadingTimeoutTimer = nil
+
+        // Show all data UI now that loading is complete
+        showAllDataUI()
+
+        UIView.animate(withDuration: 0.3, animations: {
+            overlay.alpha = 0
+        }, completion: { _ in
+            overlay.removeFromSuperview()
+            self.loadingOverlay = nil
+        })
+    }
+
+    func markDataLoaded(_ key: String) {
+        guard isInitialLoad else { return }
+
+        loadingStates[key] = true
+
+        // Check if all critical data is loaded
+        let allLoaded = loadingStates.values.allSatisfy { $0 }
+        if allLoaded {
+            isInitialLoad = false
+            DispatchQueue.main.async {
+                self.hideLoadingOverlay()
+            }
+        }
     }
 
     private func setupTabBar() {
@@ -723,6 +839,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     func showHideNSDetails() {
+        if isInitialLoad || !isDataSourceConfigured() {
+            return
+        }
+
         var isHidden = false
         if !IsNightscoutEnabled() {
             isHidden = true
@@ -978,17 +1098,23 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     // MARK: - First Time Setup
 
     private func checkAndShowImportButtonIfNeeded() {
-        // Check if this is first-time setup (no Nightscout URL configured AND no Dexcom configured)
-        let isNightscoutConfigured = !Storage.shared.url.value.isEmpty && !Storage.shared.token.value.isEmpty
-        let isDexcomConfigured = !Storage.shared.shareUserName.value.isEmpty && !Storage.shared.sharePassword.value.isEmpty
-        let isFirstTimeSetup = !isNightscoutConfigured && !isDexcomConfigured
+        // Check if this is first-time setup (no data source configured)
+        let isFirstTimeSetup = !isDataSourceConfigured()
 
         if isFirstTimeSetup {
             setupFirstTimeButtons()
-            hideGraphs()
+            hideAllDataUI()
+            // Hide loading overlay if it's showing and mark as not loading
+            if loadingOverlay != nil {
+                isInitialLoad = false
+                hideLoadingOverlay()
+            }
         } else {
             hideFirstTimeButtons()
-            showGraphs()
+            // Only show data UI if we're not in initial loading state
+            if !isInitialLoad || loadingOverlay == nil {
+                showAllDataUI()
+            }
         }
     }
 
@@ -1105,8 +1231,55 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         updateGraphVisibility()
     }
 
+    private func hideAllDataUI() {
+        // Hide graphs
+        BGChart.isHidden = true
+        BGChartFull.isHidden = true
+
+        // Hide BG display elements
+        BGText.isHidden = true
+        DeltaText.isHidden = true
+        DirectionText.isHidden = true
+        MinAgoText.isHidden = true
+        serverText.isHidden = true
+
+        // Hide info table and stats
+        infoTable.isHidden = true
+        statsView.isHidden = true
+
+        // Hide loop status and prediction
+        LoopStatusLabel.isHidden = true
+        PredictionLabel.isHidden = true
+    }
+
+    private func showAllDataUI() {
+        // Show BG display elements
+        BGText.isHidden = false
+        DeltaText.isHidden = false
+        DirectionText.isHidden = false
+        MinAgoText.isHidden = false
+        serverText.isHidden = false
+
+        // Show graphs based on settings
+        updateGraphVisibility()
+
+        // Show/hide info table and stats based on user settings
+        let isNightscoutEnabled = IsNightscoutEnabled()
+        if isNightscoutEnabled {
+            infoTable.isHidden = Storage.shared.hideInfoTable.value
+            LoopStatusLabel.isHidden = false
+            PredictionLabel.isHidden = IsNotLooping
+        } else {
+            infoTable.isHidden = true
+            LoopStatusLabel.isHidden = true
+            PredictionLabel.isHidden = true
+        }
+
+        statsView.isHidden = !Storage.shared.showStats.value
+    }
+
     private func updateGraphVisibility() {
-        let isFirstTimeSetup = Storage.shared.url.value.isEmpty && Storage.shared.token.value.isEmpty
+        let isFirstTimeSetup = !isDataSourceConfigured()
 
         if isFirstTimeSetup {
             BGChart.isHidden = true
@@ -1130,7 +1303,25 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     @objc private func dismissModal() {
-        dismiss(animated: true)
+        dismiss(animated: true) { [weak self] in
+            guard let self = self else { return }
+
+            // Check if user just configured a data source
+            if self.isDataSourceConfigured(), self.loadingOverlay == nil {
+                // Reset loading states for fresh load
+                self.loadingStates = [
+                    "bg": false,
+                    "profile": false,
+                    "deviceStatus": false,
+                ]
+                self.isInitialLoad = true
+
+                // Show loading overlay and trigger refresh
+                self.setupLoadingState()
+                self.showLoadingOverlay()
+                self.refresh()
+            }
+        }
     }
 }
 

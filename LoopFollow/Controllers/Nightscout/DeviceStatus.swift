@@ -203,6 +203,10 @@ extension MainViewController {
         }
 
         evaluateNotLooping()
+
+        // Mark device status as loaded for initial loading state
+        markDataLoaded("deviceStatus")
+
         LogManager.shared.log(category: .deviceStatus, message: "Update Device Status done", isDebug: true)
     }
 }
