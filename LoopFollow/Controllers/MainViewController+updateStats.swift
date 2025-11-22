@@ -27,7 +27,7 @@ extension MainViewController {
             statsHighPercent.text = String(format: "%.1f%%", stats.percentHigh)
             statsAvgBG.text = Localizer.toDisplayUnits(String(format: "%.0f", stats.avgBG))
             if Storage.shared.useIFCC.value {
-                statsEstA1C.text = String(format: "%.0f%%", stats.a1C)
+                statsEstA1C.text = String(format: "%.0f", stats.a1C)
             } else {
                 statsEstA1C.text = String(format: "%.1f%%", stats.a1C)
             }
