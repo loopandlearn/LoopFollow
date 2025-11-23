@@ -8,7 +8,14 @@ struct TreatmentsView: View {
 
     var body: some View {
         List {
-            if viewModel.groupedTreatments.isEmpty {
+            if viewModel.isInitialLoading {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .padding()
+                    Spacer()
+                }
+            } else if viewModel.groupedTreatments.isEmpty {
                 Text("No recent treatments")
                     .foregroundColor(.secondary)
                     .padding()
@@ -20,15 +27,46 @@ struct TreatmentsView: View {
                         }
                     }
                 }
+
+                Section {
+                    if viewModel.isLoadingMore {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                                .padding()
+                            Spacer()
+                        }
+                    } else {
+                        Button(action: {
+                            viewModel.loadMoreIfNeeded()
+                        }) {
+                            HStack {
+                                Spacer()
+                                VStack {
+                                    Text("Load More")
+                                        .font(.headline)
+                                        .foregroundColor(.blue)
+                                    Text("Tap to load older treatments")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                            }
+                            .padding(.vertical, 8)
+                        }
+                    }
+                }
             }
         }
         .navigationTitle("Treatments")
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
         .refreshable {
-            viewModel.loadTreatments()
+            viewModel.refreshTreatments()
         }
         .onAppear {
-            viewModel.loadTreatments()
+            if viewModel.groupedTreatments.isEmpty {
+                viewModel.loadInitialTreatments()
+            }
         }
     }
 
@@ -590,7 +628,7 @@ enum TreatmentType {
 }
 
 struct Treatment: Identifiable {
-    let id = UUID()
+    let id: String
     let type: TreatmentType
     let date: TimeInterval
     let title: String
@@ -598,6 +636,17 @@ struct Treatment: Identifiable {
     let icon: String
     let color: Color
     let bgValue: Int
+
+    init(id: String? = nil, type: TreatmentType, date: TimeInterval, title: String, subtitle: String?, icon: String, color: Color, bgValue: Int) {
+        self.id = id ?? "\(type)-\(date)-\(title)"
+        self.type = type
+        self.date = date
+        self.title = title
+        self.subtitle = subtitle
+        self.icon = icon
+        self.color = color
+        self.bgValue = bgValue
+    }
 
     var hourKey: String {
         let date = Date(timeIntervalSince1970: self.date)
@@ -609,129 +658,316 @@ struct Treatment: Identifiable {
 
 class TreatmentsViewModel: ObservableObject {
     @Published var groupedTreatments: [String: [Treatment]] = [:]
+    @Published var isInitialLoading = false
+    @Published var isLoadingMore = false
+    @Published var hasMoreData = true
 
-    func loadTreatments() {
-        // Get the main view controller to access the data
-        guard let mainVC = getMainViewController() else { return }
+    private var allTreatments: [Treatment] = []
+    private var processedNightscoutIds = Set<String>() // Track which NS entries we've already processed
+    private var oldestFetchedDate: Date? // Track the oldest treatment date we've fetched
+    private let pageSize = 100
+    private var isFetching = false
 
-        DispatchQueue.main.async { [weak self] in
+    func loadInitialTreatments() {
+        guard !isInitialLoading, !isFetching else {
+            return
+        }
+
+        isInitialLoading = true
+        isFetching = true
+        allTreatments.removeAll()
+        processedNightscoutIds.removeAll()
+        oldestFetchedDate = nil
+        hasMoreData = true
+
+        // Start from now and go backwards
+        fetchTreatments(endDate: Date()) { [weak self] treatments, rawCount in
             guard let self = self else { return }
 
-            var allTreatments: [Treatment] = []
+            DispatchQueue.main.async {
+                self.allTreatments = treatments
+                self.regroupTreatments()
 
-            // Load carbs - take last 50
-            let carbs = mainVC.carbData.suffix(50).map { carbData -> Treatment in
-                // Find actual BG at this time (stored sgv has offset for graph positioning)
-                let actualBG = self.findNearestBG(at: carbData.date, in: mainVC.bgData)
-                return Treatment(
-                    type: .carb,
-                    date: carbData.date,
-                    title: "\(Int(carbData.value))g",
-                    subtitle: "Carbs",
-                    icon: "circle.fill",
-                    color: .orange,
-                    bgValue: actualBG
-                )
+                // Update oldest date from the last (oldest) treatment
+                if let oldest = treatments.last {
+                    self.oldestFetchedDate = Date(timeIntervalSince1970: oldest.date)
+                }
+
+                // Has more data if we got a full page from Nightscout
+                self.hasMoreData = rawCount >= self.pageSize
+                self.isInitialLoading = false
+                self.isFetching = false
             }
-            allTreatments.append(contentsOf: carbs)
+        }
+    }
+    
+    func refreshTreatments() {
+        allTreatments.removeAll()
+        processedNightscoutIds.removeAll()
+        oldestFetchedDate = nil
+        hasMoreData = true
+        isFetching = false
+        loadInitialTreatments()
+    }
 
-            // Load boluses - take last 50
-            let boluses = mainVC.bolusData.suffix(50).map { bolusData -> Treatment in
-                // Find actual BG at this time (stored sgv has offset for graph positioning)
-                let actualBG = self.findNearestBG(at: bolusData.date, in: mainVC.bgData)
-                return Treatment(
-                    type: .bolus,
-                    date: bolusData.date,
-                    title: String(format: "%.2f U", bolusData.value),
-                    subtitle: "Bolus",
-                    icon: "circle.fill",
-                    color: .blue,
-                    bgValue: actualBG
-                )
+    func loadMoreIfNeeded() {
+        guard !isLoadingMore, !isFetching, hasMoreData, let oldestDate = oldestFetchedDate else {
+            return
+        }
+
+        isLoadingMore = true
+        isFetching = true
+
+        // Fetch treatments older than the oldest we have
+        fetchTreatments(endDate: oldestDate) { [weak self] treatments, rawCount in
+            guard let self = self else { return }
+
+            DispatchQueue.main.async {
+                self.allTreatments.append(contentsOf: treatments)
+                self.regroupTreatments()
+
+                // Update oldest date from the last (oldest) treatment in the new batch
+                if let oldest = treatments.last {
+                    self.oldestFetchedDate = Date(timeIntervalSince1970: oldest.date)
+                }
+
+                // Has more data if we got a full page from Nightscout
+                self.hasMoreData = rawCount >= self.pageSize
+                self.isLoadingMore = false
+                self.isFetching = false
             }
-            allTreatments.append(contentsOf: boluses)
+        }
+    }
 
-            // Load SMB (automatic boluses) - take last 50
-            let smbs = mainVC.smbData.suffix(50).map { smbData -> Treatment in
-                // Find actual BG at this time (stored sgv has offset for graph positioning)
-                let actualBG = self.findNearestBG(at: smbData.date, in: mainVC.bgData)
-                return Treatment(
-                    type: .smb,
-                    date: smbData.date,
-                    title: String(format: "%.2f U", smbData.value),
-                    subtitle: "Automatic Bolus",
-                    icon: "arrowtriangle.down.fill",
-                    color: .blue,
-                    bgValue: actualBG
-                )
+    private func fetchTreatments(endDate: Date, completion: @escaping ([Treatment], Int) -> Void) {
+        guard IsNightscoutEnabled() else {
+            completion([], 0)
+            return
+        }
+
+        let baseURL = Storage.shared.url.value
+        let token = Storage.shared.token.value
+
+        guard !baseURL.isEmpty else {
+            completion([], 0)
+            return
+        }
+        
+        // Format dates for the query
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        
+        // For pagination: fetch treatments with created_at < endDate
+        // Go back up to 365 days from endDate to ensure we get enough data
+        let startDate = Calendar.current.date(byAdding: .day, value: -365, to: endDate)!
+        let endDateString = formatter.string(from: endDate)
+        let startDateString = formatter.string(from: startDate)
+
+        // Build parameters with date filtering
+        let parameters: [String: String] = [
+            "find[created_at][$gte]": startDateString,
+            "find[created_at][$lt]": endDateString,
+            "count": "\(pageSize)",
+        ]
+
+        // Construct URL
+        guard let url = NightscoutUtils.constructURL(
+            baseURL: baseURL,
+            token: token,
+            endpoint: "/api/v1/treatments.json",
+            parameters: parameters
+        ) else {
+            completion([], 0)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+        request.httpMethod = "GET"
+
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+
+            if let error = error {
+                LogManager.shared.log(category: .nightscout, message: "Failed to fetch treatments: \(error.localizedDescription)")
+                completion([], 0)
+                return
             }
-            allTreatments.append(contentsOf: smbs)
 
-            // Load temp basals - filter to show only start times (not end times)
-            // basalData contains pairs of start/end dots for graphing
-            // Each temp basal has: [start_time, end_time] with same basalRate
-            var processedBasals: [Treatment] = []
-            let basalArray = Array(mainVC.basalData.suffix(100))
+            guard let data = data else {
+                completion([], 0)
+                return
+            }
 
-            var i = 0
-            while i < basalArray.count {
-                let current = basalArray[i]
+            do {
+                guard let entries = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: AnyObject]] else {
+                    completion([], 0)
+                    return
+                }
 
-                // Check if the next entry is the "end" marker (same rate, later time)
-                if i + 1 < basalArray.count {
-                    let next = basalArray[i + 1]
-                    if next.basalRate == current.basalRate, next.date > current.date, (next.date - current.date) < 3600 {
-                        // This is a start/end pair - keep the start (current), skip the end (next)
-                        processedBasals.append(Treatment(
-                            type: .tempBasal,
-                            date: current.date,
-                            title: String(format: "%.2f U/hr", current.basalRate),
-                            subtitle: "Temp Basal",
-                            icon: "chart.xyaxis.line",
+                // Parse treatments
+                let rawCount = entries.count
+                let treatments = self.parseTreatments(from: entries)
+
+                completion(treatments, rawCount)
+
+            } catch {
+                LogManager.shared.log(category: .nightscout, message: "Failed to parse treatments: \(error.localizedDescription)")
+                completion([], 0)
+            }
+        }
+
+        task.resume()
+    }
+
+    private func parseTreatments(from entries: [[String: AnyObject]]) -> [Treatment] {
+        var treatments: [Treatment] = []
+        guard let mainVC = getMainViewController() else { return [] }
+
+        for entry in entries {
+            guard let eventType = entry["eventType"] as? String,
+                  let createdAt = entry["created_at"] as? String,
+                  let date = NightscoutUtils.parseDate(createdAt)
+            else {
+                continue
+            }
+
+            let timestamp = date.timeIntervalSince1970
+            let nsId = entry["_id"] as? String ?? "unknown-\(timestamp)"
+
+            // Skip if we've already processed this Nightscout entry
+            if processedNightscoutIds.contains(nsId) {
+                continue
+            }
+
+            // Mark this entry as processed
+            processedNightscoutIds.insert(nsId)
+
+            switch eventType {
+            case "Carb Correction", "Meal Bolus":
+                if let carbs = entry["carbs"] as? Double, carbs > 0 {
+                    let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
+                    let treatment = Treatment(
+                        id: "\(nsId)-carb",
+                        type: .carb,
+                        date: timestamp,
+                        title: "\(Int(carbs))g",
+                        subtitle: "Carbs",
+                        icon: "circle.fill",
+                        color: .orange,
+                        bgValue: actualBG
+                    )
+                    treatments.append(treatment)
+                }
+
+                // Also process bolus from Meal Bolus
+                if eventType == "Meal Bolus",
+                   let insulin = entry["insulin"] as? Double, insulin > 0
+                {
+                    let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
+                    let treatment = Treatment(
+                        id: "\(nsId)-bolus",
+                        type: .bolus,
+                        date: timestamp,
+                        title: String(format: "%.2f U", insulin),
+                        subtitle: "Bolus",
+                        icon: "circle.fill",
+                        color: .blue,
+                        bgValue: actualBG
+                    )
+                    treatments.append(treatment)
+                }
+
+            case "Correction Bolus", "Bolus", "External Insulin":
+                if let insulin = entry["insulin"] as? Double, insulin > 0 {
+                    let isAutomatic = entry["automatic"] as? Bool ?? false
+                    let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
+
+                    if isAutomatic {
+                        let treatment = Treatment(
+                            id: "\(nsId)-smb",
+                            type: .smb,
+                            date: timestamp,
+                            title: String(format: "%.2f U", insulin),
+                            subtitle: "Automatic Bolus",
+                            icon: "arrowtriangle.down.fill",
                             color: .blue,
-                            bgValue: 0
-                        ))
-                        i += 2 // Skip both this and next
-                        continue
+                            bgValue: actualBG
+                        )
+                        treatments.append(treatment)
+                    } else {
+                        let treatment = Treatment(
+                            id: "\(nsId)-bolus",
+                            type: .bolus,
+                            date: timestamp,
+                            title: String(format: "%.2f U", insulin),
+                            subtitle: "Bolus",
+                            icon: "circle.fill",
+                            color: .blue,
+                            bgValue: actualBG
+                        )
+                        treatments.append(treatment)
                     }
                 }
 
-                // Not a pair, just add it
-                processedBasals.append(Treatment(
-                    type: .tempBasal,
-                    date: current.date,
-                    title: String(format: "%.2f U/hr", current.basalRate),
-                    subtitle: "Temp Basal",
-                    icon: "chart.xyaxis.line",
-                    color: .blue,
-                    bgValue: 0
-                ))
-                i += 1
-            }
-
-            // Reverse to get most recent first and take 50
-            allTreatments.append(contentsOf: processedBasals.reversed().prefix(50))
-
-            // Sort all treatments by date (most recent first)
-            allTreatments.sort { $0.date > $1.date }
-
-            // Group by hour
-            var grouped: [String: [Treatment]] = [:]
-            for treatment in allTreatments {
-                let key = treatment.hourKey
-                if grouped[key] == nil {
-                    grouped[key] = []
+            case "SMB":
+                if let insulin = entry["insulin"] as? Double, insulin > 0 {
+                    let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
+                    let treatment = Treatment(
+                        id: "\(nsId)-smb",
+                        type: .smb,
+                        date: timestamp,
+                        title: String(format: "%.2f U", insulin),
+                        subtitle: "Automatic Bolus",
+                        icon: "arrowtriangle.down.fill",
+                        color: .blue,
+                        bgValue: actualBG
+                    )
+                    treatments.append(treatment)
                 }
-                grouped[key]?.append(treatment)
-            }
 
-            // Sort treatments within each hour
-            for key in grouped.keys {
-                grouped[key]?.sort { $0.date > $1.date }
-            }
+            case "Temp Basal":
+                if let rate = entry["rate"] as? Double {
+                    let treatment = Treatment(
+                        id: "\(nsId)-basal",
+                        type: .tempBasal,
+                        date: timestamp,
+                        title: String(format: "%.2f U/hr", rate),
+                        subtitle: "Temp Basal",
+                        icon: "chart.xyaxis.line",
+                        color: .blue,
+                        bgValue: 0
+                    )
+                    treatments.append(treatment)
+                }
 
-            self.groupedTreatments = grouped
+            default:
+                break
+            }
         }
+
+        // Sort by date descending (most recent first)
+        return treatments.sorted { $0.date > $1.date }
+    }
+
+    private func regroupTreatments() {
+        var grouped: [String: [Treatment]] = [:]
+
+        for treatment in allTreatments {
+            let key = treatment.hourKey
+            if grouped[key] == nil {
+                grouped[key] = []
+            }
+            grouped[key]?.append(treatment)
+        }
+
+        // Sort treatments within each hour
+        for key in grouped.keys {
+            grouped[key]?.sort { $0.date > $1.date }
+        }
+
+        groupedTreatments = grouped
     }
 
     private func findNearestBG(at timestamp: TimeInterval, in bgData: [ShareGlucoseData]) -> Int {

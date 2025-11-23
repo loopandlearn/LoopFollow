@@ -81,7 +81,7 @@ class StatsDataFetcher {
         utcISODateFormatter.timeZone = TimeZone(abbreviation: "UTC")
 
         let startDate = Calendar.current.date(byAdding: .day, value: -1 * days, to: Date())!
-        let endDate = Calendar.current.date(byAdding: .hour, value: 6, to: Date())!
+        let endDate = Date()
 
         let startTimeString = utcISODateFormatter.string(from: startDate)
         let currentTimeString = utcISODateFormatter.string(from: endDate)
