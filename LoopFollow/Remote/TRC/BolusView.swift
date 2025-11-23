@@ -51,7 +51,9 @@ struct BolusView: View {
 
     private func roundedToStep(_ value: Double) -> Double {
         guard stepU > 0 else { return value }
-        let stepped = (value / stepU).rounded() * stepU
+
+        let stepped = (value / stepU).rounded(.up) * stepU
+
         let p = pow(10.0, Double(stepFractionDigits))
         return (stepped * p).rounded() / p
     }
@@ -87,6 +89,9 @@ struct BolusView: View {
                             bolusFieldIsFocused = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 if bolusAmount.doubleValue(for: .internationalUnit()) > 0.0 {
+                                    let steppedAmount = roundedToStep(self.bolusAmount.doubleValue(for: .internationalUnit()))
+                                    bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: steppedAmount)
+
                                     alertType = .confirmBolus
                                     showAlert = true
                                 }
@@ -138,7 +143,7 @@ struct BolusView: View {
                         title: Text("Old Calculation Warning"),
                         message: Text(alertMessage ?? ""),
                         primaryButton: .default(Text("Use Anyway")) {
-                            if let rec = deviceRecBolus.value, rec >= stepU {
+                            if let rec = deviceRecBolus.value {
                                 applyRecommendedBolus(rec)
                             }
                         },
@@ -156,7 +161,6 @@ struct BolusView: View {
     @ViewBuilder
     private func recommendedBlocks(now: Date) -> some View {
         if let rec = deviceRecBolus.value,
-           rec >= stepU,
            let t = enactedOrSuggested.value
         {
             let ageSec = max(0, now.timeIntervalSince1970 - t)
@@ -214,7 +218,6 @@ struct BolusView: View {
     }
 
     private func applyRecommendedBolus(_ rec: Double) {
-        guard rec >= stepU else { return }
         let maxU = maxBolus.value.doubleValue(for: .internationalUnit())
         let clamped = min(rec, maxU)
         let stepped = roundedToStep(clamped)
