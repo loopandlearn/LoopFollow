@@ -263,6 +263,15 @@ struct MealView: View {
             DispatchQueue.main.async {
                 isLoading = false
                 if success {
+                    // Save recent carb entry for bolus calculator if carbs were sent
+                    let carbsValue = carbs.doubleValue(for: .gram())
+                    if carbsValue > 0 {
+                        BolusCalculatorHelper.shared.saveRecentCarbCommand(
+                            carbs: carbsValue,
+                            timestamp: scheduledDate ?? Date()
+                        )
+                    }
+
                     statusMessage = "Meal command sent successfully."
                     LogManager.shared.log(
                         category: .apns,

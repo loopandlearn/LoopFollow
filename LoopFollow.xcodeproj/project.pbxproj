@@ -31,6 +31,7 @@
 		DD0650F72DCFDA26004D3B41 /* InfoBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F62DCFDA26004D3B41 /* InfoBanner.swift */; };
 		DD0650F92DCFE7BE004D3B41 /* FastDropAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650F82DCFE7BE004D3B41 /* FastDropAlarmEditor.swift */; };
 		DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */; };
+		B6AA43644FF2B39E30EDC075 /* BolusCalculatorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AA43644FF2B39E30EDC076 /* BolusCalculatorHelper.swift */; };
 		DD0B9D562DE1EC8A0090C337 /* AlarmType+Snooze.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0B9D552DE1EC8A0090C337 /* AlarmType+Snooze.swift */; };
 		DD0B9D582DE1F3B20090C337 /* AlarmType+canAcknowledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0B9D572DE1F3B20090C337 /* AlarmType+canAcknowledge.swift */; };
 		DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */; };
@@ -424,6 +425,7 @@
 		DD0650F62DCFDA26004D3B41 /* InfoBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoBanner.swift; sourceTree = "<group>"; };
 		DD0650F82DCFE7BE004D3B41 /* FastDropAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastDropAlarmEditor.swift; sourceTree = "<group>"; };
 		DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutUtils.swift; sourceTree = "<group>"; };
+		B6AA43644FF2B39E30EDC076 /* BolusCalculatorHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusCalculatorHelper.swift; sourceTree = "<group>"; };
 		DD0B9D552DE1EC8A0090C337 /* AlarmType+Snooze.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlarmType+Snooze.swift"; sourceTree = "<group>"; };
 		DD0B9D572DE1F3B20090C337 /* AlarmType+canAcknowledge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlarmType+canAcknowledge.swift"; sourceTree = "<group>"; };
 		DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
@@ -1526,6 +1528,7 @@
 				FCD2A27C24C9D044009F7B7B /* Globals.swift */,
 				FC8589BE252B54F500C8FC73 /* Mobileprovision.swift */,
 				DD07B5C829E2F9C400C6A635 /* NightscoutUtils.swift */,
+				B6AA43644FF2B39E30EDC076 /* BolusCalculatorHelper.swift */,
 				DDB0AF512BB1A8BE00AFA48B /* BuildDetails.swift */,
 				DD91E4DC2BDEC3F8002D9E97 /* GlucoseConversion.swift */,
 				DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */,
@@ -1933,6 +1936,7 @@
 				DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */,
 				FC16A97A24996673003D6245 /* NightScout.swift in Sources */,
 				DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */,
+				B6AA43644FF2B39E30EDC075 /* BolusCalculatorHelper.swift in Sources */,
 				DDCF9A8C2D86005E004DF4DD /* AlarmManager.swift in Sources */,
 				DDCC3A4F2DDC5B54006F1C10 /* BatteryDropCondition.swift in Sources */,
 				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,

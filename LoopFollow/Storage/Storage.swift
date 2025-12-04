@@ -171,6 +171,9 @@ class Storage {
     var returnApnsKey = StorageValue<String>(key: "returnApnsKey", defaultValue: "")
     var returnKeyId = StorageValue<String>(key: "returnKeyId", defaultValue: "")
 
+    // Recent carb entry for bolus calculator
+    var recentCarbEntry = StorageValue<RecentCarbEntry?>(key: "recentCarbEntry", defaultValue: nil as RecentCarbEntry?)
+
     static let shared = Storage()
     private init() {}
 }

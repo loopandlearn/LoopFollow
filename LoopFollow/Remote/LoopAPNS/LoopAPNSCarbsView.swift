@@ -399,6 +399,13 @@ struct LoopAPNSCarbsView: View {
                 if success {
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
+
+                    // Save recent carb entry for bolus calculator
+                    BolusCalculatorHelper.shared.saveRecentCarbCommand(
+                        carbs: carbsAmount.doubleValue(for: .gram()),
+                        timestamp: adjustedConsumedDate
+                    )
+
                     let timeFormatter = DateFormatter()
                     timeFormatter.timeStyle = .short
                     self.alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"

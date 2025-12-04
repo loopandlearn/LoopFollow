@@ -24,6 +24,13 @@ struct LoopAPNSBolusView: View {
     private let otpPeriod: TimeInterval = 30
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
+    // Bolus calculator state
+    @State private var carbsForCalculation = ""
+    @State private var calculatedBolusFromCarbs: Double? = nil
+    @State private var isCalculatorExpanded = false
+    @State private var recentCarbSuggestion: (carbs: Double, bolus: Double, minutesAgo: Int)? = nil
+    @FocusState private var carbsFieldIsFocused: Bool
+
     // Computed property to check if TOTP should be blocked
     private var isTOTPBlocked: Bool {
         TOTPService.shared.isTOTPBlocked(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
@@ -40,6 +47,90 @@ struct LoopAPNSBolusView: View {
         NavigationView {
             VStack {
                 Form {
+                    // Bolus calculator section (collapsible)
+                    Section(header:
+                        Button(action: {
+                            withAnimation {
+                                isCalculatorExpanded.toggle()
+                            }
+                        }) {
+                            HStack {
+                                Text("Bolus Calculator")
+                                Spacer()
+                                Image(systemName: isCalculatorExpanded ? "chevron.up" : "chevron.down")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    ) {
+                        if isCalculatorExpanded {
+                            HStack {
+                                Text("Carbs")
+                                Spacer()
+                                TextField("0", text: $carbsForCalculation)
+                                    .keyboardType(.decimalPad)
+                                    .multilineTextAlignment(.trailing)
+                                    .focused($carbsFieldIsFocused)
+                                    .onChange(of: carbsForCalculation) { newValue in
+                                        // Only allow numbers and decimal point
+                                        let filtered = newValue.filter { "0123456789.".contains($0) }
+                                        // Ensure only one decimal point
+                                        let components = filtered.components(separatedBy: ".")
+                                        if components.count > 2 {
+                                            carbsForCalculation = String(filtered.dropLast())
+                                        } else {
+                                            carbsForCalculation = filtered
+                                        }
+
+                                        // Calculate bolus from carbs
+                                        if let carbsValue = Double(carbsForCalculation), carbsValue > 0 {
+                                            calculatedBolusFromCarbs = BolusCalculatorHelper.shared.calculateBolusFromCarbs(carbsValue)
+                                        } else {
+                                            calculatedBolusFromCarbs = nil
+                                        }
+                                    }
+                                Text("g")
+                                    .foregroundColor(.secondary)
+                            }
+
+                            if let calculatedBolus = calculatedBolusFromCarbs {
+                                Button(action: {
+                                    applyCalculatedBolus()
+                                }) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Calculated: \(String(format: "%.2f", calculatedBolus))U")
+                                                .font(.headline)
+                                                .foregroundColor(.primary)
+                                            if let carbRatio = BolusCalculatorHelper.shared.getCurrentCarbRatio() {
+                                                Text("Using carb ratio: 1U per \(String(format: "%.1f", carbRatio))g")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        }
+                                        Spacer()
+                                        Image(systemName: "arrow.down.circle.fill")
+                                            .foregroundColor(.blue)
+                                            .font(.title2)
+                                    }
+                                    .padding(.vertical, 8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            } else if !carbsForCalculation.isEmpty {
+                                Text("Enter valid carb amount to calculate")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            if BolusCalculatorHelper.shared.getCurrentCarbRatio() == nil && !carbsForCalculation.isEmpty {
+                                Text("⚠️ Carb ratio not available from profile")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                    }
+
                     // Recommended bolus section
                     if let recommendedBolus = recommendedBolus, recommendedBolus > 0, let lastLoopTime = lastLoopTime {
                         let timeSinceCalculation = Date().timeIntervalSince1970 - lastLoopTime
@@ -61,7 +152,7 @@ struct LoopAPNSBolusView: View {
                                                 .foregroundColor(.secondary)
                                         }
                                         Spacer()
-                                        Image(systemName: "arrow.up.circle.fill")
+                                        Image(systemName: "arrow.down.circle.fill")
                                             .foregroundColor(.blue)
                                             .font(.title2)
                                     }
@@ -182,6 +273,26 @@ struct LoopAPNSBolusView: View {
                 }
 
                 loadRecommendedBolus()
+                loadRecentCarbSuggestion()
+
+                // Determine if calculator should be expanded by default
+                // Collapse if there's a recommended bolus, expand otherwise
+                let hasRecommendedBolus = recommendedBolus != nil && recommendedBolus! > 0
+                isCalculatorExpanded = !hasRecommendedBolus
+
+                // Auto-populate carbs field if recent carb entry exists
+                if let suggestion = recentCarbSuggestion {
+                    carbsForCalculation = String(format: "%.0f", suggestion.carbs)
+                    // Trigger calculation
+                    if let carbsValue = Double(carbsForCalculation), carbsValue > 0 {
+                        calculatedBolusFromCarbs = BolusCalculatorHelper.shared.calculateBolusFromCarbs(carbsValue)
+                    }
+                    // Only expand calculator if there's no recommended bolus
+                    if !hasRecommendedBolus {
+                        isCalculatorExpanded = true
+                    }
+                }
+
                 // Reset timer state so it shows '-' until first tick
                 otpTimeRemaining = nil
                 // Don't reset TOTP usage flag here - let the timer handle it
@@ -278,6 +389,17 @@ struct LoopAPNSBolusView: View {
 
         // Reset warning state when new data is loaded
         showOldCalculationWarning = false
+    }
+
+    private func loadRecentCarbSuggestion() {
+        // Load recent carb suggestion
+        recentCarbSuggestion = BolusCalculatorHelper.shared.getSuggestedBolusFromRecentCarbs()
+    }
+
+    private func applyCalculatedBolus() {
+        guard let calculatedBolus = calculatedBolusFromCarbs else { return }
+        insulinAmount = HKQuantity(unit: .internationalUnit(), doubleValue: calculatedBolus)
+        carbsFieldIsFocused = false
     }
 
     private func handleRecommendedBolusTap() {
