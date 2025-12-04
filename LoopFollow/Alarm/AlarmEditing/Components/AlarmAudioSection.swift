@@ -40,6 +40,24 @@ struct AlarmAudioSection: View {
                     allowed: RepeatSoundOption.allowed(for: alarm.activeOption)
                 )
             }
+
+            Stepper(
+                value: $alarm.soundDelay,
+                in: 0 ... 60,
+                step: 5
+            ) {
+                HStack {
+                    Text("Delay Between Sounds")
+                    Spacer()
+                    if alarm.soundDelay == 0 {
+                        Text("Off")
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("\(alarm.soundDelay) sec")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
         }.onChange(of: alarm.activeOption) { newActive in
             let playAllowed = PlaySoundOption.allowed(for: newActive)
             if !playAllowed.contains(alarm.playSoundOption) {
