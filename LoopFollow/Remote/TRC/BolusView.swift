@@ -52,7 +52,7 @@ struct BolusView: View {
     private func roundedToStep(_ value: Double) -> Double {
         guard stepU > 0 else { return value }
 
-        let stepped = (value / stepU).rounded(.up) * stepU
+        let stepped = (value / stepU).rounded(.down) * stepU
 
         let p = pow(10.0, Double(stepFractionDigits))
         return (stepped * p).rounded() / p
