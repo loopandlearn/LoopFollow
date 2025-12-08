@@ -164,40 +164,52 @@ struct BolusView: View {
            let t = enactedOrSuggested.value
         {
             let ageSec = max(0, now.timeIntervalSince1970 - t)
+
             if ageSec < 12 * 60 {
-                let mins = Int(ageSec / 60)
-                let isStale5 = ageSec >= 5 * 60
+                let maxU = maxBolus.value.doubleValue(for: .internationalUnit())
+                let clamped = min(rec, maxU)
+                let steppedRec = roundedToStep(clamped)
 
-                Section(header: Text("Recommended Bolus")) {
-                    Button {
-                        handleRecommendedBolusTap(rec: rec, ageSec: ageSec)
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("\(InsulinFormatter.shared.string(rec))U")
-                                Text("Calculated \(mins) minute\(mins == 1 ? "" : "s") ago")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                if steppedRec > 0 {
+                    let mins = Int(ageSec / 60)
+                    let isStale5 = ageSec >= 5 * 60
+
+                    Section(header: Text("Recommended Bolus")) {
+                        Button {
+                            handleRecommendedBolusTap(rec: steppedRec, ageSec: ageSec)
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("\(InsulinFormatter.shared.string(steppedRec))U")
+                                    Text("Calculated \(mins) minute\(mins == 1 ? "" : "s") ago")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.circle.fill")
+                                    .font(.title2)
                             }
-                            Spacer()
-                            Image(systemName: "arrow.up.circle.fill")
-                                .font(.title2)
+                            .padding(.vertical, 8)
                         }
-                        .padding(.vertical, 8)
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+
+                    Section {
+                        let color: Color = isStale5 ? .red : .yellow
+                        Text("WARNING: New treatments may have occurred since the last recommended bolus was calculated \(presentableMinutesFormat(timeInterval: ageSec)) ago.")
+                            .font(.callout)
+                            .foregroundColor(color)
+                            .multilineTextAlignment(.leading)
+                    }
+
+                } else {
+                    EmptyView()
                 }
 
-                Section {
-                    let color: Color = isStale5 ? .red : .yellow
-                    Text("WARNING: New treatments may have occurred since the last recommended bolus was calculated \(presentableMinutesFormat(timeInterval: ageSec)) ago.")
-                        .font(.callout)
-                        .foregroundColor(color)
-                        .multilineTextAlignment(.leading)
-                }
             } else {
                 EmptyView()
             }
+
         } else {
             EmptyView()
         }
