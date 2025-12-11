@@ -51,10 +51,10 @@ struct BolusView: View {
 
     private func roundedToStep(_ value: Double) -> Double {
         guard stepU > 0 else { return value }
-        
-        let epsilon: Double = 1e-10
+
+        let epsilon = 1e-10
         let stepped = ((value / stepU) + epsilon).rounded(.down) * stepU
-        
+
         let p = pow(10.0, Double(stepFractionDigits))
         return (stepped * p).rounded() / p
     }
