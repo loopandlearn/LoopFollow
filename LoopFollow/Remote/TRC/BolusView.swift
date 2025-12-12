@@ -66,7 +66,7 @@ struct BolusView: View {
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 Form {
                     recommendedBlocks(now: context.date)
-
+                    
                     Section {
                         HKQuantityInputView(
                             label: "Bolus Amount",
@@ -81,7 +81,7 @@ struct BolusView: View {
                             }
                         )
                     }
-
+                    
                     LoadingButtonView(
                         buttonText: "Send Bolus",
                         progressText: "Sending Bolus...",
@@ -89,10 +89,11 @@ struct BolusView: View {
                         action: {
                             bolusFieldIsFocused = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                if bolusAmount.doubleValue(for: .internationalUnit()) > 0.0 {
-                                    let steppedAmount = roundedToStep(self.bolusAmount.doubleValue(for: .internationalUnit()))
+                                let rawValue = self.bolusAmount.doubleValue(for: .internationalUnit())
+                                let steppedAmount = roundedToStep(rawValue)
+                                
+                                if steppedAmount > 0 {
                                     bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: steppedAmount)
-
                                     alertType = .confirmBolus
                                     showAlert = true
                                 }
