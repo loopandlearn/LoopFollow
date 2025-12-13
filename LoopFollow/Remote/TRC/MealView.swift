@@ -93,7 +93,7 @@ struct MealView: View {
                                 quantity: $bolusAmount,
                                 unit: .internationalUnit(),
                                 maxLength: 4,
-                                minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05),
+                                minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0),
                                 maxValue: maxBolus.value,
                                 isFocused: $bolusFieldIsFocused,
                                 onValidationError: { message in

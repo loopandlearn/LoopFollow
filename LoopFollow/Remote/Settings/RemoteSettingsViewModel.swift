@@ -56,8 +56,7 @@ class RemoteSettingsViewModel: ObservableObject {
 
         // Determine if a comparison is needed and perform it.
         switch remoteType {
-        case .loopAPNS, .trc:
-            // For both Loop and TRC, the target Team ID is in the same storage location.
+        case .trc:
             // If the target ID is empty, there's nothing to compare.
             guard !targetTeamId.isEmpty else {
                 return false
@@ -65,7 +64,7 @@ class RemoteSettingsViewModel: ObservableObject {
             // Return true if the IDs are different.
             return loopFollowTeamID != targetTeamId
 
-        case .none, .nightscout:
+        case .loopAPNS, .none, .nightscout:
             // For other remote types, this check is not applicable.
             return false
         }
