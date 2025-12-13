@@ -206,7 +206,7 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
             let value = quantity.doubleValue(for: unit)
             let formatter = NumberFormatter()
             formatter.minimumFractionDigits = unit.preferredFractionDigits
-            formatter.maximumFractionDigits = unit.preferredFractionDigits
+            formatter.maximumFractionDigits = max(unit.preferredFractionDigits, 3)
             formatter.numberStyle = .decimal
             return formatter.string(from: NSNumber(value: value)) ?? ""
         }

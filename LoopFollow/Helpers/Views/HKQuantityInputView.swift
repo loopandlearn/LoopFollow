@@ -13,8 +13,9 @@ struct HKQuantityInputView: View {
     var minValue: HKQuantity
     var maxValue: HKQuantity
     @FocusState.Binding var isFocused: Bool
-
     var onValidationError: (String) -> Void
+
+    @ObservedObject private var insulinPrecision = InsulinPrecisionManager.shared
 
     var body: some View {
         HStack {

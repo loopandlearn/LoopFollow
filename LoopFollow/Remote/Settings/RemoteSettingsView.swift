@@ -7,6 +7,7 @@ import SwiftUI
 struct RemoteSettingsView: View {
     @ObservedObject var viewModel: RemoteSettingsViewModel
     @ObservedObject private var device = Storage.shared.device
+    @ObservedObject var bolusIncrement = Storage.shared.bolusIncrement
 
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
@@ -109,6 +110,29 @@ struct RemoteSettingsView: View {
                 guardrailsSection
             }
 
+            if !Storage.shared.bolusIncrementDetected.value {
+                Section(header: Text("Bolus Increment")) {
+                    HStack {
+                        Text("Increment")
+                        Spacer()
+                        TextFieldWithToolBar(
+                            quantity: $bolusIncrement.value,
+                            maxLength: 5,
+                            unit: HKUnit.internationalUnit(),
+                            allowDecimalSeparator: true,
+                            minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.001),
+                            maxValue: HKQuantity(unit: .internationalUnit(), doubleValue: 1),
+                            onValidationError: { message in
+                                handleValidationError(message)
+                            }
+                        )
+                        .frame(width: 100)
+                        Text("U")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+
             // MARK: - User Information Section
 
             if viewModel.remoteType != .none && viewModel.remoteType != .loopAPNS {
@@ -160,9 +184,12 @@ struct RemoteSettingsView: View {
 
                 Section(header: Text("Debug / Info")) {
                     Text("Device Token: \(Storage.shared.deviceToken.value)")
-                    Text("Production Env.: \(Storage.shared.productionEnvironment.value ? "True" : "False")")
+                    Text("APNS Environment: \(Storage.shared.productionEnvironment.value ? "Production" : "Development")")
                     Text("Team ID: \(Storage.shared.teamId.value ?? "")")
                     Text("Bundle ID: \(Storage.shared.bundleId.value)")
+                    if Storage.shared.bolusIncrementDetected.value {
+                        Text("Bolus Increment: \(Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()), specifier: "%.3f") U")
+                    }
                 }
             }
 
@@ -259,6 +286,9 @@ struct RemoteSettingsView: View {
                     } else {
                         Text("TOTP Code: Invalid QR code URL")
                             .foregroundColor(.red)
+                    }
+                    if Storage.shared.bolusIncrementDetected.value {
+                        Text("Bolus Increment: \(Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()), specifier: "%.3f") U")
                     }
                 }
 

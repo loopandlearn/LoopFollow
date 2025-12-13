@@ -14,112 +14,110 @@ extension MainViewController {
             Storage.shared.remoteType.value = .none
         }
 
-        if let lastLoopTime = formatter.date(from: (lastLoopRecord["timestamp"] as! String))?.timeIntervalSince1970 {
-            let previousLastLoopTime = Observable.shared.alertLastLoopTime.value ?? 0
-            Observable.shared.alertLastLoopTime.value = lastLoopTime
-            if let failure = lastLoopRecord["failureReason"] {
-                LoopStatusLabel.text = "X"
-                latestLoopStatusString = "X"
-            } else {
-                var wasEnacted = false
-                if let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] {
-                    wasEnacted = true
-                    if let lastTempBasal = enacted["rate"] as? Double {}
-                }
+        let previousLastLoopTime = Observable.shared.previousAlertLastLoopTime.value ?? 0
+        let lastLoopTime = Observable.shared.alertLastLoopTime.value ?? 0
 
-                // ISF
-                let profileISF = profileManager.currentISF()
-                if let profileISF = profileISF {
-                    infoManager.updateInfoData(type: .isf, value: profileISF)
-                }
+        if lastLoopRecord["failureReason"] != nil {
+            LoopStatusLabel.text = "X"
+            latestLoopStatusString = "X"
+        } else {
+            var wasEnacted = false
+            if lastLoopRecord["enacted"] is [String: AnyObject] {
+                wasEnacted = true
+            }
 
-                // Carb Ratio (CR)
-                let profileCR = profileManager.currentCarbRatio()
-                if let profileCR = profileCR {
-                    infoManager.updateInfoData(type: .carbRatio, value: profileCR)
-                }
+            // ISF
+            let profileISF = profileManager.currentISF()
+            if let profileISF = profileISF {
+                infoManager.updateInfoData(type: .isf, value: profileISF)
+            }
 
-                // Target
-                let profileTargetLow = profileManager.currentTargetLow()
-                let profileTargetHigh = profileManager.currentTargetHigh()
+            // Carb Ratio (CR)
+            let profileCR = profileManager.currentCarbRatio()
+            if let profileCR = profileCR {
+                infoManager.updateInfoData(type: .carbRatio, value: profileCR)
+            }
 
-                if let profileTargetLow = profileTargetLow, let profileTargetHigh = profileTargetHigh, profileTargetLow != profileTargetHigh {
-                    infoManager.updateInfoData(type: .target, firstValue: profileTargetLow, secondValue: profileTargetHigh, separator: .dash)
-                } else if let profileTargetLow = profileTargetLow {
-                    infoManager.updateInfoData(type: .target, value: profileTargetLow)
-                }
+            // Target
+            let profileTargetLow = profileManager.currentTargetLow()
+            let profileTargetHigh = profileManager.currentTargetHigh()
 
-                // IOB
-                if let insulinMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
-                    infoManager.updateInfoData(type: .iob, value: insulinMetric)
-                    latestIOB = insulinMetric
-                }
+            if let profileTargetLow = profileTargetLow, let profileTargetHigh = profileTargetHigh, profileTargetLow != profileTargetHigh {
+                infoManager.updateInfoData(type: .target, firstValue: profileTargetLow, secondValue: profileTargetHigh, separator: .dash)
+            } else if let profileTargetLow = profileTargetLow {
+                infoManager.updateInfoData(type: .target, value: profileTargetLow)
+            }
 
-                // COB
-                if let cobMetric = CarbMetric(from: lastLoopRecord["cob"], key: "cob") {
-                    infoManager.updateInfoData(type: .cob, value: cobMetric)
-                    latestCOB = cobMetric
-                }
+            // IOB
+            if let insulinMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
+                infoManager.updateInfoData(type: .iob, value: insulinMetric)
+                latestIOB = insulinMetric
+            }
 
-                if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject] {
-                    let prediction = predictdata["values"] as! [Double]
-                    PredictionLabel.text = Localizer.toDisplayUnits(String(Int(prediction.last!)))
-                    PredictionLabel.textColor = UIColor.systemPurple
-                    if Storage.shared.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
-                        predictionData.removeAll()
-                        var predictionTime = lastLoopTime
-                        let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
-                        var i = 0
-                        while i <= toLoad {
-                            if i < prediction.count {
-                                let sgvValue = Int(round(prediction[i]))
-                                // Skip values higher than 600
-                                if sgvValue <= 600 {
-                                    let prediction = ShareGlucoseData(sgv: sgvValue, date: predictionTime, direction: "flat")
-                                    predictionData.append(prediction)
-                                }
-                                predictionTime += 300
-                            }
-                            i += 1
-                        }
+            // COB
+            if let cobMetric = CarbMetric(from: lastLoopRecord["cob"], key: "cob") {
+                infoManager.updateInfoData(type: .cob, value: cobMetric)
+                latestCOB = cobMetric
+            }
 
-                        if let predMin = prediction.min(), let predMax = prediction.max() {
-                            let formattedMin = Localizer.toDisplayUnits(String(predMin))
-                            let formattedMax = Localizer.toDisplayUnits(String(predMax))
-                            let value = "\(formattedMin)/\(formattedMax)"
-                            infoManager.updateInfoData(type: .minMax, value: value)
-                        }
-
-                        updatePredictionGraph()
-                    }
-                } else {
+            if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject] {
+                let prediction = predictdata["values"] as! [Double]
+                PredictionLabel.text = Localizer.toDisplayUnits(String(Int(prediction.last!)))
+                PredictionLabel.textColor = UIColor.systemPurple
+                if Storage.shared.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
                     predictionData.removeAll()
-                    infoManager.clearInfoData(type: .minMax)
+                    var predictionTime = lastLoopTime
+                    let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
+                    var i = 0
+                    while i <= toLoad {
+                        if i < prediction.count {
+                            let sgvValue = Int(round(prediction[i]))
+                            // Skip values higher than 600
+                            if sgvValue <= 600 {
+                                let prediction = ShareGlucoseData(sgv: sgvValue, date: predictionTime, direction: "flat")
+                                predictionData.append(prediction)
+                            }
+                            predictionTime += 300
+                        }
+                        i += 1
+                    }
+
+                    if let predMin = prediction.min(), let predMax = prediction.max() {
+                        let formattedMin = Localizer.toDisplayUnits(String(predMin))
+                        let formattedMax = Localizer.toDisplayUnits(String(predMax))
+                        let value = "\(formattedMin)/\(formattedMax)"
+                        infoManager.updateInfoData(type: .minMax, value: value)
+                    }
+
                     updatePredictionGraph()
                 }
-                if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
-                    let formattedRecBolus = String(format: "%.2fU", recBolus)
-                    infoManager.updateInfoData(type: .recBolus, value: formattedRecBolus)
-                    Observable.shared.deviceRecBolus.value = recBolus
-                }
-                if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
-                    if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
-                        var lastBGTime = lastLoopTime
-                        if bgData.count > 0 {
-                            lastBGTime = bgData[bgData.count - 1].date
-                        }
-                        if tempBasalTime > lastBGTime, !wasEnacted {
-                            LoopStatusLabel.text = "⏀"
-                            latestLoopStatusString = "⏀"
-                        } else {
-                            LoopStatusLabel.text = "↻"
-                            latestLoopStatusString = "↻"
-                        }
+            } else {
+                predictionData.removeAll()
+                infoManager.clearInfoData(type: .minMax)
+                updatePredictionGraph()
+            }
+            if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
+                let formattedRecBolus = String(format: "%.2fU", recBolus)
+                infoManager.updateInfoData(type: .recBolus, value: formattedRecBolus)
+                Observable.shared.deviceRecBolus.value = recBolus
+            }
+            if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
+                if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
+                    var lastBGTime = lastLoopTime
+                    if bgData.count > 0 {
+                        lastBGTime = bgData[bgData.count - 1].date
                     }
-                } else {
-                    LoopStatusLabel.text = "↻"
-                    latestLoopStatusString = "↻"
+                    if tempBasalTime > lastBGTime, !wasEnacted {
+                        LoopStatusLabel.text = "⏀"
+                        latestLoopStatusString = "⏀"
+                    } else {
+                        LoopStatusLabel.text = "↻"
+                        latestLoopStatusString = "↻"
+                    }
                 }
+            } else {
+                LoopStatusLabel.text = "↻"
+                latestLoopStatusString = "↻"
             }
         }
     }
