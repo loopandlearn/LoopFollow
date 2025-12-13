@@ -148,6 +148,168 @@ struct ImportExportSettingsView: View {
         .sheet(isPresented: $viewModel.showImportConfirmation) {
             ImportConfirmationView(viewModel: viewModel)
         }
+        .sheet(isPresented: $viewModel.showExportSuccessAlert) {
+            ExportSuccessView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $viewModel.showImportNotFoundAlert) {
+            ImportNotFoundView(viewModel: viewModel)
+        }
+    }
+}
+
+struct ImportNotFoundView: View {
+    @ObservedObject var viewModel: ImportExportSettingsViewModel
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Header
+                VStack(spacing: 12) {
+                    Image(systemName: "icloud.slash")
+                        .font(.system(size: 60))
+                        .foregroundColor(.orange)
+
+                    Text("No Settings Found")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+
+                    Text(viewModel.importNotFoundMessage)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .padding(.top, 30)
+
+                Spacer()
+
+                // Done Button
+                Button(action: {
+                    viewModel.showImportNotFoundAlert = false
+                }) {
+                    HStack {
+                        Image(systemName: "xmark")
+                        Text("OK")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 20)
+            }
+            .navigationBarHidden(true)
+        }
+    }
+}
+
+struct ExportSuccessView: View {
+    @ObservedObject var viewModel: ImportExportSettingsViewModel
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Header
+                VStack(spacing: 12) {
+                    Image(systemName: "checkmark.icloud.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.green)
+
+                    Text("Export Successful")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+
+                    Text(viewModel.exportSuccessMessage)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 30)
+
+                // Exported Settings Details
+                if !viewModel.exportSuccessDetails.isEmpty {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Exported Settings")
+                            .font(.headline)
+                            .padding(.horizontal)
+
+                        VStack(spacing: 12) {
+                            ForEach(viewModel.exportSuccessDetails, id: \.self) { detail in
+                                HStack(spacing: 12) {
+                                    Image(systemName: iconForDetail(detail))
+                                        .font(.title2)
+                                        .foregroundColor(colorForDetail(detail))
+                                        .frame(width: 30)
+
+                                    Text(detail)
+                                        .font(.subheadline)
+                                        .lineLimit(2)
+
+                                    Spacer()
+
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                }
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+
+                Spacer()
+
+                // Done Button
+                Button(action: {
+                    viewModel.showExportSuccessAlert = false
+                }) {
+                    HStack {
+                        Image(systemName: "checkmark")
+                        Text("Done")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 20)
+            }
+            .navigationBarHidden(true)
+        }
+    }
+
+    private func iconForDetail(_ detail: String) -> String {
+        if detail.lowercased().contains("nightscout") {
+            return "network"
+        } else if detail.lowercased().contains("dexcom") {
+            return "person.circle"
+        } else if detail.lowercased().contains("remote") {
+            return "antenna.radiowaves.left.and.right"
+        } else if detail.lowercased().contains("alarm") {
+            return "bell"
+        }
+        return "gear"
+    }
+
+    private func colorForDetail(_ detail: String) -> Color {
+        if detail.lowercased().contains("nightscout") {
+            return .blue
+        } else if detail.lowercased().contains("dexcom") {
+            return .green
+        } else if detail.lowercased().contains("remote") {
+            return .orange
+        } else if detail.lowercased().contains("alarm") {
+            return .red
+        }
+        return .gray
     }
 }
 

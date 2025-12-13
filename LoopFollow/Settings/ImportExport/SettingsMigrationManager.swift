@@ -44,6 +44,15 @@ class SettingsMigrationManager {
             )
         }
 
+        // Try to decode as DexcomSettingsExport
+        if let dexcomSettings = try? JSONDecoder().decode(DexcomSettingsExport.self, from: data) {
+            print("✅ Successfully decoded as DexcomSettingsExport")
+            return CombinedSettingsExport(
+                dexcom: dexcomSettings,
+                exportType: "Dexcom Settings"
+            )
+        }
+
         // Try to decode as RemoteSettingsExport
         if let remoteSettings = try? JSONDecoder().decode(RemoteSettingsExport.self, from: data) {
             print("✅ Successfully decoded as RemoteSettingsExport")

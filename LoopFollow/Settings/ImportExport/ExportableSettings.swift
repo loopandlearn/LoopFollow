@@ -43,6 +43,45 @@ struct NightscoutSettingsExport: Codable {
     }
 }
 
+// MARK: - Dexcom Settings Export
+
+struct DexcomSettingsExport: Codable {
+    let version: String
+    let userName: String
+    let password: String
+    let server: String
+
+    static func fromCurrentStorage() -> DexcomSettingsExport {
+        let storage = Storage.shared
+        return DexcomSettingsExport(
+            version: AppVersionManager().version(),
+            userName: storage.shareUserName.value,
+            password: storage.sharePassword.value,
+            server: storage.shareServer.value
+        )
+    }
+
+    func applyToStorage() {
+        let storage = Storage.shared
+        storage.shareUserName.value = userName
+        storage.sharePassword.value = password
+        storage.shareServer.value = server
+    }
+
+    func encodeToJSON() -> String? {
+        do {
+            let data = try JSONEncoder().encode(self)
+            return String(data: data, encoding: .utf8)
+        } catch {
+            return nil
+        }
+    }
+
+    func hasValidSettings() -> Bool {
+        return !userName.isEmpty && !password.isEmpty
+    }
+}
+
 // MARK: - Alarm Settings Export
 
 struct AlarmSettingsExport: Codable {
@@ -279,12 +318,14 @@ struct CombinedSettingsExport: Codable {
     let version: String
     let appVersion: String
     let nightscout: NightscoutSettingsExport?
+    let dexcom: DexcomSettingsExport?
     let remote: RemoteSettingsExport?
     let alarms: AlarmSettingsExport?
     let exportType: String
     let timestamp: Date
 
     init(nightscout: NightscoutSettingsExport? = nil,
+         dexcom: DexcomSettingsExport? = nil,
          remote: RemoteSettingsExport? = nil,
          alarms: AlarmSettingsExport? = nil,
          exportType: String)
@@ -292,6 +333,7 @@ struct CombinedSettingsExport: Codable {
         version = "1.0"
         appVersion = AppVersionManager().version()
         self.nightscout = nightscout
+        self.dexcom = dexcom
         self.remote = remote
         self.alarms = alarms
         self.exportType = exportType

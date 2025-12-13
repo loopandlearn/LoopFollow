@@ -26,6 +26,11 @@ class ImportExportSettingsViewModel: ObservableObject {
     @Published var showImportConfirmation = false
     @Published var pendingImportSettings: CombinedSettingsExport?
     @Published var pendingImportSource: String = ""
+    @Published var showExportSuccessAlert = false
+    @Published var exportSuccessMessage = ""
+    @Published var exportSuccessDetails: [String] = []
+    @Published var showImportNotFoundAlert = false
+    @Published var importNotFoundMessage = ""
 
     // MARK: - Export Types
 
@@ -119,6 +124,18 @@ class ImportExportSettingsViewModel: ObservableObject {
             nightscout.applyToStorage()
             importedComponents.append("Nightscout settings")
             LogManager.shared.log(category: .general, message: "Nightscout settings imported from \(source) (version: \(nightscout.version))")
+        }
+
+        if let dexcom = settings.dexcom {
+            // Check if Dexcom settings are already configured
+            let currentDexcom = DexcomSettingsExport.fromCurrentStorage()
+            if currentDexcom.hasValidSettings() {
+                LogManager.shared.log(category: .general, message: "Warning: Dexcom settings are already configured. Import will overwrite existing Dexcom settings.")
+            }
+
+            dexcom.applyToStorage()
+            importedComponents.append("Dexcom settings")
+            LogManager.shared.log(category: .general, message: "Dexcom settings imported from \(source) (version: \(dexcom.version))")
         }
 
         if let remote = settings.remote {
@@ -223,12 +240,31 @@ class ImportExportSettingsViewModel: ObservableObject {
 
     // MARK: - iCloud Methods
 
+    /// Returns the iCloud container URL for persistent storage (survives app deletion)
+    /// Falls back to local Documents if iCloud is not available
+    private func getICloudContainerURL() -> URL? {
+        if let iCloudURL = FileManager.default.url(forUbiquityContainerIdentifier: nil) {
+            let documentsURL = iCloudURL.appendingPathComponent("Documents")
+            if !FileManager.default.fileExists(atPath: documentsURL.path) {
+                try? FileManager.default.createDirectory(at: documentsURL, withIntermediateDirectories: true)
+            }
+            return documentsURL
+        }
+        return nil
+    }
+
     func exportToiCloud() {
         // Create a comprehensive settings export for iCloud
+        let nightscoutSettings = NightscoutSettingsExport.fromCurrentStorage()
+        let dexcomSettings = DexcomSettingsExport.fromCurrentStorage()
+        let remoteSettings = RemoteSettingsExport.fromCurrentStorage()
+        let alarmSettings = AlarmSettingsExport.fromCurrentStorage()
+
         let allSettings = CombinedSettingsExport(
-            nightscout: NightscoutSettingsExport.fromCurrentStorage(),
-            remote: RemoteSettingsExport.fromCurrentStorage(),
-            alarms: AlarmSettingsExport.fromCurrentStorage(),
+            nightscout: nightscoutSettings,
+            dexcom: dexcomSettings,
+            remote: remoteSettings,
+            alarms: alarmSettings,
             exportType: "All Settings"
         )
 
@@ -237,18 +273,50 @@ class ImportExportSettingsViewModel: ObservableObject {
             return
         }
 
-        // Save to iCloud Documents with app suffix
-        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let iCloudDocumentsPath = getICloudContainerURL() else {
+            qrCodeErrorMessage = "iCloud is not available. Please sign in to iCloud in Settings and enable iCloud Drive."
+            LogManager.shared.log(category: .general, message: "iCloud ubiquity container not available")
+            return
+        }
+
         let fileName = "\(AppConstants.appInstanceId)Settings.json"
-        let iCloudPath = documentsPath.appendingPathComponent(fileName)
+        let iCloudPath = iCloudDocumentsPath.appendingPathComponent(fileName)
 
         LogManager.shared.log(category: .general, message: "Attempting to export settings to iCloud")
-        LogManager.shared.log(category: .general, message: "iCloud documents path: \(documentsPath.path)")
+        LogManager.shared.log(category: .general, message: "iCloud ubiquity container path: \(iCloudDocumentsPath.path)")
         LogManager.shared.log(category: .general, message: "Saving settings file to: \(iCloudPath.path)")
 
         do {
             try jsonData.write(to: iCloudPath)
-            qrCodeErrorMessage = "Settings exported to iCloud successfully"
+
+            // Build export details for the success alert - show what's being exported
+            var details: [String] = []
+
+            // Nightscout - show if URL is configured
+            if !nightscoutSettings.url.isEmpty {
+                details.append("Nightscout: \(nightscoutSettings.url)")
+            }
+
+            // Dexcom - show if username is configured
+            if !dexcomSettings.userName.isEmpty {
+                details.append("Dexcom: \(dexcomSettings.userName)")
+            }
+
+            // Remote - only show if a remote type is actually configured (not "none")
+            if remoteSettings.remoteType != .none {
+                details.append("Remote: \(remoteSettings.remoteType.rawValue)")
+            }
+
+            // Alarms - show if any alarms exist
+            if !alarmSettings.alarms.isEmpty {
+                details.append("Alarms: \(alarmSettings.alarms.count) alarm(s)")
+            }
+
+            exportSuccessDetails = details
+            exportSuccessMessage = "Settings saved to iCloud"
+            showExportSuccessAlert = true
+            qrCodeErrorMessage = "" // Clear any previous error
+
             LogManager.shared.log(category: .general, message: "All settings exported to iCloud successfully")
         } catch {
             qrCodeErrorMessage = "Failed to export to iCloud: \(error.localizedDescription)"
@@ -256,21 +324,29 @@ class ImportExportSettingsViewModel: ObservableObject {
     }
 
     func importFromiCloud() {
+        // Try to read from iCloud ubiquity container (persists after app deletion)
+        guard let iCloudDocumentsPath = getICloudContainerURL() else {
+            importNotFoundMessage = "iCloud is not available.\n\nPlease sign in to iCloud in Settings and enable iCloud Drive."
+            showImportNotFoundAlert = true
+            LogManager.shared.log(category: .general, message: "iCloud ubiquity container not available for import")
+            return
+        }
+
+        let fileName = "\(AppConstants.appInstanceId)Settings.json"
+        let iCloudPath = iCloudDocumentsPath.appendingPathComponent(fileName)
+
+        LogManager.shared.log(category: .general, message: "Attempting to import settings from iCloud")
+        LogManager.shared.log(category: .general, message: "iCloud ubiquity container path: \(iCloudDocumentsPath.path)")
+        LogManager.shared.log(category: .general, message: "Looking for settings file: \(iCloudPath.path)")
+
+        guard FileManager.default.fileExists(atPath: iCloudPath.path) else {
+            LogManager.shared.log(category: .general, message: "Settings file not found at: \(iCloudPath.path)")
+            importNotFoundMessage = "No settings file found in iCloud.\n\nMake sure you have previously exported settings to iCloud from this app."
+            showImportNotFoundAlert = true
+            return
+        }
+
         do {
-            let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let fileName = "\(AppConstants.appInstanceId)Settings.json"
-            let iCloudPath = documentsPath.appendingPathComponent(fileName)
-
-            LogManager.shared.log(category: .general, message: "Attempting to import settings from iCloud")
-            LogManager.shared.log(category: .general, message: "iCloud documents path: \(documentsPath.path)")
-            LogManager.shared.log(category: .general, message: "Looking for settings file: \(iCloudPath.path)")
-
-            guard FileManager.default.fileExists(atPath: iCloudPath.path) else {
-                LogManager.shared.log(category: .general, message: "Settings file not found at: \(iCloudPath.path)")
-                qrCodeErrorMessage = "No settings found in iCloud"
-                return
-            }
-
             LogManager.shared.log(category: .general, message: "Settings file found, attempting to read data")
 
             let data = try Data(contentsOf: iCloudPath)
@@ -300,17 +376,18 @@ class ImportExportSettingsViewModel: ObservableObject {
 
     private func createImportPreview(from settings: CombinedSettingsExport) {
         let nightscoutURL = settings.nightscout?.url.isEmpty == false ? settings.nightscout?.url : nil
-        let dexcomUsername: String? = nil // Dexcom settings are not part of the export structure
+        let dexcomUsername = settings.dexcom?.userName.isEmpty == false ? settings.dexcom?.userName : nil
         let remoteType = settings.remote?.remoteType != .none ? settings.remote?.remoteType.rawValue : nil
         let alarmCount = settings.alarms?.alarms.count ?? 0
         let alarmNames = settings.alarms?.alarms.map { $0.name } ?? []
 
         // Check if any settings are actually present
         let hasAnySettings = (nightscoutURL != nil && !nightscoutURL!.isEmpty) ||
+            (dexcomUsername != nil && !dexcomUsername!.isEmpty) ||
             (remoteType != nil && !remoteType!.isEmpty && remoteType != "None") ||
             alarmCount > 0
 
-        LogManager.shared.log(category: .general, message: "Import preview check - nightscoutURL: \(nightscoutURL ?? "nil"), remoteType: \(remoteType ?? "nil"), alarmCount: \(alarmCount), hasAnySettings: \(hasAnySettings)")
+        LogManager.shared.log(category: .general, message: "Import preview check - nightscoutURL: \(nightscoutURL ?? "nil"), dexcomUsername: \(dexcomUsername ?? "nil"), remoteType: \(remoteType ?? "nil"), alarmCount: \(alarmCount), hasAnySettings: \(hasAnySettings)")
 
         if hasAnySettings {
             LogManager.shared.log(category: .general, message: "Creating import preview with settings")
@@ -326,8 +403,9 @@ class ImportExportSettingsViewModel: ObservableObject {
             LogManager.shared.log(category: .general, message: "Set showImportConfirmation = true")
         } else {
             LogManager.shared.log(category: .general, message: "No settings found, clearing import data")
-            // No settings found, show error message and clear any pending data
-            qrCodeErrorMessage = "No settings found in import data"
+            // No settings found, show alert and clear any pending data
+            importNotFoundMessage = "The settings file exists but contains no valid settings to import."
+            showImportNotFoundAlert = true
             showImportConfirmation = false
             importPreview = nil
             pendingImportSettings = nil
