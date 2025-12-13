@@ -16,11 +16,13 @@
 		656F8C102E49F36F0008DC1D /* QRCodeDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */; };
 		656F8C122E49F3780008DC1D /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */; };
 		656F8C142E49F3D20008DC1D /* RemoteCommandSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */; };
-		65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */; };
 		6584B1012E4A263900135D4D /* TOTPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6584B1002E4A263900135D4D /* TOTPService.swift */; };
+		65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */; };
 		65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
+		DD026E592EA2C8A200A39CB5 /* InsulinPrecisionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD026E582EA2C8A200A39CB5 /* InsulinPrecisionManager.swift */; };
+		DD026E5B2EA2C9C300A39CB5 /* InsulinFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD026E5A2EA2C9C300A39CB5 /* InsulinFormatter.swift */; };
 		DD0650A92DCA8A10004D3B41 /* AlarmBGSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */; };
 		DD0650EB2DCE8385004D3B41 /* LowBGCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650EA2DCE8385004D3B41 /* LowBGCondition.swift */; };
 		DD0650ED2DCE9371004D3B41 /* HighBgAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0650EC2DCE9371004D3B41 /* HighBgAlarmEditor.swift */; };
@@ -408,12 +410,14 @@
 		656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeDisplayView.swift; sourceTree = "<group>"; };
 		656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommandSettings.swift; sourceTree = "<group>"; };
-		65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTokenValidationView.swift; sourceTree = "<group>"; };
 		6584B1002E4A263900135D4D /* TOTPService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPService.swift; sourceTree = "<group>"; };
+		65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTokenValidationView.swift; sourceTree = "<group>"; };
 		65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonHandler.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
 		DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireCondition.swift; sourceTree = "<group>"; };
+		DD026E582EA2C8A200A39CB5 /* InsulinPrecisionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinPrecisionManager.swift; sourceTree = "<group>"; };
+		DD026E5A2EA2C9C300A39CB5 /* InsulinFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinFormatter.swift; sourceTree = "<group>"; };
 		DD0650A82DCA8A10004D3B41 /* AlarmBGSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmBGSection.swift; sourceTree = "<group>"; };
 		DD0650EA2DCE8385004D3B41 /* LowBGCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowBGCondition.swift; sourceTree = "<group>"; };
 		DD0650EC2DCE9371004D3B41 /* HighBgAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighBgAlarmEditor.swift; sourceTree = "<group>"; };
@@ -1505,6 +1509,8 @@
 		FCC688542489367300A0279D /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				DD026E5A2EA2C9C300A39CB5 /* InsulinFormatter.swift */,
+				DD026E582EA2C8A200A39CB5 /* InsulinPrecisionManager.swift */,
 				656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */,
 				DD4A407D2E6AFEE6007B318B /* AuthService.swift */,
 				DD1D52B82E1EB5DC00432050 /* TabPosition.swift */,
@@ -1971,6 +1977,7 @@
 				DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */,
 				DDEF503A2D31615000999A5D /* LogManager.swift in Sources */,
 				DD4878172C7B75350048F05C /* BolusView.swift in Sources */,
+				DD026E592EA2C8A200A39CB5 /* InsulinPrecisionManager.swift in Sources */,
 				DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */,
 				DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
@@ -2085,6 +2092,7 @@
 				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
 				DD58171C2D299F940041FB98 /* BluetoothDevice.swift in Sources */,
 				DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */,
+				DD026E5B2EA2C9C300A39CB5 /* InsulinFormatter.swift in Sources */,
 				DD5334B02D1447C500CDD6EA /* BLEManager.swift in Sources */,
 				DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */,
 				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */,
