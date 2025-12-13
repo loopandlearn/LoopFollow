@@ -160,6 +160,7 @@ class Storage {
     var persistentNotificationLastBGTime = StorageValue<Date>(key: "persistentNotificationLastBGTime", defaultValue: .distantPast)
 
     var lastLoopingChecked = StorageValue<Date?>(key: "lastLoopingChecked", defaultValue: nil)
+    var lastBGChecked = StorageValue<Date?>(key: "lastBGChecked", defaultValue: nil)
 
     var alarmsPosition = StorageValue<TabPosition>(key: "alarmsPosition", defaultValue: .position2)
     var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .more)
@@ -169,6 +170,9 @@ class Storage {
 
     var returnApnsKey = StorageValue<String>(key: "returnApnsKey", defaultValue: "")
     var returnKeyId = StorageValue<String>(key: "returnKeyId", defaultValue: "")
+
+    var bolusIncrement = SecureStorageValue<HKQuantity>(key: "bolusIncrement", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05))
+    var bolusIncrementDetected = StorageValue<Bool>(key: "bolusIncrementDetected", defaultValue: false)
 
     static let shared = Storage()
     private init() {}
