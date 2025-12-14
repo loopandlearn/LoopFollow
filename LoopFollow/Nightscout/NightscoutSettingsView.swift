@@ -12,6 +12,7 @@ struct NightscoutSettingsView: View {
                 urlSection
                 tokenSection
                 statusSection
+                importSection
             }
             .onDisappear {
                 viewModel.dismiss()
@@ -52,6 +53,18 @@ struct NightscoutSettingsView: View {
     private var statusSection: some View {
         Section(header: Text("Status")) {
             Text(viewModel.nightscoutStatus)
+        }
+    }
+
+    private var importSection: some View {
+        Section(header: Text("Import Settings")) {
+            NavigationLink(destination: ImportExportSettingsView()) {
+                HStack {
+                    Image(systemName: "square.and.arrow.down")
+                        .foregroundColor(.blue)
+                    Text("Import Settings from QR Code or iCloud")
+                }
+            }
         }
     }
 }
