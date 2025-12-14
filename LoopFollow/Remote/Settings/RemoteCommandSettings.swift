@@ -145,7 +145,7 @@ struct RemoteCommandSettings: Codable {
     }
 
     /// Checks if the settings are valid for the given remote type
-    func isValid() -> Bool {
+    func hasValidSettings() -> Bool {
         switch remoteType {
         case .none:
             return true

@@ -54,6 +54,12 @@ struct SettingsMenuView: View {
                         showingTabCustomization = true
                     }
 
+                    NavigationRow(title: "Import/Export Settings",
+                                  icon: "square.and.arrow.down")
+                    {
+                        settingsPath.value.append(Sheet.importExport)
+                    }
+
                     if !nightscoutURL.value.isEmpty {
                         NavigationRow(title: "Information Display Settings",
                                       icon: "info.circle")
@@ -63,12 +69,6 @@ struct SettingsMenuView: View {
 
                         NavigationRow(title: "Remote Settings",
                                       icon: "antenna.radiowaves.left.and.right")
-                        {
-                            settingsPath.value.append(Sheet.remote)
-                        }
-                    } else {
-                        NavigationRow(title: "Import Settings",
-                                      icon: "square.and.arrow.down")
                         {
                             settingsPath.value.append(Sheet.remote)
                         }
@@ -279,6 +279,7 @@ private enum Sheet: Hashable, Identifiable {
     case infoDisplay
     case alarmsList, alarmSettings
     case remote
+    case importExport
     case calendar, contact
     case advanced
     case viewLog
@@ -297,6 +298,7 @@ private enum Sheet: Hashable, Identifiable {
         case .alarmsList: AlarmListView()
         case .alarmSettings: AlarmSettingsView()
         case .remote: RemoteSettingsView(viewModel: .init())
+        case .importExport: ImportExportSettingsView()
         case .calendar: CalendarSettingsView()
         case .contact: ContactSettingsView(viewModel: .init())
         case .advanced: AdvancedSettingsView(viewModel: .init())

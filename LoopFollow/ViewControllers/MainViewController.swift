@@ -45,6 +45,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var refreshScrollView: UIScrollView!
     var refreshControl: UIRefreshControl!
 
+    // Setup buttons for first-time configuration
+    private var setupNightscoutButton: UIButton!
+    private var setupDexcomButton: UIButton!
+
     let speechSynthesizer = AVSpeechSynthesizer()
 
     // Variables for BG Charts
@@ -118,6 +122,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     private var cancellables = Set<AnyCancellable>()
 
+    // Loading state management
+    private var loadingOverlay: UIView?
+    private var isInitialLoad = true
+    private var loadingStates: [String: Bool] = [
+        "bg": false,
+        "profile": false,
+        "deviceStatus": false,
+    ]
+    private var loadingTimeoutTimer: Timer?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -153,7 +167,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer)
 
         // setup show/hide small graph and stats
-        BGChartFull.isHidden = !Storage.shared.showSmallGraph.value
+        updateGraphVisibility()
         statsView.isHidden = !Storage.shared.showStats.value
 
         BGChart.delegate = self
@@ -259,7 +273,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         Storage.shared.showSmallGraph.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.BGChartFull.isHidden = !Storage.shared.showSmallGraph.value
+                self?.updateGraphVisibility()
             }
             .store(in: &cancellables)
 
@@ -309,6 +323,28 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateNightscoutTabState()
+                self?.checkAndShowImportButtonIfNeeded()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.token.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.checkAndShowImportButtonIfNeeded()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.shareUserName.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.checkAndShowImportButtonIfNeeded()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.sharePassword.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.checkAndShowImportButtonIfNeeded()
             }
             .store(in: &cancellables)
 
@@ -361,6 +397,115 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         setupTabBar()
 
         speechSynthesizer.delegate = self
+
+        // Check configuration and show appropriate UI
+        if isDataSourceConfigured() {
+            // Data source configured - show loading overlay
+            setupLoadingState()
+            showLoadingOverlay()
+        } else {
+            // No data source - hide all data UI and show setup buttons
+            hideAllDataUI()
+            isInitialLoad = false
+        }
+
+        checkAndShowImportButtonIfNeeded()
+    }
+
+    // MARK: - Loading Overlay
+
+    private func isDataSourceConfigured() -> Bool {
+        let isNightscoutConfigured = !Storage.shared.url.value.isEmpty
+        let isDexcomConfigured = !Storage.shared.shareUserName.value.isEmpty && !Storage.shared.sharePassword.value.isEmpty
+        return isNightscoutConfigured || isDexcomConfigured
+    }
+
+    private func setupLoadingState() {
+        // If Nightscout is not enabled, mark profile and deviceStatus as loaded
+        // since we only need BG data from Dexcom Share
+        if !IsNightscoutEnabled() {
+            loadingStates["profile"] = true
+            loadingStates["deviceStatus"] = true
+        }
+    }
+
+    private func showLoadingOverlay() {
+        guard loadingOverlay == nil else { return }
+
+        // Hide all data UI while loading
+        hideAllDataUI()
+
+        let overlay = UIView(frame: view.bounds)
+        overlay.backgroundColor = UIColor.systemBackground
+        overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.startAnimating()
+
+        let loadingLabel = UILabel()
+        loadingLabel.translatesAutoresizingMaskIntoConstraints = false
+        loadingLabel.text = "Loading..."
+        loadingLabel.textAlignment = .center
+        loadingLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        loadingLabel.textColor = UIColor.secondaryLabel
+
+        overlay.addSubview(activityIndicator)
+        overlay.addSubview(loadingLabel)
+
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: overlay.centerYAnchor, constant: -20),
+
+            loadingLabel.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            loadingLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 16),
+        ])
+
+        view.addSubview(overlay)
+        loadingOverlay = overlay
+
+        // Set a timeout to hide the loading overlay if data takes too long
+        loadingTimeoutTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: false) { [weak self] _ in
+            guard let self = self else { return }
+            if self.isInitialLoad {
+                LogManager.shared.log(category: .general, message: "Loading timeout reached, hiding overlay")
+                self.isInitialLoad = false
+                self.hideLoadingOverlay()
+            }
+        }
+    }
+
+    private func hideLoadingOverlay() {
+        guard let overlay = loadingOverlay else { return }
+
+        // Cancel the timeout timer
+        loadingTimeoutTimer?.invalidate()
+        loadingTimeoutTimer = nil
+
+        // Show all data UI now that loading is complete
+        showAllDataUI()
+
+        UIView.animate(withDuration: 0.3, animations: {
+            overlay.alpha = 0
+        }, completion: { _ in
+            overlay.removeFromSuperview()
+            self.loadingOverlay = nil
+        })
+    }
+
+    func markDataLoaded(_ key: String) {
+        guard isInitialLoad else { return }
+
+        loadingStates[key] = true
+
+        // Check if all critical data is loaded
+        let allLoaded = loadingStates.values.allSatisfy { $0 }
+        if allLoaded {
+            isInitialLoad = false
+            DispatchQueue.main.async {
+                self.hideLoadingOverlay()
+            }
+        }
     }
 
     private func setupTabBar() {
@@ -694,6 +839,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     func showHideNSDetails() {
+        if isInitialLoad || !isDataSourceConfigured() {
+            return
+        }
+
         var isHidden = false
         if !IsNightscoutEnabled() {
             isHidden = true
@@ -944,6 +1093,235 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         Storage.shared.infoSort.value = sortArray
         Storage.shared.infoVisible.value = visibleArray
+    }
+
+    // MARK: - First Time Setup
+
+    private func checkAndShowImportButtonIfNeeded() {
+        // Check if this is first-time setup (no data source configured)
+        let isFirstTimeSetup = !isDataSourceConfigured()
+
+        if isFirstTimeSetup {
+            setupFirstTimeButtons()
+            hideAllDataUI()
+            // Hide loading overlay if it's showing and mark as not loading
+            if loadingOverlay != nil {
+                isInitialLoad = false
+                hideLoadingOverlay()
+            }
+        } else {
+            hideFirstTimeButtons()
+            // Only show data UI if we're not in initial loading state
+            if !isInitialLoad || loadingOverlay == nil {
+                showAllDataUI()
+            }
+        }
+    }
+
+    private func setupFirstTimeButtons() {
+        // Create Setup Nightscout button
+        if setupNightscoutButton == nil {
+            setupNightscoutButton = UIButton(type: .system)
+            setupNightscoutButton.setTitle("Setup Nightscout", for: .normal)
+            setupNightscoutButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+            setupNightscoutButton.backgroundColor = UIColor.systemBlue
+            setupNightscoutButton.setTitleColor(.white, for: .normal)
+            setupNightscoutButton.layer.cornerRadius = 12
+            setupNightscoutButton.layer.shadowColor = UIColor.black.cgColor
+            setupNightscoutButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+            setupNightscoutButton.layer.shadowOpacity = 0.3
+            setupNightscoutButton.layer.shadowRadius = 4
+            setupNightscoutButton.addTarget(self, action: #selector(setupNightscoutTapped), for: .touchUpInside)
+
+            view.addSubview(setupNightscoutButton)
+            setupNightscoutButton.translatesAutoresizingMaskIntoConstraints = false
+
+            NSLayoutConstraint.activate([
+                setupNightscoutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                setupNightscoutButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -30),
+                setupNightscoutButton.widthAnchor.constraint(equalToConstant: 200),
+                setupNightscoutButton.heightAnchor.constraint(equalToConstant: 50),
+            ])
+        }
+
+        // Create Setup Dexcom Share button
+        if setupDexcomButton == nil {
+            setupDexcomButton = UIButton(type: .system)
+            setupDexcomButton.setTitle("Setup Dexcom Share", for: .normal)
+            setupDexcomButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+            setupDexcomButton.backgroundColor = UIColor.systemGreen
+            setupDexcomButton.setTitleColor(.white, for: .normal)
+            setupDexcomButton.layer.cornerRadius = 12
+            setupDexcomButton.layer.shadowColor = UIColor.black.cgColor
+            setupDexcomButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+            setupDexcomButton.layer.shadowOpacity = 0.3
+            setupDexcomButton.layer.shadowRadius = 4
+            setupDexcomButton.addTarget(self, action: #selector(setupDexcomTapped), for: .touchUpInside)
+
+            view.addSubview(setupDexcomButton)
+            setupDexcomButton.translatesAutoresizingMaskIntoConstraints = false
+
+            NSLayoutConstraint.activate([
+                setupDexcomButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                setupDexcomButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 30),
+                setupDexcomButton.widthAnchor.constraint(equalToConstant: 200),
+                setupDexcomButton.heightAnchor.constraint(equalToConstant: 50),
+            ])
+        }
+
+        setupNightscoutButton.isHidden = false
+        setupDexcomButton.isHidden = false
+    }
+
+    private func hideFirstTimeButtons() {
+        setupNightscoutButton?.isHidden = true
+        setupDexcomButton?.isHidden = true
+    }
+
+    @objc private func setupNightscoutTapped() {
+        let nightscoutSettingsView = NightscoutSettingsView(viewModel: .init())
+        let hostingController = UIHostingController(rootView: nightscoutSettingsView)
+        let navController = UINavigationController(rootViewController: hostingController)
+
+        // Apply dark mode if needed
+        if Storage.shared.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+            navController.overrideUserInterfaceStyle = .dark
+        }
+
+        // Add a Done button
+        hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .pageSheet
+        present(navController, animated: true)
+    }
+
+    @objc private func setupDexcomTapped() {
+        let dexcomSettingsView = DexcomSettingsView(viewModel: .init())
+        let hostingController = UIHostingController(rootView: dexcomSettingsView)
+        let navController = UINavigationController(rootViewController: hostingController)
+
+        // Apply dark mode if needed
+        if Storage.shared.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+            navController.overrideUserInterfaceStyle = .dark
+        }
+
+        // Add a Done button
+        hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .pageSheet
+        present(navController, animated: true)
+    }
+
+    private func hideGraphs() {
+        BGChart.isHidden = true
+        BGChartFull.isHidden = true
+    }
+
+    private func showGraphs() {
+        updateGraphVisibility()
+    }
+
+    private func hideAllDataUI() {
+        // Hide graphs
+        BGChart.isHidden = true
+        BGChartFull.isHidden = true
+
+        // Hide BG display elements
+        BGText.isHidden = true
+        DeltaText.isHidden = true
+        DirectionText.isHidden = true
+        MinAgoText.isHidden = true
+        serverText.isHidden = true
+
+        // Hide info table and stats
+        infoTable.isHidden = true
+        statsView.isHidden = true
+
+        // Hide loop status and prediction
+        LoopStatusLabel.isHidden = true
+        PredictionLabel.isHidden = true
+    }
+
+    private func showAllDataUI() {
+        // Show BG display elements
+        BGText.isHidden = false
+        DeltaText.isHidden = false
+        DirectionText.isHidden = false
+        MinAgoText.isHidden = false
+        serverText.isHidden = false
+
+        // Show graphs based on settings
+        updateGraphVisibility()
+
+        // Show/hide info table and stats based on user settings
+        let isNightscoutEnabled = IsNightscoutEnabled()
+        if isNightscoutEnabled {
+            infoTable.isHidden = Storage.shared.hideInfoTable.value
+            LoopStatusLabel.isHidden = false
+            PredictionLabel.isHidden = IsNotLooping
+        } else {
+            infoTable.isHidden = true
+            LoopStatusLabel.isHidden = true
+            PredictionLabel.isHidden = true
+        }
+
+        statsView.isHidden = !Storage.shared.showStats.value
+    }
+
+    private func updateGraphVisibility() {
+        let isFirstTimeSetup = !isDataSourceConfigured()
+
+        if isFirstTimeSetup {
+            BGChart.isHidden = true
+            BGChartFull.isHidden = true
+        } else {
+            BGChart.isHidden = false
+            BGChartFull.isHidden = !Storage.shared.showSmallGraph.value
+        }
+    }
+
+    @objc private func importSettingsButtonTapped() {
+        presentImportSettingsView()
+    }
+
+    private func presentImportSettingsView() {
+        let importExportView = ImportExportSettingsView()
+        let hostingController = UIHostingController(rootView: importExportView)
+        hostingController.modalPresentationStyle = .pageSheet
+
+        present(hostingController, animated: true)
+    }
+
+    @objc private func dismissModal() {
+        dismiss(animated: true) { [weak self] in
+            guard let self = self else { return }
+
+            // Check if user just configured a data source
+            if self.isDataSourceConfigured(), self.loadingOverlay == nil {
+                // Reset loading states for fresh load
+                self.loadingStates = [
+                    "bg": false,
+                    "profile": false,
+                    "deviceStatus": false,
+                ]
+                self.isInitialLoad = true
+
+                // Show loading overlay and trigger refresh
+                self.setupLoadingState()
+                self.showLoadingOverlay()
+                self.refresh()
+            }
+        }
     }
 }
 
