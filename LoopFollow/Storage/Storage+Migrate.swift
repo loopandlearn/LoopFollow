@@ -1,6 +1,7 @@
 // LoopFollow
 // Storage+Migrate.swift
 
+import Contacts
 import Foundation
 
 extension Storage {
@@ -1675,5 +1676,86 @@ extension Storage {
         alarm.activeOption = .always
 
         Storage.shared.alarms.value.append(alarm)
+    }
+
+    private func loopFollowContactName(for type: ContactType) -> String {
+        let bundleDisplayName =
+            Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+                ?? "LoopFollow"
+
+        return "\(bundleDisplayName) - \(type.rawValue)"
+    }
+
+    private func idStorage(for type: ContactType) -> StorageValue<String?> {
+        switch type {
+        case .BG:
+            return Storage.shared.contactBGID
+        case .Trend:
+            return Storage.shared.contactTrendID
+        case .Delta:
+            return Storage.shared.contactDeltaID
+        }
+    }
+
+    func migrateStep3_removeDuplicateContacts() {
+        let store = CNContactStore()
+
+        guard CNContactStore.authorizationStatus(for: .contacts) == .authorized else {
+            return
+        }
+
+        let keys: [CNKeyDescriptor] = [
+            CNContactIdentifierKey as CNKeyDescriptor,
+            CNContactGivenNameKey as CNKeyDescriptor,
+        ]
+
+        for type in ContactType.allCases {
+            let name = loopFollowContactName(for: type)
+            let predicate = CNContact.predicateForContacts(matchingName: name)
+            let idStorage = idStorage(for: type)
+
+            let contacts: [CNContact]
+            do {
+                contacts = try store.unifiedContacts(
+                    matching: predicate,
+                    keysToFetch: keys
+                )
+            } catch {
+                continue
+            }
+
+            guard !contacts.isEmpty else {
+                idStorage.value = nil
+                continue
+            }
+
+            let keptContact: CNContact
+
+            if
+                let storedID = idStorage.value,
+                let stored = contacts.first(where: { $0.identifier == storedID })
+            {
+                keptContact = stored
+            } else {
+                keptContact = contacts[0]
+            }
+
+            // Delete all others
+            let save = CNSaveRequest()
+
+            for contact in contacts where contact.identifier != keptContact.identifier {
+                if let mutable = contact.mutableCopy() as? CNMutableContact {
+                    save.delete(mutable)
+                }
+            }
+
+            do {
+                try store.execute(save)
+            } catch {
+                // best effort
+            }
+
+            idStorage.value = keptContact.identifier
+        }
     }
 }
