@@ -326,7 +326,8 @@ class ImportExportSettingsViewModel: ObservableObject {
         store.synchronize()
 
         guard let jsonString = store.string(forKey: iCloudSettingsKey),
-              let jsonData = jsonString.data(using: .utf8) else {
+              let jsonData = jsonString.data(using: .utf8)
+        else {
             importNotFoundMessage = "No settings file found in iCloud.\n\nMake sure you have previously exported settings to iCloud from this app."
             showImportNotFoundAlert = true
             LogManager.shared.log(category: .general, message: "No settings found in iCloud Key-Value Storage")
