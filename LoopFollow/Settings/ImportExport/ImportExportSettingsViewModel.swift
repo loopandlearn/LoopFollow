@@ -36,12 +36,14 @@ class ImportExportSettingsViewModel: ObservableObject {
 
     enum ExportType: String, CaseIterable {
         case nightscout = "Nightscout Settings"
+        case dexcom = "Dexcom Share Settings"
         case remote = "Remote Settings"
         case alarms = "Alarm Settings"
 
         var icon: String {
             switch self {
             case .nightscout: return "network"
+            case .dexcom: return "network"
             case .remote: return "antenna.radiowaves.left.and.right"
             case .alarms: return "bell"
             }
@@ -205,6 +207,16 @@ class ImportExportSettingsViewModel: ObservableObject {
             }
             settings = CombinedSettingsExport(
                 alarms: alarmSettings,
+                exportType: exportType.rawValue
+            )
+        case .dexcom:
+            let dexcomSettings = DexcomSettingsExport.fromCurrentStorage()
+            if !dexcomSettings.hasValidSettings() {
+                qrCodeErrorMessage = "Please configure your Dexcom Share settings first (username and password)"
+                return nil
+            }
+            settings = CombinedSettingsExport(
+                dexcom: dexcomSettings,
                 exportType: exportType.rawValue
             )
         }
