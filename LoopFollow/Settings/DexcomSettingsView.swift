@@ -47,7 +47,7 @@ struct DexcomSettingsView: View {
                 HStack {
                     Image(systemName: "square.and.arrow.down")
                         .foregroundColor(.blue)
-                    Text("Import Settings from QR Code or iCloud")
+                    Text("Import Settings from QR Code")
                 }
             }
         }
