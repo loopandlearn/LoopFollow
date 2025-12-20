@@ -90,8 +90,82 @@ struct Alarm: Identifiable, Codable, Equatable {
     /// When the sound should repeat
     var repeatSoundOption: RepeatSoundOption = .always
 
+    /// Delay in seconds between repeated alarm sounds (0 = no delay, only applies when repeating)
+    var soundDelay: Int = 0
+
     /// When is the alarm active
     var activeOption: ActiveOption = .always
+
+    // MARK: - Codable (Custom implementation for backward compatibility)
+
+    enum CodingKeys: String, CodingKey {
+        case id, type, name, isEnabled, snoozedUntil
+        case aboveBG, belowBG, threshold, predictiveMinutes, delta
+        case persistentMinutes, monitoringWindow, soundFile
+        case snoozeDuration, playSoundOption, repeatSoundOption
+        case soundDelay, activeOption
+        case missedBolusPrebolusWindow, missedBolusIgnoreSmallBolusUnits
+        case missedBolusIgnoreUnderGrams, missedBolusIgnoreUnderBG
+        case bolusCountThreshold, bolusWindowMinutes
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decode(UUID.self, forKey: .id)
+        type = try container.decode(AlarmType.self, forKey: .type)
+        name = try container.decode(String.self, forKey: .name)
+        isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? true
+        snoozedUntil = try container.decodeIfPresent(Date.self, forKey: .snoozedUntil)
+        aboveBG = try container.decodeIfPresent(Double.self, forKey: .aboveBG)
+        belowBG = try container.decodeIfPresent(Double.self, forKey: .belowBG)
+        threshold = try container.decodeIfPresent(Double.self, forKey: .threshold)
+        predictiveMinutes = try container.decodeIfPresent(Int.self, forKey: .predictiveMinutes)
+        delta = try container.decodeIfPresent(Double.self, forKey: .delta)
+        persistentMinutes = try container.decodeIfPresent(Int.self, forKey: .persistentMinutes)
+        monitoringWindow = try container.decodeIfPresent(Int.self, forKey: .monitoringWindow)
+        soundFile = try container.decode(SoundFile.self, forKey: .soundFile)
+        snoozeDuration = try container.decodeIfPresent(Int.self, forKey: .snoozeDuration) ?? 5
+        playSoundOption = try container.decodeIfPresent(PlaySoundOption.self, forKey: .playSoundOption) ?? .always
+        repeatSoundOption = try container.decodeIfPresent(RepeatSoundOption.self, forKey: .repeatSoundOption) ?? .always
+        // Handle backward compatibility: default to 0 if soundDelay is missing
+        soundDelay = try container.decodeIfPresent(Int.self, forKey: .soundDelay) ?? 0
+        activeOption = try container.decodeIfPresent(ActiveOption.self, forKey: .activeOption) ?? .always
+        missedBolusPrebolusWindow = try container.decodeIfPresent(Int.self, forKey: .missedBolusPrebolusWindow)
+        missedBolusIgnoreSmallBolusUnits = try container.decodeIfPresent(Double.self, forKey: .missedBolusIgnoreSmallBolusUnits)
+        missedBolusIgnoreUnderGrams = try container.decodeIfPresent(Double.self, forKey: .missedBolusIgnoreUnderGrams)
+        missedBolusIgnoreUnderBG = try container.decodeIfPresent(Double.self, forKey: .missedBolusIgnoreUnderBG)
+        bolusCountThreshold = try container.decodeIfPresent(Int.self, forKey: .bolusCountThreshold)
+        bolusWindowMinutes = try container.decodeIfPresent(Int.self, forKey: .bolusWindowMinutes)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(type, forKey: .type)
+        try container.encode(name, forKey: .name)
+        try container.encode(isEnabled, forKey: .isEnabled)
+        try container.encodeIfPresent(snoozedUntil, forKey: .snoozedUntil)
+        try container.encodeIfPresent(aboveBG, forKey: .aboveBG)
+        try container.encodeIfPresent(belowBG, forKey: .belowBG)
+        try container.encodeIfPresent(threshold, forKey: .threshold)
+        try container.encodeIfPresent(predictiveMinutes, forKey: .predictiveMinutes)
+        try container.encodeIfPresent(delta, forKey: .delta)
+        try container.encodeIfPresent(persistentMinutes, forKey: .persistentMinutes)
+        try container.encodeIfPresent(monitoringWindow, forKey: .monitoringWindow)
+        try container.encode(soundFile, forKey: .soundFile)
+        try container.encode(snoozeDuration, forKey: .snoozeDuration)
+        try container.encode(playSoundOption, forKey: .playSoundOption)
+        try container.encode(repeatSoundOption, forKey: .repeatSoundOption)
+        try container.encode(soundDelay, forKey: .soundDelay)
+        try container.encode(activeOption, forKey: .activeOption)
+        try container.encodeIfPresent(missedBolusPrebolusWindow, forKey: .missedBolusPrebolusWindow)
+        try container.encodeIfPresent(missedBolusIgnoreSmallBolusUnits, forKey: .missedBolusIgnoreSmallBolusUnits)
+        try container.encodeIfPresent(missedBolusIgnoreUnderGrams, forKey: .missedBolusIgnoreUnderGrams)
+        try container.encodeIfPresent(missedBolusIgnoreUnderBG, forKey: .missedBolusIgnoreUnderBG)
+        try container.encodeIfPresent(bolusCountThreshold, forKey: .bolusCountThreshold)
+        try container.encodeIfPresent(bolusWindowMinutes, forKey: .bolusWindowMinutes)
+    }
 
     // ─────────────────────────────────────────────────────────────
     //  Missed‑Bolus‑specific settings
@@ -180,7 +254,9 @@ struct Alarm: Identifiable, Codable, Equatable {
 
         if playSound {
             AlarmSound.setSoundFile(str: soundFile.rawValue)
-            AlarmSound.play(repeating: shouldRepeat)
+            // Only use delay if repeating is enabled, otherwise delay doesn't make sense
+            let delay = shouldRepeat ? soundDelay : 0
+            AlarmSound.play(repeating: shouldRepeat, delay: delay)
         }
     }
 
