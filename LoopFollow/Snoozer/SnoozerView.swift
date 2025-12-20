@@ -74,8 +74,11 @@ struct SnoozerView: View {
                     if alarm != nil {
                         showSnoozerBar = true
                         cancelAutoHide()
-                    } else if !isGlobalSnoozeActive {
-                        scheduleAutoHide()
+                    } else {
+                        // When alarm is dismissed, schedule auto-hide if no global snooze is active
+                        if !isGlobalSnoozeActive {
+                            scheduleAutoHide()
+                        }
                     }
                 }
                 .onChange(of: isGlobalSnoozeActive) { active in
@@ -93,6 +96,56 @@ struct SnoozerView: View {
                 if showSnoozerBar || isGlobalSnoozeActive {
                     snoozerBar(compact: isLandscape)
                         .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            }
+            .overlay(alignment: .bottom) {
+                if let alarm = vm.activeAlarm {
+                    VStack(spacing: 16) {
+                        // Alarm name at the top
+                        Text(alarm.name)
+                            .font(.system(size: 30, weight: .semibold))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                            .padding(.top, 20)
+
+                        Divider()
+
+                        // Snooze duration controls
+                        if alarm.type.snoozeTimeUnit != .none {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Snooze for")
+                                        .font(.headline)
+                                    Text("\(vm.snoozeUnits) \(vm.timeUnitLabel)")
+                                        .font(.title3).bold()
+                                }
+                                Spacer()
+                                Stepper("", value: $vm.snoozeUnits,
+                                        in: alarm.type.snoozeRange,
+                                        step: alarm.type.snoozeStep)
+                                    .labelsHidden()
+                            }
+                            .padding(.horizontal, 24)
+                        }
+
+                        // Snooze button anchored to tab bar edge (bottom of VStack)
+                        Button(action: vm.snoozeTapped) {
+                            Text(vm.snoozeUnits == 0 ? "Acknowledge" : "Snooze")
+                                .font(.system(size: 30, weight: .bold))
+                                .frame(maxWidth: .infinity, minHeight: 60)
+                                .background(Color.orange)
+                                .foregroundColor(.white)
+                                .clipShape(Capsule())
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 20)
+                    }
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(20, corners: [.topLeft, .topRight])
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .animation(.spring(), value: vm.activeAlarm != nil)
+                    .padding(.bottom, 0) // Anchor directly to bottom edge
                 }
             }
             .sheet(isPresented: $showDatePickerDate) { datePickerSheetDate() }
@@ -171,56 +224,12 @@ struct SnoozerView: View {
                     .padding(.bottom, 8)
             }
 
-            if let alarm = vm.activeAlarm {
-                VStack(spacing: 16) {
-                    Text(alarm.name)
-                        .font(.system(size: 30, weight: .semibold))
-                        .foregroundColor(.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                        .padding(.top, 20)
-                    Divider()
-
-                    if alarm.type.snoozeTimeUnit != .none {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Snooze for")
-                                    .font(.headline)
-                                Text("\(vm.snoozeUnits) \(vm.timeUnitLabel)")
-                                    .font(.title3).bold()
-                            }
-                            Spacer()
-                            Stepper("", value: $vm.snoozeUnits,
-                                    in: alarm.type.snoozeRange,
-                                    step: alarm.type.snoozeStep)
-                                .labelsHidden()
-                        }
-                        .padding(.horizontal, 24)
-                    }
-
-                    Button(action: vm.snoozeTapped) {
-                        Text(vm.snoozeUnits == 0 ? "Acknowledge" : "Snooze")
-                            .font(.system(size: 30, weight: .bold))
-                            .frame(maxWidth: .infinity, minHeight: 60)
-                            .background(Color.orange)
-                            .foregroundColor(.white)
-                            .clipShape(Capsule())
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 20)
-                }
-                .background(.ultraThinMaterial)
-                .cornerRadius(20, corners: [.topLeft, .topRight])
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .animation(.spring(), value: vm.activeAlarm != nil)
-            } else {
+            if snoozerEmoji.value {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     VStack(spacing: 4) {
-                        if snoozerEmoji.value {
-                            Text(bgEmoji)
-                                .font(.system(size: 128))
-                                .minimumScaleFactor(0.5)
-                        }
+                        Text(bgEmoji)
+                            .font(.system(size: 128))
+                            .minimumScaleFactor(0.5)
 
                         Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
                             .font(.system(size: 70))
@@ -229,8 +238,18 @@ struct SnoozerView: View {
                             .frame(height: 78)
                     }
                 }
-                Spacer()
+            } else {
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    VStack(spacing: 4) {
+                        Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
+                            .font(.system(size: 70))
+                            .minimumScaleFactor(0.5)
+                            .foregroundColor(.white)
+                            .frame(height: 78)
+                    }
+                }
             }
+            Spacer()
         }
     }
 
@@ -471,10 +490,12 @@ struct SnoozerView: View {
 
     private func scheduleAutoHide() {
         cancelAutoHide()
-        if isGlobalSnoozeActive || vm.activeAlarm != nil { return }
+        // Always schedule the task - it will check conditions when it executes
+        // This ensures auto-hide works even if conditions change between scheduling and execution
         let task = DispatchWorkItem {
-            if !isGlobalSnoozeActive && vm.activeAlarm == nil {
-                withAnimation { showSnoozerBar = false }
+            // Only hide if neither global snooze nor active alarm exists
+            if !self.isGlobalSnoozeActive && self.vm.activeAlarm == nil {
+                withAnimation { self.showSnoozerBar = false }
             }
         }
         autoHideTask = task
