@@ -74,8 +74,11 @@ struct SnoozerView: View {
                     if alarm != nil {
                         showSnoozerBar = true
                         cancelAutoHide()
-                    } else if !isGlobalSnoozeActive {
-                        scheduleAutoHide()
+                    } else {
+                        // When alarm is dismissed, schedule auto-hide if no global snooze is active
+                        if !isGlobalSnoozeActive {
+                            scheduleAutoHide()
+                        }
                     }
                 }
                 .onChange(of: isGlobalSnoozeActive) { active in
@@ -487,10 +490,12 @@ struct SnoozerView: View {
 
     private func scheduleAutoHide() {
         cancelAutoHide()
-        if isGlobalSnoozeActive || vm.activeAlarm != nil { return }
+        // Always schedule the task - it will check conditions when it executes
+        // This ensures auto-hide works even if conditions change between scheduling and execution
         let task = DispatchWorkItem {
-            if !isGlobalSnoozeActive && vm.activeAlarm == nil {
-                withAnimation { showSnoozerBar = false }
+            // Only hide if neither global snooze nor active alarm exists
+            if !self.isGlobalSnoozeActive && self.vm.activeAlarm == nil {
+                withAnimation { self.showSnoozerBar = false }
             }
         }
         autoHideTask = task
