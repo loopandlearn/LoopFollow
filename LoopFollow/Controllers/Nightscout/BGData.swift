@@ -261,6 +261,9 @@ extension MainViewController {
                 Observable.shared.deltaText.value = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
 
+            // Mark BG data as loaded for initial loading state
+            self.markDataLoaded("bg")
+
             // Update contact
             if Storage.shared.contactEnabled.value {
                 self.contactImageUpdater

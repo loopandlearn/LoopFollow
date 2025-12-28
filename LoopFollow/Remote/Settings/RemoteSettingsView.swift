@@ -1,12 +1,15 @@
 // LoopFollow
 // RemoteSettingsView.swift
 
+import AVFoundation
 import HealthKit
 import SwiftUI
+import UIKit
 
 struct RemoteSettingsView: View {
     @ObservedObject var viewModel: RemoteSettingsViewModel
     @ObservedObject private var device = Storage.shared.device
+    @ObservedObject var bolusIncrement = Storage.shared.bolusIncrement
 
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
@@ -18,7 +21,6 @@ struct RemoteSettingsView: View {
 
     enum AlertType {
         case validation
-        case qrCodeError
         case urlTokenValidation
         case urlTokenUpdate
     }
@@ -61,34 +63,21 @@ struct RemoteSettingsView: View {
                     .foregroundColor(.secondary)
             }
 
-            // MARK: - QR Code Sharing Section
+            // MARK: - Import/Export Settings Section
 
             Section {
-                if viewModel.remoteType == .none {
-                    Button(action: {
-                        viewModel.isShowingQRCodeScanner = true
-                    }) {
-                        HStack {
-                            Image(systemName: "qrcode.viewfinder")
-                            Text("Import Remote Settings from QR Code")
-                        }
+                NavigationLink(destination: ImportExportSettingsView()) {
+                    HStack {
+                        Image(systemName: "square.and.arrow.down")
+                            .foregroundColor(.blue)
+                        Text("Import/Export Settings")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                } else {
-                    Button(action: {
-                        viewModel.isShowingQRCodeDisplay = true
-                    }) {
-                        HStack {
-                            Image(systemName: "qrcode")
-                            Text("Export Remote Settings as QR Code")
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
                 }
+                .buttonStyle(.plain)
             }
 
             // MARK: - Meal Section (for TRC only)
@@ -107,6 +96,29 @@ struct RemoteSettingsView: View {
 
             if viewModel.remoteType == .trc || viewModel.remoteType == .loopAPNS {
                 guardrailsSection
+            }
+
+            if !Storage.shared.bolusIncrementDetected.value {
+                Section(header: Text("Bolus Increment")) {
+                    HStack {
+                        Text("Increment")
+                        Spacer()
+                        TextFieldWithToolBar(
+                            quantity: $bolusIncrement.value,
+                            maxLength: 5,
+                            unit: HKUnit.internationalUnit(),
+                            allowDecimalSeparator: true,
+                            minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.001),
+                            maxValue: HKQuantity(unit: .internationalUnit(), doubleValue: 1),
+                            onValidationError: { message in
+                                handleValidationError(message)
+                            }
+                        )
+                        .frame(width: 100)
+                        Text("U")
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
 
             // MARK: - User Information Section
@@ -160,9 +172,12 @@ struct RemoteSettingsView: View {
 
                 Section(header: Text("Debug / Info")) {
                     Text("Device Token: \(Storage.shared.deviceToken.value)")
-                    Text("Production Env.: \(Storage.shared.productionEnvironment.value ? "True" : "False")")
+                    Text("APNS Environment: \(Storage.shared.productionEnvironment.value ? "Production" : "Development")")
                     Text("Team ID: \(Storage.shared.teamId.value ?? "")")
                     Text("Bundle ID: \(Storage.shared.bundleId.value)")
+                    if Storage.shared.bolusIncrementDetected.value {
+                        Text("Bolus Increment: \(Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()), specifier: "%.3f") U")
+                    }
                 }
             }
 
@@ -260,6 +275,9 @@ struct RemoteSettingsView: View {
                         Text("TOTP Code: Invalid QR code URL")
                             .foregroundColor(.red)
                     }
+                    if Storage.shared.bolusIncrementDetected.value {
+                        Text("Bolus Increment: \(Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()), specifier: "%.3f") U")
+                    }
                 }
 
                 if viewModel.areTeamIdsDifferent {
@@ -294,12 +312,6 @@ struct RemoteSettingsView: View {
                     message: Text(alertMessage ?? "Invalid input."),
                     dismissButton: .default(Text("OK"))
                 )
-            case .qrCodeError:
-                return Alert(
-                    title: Text("QR Code Error"),
-                    message: Text(alertMessage ?? "An error occurred while processing the QR code."),
-                    dismissButton: .default(Text("OK"))
-                )
             case .urlTokenValidation:
                 return Alert(
                     title: Text("URL/Token Validation"),
@@ -323,30 +335,6 @@ struct RemoteSettingsView: View {
         .sheet(isPresented: $viewModel.isShowingLoopAPNSScanner) {
             SimpleQRCodeScannerView { result in
                 viewModel.handleLoopAPNSQRCodeScanResult(result)
-            }
-        }
-        .sheet(isPresented: $viewModel.isShowingQRCodeScanner) {
-            SimpleQRCodeScannerView { result in
-                viewModel.handleRemoteCommandQRCodeScanResult(result)
-            }
-        }
-        .sheet(isPresented: $viewModel.isShowingQRCodeDisplay) {
-            NavigationView {
-                VStack {
-                    if let qrCodeString = viewModel.generateQRCodeForCurrentSettings() {
-                        QRCodeDisplayView(qrCodeString: qrCodeString)
-                            .padding()
-                    } else {
-                        Text("Failed to generate QR code")
-                            .foregroundColor(.red)
-                            .padding()
-                    }
-                }
-                .navigationTitle("Share Remote Settings")
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationBarItems(trailing: Button("Done") {
-                    viewModel.isShowingQRCodeDisplay = false
-                })
             }
         }
         .sheet(isPresented: $viewModel.showURLTokenValidation) {
@@ -379,15 +367,6 @@ struct RemoteSettingsView: View {
         .onReceive(otpTimer) { _ in
             let now = Date().timeIntervalSince1970
             otpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
-        }
-        .onReceive(viewModel.$qrCodeErrorMessage) { errorMessage in
-            if let errorMessage = errorMessage, !errorMessage.isEmpty {
-                handleQRCodeError(errorMessage)
-                // Clear the error message after showing the alert
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    viewModel.qrCodeErrorMessage = nil
-                }
-            }
         }
         .onReceive(viewModel.$showURLTokenValidation) { showValidation in
             if showValidation {
@@ -426,14 +405,6 @@ struct RemoteSettingsView: View {
     private func handleValidationError(_ message: String) {
         alertMessage = message
         alertType = .validation
-        showAlert = true
-    }
-
-    // MARK: - QR Code Error Handler
-
-    private func handleQRCodeError(_ message: String) {
-        alertMessage = message
-        alertType = .qrCodeError
         showAlert = true
     }
 
