@@ -18,7 +18,7 @@ extension HKUnit {
         case .millimolesPerLiter:
             return 1
         case .internationalUnit():
-            return 3
+            return InsulinPrecisionManager.shared.fractionDigits
         default:
             return 0
         }

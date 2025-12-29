@@ -24,6 +24,9 @@ extension MainViewController {
         profileManager.loadProfile(from: profileData)
         infoManager.updateInfoData(type: .profile, value: profileData.defaultProfile)
 
+        // Mark profile data as loaded for initial loading state
+        markDataLoaded("profile")
+
         basalProfile.removeAll()
         for basalEntry in store.basal {
             let entry = basalProfileStruct(value: basalEntry.value, time: basalEntry.time, timeAsSeconds: basalEntry.timeAsSeconds)
