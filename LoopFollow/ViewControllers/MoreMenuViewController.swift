@@ -12,15 +12,23 @@ class MoreMenuViewController: UIViewController {
     struct MenuItem {
         let title: String
         let icon: String
+        let subtitle: String?
         let action: () -> Void
+
+        init(title: String, icon: String, subtitle: String? = nil, action: @escaping () -> Void) {
+            self.title = title
+            self.icon = icon
+            self.subtitle = subtitle
+            self.action = action
+        }
     }
 
-    private var menuItems: [MenuItem] = []
+    private var menuSections: [[MenuItem]] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "More"
+        title = "Menu"
         view.backgroundColor = .systemBackground
 
         // Apply appearance mode
@@ -81,46 +89,61 @@ class MoreMenuViewController: UIViewController {
     }
 
     private func updateMenuItems() {
-        menuItems = []
+        menuSections = []
 
-        // Always add Settings
-        menuItems.append(MenuItem(
-            title: "Settings",
-            icon: "gear",
-            action: { [weak self] in
-                self?.openSettings()
+        // Section 0: Settings (always fixed at top)
+        let settingsSection = [
+            MenuItem(
+                title: "Settings",
+                icon: "gear",
+                action: { [weak self] in
+                    self?.openSettings()
+                }
+            ),
+        ]
+        menuSections.append(settingsSection)
+
+        let itemsInMenu = Storage.shared.itemsInMenu()
+
+        if !itemsInMenu.isEmpty {
+            var dynamicSection: [MenuItem] = []
+            for item in itemsInMenu {
+                dynamicSection.append(MenuItem(
+                    title: item.displayName,
+                    icon: item.icon,
+                    action: { [weak self] in
+                        self?.openItem(item)
+                    }
+                ))
             }
-        ))
-
-        // Add items based on their positions
-        if Storage.shared.alarmsPosition.value == .more {
-            menuItems.append(MenuItem(
-                title: "Alarms",
-                icon: "alarm",
-                action: { [weak self] in
-                    self?.openAlarms()
-                }
-            ))
+            menuSections.append(dynamicSection)
         }
 
-        if Storage.shared.remotePosition.value == .more {
-            menuItems.append(MenuItem(
-                title: "Remote",
-                icon: "antenna.radiowaves.left.and.right",
+        // Section: Community
+        let communitySection = [
+            MenuItem(
+                title: "LoopFollow Facebook Group",
+                icon: "person.2.fill",
                 action: { [weak self] in
-                    self?.openRemote()
+                    self?.openFacebookGroup()
                 }
-            ))
-        }
+            ),
+        ]
+        menuSections.append(communitySection)
+    }
 
-        if Storage.shared.nightscoutPosition.value == .more {
-            menuItems.append(MenuItem(
-                title: "Nightscout",
-                icon: "safari",
-                action: { [weak self] in
-                    self?.openNightscout()
-                }
-            ))
+    private func openItem(_ item: TabItem) {
+        switch item {
+        case .home:
+            openHome()
+        case .alarms:
+            openAlarmsConfig()
+        case .remote:
+            openRemote()
+        case .nightscout:
+            openNightscout()
+        case .snoozer:
+            openSnoozer()
         }
     }
 
@@ -133,20 +156,19 @@ class MoreMenuViewController: UIViewController {
         settingsVC.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
 
-        // Add a close button
         settingsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
-            action: #selector(dismissModal)
+            action: #selector(dismissSettingsModal)
         )
 
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
     }
 
-    private func openAlarms() {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let alarmsVC = storyboard.instantiateViewController(withIdentifier: "AlarmViewController")
+    private func openAlarmsConfig() {
+        let alarmsVC = UIHostingController(rootView: AlarmsContainerView())
+        alarmsVC.title = "Alarms"
         let navController = UINavigationController(rootViewController: alarmsVC)
 
         // Apply appearance mode
@@ -154,7 +176,6 @@ class MoreMenuViewController: UIViewController {
         alarmsVC.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
 
-        // Add a close button
         alarmsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
@@ -175,7 +196,6 @@ class MoreMenuViewController: UIViewController {
         remoteVC.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
 
-        // Add a close button
         remoteVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
@@ -196,7 +216,6 @@ class MoreMenuViewController: UIViewController {
         nightscoutVC.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
 
-        // Add a close button
         nightscoutVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
@@ -207,23 +226,91 @@ class MoreMenuViewController: UIViewController {
         present(navController, animated: true)
     }
 
+    private func openSnoozer() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let snoozerVC = storyboard.instantiateViewController(withIdentifier: "SnoozerViewController")
+        let navController = UINavigationController(rootViewController: snoozerVC)
+
+        if Storage.shared.forceDarkMode.value {
+            snoozerVC.overrideUserInterfaceStyle = .dark
+            navController.overrideUserInterfaceStyle = .dark
+        }
+
+        snoozerVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
+    }
+
+    private func openHome() {
+        // First check if Home is in the tab bar
+        if let tabVC = tabBarController {
+            for (index, vc) in (tabVC.viewControllers ?? []).enumerated() {
+                if vc is MainViewController {
+                    // Home is in the tab bar, switch to it
+                    tabVC.selectedIndex = index
+                    return
+                }
+            }
+        }
+
+        // Home is in the menu - present the full Home screen as a modal
+        let homeModalView = HomeModalView()
+        let hostingController = UIHostingController(rootView: homeModalView)
+
+        if Storage.shared.forceDarkMode.value {
+            hostingController.overrideUserInterfaceStyle = .dark
+        }
+
+        hostingController.modalPresentationStyle = .fullScreen
+        present(hostingController, animated: true)
+    }
+
+    private func openFacebookGroup() {
+        if let url = URL(string: "https://www.facebook.com/groups/loopfollowlnl") {
+            UIApplication.shared.open(url)
+        }
+    }
+
+    @objc private func dismissSettingsModal() {
+        dismiss(animated: true) {
+            // Rebuild tabs after settings is dismissed to apply any tab order changes
+            MainViewController.rebuildTabsIfNeeded()
+        }
+    }
+
     @objc private func dismissModal() {
         dismiss(animated: true)
     }
 }
 
 extension MoreMenuViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        return menuItems.count
+    func numberOfSections(in _: UITableView) -> Int {
+        return menuSections.count
+    }
+
+    func tableView(_: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return menuSections[section].count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        let item = menuItems[indexPath.row]
+        let item = menuSections[indexPath.section][indexPath.row]
 
         var config = cell.defaultContentConfiguration()
         config.text = item.title
         config.image = UIImage(systemName: item.icon)
+
+        if let subtitle = item.subtitle {
+            config.secondaryText = subtitle
+            config.secondaryTextProperties.color = .orange
+            config.secondaryTextProperties.font = .preferredFont(forTextStyle: .caption1)
+        }
+
         cell.contentConfiguration = config
         cell.accessoryType = .disclosureIndicator
 
@@ -232,6 +319,6 @@ extension MoreMenuViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        menuItems[indexPath.row].action()
+        menuSections[indexPath.section][indexPath.row].action()
     }
 }
