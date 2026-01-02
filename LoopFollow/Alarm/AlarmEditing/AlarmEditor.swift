@@ -77,6 +77,7 @@ struct AlarmEditor: View {
         case .sensorChange: SensorAgeAlarmEditor(alarm: $alarm)
         case .pumpChange: PumpChangeAlarmEditor(alarm: $alarm)
         case .pump: PumpVolumeAlarmEditor(alarm: $alarm)
+        case .pumpBattery: BatteryAlarmEditor(alarm: $alarm)
         case .iob: IOBAlarmEditor(alarm: $alarm)
         case .battery: BatteryAlarmEditor(alarm: $alarm)
         case .batteryDrop: BatteryDropAlarmEditor(alarm: $alarm)

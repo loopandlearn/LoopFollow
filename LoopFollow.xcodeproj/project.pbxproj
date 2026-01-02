@@ -197,6 +197,7 @@
 		DDC7E5472DBD8A1600EB1127 /* AlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5402DBD8A1600EB1127 /* AlarmEditor.swift */; };
 		DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC7E5CE2DC77C2000EB1127 /* SnoozerViewModel.swift */; };
 		DDCC3A4B2DDBB5E4006F1C10 /* BatteryCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A4A2DDBB5E4006F1C10 /* BatteryCondition.swift */; };
+		DDCC3A502DDED000006F1C10 /* PumpBatteryCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A512DDED000006F1C10 /* PumpBatteryCondition.swift */; };
 		DDCC3A4D2DDBB77C006F1C10 /* BatteryAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A4C2DDBB77C006F1C10 /* BatteryAlarmEditor.swift */; };
 		DDCC3A4F2DDC5B54006F1C10 /* BatteryDropCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A4E2DDC5B54006F1C10 /* BatteryDropCondition.swift */; };
 		DDCC3A542DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC3A532DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift */; };
@@ -597,6 +598,7 @@
 		DDC7E5402DBD8A1600EB1127 /* AlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmEditor.swift; sourceTree = "<group>"; };
 		DDC7E5CE2DC77C2000EB1127 /* SnoozerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozerViewModel.swift; sourceTree = "<group>"; };
 		DDCC3A4A2DDBB5E4006F1C10 /* BatteryCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryCondition.swift; sourceTree = "<group>"; };
+		DDCC3A512DDED000006F1C10 /* PumpBatteryCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpBatteryCondition.swift; sourceTree = "<group>"; };
 		DDCC3A4C2DDBB77C006F1C10 /* BatteryAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryAlarmEditor.swift; sourceTree = "<group>"; };
 		DDCC3A4E2DDC5B54006F1C10 /* BatteryDropCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryDropCondition.swift; sourceTree = "<group>"; };
 		DDCC3A532DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryDropAlarmEditor.swift; sourceTree = "<group>"; };
@@ -886,6 +888,7 @@
 				DDCC3A552DDC9617006F1C10 /* MissedBolusCondition.swift */,
 				DDCC3A4E2DDC5B54006F1C10 /* BatteryDropCondition.swift */,
 				DDCC3A4A2DDBB5E4006F1C10 /* BatteryCondition.swift */,
+				DDCC3A512DDED000006F1C10 /* PumpBatteryCondition.swift */,
 				DDB9FC7A2DDB573F00EFAA76 /* IOBCondition.swift */,
 				DDC6CA482DD8E47A0060EE25 /* PumpVolumeCondition.swift */,
 				DDC6CA442DD8D8E60060EE25 /* PumpChangeCondition.swift */,
@@ -1949,6 +1952,7 @@
 				DDC7E5152DBCFA7900EB1127 /* SnoozerViewController.swift in Sources */,
 				DD7F4C072DD5042F00D449E9 /* OverrideStartAlarmEditor.swift in Sources */,
 				DDCC3A4B2DDBB5E4006F1C10 /* BatteryCondition.swift in Sources */,
+				DDCC3A502DDED000006F1C10 /* PumpBatteryCondition.swift in Sources */,
 				DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */,
 				656F8C142E49F3D20008DC1D /* RemoteCommandSettings.swift in Sources */,
 				DD12D4872E1705E6004E0112 /* AlarmsContainerView.swift in Sources */,
