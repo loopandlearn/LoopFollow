@@ -162,9 +162,14 @@ class Storage {
     var lastLoopingChecked = StorageValue<Date?>(key: "lastLoopingChecked", defaultValue: nil)
     var lastBGChecked = StorageValue<Date?>(key: "lastBGChecked", defaultValue: nil)
 
+    // Tab positions - which position each item is in (positions 1-4 are customizable, 5 is always Menu)
+    var homePosition = StorageValue<TabPosition>(key: "homePosition", defaultValue: .position1)
     var alarmsPosition = StorageValue<TabPosition>(key: "alarmsPosition", defaultValue: .position2)
-    var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .more)
+    var snoozerPosition = StorageValue<TabPosition>(key: "snoozerPosition", defaultValue: .position3)
     var nightscoutPosition = StorageValue<TabPosition>(key: "nightscoutPosition", defaultValue: .position4)
+    var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .menu)
+    var statisticsPosition = StorageValue<TabPosition>(key: "statisticsPosition", defaultValue: .menu)
+    var treatmentsPosition = StorageValue<TabPosition>(key: "treatmentsPosition", defaultValue: .menu)
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 
@@ -176,4 +181,49 @@ class Storage {
 
     static let shared = Storage()
     private init() {}
+
+    // MARK: - Tab Position Helpers
+
+    /// Get the position for a given tab item
+    func position(for item: TabItem) -> TabPosition {
+        switch item {
+        case .home: return homePosition.value
+        case .alarms: return alarmsPosition.value
+        case .remote: return remotePosition.value
+        case .nightscout: return nightscoutPosition.value
+        case .snoozer: return snoozerPosition.value
+        }
+    }
+
+    /// Set the position for a given tab item
+    func setPosition(_ position: TabPosition, for item: TabItem) {
+        switch item {
+        case .home: homePosition.value = position
+        case .alarms: alarmsPosition.value = position
+        case .remote: remotePosition.value = position
+        case .nightscout: nightscoutPosition.value = position
+        case .snoozer: snoozerPosition.value = position
+        }
+    }
+
+    /// Get the tab item at a specific position (nil if no item at that position)
+    func tabItem(at position: TabPosition) -> TabItem? {
+        for item in TabItem.allCases {
+            // Use normalized comparison to handle legacy values (.more, .disabled -> .menu)
+            if self.position(for: item).normalized == position.normalized {
+                return item
+            }
+        }
+        return nil
+    }
+
+    /// Get all items in the Menu (position 5)
+    func itemsInMenu() -> [TabItem] {
+        TabItem.allCases.filter { position(for: $0).normalized == .menu }
+    }
+
+    /// Get items ordered by their position in the tab bar (positions 1-4)
+    func orderedTabBarItems() -> [TabItem] {
+        TabPosition.customizablePositions.compactMap { tabItem(at: $0) }
+    }
 }

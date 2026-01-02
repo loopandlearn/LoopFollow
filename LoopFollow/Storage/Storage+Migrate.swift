@@ -4,14 +4,37 @@
 import Foundation
 
 extension Storage {
+    func migrateStep3() {
+        LogManager.shared.log(category: .general, message: "Running migrateStep3 - this should only happen once!")
+
+        if !TabPosition.customizablePositions.contains(homePosition.value.normalized) {
+            LogManager.shared.log(category: .general, message: "migrateStep3: Setting home to position1 (was \(homePosition.value.rawValue))")
+            homePosition.value = .position1
+        }
+
+        if !TabPosition.customizablePositions.contains(snoozerPosition.value.normalized) {
+            snoozerPosition.value = .position3
+        }
+
+        if alarmsPosition.value == .more {
+            alarmsPosition.value = .menu
+        }
+        if remotePosition.value == .more {
+            remotePosition.value = .menu
+        }
+        if nightscoutPosition.value == .more {
+            nightscoutPosition.value = .menu
+        }
+    }
+
     func migrateStep2() {
         // Migrate from old system to new position-based system
         if remoteType.value != .none {
             remotePosition.value = .position2
-            alarmsPosition.value = .more
+            alarmsPosition.value = .menu
         } else {
             alarmsPosition.value = .position2
-            remotePosition.value = .more
+            remotePosition.value = .menu
         }
         nightscoutPosition.value = .position4
     }
