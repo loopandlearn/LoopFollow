@@ -388,7 +388,7 @@ extension AlarmType {
         case .battery: return "battery.25"
         case .batteryDrop: return "battery.100.bolt"
         case .pump: return "drop"
-        case .pumpBattery: return "battery.25"
+        case .pumpBattery: return "powermeter"
         case .pumpChange: return "arrow.triangle.2.circlepath"
         case .sensorChange: return "sensor.tag.radiowaves.forward"
         case .notLooping: return "circle.slash"
