@@ -45,35 +45,42 @@ class ContactImageUpdater {
                 }
 
                 do {
-                    let predicate = CNContact.predicateForContacts(matchingName: contactName)
                     let keysToFetch = [
                         CNContactIdentifierKey as CNKeyDescriptor,
                         CNContactGivenNameKey as CNKeyDescriptor,
                         CNContactImageDataKey as CNKeyDescriptor
                     ]
                     
-                    let contacts = try self.contactStore.unifiedContacts(matching: predicate, keysToFetch: keysToFetch)
-                    let existingContacts = contacts.filter { $0.givenName == contactName }
+                    var allMatchingContacts: [CNContact] = []
+                    let containers = try self.contactStore.containers(matching: nil)
+                    
+                    for container in containers {
+                        let containerPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
+                        try self.contactStore.enumerateContacts(with: containerPredicate, keysToFetch: keysToFetch) { contact, _ in
+                            if contact.givenName == contactName {
+                                if !allMatchingContacts.contains(where: { $0.identifier == contact.identifier }) {
+                                    allMatchingContacts.append(contact)
+                                }
+                            }
+                            return true
+                        }
+                    }
                     
                     let saveRequest = CNSaveRequest()
                     
-                    if let existingContact = existingContacts.first {
-                        for duplicateContact in existingContacts.dropFirst() {
-                            if let mutableDuplicate = duplicateContact.mutableCopy() as? CNMutableContact {
-                                saveRequest.delete(mutableDuplicate)
-                            }
-                        }
+                    if let existingContact = allMatchingContacts.first {
                         if let mutableContact = existingContact.mutableCopy() as? CNMutableContact {
                             mutableContact.imageData = imageData
                             saveRequest.update(mutableContact)
+                            try self.contactStore.execute(saveRequest)
+                            LogManager.shared.log(category: .contact, message: "Contact image updated successfully for \(contactName).")
                         }
-                        try self.contactStore.execute(saveRequest)
-                        LogManager.shared.log(category: .contact, message: "Contact image updated successfully for \(contactName).")
                     } else {
+                        let defaultContainer = containers.first?.identifier
                         let newContact = CNMutableContact()
                         newContact.givenName = contactName
                         newContact.imageData = imageData
-                        saveRequest.add(newContact, toContainerWithIdentifier: nil)
+                        saveRequest.add(newContact, toContainerWithIdentifier: defaultContainer)
                         try self.contactStore.execute(saveRequest)
                         LogManager.shared.log(category: .contact, message: "New contact created with updated image for \(contactName).")
                     }
