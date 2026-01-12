@@ -54,24 +54,23 @@ class ContactImageUpdater {
                     var allMatchingContacts: [CNContact] = []
                     let containers = try self.contactStore.containers(matching: nil)
 
-                    for container in containers {
-                        let containerPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
-                        let containerContacts = try self.contactStore.unifiedContacts(matching: containerPredicate, keysToFetch: keysToFetch)
-                        let matchingContacts = containerContacts.filter { $0.givenName == contactName }
-                        for contact in matchingContacts {
-                            if !allMatchingContacts.contains(where: { $0.identifier == contact.identifier }) {
-                                allMatchingContacts.append(contact)
-                            }
-                        }
-                    }
-
-                    // Also try the name-based search as a fallback
+                    // Run fast check first
                     let namePredicate = CNContact.predicateForContacts(matchingName: contactName)
                     let nameContacts = try self.contactStore.unifiedContacts(matching: namePredicate, keysToFetch: keysToFetch)
                     let matchingNameContacts = nameContacts.filter { $0.givenName == contactName }
-                    for contact in matchingNameContacts {
-                        if !allMatchingContacts.contains(where: { $0.identifier == contact.identifier }) {
-                            allMatchingContacts.append(contact)
+                    allMatchingContacts.append(contentsOf: matchingNameContacts)
+
+                    // If it fails, make heavy iteration by containers
+                    if allMatchingContacts.isEmpty {
+                        for container in containers {
+                            let containerPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
+                            let containerContacts = try self.contactStore.unifiedContacts(matching: containerPredicate, keysToFetch: keysToFetch)
+                            let matchingContacts = containerContacts.filter { $0.givenName == contactName }
+                            for contact in matchingContacts {
+                                if !allMatchingContacts.contains(where: { $0.identifier == contact.identifier }) {
+                                    allMatchingContacts.append(contact)
+                                }
+                            }
                         }
                     }
 
