@@ -48,26 +48,35 @@ class ContactImageUpdater {
                     let keysToFetch = [
                         CNContactIdentifierKey as CNKeyDescriptor,
                         CNContactGivenNameKey as CNKeyDescriptor,
-                        CNContactImageDataKey as CNKeyDescriptor
+                        CNContactImageDataKey as CNKeyDescriptor,
                     ]
-                    
+
                     var allMatchingContacts: [CNContact] = []
                     let containers = try self.contactStore.containers(matching: nil)
-                    
+
                     for container in containers {
                         let containerPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
-                        try self.contactStore.enumerateContacts(with: containerPredicate, keysToFetch: keysToFetch) { contact, _ in
-                            if contact.givenName == contactName {
-                                if !allMatchingContacts.contains(where: { $0.identifier == contact.identifier }) {
-                                    allMatchingContacts.append(contact)
-                                }
+                        let containerContacts = try self.contactStore.unifiedContacts(matching: containerPredicate, keysToFetch: keysToFetch)
+                        let matchingContacts = containerContacts.filter { $0.givenName == contactName }
+                        for contact in matchingContacts {
+                            if !allMatchingContacts.contains(where: { $0.identifier == contact.identifier }) {
+                                allMatchingContacts.append(contact)
                             }
-                            return true
                         }
                     }
-                    
+
+                    // Also try the name-based search as a fallback
+                    let namePredicate = CNContact.predicateForContacts(matchingName: contactName)
+                    let nameContacts = try self.contactStore.unifiedContacts(matching: namePredicate, keysToFetch: keysToFetch)
+                    let matchingNameContacts = nameContacts.filter { $0.givenName == contactName }
+                    for contact in matchingNameContacts {
+                        if !allMatchingContacts.contains(where: { $0.identifier == contact.identifier }) {
+                            allMatchingContacts.append(contact)
+                        }
+                    }
+
                     let saveRequest = CNSaveRequest()
-                    
+
                     if let existingContact = allMatchingContacts.first {
                         if let mutableContact = existingContact.mutableCopy() as? CNMutableContact {
                             mutableContact.imageData = imageData
