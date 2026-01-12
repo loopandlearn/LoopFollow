@@ -84,7 +84,8 @@ class ContactImageUpdater {
                             LogManager.shared.log(category: .contact, message: "Contact image updated successfully for \(contactName).")
                         }
                     } else {
-                        let defaultContainer = containers.first?.identifier
+                        // Use default container
+                        let defaultContainer = self.contactStore.defaultContainerIdentifier()
                         let newContact = CNMutableContact()
                         newContact.givenName = contactName
                         newContact.imageData = imageData
