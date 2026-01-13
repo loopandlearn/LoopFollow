@@ -44,26 +44,54 @@ class ContactImageUpdater {
                     continue
                 }
 
-                let predicate = CNContact.predicateForContacts(matchingName: contactName)
-                let keysToFetch = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactImageDataKey] as [CNKeyDescriptor]
-
                 do {
-                    let contacts = try self.contactStore.unifiedContacts(matching: predicate, keysToFetch: keysToFetch)
+                    let keysToFetch = [
+                        CNContactIdentifierKey as CNKeyDescriptor,
+                        CNContactGivenNameKey as CNKeyDescriptor,
+                        CNContactImageDataKey as CNKeyDescriptor,
+                    ]
 
-                    if let contact = contacts.first, let mutableContact = contact.mutableCopy() as? CNMutableContact {
-                        mutableContact.imageData = imageData
-                        let saveRequest = CNSaveRequest()
-                        saveRequest.update(mutableContact)
-                        try self.contactStore.execute(saveRequest)
-                        print("Contact image updated successfully for \(contactName).")
+                    var allMatchingContacts: [CNContact] = []
+                    let containers = try self.contactStore.containers(matching: nil)
+
+                    // Run fast check first
+                    let namePredicate = CNContact.predicateForContacts(matchingName: contactName)
+                    let nameContacts = try self.contactStore.unifiedContacts(matching: namePredicate, keysToFetch: keysToFetch)
+                    let matchingNameContacts = nameContacts.filter { $0.givenName == contactName }
+                    allMatchingContacts.append(contentsOf: matchingNameContacts)
+
+                    // If it fails, make heavy iteration by containers
+                    if allMatchingContacts.isEmpty {
+                        for container in containers {
+                            let containerPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
+                            let containerContacts = try self.contactStore.unifiedContacts(matching: containerPredicate, keysToFetch: keysToFetch)
+                            let matchingContacts = containerContacts.filter { $0.givenName == contactName }
+                            for contact in matchingContacts {
+                                if !allMatchingContacts.contains(where: { $0.identifier == contact.identifier }) {
+                                    allMatchingContacts.append(contact)
+                                }
+                            }
+                        }
+                    }
+
+                    let saveRequest = CNSaveRequest()
+
+                    if let existingContact = allMatchingContacts.first {
+                        if let mutableContact = existingContact.mutableCopy() as? CNMutableContact {
+                            mutableContact.imageData = imageData
+                            saveRequest.update(mutableContact)
+                            try self.contactStore.execute(saveRequest)
+                            LogManager.shared.log(category: .contact, message: "Contact image updated successfully for \(contactName).")
+                        }
                     } else {
+                        // Use default container
+                        let defaultContainer = self.contactStore.defaultContainerIdentifier()
                         let newContact = CNMutableContact()
                         newContact.givenName = contactName
                         newContact.imageData = imageData
-                        let saveRequest = CNSaveRequest()
-                        saveRequest.add(newContact, toContainerWithIdentifier: nil)
+                        saveRequest.add(newContact, toContainerWithIdentifier: defaultContainer)
                         try self.contactStore.execute(saveRequest)
-                        print("New contact created with updated image for \(contactName).")
+                        LogManager.shared.log(category: .contact, message: "New contact created with updated image for \(contactName).")
                     }
                 } catch {
                     LogManager.shared.log(category: .contact, message: "Failed to update or create contact for \(contactName): \(error)")
