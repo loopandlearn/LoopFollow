@@ -125,6 +125,7 @@ platform :ios do
     end
 
     configure_bundle_id("LoopFollow", "com.#{TEAMID}.LoopFollow", [
+      Spaceship::ConnectAPI::BundleIdCapability::Type::PUSH_NOTIFICATIONS
     ])
     
   end
