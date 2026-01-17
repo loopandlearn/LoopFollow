@@ -16,7 +16,7 @@
 		656F8C102E49F36F0008DC1D /* QRCodeDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */; };
 		656F8C122E49F3780008DC1D /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */; };
 		656F8C142E49F3D20008DC1D /* RemoteCommandSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */; };
-		65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */; };
+		657F99E92F0BC81500F732BD /* OTPSecureMessenger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657F99E82F0BC81500F732BD /* OTPSecureMessenger.swift */; };
 		6584B1012E4A263900135D4D /* TOTPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6584B1002E4A263900135D4D /* TOTPService.swift */; };
 		65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
@@ -408,7 +408,7 @@
 		656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeDisplayView.swift; sourceTree = "<group>"; };
 		656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommandSettings.swift; sourceTree = "<group>"; };
-		65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTokenValidationView.swift; sourceTree = "<group>"; };
+		657F99E82F0BC81500F732BD /* OTPSecureMessenger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPSecureMessenger.swift; sourceTree = "<group>"; };
 		6584B1002E4A263900135D4D /* TOTPService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPService.swift; sourceTree = "<group>"; };
 		65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonHandler.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1212,6 +1212,7 @@
 		DDEF503E2D479B8A00884336 /* LoopAPNS */ = {
 			isa = PBXGroup;
 			children = (
+				657F99E82F0BC81500F732BD /* OTPSecureMessenger.swift */,
 				6584B1002E4A263900135D4D /* TOTPService.swift */,
 				DDEF503F2D479B8A00884336 /* LoopAPNSService.swift */,
 				DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */,
@@ -2066,6 +2067,7 @@
 				DD5DA27C2DC930D6003D44FC /* GlucoseValue.swift in Sources */,
 				DD9ACA062D32AF7900415D8A /* TreatmentsTask.swift in Sources */,
 				DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */,
+				657F99E92F0BC81500F732BD /* OTPSecureMessenger.swift in Sources */,
 				DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */,
 				DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */,
 				DD83164C2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift in Sources */,
