@@ -33,9 +33,23 @@ struct DexcomSettingsView: View {
                     }
                     .pickerStyle(SegmentedPickerStyle())
                 }
+
+                importSection
             }
         }
         .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
         .navigationBarTitle("Dexcom Settings", displayMode: .inline)
+    }
+
+    private var importSection: some View {
+        Section(header: Text("Import Settings")) {
+            NavigationLink(destination: ImportExportSettingsView()) {
+                HStack {
+                    Image(systemName: "square.and.arrow.down")
+                        .foregroundColor(.blue)
+                    Text("Import Settings from QR Code")
+                }
+            }
+        }
     }
 }
