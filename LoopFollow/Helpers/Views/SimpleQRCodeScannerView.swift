@@ -16,11 +16,10 @@ struct SimpleQRCodeScannerView: UIViewControllerRepresentable {
 
         let navController = UINavigationController(rootViewController: scannerVC)
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            scannerVC.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        scannerVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         return navController
     }
