@@ -51,9 +51,10 @@ extension MainViewController {
         }
 
         var parameters: [String: String] = [:]
+        let utcISODateFormatter = ISO8601DateFormatter()
         let date = Calendar.current.date(byAdding: .day, value: -1 * Storage.shared.downloadDays.value, to: Date())!
         parameters["count"] = "\(Storage.shared.downloadDays.value * 2 * 24 * 60 / 5)"
-        parameters["find[date][$gte]"] = "\(Int(date.timeIntervalSince1970 * 1000))"
+        parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: date)
 
         // Exclude 'cal' entries
         parameters["find[type][$ne]"] = "cal"
