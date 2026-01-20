@@ -59,7 +59,8 @@ extension Storage {
 
         let legacyForceDarkMode = UserDefaultsValue<Bool>(key: "forceDarkMode", default: true)
         if legacyForceDarkMode.exists {
-            Storage.shared.forceDarkMode.value = legacyForceDarkMode.value
+            // Migrate from Bool to AppearanceMode: true -> .dark, false -> .system
+            Storage.shared.appearanceMode.value = legacyForceDarkMode.value ? .dark : .system
             legacyForceDarkMode.setNil(key: "forceDarkMode")
         }
 
@@ -152,7 +153,7 @@ extension Storage {
         // ── General (done earlier, but safe to repeat) ──
         move(UserDefaultsValue<Bool>(key: "colorBGText", default: true), into: Storage.shared.colorBGText)
         move(UserDefaultsValue<Bool>(key: "appBadge", default: true), into: appBadge)
-        move(UserDefaultsValue<Bool>(key: "forceDarkMode", default: false), into: forceDarkMode)
+        // Note: forceDarkMode migration to appearanceMode is handled earlier in migrateGeneralSettings()
         move(UserDefaultsValue<Bool>(key: "showStats", default: true), into: showStats)
         move(UserDefaultsValue<Bool>(key: "useIFCC", default: false), into: useIFCC)
         move(UserDefaultsValue<Bool>(key: "showSmallGraph", default: true), into: showSmallGraph)
