@@ -87,6 +87,7 @@ extension Storage {
 
         let legacyForceDarkMode = UserDefaultsValue<Bool>(key: "forceDarkMode", default: true)
         if legacyForceDarkMode.exists {
+            // Migrate from Bool to AppearanceMode: true -> .dark, false -> .system
             Storage.shared.appearanceMode.value = legacyForceDarkMode.value ? .dark : .system
             legacyForceDarkMode.setNil(key: "forceDarkMode")
         }
