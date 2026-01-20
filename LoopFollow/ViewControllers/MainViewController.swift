@@ -465,7 +465,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         loadingOverlay = overlay
 
         // Set a timeout to hide the loading overlay if data takes too long
-        loadingTimeoutTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: false) { [weak self] _ in
+        loadingTimeoutTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: false) { [weak self] _ in
             guard let self = self else { return }
             if self.isInitialLoad {
                 LogManager.shared.log(category: .general, message: "Loading timeout reached, hiding overlay")
