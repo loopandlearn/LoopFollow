@@ -119,5 +119,7 @@ struct GeneralSettingsView: View {
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("General Settings", displayMode: .inline)
+        .settingsStyle(title: "General Settings")
+
     }
 }

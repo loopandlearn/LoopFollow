@@ -66,7 +66,7 @@ struct ImportExportSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Import/Export Settings")
+        .settingsStyle(title: "Import/Export Settings")
         .sheet(isPresented: $viewModel.isShowingQRCodeScanner) {
             SimpleQRCodeScannerView { result in
                 viewModel.handleQRCodeScanResult(result)

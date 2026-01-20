@@ -23,3 +23,25 @@ struct NavigationRow: View {
         .buttonStyle(.plain)
     }
 }
+
+// MARK: - Settings View Modifier
+
+struct SettingsStyleModifier: ViewModifier {
+    let title: String
+
+    func body(content: Content) -> some View {
+        content
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+    }
+}
+
+extension View {
+    /// Applies standard styling for settings views:
+    /// - Sets the navigation title with inline display mode
+    /// - Applies dark mode preference if enabled in settings
+    func settingsStyle(title: String) -> some View {
+        modifier(SettingsStyleModifier(title: title))
+    }
+}
