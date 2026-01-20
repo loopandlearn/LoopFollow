@@ -27,7 +27,7 @@ struct BackgroundRefreshSettingsView: View {
                 stopTimer()
             }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Background Refresh Settings", displayMode: .inline)
     }
 

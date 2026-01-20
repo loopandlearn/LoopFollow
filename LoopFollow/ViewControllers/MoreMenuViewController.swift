@@ -1,11 +1,13 @@
 // LoopFollow
 // MoreMenuViewController.swift
 
+import Combine
 import SwiftUI
 import UIKit
 
 class MoreMenuViewController: UIViewController {
     private var tableView: UITableView!
+    private var cancellables = Set<AnyCancellable>()
 
     struct MenuItem {
         let title: String
@@ -21,10 +23,24 @@ class MoreMenuViewController: UIViewController {
         title = "More"
         view.backgroundColor = .systemBackground
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+
+        // Listen for appearance setting changes
+        Storage.shared.appearanceMode.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] mode in
+                self?.overrideUserInterfaceStyle = mode.userInterfaceStyle
+            }
+            .store(in: &cancellables)
+
+        // Listen for system appearance changes (when in System mode)
+        NotificationCenter.default.publisher(for: .appearanceDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+            }
+            .store(in: &cancellables)
 
         setupTableView()
         updateMenuItems()
@@ -35,6 +51,16 @@ class MoreMenuViewController: UIViewController {
         updateMenuItems()
         tableView.reloadData()
         Observable.shared.settingsPath.set(NavigationPath())
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if Storage.shared.appearanceMode.value == .system,
+           previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle
+        {
+            overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        }
     }
 
     private func setupTableView() {
@@ -102,11 +128,10 @@ class MoreMenuViewController: UIViewController {
         let settingsVC = UIHostingController(rootView: SettingsMenuView())
         let navController = UINavigationController(rootViewController: settingsVC)
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            settingsVC.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        settingsVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         // Add a close button
         settingsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -124,11 +149,10 @@ class MoreMenuViewController: UIViewController {
         let alarmsVC = storyboard.instantiateViewController(withIdentifier: "AlarmViewController")
         let navController = UINavigationController(rootViewController: alarmsVC)
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            alarmsVC.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        alarmsVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         // Add a close button
         alarmsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -146,11 +170,10 @@ class MoreMenuViewController: UIViewController {
         let remoteVC = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
         let navController = UINavigationController(rootViewController: remoteVC)
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            remoteVC.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        remoteVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         // Add a close button
         remoteVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -168,11 +191,10 @@ class MoreMenuViewController: UIViewController {
         let nightscoutVC = storyboard.instantiateViewController(withIdentifier: "NightscoutViewController")
         let navController = UINavigationController(rootViewController: nightscoutVC)
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            nightscoutVC.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        nightscoutVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         // Add a close button
         nightscoutVC.navigationItem.rightBarButtonItem = UIBarButtonItem(

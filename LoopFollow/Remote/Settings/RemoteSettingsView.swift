@@ -373,7 +373,7 @@ struct RemoteSettingsView: View {
                 // The sheet will be shown automatically due to the binding
             }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationTitle("Remote Settings")
         .navigationBarTitleDisplayMode(.inline)
     }

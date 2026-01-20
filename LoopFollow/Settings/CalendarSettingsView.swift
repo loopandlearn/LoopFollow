@@ -74,7 +74,7 @@ struct CalendarSettingsView: View {
                 await requestCalendarAccessAndLoad()
             }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Calendar", displayMode: .inline)
     }
 

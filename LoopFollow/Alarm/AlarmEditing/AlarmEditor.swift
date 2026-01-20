@@ -41,7 +41,7 @@ struct AlarmEditor: View {
                 }
                 .navigationTitle(alarm.type.rawValue)
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 
     @ViewBuilder

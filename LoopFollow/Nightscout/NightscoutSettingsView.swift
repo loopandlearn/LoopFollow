@@ -18,7 +18,7 @@ struct NightscoutSettingsView: View {
                 viewModel.dismiss()
             }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Nightscout Settings", displayMode: .inline)
     }
 

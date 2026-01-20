@@ -1,6 +1,7 @@
 // LoopFollow
 // SettingsViewController.swift
 
+import Combine
 import SwiftUI
 import UIKit
 
@@ -8,6 +9,7 @@ final class SettingsViewController: UIViewController {
     // MARK: Stored properties
 
     private var host: UIHostingController<SettingsMenuView>!
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: Life-cycle
 
@@ -17,10 +19,24 @@ final class SettingsViewController: UIViewController {
         // Build SwiftUI menu
         host = UIHostingController(rootView: SettingsMenuView())
 
-        // Dark-mode override
-        if Storage.shared.forceDarkMode.value {
-            host.overrideUserInterfaceStyle = .dark
-        }
+        // Appearance mode override
+        host.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+
+        // Listen for appearance setting changes
+        Storage.shared.appearanceMode.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] mode in
+                self?.updateAppearance(mode)
+            }
+            .store(in: &cancellables)
+
+        // Listen for system appearance changes (when in System mode)
+        NotificationCenter.default.publisher(for: .appearanceDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateAppearance(Storage.shared.appearanceMode.value)
+            }
+            .store(in: &cancellables)
 
         // Embed
         addChild(host)
@@ -39,5 +55,19 @@ final class SettingsViewController: UIViewController {
         super.viewWillAppear(animated)
 
         Observable.shared.settingsPath.set(NavigationPath())
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if Storage.shared.appearanceMode.value == .system,
+           previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle
+        {
+            updateAppearance(.system)
+        }
+    }
+
+    private func updateAppearance(_ mode: AppearanceMode) {
+        host.overrideUserInterfaceStyle = mode.userInterfaceStyle
     }
 }

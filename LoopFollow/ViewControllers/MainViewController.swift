@@ -173,10 +173,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         BGChart.delegate = self
         BGChartFull.delegate = self
 
-        if Storage.shared.forceDarkMode.value {
-            overrideUserInterfaceStyle = .dark
-            tabBarController?.overrideUserInterfaceStyle = .dark
-        }
+        // Apply initial appearance mode
+        updateAppearance(Storage.shared.appearanceMode.value)
 
         // Trigger foreground and background functions
         let notificationCenter = NotificationCenter.default
@@ -253,6 +251,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.setBGTextColor()
+            }
+            .store(in: &cancellables)
+
+        // Update appearance when setting changes
+        Storage.shared.appearanceMode.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] mode in
+                self?.updateAppearance(mode)
             }
             .store(in: &cancellables)
 
@@ -895,6 +901,43 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
+    func updateAppearance(_ mode: AppearanceMode) {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first else { return }
+
+        let style: UIUserInterfaceStyle
+        switch mode {
+        case .light:
+            style = .light
+        case .dark:
+            style = .dark
+        case .system:
+            // Use .unspecified to follow system
+            style = .unspecified
+        }
+
+        // Update this view controller
+        overrideUserInterfaceStyle = style
+
+        // Update the tab bar controller (affects all tabs)
+        tabBarController?.overrideUserInterfaceStyle = style
+
+        // Update the window (affects the entire app including modals)
+        window.overrideUserInterfaceStyle = style
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        // When system appearance changes and we're in "System" mode, notify all observers
+        if Storage.shared.appearanceMode.value == .system,
+           previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle
+        {
+            // Post notification so other view controllers can update if needed
+            NotificationCenter.default.post(name: .appearanceDidChange, object: nil)
+        }
+    }
+
     func bgDirectionGraphic(_ value: String) -> String {
         let // graphics:[String:String]=["Flat":"\u{2192}","DoubleUp":"\u{21C8}","SingleUp":"\u{2191}","FortyFiveUp":"\u{2197}\u{FE0E}","FortyFiveDown":"\u{2198}\u{FE0E}","SingleDown":"\u{2193}","DoubleDown":"\u{21CA}","None":"-","NOT COMPUTABLE":"-","RATE OUT OF RANGE":"-"]
             graphics: [String: String] = ["Flat": "→", "DoubleUp": "↑↑", "SingleUp": "↑", "FortyFiveUp": "↗", "FortyFiveDown": "↘︎", "SingleDown": "↓", "DoubleDown": "↓↓", "None": "-", "NONE": "-", "NOT COMPUTABLE": "-", "RATE OUT OF RANGE": "-", "": "-"]
@@ -1183,11 +1226,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let hostingController = UIHostingController(rootView: nightscoutSettingsView)
         let navController = UINavigationController(rootViewController: hostingController)
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            hostingController.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         // Add a Done button
         hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -1205,11 +1247,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let hostingController = UIHostingController(rootView: dexcomSettingsView)
         let navController = UINavigationController(rootViewController: hostingController)
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            hostingController.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         // Add a Done button
         hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(

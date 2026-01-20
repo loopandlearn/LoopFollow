@@ -132,7 +132,7 @@ struct GraphSettingsView: View {
                 }
             }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Graph Settings", displayMode: .inline)
     }
 
