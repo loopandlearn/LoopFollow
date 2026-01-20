@@ -7,17 +7,16 @@ struct NightscoutSettingsView: View {
     @ObservedObject var viewModel: NightscoutSettingsViewModel
 
     var body: some View {
-        NavigationView {
-            Form {
-                urlSection
-                tokenSection
-                statusSection
-                importSection
-            }
-            .onDisappear {
-                viewModel.dismiss()
-            }
+        Form {
+            urlSection
+            tokenSection
+            statusSection
+            importSection
         }
+        .onDisappear {
+            viewModel.dismiss()
+        }
+
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Nightscout Settings", displayMode: .inline)
     }

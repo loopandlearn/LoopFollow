@@ -45,153 +45,151 @@ struct AlarmSettingsView: View {
     }
 
     var body: some View {
-        NavigationView {
-            Form {
-                Section(
-                    header: Text("Snooze & Mute Options"),
-                    footer: Text("""
-                    “Snooze All” disables every alarm. \
-                    “Mute All” silences phone sounds but still vibrates \
-                    and shows iOS notifications.
-                    """)
-                ) {
-                    Toggle("All Alerts Snoozed", isOn: Binding(
-                        get: {
-                            if let until = cfgStore.value.snoozeUntil { return until > Date() }
-                            return false
-                        },
-                        set: { on in
-                            if on {
-                                let target = cfgStore.value.snoozeUntil ?? Date()
-                                if target <= Date() {
-                                    cfgStore.value.snoozeUntil = Date().addingTimeInterval(3600)
-                                }
-                            } else {
-                                cfgStore.value.snoozeUntil = nil
+        Form {
+            Section(
+                header: Text("Snooze & Mute Options"),
+                footer: Text("""
+                “Snooze All” disables every alarm. \
+                “Mute All” silences phone sounds but still vibrates \
+                and shows iOS notifications.
+                """)
+            ) {
+                Toggle("All Alerts Snoozed", isOn: Binding(
+                    get: {
+                        if let until = cfgStore.value.snoozeUntil { return until > Date() }
+                        return false
+                    },
+                    set: { on in
+                        if on {
+                            let target = cfgStore.value.snoozeUntil ?? Date()
+                            if target <= Date() {
+                                cfgStore.value.snoozeUntil = Date().addingTimeInterval(3600)
                             }
+                        } else {
+                            cfgStore.value.snoozeUntil = nil
                         }
-                    ))
-
-                    if let until = cfgStore.value.snoozeUntil, until > Date() {
-                        DatePicker(
-                            "Until",
-                            selection: optDateBinding(
-                                Binding(
-                                    get: { cfgStore.value.snoozeUntil },
-                                    set: { cfgStore.value.snoozeUntil = $0 }
-                                )
-                            ),
-                            displayedComponents: [.date, .hourAndMinute]
-                        )
-                        .datePickerStyle(.compact)
                     }
+                ))
 
-                    Toggle("All Sounds Muted", isOn: Binding(
-                        get: {
-                            if let until = cfgStore.value.muteUntil { return until > Date() }
-                            return false
-                        },
-                        set: { on in
-                            if on {
-                                let target = cfgStore.value.muteUntil ?? Date()
-                                if target <= Date() {
-                                    cfgStore.value.muteUntil = Date().addingTimeInterval(3600)
-                                }
-                            } else {
-                                cfgStore.value.muteUntil = nil
-                            }
-                        }
-                    ))
-
-                    if let until = cfgStore.value.muteUntil, until > Date() {
-                        DatePicker(
-                            "Until",
-                            selection: optDateBinding(
-                                Binding(
-                                    get: { cfgStore.value.muteUntil },
-                                    set: { cfgStore.value.muteUntil = $0 }
-                                )
-                            ),
-                            displayedComponents: [.date, .hourAndMinute]
-                        )
-                        .datePickerStyle(.compact)
-                    }
-                }
-
-                Section(
-                    header: Text("Day / Night Schedule"),
-                    footer: Text("Pick when your day period begins and when your night period begins. " +
-                        "Any time from your Day-starts time up until your Night-starts time will count as day; " +
-                        "from Night-starts until the next Day-starts will count as night.")
-                ) {
+                if let until = cfgStore.value.snoozeUntil, until > Date() {
                     DatePicker(
-                        "Day starts",
-                        selection: dayBinding,
-                        displayedComponents: [.hourAndMinute]
-                    )
-                    .datePickerStyle(.compact)
-
-                    DatePicker(
-                        "Night starts",
-                        selection: nightBinding,
-                        displayedComponents: [.hourAndMinute]
+                        "Until",
+                        selection: optDateBinding(
+                            Binding(
+                                get: { cfgStore.value.snoozeUntil },
+                                set: { cfgStore.value.snoozeUntil = $0 }
+                            )
+                        ),
+                        displayedComponents: [.date, .hourAndMinute]
                     )
                     .datePickerStyle(.compact)
                 }
 
-                Section(header: Text("Alarm Settings")) {
-                    Toggle(
-                        "Override System Volume",
-                        isOn: Binding(
-                            get: { cfgStore.value.overrideSystemOutputVolume },
-                            set: { cfgStore.value.overrideSystemOutputVolume = $0 }
-                        )
-                    )
-
-                    if cfgStore.value.overrideSystemOutputVolume {
-                        Stepper(
-                            "Volume Level: \(Int(cfgStore.value.forcedOutputVolume * 100))%",
-                            value: Binding(
-                                get: { Double(cfgStore.value.forcedOutputVolume) },
-                                set: { cfgStore.value.forcedOutputVolume = Float($0) }
-                            ),
-                            in: 0 ... 1,
-                            step: 0.05
-                        )
+                Toggle("All Sounds Muted", isOn: Binding(
+                    get: {
+                        if let until = cfgStore.value.muteUntil { return until > Date() }
+                        return false
+                    },
+                    set: { on in
+                        if on {
+                            let target = cfgStore.value.muteUntil ?? Date()
+                            if target <= Date() {
+                                cfgStore.value.muteUntil = Date().addingTimeInterval(3600)
+                            }
+                        } else {
+                            cfgStore.value.muteUntil = nil
+                        }
                     }
+                ))
 
-                    Toggle(
-                        "Audio During Calls",
-                        isOn: Binding(
-                            get: { cfgStore.value.audioDuringCalls },
-                            set: { cfgStore.value.audioDuringCalls = $0 }
-                        )
+                if let until = cfgStore.value.muteUntil, until > Date() {
+                    DatePicker(
+                        "Until",
+                        selection: optDateBinding(
+                            Binding(
+                                get: { cfgStore.value.muteUntil },
+                                set: { cfgStore.value.muteUntil = $0 }
+                            )
+                        ),
+                        displayedComponents: [.date, .hourAndMinute]
                     )
+                    .datePickerStyle(.compact)
+                }
+            }
 
-                    Toggle(
-                        "Ignore Zero BG",
-                        isOn: Binding(
-                            get: { cfgStore.value.ignoreZeroBG },
-                            set: { cfgStore.value.ignoreZeroBG = $0 }
-                        )
+            Section(
+                header: Text("Day / Night Schedule"),
+                footer: Text("Pick when your day period begins and when your night period begins. " +
+                    "Any time from your Day-starts time up until your Night-starts time will count as day; " +
+                    "from Night-starts until the next Day-starts will count as night.")
+            ) {
+                DatePicker(
+                    "Day starts",
+                    selection: dayBinding,
+                    displayedComponents: [.hourAndMinute]
+                )
+                .datePickerStyle(.compact)
+
+                DatePicker(
+                    "Night starts",
+                    selection: nightBinding,
+                    displayedComponents: [.hourAndMinute]
+                )
+                .datePickerStyle(.compact)
+            }
+
+            Section(header: Text("Alarm Settings")) {
+                Toggle(
+                    "Override System Volume",
+                    isOn: Binding(
+                        get: { cfgStore.value.overrideSystemOutputVolume },
+                        set: { cfgStore.value.overrideSystemOutputVolume = $0 }
                     )
+                )
 
-                    Toggle(
-                        "Auto‑Snooze CGM Start",
-                        isOn: Binding(
-                            get: { cfgStore.value.autoSnoozeCGMStart },
-                            set: { cfgStore.value.autoSnoozeCGMStart = $0 }
-                        )
-                    )
-
-                    Toggle(
-                        "Volume Buttons Snooze Alarms",
-                        isOn: Binding(
-                            get: { cfgStore.value.enableVolumeButtonSnooze },
-                            set: { cfgStore.value.enableVolumeButtonSnooze = $0 }
-                        )
+                if cfgStore.value.overrideSystemOutputVolume {
+                    Stepper(
+                        "Volume Level: \(Int(cfgStore.value.forcedOutputVolume * 100))%",
+                        value: Binding(
+                            get: { Double(cfgStore.value.forcedOutputVolume) },
+                            set: { cfgStore.value.forcedOutputVolume = Float($0) }
+                        ),
+                        in: 0 ... 1,
+                        step: 0.05
                     )
                 }
+
+                Toggle(
+                    "Audio During Calls",
+                    isOn: Binding(
+                        get: { cfgStore.value.audioDuringCalls },
+                        set: { cfgStore.value.audioDuringCalls = $0 }
+                    )
+                )
+
+                Toggle(
+                    "Ignore Zero BG",
+                    isOn: Binding(
+                        get: { cfgStore.value.ignoreZeroBG },
+                        set: { cfgStore.value.ignoreZeroBG = $0 }
+                    )
+                )
+
+                Toggle(
+                    "Auto‑Snooze CGM Start",
+                    isOn: Binding(
+                        get: { cfgStore.value.autoSnoozeCGMStart },
+                        set: { cfgStore.value.autoSnoozeCGMStart = $0 }
+                    )
+                )
+
+                Toggle(
+                    "Volume Buttons Snooze Alarms",
+                    isOn: Binding(
+                        get: { cfgStore.value.enableVolumeButtonSnooze },
+                        set: { cfgStore.value.enableVolumeButtonSnooze = $0 }
+                    )
+                )
             }
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
