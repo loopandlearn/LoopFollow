@@ -38,38 +38,38 @@ struct BackgroundRefreshSettingsView: View {
                     Text(type.rawValue).tag(type)
                 }
             }
-            .pickerStyle(MenuPickerStyle())
+            .pickerStyle(.menu)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Adjust the background refresh type.")
                     .font(.footnote)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
 
                 switch viewModel.backgroundRefreshType {
                 case .none:
                     Text("No background refresh. Alarms and updates will not work unless the app is open in the foreground.")
                         .font(.footnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
 
                 case .silentTune:
                     Text("A silent tune will play in the background, keeping the app active. May be interrupted by other apps. Allows continuous updates but consumes more battery.")
                         .font(.footnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
 
                 case .rileyLink:
                     Text("Requires a RileyLink-compatible device within Bluetooth range. Provides updates once per minute and uses less battery than the silent tune method.")
                         .font(.footnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
 
                 case .dexcom:
                     Text("Requires a Dexcom G6/ONE/G7/ONE+ transmitter within Bluetooth range. Provides updates every 5 minutes and uses less battery than the silent tune method. If you have more than one device to choose from, select the one with the smallest expected bg delay.")
                         .font(.footnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
 
                 case .omnipodDash:
                     Text("Requires an OmniPod DASH pod paired with this device within Bluetooth range. Provides updates once every 3 minutes and uses less battery than the silent tune method.")
                         .font(.footnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -78,7 +78,7 @@ struct BackgroundRefreshSettingsView: View {
     @ViewBuilder
     private var selectedDeviceSection: some View {
         if let storedDevice = bleManager.getSelectedDevice() {
-            Section(header: Text("Selected Device")) {
+            Section("Selected Device") {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(storedDevice.name ?? "Unknown Device")
                         .font(.headline)
@@ -87,12 +87,12 @@ struct BackgroundRefreshSettingsView: View {
 
                     if storedDevice.rssi != 0 {
                         Text("RSSI: \(storedDevice.rssi) dBm")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .font(.footnote)
                     }
                     if let offset = BLEManager.shared.expectedSensorFetchOffsetString(for: storedDevice) {
                         Text("Expected bg delay: \(offset)")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .font(.footnote)
                     }
 
@@ -102,7 +102,7 @@ struct BackgroundRefreshSettingsView: View {
                             bleManager.disconnect()
                         }) {
                             Text("Disconnect")
-                                .foregroundColor(.blue)
+                                .foregroundStyle(.blue)
                         }
                         .buttonStyle(BorderlessButtonStyle())
                         Spacer()
@@ -125,7 +125,7 @@ struct BackgroundRefreshSettingsView: View {
     }
 
     private var availableDevicesSection: some View {
-        Section(header: scanningStatusHeader) {
+        Section {
             BLEDeviceSelectionView(
                 bleManager: bleManager,
                 selectedFilter: viewModel.backgroundRefreshType,
@@ -133,13 +133,15 @@ struct BackgroundRefreshSettingsView: View {
                     bleManager.connect(device: device)
                 }
             )
+        } header: {
+            scanningStatusHeader
         }
     }
 
     private var scanningStatusHeader: some View {
         Text("Scanning for \(viewModel.backgroundRefreshType.rawValue)...")
             .font(.subheadline)
-            .foregroundColor(.secondary)
+            .foregroundStyle(.secondary)
     }
 
     private func deviceConnectionStatus(for device: BLEDevice) -> some View {
@@ -149,28 +151,28 @@ struct BackgroundRefreshSettingsView: View {
 
         if device.isConnected {
             return Text("Connected")
-                .foregroundColor(.green)
+                .foregroundStyle(.green)
         } else if let lastConnected = device.lastConnected {
             let timeRatio = timeSinceLastConnection / expectedConnectionTime
             let timeString = formattedTimeString(from: timeSinceLastConnection)
 
             if timeRatio < 1.0 {
                 return Text("Disconnected for \(timeString)")
-                    .foregroundColor(.green)
+                    .foregroundStyle(.green)
             } else if timeRatio <= 1.15 {
                 return Text("Disconnected for \(timeString)")
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
             } else if timeRatio <= 3.0 {
                 return Text("Disconnected for \(timeString)")
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
             } else {
                 let date = dateTimeUtils.formattedDate(from: lastConnected)
                 return Text("Last connection: \(date)")
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
             }
         } else {
             return Text("Reconnecting...")
-                .foregroundColor(.orange)
+                .foregroundStyle(.orange)
         }
     }
 

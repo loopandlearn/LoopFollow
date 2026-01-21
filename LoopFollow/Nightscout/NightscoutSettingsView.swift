@@ -23,7 +23,7 @@ struct NightscoutSettingsView: View {
     // MARK: - Subviews / Computed Properties
 
     private var urlSection: some View {
-        Section(header: Text("URL")) {
+        Section("URL") {
             TextField("Enter URL", text: $viewModel.nightscoutURL)
                 .textContentType(.username)
                 .autocapitalization(.none)
@@ -35,7 +35,7 @@ struct NightscoutSettingsView: View {
     }
 
     private var tokenSection: some View {
-        Section(header: Text("Token")) {
+        Section("Token") {
             HStack {
                 Text("Access Token")
                 TogglableSecureInput(
@@ -49,17 +49,17 @@ struct NightscoutSettingsView: View {
     }
 
     private var statusSection: some View {
-        Section(header: Text("Status")) {
+        Section("Status") {
             Text(viewModel.nightscoutStatus)
         }
     }
 
     private var importSection: some View {
-        Section(header: Text("Import Settings")) {
+        Section("Import Settings") {
             NavigationLink(destination: ImportExportSettingsView()) {
                 HStack {
                     Image(systemName: "square.and.arrow.down")
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                     Text("Import Settings from QR Code")
                 }
             }

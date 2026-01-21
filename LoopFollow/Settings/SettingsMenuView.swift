@@ -5,6 +5,15 @@ import SwiftUI
 import UIKit
 
 struct SettingsMenuView: View {
+    // MARK: - Init parameters
+
+    /// When true, shows a close button for modal dismissal
+    var isModal: Bool = false
+
+    // MARK: - Environment
+
+    @Environment(\.dismiss) private var dismiss
+
     // MARK: - Observed Objects
 
     @ObservedObject private var nightscoutURL = Storage.shared.url
@@ -138,6 +147,15 @@ struct SettingsMenuView: View {
             }
             .navigationTitle("Settings")
             .navigationDestination(for: Sheet.self) { $0.destination }
+            .toolbar {
+                if isModal {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Close") {
+                            dismiss()
+                        }
+                    }
+                }
+            }
             .sheet(isPresented: $showingTabCustomization) {
                 TabCustomizationModal(
                     isPresented: $showingTabCustomization,

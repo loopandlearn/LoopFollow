@@ -8,7 +8,7 @@ struct AdvancedSettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("Advanced Settings")) {
+            Section("Advanced Settings") {
                 Toggle("Download Treatments", isOn: $viewModel.downloadTreatments)
                 Toggle("Download Prediction", isOn: $viewModel.downloadPrediction)
                 Toggle("Graph Basal", isOn: $viewModel.graphBasal)
@@ -21,7 +21,7 @@ struct AdvancedSettingsView: View {
                 }
             }
 
-            Section(header: Text("Logging Options")) {
+            Section("Logging Options") {
                 Toggle("Debug Log Level", isOn: $viewModel.debugLogLevel)
             }
         }

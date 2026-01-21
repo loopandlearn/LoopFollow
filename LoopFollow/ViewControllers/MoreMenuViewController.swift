@@ -125,23 +125,17 @@ class MoreMenuViewController: UIViewController {
     }
 
     private func openSettings() {
-        let settingsVC = UIHostingController(rootView: SettingsMenuView())
-        let navController = UINavigationController(rootViewController: settingsVC)
+        let settingsVC = UIHostingController(rootView: SettingsMenuView(isModal: true))
+
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         settingsVC.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
 
-        // Add a close button
-        settingsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
-            target: self,
-            action: #selector(dismissModal)
-        )
 
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        settingsVC.modalPresentationStyle = .fullScreen
+        present(settingsVC, animated: true)
     }
 
     private func openAlarms() {

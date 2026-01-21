@@ -138,7 +138,7 @@ struct AlarmSettingsView: View {
                 .datePickerStyle(.compact)
             }
 
-            Section(header: Text("Alarm Settings")) {
+            Section("Alarm Settings") {
                 Toggle(
                     "Override System Volume",
                     isOn: Binding(

@@ -8,7 +8,7 @@ struct DexcomSettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("Dexcom Settings")) {
+            Section("Dexcom Settings") {
                 HStack {
                     Text("User Name")
                     TextField("Enter User Name", text: $viewModel.userName)
@@ -30,7 +30,7 @@ struct DexcomSettingsView: View {
                     Text("US").tag("US")
                     Text("NON-US").tag("NON-US")
                 }
-                .pickerStyle(SegmentedPickerStyle())
+                .pickerStyle(.segmented)
             }
 
             importSection
@@ -40,11 +40,11 @@ struct DexcomSettingsView: View {
     }
 
     private var importSection: some View {
-        Section(header: Text("Import Settings")) {
+        Section("Import Settings") {
             NavigationLink(destination: ImportExportSettingsView()) {
                 HStack {
                     Image(systemName: "square.and.arrow.down")
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                     Text("Import Settings from QR Code")
                 }
             }

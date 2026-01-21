@@ -8,7 +8,7 @@ struct InfoDisplaySettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("General")) {
+            Section("General") {
                 Toggle(isOn: Binding(
                     get: { Storage.shared.hideInfoTable.value },
                     set: { Storage.shared.hideInfoTable.value = $0 }
@@ -17,7 +17,7 @@ struct InfoDisplaySettingsView: View {
                 }
             }
 
-            Section(header: Text("Information Display Settings")) {
+            Section("Information Display Settings") {
                 List {
                     ForEach(viewModel.infoSort, id: \.self) { sortedIndex in
                         HStack {

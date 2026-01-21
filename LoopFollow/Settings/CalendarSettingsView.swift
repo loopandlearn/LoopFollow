@@ -38,7 +38,7 @@ struct CalendarSettingsView: View {
             // ------------- Access / calendar picker -------------
             if accessDenied {
                 Text("Calendar access denied")
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
             } else {
                 if !calendars.isEmpty {
                     Picker("Calendar",
