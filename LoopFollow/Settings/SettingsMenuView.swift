@@ -21,8 +21,6 @@ struct SettingsMenuView: View {
 
     // MARK: – Local state
 
-    @State private var latestVersion: String?
-    @State private var versionTint: Color = .secondary
     @State private var showingTabCustomization = false
 
     // MARK: – Observed objects
@@ -34,21 +32,18 @@ struct SettingsMenuView: View {
     var body: some View {
         NavigationStack(path: $settingsPath.value) {
             List {
-                // ───────── Data settings ─────────
-                dataSection
-
                 // ───────── App settings ─────────
                 Section("App Settings") {
-                    NavigationRow(title: "Background Refresh Settings",
-                                  icon: "arrow.clockwise")
-                    {
-                        settingsPath.value.append(Sheet.backgroundRefresh)
-                    }
-
                     NavigationRow(title: "General Settings",
                                   icon: "gearshape")
                     {
                         settingsPath.value.append(Sheet.general)
+                    }
+
+                    NavigationRow(title: "Background Refresh Settings",
+                                  icon: "arrow.clockwise")
+                    {
+                        settingsPath.value.append(Sheet.backgroundRefresh)
                     }
 
                     NavigationRow(title: "Graph Settings",
@@ -82,15 +77,6 @@ struct SettingsMenuView: View {
                             settingsPath.value.append(Sheet.remote)
                         }
                     }
-                }
-
-                // ───────── Alarms ─────────
-                Section {
-                    NavigationRow(title: "Alarms",
-                                  icon: "bell")
-                    {
-                        settingsPath.value.append(Sheet.alarmsList)
-                    }
 
                     NavigationRow(title: "Alarm Settings",
                                   icon: "bell.badge")
@@ -98,6 +84,9 @@ struct SettingsMenuView: View {
                         settingsPath.value.append(Sheet.alarmSettings)
                     }
                 }
+
+                // ───────── Data settings ─────────
+                dataSection
 
                 // ───────── Integrations ─────────
                 Section("Integrations") {
@@ -134,24 +123,23 @@ struct SettingsMenuView: View {
                               icon: "square.and.arrow.up",
                               action: shareLogs)
                 }
-
-                // ───────── Community ─────────
-                Section("Community") {
-                    LinkRow(title: "LoopFollow Facebook Group",
-                            icon: "person.2.fill",
-                            url: URL(string: "https://www.facebook.com/groups/loopfollowlnl")!)
-                }
-
-                // ───────── Build info ─────────
-                buildInfoSection
             }
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: Sheet.self) { $0.destination }
             .toolbar {
                 if isModal {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Close") {
                             dismiss()
+                        }
+                    }
+                } else {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "chevron.left")
                         }
                     }
                 }
@@ -166,7 +154,6 @@ struct SettingsMenuView: View {
                 )
             }
         }
-        .task { await refreshVersionInfo() }
     }
 
     // MARK: – Section builders
@@ -198,49 +185,7 @@ struct SettingsMenuView: View {
         }
     }
 
-    @ViewBuilder
-    private var buildInfoSection: some View {
-        let build = BuildDetails.default
-        let ver = AppVersionManager().version()
-
-        Section("Build Information") {
-            keyValue("Version", ver, tint: versionTint)
-            keyValue("Latest version", latestVersion ?? "Fetching…")
-
-            if !(build.isMacApp() || build.isSimulatorBuild()) {
-                keyValue(build.expirationHeaderString,
-                         dateTimeUtils.formattedDate(from: build.calculateExpirationDate()))
-            }
-            keyValue("Built",
-                     dateTimeUtils.formattedDate(from: build.buildDate()))
-            keyValue("Branch", build.branchAndSha)
-        }
-    }
-
     // MARK: – Helpers
-
-    private func keyValue(_ key: String,
-                          _ value: String,
-                          tint: Color = .secondary) -> some View
-    {
-        HStack {
-            Text(key)
-            Spacer()
-            Text(value).foregroundColor(tint)
-        }
-    }
-
-    private func refreshVersionInfo() async {
-        let mgr = AppVersionManager()
-        let (latest, newer, blacklisted) = await mgr.checkForNewVersionAsync()
-        latestVersion = latest ?? "Unknown"
-
-        let current = mgr.version()
-        versionTint = blacklisted ? .red
-            : newer ? .orange
-            : latest == current ? .green
-            : .secondary
-    }
 
     private func shareLogs() {
         let files = LogManager.shared.logFilesForTodayAndYesterday()

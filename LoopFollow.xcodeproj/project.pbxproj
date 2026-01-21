@@ -248,6 +248,7 @@
 		DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D842D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift */; };
 		DDFF3D872D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D862D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift */; };
 		DDFF3D892D1429AB00BF9D9E /* BackgroundRefreshType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D882D1429AB00BF9D9E /* BackgroundRefreshType.swift */; };
+		E2D4632C2F2063DD003D7CB4 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D4632B2F2063DD003D7CB4 /* AboutView.swift */; };
 		FC16A97A24996673003D6245 /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97924996673003D6245 /* NightScout.swift */; };
 		FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
 		FC16A97D24996747003D6245 /* SpeakBG.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97C24996747003D6245 /* SpeakBG.swift */; };
@@ -652,6 +653,7 @@
 		DDFF3D842D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshSettingsView.swift; sourceTree = "<group>"; };
 		DDFF3D862D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshSettingsViewModel.swift; sourceTree = "<group>"; };
 		DDFF3D882D1429AB00BF9D9E /* BackgroundRefreshType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshType.swift; sourceTree = "<group>"; };
+		E2D4632B2F2063DD003D7CB4 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
 		FC16A97924996673003D6245 /* NightScout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScout.swift; sourceTree = "<group>"; };
 		FC16A97C24996747003D6245 /* SpeakBG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakBG.swift; sourceTree = "<group>"; };
@@ -848,6 +850,7 @@
 		6589CC612E9E7D1600BB18FE /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				E2D4632B2F2063DD003D7CB4 /* AboutView.swift */,
 				6589CC552E9E7D1600BB18FE /* ImportExport */,
 				6589CC562E9E7D1600BB18FE /* AdvancedSettingsView.swift */,
 				6589CC572E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift */,
@@ -1921,6 +1924,7 @@
 				DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */,
 				DD0B9D582DE1F3B20090C337 /* AlarmType+canAcknowledge.swift in Sources */,
 				DD7F4BC52DD3CE0700D449E9 /* AlarmBGLimitSection.swift in Sources */,
+				E2D4632C2F2063DD003D7CB4 /* AboutView.swift in Sources */,
 				DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */,
 				DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */,
 				DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */,

@@ -27,7 +27,7 @@ struct GraphSettingsView: View {
     var body: some View {
         Form {
             // ── Graph Display ────────────────────────────────────────────
-            Section("Graph Display") {
+            Section {
                 Toggle("Display Dots", isOn: $showDots.value)
                     .onChange(of: showDots.value) { _ in markDirty() }
 
@@ -47,20 +47,24 @@ struct GraphSettingsView: View {
 
                 Toggle("Show Midnight Lines", isOn: $showMidnightLines.value)
                     .onChange(of: showMidnightLines.value) { _ in markDirty() }
+            } header: {
+                Label("Graph Display", systemImage: "chart.line.uptrend.xyaxis")
             }
 
             // ── Treatments ───────────────────────────────────────────────
             if nightscoutEnabled {
-                Section("Treatments") {
+                Section {
                     Toggle("Show Carb/Bolus Values", isOn: $showValues.value)
                     Toggle("Show Carb Absorption", isOn: $showAbsorption.value)
                     Toggle("Treatments on Small Graph",
                            isOn: $smallGraphTreatments.value)
+                } header: {
+                    Label("Treatments", systemImage: "pills")
                 }
             }
 
             // ── Small Graph ──────────────────────────────────────────────
-            Section("Small Graph") {
+            Section {
                 SettingsStepperRow(
                     title: "Height",
                     range: 40 ... 80,
@@ -69,11 +73,13 @@ struct GraphSettingsView: View {
                     format: { "\(Int($0)) pt" }
                 )
                 .onChange(of: smallGraphHeight.value) { _ in markDirty() }
+            } header: {
+                Label("Small Graph", systemImage: "chart.bar.xaxis")
             }
 
             // ── Prediction ───────────────────────────────────────────────
             if nightscoutEnabled {
-                Section("Prediction") {
+                Section {
                     SettingsStepperRow(
                         title: "Hours of Prediction",
                         range: 0 ... 6,
@@ -81,12 +87,14 @@ struct GraphSettingsView: View {
                         value: $predictionToLoad.value,
                         format: { "\($0.localized(maxFractionDigits: 2)) h" }
                     )
+                } header: {
+                    Label("Prediction", systemImage: "waveform.path.ecg")
                 }
             }
 
             // ── Basal / BG scale ─────────────────────────────────────────
             if nightscoutEnabled {
-                Section("Basal / BG Scale") {
+                Section {
                     SettingsStepperRow(
                         title: "Min Basal",
                         range: 0.5 ... 20,
@@ -101,11 +109,13 @@ struct GraphSettingsView: View {
                         value: $minBGScale.value
                     )
                     .onChange(of: minBGScale.value) { _ in markDirty() }
+                } header: {
+                    Label("Basal / BG Scale", systemImage: "slider.horizontal.3")
                 }
             }
 
             // ── Target lines ─────────────────────────────────────────────
-            Section("Target Lines") {
+            Section {
                 BGPicker(title: "Low BG Line",
                          range: 40 ... 120,
                          value: $lowLine.value)
@@ -115,11 +125,15 @@ struct GraphSettingsView: View {
                          range: 120 ... 400,
                          value: $highLine.value)
                     .onChange(of: highLine.value) { _ in markDirty() }
+            } header: {
+                Label("Target Lines", systemImage: "target")
+            } footer: {
+                Text("Target lines show your desired blood glucose range on the graph. Values below the low line or above the high line indicate out-of-range readings.")
             }
 
             // ── History window ───────────────────────────────────────────
             if nightscoutEnabled {
-                Section("History") {
+                Section {
                     SettingsStepperRow(
                         title: "Show Days Back",
                         range: 1 ... 4,
@@ -127,6 +141,8 @@ struct GraphSettingsView: View {
                         value: $downloadDays.value,
                         format: { "\(Int($0)) d" }
                     )
+                } header: {
+                    Label("History", systemImage: "clock.arrow.circlepath")
                 }
             }
         }

@@ -78,7 +78,7 @@ struct BackgroundRefreshSettingsView: View {
     @ViewBuilder
     private var selectedDeviceSection: some View {
         if let storedDevice = bleManager.getSelectedDevice() {
-            Section("Selected Device") {
+            Section {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(storedDevice.name ?? "Unknown Device")
                         .font(.headline)
@@ -109,6 +109,8 @@ struct BackgroundRefreshSettingsView: View {
                     }
                 }
                 .padding(.vertical, 8)
+            } header: {
+                Label("Selected Device", systemImage: "checkmark.circle")
             }
             .id(forceRefresh)
         }

@@ -12,7 +12,7 @@ struct ImportExportSettingsView: View {
         List {
             // MARK: - Import Section
 
-            Section("Import Settings") {
+            Section {
                 Button(action: {
                     viewModel.isShowingQRCodeScanner = true
                 }) {
@@ -23,11 +23,13 @@ struct ImportExportSettingsView: View {
                     }
                 }
                 .buttonStyle(.plain)
+            } header: {
+                Label("Import Settings", systemImage: "square.and.arrow.down")
             }
 
             // MARK: - Export Section
 
-            Section("Export Settings To QR Code") {
+            Section {
                 ForEach(ImportExportSettingsViewModel.ExportType.allCases, id: \.self) { exportType in
                     Button(action: {
                         if exportType == .alarms {
@@ -51,6 +53,8 @@ struct ImportExportSettingsView: View {
                     }
                     .buttonStyle(.plain)
                 }
+            } header: {
+                Label("Export Settings To QR Code", systemImage: "qrcode")
             }
 
             // MARK: - Status Message

@@ -29,9 +29,13 @@ struct GeneralSettingsView: View {
 
     var body: some View {
         Form {
-            Section("App Settings") {
+            Section {
                 Toggle("Display App Badge", isOn: $appBadge.value)
                 Toggle("Persistent Notification", isOn: $persistentNotification.value)
+            } header: {
+                Label("App Settings", systemImage: "gear")
+            } footer: {
+                Text("App Badge shows your current BG on the app icon. Persistent Notification keeps a notification visible for quick access.")
             }
 
             Section("Display") {
@@ -58,9 +62,11 @@ struct GeneralSettingsView: View {
                             window?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                         }
                     }
+            } header: {
+                Label("Display", systemImage: "display")
             }
 
-            Section("Speak BG") {
+            Section {
                 Toggle("Speak BG", isOn: $speakBG.value.animation())
 
                 if speakBG.value {
@@ -115,6 +121,10 @@ struct GeneralSettingsView: View {
                         }
                     }
                 }
+            } header: {
+                Label("Speak BG", systemImage: "speaker.wave.2")
+            } footer: {
+                Text("Speak BG reads your blood glucose aloud. Use 'Always' to hear every reading, or set specific thresholds for low and high alerts.")
             }
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)

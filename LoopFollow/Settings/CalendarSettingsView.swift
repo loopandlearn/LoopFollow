@@ -26,10 +26,12 @@ struct CalendarSettingsView: View {
                 Toggle("Save BG to Calendar",
                        isOn: $writeCalendarEvent.value)
                     .disabled(accessDenied) // prevent use when no access
+            } header: {
+                Label("Calendar Write", systemImage: "calendar.badge.plus")
             } footer: {
                 Text("""
                 Add the Apple-Calendar complication to your watch or CarPlay \
-                to see BG readings. Create a separate calendar (e.g. “Follow”) \
+                to see BG readings. Create a separate calendar (e.g. "Follow") \
                 — this view will **delete** events on the same calendar each time \
                 it writes new readings.
                 """)
@@ -52,7 +54,7 @@ struct CalendarSettingsView: View {
             }
 
             // ------------- Template lines -------------
-            Section("Calendar Text") {
+            Section {
                 TextField("Line 1", text: $watchLine1.value)
                     .textInputAutocapitalization(.never)
                     .disableAutocorrection(true)
@@ -60,13 +62,17 @@ struct CalendarSettingsView: View {
                 TextField("Line 2", text: $watchLine2.value)
                     .textInputAutocapitalization(.never)
                     .disableAutocorrection(true)
+            } header: {
+                Label("Calendar Text", systemImage: "doc.text")
             }
 
             // ------------- Variable cheat-sheet -------------
-            Section("Available Variables") {
+            Section {
                 ForEach(variableDescriptions, id: \.self) { desc in
                     Text(desc)
                 }
+            } header: {
+                Label("Available Variables", systemImage: "list.bullet")
             }
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)

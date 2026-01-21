@@ -23,7 +23,7 @@ struct NightscoutSettingsView: View {
     // MARK: - Subviews / Computed Properties
 
     private var urlSection: some View {
-        Section("URL") {
+        Section {
             TextField("Enter URL", text: $viewModel.nightscoutURL)
                 .textContentType(.username)
                 .autocapitalization(.none)
@@ -31,11 +31,15 @@ struct NightscoutSettingsView: View {
                 .onChange(of: viewModel.nightscoutURL) { newValue in
                     viewModel.processURL(newValue)
                 }
+        } header: {
+            Label("URL", systemImage: "globe")
+        } footer: {
+            Text("Enter your Nightscout site URL (e.g., https://yoursite.herokuapp.com or https://yoursite.ns.10be.de).")
         }
     }
 
     private var tokenSection: some View {
-        Section("Token") {
+        Section {
             HStack {
                 Text("Access Token")
                 TogglableSecureInput(
@@ -45,17 +49,23 @@ struct NightscoutSettingsView: View {
                     textContentType: .password
                 )
             }
+        } header: {
+            Label("Token", systemImage: "key")
+        } footer: {
+            Text("Optional: Enter an access token if your Nightscout site requires authentication.")
         }
     }
 
     private var statusSection: some View {
-        Section("Status") {
+        Section {
             Text(viewModel.nightscoutStatus)
+        } header: {
+            Label("Status", systemImage: "checkmark.circle")
         }
     }
 
     private var importSection: some View {
-        Section("Import Settings") {
+        Section {
             NavigationLink(destination: ImportExportSettingsView()) {
                 HStack {
                     Image(systemName: "square.and.arrow.down")
@@ -63,6 +73,8 @@ struct NightscoutSettingsView: View {
                     Text("Import Settings from QR Code")
                 }
             }
+        } header: {
+            Label("Import Settings", systemImage: "square.and.arrow.down")
         }
     }
 }

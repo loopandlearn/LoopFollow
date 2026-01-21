@@ -573,8 +573,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Tab 4 - Settings or More
         if willHaveMoreTab {
             let moreVC = MoreMenuViewController()
-            moreVC.tabBarItem = UITabBarItem(title: "More", image: UIImage(systemName: "ellipsis"), tag: 4)
-            viewControllers.append(moreVC)
+            let moreNav = UINavigationController(rootViewController: moreVC)
+            moreNav.tabBarItem = UITabBarItem(title: "More", image: UIImage(systemName: "ellipsis"), tag: 4)
+            if Storage.shared.forceDarkMode.value {
+                moreNav.overrideUserInterfaceStyle = .dark
+            }
+            viewControllers.append(moreNav)
         } else {
             let settingsVC = SettingsViewController()
             settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gear"), tag: 4)

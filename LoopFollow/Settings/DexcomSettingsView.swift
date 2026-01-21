@@ -8,7 +8,7 @@ struct DexcomSettingsView: View {
 
     var body: some View {
         Form {
-            Section("Dexcom Settings") {
+            Section {
                 HStack {
                     Text("User Name")
                     TextField("Enter User Name", text: $viewModel.userName)
@@ -31,6 +31,10 @@ struct DexcomSettingsView: View {
                     Text("NON-US").tag("NON-US")
                 }
                 .pickerStyle(.segmented)
+            } header: {
+                Label("Dexcom Settings", systemImage: "drop.fill")
+            } footer: {
+                Text("Enter your Dexcom Share credentials. Select 'US' for accounts created in the United States, otherwise select 'NON-US'.")
             }
 
             importSection
@@ -40,7 +44,7 @@ struct DexcomSettingsView: View {
     }
 
     private var importSection: some View {
-        Section("Import Settings") {
+        Section {
             NavigationLink(destination: ImportExportSettingsView()) {
                 HStack {
                     Image(systemName: "square.and.arrow.down")
@@ -48,6 +52,8 @@ struct DexcomSettingsView: View {
                     Text("Import Settings from QR Code")
                 }
             }
+        } header: {
+            Label("Import Settings", systemImage: "square.and.arrow.down")
         }
     }
 }

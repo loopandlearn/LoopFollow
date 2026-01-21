@@ -13,7 +13,7 @@ struct ContactSettingsView: View {
 
     var body: some View {
         Form {
-            Section("Contact Integration") {
+            Section {
                 Text("Add the contact named '\(viewModel.contactName)' to your watch face to show the current BG value in real time. Make sure to give the app full access to Contacts when prompted.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
@@ -26,10 +26,12 @@ struct ContactSettingsView: View {
                             requestContactAccess()
                         }
                     }
+            } header: {
+                Label("Contact Integration", systemImage: "person.crop.circle")
             }
 
             if viewModel.contactEnabled {
-                Section("Color Options") {
+                Section {
                     Text("Select the colors for your BG values.  Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -46,9 +48,11 @@ struct ContactSettingsView: View {
                             Text(option.rawValue.capitalized).tag(option.rawValue)
                         }
                     }
+                } header: {
+                    Label("Color Options", systemImage: "paintpalette")
                 }
 
-                Section("Additional Information") {
+                Section {
                     Text("To see your trend or delta, include one in the original '\(viewModel.contactName)' contact, or create separate contacts ending in '- Trend' and '- Delta' for up to three contacts on your watch face.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -71,6 +75,8 @@ struct ContactSettingsView: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                } header: {
+                    Label("Additional Information", systemImage: "info.circle")
                 }
             }
         }

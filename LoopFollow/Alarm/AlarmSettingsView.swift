@@ -46,14 +46,7 @@ struct AlarmSettingsView: View {
 
     var body: some View {
         Form {
-            Section(
-                header: Text("Snooze & Mute Options"),
-                footer: Text("""
-                “Snooze All” disables every alarm. \
-                “Mute All” silences phone sounds but still vibrates \
-                and shows iOS notifications.
-                """)
-            ) {
+            Section {
                 Toggle("All Alerts Snoozed", isOn: Binding(
                     get: {
                         if let until = cfgStore.value.snoozeUntil { return until > Date() }
@@ -115,14 +108,17 @@ struct AlarmSettingsView: View {
                     )
                     .datePickerStyle(.compact)
                 }
+            } header: {
+                Label("Snooze & Mute Options", systemImage: "moon.zzz")
+            } footer: {
+                Text("""
+                "Snooze All" disables every alarm. \
+                "Mute All" silences phone sounds but still vibrates \
+                and shows iOS notifications.
+                """)
             }
 
-            Section(
-                header: Text("Day / Night Schedule"),
-                footer: Text("Pick when your day period begins and when your night period begins. " +
-                    "Any time from your Day-starts time up until your Night-starts time will count as day; " +
-                    "from Night-starts until the next Day-starts will count as night.")
-            ) {
+            Section {
                 DatePicker(
                     "Day starts",
                     selection: dayBinding,
@@ -136,15 +132,18 @@ struct AlarmSettingsView: View {
                     displayedComponents: [.hourAndMinute]
                 )
                 .datePickerStyle(.compact)
+            } header: {
+                Label("Day / Night Schedule", systemImage: "sun.and.horizon")
+            } footer: {
+                Text("Pick when your day period begins and when your night period begins. " +
+                    "Any time from your Day-starts time up until your Night-starts time will count as day; " +
+                    "from Night-starts until the next Day-starts will count as night.")
             }
 
-            Section("Alarm Settings") {
+            Section {
                 Toggle(
                     "Override System Volume",
-                    isOn: Binding(
-                        get: { cfgStore.value.overrideSystemOutputVolume },
-                        set: { cfgStore.value.overrideSystemOutputVolume = $0 }
-                    )
+                    isOn: $cfgStore.value.binding(\.overrideSystemOutputVolume)
                 )
 
                 if cfgStore.value.overrideSystemOutputVolume {
@@ -161,35 +160,25 @@ struct AlarmSettingsView: View {
 
                 Toggle(
                     "Audio During Calls",
-                    isOn: Binding(
-                        get: { cfgStore.value.audioDuringCalls },
-                        set: { cfgStore.value.audioDuringCalls = $0 }
-                    )
+                    isOn: $cfgStore.value.binding(\.audioDuringCalls)
                 )
 
                 Toggle(
                     "Ignore Zero BG",
-                    isOn: Binding(
-                        get: { cfgStore.value.ignoreZeroBG },
-                        set: { cfgStore.value.ignoreZeroBG = $0 }
-                    )
+                    isOn: $cfgStore.value.binding(\.ignoreZeroBG)
                 )
 
                 Toggle(
                     "Auto‑Snooze CGM Start",
-                    isOn: Binding(
-                        get: { cfgStore.value.autoSnoozeCGMStart },
-                        set: { cfgStore.value.autoSnoozeCGMStart = $0 }
-                    )
+                    isOn: $cfgStore.value.binding(\.autoSnoozeCGMStart)
                 )
 
                 Toggle(
                     "Volume Buttons Snooze Alarms",
-                    isOn: Binding(
-                        get: { cfgStore.value.enableVolumeButtonSnooze },
-                        set: { cfgStore.value.enableVolumeButtonSnooze = $0 }
-                    )
+                    isOn: $cfgStore.value.binding(\.enableVolumeButtonSnooze)
                 )
+            } header: {
+                Label("Alarm Settings", systemImage: "bell.badge")
             }
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)

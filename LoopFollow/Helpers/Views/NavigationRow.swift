@@ -45,3 +45,28 @@ extension View {
         modifier(SettingsStyleModifier(title: title))
     }
 }
+
+// MARK: - Binding Helpers
+
+extension Binding {
+    /// Creates a binding that accesses a property on the wrapped value using a keypath.
+    /// Useful for creating bindings to nested properties in storage objects.
+    ///
+    /// Example:
+    /// ```
+    /// // Instead of:
+    /// Toggle("Override", isOn: Binding(
+    ///     get: { cfgStore.value.overrideVolume },
+    ///     set: { cfgStore.value.overrideVolume = $0 }
+    /// ))
+    ///
+    /// // Use:
+    /// Toggle("Override", isOn: $cfgStore.value.binding(\.overrideVolume))
+    /// ```
+    func binding<T>(_ keyPath: WritableKeyPath<Value, T>) -> Binding<T> {
+        Binding<T>(
+            get: { self.wrappedValue[keyPath: keyPath] },
+            set: { self.wrappedValue[keyPath: keyPath] = $0 }
+        )
+    }
+}
