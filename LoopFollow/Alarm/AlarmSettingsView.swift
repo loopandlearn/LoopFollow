@@ -147,15 +147,20 @@ struct AlarmSettingsView: View {
                 )
 
                 if cfgStore.value.overrideSystemOutputVolume {
-                    Stepper(
-                        "Volume Level: \(Int(cfgStore.value.forcedOutputVolume * 100))%",
-                        value: Binding(
-                            get: { Double(cfgStore.value.forcedOutputVolume) },
-                            set: { cfgStore.value.forcedOutputVolume = Float($0) }
-                        ),
-                        in: 0 ... 1,
-                        step: 0.05
-                    )
+                    HStack {
+                        Text("Volume Level")
+                        Spacer()
+                        Text("\(Int(cfgStore.value.forcedOutputVolume * 100))%")
+                            .foregroundColor(.secondary)
+                        Stepper("",
+                                value: Binding(
+                                    get: { Double(cfgStore.value.forcedOutputVolume) },
+                                    set: { cfgStore.value.forcedOutputVolume = Float($0) }
+                                ),
+                                in: 0 ... 1,
+                                step: 0.05)
+                            .labelsHidden()
+                    }
                 }
 
                 Toggle(

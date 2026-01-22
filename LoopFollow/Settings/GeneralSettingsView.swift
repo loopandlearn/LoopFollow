@@ -4,6 +4,7 @@
 import SwiftUI
 
 struct GeneralSettingsView: View {
+    @ObservedObject var units = Storage.shared.units
     @ObservedObject var colorBGText = Storage.shared.colorBGText
     @ObservedObject var appBadge = Storage.shared.appBadge
     @ObservedObject var appearanceMode = Storage.shared.appearanceMode
@@ -29,6 +30,16 @@ struct GeneralSettingsView: View {
 
     var body: some View {
         Form {
+            Section {
+                Picker("Units", selection: $units.value) {
+                    Text("mg/dL").tag("mg/dL")
+                    Text("mmol/L").tag("mmol/L")
+                }
+                .pickerStyle(.menu)
+            } header: {
+                Label("Units", systemImage: "ruler")
+            }
+
             Section {
                 Toggle("Display App Badge", isOn: $appBadge.value)
                 Toggle("Persistent Notification", isOn: $persistentNotification.value)
@@ -62,6 +73,7 @@ struct GeneralSettingsView: View {
                             window?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                         }
                     }
+                Toggle("Force Dark Mode (restart app)", isOn: $forceDarkMode.value)
             } header: {
                 Label("Display", systemImage: "display")
             }

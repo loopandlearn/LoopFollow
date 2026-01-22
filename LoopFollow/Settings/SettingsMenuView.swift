@@ -19,10 +19,6 @@ struct SettingsMenuView: View {
     @ObservedObject private var nightscoutURL = Storage.shared.url
     @ObservedObject private var settingsPath = Observable.shared.settingsPath
 
-    // MARK: – Local state
-
-    @State private var showingTabCustomization = false
-
     // MARK: – Observed objects
 
     @ObservedObject private var url = Storage.shared.url
@@ -34,51 +30,51 @@ struct SettingsMenuView: View {
             List {
                 // ───────── App settings ─────────
                 Section("App Settings") {
-                    NavigationRow(title: "General Settings",
+                    NavigationRow(title: "General",
                                   icon: "gearshape")
                     {
                         settingsPath.value.append(Sheet.general)
                     }
 
-                    NavigationRow(title: "Background Refresh Settings",
+                    NavigationRow(title: "Background Refresh",
                                   icon: "arrow.clockwise")
                     {
                         settingsPath.value.append(Sheet.backgroundRefresh)
                     }
 
-                    NavigationRow(title: "Graph Settings",
+                    NavigationRow(title: "Graph",
                                   icon: "chart.xyaxis.line")
                     {
                         settingsPath.value.append(Sheet.graph)
                     }
 
-                    NavigationRow(title: "Tab Settings",
+                    NavigationRow(title: "Tabs",
                                   icon: "rectangle.3.group")
                     {
-                        showingTabCustomization = true
+                        settingsPath.value.append(Sheet.tabs)
                     }
 
-                    NavigationRow(title: "Import/Export Settings",
+                    NavigationRow(title: "Import/Export",
                                   icon: "square.and.arrow.down")
                     {
                         settingsPath.value.append(Sheet.importExport)
                     }
 
                     if !nightscoutURL.value.isEmpty {
-                        NavigationRow(title: "Information Display Settings",
+                        NavigationRow(title: "Information Display",
                                       icon: "info.circle")
                         {
                             settingsPath.value.append(Sheet.infoDisplay)
                         }
 
-                        NavigationRow(title: "Remote Settings",
+                        NavigationRow(title: "Remote",
                                       icon: "antenna.radiowaves.left.and.right")
                         {
                             settingsPath.value.append(Sheet.remote)
                         }
                     }
 
-                    NavigationRow(title: "Alarm Settings",
+                    NavigationRow(title: "Alarms",
                                   icon: "bell.badge")
                     {
                         settingsPath.value.append(Sheet.alarmSettings)
@@ -104,8 +100,8 @@ struct SettingsMenuView: View {
                 }
 
                 // ───────── Advanced / Logs ─────────
-                Section("Advanced Settings") {
-                    NavigationRow(title: "Advanced Settings",
+                Section("Advanced") {
+                    NavigationRow(title: "Advanced",
                                   icon: "exclamationmark.shield")
                     {
                         settingsPath.value.append(Sheet.advanced)
@@ -124,8 +120,9 @@ struct SettingsMenuView: View {
                               action: shareLogs)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(isModal ? "Settings" : "")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(!isModal)
             .navigationDestination(for: Sheet.self) { $0.destination }
             .toolbar {
                 if isModal {
@@ -134,24 +131,7 @@ struct SettingsMenuView: View {
                             dismiss()
                         }
                     }
-                } else {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                        }
-                    }
                 }
-            }
-            .sheet(isPresented: $showingTabCustomization) {
-                TabCustomizationModal(
-                    isPresented: $showingTabCustomization,
-                    onApply: {
-                        // Dismiss any presented view controller and go to home tab
-                        handleTabReorganization()
-                    }
-                )
             }
         }
     }
@@ -161,23 +141,13 @@ struct SettingsMenuView: View {
     @ViewBuilder
     private var dataSection: some View {
         Section("Data Settings") {
-            Picker("Units",
-                   selection: Binding(
-                       get: { Storage.shared.units.value },
-                       set: { Storage.shared.units.value = $0 }
-                   )) {
-                Text("mg/dL").tag("mg/dL")
-                Text("mmol/L").tag("mmol/L")
-            }
-            .pickerStyle(.segmented)
-
-            NavigationRow(title: "Nightscout Settings",
+            NavigationRow(title: "Nightscout",
                           icon: "network")
             {
                 settingsPath.value.append(Sheet.nightscout)
             }
 
-            NavigationRow(title: "Dexcom Settings",
+            NavigationRow(title: "Dexcom",
                           icon: "sensor.tag.radiowaves.forward")
             {
                 settingsPath.value.append(Sheet.dexcom)
@@ -200,37 +170,6 @@ struct SettingsMenuView: View {
                                            applicationActivities: nil)
         UIApplication.shared.topMost?.present(avc, animated: true)
     }
-
-    private func handleTabReorganization() {
-        // Find the root tab bar controller
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootVC = window.rootViewController else { return }
-
-        // Navigate through the hierarchy to find the tab bar controller
-        var tabBarController: UITabBarController?
-
-        if let tbc = rootVC as? UITabBarController {
-            tabBarController = tbc
-        } else if let nav = rootVC as? UINavigationController,
-                  let tbc = nav.viewControllers.first as? UITabBarController
-        {
-            tabBarController = tbc
-        }
-
-        guard let tabBar = tabBarController else { return }
-
-        // Dismiss any modals first
-        if let presented = tabBar.presentedViewController {
-            presented.dismiss(animated: false) {
-                // After dismissal, switch to home tab
-                tabBar.selectedIndex = 0
-            }
-        } else {
-            // No modal to dismiss, just switch to home
-            tabBar.selectedIndex = 0
-        }
-    }
 }
 
 // MARK: – Sheet routing
@@ -238,7 +177,7 @@ struct SettingsMenuView: View {
 private enum Sheet: Hashable, Identifiable {
     case nightscout, dexcom
     case backgroundRefresh
-    case general, graph
+    case general, graph, tabs
     case infoDisplay
     case alarmsList, alarmSettings
     case remote
@@ -257,6 +196,7 @@ private enum Sheet: Hashable, Identifiable {
         case .backgroundRefresh: BackgroundRefreshSettingsView(viewModel: .init())
         case .general: GeneralSettingsView()
         case .graph: GraphSettingsView()
+        case .tabs: TabSettingsView()
         case .infoDisplay: InfoDisplaySettingsView(viewModel: .init())
         case .alarmsList: AlarmListView()
         case .alarmSettings: AlarmSettingsView()

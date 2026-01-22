@@ -53,8 +53,6 @@ class MoreMenuViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        // Show navigation bar when returning to More menu
-        navigationController?.setNavigationBarHidden(false, animated: animated)
         updateSections()
         tableView.reloadData()
         Observable.shared.settingsPath.set(NavigationPath())
@@ -164,6 +162,7 @@ class MoreMenuViewController: UIViewController {
 
     private func openSettings() {
         let settingsVC = UIHostingController(rootView: SettingsMenuView(isModal: false))
+        settingsVC.title = "Settings"
 
 
         // Apply appearance mode
@@ -172,8 +171,6 @@ class MoreMenuViewController: UIViewController {
         navController.overrideUserInterfaceStyle = style
 
 
-        // Hide UIKit nav bar - SwiftUI's NavigationStack will handle navigation
-        navigationController?.setNavigationBarHidden(true, animated: false)
         navigationController?.pushViewController(settingsVC, animated: true)
     }
 
