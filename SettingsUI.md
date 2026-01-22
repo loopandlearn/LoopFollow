@@ -844,3 +844,122 @@ Reorganized SettingsMenuView for better logical grouping:
 2. `MoreMenuViewController.swift` - Push navigation, sections, viewWillAppear nav bar handling
 3. `SettingsMenuView.swift` - Back button, inline title, section reordering
 4. `AboutView.swift` - New file for About screen (created in Session 4)
+
+---
+
+### Session 6 - Alarm Language Fixes, UI Polish & Navigation Fixes
+**Date:** 2026-01-23
+
+#### Alarm Threshold Language Fixes
+
+Fixed UI text in alarm editors to accurately match the underlying evaluation logic. Several alarms used `<=` or `>=` comparisons but their UI text implied strict `<` or `>`.
+
+**Issues Found & Fixed:**
+
+| Alarm | Component | Previous Text | Logic | Fixed Text |
+|-------|-----------|---------------|-------|------------|
+| Phone Battery | Footer | "drops below" | `<=` | "drops to or below" |
+| Pump Battery | Footer | "drops below" | `<=` | "drops to or below" |
+| COB | InfoBanner | "exceeds" | `>=` | "reaches or exceeds" |
+| COB | Footer/Title | "is above" / "Above" | `>=` | "is at or above" / "At or Above" |
+| RecBolus | Footer/Title | "is above" / "More than" | `>=` | "is at or above" / "At or Above" |
+| MissedBolus (carbs) | Footer/Title | "below" / "Below" | ignores `<=` | "at or below" / "At or Below" |
+| MissedBolus (bolus) | Footer/Title | "below" / "Ignore below" | ignores `<=` | "at or below" / "Ignore at or below" |
+
+**Files Changed:**
+- `PhoneBatteryAlarmEditor.swift`
+- `PumpBatteryAlarmEditor.swift`
+- `COBAlarmEditor.swift`
+- `RecBolusAlarmEditor.swift`
+- `MissedBolusAlarmEditor.swift`
+
+#### Settings Menu Item Renaming
+
+Removed redundant "Settings" suffix from all menu items since they're already inside the Settings screen:
+
+| Before | After |
+|--------|-------|
+| General Settings | General |
+| Background Refresh Settings | Background Refresh |
+| Graph Settings | Graph |
+| Tab Settings | Tabs |
+| Import/Export Settings | Import/Export |
+| Information Display Settings | Information Display |
+| Remote Settings | Remote |
+| Alarm Settings | Alarms |
+| Nightscout Settings | Nightscout |
+| Dexcom Settings | Dexcom |
+| Advanced Settings (section + row) | Advanced |
+
+**File Changed:** `SettingsMenuView.swift`
+
+#### Navigation Fixes
+
+**Back button not working:**
+The custom SwiftUI chevron back button was calling `dismiss()` which doesn't properly pop a UIHostingController from a UIKit UINavigationController.
+
+**Fix:** Let UIKit handle navigation naturally:
+- Removed `navigationController?.setNavigationBarHidden(true)` from `openSettings()`
+- Removed custom chevron back button from `SettingsMenuView` for non-modal case
+- Set `settingsVC.title = "Settings"` on the UIHostingController
+- UIKit's navigation bar now provides the back button
+
+**Double title fix:**
+Both UIKit and SwiftUI were showing "Settings" title simultaneously.
+
+**Fix:**
+- Hide SwiftUI's navigation bar when not modal (`.navigationBarHidden(!isModal)`)
+- UIKit handles title display via `settingsVC.title`
+
+**Files Changed:**
+- `MoreMenuViewController.swift`
+- `SettingsMenuView.swift`
+
+#### Tabs: Modal → Navigation Page
+
+Converted the Tabs settings from a modal popup to a pushed navigation page, consistent with all other settings.
+
+**Changes:**
+- Renamed `TabCustomizationModal` to `TabSettingsView`
+- Removed modal wrapper (NavigationView, Cancel button)
+- Changed Apply from toolbar button to inline form button
+- Added `tabs` case to `Sheet` enum for navigation routing
+- Removed `showingTabCustomization` state and `.sheet` modifier
+- Moved `handleTabReorganization()` into `TabSettingsView`
+
+**Files Changed:**
+- `TabCustomizationModal.swift` (renamed struct to `TabSettingsView`)
+- `SettingsMenuView.swift`
+
+#### Units Picker Changes
+
+1. Changed picker style from `.segmented` to `.menu` for a cleaner look
+2. Moved Units picker from main Settings menu (Data Settings section) to top of General Settings
+
+**Files Changed:**
+- `SettingsMenuView.swift` - Removed Units picker and `units` ObservedObject
+- `GeneralSettingsView.swift` - Added Units picker as first section
+
+#### Volume Level Stepper Fix (Alarm Settings)
+
+The Volume Level stepper was changing its row label text on every +/- tap (e.g., "Volume Level: 50%", "Volume Level: 55%"), causing text reflow.
+
+**Fix:** Split into fixed label + separate value + hidden-label stepper:
+```swift
+HStack {
+    Text("Volume Level")
+    Spacer()
+    Text("\(Int(...))%")
+        .foregroundColor(.secondary)
+    Stepper("", value: ..., in: ..., step: ...)
+        .labelsHidden()
+}
+```
+
+**File Changed:** `AlarmSettingsView.swift`
+
+#### General Settings Reordering
+
+Moved "Force Dark Mode (restart app)" from top of Display section to bottom, after "Force portrait mode" (rarely changed setting).
+
+**File Changed:** `GeneralSettingsView.swift`
