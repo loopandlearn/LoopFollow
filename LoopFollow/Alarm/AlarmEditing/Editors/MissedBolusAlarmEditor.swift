@@ -41,8 +41,8 @@ struct MissedBolusAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Ignore small boluses",
-                footer: "Boluses below this size are ignored.",
-                title: "Ignore below",
+                footer: "Boluses at or below this size are ignored.",
+                title: "Ignore at or below",
                 range: 0.05 ... 2,
                 step: 0.05,
                 unitLabel: "Units",
@@ -51,8 +51,8 @@ struct MissedBolusAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Ignore small carbs",
-                footer: "Carb entries below this amount will not trigger the alarm.",
-                title: "Below",
+                footer: "Carb entries at or below this amount will not trigger the alarm.",
+                title: "At or Below",
                 range: 0 ... 15,
                 step: 1,
                 unitLabel: "Grams",
