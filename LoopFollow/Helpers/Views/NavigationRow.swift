@@ -33,7 +33,7 @@ struct SettingsStyleModifier: ViewModifier {
         content
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
-            .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+            .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 }
 

@@ -164,12 +164,10 @@ class MoreMenuViewController: UIViewController {
         let settingsVC = UIHostingController(rootView: SettingsMenuView(isModal: false))
         settingsVC.title = "Settings"
 
-
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         settingsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
+        navigationController?.overrideUserInterfaceStyle = style
 
         navigationController?.pushViewController(settingsVC, animated: true)
     }
@@ -178,12 +176,10 @@ class MoreMenuViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let alarmsVC = storyboard.instantiateViewController(withIdentifier: "AlarmViewController")
 
-
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         alarmsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
+        navigationController?.overrideUserInterfaceStyle = style
 
         navigationController?.pushViewController(alarmsVC, animated: true)
     }
@@ -192,12 +188,10 @@ class MoreMenuViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let remoteVC = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
 
-
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         remoteVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
+        navigationController?.overrideUserInterfaceStyle = style
 
         navigationController?.pushViewController(remoteVC, animated: true)
     }
@@ -206,12 +200,10 @@ class MoreMenuViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let nightscoutVC = storyboard.instantiateViewController(withIdentifier: "NightscoutViewController")
 
-
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         nightscoutVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
+        navigationController?.overrideUserInterfaceStyle = style
 
         navigationController?.pushViewController(nightscoutVC, animated: true)
     }
@@ -226,10 +218,6 @@ class MoreMenuViewController: UIViewController {
         let aboutView = AboutView()
         let hostingController = UIHostingController(rootView: aboutView)
         hostingController.title = "About"
-
-        if Storage.shared.forceDarkMode.value {
-            hostingController.overrideUserInterfaceStyle = .dark
-        }
 
         navigationController?.pushViewController(hostingController, animated: true)
     }

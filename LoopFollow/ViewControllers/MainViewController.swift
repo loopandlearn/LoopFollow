@@ -575,9 +575,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             let moreVC = MoreMenuViewController()
             let moreNav = UINavigationController(rootViewController: moreVC)
             moreNav.tabBarItem = UITabBarItem(title: "More", image: UIImage(systemName: "ellipsis"), tag: 4)
-            if Storage.shared.forceDarkMode.value {
-                moreNav.overrideUserInterfaceStyle = .dark
-            }
+
             viewControllers.append(moreNav)
         } else {
             let settingsVC = SettingsViewController()

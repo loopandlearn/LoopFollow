@@ -401,7 +401,6 @@ struct RemoteSettingsView: View {
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationTitle("Remote Settings")
         .navigationBarTitleDisplayMode(.inline)
-
     }
 
     // MARK: - Custom Row for Remote Type Selection

@@ -49,7 +49,7 @@ struct GeneralSettingsView: View {
                 Text("App Badge shows your current BG on the app icon. Persistent Notification keeps a notification visible for quick access.")
             }
 
-            Section("Display") {
+            Section {
                 Picker("Appearance", selection: $appearanceMode.value) {
                     ForEach(AppearanceMode.allCases, id: \.self) { mode in
                         Text(mode.displayName).tag(mode)
@@ -73,7 +73,6 @@ struct GeneralSettingsView: View {
                             window?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                         }
                     }
-                Toggle("Force Dark Mode (restart app)", isOn: $forceDarkMode.value)
             } header: {
                 Label("Display", systemImage: "display")
             }
@@ -142,6 +141,5 @@ struct GeneralSettingsView: View {
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("General Settings", displayMode: .inline)
         .settingsStyle(title: "General Settings")
-
     }
 }
