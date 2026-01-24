@@ -1,9 +1,13 @@
-#include? "LoopFollowConfigOverride.xcconfig"
-#include? "../../LoopFollowConfigOverride.xcconfig"
+//#include? "LoopFollowConfigOverride.xcconfig"
+//#include? "../../LoopFollowConfigOverride.xcconfig"
 #include? "LoopFollowDisplayNameConfig.xcconfig"
 #include? "../../LoopFollowDisplayNameConfig.xcconfig"
 
-unique_id = ${DEVELOPMENT_TEAM}
+//Bundle Identifier must be formatted like: com.$(DEVELOPMENT_TEAM).LoopFollow
+//$(DEVELOPMENT_TEAM) will be repalced by the TEAMID repository secret during build phase.
+BUNDLE_IDENTIFIER = com.$(DEVELOPMENT_TEAM).LoopFollow
+//BUNDLE_IDENTIFIER = com.$(DEVELOPMENT_TEAM).LoopFollow.Second
+//BUNDLE_IDENTIFIER = com.$(DEVELOPMENT_TEAM).LoopFollow.Third
 
 //Version (DEFAULT)
 LOOP_FOLLOW_MARKETING_VERSION = 4.4.3
