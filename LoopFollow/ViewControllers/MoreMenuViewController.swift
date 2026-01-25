@@ -25,7 +25,6 @@ class MoreMenuViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "More"
         view.backgroundColor = .systemBackground
 
         // Apply appearance mode
@@ -53,6 +52,8 @@ class MoreMenuViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // Hide navigation bar on More page
+        navigationController?.setNavigationBarHidden(true, animated: animated)
         updateSections()
         tableView.reloadData()
         Observable.shared.settingsPath.set(NavigationPath())
@@ -163,48 +164,60 @@ class MoreMenuViewController: UIViewController {
     private func openSettings() {
         let settingsVC = UIHostingController(rootView: SettingsMenuView(isModal: false))
         settingsVC.title = "Settings"
+        settingsVC.hidesBottomBarWhenPushed = true
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         settingsVC.overrideUserInterfaceStyle = style
         navigationController?.overrideUserInterfaceStyle = style
 
+        // Hide UIKit nav bar - SwiftUI handles navigation
+        navigationController?.setNavigationBarHidden(true, animated: false)
         navigationController?.pushViewController(settingsVC, animated: true)
     }
 
     private func openAlarms() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let alarmsVC = storyboard.instantiateViewController(withIdentifier: "AlarmViewController")
+        alarmsVC.hidesBottomBarWhenPushed = true
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         alarmsVC.overrideUserInterfaceStyle = style
         navigationController?.overrideUserInterfaceStyle = style
 
+        // Show UIKit nav bar for UIKit views
+        navigationController?.setNavigationBarHidden(false, animated: false)
         navigationController?.pushViewController(alarmsVC, animated: true)
     }
 
     private func openRemote() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let remoteVC = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
+        remoteVC.hidesBottomBarWhenPushed = true
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         remoteVC.overrideUserInterfaceStyle = style
         navigationController?.overrideUserInterfaceStyle = style
 
+        // Show UIKit nav bar for UIKit views
+        navigationController?.setNavigationBarHidden(false, animated: false)
         navigationController?.pushViewController(remoteVC, animated: true)
     }
 
     private func openNightscout() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let nightscoutVC = storyboard.instantiateViewController(withIdentifier: "NightscoutViewController")
+        nightscoutVC.hidesBottomBarWhenPushed = true
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         nightscoutVC.overrideUserInterfaceStyle = style
         navigationController?.overrideUserInterfaceStyle = style
 
+        // Show UIKit nav bar for UIKit views
+        navigationController?.setNavigationBarHidden(false, animated: false)
         navigationController?.pushViewController(nightscoutVC, animated: true)
     }
 
@@ -218,7 +231,15 @@ class MoreMenuViewController: UIViewController {
         let aboutView = AboutView()
         let hostingController = UIHostingController(rootView: aboutView)
         hostingController.title = "About"
+        hostingController.hidesBottomBarWhenPushed = true
 
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.overrideUserInterfaceStyle = style
+        navigationController?.overrideUserInterfaceStyle = style
+
+        // Hide UIKit nav bar - SwiftUI handles navigation
+        navigationController?.setNavigationBarHidden(true, animated: false)
         navigationController?.pushViewController(hostingController, animated: true)
     }
 }

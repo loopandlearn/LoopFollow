@@ -4,38 +4,51 @@
 import SwiftUI
 
 struct AboutView: View {
+    @Environment(\.dismiss) private var dismiss
+
     @State private var latestVersion: String?
     @State private var versionTint: Color = .secondary
 
     var body: some View {
-        List {
-            Section {
-                HStack {
-                    Spacer()
-                    VStack(spacing: 12) {
-                        Image("AppIcon")
-                            .resizable()
-                            .frame(width: 80, height: 80)
-                            .cornerRadius(16)
+        NavigationStack {
+            List {
+                Section {
+                    HStack {
+                        Spacer()
+                        VStack(spacing: 12) {
+                            Image("AppIconDisplay")
+                                .resizable()
+                                .frame(width: 80, height: 80)
+                                .cornerRadius(16)
 
-                        Text("LoopFollow")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            Text("LoopFollow")
+                                .font(.title2)
+                                .fontWeight(.semibold)
 
-                        Text("Monitor blood glucose remotely")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            Text("Monitor blood glucose remotely")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
                     }
-                    Spacer()
+                    .padding(.vertical, 20)
                 }
-                .padding(.vertical, 20)
-            }
 
-            buildInfoSection
+                buildInfoSection
+            }
+            .navigationTitle("About")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                    }
+                }
+            }
+            .task { await refreshVersionInfo() }
         }
-        .navigationTitle("About")
-        .navigationBarTitleDisplayMode(.inline)
-        .task { await refreshVersionInfo() }
     }
 
     @ViewBuilder

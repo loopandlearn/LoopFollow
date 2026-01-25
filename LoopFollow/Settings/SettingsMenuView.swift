@@ -120,15 +120,22 @@ struct SettingsMenuView: View {
                               action: shareLogs)
                 }
             }
-            .navigationTitle(isModal ? "Settings" : "")
+            .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarHidden(!isModal)
             .navigationDestination(for: Sheet.self) { $0.destination }
             .toolbar {
                 if isModal {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Close") {
                             dismiss()
+                        }
+                    }
+                } else {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "chevron.left")
                         }
                     }
                 }
