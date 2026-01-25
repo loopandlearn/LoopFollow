@@ -15,12 +15,16 @@ class MoreMenuViewController: UIViewController {
         let action: () -> Void
     }
 
-    private var menuItems: [MenuItem] = []
+    struct MenuSection {
+        let title: String?
+        let items: [MenuItem]
+    }
+
+    private var sections: [MenuSection] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "More"
         view.backgroundColor = .systemBackground
 
         // Apply appearance mode
@@ -43,12 +47,14 @@ class MoreMenuViewController: UIViewController {
             .store(in: &cancellables)
 
         setupTableView()
-        updateMenuItems()
+        updateSections()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        updateMenuItems()
+        // Hide navigation bar on More page
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+        updateSections()
         tableView.reloadData()
         Observable.shared.settingsPath.set(NavigationPath())
     }
@@ -80,11 +86,13 @@ class MoreMenuViewController: UIViewController {
         ])
     }
 
-    private func updateMenuItems() {
-        menuItems = []
+    private func updateSections() {
+        sections = []
 
-        // Always add Settings
-        menuItems.append(MenuItem(
+        // Main section - Settings and dynamic items
+        var mainItems: [MenuItem] = []
+
+        mainItems.append(MenuItem(
             title: "Settings",
             icon: "gear",
             action: { [weak self] in
@@ -92,9 +100,8 @@ class MoreMenuViewController: UIViewController {
             }
         ))
 
-        // Add items based on their positions
         if Storage.shared.alarmsPosition.value == .more {
-            menuItems.append(MenuItem(
+            mainItems.append(MenuItem(
                 title: "Alarms",
                 icon: "alarm",
                 action: { [weak self] in
@@ -104,7 +111,7 @@ class MoreMenuViewController: UIViewController {
         }
 
         if Storage.shared.remotePosition.value == .more {
-            menuItems.append(MenuItem(
+            mainItems.append(MenuItem(
                 title: "Remote",
                 icon: "antenna.radiowaves.left.and.right",
                 action: { [weak self] in
@@ -114,7 +121,7 @@ class MoreMenuViewController: UIViewController {
         }
 
         if Storage.shared.nightscoutPosition.value == .more {
-            menuItems.append(MenuItem(
+            mainItems.append(MenuItem(
                 title: "Nightscout",
                 icon: "safari",
                 action: { [weak self] in
@@ -122,104 +129,137 @@ class MoreMenuViewController: UIViewController {
                 }
             ))
         }
+
+        sections.append(MenuSection(title: nil, items: mainItems))
+
+        // Community section
+        sections.append(MenuSection(
+            title: "Community",
+            items: [
+                MenuItem(
+                    title: "LoopFollow Facebook Group",
+                    icon: "person.2.fill",
+                    action: { [weak self] in
+                        self?.openFacebookGroup()
+                    }
+                ),
+            ]
+        ))
+
+        // About section
+        sections.append(MenuSection(
+            title: "About",
+            items: [
+                MenuItem(
+                    title: "About LoopFollow",
+                    icon: "info.circle",
+                    action: { [weak self] in
+                        self?.openAbout()
+                    }
+                ),
+            ]
+        ))
     }
 
     private func openSettings() {
-        let settingsVC = UIHostingController(rootView: SettingsMenuView())
-        let navController = UINavigationController(rootViewController: settingsVC)
+        let settingsVC = UIHostingController(rootView: SettingsMenuView(isModal: false))
+        settingsVC.title = "Settings"
+        settingsVC.hidesBottomBarWhenPushed = true
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         settingsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
+        navigationController?.overrideUserInterfaceStyle = style
 
-        // Add a close button
-        settingsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
-            target: self,
-            action: #selector(dismissModal)
-        )
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        // Hide UIKit nav bar - SwiftUI handles navigation
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        navigationController?.pushViewController(settingsVC, animated: true)
     }
 
     private func openAlarms() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let alarmsVC = storyboard.instantiateViewController(withIdentifier: "AlarmViewController")
-        let navController = UINavigationController(rootViewController: alarmsVC)
+        alarmsVC.hidesBottomBarWhenPushed = true
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         alarmsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
+        navigationController?.overrideUserInterfaceStyle = style
 
-        // Add a close button
-        alarmsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
-            target: self,
-            action: #selector(dismissModal)
-        )
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        // Show UIKit nav bar for UIKit views
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationController?.pushViewController(alarmsVC, animated: true)
     }
 
     private func openRemote() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let remoteVC = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
-        let navController = UINavigationController(rootViewController: remoteVC)
+        remoteVC.hidesBottomBarWhenPushed = true
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         remoteVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
+        navigationController?.overrideUserInterfaceStyle = style
 
-        // Add a close button
-        remoteVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
-            target: self,
-            action: #selector(dismissModal)
-        )
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        // Show UIKit nav bar for UIKit views
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationController?.pushViewController(remoteVC, animated: true)
     }
 
     private func openNightscout() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let nightscoutVC = storyboard.instantiateViewController(withIdentifier: "NightscoutViewController")
-        let navController = UINavigationController(rootViewController: nightscoutVC)
+        nightscoutVC.hidesBottomBarWhenPushed = true
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         nightscoutVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
+        navigationController?.overrideUserInterfaceStyle = style
 
-        // Add a close button
-        nightscoutVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
-            target: self,
-            action: #selector(dismissModal)
-        )
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        // Show UIKit nav bar for UIKit views
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationController?.pushViewController(nightscoutVC, animated: true)
     }
 
-    @objc private func dismissModal() {
-        dismiss(animated: true)
+    private func openFacebookGroup() {
+        if let url = URL(string: "https://www.facebook.com/groups/loopfollowlnl") {
+            UIApplication.shared.open(url)
+        }
+    }
+
+    private func openAbout() {
+        let aboutView = AboutView()
+        let hostingController = UIHostingController(rootView: aboutView)
+        hostingController.title = "About"
+        hostingController.hidesBottomBarWhenPushed = true
+
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.overrideUserInterfaceStyle = style
+        navigationController?.overrideUserInterfaceStyle = style
+
+        // Hide UIKit nav bar - SwiftUI handles navigation
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        navigationController?.pushViewController(hostingController, animated: true)
     }
 }
 
 extension MoreMenuViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        return menuItems.count
+    func numberOfSections(in _: UITableView) -> Int {
+        return sections.count
+    }
+
+    func tableView(_: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return sections[section].items.count
+    }
+
+    func tableView(_: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return sections[section].title
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        let item = menuItems[indexPath.row]
+        let item = sections[indexPath.section].items[indexPath.row]
 
         var config = cell.defaultContentConfiguration()
         config.text = item.title
@@ -232,6 +272,6 @@ extension MoreMenuViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        menuItems[indexPath.row].action()
+        sections[indexPath.section].items[indexPath.row].action()
     }
 }

@@ -2,10 +2,10 @@
 // TabCustomizationModal.swift
 
 import SwiftUI
+import UIKit
 
-struct TabCustomizationModal: View {
-    @Binding var isPresented: Bool
-    let onApply: () -> Void
+struct TabSettingsView: View {
+    @Environment(\.dismiss) private var dismiss
 
     // Local state for editing
     @State private var alarmsPosition: TabPosition
@@ -18,11 +18,7 @@ struct TabCustomizationModal: View {
     private let originalRemotePosition: TabPosition
     private let originalNightscoutPosition: TabPosition
 
-    init(isPresented: Binding<Bool>, onApply: @escaping () -> Void) {
-        _isPresented = isPresented
-        self.onApply = onApply
-
-        // Initialize with current values
+    init() {
         let currentAlarms = Storage.shared.alarmsPosition.value
         let currentRemote = Storage.shared.remotePosition.value
         let currentNightscout = Storage.shared.nightscoutPosition.value
@@ -37,69 +33,51 @@ struct TabCustomizationModal: View {
     }
 
     var body: some View {
-        NavigationView {
-            Form {
-                Section("Tab Positions") {
-                    TabPositionRow(
-                        title: "Alarms",
-                        icon: "alarm",
-                        position: $alarmsPosition,
-                        otherPositions: [remotePosition, nightscoutPosition]
-                    )
-                    .onChange(of: alarmsPosition) { _ in checkForChanges() }
+        Form {
+            Section("Tab Positions") {
+                TabPositionRow(
+                    title: "Alarms",
+                    icon: "alarm",
+                    position: $alarmsPosition,
+                    otherPositions: [remotePosition, nightscoutPosition]
+                )
+                .onChange(of: alarmsPosition) { _ in checkForChanges() }
 
-                    TabPositionRow(
-                        title: "Remote",
-                        icon: "antenna.radiowaves.left.and.right",
-                        position: $remotePosition,
-                        otherPositions: [alarmsPosition, nightscoutPosition]
-                    )
-                    .onChange(of: remotePosition) { _ in checkForChanges() }
+                TabPositionRow(
+                    title: "Remote",
+                    icon: "antenna.radiowaves.left.and.right",
+                    position: $remotePosition,
+                    otherPositions: [alarmsPosition, nightscoutPosition]
+                )
+                .onChange(of: remotePosition) { _ in checkForChanges() }
 
-                    TabPositionRow(
-                        title: "Nightscout",
-                        icon: "safari",
-                        position: $nightscoutPosition,
-                        otherPositions: [alarmsPosition, remotePosition]
-                    )
-                    .onChange(of: nightscoutPosition) { _ in checkForChanges() }
-                }
-
-                Section {
-                    Text("• Tab 2 and Tab 4 can each hold one item")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text("• Items in 'More Menu' appear under the last tab")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text("• Hidden items are not accessible")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                if hasChanges {
-                    Section {
-                        Text("Changes will be applied when you tap 'Apply'")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                    }
-                }
+                TabPositionRow(
+                    title: "Nightscout",
+                    icon: "safari",
+                    position: $nightscoutPosition,
+                    otherPositions: [alarmsPosition, remotePosition]
+                )
+                .onChange(of: nightscoutPosition) { _ in checkForChanges() }
             }
-            .navigationTitle("Tab Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        isPresented = false
-                    }
-                }
 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Apply") {
+            Section {
+                Text("• Tab 2 and Tab 4 can each hold one item")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("• Items in 'More Menu' appear under the last tab")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("• Hidden items are not accessible")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            if hasChanges {
+                Section {
+                    Button("Apply Changes") {
                         applyChanges()
                     }
                     .fontWeight(.semibold)
-                    .disabled(!hasChanges)
                 }
             }
         }
@@ -113,17 +91,40 @@ struct TabCustomizationModal: View {
     }
 
     private func applyChanges() {
-        // Save the new positions
         Storage.shared.alarmsPosition.value = alarmsPosition
         Storage.shared.remotePosition.value = remotePosition
         Storage.shared.nightscoutPosition.value = nightscoutPosition
 
-        // Dismiss the modal
-        isPresented = false
+        dismiss()
 
-        // Call the completion handler after a small delay to ensure modal is dismissed
+        // Handle tab reorganization after dismissal
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            onApply()
+            handleTabReorganization()
+        }
+    }
+
+    private func handleTabReorganization() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController else { return }
+
+        var tabBarController: UITabBarController?
+        if let tbc = rootVC as? UITabBarController {
+            tabBarController = tbc
+        } else if let nav = rootVC as? UINavigationController,
+                  let tbc = nav.viewControllers.first as? UITabBarController
+        {
+            tabBarController = tbc
+        }
+
+        guard let tabBar = tabBarController else { return }
+
+        if let presented = tabBar.presentedViewController {
+            presented.dismiss(animated: false) {
+                tabBar.selectedIndex = 0
+            }
+        } else {
+            tabBar.selectedIndex = 0
         }
     }
 }
