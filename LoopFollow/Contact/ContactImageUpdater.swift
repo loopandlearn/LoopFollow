@@ -19,7 +19,7 @@ class ContactImageUpdater {
         return ContactColorOption(rawValue: rawValue)?.uiColor ?? .white
     }
 
-    func updateContactImage(bgValue: String, trend: String, delta: String, stale: Bool) {
+    func updateContactImage(bgValue: String, trend: String, delta: String, iob: String, stale: Bool) {
         queue.async {
             guard CNContactStore.authorizationStatus(for: .contacts) == .authorized else {
                 LogManager.shared.log(category: .contact, message: "Access to contacts is not authorized.")
@@ -37,9 +37,13 @@ class ContactImageUpdater {
                     continue
                 }
 
+                if contactType == .IOB, Storage.shared.contactIOB.value != .separate {
+                    continue
+                }
+
                 let contactName = "\(bundleDisplayName) - \(contactType.rawValue)"
 
-                guard let imageData = self.generateContactImage(bgValue: bgValue, trend: trend, delta: delta, stale: stale, contactType: contactType)?.pngData() else {
+                guard let imageData = self.generateContactImage(bgValue: bgValue, trend: trend, delta: delta, iob: iob, stale: stale, contactType: contactType)?.pngData() else {
                     LogManager.shared.log(category: .contact, message: "Failed to generate contact image for \(contactName).")
                     continue
                 }
@@ -100,7 +104,7 @@ class ContactImageUpdater {
         }
     }
 
-    private func generateContactImage(bgValue: String, trend: String, delta: String, stale: Bool, contactType: ContactType) -> UIImage? {
+    private func generateContactImage(bgValue: String, trend: String, delta: String, iob: String, stale: Bool, contactType: ContactType) -> UIImage? {
         let size = CGSize(width: 300, height: 300)
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
@@ -136,8 +140,19 @@ class ContactImageUpdater {
             ]
 
             delta.draw(in: deltaRect, withAttributes: deltaAttributes)
+        } else if contactType == .IOB, Storage.shared.contactIOB.value == .separate {
+            let iobRect = CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
+            let iobFontSize = max(40, 200 - CGFloat(iob.count * 15))
+
+            let iobAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.boldSystemFont(ofSize: iobFontSize),
+                .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
+                .paragraphStyle: paragraphStyle,
+            ]
+
+            iob.draw(in: iobRect, withAttributes: iobAttributes)
         } else if contactType == .BG {
-            let includesExtra = Storage.shared.contactDelta.value == .include || Storage.shared.contactTrend.value == .include
+            let includesExtra = Storage.shared.contactDelta.value == .include || Storage.shared.contactTrend.value == .include || Storage.shared.contactIOB.value == .include
 
             let maxFontSize: CGFloat = includesExtra ? 160 : 200
             let fontSize = maxFontSize - CGFloat(bgValue.count * 15)
@@ -168,7 +183,14 @@ class ContactImageUpdater {
                     .paragraphStyle: paragraphStyle,
                 ]
 
-                let extra = Storage.shared.contactDelta.value == .include ? delta : trend
+                let extra: String
+                if Storage.shared.contactDelta.value == .include {
+                    extra = delta
+                } else if Storage.shared.contactTrend.value == .include {
+                    extra = trend
+                } else {
+                    extra = iob
+                }
                 extra.draw(in: extraRect, withAttributes: extraAttributes)
             }
         }

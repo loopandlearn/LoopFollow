@@ -40,6 +40,7 @@ class Storage {
 
     var contactTrend = StorageValue<ContactIncludeOption>(key: "contactTrend", defaultValue: .off)
     var contactDelta = StorageValue<ContactIncludeOption>(key: "contactDelta", defaultValue: .off)
+    var contactIOB = StorageValue<ContactIncludeOption>(key: "contactIOB", defaultValue: .off)
     var contactEnabled = StorageValue<Bool>(key: "contactEnabled", defaultValue: false)
     var contactBackgroundColor = StorageValue<String>(key: "contactBackgroundColor", defaultValue: ContactColorOption.black.rawValue)
     var contactTextColor = StorageValue<String>(key: "contactTextColor", defaultValue: ContactColorOption.white.rawValue)

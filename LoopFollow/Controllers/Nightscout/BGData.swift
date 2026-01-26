@@ -270,6 +270,7 @@ extension MainViewController {
                         bgValue: Observable.shared.bgText.value,
                         trend: Observable.shared.directionText.value,
                         delta: Observable.shared.deltaText.value,
+                        iob: Observable.shared.iobText.value,
                         stale: Observable.shared.bgStale.value
                     )
             }

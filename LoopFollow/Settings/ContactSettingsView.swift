@@ -50,7 +50,7 @@ struct ContactSettingsView: View {
                     }
 
                     Section(header: Text("Additional Information")) {
-                        Text("To see your trend or delta, include one in the original '\(viewModel.contactName)' contact, or create separate contacts ending in '- Trend' and '- Delta' for up to three contacts on your watch face.")
+                        Text("To see your trend, delta, or IOB, include one in the original '\(viewModel.contactName)' contact, or create separate contacts ending in '- Trend', '- Delta', or '- IOB' for up to four contacts on your watch face.")
                             .font(.footnote)
                             .foregroundColor(.secondary)
                             .padding(.vertical, 4)
@@ -67,6 +67,15 @@ struct ContactSettingsView: View {
                         Text("Show Delta")
                             .font(.subheadline)
                         Picker("Show Delta", selection: $viewModel.contactDelta) {
+                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                                Text(option.rawValue).tag(option)
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+
+                        Text("Show IOB")
+                            .font(.subheadline)
+                        Picker("Show IOB", selection: $viewModel.contactIOB) {
                             ForEach(ContactIncludeOption.allCases, id: \.self) { option in
                                 Text(option.rawValue).tag(option)
                             }
