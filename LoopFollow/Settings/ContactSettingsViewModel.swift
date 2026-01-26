@@ -24,8 +24,9 @@ class ContactSettingsViewModel: ObservableObject {
 
     @Published var contactTrend: ContactIncludeOption {
         didSet {
-            if contactTrend == .include && contactDelta == .include {
-                contactDelta = .off
+            if contactTrend == .include {
+                if contactDelta == .include { contactDelta = .off }
+                if contactIOB == .include { contactIOB = .off }
             }
             Storage.shared.contactTrend.value = contactTrend
             triggerRefresh()
@@ -34,10 +35,22 @@ class ContactSettingsViewModel: ObservableObject {
 
     @Published var contactDelta: ContactIncludeOption {
         didSet {
-            if contactDelta == .include && contactTrend == .include {
-                contactTrend = .off
+            if contactDelta == .include {
+                if contactTrend == .include { contactTrend = .off }
+                if contactIOB == .include { contactIOB = .off }
             }
             Storage.shared.contactDelta.value = contactDelta
+            triggerRefresh()
+        }
+    }
+
+    @Published var contactIOB: ContactIncludeOption {
+        didSet {
+            if contactIOB == .include {
+                if contactTrend == .include { contactTrend = .off }
+                if contactDelta == .include { contactDelta = .off }
+            }
+            Storage.shared.contactIOB.value = contactIOB
             triggerRefresh()
         }
     }
@@ -63,6 +76,7 @@ class ContactSettingsViewModel: ObservableObject {
         contactEnabled = Storage.shared.contactEnabled.value
         contactTrend = Storage.shared.contactTrend.value
         contactDelta = Storage.shared.contactDelta.value
+        contactIOB = Storage.shared.contactIOB.value
         contactBackgroundColor = Storage.shared.contactBackgroundColor.value
         contactTextColor = Storage.shared.contactTextColor.value
 
@@ -74,6 +88,9 @@ class ContactSettingsViewModel: ObservableObject {
 
         Storage.shared.contactDelta.$value
             .assign(to: &$contactDelta)
+
+        Storage.shared.contactIOB.$value
+            .assign(to: &$contactIOB)
 
         Storage.shared.contactBackgroundColor.$value
             .assign(to: &$contactBackgroundColor)

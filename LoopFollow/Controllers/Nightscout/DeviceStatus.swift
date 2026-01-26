@@ -239,6 +239,16 @@ extension MainViewController {
         // Mark device status as loaded for initial loading state
         markDataLoaded("deviceStatus")
 
+        if Storage.shared.contactEnabled.value, Storage.shared.contactIOB.value != .off {
+            contactImageUpdater.updateContactImage(
+                bgValue: Observable.shared.bgText.value,
+                trend: Observable.shared.directionText.value,
+                delta: Observable.shared.deltaText.value,
+                iob: Observable.shared.iobText.value,
+                stale: Observable.shared.bgStale.value
+            )
+        }
+
         LogManager.shared.log(category: .deviceStatus, message: "Update Device Status done", isDebug: true)
     }
 }
