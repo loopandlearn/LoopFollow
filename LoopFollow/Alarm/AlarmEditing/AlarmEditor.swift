@@ -41,7 +41,7 @@ struct AlarmEditor: View {
                 }
                 .navigationTitle(alarm.type.rawValue)
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 
     @ViewBuilder
@@ -77,8 +77,9 @@ struct AlarmEditor: View {
         case .sensorChange: SensorAgeAlarmEditor(alarm: $alarm)
         case .pumpChange: PumpChangeAlarmEditor(alarm: $alarm)
         case .pump: PumpVolumeAlarmEditor(alarm: $alarm)
+        case .pumpBattery: PumpBatteryAlarmEditor(alarm: $alarm)
         case .iob: IOBAlarmEditor(alarm: $alarm)
-        case .battery: BatteryAlarmEditor(alarm: $alarm)
+        case .battery: PhoneBatteryAlarmEditor(alarm: $alarm)
         case .batteryDrop: BatteryDropAlarmEditor(alarm: $alarm)
         case .missedBolus: MissedBolusAlarmEditor(alarm: $alarm)
         }

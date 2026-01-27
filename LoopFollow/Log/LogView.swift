@@ -36,7 +36,7 @@ struct LogView: View {
                 viewModel.loadLogEntries()
             }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Today's Logs", displayMode: .inline)
     }
 }

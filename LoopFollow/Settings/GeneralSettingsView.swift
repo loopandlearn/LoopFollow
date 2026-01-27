@@ -6,7 +6,7 @@ import SwiftUI
 struct GeneralSettingsView: View {
     @ObservedObject var colorBGText = Storage.shared.colorBGText
     @ObservedObject var appBadge = Storage.shared.appBadge
-    @ObservedObject var forceDarkMode = Storage.shared.forceDarkMode
+    @ObservedObject var appearanceMode = Storage.shared.appearanceMode
     @ObservedObject var showStats = Storage.shared.showStats
     @ObservedObject var useIFCC = Storage.shared.useIFCC
     @ObservedObject var showSmallGraph = Storage.shared.showSmallGraph
@@ -36,7 +36,11 @@ struct GeneralSettingsView: View {
                 }
 
                 Section("Display") {
-                    Toggle("Force Dark Mode (restart app)", isOn: $forceDarkMode.value)
+                    Picker("Appearance", selection: $appearanceMode.value) {
+                        ForEach(AppearanceMode.allCases, id: \.self) { mode in
+                            Text(mode.displayName).tag(mode)
+                        }
+                    }
                     Toggle("Display Stats", isOn: $showStats.value)
                     Toggle("Use IFCC A1C", isOn: $useIFCC.value)
                     Toggle("Display Small Graph", isOn: $showSmallGraph.value)
@@ -115,7 +119,7 @@ struct GeneralSettingsView: View {
                 }
             }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("General Settings", displayMode: .inline)
     }
 }

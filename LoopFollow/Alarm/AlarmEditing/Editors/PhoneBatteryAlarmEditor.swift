@@ -1,15 +1,15 @@
 // LoopFollow
-// BatteryAlarmEditor.swift
+// PhoneBatteryAlarmEditor.swift
 
 import SwiftUI
 
-struct BatteryAlarmEditor: View {
+struct PhoneBatteryAlarmEditor: View {
     @Binding var alarm: Alarm
 
     var body: some View {
         Group {
             InfoBanner(
-                text: "This warns you when the phone’s battery gets low, based on the percentage you choose.",
+                text: "This warns you when the phone's battery gets low, based on the percentage you choose.",
                 alarmType: alarm.type
             )
 

@@ -33,11 +33,7 @@ extension MainViewController {
             let profileISF = profileManager.currentISF()
             var enactedISF: HKQuantity?
             if let enactedISFValue = enactedOrSuggested["ISF"] as? Double {
-                var determinedISFUnit: HKUnit = .milligramsPerDeciliter
-                if enactedISFValue < 16 {
-                    determinedISFUnit = .millimolesPerLiter
-                }
-                enactedISF = HKQuantity(unit: determinedISFUnit, doubleValue: enactedISFValue)
+                enactedISF = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: enactedISFValue)
             }
             if let profileISF = profileISF, let enactedISF = enactedISF, profileISF != enactedISF {
                 infoManager.updateInfoData(type: .isf, firstValue: profileISF, secondValue: enactedISF, separator: .arrow)

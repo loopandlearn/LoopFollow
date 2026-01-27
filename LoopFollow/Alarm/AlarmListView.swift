@@ -90,7 +90,7 @@ struct AlarmListView: View {
                 Button { sheetInfo = .picker } label: { Image(systemName: "plus") }
             }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 
     // MARK: - Views

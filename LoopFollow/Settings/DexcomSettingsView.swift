@@ -37,7 +37,7 @@ struct DexcomSettingsView: View {
                 importSection
             }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Dexcom Settings", displayMode: .inline)
     }
 

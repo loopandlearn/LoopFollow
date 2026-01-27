@@ -64,17 +64,20 @@ extension MainViewController {
             LoopStatusLabel.textAlignment = .right
             LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
 
-            if Storage.shared.forceDarkMode.value {
+            switch Storage.shared.appearanceMode.value {
+            case .dark:
                 LoopStatusLabel.textColor = UIColor.white
-            } else {
+            case .light:
                 LoopStatusLabel.textColor = UIColor.black
+            case .system:
+                LoopStatusLabel.textColor = UIColor.label
             }
         }
     }
 
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
-        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
+        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
         if Storage.shared.device.value == "Loop" {
@@ -125,6 +128,14 @@ extension MainViewController {
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U")
                 }
+            }
+
+            // Parse pump battery percentage
+            if let pumpBatteryRecord = lastPumpRecord["battery"] as? [String: AnyObject],
+               let pumpBatteryPercent = pumpBatteryRecord["percent"] as? Double
+            {
+                infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", pumpBatteryPercent) + "%")
+                Observable.shared.pumpBatteryLevel.value = pumpBatteryPercent
             }
 
             if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],

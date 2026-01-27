@@ -6,19 +6,42 @@ import SwiftUI
 import UIKit
 
 class RemoteViewController: UIViewController {
-    private var cancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
     private var hostingController: UIHostingController<AnyView>?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        cancellable = Storage.shared.device.$value
+        // Apply initial appearance
+        overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+
+        Storage.shared.device.$value
             .removeDuplicates()
             .sink { [weak self] _ in
                 DispatchQueue.main.async {
                     self?.updateView()
                 }
             }
+            .store(in: &cancellables)
+
+        // Listen for appearance setting changes
+        Storage.shared.appearanceMode.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] mode in
+                self?.overrideUserInterfaceStyle = mode.userInterfaceStyle
+                self?.hostingController?.overrideUserInterfaceStyle = mode.userInterfaceStyle
+            }
+            .store(in: &cancellables)
+
+        // Listen for system appearance changes (when in System mode)
+        NotificationCenter.default.publisher(for: .appearanceDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+                self?.overrideUserInterfaceStyle = style
+                self?.hostingController?.overrideUserInterfaceStyle = style
+            }
+            .store(in: &cancellables)
     }
 
     private func updateView() {
@@ -89,7 +112,15 @@ class RemoteViewController: UIViewController {
         updateView()
     }
 
-    deinit {
-        cancellable?.cancel()
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if Storage.shared.appearanceMode.value == .system,
+           previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle
+        {
+            let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+            overrideUserInterfaceStyle = style
+            hostingController?.overrideUserInterfaceStyle = style
+        }
     }
 }

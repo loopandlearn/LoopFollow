@@ -219,6 +219,8 @@ struct AlarmSelectionRow: View {
             return "Pump Change Alert"
         case .pump:
             return "Pump Insulin Alert"
+        case .pumpBattery:
+            return "Pump Battery Alert"
         case .battery:
             return "Low Battery"
         case .batteryDrop:

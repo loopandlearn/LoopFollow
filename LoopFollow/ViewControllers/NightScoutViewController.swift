@@ -1,17 +1,33 @@
 // LoopFollow
 // NightScoutViewController.swift
 
+import Combine
 import UIKit
 import WebKit
 
 class NightscoutViewController: UIViewController {
     @IBOutlet var webView: WKWebView!
+    private var cancellables = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if Storage.shared.forceDarkMode.value {
-            overrideUserInterfaceStyle = .dark
-        }
+        overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+
+        // Listen for appearance setting changes
+        Storage.shared.appearanceMode.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] mode in
+                self?.overrideUserInterfaceStyle = mode.userInterfaceStyle
+            }
+            .store(in: &cancellables)
+
+        // Listen for system appearance changes (when in System mode)
+        NotificationCenter.default.publisher(for: .appearanceDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+            }
+            .store(in: &cancellables)
 
         var url = Storage.shared.url.value
         let token = Storage.shared.token.value
@@ -39,6 +55,16 @@ class NightscoutViewController: UIViewController {
         clearWebCache()
         webView.reload()
         sender.endRefreshing()
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if Storage.shared.appearanceMode.value == .system,
+           previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle
+        {
+            overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        }
     }
 
     func clearWebCache() {
