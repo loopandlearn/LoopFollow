@@ -31,21 +31,33 @@ struct ContactSettingsView: View {
 
                 if viewModel.contactEnabled {
                     Section(header: Text("Color Options")) {
-                        Text("Select the colors for your BG values.  Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
+                        Text("Select the colors for your BG values. Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
                             .font(.footnote)
                             .foregroundColor(.secondary)
                             .padding(.vertical, 4)
 
-                        Picker("Select Background Color", selection: $viewModel.contactBackgroundColor) {
+                        Picker("Background Color", selection: $viewModel.contactBackgroundColor) {
                             ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
                                 Text(option.rawValue.capitalized).tag(option.rawValue)
                             }
                         }
 
-                        Picker("Select Text Color", selection: $viewModel.contactTextColor) {
-                            ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
-                                Text(option.rawValue.capitalized).tag(option.rawValue)
+                        Picker("Color Mode", selection: $viewModel.contactColorMode) {
+                            ForEach(ContactColorMode.allCases, id: \.self) { mode in
+                                Text(mode.displayName).tag(mode)
                             }
+                        }
+
+                        if viewModel.contactColorMode == .staticColor {
+                            Picker("Text Color", selection: $viewModel.contactTextColor) {
+                                ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
+                                    Text(option.rawValue.capitalized).tag(option.rawValue)
+                                }
+                            }
+                        } else {
+                            Text("Dynamic mode colors text based on BG range: Green (in range), Yellow (high), Red (low)")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
                         }
                     }
 
