@@ -1,7 +1,7 @@
 // LoopFollow
 // ContactType.swift
 
-enum ContactType: String, CaseIterable {
+enum ContactType: String, CaseIterable, Codable {
     case BG
     case Trend
     case Delta

@@ -24,33 +24,63 @@ class ContactSettingsViewModel: ObservableObject {
 
     @Published var contactTrend: ContactIncludeOption {
         didSet {
-            if contactTrend == .include {
-                if contactDelta == .include { contactDelta = .off }
-                if contactIOB == .include { contactIOB = .off }
-            }
             Storage.shared.contactTrend.value = contactTrend
+            if contactTrend != .include {
+                contactTrendTarget = .BG
+            }
+            if contactTrend != .separate {
+                if contactDeltaTarget == .Trend { contactDeltaTarget = .BG }
+                if contactIOBTarget == .Trend { contactIOBTarget = .BG }
+            }
             triggerRefresh()
         }
     }
 
     @Published var contactDelta: ContactIncludeOption {
         didSet {
-            if contactDelta == .include {
-                if contactTrend == .include { contactTrend = .off }
-                if contactIOB == .include { contactIOB = .off }
-            }
             Storage.shared.contactDelta.value = contactDelta
+            if contactDelta != .include {
+                contactDeltaTarget = .BG
+            }
+            if contactDelta != .separate {
+                if contactTrendTarget == .Delta { contactTrendTarget = .BG }
+                if contactIOBTarget == .Delta { contactIOBTarget = .BG }
+            }
             triggerRefresh()
         }
     }
 
     @Published var contactIOB: ContactIncludeOption {
         didSet {
-            if contactIOB == .include {
-                if contactTrend == .include { contactTrend = .off }
-                if contactDelta == .include { contactDelta = .off }
-            }
             Storage.shared.contactIOB.value = contactIOB
+            if contactIOB != .include {
+                contactIOBTarget = .BG
+            }
+            if contactIOB != .separate {
+                if contactTrendTarget == .IOB { contactTrendTarget = .BG }
+                if contactDeltaTarget == .IOB { contactDeltaTarget = .BG }
+            }
+            triggerRefresh()
+        }
+    }
+
+    @Published var contactTrendTarget: ContactType {
+        didSet {
+            Storage.shared.contactTrendTarget.value = contactTrendTarget
+            triggerRefresh()
+        }
+    }
+
+    @Published var contactDeltaTarget: ContactType {
+        didSet {
+            Storage.shared.contactDeltaTarget.value = contactDeltaTarget
+            triggerRefresh()
+        }
+    }
+
+    @Published var contactIOBTarget: ContactType {
+        didSet {
+            Storage.shared.contactIOBTarget.value = contactIOBTarget
             triggerRefresh()
         }
     }
@@ -77,6 +107,9 @@ class ContactSettingsViewModel: ObservableObject {
         contactTrend = Storage.shared.contactTrend.value
         contactDelta = Storage.shared.contactDelta.value
         contactIOB = Storage.shared.contactIOB.value
+        contactTrendTarget = Storage.shared.contactTrendTarget.value
+        contactDeltaTarget = Storage.shared.contactDeltaTarget.value
+        contactIOBTarget = Storage.shared.contactIOBTarget.value
         contactBackgroundColor = Storage.shared.contactBackgroundColor.value
         contactTextColor = Storage.shared.contactTextColor.value
 
@@ -92,11 +125,34 @@ class ContactSettingsViewModel: ObservableObject {
         Storage.shared.contactIOB.$value
             .assign(to: &$contactIOB)
 
+        Storage.shared.contactTrendTarget.$value
+            .assign(to: &$contactTrendTarget)
+
+        Storage.shared.contactDeltaTarget.$value
+            .assign(to: &$contactDeltaTarget)
+
+        Storage.shared.contactIOBTarget.$value
+            .assign(to: &$contactIOBTarget)
+
         Storage.shared.contactBackgroundColor.$value
             .assign(to: &$contactBackgroundColor)
 
         Storage.shared.contactTextColor.$value
             .assign(to: &$contactTextColor)
+    }
+
+    func availableTargets(for field: ContactType) -> [ContactType] {
+        var targets: [ContactType] = [.BG]
+        if field != .Trend, contactTrend == .separate {
+            targets.append(.Trend)
+        }
+        if field != .Delta, contactDelta == .separate {
+            targets.append(.Delta)
+        }
+        if field != .IOB, contactIOB == .separate {
+            targets.append(.IOB)
+        }
+        return targets
     }
 
     private func triggerRefresh() {
