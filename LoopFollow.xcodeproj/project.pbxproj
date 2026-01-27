@@ -16,6 +16,7 @@
 		656F8C102E49F36F0008DC1D /* QRCodeDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */; };
 		656F8C122E49F3780008DC1D /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */; };
 		656F8C142E49F3D20008DC1D /* RemoteCommandSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */; };
+		657F99E92F0BC81500F732BD /* OTPSecureMessenger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657F99E82F0BC81500F732BD /* OTPSecureMessenger.swift */; };
 		6584B1012E4A263900135D4D /* TOTPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6584B1002E4A263900135D4D /* TOTPService.swift */; };
 		6589CC622E9E7D1600BB18FE /* ImportExportSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC532E9E7D1600BB18FE /* ImportExportSettingsView.swift */; };
 		6589CC632E9E7D1600BB18FE /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC5D2E9E7D1600BB18FE /* GeneralSettingsView.swift */; };
@@ -418,6 +419,7 @@
 		656F8C0F2E49F36F0008DC1D /* QRCodeDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeDisplayView.swift; sourceTree = "<group>"; };
 		656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommandSettings.swift; sourceTree = "<group>"; };
+		657F99E82F0BC81500F732BD /* OTPSecureMessenger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPSecureMessenger.swift; sourceTree = "<group>"; };
 		6584B1002E4A263900135D4D /* TOTPService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPService.swift; sourceTree = "<group>"; };
 		6589CC522E9E7D1600BB18FE /* ExportableSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportableSettings.swift; sourceTree = "<group>"; };
 		6589CC532E9E7D1600BB18FE /* ImportExportSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportExportSettingsView.swift; sourceTree = "<group>"; };
@@ -1247,6 +1249,7 @@
 		DDEF503E2D479B8A00884336 /* LoopAPNS */ = {
 			isa = PBXGroup;
 			children = (
+				657F99E82F0BC81500F732BD /* OTPSecureMessenger.swift */,
 				6584B1002E4A263900135D4D /* TOTPService.swift */,
 				DDEF503F2D479B8A00884336 /* LoopAPNSService.swift */,
 				DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */,
@@ -2117,6 +2120,7 @@
 				DD5DA27C2DC930D6003D44FC /* GlucoseValue.swift in Sources */,
 				DD9ACA062D32AF7900415D8A /* TreatmentsTask.swift in Sources */,
 				DD98F54424BCEFEE0007425A /* ShareClientExtension.swift in Sources */,
+				657F99E92F0BC81500F732BD /* OTPSecureMessenger.swift in Sources */,
 				DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */,
 				DD0C0C602C415B9D00DBADDF /* ProfileManager.swift in Sources */,
 				DD83164C2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift in Sources */,
