@@ -77,25 +77,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let title = alert["title"] as? String ?? ""
                 let body = alert["body"] as? String ?? ""
                 LogManager.shared.log(category: .general, message: "Notification - Title: \(title), Body: \(body)")
-
-                // Check if this is a command response from Loop
-                if let commandStatus = userInfo["command_status"] as? String,
-                   let commandType = userInfo["command_type"] as? String
-                {
-                    LogManager.shared.log(category: .apns, message: "Loop command response - Type: \(commandType), Status: \(commandStatus), Message: \(body)")
-
-                    // Post notification for UI to handle if needed
-                    NotificationCenter.default.post(
-                        name: NSNotification.Name("LoopCommandResponse"),
-                        object: nil,
-                        userInfo: [
-                            "commandType": commandType,
-                            "commandStatus": commandStatus,
-                            "message": body,
-                            "title": title,
-                        ]
-                    )
-                }
             }
 
             // Handle silent notification (content-available)
