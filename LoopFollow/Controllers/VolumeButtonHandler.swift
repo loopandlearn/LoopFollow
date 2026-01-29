@@ -10,7 +10,7 @@ import UIKit
 class VolumeButtonHandler: NSObject {
     static let shared = VolumeButtonHandler()
 
-    /// Volume button snoozer activation delay in seconds
+    // Volume button snoozer activation delay in seconds
     private let volumeButtonActivationDelay: TimeInterval = 0.9
 
     // Volume button detection parameters
@@ -18,7 +18,7 @@ class VolumeButtonHandler: NSObject {
     private let volumeButtonPressTimeWindow: TimeInterval = 0.3
     private let volumeButtonCooldown: TimeInterval = 0.5
 
-    /// KVO observer for system volume
+    // KVO observer for system volume
     private var volumeObserver: NSKeyValueObservation?
 
     private var lastVolume: Float = 0.0
@@ -31,7 +31,7 @@ class VolumeButtonHandler: NSObject {
     private var lastSignificantVolumeChange: Date?
     private var volumeChangePattern: [TimeInterval] = []
 
-    /// Remote command center for handling bluetooth/CarPlay buttons
+    // Remote command center for handling bluetooth/CarPlay buttons
     private var remoteCommandsEnabled = false
 
     private var cancellables = Set<AnyCancellable>()

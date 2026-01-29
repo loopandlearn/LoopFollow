@@ -52,7 +52,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - Remote Notifications
 
-    /// Called when successfully registered for remote notifications
+    // Called when successfully registered for remote notifications
     func application(_: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
 
@@ -61,12 +61,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         LogManager.shared.log(category: .general, message: "Successfully registered for remote notifications with token: \(tokenString)")
     }
 
-    /// Called when failed to register for remote notifications
+    // Called when failed to register for remote notifications
     func application(_: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         LogManager.shared.log(category: .general, message: "Failed to register for remote notifications: \(error.localizedDescription)")
     }
 
-    /// Called when a remote notification is received
+    // Called when a remote notification is received
     func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         LogManager.shared.log(category: .general, message: "Received remote notification: \(userInfo)")
 

@@ -5,7 +5,7 @@ import Foundation
 import UIKit
 
 extension MainViewController {
-    /// NS Cage Struct
+    // NS Cage Struct
     struct cageData: Codable {
         var created_at: String
     }
@@ -18,27 +18,27 @@ extension MainViewController {
         var created_at: String
     }
 
-    /// NS Basal Profile Struct
+    // NS Basal Profile Struct
     struct basalProfileStruct: Codable {
         var value: Double
         var time: String
         var timeAsSeconds: Double
     }
 
-    /// NS Basal Data  Struct
+    // NS Basal Data  Struct
     struct basalGraphStruct: Codable {
         var basalRate: Double
         var date: TimeInterval
     }
 
-    /// NS Bolus Data  Struct
+    // NS Bolus Data  Struct
     struct bolusGraphStruct: Codable {
         var value: Double
         var date: TimeInterval
         var sgv: Int
     }
 
-    /// NS Bolus Data  Struct
+    // NS Bolus Data  Struct
     struct carbGraphStruct: Codable {
         var value: Double
         var date: TimeInterval

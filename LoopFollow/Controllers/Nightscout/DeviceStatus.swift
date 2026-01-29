@@ -75,7 +75,7 @@ extension MainViewController {
         }
     }
 
-    /// NS Device Status Response Processor
+    // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
         infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
 

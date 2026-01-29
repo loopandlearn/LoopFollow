@@ -44,6 +44,7 @@ struct AlarmEditor: View {
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 
+    @ViewBuilder
     private func innerEditor() -> some View {
         Form {
             innerEditorBody()

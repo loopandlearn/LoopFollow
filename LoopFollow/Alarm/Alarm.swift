@@ -183,9 +183,9 @@ struct Alarm: Identifiable, Codable, Equatable {
     /// “Ignore Under BG” (if current BG is below this, skip the alert)
     var missedBolusIgnoreUnderBG: Double?
 
-    /// ─────────────────────────────────────────────────────────────
-    /// Bolus‑Count fields ─
-    /// ─────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────
+    // Bolus‑Count fields ─
+    // ─────────────────────────────────────────────────────────────
     /// trigger when N or more of those boluses occur...
     var bolusCountThreshold: Int?
     /// ...within this many minutes
@@ -266,7 +266,7 @@ struct Alarm: Identifiable, Codable, Equatable {
 
         switch type {
         case .buildExpire:
-            // Alert 7 days before the build expires
+            /// Alert 7 days before the build expires
             threshold = 7
             soundFile = .wrongAnswer
             snoozeDuration = 1

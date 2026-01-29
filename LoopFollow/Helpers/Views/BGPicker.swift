@@ -12,9 +12,7 @@ struct BGPicker: View {
 
     // MARK: – Helpers
 
-    private var unit: HKUnit {
-        Localizer.getPreferredUnit()
-    }
+    private var unit: HKUnit { Localizer.getPreferredUnit() }
 
     private var allValues: [Double] {
         if unit == .millimolesPerLiter {

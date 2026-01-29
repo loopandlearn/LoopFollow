@@ -13,12 +13,12 @@ protocol UserDefaultsAnyValue {
 ///
 /// Another feature of this class is that when the value changes, the change can be observed by multiple observers. There are two observation levels: the instance level, when the observers register directly to the UserDefaultsValue instance, and group level, if the UserDefaultsValue instance is embeded in a group (UserDefaultsValueGroups class manages the groups). It is very convenient to declare related values in the same group, so when one of them changes, the group observers are notified that a change occured in that group (no need to observe each particular UserDefaultsValue instance).
 class UserDefaultsValue<T: AnyConvertible & Equatable>: UserDefaultsAnyValue {
-    /// user defaults key (UserDefaultsAnyValue protocol implementation)
+    // user defaults key (UserDefaultsAnyValue protocol implementation)
     let key: String
 
     typealias ValueType = T
 
-    /// the value (strong typed)
+    // the value (strong typed)
     var value: T {
         didSet {
             // continue only if the new value is different than old value
@@ -69,16 +69,16 @@ class UserDefaultsValue<T: AnyConvertible & Equatable>: UserDefaultsAnyValue {
         return UserDefaultsValue.defaults.object(forKey: key) != nil
     }
 
-    /// on change closure
+    // on change closure
     private let onChange: ((T) -> Void)?
 
-    /// validate & transform closure : giving the new value, validate it; if validations passes, return the new value; if fails, transform the value, returning a modified version or ... return nil and the change will not gonna happen
+    // validate & transform closure : giving the new value, validate it; if validations passes, return the new value; if fails, transform the value, returning a modified version or ... return nil and the change will not gonna happen
     private let validation: ((T) -> T?)?
 
-    /// value change observers
+    // value change observers
     private var observers: [UUID: (T) -> Void] = [:]
 
-    /// user defaults used for persistence
+    // user defaults used for persistence
     private class var defaults: UserDefaults {
         return UserDefaults(suiteName: AppConstants.APP_GROUP_ID)!
     }

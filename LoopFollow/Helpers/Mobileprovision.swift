@@ -73,16 +73,16 @@ struct MobileProvision: Decodable {
     }
 }
 
-/// Factory methods
+// Factory methods
 extension MobileProvision {
-    /// Read mobileprovision file embedded in app.
+    // Read mobileprovision file embedded in app.
     static func read() -> MobileProvision? {
         let profilePath: String? = Bundle.main.path(forResource: "embedded", ofType: "mobileprovision")
         guard let path = profilePath else { return nil }
         return read(from: path)
     }
 
-    /// Read a .mobileprovision file on disk
+    // Read a .mobileprovision file on disk
     static func read(from profilePath: String) -> MobileProvision? {
         guard let plistDataString = try? NSString(contentsOfFile: profilePath,
                                                   encoding: String.Encoding.isoLatin1.rawValue) else { return nil }
@@ -98,7 +98,8 @@ extension MobileProvision {
         guard let plist = extractedPlist?.appending("</plist>").data(using: .isoLatin1) else { return nil }
         let decoder = PropertyListDecoder()
         do {
-            return try decoder.decode(MobileProvision.self, from: plist)
+            let provision = try decoder.decode(MobileProvision.self, from: plist)
+            return provision
         } catch {
             return nil
         }

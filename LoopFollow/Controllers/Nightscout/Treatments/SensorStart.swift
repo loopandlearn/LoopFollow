@@ -14,7 +14,7 @@ extension MainViewController {
         }
     }
 
-    /// NS Sensor Start Response Processor
+    // NS Sensor Start Response Processor
     func processSensorStart(entries: [sageData]) {
         sensorStartGraphData.removeAll()
         var lastFoundIndex = 0

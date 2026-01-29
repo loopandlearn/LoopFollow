@@ -20,8 +20,8 @@ struct AddAlarmSheet: View {
                             Section(header: Text(group.rawValue)
                                 .font(.headline)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 4))
-                            {
+                                .padding(.horizontal, 4)
+                            ) {
                                 ForEach(AlarmType.allCases.filter { $0.group == group }, id: \.self) { type in
                                     AlarmTile(type: type) {
                                         onSelect(type)

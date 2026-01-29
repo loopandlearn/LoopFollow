@@ -5,7 +5,7 @@ import Foundation
 import UIKit
 
 extension MainViewController {
-    /// Dex Share Web Call
+    // Dex Share Web Call
     func webLoadDexShare() {
         // Dexcom Share only returns 24 hrs of data as of now
         // Requesting more just for consistency with NS
@@ -42,7 +42,7 @@ extension MainViewController {
         }
     }
 
-    /// NS BG Data Web call
+    // NS BG Data Web call
     func webLoadNSBGData(dexData: [ShareGlucoseData] = []) {
         // This kicks it out in the instance where dexcom fails but they aren't using NS &&
         if !IsNightscoutEnabled() {
@@ -218,7 +218,7 @@ extension MainViewController {
         }
     }
 
-    /// NS BG Data Front end updater
+    // NS BG Data Front end updater
     func viewUpdateNSBG(sourceName: String) {
         DispatchQueue.main.async {
             TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date())

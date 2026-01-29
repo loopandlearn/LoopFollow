@@ -80,7 +80,7 @@ class LoopAPNSService {
             return nil
         }
 
-        return [
+        let returnInfo: [String: Any] = [
             "production_environment": BuildDetails.default.isTestFlightBuild(),
             "device_token": loopFollowDeviceToken,
             "bundle_id": Bundle.main.bundleIdentifier ?? "",
@@ -88,6 +88,8 @@ class LoopAPNSService {
             "key_id": keyIdForReturn,
             "apns_key": apnsKeyForReturn,
         ]
+
+        return returnInfo
     }
 
     /// Validates the Loop APNS setup by checking all required fields
@@ -104,7 +106,9 @@ class LoopAPNSService {
         let hasBasicSetup = hasKeyId && hasAPNSKey && hasQrCode
 
         // For full validation (after device token is fetched), check everything
-        return hasBasicSetup && hasDeviceToken && hasBundleIdentifier
+        let hasFullSetup = hasBasicSetup && hasDeviceToken && hasBundleIdentifier
+
+        return hasFullSetup
     }
 
     /// Sends carbs via APNS push notification

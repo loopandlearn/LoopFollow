@@ -4,7 +4,7 @@
 import Foundation
 
 extension MainViewController {
-    /// NS Profile Web Call
+    // NS Profile Web Call
     func webLoadNSProfile() {
         NightscoutUtils.executeRequest(eventType: .profile, parameters: [:]) { (result: Result<NSProfile, Error>) in
             switch result {
@@ -16,7 +16,7 @@ extension MainViewController {
         }
     }
 
-    /// NS Profile Response Processor
+    // NS Profile Response Processor
     func updateProfile(profileData: NSProfile) {
         guard let store = profileData.store["default"] ?? profileData.store["Default"] else {
             return
