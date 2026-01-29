@@ -343,7 +343,7 @@ struct OverrideActivationModal: View {
         }
     }
 
-    // Helper function to format duration in hours and minutes
+    /// Helper function to format duration in hours and minutes
     private func formatDuration(_ hours: Double) -> String {
         let totalMinutes = Int(hours * 60)
         let hours = totalMinutes / 60

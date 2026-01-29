@@ -4,7 +4,7 @@
 import Foundation
 
 extension MainViewController {
-    // NS Cage Web Call
+    /// NS Cage Web Call
     func webLoadNSCage() {
         let currentTimeString = dateTimeUtils.getDateTimeString()
 
@@ -24,7 +24,7 @@ extension MainViewController {
         }
     }
 
-    // NS Cage Response Processor
+    /// NS Cage Response Processor
     func updateCage(data: [cageData]) {
         infoManager.clearInfoData(type: .cage)
         if data.count == 0 {

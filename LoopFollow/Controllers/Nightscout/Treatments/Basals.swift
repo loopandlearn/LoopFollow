@@ -4,7 +4,7 @@
 import Foundation
 
 extension MainViewController {
-    // NS Temp Basal Response Processor
+    /// NS Temp Basal Response Processor
     func processNSBasals(entries: [[String: AnyObject]]) {
         infoManager.clearInfoData(type: .basal)
 

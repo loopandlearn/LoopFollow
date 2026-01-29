@@ -4,7 +4,7 @@
 import Foundation
 
 extension MainViewController {
-    // NS SMB Processor
+    /// NS SMB Processor
     func processNSSmb(entries: [[String: AnyObject]]) {
         smbData.removeAll()
         var lastFoundIndex = 0

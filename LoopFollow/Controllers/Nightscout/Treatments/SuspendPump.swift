@@ -4,7 +4,7 @@
 import Foundation
 
 extension MainViewController {
-    // NS Suspend Pump Response Processor
+    /// NS Suspend Pump Response Processor
     func processSuspendPump(entries: [[String: AnyObject]]) {
         suspendGraphData.removeAll()
 

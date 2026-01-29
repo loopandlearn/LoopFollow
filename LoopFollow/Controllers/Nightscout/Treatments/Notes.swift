@@ -5,7 +5,7 @@ import Foundation
 import UIKit
 
 extension MainViewController {
-    // NS Note Response Processor
+    /// NS Note Response Processor
     func processNotes(entries: [[String: AnyObject]]) {
         // because it's a small array, we're going to destroy and reload every time.
         noteGraphData.removeAll()

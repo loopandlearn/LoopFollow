@@ -14,8 +14,6 @@ import Foundation
 /// cannula 3-day hard-stop.  Automatically disables itself after firing.
 struct PumpChangeCondition: AlarmCondition {
     static let type: AlarmType = .pumpChange
-    init() {}
-
     /// Pod lifetime = 3 days = 72 h
     private let lifetime: TimeInterval = 3 * 24 * 60 * 60
 

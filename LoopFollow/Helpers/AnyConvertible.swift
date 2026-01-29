@@ -9,7 +9,7 @@ protocol AnyConvertible {
     static func fromAny(_ anyValue: Any) -> Self?
 }
 
-// common type implementations
+/// common type implementations
 extension Bool: AnyConvertible {
     func toAny() -> Any {
         return self

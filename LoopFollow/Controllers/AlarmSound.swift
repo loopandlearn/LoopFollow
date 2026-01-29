@@ -6,7 +6,7 @@ import Foundation
 import MediaPlayer
 import UIKit
 
-/*
+/**
  * Class that handles the playing and the volume of the alarm sound.
  */
 class AlarmSound {
@@ -48,7 +48,7 @@ class AlarmSound {
         AlarmSound.stop()
     }
 
-    /*
+    /**
      * Sets the audio volume to 0.
      */
     static func muteVolume() {
@@ -61,7 +61,7 @@ class AlarmSound {
         soundURL = Bundle.main.url(forResource: str, withExtension: "caf")!
     }
 
-    /*
+    /**
      * Sets the volume of the alarm back to the volume before it has been muted.
      */
     static func unmuteVolume() {
@@ -284,7 +284,7 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
         }
     }
 
-    /* if an error occurs while decoding it will be reported to the delegate. */
+    /** if an error occurs while decoding it will be reported to the delegate. */
     func audioPlayerDecodeErrorDidOccur(_: AVAudioPlayer, error: Error?) {
         if let error = error {
             LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerDecodeErrorDidOccur: \(error)")
@@ -302,14 +302,14 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
     }
 
     /* audioPlayerEndInterruption:withOptions: is called when the audio session interruption has ended and this player had been interrupted while playing. */
-    /* Currently the only flag is AVAudioSessionInterruptionFlags_ShouldResume. */
+    /** Currently the only flag is AVAudioSessionInterruptionFlags_ShouldResume. */
     func audioPlayerEndInterruption(_: AVAudioPlayer, withOptions flags: Int) {
         LogManager.shared.log(category: .alarm, message: "AlarmRule - audioPlayerEndInterruption withOptions: \(flags)")
         Observable.shared.alarmSoundPlaying.value = false
     }
 }
 
-// Helper function inserted by Swift 4.2 migrator.
+/// Helper function inserted by Swift 4.2 migrator.
 private func convertFromAVAudioSessionCategory(_ input: AVAudioSession.Category) -> String {
     return input.rawValue
 }

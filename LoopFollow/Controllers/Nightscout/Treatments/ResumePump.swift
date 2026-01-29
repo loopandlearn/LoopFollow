@@ -4,7 +4,7 @@
 import Foundation
 
 extension MainViewController {
-    // NS Resume Pump Response Processor
+    /// NS Resume Pump Response Processor
     func processResumePump(entries: [[String: AnyObject]]) {
         resumeGraphData.removeAll()
 

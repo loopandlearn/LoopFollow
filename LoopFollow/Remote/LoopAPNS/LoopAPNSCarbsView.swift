@@ -23,7 +23,7 @@ struct LoopAPNSCarbsView: View {
     @FocusState private var carbsFieldIsFocused: Bool
     @FocusState private var absorptionFieldIsFocused: Bool
 
-    // Computed property to check if TOTP should be blocked
+    /// Computed property to check if TOTP should be blocked
     private var isTOTPBlocked: Bool {
         TOTPService.shared.isTOTPBlocked(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
     }
@@ -421,7 +421,7 @@ struct LoopAPNSCarbsView: View {
     }
 }
 
-// APNS Payload structure for carbs
+/// APNS Payload structure for carbs
 struct LoopAPNSPayload {
     enum PayloadType {
         case carbs

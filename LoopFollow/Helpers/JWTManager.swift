@@ -44,7 +44,7 @@ class JWTManager {
         }
     }
 
-    // Invalidate the cache by clearing values in Storage.shared
+    /// Invalidate the cache by clearing values in Storage.shared
     func invalidateCache() {
         Storage.shared.cachedJWT.value = nil
         Storage.shared.jwtExpirationDate.value = nil

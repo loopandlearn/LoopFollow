@@ -18,7 +18,7 @@ struct InfoBanner: View {
     var tint: Color = Color.blue.opacity(0.20)
     var border: Color = Color.blue.opacity(0.40)
 
-    // ────────── View ──────────
+    /// ────────── View ──────────
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: alarmType?.icon ?? "info.circle.fill")

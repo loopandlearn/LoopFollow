@@ -39,7 +39,7 @@ class UserDefaultsValueGroups {
         }
     }
 
-    // called by UserDefaultsValue instances when value changes
+    /// called by UserDefaultsValue instances when value changes
     class func valueChanged(_ value: UserDefaultsAnyValue) {
         valueKeyToGroupNames[value.key]?.forEach { groupName in
             notifyValueChanged(value, in: groupName)
@@ -57,7 +57,7 @@ class UserDefaultsValueGroups {
     private static var groupNameToObservers: [String: [UUID: (UserDefaultsAnyValue, String) -> Void]] = [:]
 }
 
-// user default values group definitions
+/// user default values group definitions
 extension UserDefaultsValueGroups {
     enum GroupNames {
         static let watchSync = "watchSync"

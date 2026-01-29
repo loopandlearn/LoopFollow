@@ -119,7 +119,7 @@ extension MainViewController {
         }
     }
 
-    // Speaks the current blood glucose value and the change from the previous value.
+    /// Speaks the current blood glucose value and the change from the previous value.
     func speakBG(currentValue: Int, previousValue: Int) {
         // 1. Check if there's a new, unspoken BG value
         guard let lastBG = bgData.last else {

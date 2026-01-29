@@ -6,7 +6,7 @@ import HealthKit
 import UIKit
 
 extension MainViewController {
-    // NS Temporary Target Response Processor
+    /// NS Temporary Target Response Processor
     func processNSTemporaryTarget(entries: [[String: AnyObject]]) {
         tempTargetGraphData.removeAll()
         var activeTempTarget: Int?

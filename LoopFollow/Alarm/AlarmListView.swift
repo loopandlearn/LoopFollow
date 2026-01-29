@@ -95,7 +95,6 @@ struct AlarmListView: View {
 
     // MARK: - Views
 
-    @ViewBuilder
     private func alarmRow(for alarm: Alarm) -> some View {
         Button {
             selectedAlarm = alarm

@@ -115,10 +115,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var bgDataShare: [ShareGlucoseData] = []
     var dexShare: ShareClient?
 
-    // calendar setup
+    /// calendar setup
     let store = EKEventStore()
 
-    // Stores the timestamp of the last BG value that was spoken.
+    /// Stores the timestamp of the last BG value that was spoken.
     var lastSpokenBGDate: TimeInterval = 0
 
     var autoScrollPauseUntil: Date?
@@ -243,7 +243,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
-        /// When an alarm is triggered, go to the snoozer tab
+        // When an alarm is triggered, go to the snoozer tab
         Observable.shared.currentAlarm.$value
             .receive(on: DispatchQueue.main)
             .compactMap { $0 }
@@ -639,7 +639,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             Storage.shared.nightscoutPosition.value == .more
     }
 
-    // Update the Home Screen Quick Action for toggling the "Speak BG" feature based on the current speakBG setting.
+    /// Update the Home Screen Quick Action for toggling the "Speak BG" feature based on the current speakBG setting.
     func updateQuickActions() {
         let iconName = Storage.shared.speakBG.value ? "pause.circle.fill" : "play.circle.fill"
         let iconTemplate = UIApplicationShortcutIcon(systemImageName: iconName)
@@ -656,7 +656,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("refresh"), object: nil)
     }
 
-    // Clean all timers and start new ones when refreshing
+    /// Clean all timers and start new ones when refreshing
     @objc func refresh() {
         LogManager.shared.log(category: .general, message: "Refreshing")
 
@@ -693,7 +693,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         refreshControl.endRefreshing()
     }
 
-    // Scroll down BGText when refreshing
+    /// Scroll down BGText when refreshing
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView == refreshScrollView {
             let yOffset = scrollView.contentOffset.y
@@ -718,7 +718,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
-    // Info Table Functions
+    /// Info Table Functions
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         guard let infoManager = infoManager else {
             return 0
@@ -1059,7 +1059,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive _: UNNotificationResponse, withCompletionHandler _: @escaping () -> Void) {}
 
-    // User has scrolled the chart
+    /// User has scrolled the chart
     func chartTranslated(_: ChartViewBase, dX _: CGFloat, dY _: CGFloat) {
         let isViewingLatestData = abs(BGChart.highestVisibleX - BGChart.chartXMax) < 0.001
         if isViewingLatestData {
