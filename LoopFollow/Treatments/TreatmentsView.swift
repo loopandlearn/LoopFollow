@@ -59,7 +59,7 @@ struct TreatmentsView: View {
             }
         }
         .navigationTitle("Treatments")
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .refreshable {
             viewModel.refreshTreatments()
         }
@@ -276,7 +276,7 @@ struct TreatmentDetailView: View {
         }
         .navigationTitle(formatNavigationTitle(treatment.date))
         .navigationBarTitleDisplayMode(.inline)
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .onAppear {
             viewModel.loadDetails(for: treatment)
         }
