@@ -112,10 +112,8 @@ enum SoundFile: String, CaseIterable, Identifiable, Codable {
     case winGain = "Win_Gain"
     case wrongAnswer = "Wrong_Answer"
 
-    /// Identifiable conformance
-    var id: SoundFile {
-        self
-    }
+    // Identifiable conformance
+    var id: SoundFile { self }
 
     /// Human-friendly name (spaces instead of underscores)
     var displayName: String {

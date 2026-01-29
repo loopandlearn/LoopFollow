@@ -4,7 +4,7 @@
 import Foundation
 
 extension MainViewController {
-    /// NS Carb Bolus Response Processor
+    // NS Carb Bolus Response Processor
     func processNSCarbs(entries: [[String: AnyObject]]) {
         // Because it's a small array, we're going to destroy and reload every time.
         carbData.removeAll()

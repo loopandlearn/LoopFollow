@@ -6,7 +6,7 @@ import SwiftUI
 struct TemporaryAlarmEditor: View {
     @Binding var alarm: Alarm
 
-    /// Shared BG range
+    // Shared BG range
     private let bgRange: ClosedRange<Double> = 40 ... 300
 
     var body: some View {

@@ -76,7 +76,7 @@ class NightscoutViewController: UIViewController {
         }
     }
 
-    /// this handles target=_blank links by opening them in the same view
+    // this handles target=_blank links by opening them in the same view
     func webView(webView: WKWebView!, createWebViewWithConfiguration _: WKWebViewConfiguration!, forNavigationAction navigationAction: WKNavigationAction!, windowFeatures _: WKWindowFeatures!) -> WKWebView! {
         if let frame = navigationAction.targetFrame,
            frame.isMainFrame

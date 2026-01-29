@@ -3,8 +3,9 @@
 
 import SwiftUI
 
-struct SettingsStepperRow<Value: Strideable & Comparable>: View
-    where Value.Stride: SignedNumeric & Comparable
+struct SettingsStepperRow<Value>: View
+    where Value: Strideable & Comparable,
+    Value.Stride: SignedNumeric & Comparable
 {
     let title: String
     let range: ClosedRange<Value>

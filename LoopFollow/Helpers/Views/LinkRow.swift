@@ -4,6 +4,7 @@
 import Foundation
 import SwiftUI
 
+@ViewBuilder
 func LinkRow(
     title: String,
     icon: String,

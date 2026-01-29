@@ -25,16 +25,16 @@ extension Dictionary {
         return keys.isEmpty ? nil : keys
     }
 
-    /// recursively (attempt to) access queried subdictionaries
-    /// (keyPath will never be empty here; the explicit unwrapping is safe)
+    // recursively (attempt to) access queried subdictionaries
+    // (keyPath will never be empty here; the explicit unwrapping is safe)
     private func getValue(forKeyPath keyPath: [Key]) -> Any? {
         guard let value = self[keyPath.last!] else { return nil }
         return keyPath.count == 1 ? value : (value as? [Key: Any])
             .flatMap { $0.getValue(forKeyPath: Array(keyPath.dropLast())) }
     }
 
-    /// recursively (attempt to) access the queried subdictionaries to
-    /// finally replace the "inner value", given that the key path is valid
+    // recursively (attempt to) access the queried subdictionaries to
+    // finally replace the "inner value", given that the key path is valid
     private mutating func setValue(_ value: Any, forKeyPath keyPath: [Key]) {
         guard self[keyPath.last!] != nil else { return }
         if keyPath.count == 1 {

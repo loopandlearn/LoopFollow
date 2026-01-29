@@ -6,9 +6,7 @@ import SwiftUI
 struct AlarmSnoozeSection: View {
     @Binding var alarm: Alarm
 
-    private var unitLabel: String {
-        alarm.type.snoozeTimeUnit.label
-    }
+    private var unitLabel: String { alarm.type.snoozeTimeUnit.label }
 
     private var defaultSnoozeBinding: Binding<Int> {
         Binding(

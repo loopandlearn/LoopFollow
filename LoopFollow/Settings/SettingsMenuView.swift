@@ -139,6 +139,7 @@ struct SettingsMenuView: View {
 
     // MARK: – Section builders
 
+    @ViewBuilder
     private var dataSection: some View {
         Section("Data Settings") {
             Picker("Units",
@@ -244,9 +245,7 @@ private enum Sheet: Hashable, Identifiable {
     case viewLog
     case aggregatedStats
 
-    var id: Self {
-        self
-    }
+    var id: Self { self }
 
     @ViewBuilder
     var destination: some View {
@@ -270,7 +269,7 @@ private enum Sheet: Hashable, Identifiable {
     }
 }
 
-/// Helper view to access MainViewController
+// Helper view to access MainViewController
 struct AggregatedStatsViewWrapper: View {
     @State private var mainViewController: MainViewController?
 

@@ -9,9 +9,7 @@ struct TimeOfDay: Codable, Equatable {
     let minute: Int // 0…59
 
     /// total minutes since midnight
-    var minutesSinceMidnight: Int {
-        hour * 60 + minute
-    }
+    var minutesSinceMidnight: Int { hour * 60 + minute }
 
     init(hour: Int, minute: Int) {
         precondition((0 ... 23).contains(hour))

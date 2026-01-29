@@ -37,7 +37,7 @@ class BuildDetails {
         return "\(branch) \(sha)"
     }
 
-    /// Determine if the build is from TestFlight
+    // Determine if the build is from TestFlight
     func isTestFlightBuild() -> Bool {
         #if targetEnvironment(simulator)
             return false
@@ -52,7 +52,7 @@ class BuildDetails {
         #endif
     }
 
-    /// Determine if the build is for Simulator
+    // Determine if the build is for Simulator
     func isSimulatorBuild() -> Bool {
         #if targetEnvironment(simulator)
             return true
@@ -61,7 +61,7 @@ class BuildDetails {
         #endif
     }
 
-    /// Determine if the build is for Mac
+    // Determine if the build is for Mac
     func isMacApp() -> Bool {
         #if targetEnvironment(macCatalyst)
             return true
@@ -70,7 +70,7 @@ class BuildDetails {
         #endif
     }
 
-    /// Parse the build date string into a Date object
+    // Parse the build date string into a Date object
     func buildDate() -> Date? {
         guard let dateString = dict["com-LoopFollow-build-date"] as? String else {
             return nil
@@ -79,7 +79,7 @@ class BuildDetails {
         return formatter.date(from: dateString)
     }
 
-    /// Calculate the expiration date based on the build type
+    // Calculate the expiration date based on the build type
     func calculateExpirationDate() -> Date {
         if isTestFlightBuild(), let buildDate = buildDate() {
             // For TestFlight, add 90 days to the build date
@@ -94,7 +94,7 @@ class BuildDetails {
         }
     }
 
-    /// Expiration header based on build type
+    // Expiration header based on build type
     var expirationHeaderString: String {
         if isTestFlightBuild() {
             return "TestFlight Expires"

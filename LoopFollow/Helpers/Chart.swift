@@ -30,7 +30,9 @@ final class ChartXValueFormatter: AxisValueFormatter {
 
         // let date = Date(timeIntervalSince1970: epochTimezoneOffset)
         let date = Date(timeIntervalSince1970: value)
-        return dateFormatter.string(from: date)
+        let formattedDate = dateFormatter.string(from: date)
+
+        return formattedDate
     }
 }
 

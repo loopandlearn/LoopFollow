@@ -22,9 +22,7 @@ struct GraphSettingsView: View {
     @ObservedObject private var highLine = Storage.shared.highLine
     @ObservedObject private var downloadDays = Storage.shared.downloadDays
 
-    private var nightscoutEnabled: Bool {
-        IsNightscoutEnabled()
-    }
+    private var nightscoutEnabled: Bool { IsNightscoutEnabled() }
 
     var body: some View {
         NavigationView {

@@ -4,8 +4,8 @@
 import Foundation
 
 extension MainViewController {
-    /// NS Treatments Web Call
-    /// Downloads Basal, Bolus, Carbs, BG Check, Notes, Overrides
+    // NS Treatments Web Call
+    // Downloads Basal, Bolus, Carbs, BG Check, Notes, Overrides
     func WebLoadNSTreatments() {
         if !Storage.shared.downloadTreatments.value { return }
 
@@ -33,7 +33,7 @@ extension MainViewController {
         }
     }
 
-    /// Process and split out treatments to individual tasks
+    // Process and split out treatments to individual tasks
     func updateTreatments(entries: [[String: AnyObject]]) {
         var tempBasal: [[String: AnyObject]] = []
         var bolus: [[String: AnyObject]] = []

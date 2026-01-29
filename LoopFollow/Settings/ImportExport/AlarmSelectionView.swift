@@ -16,7 +16,7 @@ struct AlarmSelectionView: View {
     private let maxQRCharacters = 2000
     private let maxRecommendedAlarms = 5
 
-    /// Computed property for actual character count (used internally)
+    // Computed property for actual character count (used internally)
     private var actualCharacterCount: Int {
         let selectedAlarms = allAlarms.value.filter { selectedAlarmIds.contains($0.id) }
         let testExport = AlarmSettingsExport(

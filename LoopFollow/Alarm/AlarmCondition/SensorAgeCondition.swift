@@ -7,6 +7,8 @@ import Foundation
 /// Dexcom 10-day hard-stop.  No repeats once triggered.
 struct SensorAgeCondition: AlarmCondition {
     static let type: AlarmType = .sensorChange
+    init() {}
+
     /// Dexcom hard-stop = 10 days = 240 h
     private let lifetime: TimeInterval = 10 * 24 * 60 * 60
 

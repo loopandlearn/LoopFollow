@@ -5,7 +5,7 @@ import Foundation
 import UIKit
 
 extension MainViewController {
-    /// NS BG Check Response Processor
+    // NS BG Check Response Processor
     func processNSBGCheck(entries: [[String: AnyObject]]) {
         bgCheckData.removeAll()
 
