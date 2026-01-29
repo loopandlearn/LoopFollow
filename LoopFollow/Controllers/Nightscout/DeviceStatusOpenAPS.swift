@@ -65,6 +65,7 @@ extension MainViewController {
             if let iobMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
                 infoManager.updateInfoData(type: .iob, value: iobMetric)
                 latestIOB = iobMetric
+                Observable.shared.iobText.value = iobMetric.formattedValue()
             }
 
             // COB

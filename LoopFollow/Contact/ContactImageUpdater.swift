@@ -19,7 +19,14 @@ class ContactImageUpdater {
         return ContactColorOption(rawValue: rawValue)?.uiColor ?? .white
     }
 
-    func updateContactImage(bgValue: String, trend: String, delta: String, stale: Bool) {
+    private func textColor() -> UIColor {
+        let colorMode = Storage.shared.contactColorMode.value
+        // Use raw BG value in mg/dL (same units as highLine/lowLine)
+        let bgNumeric = Double(Observable.shared.bg.value ?? 0)
+        return colorMode.textColor(for: bgNumeric, staticColor: savedTextUIColor)
+    }
+
+    func updateContactImage(bgValue: String, trend: String, delta: String, iob: String, stale: Bool) {
         queue.async {
             guard CNContactStore.authorizationStatus(for: .contacts) == .authorized else {
                 LogManager.shared.log(category: .contact, message: "Access to contacts is not authorized.")
@@ -37,9 +44,17 @@ class ContactImageUpdater {
                     continue
                 }
 
+                if contactType == .IOB, Storage.shared.contactIOB.value != .separate {
+                    continue
+                }
+
                 let contactName = "\(bundleDisplayName) - \(contactType.rawValue)"
 
-                guard let imageData = self.generateContactImage(bgValue: bgValue, trend: trend, delta: delta, stale: stale, contactType: contactType)?.pngData() else {
+                let includedFields = self.getIncludedFields(for: contactType)
+
+                let dynamicTextColor = self.textColor()
+
+                guard let imageData = self.generateContactImage(bgValue: bgValue, trend: trend, delta: delta, iob: iob, stale: stale, contactType: contactType, includedFields: includedFields, textColor: dynamicTextColor)?.pngData() else {
                     LogManager.shared.log(category: .contact, message: "Failed to generate contact image for \(contactName).")
                     continue
                 }
@@ -100,7 +115,24 @@ class ContactImageUpdater {
         }
     }
 
-    private func generateContactImage(bgValue: String, trend: String, delta: String, stale: Bool, contactType: ContactType) -> UIImage? {
+    private func getIncludedFields(for contactType: ContactType) -> [ContactType] {
+        var included: [ContactType] = []
+        if Storage.shared.contactTrend.value == .include,
+           Storage.shared.contactTrendTarget.value == contactType {
+            included.append(.Trend)
+        }
+        if Storage.shared.contactDelta.value == .include,
+           Storage.shared.contactDeltaTarget.value == contactType {
+            included.append(.Delta)
+        }
+        if Storage.shared.contactIOB.value == .include,
+           Storage.shared.contactIOBTarget.value == contactType {
+            included.append(.IOB)
+        }
+        return included
+    }
+
+    private func generateContactImage(bgValue: String, trend: String, delta: String, iob: String, stale: Bool, contactType: ContactType, includedFields: [ContactType], textColor: UIColor) -> UIImage? {
         let size = CGSize(width: 300, height: 300)
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
@@ -111,66 +143,63 @@ class ContactImageUpdater {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
 
-        // Format extraDelta based on the user's unit preference
-        let unitPreference = Storage.shared.units.value
         let yOffset: CGFloat = 48
-        if contactType == .Trend, Storage.shared.contactTrend.value == .separate {
-            let trendRect = CGRect(x: 0, y: 46, width: size.width, height: size.height - 80)
-            let trendFontSize = max(40, 200 - CGFloat(trend.count * 15))
 
-            let trendAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.boldSystemFont(ofSize: trendFontSize),
-                .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-                .paragraphStyle: paragraphStyle,
-            ]
+        // Get the primary value for this contact type
+        let primaryValue: String
+        switch contactType {
+        case .BG: primaryValue = bgValue
+        case .Trend: primaryValue = trend
+        case .Delta: primaryValue = delta
+        case .IOB: primaryValue = iob
+        }
 
-            trend.draw(in: trendRect, withAttributes: trendAttributes)
-        } else if contactType == .Delta, Storage.shared.contactDelta.value == .separate {
-            let deltaRect = CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
-            let deltaFontSize = max(40, 200 - CGFloat(delta.count * 15))
-
-            let deltaAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.boldSystemFont(ofSize: deltaFontSize),
-                .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-                .paragraphStyle: paragraphStyle,
-            ]
-
-            delta.draw(in: deltaRect, withAttributes: deltaAttributes)
-        } else if contactType == .BG {
-            let includesExtra = Storage.shared.contactDelta.value == .include || Storage.shared.contactTrend.value == .include
-
-            let maxFontSize: CGFloat = includesExtra ? 160 : 200
-            let fontSize = maxFontSize - CGFloat(bgValue.count * 15)
-            var bgAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.boldSystemFont(ofSize: fontSize),
-                .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-                .paragraphStyle: paragraphStyle,
-            ]
-
-            if stale {
-                // Force background color back to black if stale
-                UIColor.black.setFill()
-                context.fill(CGRect(origin: .zero, size: size))
-                bgAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+        // Build extra values from included fields
+        var extraValues: [String] = []
+        for field in includedFields {
+            switch field {
+            case .Trend: extraValues.append(trend)
+            case .Delta: extraValues.append(delta)
+            case .IOB: extraValues.append(iob)
+            case .BG: break
             }
+        }
 
-            let bgRect: CGRect = includesExtra
-                ? CGRect(x: 0, y: yOffset - 20, width: size.width, height: size.height / 2)
-                : CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
+        let hasExtras = !extraValues.isEmpty
 
-            bgValue.draw(in: bgRect, withAttributes: bgAttributes)
+        // Determine font sizes based on number of extras
+        let maxFontSize: CGFloat = extraValues.count >= 2 ? 140 : (hasExtras ? 160 : 200)
+        let extraFontSize: CGFloat = extraValues.count >= 2 ? 60 : 90
 
-            if includesExtra {
-                let extraRect = CGRect(x: 0, y: size.height / 2 + 6, width: size.width, height: size.height / 2 - 20)
-                let extraAttributes: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: 90),
-                    .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
-                    .paragraphStyle: paragraphStyle,
-                ]
+        let fontSize = max(40, maxFontSize - CGFloat(primaryValue.count * 15))
 
-                let extra = Storage.shared.contactDelta.value == .include ? delta : trend
-                extra.draw(in: extraRect, withAttributes: extraAttributes)
-            }
+        var primaryAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.boldSystemFont(ofSize: fontSize),
+            .foregroundColor: stale ? UIColor.gray : textColor,
+            .paragraphStyle: paragraphStyle,
+        ]
+
+        if stale {
+            UIColor.black.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            primaryAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+        }
+
+        let primaryRect: CGRect = hasExtras
+            ? CGRect(x: 0, y: yOffset - 20, width: size.width, height: size.height / 2)
+            : CGRect(x: 0, y: yOffset, width: size.width, height: size.height - 80)
+
+        primaryValue.draw(in: primaryRect, withAttributes: primaryAttributes)
+
+        if hasExtras {
+            let extraString = extraValues.joined(separator: " ")
+            let extraRect = CGRect(x: 0, y: size.height / 2 + 6, width: size.width, height: size.height / 2 - 20)
+            let extraAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: extraFontSize),
+                .foregroundColor: stale ? UIColor.gray : textColor,
+                .paragraphStyle: paragraphStyle,
+            ]
+            extraString.draw(in: extraRect, withAttributes: extraAttributes)
         }
 
         let image = UIGraphicsGetImageFromCurrentImageContext()
