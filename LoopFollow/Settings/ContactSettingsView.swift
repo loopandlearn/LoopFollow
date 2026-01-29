@@ -50,12 +50,12 @@ struct ContactSettingsView: View {
                     }
 
                     Section(header: Text("Additional Information")) {
-                        Text("To see your trend, delta, or IOB, include one in the original '\(viewModel.contactName)' contact, or create separate contacts ending in '- Trend', '- Delta', or '- IOB' for up to four contacts on your watch face.")
+                        Text("To see your trend, delta, or IOB, include them in another contact or create separate contacts. When using 'Include', select which contact to add the value to.")
                             .font(.footnote)
                             .foregroundColor(.secondary)
                             .padding(.vertical, 4)
 
-                        Text("Show Trend")
+                        Text("Trend")
                             .font(.subheadline)
                         Picker("Show Trend", selection: $viewModel.contactTrend) {
                             ForEach(ContactIncludeOption.allCases, id: \.self) { option in
@@ -64,7 +64,15 @@ struct ContactSettingsView: View {
                         }
                         .pickerStyle(SegmentedPickerStyle())
 
-                        Text("Show Delta")
+                        if viewModel.contactTrend == .include {
+                            Picker("Include Trend in", selection: $viewModel.contactTrendTarget) {
+                                ForEach(viewModel.availableTargets(for: .Trend), id: \.self) { target in
+                                    Text(target.rawValue).tag(target)
+                                }
+                            }
+                        }
+
+                        Text("Delta")
                             .font(.subheadline)
                         Picker("Show Delta", selection: $viewModel.contactDelta) {
                             ForEach(ContactIncludeOption.allCases, id: \.self) { option in
@@ -73,7 +81,15 @@ struct ContactSettingsView: View {
                         }
                         .pickerStyle(SegmentedPickerStyle())
 
-                        Text("Show IOB")
+                        if viewModel.contactDelta == .include {
+                            Picker("Include Delta in", selection: $viewModel.contactDeltaTarget) {
+                                ForEach(viewModel.availableTargets(for: .Delta), id: \.self) { target in
+                                    Text(target.rawValue).tag(target)
+                                }
+                            }
+                        }
+
+                        Text("IOB")
                             .font(.subheadline)
                         Picker("Show IOB", selection: $viewModel.contactIOB) {
                             ForEach(ContactIncludeOption.allCases, id: \.self) { option in
@@ -81,6 +97,14 @@ struct ContactSettingsView: View {
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
+
+                        if viewModel.contactIOB == .include {
+                            Picker("Include IOB in", selection: $viewModel.contactIOBTarget) {
+                                ForEach(viewModel.availableTargets(for: .IOB), id: \.self) { target in
+                                    Text(target.rawValue).tag(target)
+                                }
+                            }
+                        }
                     }
                 }
             }
