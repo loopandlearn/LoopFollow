@@ -18,7 +18,7 @@ struct PumpBatteryAlarmEditor: View {
             AlarmStepperSection(
                 header: "Pump Battery Level",
                 footer: "This alerts you when the pump battery drops to or below this level.",
-                title: "Battery Below",
+                title: "At or Below",
                 range: 0 ... 100,
                 step: 5,
                 unitLabel: "%",

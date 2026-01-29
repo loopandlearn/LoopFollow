@@ -42,7 +42,7 @@ struct MissedBolusAlarmEditor: View {
             AlarmStepperSection(
                 header: "Ignore small boluses",
                 footer: "Boluses at or below this size are ignored.",
-                title: "Ignore at or below",
+                title: "At or Below",
                 range: 0.05 ... 2,
                 step: 0.05,
                 unitLabel: "Units",
