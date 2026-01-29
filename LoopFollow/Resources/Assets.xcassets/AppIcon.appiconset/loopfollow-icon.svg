@@ -1,0 +1,109 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Glass background gradient -->
+    <linearGradient id="glassBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F8F9FA;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F2F5;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Blue glass ring gradient -->
+    <linearGradient id="blueGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5BA3F5;stop-opacity:0.95" />
+      <stop offset="30%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3A7BC8;stop-opacity:0.95" />
+    </linearGradient>
+    
+    <!-- Glass highlight (top) -->
+    <linearGradient id="topHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.6" />
+      <stop offset="40%" style="stop-color:#FFFFFF;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+    </linearGradient>
+    
+    <!-- Glass reflection (curved) -->
+    <radialGradient id="glassReflection" cx="50%" cy="30%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.5" />
+      <stop offset="50%" style="stop-color:#FFFFFF;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- Inner glass highlight -->
+    <radialGradient id="innerHighlight" cx="50%" cy="45%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.4" />
+      <stop offset="60%" style="stop-color:#FFFFFF;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- Blue ring inner shadow -->
+    <radialGradient id="ringShadow" cx="50%" cy="50%">
+      <stop offset="70%" style="stop-color:#000000;stop-opacity:0" />
+      <stop offset="85%" style="stop-color:#000000;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0.25" />
+    </radialGradient>
+    
+    <!-- Glass blur for soft edges -->
+    <filter id="softBlur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1"/>
+    </filter>
+    
+    <!-- Glass blur for highlights -->
+    <filter id="highlightBlur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+    </filter>
+  </defs>
+  
+  <!-- Glass background -->
+  <rect x="0" y="0" width="1024" height="1024" 
+        fill="url(#glassBg)"/>
+  
+  <!-- Main glass highlight across top -->
+  <rect x="0" y="0" width="1024" height="512" 
+        fill="url(#topHighlight)"/>
+  
+  <!-- Curved glass reflection -->
+  <ellipse cx="512" cy="256" rx="600" ry="400" 
+           fill="url(#glassReflection)"
+           opacity="0.8"/>
+  
+  <!-- Blue glass ring - outer -->
+  <circle cx="512" cy="512" r="450" 
+          fill="url(#blueGlass)"/>
+  
+  <!-- Blue ring inner shadow for depth -->
+  <circle cx="512" cy="512" r="450" 
+          fill="url(#ringShadow)"/>
+  
+  <!-- White inner circle to create ring -->
+  <circle cx="512" cy="512" r="315" 
+          fill="#FFFFFF"
+          opacity="0.98"/>
+  
+  <!-- Glass highlight on white ring area -->
+  <ellipse cx="512" cy="380" rx="380" ry="200" 
+           fill="url(#innerHighlight)"
+           opacity="0.7"/>
+  
+  <!-- White center circle -->
+  <circle cx="512" cy="512" r="200" 
+          fill="#FFFFFF"
+          opacity="0.95"/>
+  
+  <!-- Center glass highlight -->
+  <ellipse cx="512" cy="420" rx="180" ry="120" 
+           fill="url(#innerHighlight)"
+           opacity="0.6"/>
+  
+  <!-- Additional glass reflection on blue ring -->
+  <ellipse cx="512" cy="320" rx="420" ry="250" 
+           fill="#FFFFFF" 
+           opacity="0.25"
+           filter="url(#highlightBlur)"/>
+  
+  <!-- Subtle bottom shadow for depth -->
+  <ellipse cx="512" cy="700" rx="450" ry="100" 
+           fill="#000000" 
+           opacity="0.05"
+           filter="url(#softBlur)"/>
+</svg>
