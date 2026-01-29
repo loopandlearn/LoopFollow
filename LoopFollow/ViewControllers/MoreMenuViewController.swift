@@ -229,11 +229,10 @@ class MoreMenuViewController: UIViewController {
         let treatmentsVC = UIHostingController(rootView: TreatmentsView())
         let navController = UINavigationController(rootViewController: treatmentsVC)
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            treatmentsVC.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        treatmentsVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         // Add a close button
         treatmentsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -257,11 +256,10 @@ class MoreMenuViewController: UIViewController {
         )
         let navController = UINavigationController(rootViewController: statsVC)
 
-        // Apply dark mode if needed
-        if Storage.shared.forceDarkMode.value {
-            statsVC.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        statsVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         // Add a close button
         statsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
