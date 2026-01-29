@@ -99,6 +99,13 @@ class ContactSettingsViewModel: ObservableObject {
         }
     }
 
+    @Published var contactColorMode: ContactColorMode {
+        didSet {
+            Storage.shared.contactColorMode.value = contactColorMode
+            triggerRefresh()
+        }
+    }
+
     private let storage = ObservableUserDefaults.shared
     private var cancellables = Set<AnyCancellable>()
 
@@ -112,6 +119,7 @@ class ContactSettingsViewModel: ObservableObject {
         contactIOBTarget = Storage.shared.contactIOBTarget.value
         contactBackgroundColor = Storage.shared.contactBackgroundColor.value
         contactTextColor = Storage.shared.contactTextColor.value
+        contactColorMode = Storage.shared.contactColorMode.value
 
         Storage.shared.contactEnabled.$value
             .assign(to: &$contactEnabled)
@@ -139,6 +147,9 @@ class ContactSettingsViewModel: ObservableObject {
 
         Storage.shared.contactTextColor.$value
             .assign(to: &$contactTextColor)
+
+        Storage.shared.contactColorMode.$value
+            .assign(to: &$contactColorMode)
     }
 
     func availableTargets(for field: ContactType) -> [ContactType] {

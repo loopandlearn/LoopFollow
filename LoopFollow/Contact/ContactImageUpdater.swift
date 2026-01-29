@@ -19,6 +19,13 @@ class ContactImageUpdater {
         return ContactColorOption(rawValue: rawValue)?.uiColor ?? .white
     }
 
+    private func textColor() -> UIColor {
+        let colorMode = Storage.shared.contactColorMode.value
+        // Use raw BG value in mg/dL (same units as highLine/lowLine)
+        let bgNumeric = Double(Observable.shared.bg.value ?? 0)
+        return colorMode.textColor(for: bgNumeric, staticColor: savedTextUIColor)
+    }
+
     func updateContactImage(bgValue: String, trend: String, delta: String, iob: String, stale: Bool) {
         queue.async {
             guard CNContactStore.authorizationStatus(for: .contacts) == .authorized else {
@@ -45,7 +52,9 @@ class ContactImageUpdater {
 
                 let includedFields = self.getIncludedFields(for: contactType)
 
-                guard let imageData = self.generateContactImage(bgValue: bgValue, trend: trend, delta: delta, iob: iob, stale: stale, contactType: contactType, includedFields: includedFields)?.pngData() else {
+                let dynamicTextColor = self.textColor()
+
+                guard let imageData = self.generateContactImage(bgValue: bgValue, trend: trend, delta: delta, iob: iob, stale: stale, contactType: contactType, includedFields: includedFields, textColor: dynamicTextColor)?.pngData() else {
                     LogManager.shared.log(category: .contact, message: "Failed to generate contact image for \(contactName).")
                     continue
                 }
@@ -123,7 +132,7 @@ class ContactImageUpdater {
         return included
     }
 
-    private func generateContactImage(bgValue: String, trend: String, delta: String, iob: String, stale: Bool, contactType: ContactType, includedFields: [ContactType]) -> UIImage? {
+    private func generateContactImage(bgValue: String, trend: String, delta: String, iob: String, stale: Bool, contactType: ContactType, includedFields: [ContactType], textColor: UIColor) -> UIImage? {
         let size = CGSize(width: 300, height: 300)
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
@@ -166,7 +175,7 @@ class ContactImageUpdater {
 
         var primaryAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.boldSystemFont(ofSize: fontSize),
-            .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
+            .foregroundColor: stale ? UIColor.gray : textColor,
             .paragraphStyle: paragraphStyle,
         ]
 
@@ -187,7 +196,7 @@ class ContactImageUpdater {
             let extraRect = CGRect(x: 0, y: size.height / 2 + 6, width: size.width, height: size.height / 2 - 20)
             let extraAttributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: extraFontSize),
-                .foregroundColor: stale ? UIColor.gray : savedTextUIColor,
+                .foregroundColor: stale ? UIColor.gray : textColor,
                 .paragraphStyle: paragraphStyle,
             ]
             extraString.draw(in: extraRect, withAttributes: extraAttributes)
