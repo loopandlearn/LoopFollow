@@ -4,7 +4,7 @@
 import Foundation
 
 extension MainViewController {
-    // NS Iage Web Call
+    /// NS Iage Web Call
     func webLoadNSIage() {
         let lastDateString = dateTimeUtils.getDateTimeString(addingDays: -60)
         let currentTimeString = dateTimeUtils.getDateTimeString()
@@ -28,7 +28,7 @@ extension MainViewController {
         }
     }
 
-    // NS Sage Response Processor
+    /// NS Sage Response Processor
     func updateIage(data: [iageData]) {
         infoManager.clearInfoData(type: .iage)
 

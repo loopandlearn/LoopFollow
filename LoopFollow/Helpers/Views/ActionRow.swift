@@ -3,7 +3,6 @@
 
 import SwiftUI
 
-@ViewBuilder
 func ActionRow(
     title: String,
     icon: String,

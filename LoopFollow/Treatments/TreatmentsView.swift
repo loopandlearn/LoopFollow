@@ -700,7 +700,7 @@ class TreatmentsViewModel: ObservableObject {
             }
         }
     }
-    
+
     func refreshTreatments() {
         allTreatments.removeAll()
         processedNightscoutIds.removeAll()
@@ -752,12 +752,12 @@ class TreatmentsViewModel: ObservableObject {
             completion([], 0)
             return
         }
-        
+
         // Format dates for the query
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         formatter.timeZone = TimeZone(abbreviation: "UTC")
-        
+
         // For pagination: fetch treatments with created_at < endDate
         // Go back up to 365 days from endDate to ensure we get enough data
         let startDate = Calendar.current.date(byAdding: .day, value: -365, to: endDate)!
@@ -786,7 +786,7 @@ class TreatmentsViewModel: ObservableObject {
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         request.httpMethod = "GET"
 
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
             guard let self = self else { return }
 
             if let error = error {

@@ -4,7 +4,7 @@
 import Foundation
 
 extension MainViewController {
-    // NS Sage Web Call
+    /// NS Sage Web Call
     func webLoadNSSage() {
         let lastDateString = dateTimeUtils.getDateTimeString(addingDays: -60)
         let currentTimeString = dateTimeUtils.getDateTimeString()
@@ -28,7 +28,7 @@ extension MainViewController {
         }
     }
 
-    // NS Sage Response Processor
+    /// NS Sage Response Processor
     func updateSage(data: [sageData]) {
         infoManager.clearInfoData(type: .sage)
 

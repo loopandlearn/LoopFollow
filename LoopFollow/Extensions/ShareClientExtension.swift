@@ -17,7 +17,7 @@ public struct ShareGlucoseData: Decodable {
         case direction
     }
 
-    // Decoder initializer for handling JSON data
+    /// Decoder initializer for handling JSON data
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 

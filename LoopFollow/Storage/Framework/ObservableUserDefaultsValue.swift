@@ -9,7 +9,7 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
     let key: String
     typealias ValueType = T
 
-    // The value (strong typed)
+    /// The value (strong typed)
     @Published var value: T {
         didSet {
             // Continue only if the new value is different from the old value
@@ -63,17 +63,17 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
         return ObservableUserDefaultsValue.defaults.object(forKey: key) != nil
     }
 
-    // On change closure
+    /// On change closure
     private let onChange: ((T) -> Void)?
 
-    // Validate & transform closure : given the new value, validate it; if validation passes, return the new value;
-    // if validation fails, transform the value, returning a modified version or return nil and the change will not happen
+    /// Validate & transform closure : given the new value, validate it; if validation passes, return the new value;
+    /// if validation fails, transform the value, returning a modified version or return nil and the change will not happen
     private let validation: ((T) -> T?)?
 
-    // Value change observers
+    /// Value change observers
     private var observers: [UUID: (T) -> Void] = [:]
 
-    // User defaults used for persistence
+    /// User defaults used for persistence
     private class var defaults: UserDefaults {
         return UserDefaults(suiteName: AppConstants.APP_GROUP_ID)!
     }

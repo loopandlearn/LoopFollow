@@ -101,7 +101,7 @@ class Localizer {
 }
 
 extension Float {
-    // remove the decimal part of the float if it is ".0" and trim whitespaces
+    /// remove the decimal part of the float if it is ".0" and trim whitespaces
     var cleanValue: String {
         return truncatingRemainder(dividingBy: 1) == 0
             ? String(format: "%5.0f", self).trimmingCharacters(in: CharacterSet.whitespaces)

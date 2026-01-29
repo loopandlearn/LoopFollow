@@ -6,9 +6,6 @@ import Foundation
 @testable import LoopFollow
 import Testing
 
-@testable import LoopFollow
-import Testing
-
 // MARK: - Alarm helpers
 
 extension Alarm {

@@ -5,8 +5,6 @@ import Charts
 import Foundation
 import UIKit
 
-import Charts
-
 enum GraphDataIndex: Int {
     case bg = 0
     case prediction = 1
@@ -139,14 +137,13 @@ class TempTargetChartDataEntry: ChartDataEntry {
     }
 
     override func copy(with _: NSZone? = nil) -> Any {
-        let copy = TempTargetChartDataEntry(
+        return TempTargetChartDataEntry(
             xStart: xStart,
             xEnd: xEnd,
             yTop: yTop,
             yBottom: yBottom,
             data: data
         )
-        return copy
     }
 }
 
