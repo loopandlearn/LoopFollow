@@ -9,9 +9,20 @@ class StatsDataService {
     var daysToAnalyze: Int = 14
     private let dataFetcher: StatsDataFetcher
 
+    /// Stores raw temp basal entries with rate and duration
+    var tempBasalEntries: [TempBasalEntry] = []
+
+    /// Structure to hold temp basal data for calculations
+    struct TempBasalEntry {
+        let rate: Double           // U/hr (absolute rate)
+        let startTime: TimeInterval // Unix timestamp
+        let durationMinutes: Double // Duration in minutes
+    }
+
     init(mainViewController: MainViewController?) {
         self.mainViewController = mainViewController
         dataFetcher = StatsDataFetcher(mainViewController: mainViewController)
+        dataFetcher.dataService = self
     }
 
     func ensureDataAvailable(onProgress: @escaping () -> Void, completion: @escaping () -> Void) {
@@ -104,5 +115,10 @@ class StatsDataService {
     func getBasalProfile() -> [MainViewController.basalProfileStruct] {
         guard let mainVC = mainViewController else { return [] }
         return mainVC.basalProfile
+    }
+
+    func getTempBasalData() -> [TempBasalEntry] {
+        let cutoffTime = Date().timeIntervalSince1970 - (Double(daysToAnalyze) * 24 * 60 * 60)
+        return tempBasalEntries.filter { $0.startTime >= cutoffTime }
     }
 }

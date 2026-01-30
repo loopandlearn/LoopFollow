@@ -85,11 +85,17 @@ class SimpleStatsViewModel: ObservableObject {
             avgCarbs = nil
         }
 
-        let basalDataInPeriod = dataService.getBasalData()
-        let totalBasalOverPeriod = calculateTotalBasal(basalData: basalDataInPeriod)
+        let basalProfile = dataService.getBasalProfile()
+        let dailyProgrammedBasal = calculateProgrammedBasalFromProfile(basalProfile: basalProfile)
+        programmedBasal = dailyProgrammedBasal
 
-        let basalDates = basalDataInPeriod.map { $0.date }.filter { $0 >= cutoffTime }
-        let actualBasalDays = calculateActualDaysCovered(dates: basalDates, requestedDays: dataService.daysToAnalyze)
+        // Calculate actual basal using temp basal adjustments
+        let tempBasalData = dataService.getTempBasalData()
+        let (totalActualBasal, actualBasalDays) = calculateActualBasalFromTempBasals(
+            tempBasals: tempBasalData,
+            basalProfile: basalProfile,
+            dailyProgrammedBasal: dailyProgrammedBasal
+        )
 
         var avgDailyBolus = 0.0
         var avgDailyBasal = 0.0
@@ -99,7 +105,7 @@ class SimpleStatsViewModel: ObservableObject {
         }
 
         if actualBasalDays > 0 {
-            avgDailyBasal = totalBasalOverPeriod / Double(actualBasalDays)
+            avgDailyBasal = totalActualBasal / Double(actualBasalDays)
             actualBasal = avgDailyBasal
         } else {
             actualBasal = nil
@@ -110,46 +116,115 @@ class SimpleStatsViewModel: ObservableObject {
         } else {
             totalDailyDose = nil
         }
-
-        let basalProfile = dataService.getBasalProfile()
-        programmedBasal = calculateProgrammedBasalFromProfile(basalProfile: basalProfile)
     }
 
-    private func calculateTotalBasal(basalData: [MainViewController.basalGraphStruct]) -> Double {
-        guard !basalData.isEmpty else { return 0.0 }
-
-        var totalBasal = 0.0
+    /// Calculates actual basal delivered using:
+    /// Actual = Programmed Basal + Sum of all temp basal adjustments
+    /// Where adjustment = (temp_rate - scheduled_rate) * duration
+    private func calculateActualBasalFromTempBasals(
+        tempBasals: [StatsDataService.TempBasalEntry],
+        basalProfile: [MainViewController.basalProfileStruct],
+        dailyProgrammedBasal: Double
+    ) -> (totalBasal: Double, daysWithData: Int) {
         let cutoffTime = Date().timeIntervalSince1970 - (Double(dataService.daysToAnalyze) * 24 * 60 * 60)
         let now = Date().timeIntervalSince1970
 
-        let basalProfile = dataService.getBasalProfile()
-
-        let sortedBasal = basalData.sorted { $0.date < $1.date }
-
-        for i in 0 ..< sortedBasal.count {
-            let current = sortedBasal[i]
-            let startTime = max(current.date, cutoffTime)
-
-            let endTime: TimeInterval
-            if i < sortedBasal.count - 1 {
-                endTime = min(sortedBasal[i + 1].date, now)
-            } else {
-                endTime = now
-            }
-
-            if endTime > startTime {
-                let durationHours = (endTime - startTime) / 3600.0
-
-                let scheduledBasalRate = getScheduledBasalRate(for: startTime, profile: basalProfile)
-
-                let adjustment = current.basalRate - scheduledBasalRate
-
-                totalBasal += scheduledBasalRate * durationHours
-                totalBasal += adjustment * durationHours
-            }
+        // Filter temp basals to the analysis period
+        let relevantTempBasals = tempBasals.filter { tempBasal in
+            let tempEnd = tempBasal.startTime + (tempBasal.durationMinutes * 60)
+            return tempEnd > cutoffTime && tempBasal.startTime < now
         }
 
-        return totalBasal
+        guard !relevantTempBasals.isEmpty else {
+            // No temp basals - return programmed basal for the period
+            return (dailyProgrammedBasal, dataService.daysToAnalyze)
+        }
+
+        // Calculate total adjustment from all temp basals
+        var totalAdjustment = 0.0
+
+        for tempBasal in relevantTempBasals {
+            // Clamp temp basal to analysis window
+            let effectiveStart = max(tempBasal.startTime, cutoffTime)
+            let effectiveEnd = min(tempBasal.startTime + (tempBasal.durationMinutes * 60), now)
+
+            guard effectiveEnd > effectiveStart else { continue }
+
+            // For each segment of this temp basal, calculate the adjustment
+            // We need to handle cases where the temp basal spans multiple profile segments
+            totalAdjustment += calculateAdjustmentForTempBasal(
+                tempRate: tempBasal.rate,
+                startTime: effectiveStart,
+                endTime: effectiveEnd,
+                profile: basalProfile
+            )
+        }
+
+        // Calculate days with data
+        let calendar = Calendar.current
+        var uniqueDays = Set<Date>()
+        for tempBasal in relevantTempBasals {
+            let dateObj = Date(timeIntervalSince1970: tempBasal.startTime)
+            let dayStart = calendar.startOfDay(for: dateObj)
+            uniqueDays.insert(dayStart)
+        }
+        let daysWithData = min(uniqueDays.count, dataService.daysToAnalyze)
+
+        // Actual = Programmed + Adjustments
+        let totalActualBasal = (dailyProgrammedBasal * Double(daysWithData)) + totalAdjustment
+
+        return (totalActualBasal, daysWithData)
+    }
+
+    /// Calculates the adjustment (positive or negative) for a single temp basal
+    /// Adjustment = (temp_rate - scheduled_rate) * duration_hours
+    private func calculateAdjustmentForTempBasal(
+        tempRate: Double,
+        startTime: TimeInterval,
+        endTime: TimeInterval,
+        profile: [MainViewController.basalProfileStruct]
+    ) -> Double {
+        guard !profile.isEmpty, endTime > startTime else { return 0.0 }
+
+        var totalAdjustment = 0.0
+        let sortedProfile = profile.sorted { $0.timeAsSeconds < $1.timeAsSeconds }
+        let calendar = Calendar.current
+
+        var currentTime = startTime
+        while currentTime < endTime {
+            let currentDate = Date(timeIntervalSince1970: currentTime)
+            let dayStart = calendar.startOfDay(for: currentDate).timeIntervalSince1970
+            let nextDayStart = dayStart + 24 * 60 * 60
+
+            // Process each profile segment for this day
+            for i in 0 ..< sortedProfile.count {
+                let scheduledRate = sortedProfile[i].value
+                let segmentStartInDay = dayStart + sortedProfile[i].timeAsSeconds
+
+                let segmentEndInDay: TimeInterval
+                if i < sortedProfile.count - 1 {
+                    segmentEndInDay = dayStart + sortedProfile[i + 1].timeAsSeconds
+                } else {
+                    segmentEndInDay = nextDayStart
+                }
+
+                // Calculate overlap between this profile segment and the temp basal
+                let overlapStart = max(currentTime, segmentStartInDay)
+                let overlapEnd = min(endTime, segmentEndInDay)
+
+                if overlapEnd > overlapStart {
+                    let durationHours = (overlapEnd - overlapStart) / 3600.0
+                    // Adjustment = (temp_rate - scheduled_rate) * duration
+                    let adjustment = (tempRate - scheduledRate) * durationHours
+                    totalAdjustment += adjustment
+                }
+            }
+
+            // Move to next day
+            currentTime = nextDayStart
+        }
+
+        return totalAdjustment
     }
 
     private func getScheduledBasalRate(for time: TimeInterval, profile: [MainViewController.basalProfileStruct]) -> Double {

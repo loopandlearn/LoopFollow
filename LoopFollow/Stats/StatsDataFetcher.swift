@@ -5,6 +5,7 @@ import Foundation
 
 class StatsDataFetcher {
     weak var mainViewController: MainViewController?
+    weak var dataService: StatsDataService?
 
     init(mainViewController: MainViewController?) {
         self.mainViewController = mainViewController
@@ -274,6 +275,7 @@ class StatsDataFetcher {
 
     private func fetchAndMergeBasalData(entries: [[String: AnyObject]], days: Int, mainVC: MainViewController) {
         let cutoffTime = Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60)
+        let now = Date().timeIntervalSince1970
 
         var basalEntries: [[String: AnyObject]] = []
         for entry in entries {
@@ -285,7 +287,11 @@ class StatsDataFetcher {
 
         mainVC.statsBasalData.removeAll { $0.date < cutoffTime }
 
-        let existingDates = Set(mainVC.statsBasalData.map { Int($0.date) })
+        // Clear and rebuild temp basal entries for stats calculation
+        dataService?.tempBasalEntries.removeAll { $0.startTime < cutoffTime }
+        var existingTempBasalTimes = Set(dataService?.tempBasalEntries.map { Int($0.startTime) } ?? [])
+
+        var existingDates = Set(mainVC.statsBasalData.map { Int($0.date) })
         var tempArray = basalEntries
         tempArray.reverse()
 
@@ -306,7 +312,35 @@ class StatsDataFetcher {
                 continue
             }
 
-            let duration = currentEntry["duration"] as? Double ?? 0.0
+            var duration = currentEntry["duration"] as? Double ?? 0.0
+
+            // Store raw temp basal entry for stats calculation
+            // Adjust duration if it overlaps with next temp basal
+            var effectiveDuration = duration
+            if i < tempArray.count - 1 {
+                let nextEntry = tempArray[i + 1] as [String: AnyObject]?
+                let nextDateStr = nextEntry?["timestamp"] as? String ?? nextEntry?["created_at"] as? String
+                if let rawNext = nextDateStr,
+                   let nextDateParsed = NightscoutUtils.parseDate(rawNext)
+                {
+                    let nextDateTimeStamp = nextDateParsed.timeIntervalSince1970
+                    let tempBasalEnd = dateTimeStamp + (duration * 60)
+                    if nextDateTimeStamp < tempBasalEnd {
+                        // Adjust duration to end when next temp basal starts
+                        effectiveDuration = (nextDateTimeStamp - dateTimeStamp) / 60.0
+                    }
+                }
+            }
+
+            if !existingTempBasalTimes.contains(Int(dateTimeStamp)) {
+                let tempBasalEntry = StatsDataService.TempBasalEntry(
+                    rate: basalRate,
+                    startTime: dateTimeStamp,
+                    durationMinutes: effectiveDuration > 0 ? effectiveDuration : 30.0
+                )
+                dataService?.tempBasalEntries.append(tempBasalEntry)
+                existingTempBasalTimes.insert(Int(dateTimeStamp))
+            }
 
             if i > 0 {
                 let priorEntry = tempArray[i - 1] as [String: AnyObject]?
@@ -316,49 +350,19 @@ class StatsDataFetcher {
                 {
                     let priorDateTimeStamp = priorDateParsed.timeIntervalSince1970
                     let priorDuration = priorEntry?["duration"] as? Double ?? 0.0
+                    let priorEndTime = priorDateTimeStamp + (priorDuration * 60)
 
-                    if (dateTimeStamp - priorDateTimeStamp) > (priorDuration * 60) + 15 {
-                        var scheduled = 0.0
-                        var midGap = false
-                        var midGapTime: TimeInterval = 0
-                        var midGapValue: Double = 0
-
-                        for b in 0 ..< mainVC.basalScheduleData.count {
-                            let priorEnd = priorDateTimeStamp + (priorDuration * 60)
-                            if priorEnd >= mainVC.basalScheduleData[b].date {
-                                scheduled = mainVC.basalScheduleData[b].basalRate
-                                if b < mainVC.basalScheduleData.count - 1 {
-                                    if dateTimeStamp > mainVC.basalScheduleData[b + 1].date {
-                                        midGap = true
-                                        midGapTime = mainVC.basalScheduleData[b + 1].date
-                                        midGapValue = mainVC.basalScheduleData[b + 1].basalRate
-                                    }
-                                }
-                            }
-                        }
-
-                        let startDot = MainViewController.basalGraphStruct(basalRate: scheduled, date: priorDateTimeStamp + (priorDuration * 60))
-                        if !existingDates.contains(Int(startDot.date)) {
-                            mainVC.statsBasalData.append(startDot)
-                        }
-
-                        if midGap {
-                            let endDot1 = MainViewController.basalGraphStruct(basalRate: scheduled, date: midGapTime)
-                            if !existingDates.contains(Int(endDot1.date)) {
-                                mainVC.statsBasalData.append(endDot1)
-                            }
-                            let startDot2 = MainViewController.basalGraphStruct(basalRate: midGapValue, date: midGapTime)
-                            if !existingDates.contains(Int(startDot2.date)) {
-                                mainVC.statsBasalData.append(startDot2)
-                            }
-                            let endDot2 = MainViewController.basalGraphStruct(basalRate: midGapValue, date: dateTimeStamp)
-                            if !existingDates.contains(Int(endDot2.date)) {
-                                mainVC.statsBasalData.append(endDot2)
-                            }
-                        } else {
-                            let endDot = MainViewController.basalGraphStruct(basalRate: scheduled, date: dateTimeStamp)
-                            if !existingDates.contains(Int(endDot.date)) {
-                                mainVC.statsBasalData.append(endDot)
+                    if (dateTimeStamp - priorEndTime) > 15 {
+                        let gapEntries = createScheduledBasalEntriesForGap(
+                            from: priorEndTime,
+                            to: dateTimeStamp,
+                            profile: mainVC.basalProfile,
+                            existingDates: existingDates
+                        )
+                        for entry in gapEntries {
+                            if !existingDates.contains(Int(entry.date)) {
+                                mainVC.statsBasalData.append(entry)
+                                existingDates.insert(Int(entry.date))
                             }
                         }
                     }
@@ -368,11 +372,12 @@ class StatsDataFetcher {
             let startDot = MainViewController.basalGraphStruct(basalRate: basalRate, date: dateTimeStamp)
             if !existingDates.contains(Int(startDot.date)) {
                 mainVC.statsBasalData.append(startDot)
+                existingDates.insert(Int(startDot.date))
             }
 
-            var lastDot = dateTimeStamp + (duration * 60)
+            var endTime = dateTimeStamp + (duration * 60)
             if i == tempArray.count - 1, duration == 0.0 {
-                lastDot = dateTimeStamp + (30 * 60)
+                endTime = dateTimeStamp + (30 * 60)
             }
 
             if i < tempArray.count - 1 {
@@ -382,18 +387,130 @@ class StatsDataFetcher {
                    let nextDateParsed = NightscoutUtils.parseDate(rawNext)
                 {
                     let nextDateTimeStamp = nextDateParsed.timeIntervalSince1970
-                    if nextDateTimeStamp < (dateTimeStamp + (duration * 60)) {
-                        lastDot = nextDateTimeStamp
+                    if nextDateTimeStamp < endTime {
+                        endTime = nextDateTimeStamp
                     }
                 }
             }
 
-            let endDot = MainViewController.basalGraphStruct(basalRate: basalRate, date: lastDot)
+            let endDot = MainViewController.basalGraphStruct(basalRate: basalRate, date: endTime)
             if !existingDates.contains(Int(endDot.date)) {
                 mainVC.statsBasalData.append(endDot)
+                existingDates.insert(Int(endDot.date))
+            }
+        }
+
+        if !tempArray.isEmpty {
+            let firstEntry = tempArray.first as [String: AnyObject]?
+            let firstDateStr = firstEntry?["timestamp"] as? String ?? firstEntry?["created_at"] as? String
+            if let rawFirst = firstDateStr,
+               let firstDateParsed = NightscoutUtils.parseDate(rawFirst)
+            {
+                let firstTempBasalStart = firstDateParsed.timeIntervalSince1970
+                if firstTempBasalStart > cutoffTime {
+                    let gapEntries = createScheduledBasalEntriesForGap(
+                        from: cutoffTime,
+                        to: firstTempBasalStart,
+                        profile: mainVC.basalProfile,
+                        existingDates: existingDates
+                    )
+                    for entry in gapEntries {
+                        if !existingDates.contains(Int(entry.date)) {
+                            mainVC.statsBasalData.append(entry)
+                            existingDates.insert(Int(entry.date))
+                        }
+                    }
+                }
+            }
+        } else if !mainVC.basalProfile.isEmpty {
+            let gapEntries = createScheduledBasalEntriesForGap(
+                from: cutoffTime,
+                to: now,
+                profile: mainVC.basalProfile,
+                existingDates: existingDates
+            )
+            for entry in gapEntries {
+                if !existingDates.contains(Int(entry.date)) {
+                    mainVC.statsBasalData.append(entry)
+                    existingDates.insert(Int(entry.date))
+                }
+            }
+        }
+
+        if !tempArray.isEmpty {
+            let lastEntry = tempArray.last as [String: AnyObject]?
+            let lastDateStr = lastEntry?["timestamp"] as? String ?? lastEntry?["created_at"] as? String
+            let lastDuration = lastEntry?["duration"] as? Double ?? 30.0
+            if let rawLast = lastDateStr,
+               let lastDateParsed = NightscoutUtils.parseDate(rawLast)
+            {
+                let lastTempBasalEnd = lastDateParsed.timeIntervalSince1970 + (lastDuration * 60)
+                if lastTempBasalEnd < now {
+                    let gapEntries = createScheduledBasalEntriesForGap(
+                        from: lastTempBasalEnd,
+                        to: now,
+                        profile: mainVC.basalProfile,
+                        existingDates: existingDates
+                    )
+                    for entry in gapEntries {
+                        if !existingDates.contains(Int(entry.date)) {
+                            mainVC.statsBasalData.append(entry)
+                            existingDates.insert(Int(entry.date))
+                        }
+                    }
+                }
             }
         }
 
         mainVC.statsBasalData.sort { $0.date < $1.date }
+    }
+
+    private func createScheduledBasalEntriesForGap(
+        from startTime: TimeInterval,
+        to endTime: TimeInterval,
+        profile: [MainViewController.basalProfileStruct],
+        existingDates: Set<Int>
+    ) -> [MainViewController.basalGraphStruct] {
+        guard !profile.isEmpty, endTime > startTime else { return [] }
+
+        var entries: [MainViewController.basalGraphStruct] = []
+        let sortedProfile = profile.sorted { $0.timeAsSeconds < $1.timeAsSeconds }
+        let calendar = Calendar.current
+
+        var currentTime = startTime
+        while currentTime < endTime {
+            let currentDate = Date(timeIntervalSince1970: currentTime)
+            let dayStart = calendar.startOfDay(for: currentDate).timeIntervalSince1970
+            let nextDayStart = dayStart + 24 * 60 * 60
+
+            for i in 0 ..< sortedProfile.count {
+                let segmentRate = sortedProfile[i].value
+                let segmentStartInDay = dayStart + sortedProfile[i].timeAsSeconds
+
+                let segmentEndInDay: TimeInterval
+                if i < sortedProfile.count - 1 {
+                    segmentEndInDay = dayStart + sortedProfile[i + 1].timeAsSeconds
+                } else {
+                    segmentEndInDay = nextDayStart
+                }
+
+                let overlapStart = max(currentTime, segmentStartInDay)
+                let overlapEnd = min(endTime, segmentEndInDay)
+
+                if overlapEnd > overlapStart, !existingDates.contains(Int(overlapStart)) {
+                    let startEntry = MainViewController.basalGraphStruct(basalRate: segmentRate, date: overlapStart)
+                    entries.append(startEntry)
+
+                    if overlapEnd < endTime, !existingDates.contains(Int(overlapEnd)) {
+                        let endEntry = MainViewController.basalGraphStruct(basalRate: segmentRate, date: overlapEnd)
+                        entries.append(endEntry)
+                    }
+                }
+            }
+
+            currentTime = nextDayStart
+        }
+
+        return entries
     }
 }
