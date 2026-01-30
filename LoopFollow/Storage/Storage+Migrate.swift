@@ -4,6 +4,14 @@
 import Foundation
 
 extension Storage {
+    func migrateStep3() {
+        let legacyForceDarkMode = StorageValue<Bool>(key: "forceDarkMode", defaultValue: true)
+        if legacyForceDarkMode.exists {
+            Storage.shared.appearanceMode.value = legacyForceDarkMode.value ? .dark : .system
+            legacyForceDarkMode.remove()
+        }
+    }
+
     func migrateStep2() {
         // Migrate from old system to new position-based system
         if remoteType.value != .none {
@@ -59,7 +67,6 @@ extension Storage {
 
         let legacyForceDarkMode = UserDefaultsValue<Bool>(key: "forceDarkMode", default: true)
         if legacyForceDarkMode.exists {
-            // Migrate from Bool to AppearanceMode: true -> .dark, false -> .system
             Storage.shared.appearanceMode.value = legacyForceDarkMode.value ? .dark : .system
             legacyForceDarkMode.setNil(key: "forceDarkMode")
         }
