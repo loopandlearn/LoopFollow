@@ -60,6 +60,8 @@ enum TabItem: String, CaseIterable, Codable, Identifiable {
     case remote
     case nightscout
     case snoozer
+    case treatments
+    case stats
 
     var id: String { rawValue }
 
@@ -70,6 +72,8 @@ enum TabItem: String, CaseIterable, Codable, Identifiable {
         case .remote: return "Remote"
         case .nightscout: return "Nightscout"
         case .snoozer: return "Snoozer"
+        case .treatments: return "Treatments"
+        case .stats: return "Statistics"
         }
     }
 
@@ -80,11 +84,13 @@ enum TabItem: String, CaseIterable, Codable, Identifiable {
         case .remote: return "antenna.radiowaves.left.and.right"
         case .nightscout: return "safari"
         case .snoozer: return "zzz"
+        case .treatments: return "cross.case"
+        case .stats: return "chart.bar.xaxis"
         }
     }
 
     /// Items that can be moved between tab bar and menu (all except settings which doesn't exist as a tab)
     static var movableItems: [TabItem] {
-        [.home, .alarms, .remote, .nightscout, .snoozer]
+        [.home, .alarms, .remote, .nightscout, .snoozer, .treatments, .stats]
     }
 }

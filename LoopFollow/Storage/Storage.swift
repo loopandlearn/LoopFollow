@@ -196,6 +196,8 @@ class Storage {
         case .remote: return remotePosition.value
         case .nightscout: return nightscoutPosition.value
         case .snoozer: return snoozerPosition.value
+        case .stats: return statisticsPosition.value
+        case .treatments: return treatmentsPosition.value
         }
     }
 
@@ -207,6 +209,8 @@ class Storage {
         case .remote: remotePosition.value = position
         case .nightscout: nightscoutPosition.value = position
         case .snoozer: snoozerPosition.value = position
+        case .stats: statisticsPosition.value = position
+        case .treatments: treatmentsPosition.value = position
         }
     }
 

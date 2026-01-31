@@ -144,6 +144,10 @@ class MoreMenuViewController: UIViewController {
             openNightscout()
         case .snoozer:
             openSnoozer()
+        case .treatments:
+            openTreatments()
+        case .stats:
+            openAggregatedStats()
         }
     }
 
