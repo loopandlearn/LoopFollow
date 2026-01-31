@@ -5,69 +5,97 @@ import SwiftUI
 
 struct TreatmentsView: View {
     @StateObject private var viewModel = TreatmentsViewModel()
+    @State private var selectedType: TreatmentType? = nil
 
     var body: some View {
-        List {
-            if viewModel.isInitialLoading {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .padding()
-                    Spacer()
-                }
-            } else if viewModel.groupedTreatments.isEmpty {
-                Text("No recent treatments")
-                    .foregroundColor(.secondary)
-                    .padding()
-            } else {
-                ForEach(viewModel.groupedTreatments.keys.sorted(by: >), id: \.self) { hourKey in
-                    Section(header: Text(formatHourHeader(hourKey))) {
-                        ForEach(viewModel.groupedTreatments[hourKey] ?? []) { treatment in
-                            TreatmentRow(treatment: treatment)
-                        }
+        NavigationView {
+            VStack {
+                // Filter Picker
+                Picker("Filter", selection: $selectedType) {
+                    Text("All").tag(TreatmentType?.none)
+                    ForEach(TreatmentType.allCases, id: \ .self) { type in
+                        Text(type.displayName).tag(Optional(type))
                     }
                 }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding([.top, .horizontal])
 
-                Section {
-                    if viewModel.isLoadingMore {
+                List {
+                    if viewModel.isInitialLoading {
                         HStack {
                             Spacer()
                             ProgressView()
                                 .padding()
                             Spacer()
                         }
+                    } else if filteredGroupedTreatments.isEmpty {
+                        Text("No recent treatments")
+                            .foregroundColor(.secondary)
+                            .padding()
                     } else {
-                        Button(action: {
-                            viewModel.loadMoreIfNeeded()
-                        }) {
-                            HStack {
-                                Spacer()
-                                VStack {
-                                    Text("Load More")
-                                        .font(.headline)
-                                        .foregroundColor(.blue)
-                                    Text("Tap to load older treatments")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                        ForEach(filteredGroupedTreatments.keys.sorted(by: >), id: \.self) { hourKey in
+                            Section(header: Text(formatHourHeader(hourKey))) {
+                                ForEach(filteredGroupedTreatments[hourKey] ?? []) { treatment in
+                                    TreatmentRow(treatment: treatment)
                                 }
-                                Spacer()
                             }
-                            .padding(.vertical, 8)
                         }
+
+                        Section {
+                            if viewModel.isLoadingMore {
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                        .padding()
+                                    Spacer()
+                                }
+                            } else {
+                                Button(action: {
+                                    viewModel.loadMoreIfNeeded()
+                                }) {
+                                    HStack {
+                                        Spacer()
+                                        VStack {
+                                            Text("Load More")
+                                                .font(.headline)
+                                                .foregroundColor(.blue)
+                                            Text("Tap to load older treatments")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        Spacer()
+                                    }
+                                    .padding(.vertical, 8)
+                                }
+                            }
+                        }
+                    }
+                }
+                .navigationTitle("Treatments")
+                .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
+                .refreshable {
+                    viewModel.refreshTreatments()
+                }
+                .onAppear {
+                    if viewModel.groupedTreatments.isEmpty {
+                        viewModel.loadInitialTreatments()
                     }
                 }
             }
         }
-        .navigationTitle("Treatments")
-        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
-        .refreshable {
-            viewModel.refreshTreatments()
-        }
-        .onAppear {
-            if viewModel.groupedTreatments.isEmpty {
-                viewModel.loadInitialTreatments()
+    }
+
+    // Filtered grouped treatments based on selectedType
+    private var filteredGroupedTreatments: [String: [Treatment]] {
+        guard let selectedType else { return viewModel.groupedTreatments }
+        var filtered: [String: [Treatment]] = [:]
+        for (key, treatments) in viewModel.groupedTreatments {
+            let filteredTreatments = treatments.filter { $0.type == selectedType }
+            if !filteredTreatments.isEmpty {
+                filtered[key] = filteredTreatments
             }
         }
+        return filtered
     }
 
     private func formatHourHeader(_ hourKey: String) -> String {
@@ -620,11 +648,20 @@ struct TreatmentRow: View {
     }
 }
 
-enum TreatmentType {
+enum TreatmentType: CaseIterable, Hashable {
     case carb
     case bolus
     case smb
     case tempBasal
+
+    var displayName: String {
+        switch self {
+        case .carb: return "Carbs"
+        case .bolus: return "Bolus"
+        case .smb: return "SMB"
+        case .tempBasal: return "Basal"
+        }
+    }
 }
 
 struct Treatment: Identifiable {
@@ -700,7 +737,7 @@ class TreatmentsViewModel: ObservableObject {
             }
         }
     }
-    
+
     func refreshTreatments() {
         allTreatments.removeAll()
         processedNightscoutIds.removeAll()
@@ -752,12 +789,12 @@ class TreatmentsViewModel: ObservableObject {
             completion([], 0)
             return
         }
-        
+
         // Format dates for the query
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         formatter.timeZone = TimeZone(abbreviation: "UTC")
-        
+
         // For pagination: fetch treatments with created_at < endDate
         // Go back up to 365 days from endDate to ensure we get enough data
         let startDate = Calendar.current.date(byAdding: .day, value: -365, to: endDate)!
@@ -786,7 +823,7 @@ class TreatmentsViewModel: ObservableObject {
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         request.httpMethod = "GET"
 
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
             guard let self = self else { return }
 
             if let error = error {

@@ -14,7 +14,7 @@ class StatsDataService {
 
     /// Structure to hold temp basal data for calculations
     struct TempBasalEntry {
-        let rate: Double           // U/hr (absolute rate)
+        let rate: Double // U/hr (absolute rate)
         let startTime: TimeInterval // Unix timestamp
         let durationMinutes: Double // Duration in minutes
     }
