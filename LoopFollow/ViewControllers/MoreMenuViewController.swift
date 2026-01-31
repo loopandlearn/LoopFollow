@@ -151,7 +151,6 @@ class MoreMenuViewController: UIViewController {
         let settingsVC = UIHostingController(rootView: SettingsMenuView())
         let navController = UINavigationController(rootViewController: settingsVC)
 
-        // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         settingsVC.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
@@ -171,7 +170,6 @@ class MoreMenuViewController: UIViewController {
         alarmsVC.title = "Alarms"
         let navController = UINavigationController(rootViewController: alarmsVC)
 
-        // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         alarmsVC.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
@@ -191,7 +189,6 @@ class MoreMenuViewController: UIViewController {
         let remoteVC = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
         let navController = UINavigationController(rootViewController: remoteVC)
 
-        // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         remoteVC.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
@@ -211,7 +208,6 @@ class MoreMenuViewController: UIViewController {
         let nightscoutVC = storyboard.instantiateViewController(withIdentifier: "NightscoutViewController")
         let navController = UINavigationController(rootViewController: nightscoutVC)
 
-        // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         nightscoutVC.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
@@ -231,12 +227,20 @@ class MoreMenuViewController: UIViewController {
         let snoozerVC = storyboard.instantiateViewController(withIdentifier: "SnoozerViewController")
         let navController = UINavigationController(rootViewController: snoozerVC)
 
-        if Storage.shared.forceDarkMode.value {
-            snoozerVC.overrideUserInterfaceStyle = .dark
-            navController.overrideUserInterfaceStyle = .dark
-        }
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        snoozerVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
 
         snoozerVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
+    }
+
     private func openTreatments() {
         let treatmentsVC = UIHostingController(rootView: TreatmentsView())
         let navController = UINavigationController(rootViewController: treatmentsVC)
@@ -300,9 +304,7 @@ class MoreMenuViewController: UIViewController {
         let homeModalView = HomeModalView()
         let hostingController = UIHostingController(rootView: homeModalView)
 
-        if Storage.shared.forceDarkMode.value {
-            hostingController.overrideUserInterfaceStyle = .dark
-        }
+        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
 
         hostingController.modalPresentationStyle = .fullScreen
         present(hostingController, animated: true)
@@ -319,6 +321,8 @@ class MoreMenuViewController: UIViewController {
             // Rebuild tabs after settings is dismissed to apply any tab order changes
             MainViewController.rebuildTabsIfNeeded()
         }
+    }
+
     private func getMainViewController() -> MainViewController? {
         // Try to find MainViewController in the view hierarchy
         guard let tabBarController = tabBarController else { return nil }

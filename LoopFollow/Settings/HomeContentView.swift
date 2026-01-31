@@ -32,9 +32,7 @@ struct HomeContentView: UIViewControllerRepresentable {
             return fallbackVC
         }
 
-        if Storage.shared.forceDarkMode.value {
-            mainVC.overrideUserInterfaceStyle = .dark
-        }
+        mainVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
 
         mainVC.isPresentedAsModal = isModal
 
@@ -42,11 +40,7 @@ struct HomeContentView: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context _: Context) {
-        if Storage.shared.forceDarkMode.value {
-            uiViewController.overrideUserInterfaceStyle = .dark
-        } else {
-            uiViewController.overrideUserInterfaceStyle = .unspecified
-        }
+        uiViewController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
     }
 }
 
@@ -69,7 +63,7 @@ struct HomeModalView: View {
                     }
                 }
         }
-        .preferredColorScheme(Storage.shared.forceDarkMode.value ? .dark : nil)
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 }
 

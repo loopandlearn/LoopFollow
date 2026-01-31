@@ -726,9 +726,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             stackView.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor),
         ])
 
-        if Storage.shared.forceDarkMode.value {
-            vc.overrideUserInterfaceStyle = .dark
-        }
+        vc.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
 
         return vc
     }
