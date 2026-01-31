@@ -5,7 +5,7 @@ import Foundation
 
 // Class that contains general constants used in different classes
 class AppConstants {
-    static let APP_GROUP_ID = "group.com.$(unique_id).LoopFollow"
+    static let APP_GROUP_ID = "group.$(BUNDLE_IDENTIFIER)"
 
     /// Extracts the app suffix from the bundle identifier
     /// Bundle identifier format: com.$(unique_id).LoopFollow$(app_suffix)
