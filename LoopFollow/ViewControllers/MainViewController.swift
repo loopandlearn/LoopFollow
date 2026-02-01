@@ -147,6 +147,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             Storage.shared.migrationStep.value = 2
         }
 
+        if Storage.shared.migrationStep.value < 3 {
+            Storage.shared.migrateStep3()
+            Storage.shared.migrationStep.value = 3
+        }
+
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
 
