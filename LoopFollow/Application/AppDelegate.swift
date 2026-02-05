@@ -70,7 +70,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         LogManager.shared.log(category: .general, message: "Received remote notification: \(userInfo)")
 
-        // Check if this is a notification from Trio with status update
+        // Check if this is a response notification from Loop or Trio
         if let aps = userInfo["aps"] as? [String: Any] {
             // Handle visible notification (alert, sound, badge)
             if let alert = aps["alert"] as? [String: Any] {

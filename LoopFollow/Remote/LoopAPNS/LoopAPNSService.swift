@@ -47,7 +47,7 @@ class LoopAPNSService {
         }
     }
 
-    private func createReturnNotificationInfo() -> [String: Any]? {
+    private func createReturnNotificationInfo() -> ReturnNotificationInfo? {
         let loopFollowDeviceToken = Observable.shared.loopFollowDeviceToken.value
         guard !loopFollowDeviceToken.isEmpty else { return nil }
 
@@ -80,16 +80,29 @@ class LoopAPNSService {
             return nil
         }
 
-        let returnInfo: [String: Any] = [
-            "production_environment": BuildDetails.default.isTestFlightBuild(),
-            "device_token": loopFollowDeviceToken,
-            "bundle_id": Bundle.main.bundleIdentifier ?? "",
-            "team_id": loopFollowTeamID,
-            "key_id": keyIdForReturn,
-            "apns_key": apnsKeyForReturn,
-        ]
+        return ReturnNotificationInfo(
+            productionEnvironment: BuildDetails.default.isTestFlightBuild(),
+            deviceToken: loopFollowDeviceToken,
+            bundleId: Bundle.main.bundleIdentifier ?? "",
+            teamId: loopFollowTeamID,
+            keyId: keyIdForReturn,
+            apnsKey: apnsKeyForReturn
+        )
+    }
 
-        return returnInfo
+    /// Encrypts return notification info using OTP code
+    private func encryptReturnNotificationInfo(returnInfo: ReturnNotificationInfo, otpCode: String) -> String? {
+        guard let messenger = OTPSecureMessenger(otpCode: otpCode) else {
+            LogManager.shared.log(category: .apns, message: "Failed to create OTP secure messenger")
+            return nil
+        }
+
+        do {
+            return try messenger.encrypt(returnInfo)
+        } catch {
+            LogManager.shared.log(category: .apns, message: "Failed to encrypt return notification info: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     /// Validates the Loop APNS setup by checking all required fields
@@ -150,11 +163,18 @@ class LoopAPNSService {
             "alert": "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
         ] as [String: Any]
 
-        /* Let's wait with this until we have an encryption solution for LRC
-         if let returnInfo = createReturnNotificationInfo() {
-             finalPayload["return_notification"] = returnInfo
-         }
-         */
+        // Encrypt and include return notification info using OTP
+        if let returnInfo = createReturnNotificationInfo() {
+            LogManager.shared.log(category: .apns, message: "Created return notification info for carbs - deviceToken: \(returnInfo.deviceToken.prefix(8))..., bundleId: \(returnInfo.bundleId)")
+            if let encryptedReturnInfo = encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: String(payload.otp)) {
+                finalPayload["encrypted_return_notification"] = encryptedReturnInfo
+                LogManager.shared.log(category: .apns, message: "Added encrypted_return_notification to carbs payload, length: \(encryptedReturnInfo.count)")
+            } else {
+                LogManager.shared.log(category: .apns, message: "Failed to encrypt return notification info for carbs command")
+            }
+        } else {
+            LogManager.shared.log(category: .apns, message: "Failed to create return notification info for carbs command")
+        }
 
         // Log the exact carbs amount for debugging precision issues
         LogManager.shared.log(category: .apns, message: "Carbs amount - Raw: \(payload.carbsAmount ?? 0.0), Formatted: \(String(format: "%.1f", carbsAmount)), JSON: \(carbsAmount)")
@@ -208,11 +228,18 @@ class LoopAPNSService {
             "alert": "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U",
         ] as [String: Any]
 
-        /* Let's wait with this until we have an encryption solution for LRC
-         if let returnInfo = createReturnNotificationInfo() {
-             finalPayload["return_notification"] = returnInfo
-         }
-         */
+        // Encrypt and include return notification info using OTP
+        if let returnInfo = createReturnNotificationInfo() {
+            LogManager.shared.log(category: .apns, message: "Created return notification info for carbs - deviceToken: \(returnInfo.deviceToken.prefix(8))..., bundleId: \(returnInfo.bundleId)")
+            if let encryptedReturnInfo = encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: String(payload.otp)) {
+                finalPayload["encrypted_return_notification"] = encryptedReturnInfo
+                LogManager.shared.log(category: .apns, message: "Added encrypted_return_notification to carbs payload, length: \(encryptedReturnInfo.count)")
+            } else {
+                LogManager.shared.log(category: .apns, message: "Failed to encrypt return notification info for carbs command")
+            }
+        } else {
+            LogManager.shared.log(category: .apns, message: "Failed to create return notification info for carbs command")
+        }
 
         // Log the exact bolus amount for debugging precision issues
         LogManager.shared.log(category: .apns, message: "Bolus amount - Raw: \(payload.bolusAmount ?? 0.0), Formatted: \(String(format: "%.2f", bolusAmount)), JSON: \(bolusAmount)")
@@ -361,6 +388,13 @@ class LoopAPNSService {
 
         // Remove nil values to clean up the payload
         let cleanPayload = apnsPayload.compactMapValues { $0 }
+
+        // Log if encrypted_return_notification is in the payload
+        if cleanPayload["encrypted_return_notification"] != nil {
+            LogManager.shared.log(category: .apns, message: "encrypted_return_notification is present in final APNS payload")
+        } else {
+            LogManager.shared.log(category: .apns, message: "WARNING: encrypted_return_notification is NOT in final APNS payload. Available keys: \(Array(cleanPayload.keys).joined(separator: ", "))")
+        }
 
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: cleanPayload)
@@ -651,8 +685,17 @@ class LoopAPNSService {
             payload["override-duration-minutes"] = Int(duration / 60)
         }
 
+        // For override commands, we can include return notification info unencrypted
+        // since override commands don't require OTP validation in Loop
         if let returnInfo = createReturnNotificationInfo() {
-            payload["return_notification"] = returnInfo
+            payload["return_notification"] = [
+                "production_environment": returnInfo.productionEnvironment,
+                "device_token": returnInfo.deviceToken,
+                "bundle_id": returnInfo.bundleId,
+                "team_id": returnInfo.teamId,
+                "key_id": returnInfo.keyId,
+                "apns_key": returnInfo.apnsKey,
+            ]
         }
 
         // Send the notification using the existing APNS infrastructure
@@ -696,8 +739,17 @@ class LoopAPNSService {
             "alert": "Cancel Temporary Override",
         ]
 
+        // For override commands, we can include return notification info unencrypted
+        // since override commands don't require OTP validation in Loop
         if let returnInfo = createReturnNotificationInfo() {
-            payload["return_notification"] = returnInfo
+            payload["return_notification"] = [
+                "production_environment": returnInfo.productionEnvironment,
+                "device_token": returnInfo.deviceToken,
+                "bundle_id": returnInfo.bundleId,
+                "team_id": returnInfo.teamId,
+                "key_id": returnInfo.keyId,
+                "apns_key": returnInfo.apnsKey,
+            ]
         }
 
         // Send the notification using the existing APNS infrastructure
