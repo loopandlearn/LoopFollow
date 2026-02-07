@@ -12,6 +12,8 @@ class AggregatedStatsViewModel: ObservableObject {
 
     let dataService: StatsDataService
 
+    @Published var dataAvailability: DataAvailabilityInfo?
+
     init(mainViewController: MainViewController?) {
         dataService = StatsDataService(mainViewController: mainViewController)
         simpleStats = SimpleStatsViewModel(dataService: dataService)
@@ -25,10 +27,17 @@ class AggregatedStatsViewModel: ObservableObject {
         agpStats.calculateAGP()
         griStats.calculateGRI()
         tirStats.calculateTIR()
+        dataAvailability = dataService.getDataAvailability()
     }
 
     func updatePeriod(_ days: Int, completion: @escaping () -> Void = {}) {
-        dataService.daysToAnalyze = days
+        let endDate = Date()
+        let startDate = Calendar.current.date(byAdding: .day, value: -days, to: endDate) ?? endDate
+        updateDateRange(start: startDate, end: endDate, completion: completion)
+    }
+
+    func updateDateRange(start: Date, end: Date, completion: @escaping () -> Void = {}) {
+        dataService.updateDateRange(start: start, end: end)
         dataService.ensureDataAvailable(
             onProgress: {},
             completion: {

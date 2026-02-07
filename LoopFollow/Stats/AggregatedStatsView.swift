@@ -9,42 +9,71 @@ struct AggregatedStatsView: View {
     @Environment(\.dismiss) var dismiss
     @State private var showGMI: Bool
     @State private var showStdDev: Bool
-    @State private var selectedPeriod = 14
+    @State private var startDate: Date
+    @State private var endDate: Date
     @State private var isLoadingData = false
+    @State private var showLoadingMessage = false
+    @State private var loadingError = false
+    @State private var loadingTimer: Timer?
+    @State private var timeoutTimer: Timer?
 
     init(viewModel: AggregatedStatsViewModel) {
         self.viewModel = viewModel
         _showGMI = State(initialValue: Storage.shared.showGMI.value)
         _showStdDev = State(initialValue: Storage.shared.showStdDev.value)
+
+        // Initialize with 7 days ago to today
+        let end = Date()
+        let start = Calendar.current.date(byAdding: .day, value: -7, to: end) ?? end
+        _startDate = State(initialValue: start)
+        _endDate = State(initialValue: end)
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                VStack(spacing: 8) {
+                VStack(spacing: 12) {
                     Text("Statistics")
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Picker("Period", selection: $selectedPeriod) {
-                        Text("1 day").tag(1)
-                        Text("14 days").tag(14)
-                        Text("30 days").tag(30)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal)
-                    .onChange(of: selectedPeriod) { newValue in
-                        isLoadingData = true
-                        viewModel.updatePeriod(newValue) {
-                            isLoadingData = false
+                    DateRangePicker(
+                        startDate: $startDate,
+                        endDate: $endDate,
+                        availability: viewModel.dataAvailability,
+                        onDateChange: {
+                            loadingError = false
+                            isLoadingData = true
+                            viewModel.updateDateRange(start: startDate, end: endDate) {
+                                isLoadingData = false
+                            }
                         }
-                    }
+                    )
+                    .padding(.horizontal)
                 }
                 .padding(.top)
 
-                if isLoadingData {
-                    ProgressView("Loading data...")
-                        .padding()
+                if loadingError {
+                    VStack(spacing: 8) {
+                        Text("#WeAreNotWaitingAnymore")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.orange)
+                        Text("...because the data could not be loaded")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                } else if isLoadingData {
+                    VStack(spacing: 12) {
+                        ProgressView("Loading data...")
+                        if showLoadingMessage {
+                            Text("#WeAreWaitingForData")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding()
                 }
 
                 StatsGridView(
@@ -53,15 +82,20 @@ struct AggregatedStatsView: View {
                     showStdDev: $showStdDev
                 )
                 .padding(.horizontal)
+                .opacity(isLoadingData ? 0.4 : 1.0)
+                .disabled(isLoadingData)
 
                 AGPView(viewModel: viewModel.agpStats)
                     .padding(.horizontal)
+                    .opacity(isLoadingData ? 0.4 : 1.0)
 
                 TIRView(viewModel: viewModel.tirStats)
                     .padding(.horizontal)
+                    .opacity(isLoadingData ? 0.4 : 1.0)
 
                 GRIView(viewModel: viewModel.griStats)
                     .padding(.horizontal)
+                    .opacity(isLoadingData ? 0.4 : 1.0)
             }
             .padding(.bottom)
             .frame(maxWidth: .infinity)
@@ -70,17 +104,52 @@ struct AggregatedStatsView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button("Refresh") {
-                    viewModel.calculateStats()
+                    loadingError = false
+                    isLoadingData = true
+                    viewModel.updateDateRange(start: startDate, end: endDate) {
+                        isLoadingData = false
+                    }
                 }
             }
         }
         .onAppear {
-            viewModel.dataService.ensureDataAvailable(
-                onProgress: {},
-                completion: {
-                    viewModel.calculateStats()
+            // Initialize the date range in the view model
+            loadingError = false
+            isLoadingData = true
+            viewModel.updateDateRange(start: startDate, end: endDate) {
+                isLoadingData = false
+            }
+        }
+        .onChange(of: isLoadingData) { newValue in
+            if newValue {
+                showLoadingMessage = false
+                loadingError = false
+
+                // Show "still waiting" message after 3 seconds
+                loadingTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+                    showLoadingMessage = true
                 }
-            )
+
+                // Timeout after 30 seconds
+                timeoutTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: false) { _ in
+                    if self.isLoadingData {
+                        self.isLoadingData = false
+                        self.loadingError = true
+                    }
+                }
+            } else {
+                loadingTimer?.invalidate()
+                loadingTimer = nil
+                timeoutTimer?.invalidate()
+                timeoutTimer = nil
+                showLoadingMessage = false
+            }
+        }
+        .onDisappear {
+            loadingTimer?.invalidate()
+            loadingTimer = nil
+            timeoutTimer?.invalidate()
+            timeoutTimer = nil
         }
     }
 }
