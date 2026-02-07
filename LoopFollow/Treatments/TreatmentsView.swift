@@ -5,20 +5,64 @@ import SwiftUI
 
 struct TreatmentsView: View {
     @StateObject private var viewModel = TreatmentsViewModel()
-    @State private var selectedType: TreatmentType? = nil
+    @State private var selectedFilter: TreatmentFilter = .all
+    @ObservedObject private var device = Storage.shared.device
+
+    private var isLoopDevice: Bool {
+        device.value == "Loop"
+    }
+
+    private var isTrioDevice: Bool {
+        device.value == "Trio"
+    }
+
+    private var automaticFilterLabel: String {
+        if isTrioDevice {
+            return "SMB"
+        }
+        if isLoopDevice {
+            return "Automatic"
+        }
+        if viewModel.hasAutomaticEntries {
+            return "Automatic"
+        }
+        if viewModel.hasSMBEntries {
+            return "SMB"
+        }
+        return "Automatic"
+    }
+
+    private var automaticLabelIsSMB: Bool {
+        automaticFilterLabel == "SMB"
+    }
 
     var body: some View {
         NavigationView {
             VStack {
-                // Filter Picker
-                Picker("Filter", selection: $selectedType) {
-                    Text("All").tag(TreatmentType?.none)
-                    ForEach(TreatmentType.allCases, id: \ .self) { type in
-                        Text(type.displayName).tag(Optional(type))
+                Text("Treatments")
+                    .font(.largeTitle.weight(.bold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.top, 4)
+
+                // Filter Pickers
+                VStack(spacing: 12) {
+                    Picker("Filter", selection: $selectedFilter) {
+                        ForEach(TreatmentFilter.primaryFilters, id: \.self) { filter in
+                            Text(filter.displayName(automaticLabel: automaticFilterLabel)).tag(filter)
+                        }
                     }
+                    .pickerStyle(SegmentedPickerStyle())
+
+                    Picker("Bolus Filter", selection: $selectedFilter) {
+                        ForEach(TreatmentFilter.bolusFilters(isLoopDevice: isLoopDevice, isTrioDevice: isTrioDevice, automaticLabelIsSMB: automaticLabelIsSMB), id: \.self) { filter in
+                            Text(filter.displayName(automaticLabel: automaticFilterLabel)).tag(filter)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
                 }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding([.top, .horizontal])
+                .padding(.horizontal)
+                .padding(.top, 8)
 
                 List {
                     if viewModel.isInitialLoading {
@@ -71,7 +115,8 @@ struct TreatmentsView: View {
                         }
                     }
                 }
-                .navigationTitle("Treatments")
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
                 .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
                 .refreshable {
                     viewModel.refreshTreatments()
@@ -80,22 +125,54 @@ struct TreatmentsView: View {
                     if viewModel.groupedTreatments.isEmpty {
                         viewModel.loadInitialTreatments()
                     }
+                    normalizeSelectedFilter(for: device.value)
+                }
+                .onChange(of: device.value) { newValue in
+                    normalizeSelectedFilter(for: newValue)
                 }
             }
         }
     }
 
-    // Filtered grouped treatments based on selectedType
+    // Filtered grouped treatments based on selectedFilter
     private var filteredGroupedTreatments: [String: [Treatment]] {
-        guard let selectedType else { return viewModel.groupedTreatments }
+        switch selectedFilter {
+        case .all:
+            return viewModel.groupedTreatments
+        case .carb:
+            return groupedTreatments(matching: [.carb])
+        case .basal:
+            return groupedTreatments(matching: [.tempBasal])
+        case .bolusAll:
+            return groupedTreatments(matching: [.bolusAutomatic, .bolusManual, .smb])
+        case .bolusAutomatic:
+            if automaticLabelIsSMB {
+                return groupedTreatments(matching: [.bolusAutomatic, .smb])
+            }
+            return groupedTreatments(matching: [.bolusAutomatic])
+        case .bolusSMB:
+            return groupedTreatments(matching: [.smb])
+        case .bolusManual:
+            return groupedTreatments(matching: [.bolusManual])
+        }
+    }
+
+    private func groupedTreatments(matching types: Set<TreatmentType>) -> [String: [Treatment]] {
         var filtered: [String: [Treatment]] = [:]
         for (key, treatments) in viewModel.groupedTreatments {
-            let filteredTreatments = treatments.filter { $0.type == selectedType }
+            let filteredTreatments = treatments.filter { types.contains($0.type) }
             if !filteredTreatments.isEmpty {
                 filtered[key] = filteredTreatments
             }
         }
         return filtered
+    }
+
+    private func normalizeSelectedFilter(for _: String) {
+        let availableFilters = TreatmentFilter.primaryFilters + TreatmentFilter.bolusFilters(isLoopDevice: isLoopDevice, isTrioDevice: isTrioDevice, automaticLabelIsSMB: automaticLabelIsSMB)
+        if !availableFilters.contains(selectedFilter) {
+            selectedFilter = .bolusAll
+        }
     }
 
     private var sortedHourKeys: [String] {
@@ -688,17 +765,64 @@ struct TreatmentRow: View {
 
 enum TreatmentType: CaseIterable, Hashable {
     case carb
-    case bolus
+    case bolusManual
+    case bolusAutomatic
     case smb
     case tempBasal
 
     var displayName: String {
         switch self {
         case .carb: return "Carbs"
-        case .bolus: return "Bolus"
+        case .bolusManual: return "Bolus"
+        case .bolusAutomatic: return "Automatic"
         case .smb: return "SMB"
         case .tempBasal: return "Basal"
         }
+    }
+}
+
+enum TreatmentFilter: Hashable {
+    case all
+    case carb
+    case basal
+    case bolusAll
+    case bolusAutomatic
+    case bolusSMB
+    case bolusManual
+
+    func displayName(automaticLabel: String) -> String {
+        switch self {
+        case .all: return "All"
+        case .carb: return "Carbs"
+        case .basal: return "Basal"
+        case .bolusAll: return "All Boluses"
+        case .bolusAutomatic: return automaticLabel
+        case .bolusSMB: return "SMB"
+        case .bolusManual: return "Manual"
+        }
+    }
+
+    static var primaryFilters: [TreatmentFilter] {
+        [.all, .carb, .basal]
+    }
+
+    static func bolusFilters(isLoopDevice: Bool, isTrioDevice: Bool, automaticLabelIsSMB: Bool) -> [TreatmentFilter] {
+        var filters: [TreatmentFilter] = [.bolusAll]
+
+        if isTrioDevice {
+            filters.append(.bolusAutomatic)
+        } else if isLoopDevice {
+            filters.append(.bolusAutomatic)
+        } else {
+            if automaticLabelIsSMB {
+                filters.append(.bolusAutomatic)
+            } else {
+                filters.append(contentsOf: [.bolusAutomatic, .bolusSMB])
+            }
+        }
+
+        filters.append(.bolusManual)
+        return filters
     }
 }
 
@@ -736,6 +860,8 @@ class TreatmentsViewModel: ObservableObject {
     @Published var isInitialLoading = false
     @Published var isLoadingMore = false
     @Published var hasMoreData = true
+    @Published var hasSMBEntries = false
+    @Published var hasAutomaticEntries = false
 
     private var allTreatments: [Treatment] = []
     private var processedNightscoutIds = Set<String>() // Track which NS entries we've already processed
@@ -754,6 +880,8 @@ class TreatmentsViewModel: ObservableObject {
         processedNightscoutIds.removeAll()
         oldestFetchedDate = nil
         hasMoreData = true
+        hasSMBEntries = false
+        hasAutomaticEntries = false
 
         // Start from now and go backwards
         fetchTreatments(endDate: Date()) { [weak self] treatments, rawCount in
@@ -883,9 +1011,18 @@ class TreatmentsViewModel: ObservableObject {
 
                 // Parse treatments
                 let rawCount = entries.count
-                let treatments = self.parseTreatments(from: entries)
+                let result = self.parseTreatments(from: entries)
 
-                completion(treatments, rawCount)
+                DispatchQueue.main.async {
+                    if result.detectedSMB {
+                        self.hasSMBEntries = true
+                    }
+                    if result.detectedAutomatic {
+                        self.hasAutomaticEntries = true
+                    }
+                }
+
+                completion(result.treatments, rawCount)
 
             } catch {
                 LogManager.shared.log(category: .nightscout, message: "Failed to parse treatments: \(error.localizedDescription)")
@@ -896,9 +1033,11 @@ class TreatmentsViewModel: ObservableObject {
         task.resume()
     }
 
-    private func parseTreatments(from entries: [[String: AnyObject]]) -> [Treatment] {
+    private func parseTreatments(from entries: [[String: AnyObject]]) -> (treatments: [Treatment], detectedSMB: Bool, detectedAutomatic: Bool) {
         var treatments: [Treatment] = []
-        guard let mainVC = getMainViewController() else { return [] }
+        var detectedSMB = false
+        var detectedAutomatic = false
+        guard let mainVC = getMainViewController() else { return ([], false, false) }
 
         for entry in entries {
             guard let eventType = entry["eventType"] as? String,
@@ -943,7 +1082,7 @@ class TreatmentsViewModel: ObservableObject {
                     let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
                     let treatment = Treatment(
                         id: "\(nsId)-bolus",
-                        type: .bolus,
+                        type: .bolusManual,
                         date: timestamp,
                         title: String(format: "%.2f U", insulin),
                         subtitle: "Bolus",
@@ -957,15 +1096,25 @@ class TreatmentsViewModel: ObservableObject {
             case "Correction Bolus", "Bolus", "External Insulin":
                 if let insulin = entry["insulin"] as? Double, insulin > 0 {
                     let isAutomatic = entry["automatic"] as? Bool ?? false
+                    let isSMB = entry["isSMB"] as? Bool ?? false
+                    let typeString = (entry["type"] as? String)?.lowercased()
+                    let isTrioSMBType = typeString == "smb"
+                    let treatAsAutomatic = isAutomatic || isSMB || isTrioSMBType
                     let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
 
-                    if isAutomatic {
+                    if treatAsAutomatic {
+                        if isSMB || isTrioSMBType {
+                            detectedSMB = true
+                        }
+                        if isAutomatic {
+                            detectedAutomatic = true
+                        }
                         let treatment = Treatment(
                             id: "\(nsId)-smb",
-                            type: .smb,
+                            type: .bolusAutomatic,
                             date: timestamp,
                             title: String(format: "%.2f U", insulin),
-                            subtitle: "Automatic Bolus",
+                            subtitle: isSMB || isTrioSMBType ? "SMB" : "Automatic Bolus",
                             icon: "arrowtriangle.down.fill",
                             color: .blue,
                             bgValue: actualBG
@@ -974,7 +1123,7 @@ class TreatmentsViewModel: ObservableObject {
                     } else {
                         let treatment = Treatment(
                             id: "\(nsId)-bolus",
-                            type: .bolus,
+                            type: .bolusManual,
                             date: timestamp,
                             title: String(format: "%.2f U", insulin),
                             subtitle: "Bolus",
@@ -988,13 +1137,14 @@ class TreatmentsViewModel: ObservableObject {
 
             case "SMB":
                 if let insulin = entry["insulin"] as? Double, insulin > 0 {
+                    detectedSMB = true
                     let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
                     let treatment = Treatment(
                         id: "\(nsId)-smb",
                         type: .smb,
                         date: timestamp,
                         title: String(format: "%.2f U", insulin),
-                        subtitle: "Automatic Bolus",
+                        subtitle: "SMB",
                         icon: "arrowtriangle.down.fill",
                         color: .blue,
                         bgValue: actualBG
@@ -1023,7 +1173,7 @@ class TreatmentsViewModel: ObservableObject {
         }
 
         // Sort by date descending (most recent first)
-        return treatments.sorted { $0.date > $1.date }
+        return (treatments.sorted { $0.date > $1.date }, detectedSMB, detectedAutomatic)
     }
 
     private func regroupTreatments() {
