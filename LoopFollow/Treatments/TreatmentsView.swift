@@ -33,7 +33,7 @@ struct TreatmentsView: View {
                             .foregroundColor(.secondary)
                             .padding()
                     } else {
-                        ForEach(filteredGroupedTreatments.keys.sorted(by: >), id: \.self) { hourKey in
+                        ForEach(sortedHourKeys, id: \.self) { hourKey in
                             Section(header: Text(formatHourHeader(hourKey))) {
                                 ForEach(filteredGroupedTreatments[hourKey] ?? []) { treatment in
                                     TreatmentRow(treatment: treatment)
@@ -96,6 +96,44 @@ struct TreatmentsView: View {
             }
         }
         return filtered
+    }
+
+    private var sortedHourKeys: [String] {
+        filteredGroupedTreatments.keys.sorted { lhs, rhs in
+            let lhsDate = hourKeyDate(lhs)
+            let rhsDate = hourKeyDate(rhs)
+
+            switch (lhsDate, rhsDate) {
+            case let (left?, right?):
+                return left > right
+            case (_?, nil):
+                return true
+            case (nil, _?):
+                return false
+            case (nil, nil):
+                return lhs > rhs
+            }
+        }
+    }
+
+    private func hourKeyDate(_ hourKey: String) -> Date? {
+        let components = hourKey.split(separator: "-")
+        guard components.count == 4,
+              let year = Int(components[0]),
+              let month = Int(components[1]),
+              let day = Int(components[2]),
+              let hour = Int(components[3])
+        else {
+            return nil
+        }
+
+        var dateComponents = DateComponents()
+        dateComponents.year = year
+        dateComponents.month = month
+        dateComponents.day = day
+        dateComponents.hour = hour
+
+        return Calendar.current.date(from: dateComponents)
     }
 
     private func formatHourHeader(_ hourKey: String) -> String {
