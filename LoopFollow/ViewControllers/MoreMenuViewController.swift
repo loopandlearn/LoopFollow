@@ -92,6 +92,24 @@ class MoreMenuViewController: UIViewController {
             }
         ))
 
+        // Always add Treatments
+        menuItems.append(MenuItem(
+            title: "Treatments",
+            icon: "cross.case.fill",
+            action: { [weak self] in
+                self?.openTreatments()
+            }
+        ))
+
+        // Always add Statistics
+        menuItems.append(MenuItem(
+            title: "Statistics",
+            icon: "chart.bar.fill",
+            action: { [weak self] in
+                self?.openAggregatedStats()
+            }
+        ))
+
         // Add items based on their positions
         if Storage.shared.alarmsPosition.value == .more {
             menuItems.append(MenuItem(
@@ -205,6 +223,71 @@ class MoreMenuViewController: UIViewController {
 
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
+    }
+
+    private func openTreatments() {
+        let treatmentsVC = UIHostingController(rootView: TreatmentsView())
+        let navController = UINavigationController(rootViewController: treatmentsVC)
+
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        treatmentsVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
+
+        // Add a close button
+        treatmentsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
+    }
+
+    private func openAggregatedStats() {
+        guard let mainVC = getMainViewController() else {
+            presentSimpleAlert(title: "Error", message: "Unable to access data")
+            return
+        }
+
+        let statsVC = UIHostingController(
+            rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
+        )
+        let navController = UINavigationController(rootViewController: statsVC)
+
+        // Apply appearance mode
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        statsVC.overrideUserInterfaceStyle = style
+        navController.overrideUserInterfaceStyle = style
+
+        // Add a close button
+        statsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
+    }
+
+    private func getMainViewController() -> MainViewController? {
+        // Try to find MainViewController in the view hierarchy
+        guard let tabBarController = tabBarController else { return nil }
+
+        for vc in tabBarController.viewControllers ?? [] {
+            if let mainVC = vc as? MainViewController {
+                return mainVC
+            }
+            if let navVC = vc as? UINavigationController,
+               let mainVC = navVC.viewControllers.first as? MainViewController
+            {
+                return mainVC
+            }
+        }
+
+        return nil
     }
 
     @objc private func dismissModal() {
