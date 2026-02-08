@@ -31,9 +31,14 @@ struct DateRangePicker: View {
         Calendar.current.dateComponents([.day], from: startDate, to: endDate).day ?? 0
     }
 
+    private var lastFullDay: Date {
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+        return calendar.date(byAdding: .second, value: -1, to: startOfToday) ?? Date()
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            // Compact header - always visible
             Button(action: {
                 withAnimation {
                     isExpanded.toggle()
@@ -57,7 +62,6 @@ struct DateRangePicker: View {
 
                     Spacer()
 
-                    // Data availability indicator
                     if let availability = availability {
                         HStack(spacing: 4) {
                             Image(systemName: statusIcon(for: availability.dataQuality))
@@ -80,12 +84,9 @@ struct DateRangePicker: View {
             }
             .background(Color.secondary.opacity(0.1))
 
-            // Expanded content
             if isExpanded {
                 VStack(spacing: 12) {
-                    // Date selection buttons
                     HStack(spacing: 16) {
-                        // Start Date
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Start Date")
                                 .font(.caption)
@@ -112,7 +113,6 @@ struct DateRangePicker: View {
 
                         Spacer()
 
-                        // End Date
                         VStack(alignment: .leading, spacing: 4) {
                             Text("End Date")
                                 .font(.caption)
@@ -148,6 +148,7 @@ struct DateRangePicker: View {
                         )
                         .datePickerStyle(.graphical)
                         .onChange(of: startDate) { _ in
+                            startDate = Calendar.current.startOfDay(for: startDate)
                             showStartDatePicker = false
                             onDateChange()
                         }
@@ -157,11 +158,14 @@ struct DateRangePicker: View {
                         DatePicker(
                             "Select End Date",
                             selection: $endDate,
-                            in: startDate ... Date(),
+                            in: startDate ... lastFullDay,
                             displayedComponents: [.date]
                         )
                         .datePickerStyle(.graphical)
                         .onChange(of: endDate) { _ in
+                            let calendar = Calendar.current
+                            let startOfNextDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate)) ?? endDate
+                            endDate = calendar.date(byAdding: .second, value: -1, to: startOfNextDay) ?? endDate
                             showEndDatePicker = false
                             onDateChange()
                         }
@@ -169,7 +173,6 @@ struct DateRangePicker: View {
 
                     Divider()
 
-                    // Quick selection buttons
                     HStack(spacing: 8) {
                         QuickSelectButton(title: "7d") {
                             setDateRange(days: 7)
@@ -185,7 +188,6 @@ struct DateRangePicker: View {
                         }
                     }
 
-                    // Data availability details
                     if let availability = availability {
                         VStack(spacing: 6) {
                             HStack {
@@ -233,8 +235,11 @@ struct DateRangePicker: View {
     }
 
     private func setDateRange(days: Int) {
-        endDate = Date()
-        startDate = Calendar.current.date(byAdding: .day, value: -days, to: endDate) ?? endDate
+        let calendar = Calendar.current
+        endDate = lastFullDay
+        let endDayStart = calendar.startOfDay(for: endDate)
+        let startDayStart = calendar.date(byAdding: .day, value: -days, to: endDayStart) ?? endDayStart
+        startDate = calendar.startOfDay(for: startDayStart)
         showStartDatePicker = false
         showEndDatePicker = false
         onDateChange()

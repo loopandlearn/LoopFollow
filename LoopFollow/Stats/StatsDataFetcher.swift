@@ -19,9 +19,9 @@ class StatsDataFetcher {
 
         var parameters: [String: String] = [:]
         let utcISODateFormatter = ISO8601DateFormatter()
-        let date = Calendar.current.date(byAdding: .day, value: -1 * days, to: Date())!
+        let startDate = dataService?.startDate ?? Calendar.current.date(byAdding: .day, value: -1 * days, to: Date())!
         parameters["count"] = "\(days * 2 * 24 * 60 / 5)"
-        parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: date)
+        parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: startDate)
         parameters["find[type][$ne]"] = "cal"
 
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
@@ -48,7 +48,7 @@ class StatsDataFetcher {
                         }
                     }
 
-                    let cutoffTime = Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60)
+                    let cutoffTime = self.dataService?.startDate.timeIntervalSince1970 ?? (Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60))
                     mainVC.statsBGData.removeAll { $0.date < cutoffTime }
 
                     let existingDates = Set(mainVC.statsBGData.map { Int($0.date) })
@@ -81,8 +81,8 @@ class StatsDataFetcher {
         utcISODateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         utcISODateFormatter.timeZone = TimeZone(abbreviation: "UTC")
 
-        let startDate = Calendar.current.date(byAdding: .day, value: -1 * days, to: Date())!
-        let endDate = Date()
+        let startDate = dataService?.startDate ?? Calendar.current.date(byAdding: .day, value: -1 * days, to: Date())!
+        let endDate = dataService?.endDate ?? Date()
 
         let startTimeString = utcISODateFormatter.string(from: startDate)
         let currentTimeString = utcISODateFormatter.string(from: endDate)
@@ -120,7 +120,7 @@ class StatsDataFetcher {
     }
 
     private func fetchAndMergeBolusData(entries: [[String: AnyObject]], days: Int, mainVC: MainViewController) {
-        let cutoffTime = Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60)
+        let cutoffTime = dataService?.startDate.timeIntervalSince1970 ?? (Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60))
 
         var bolusEntries: [[String: AnyObject]] = []
         for entry in entries {
@@ -170,7 +170,7 @@ class StatsDataFetcher {
     }
 
     private func fetchAndMergeSMBData(entries: [[String: AnyObject]], days: Int, mainVC: MainViewController) {
-        let cutoffTime = Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60)
+        let cutoffTime = dataService?.startDate.timeIntervalSince1970 ?? (Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60))
 
         var smbEntries: [[String: AnyObject]] = []
         for entry in entries {
@@ -218,8 +218,8 @@ class StatsDataFetcher {
     }
 
     private func fetchAndMergeCarbData(entries: [[String: AnyObject]], days: Int, mainVC: MainViewController) {
-        let cutoffTime = Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60)
-        let now = Date().timeIntervalSince1970
+        let cutoffTime = dataService?.startDate.timeIntervalSince1970 ?? (Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60))
+        let now = dataService?.endDate.timeIntervalSince1970 ?? Date().timeIntervalSince1970
 
         var carbEntries: [[String: AnyObject]] = []
         for entry in entries {
@@ -274,8 +274,8 @@ class StatsDataFetcher {
     }
 
     private func fetchAndMergeBasalData(entries: [[String: AnyObject]], days: Int, mainVC: MainViewController) {
-        let cutoffTime = Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60)
-        let now = Date().timeIntervalSince1970
+        let cutoffTime = dataService?.startDate.timeIntervalSince1970 ?? (Date().timeIntervalSince1970 - (Double(days) * 24 * 60 * 60))
+        let now = dataService?.endDate.timeIntervalSince1970 ?? Date().timeIntervalSince1970
 
         var basalEntries: [[String: AnyObject]] = []
         for entry in entries {

@@ -26,4 +26,8 @@ class TIRViewModel: ObservableObject {
         Storage.shared.showTITR.value = showTITR
         calculateTIR()
     }
+
+    func clearStats() {
+        tirData = []
+    }
 }

@@ -18,4 +18,8 @@ class AGPViewModel: ObservableObject {
         let bgData = dataService.getBGData()
         agpData = AGPCalculator.calculate(bgData: bgData)
     }
+
+    func clearStats() {
+        agpData = []
+    }
 }

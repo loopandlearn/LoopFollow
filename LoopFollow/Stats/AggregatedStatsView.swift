@@ -22,9 +22,12 @@ struct AggregatedStatsView: View {
         _showGMI = State(initialValue: Storage.shared.showGMI.value)
         _showStdDev = State(initialValue: Storage.shared.showStdDev.value)
 
-        // Initialize with 7 days ago to today
-        let end = Date()
-        let start = Calendar.current.date(byAdding: .day, value: -7, to: end) ?? end
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+        let end = calendar.date(byAdding: .second, value: -1, to: startOfToday) ?? Date()
+        let endDay = calendar.startOfDay(for: end)
+        let startDay = calendar.date(byAdding: .day, value: -7, to: endDay) ?? endDay
+        let start = calendar.startOfDay(for: startDay)
         _startDate = State(initialValue: start)
         _endDate = State(initialValue: end)
     }
@@ -113,7 +116,6 @@ struct AggregatedStatsView: View {
             }
         }
         .onAppear {
-            // Initialize the date range in the view model
             loadingError = false
             isLoadingData = true
             viewModel.updateDateRange(start: startDate, end: endDate) {
@@ -135,6 +137,7 @@ struct AggregatedStatsView: View {
                     if self.isLoadingData {
                         self.isLoadingData = false
                         self.loadingError = true
+                        self.viewModel.clearAllStats()
                     }
                 }
             } else {

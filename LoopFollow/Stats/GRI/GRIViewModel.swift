@@ -28,4 +28,11 @@ class GRIViewModel: ObservableObject {
 
         griDataPoints = GRICalculator.calculateTimeSeries(bgData: bgData)
     }
+
+    func clearStats() {
+        gri = nil
+        griHypoComponent = nil
+        griHyperComponent = nil
+        griDataPoints = []
+    }
 }

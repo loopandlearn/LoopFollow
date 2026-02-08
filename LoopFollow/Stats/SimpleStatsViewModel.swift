@@ -21,6 +21,18 @@ class SimpleStatsViewModel: ObservableObject {
         self.dataService = dataService
     }
 
+    func clearStats() {
+        gmi = nil
+        avgGlucose = nil
+        stdDeviation = nil
+        coefficientOfVariation = nil
+        totalDailyDose = nil
+        programmedBasal = nil
+        actualBasal = nil
+        avgBolus = nil
+        avgCarbs = nil
+    }
+
     func calculateStats() {
         let bgData = dataService.getBGData()
         guard !bgData.isEmpty else { return }
@@ -126,13 +138,13 @@ class SimpleStatsViewModel: ObservableObject {
         basalProfile: [MainViewController.basalProfileStruct],
         dailyProgrammedBasal: Double
     ) -> (totalBasal: Double, daysWithData: Int) {
-        let cutoffTime = Date().timeIntervalSince1970 - (Double(dataService.daysToAnalyze) * 24 * 60 * 60)
-        let now = Date().timeIntervalSince1970
+        let cutoffTime = dataService.startDate.timeIntervalSince1970
+        let endTime = dataService.endDate.timeIntervalSince1970
 
         // Filter temp basals to the analysis period
         let relevantTempBasals = tempBasals.filter { tempBasal in
             let tempEnd = tempBasal.startTime + (tempBasal.durationMinutes * 60)
-            return tempEnd > cutoffTime && tempBasal.startTime < now
+            return tempEnd > cutoffTime && tempBasal.startTime < endTime
         }
 
         guard !relevantTempBasals.isEmpty else {
@@ -146,7 +158,7 @@ class SimpleStatsViewModel: ObservableObject {
         for tempBasal in relevantTempBasals {
             // Clamp temp basal to analysis window
             let effectiveStart = max(tempBasal.startTime, cutoffTime)
-            let effectiveEnd = min(tempBasal.startTime + (tempBasal.durationMinutes * 60), now)
+            let effectiveEnd = min(tempBasal.startTime + (tempBasal.durationMinutes * 60), endTime)
 
             guard effectiveEnd > effectiveStart else { continue }
 

@@ -30,6 +30,14 @@ class AggregatedStatsViewModel: ObservableObject {
         dataAvailability = dataService.getDataAvailability()
     }
 
+    func clearAllStats() {
+        simpleStats.clearStats()
+        agpStats.clearStats()
+        griStats.clearStats()
+        tirStats.clearStats()
+        dataAvailability = nil
+    }
+
     func updatePeriod(_ days: Int, completion: @escaping () -> Void = {}) {
         let endDate = Date()
         let startDate = Calendar.current.date(byAdding: .day, value: -days, to: endDate) ?? endDate

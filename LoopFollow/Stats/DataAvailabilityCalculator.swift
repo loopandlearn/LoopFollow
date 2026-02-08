@@ -12,14 +12,14 @@ struct DataAvailabilityInfo {
 
     enum DataQuality {
         case excellent // >= 95%
-        case good // >= 85%
-        case fair // >= 70%
-        case poor // < 70%
+        case good // >= 70%
+        case fair // >= 50%
+        case poor // < 50%
 
         var color: String {
             switch self {
             case .excellent: return "green"
-            case .good: return "blue"
+            case .good: return "green"
             case .fair: return "orange"
             case .poor: return "red"
             }
@@ -55,12 +55,10 @@ class DataAvailabilityCalculator {
         startDate: Date,
         endDate: Date
     ) -> DataAvailabilityInfo {
-        // Calculate time interval in minutes
         let intervalMinutes = 5.0
         let totalMinutes = endDate.timeIntervalSince(startDate) / 60.0
         let expectedReadings = Int(totalMinutes / intervalMinutes)
 
-        // Filter data within the date range
         let startTimestamp = startDate.timeIntervalSince1970
         let endTimestamp = endDate.timeIntervalSince1970
 
@@ -78,7 +76,6 @@ class DataAvailabilityCalculator {
             )
         }
 
-        // Count intervals with at least one reading
         var coveredIntervals = Set<Int>()
 
         for reading in relevantData {
@@ -98,13 +95,12 @@ class DataAvailabilityCalculator {
 
         let missingIntervals = expectedReadings - actualCoveredIntervals
 
-        // Determine data quality
         let quality: DataAvailabilityInfo.DataQuality
         if coveragePercentage >= 95.0 {
             quality = .excellent
-        } else if coveragePercentage >= 85.0 {
-            quality = .good
         } else if coveragePercentage >= 70.0 {
+            quality = .good
+        } else if coveragePercentage >= 50.0 {
             quality = .fair
         } else {
             quality = .poor
