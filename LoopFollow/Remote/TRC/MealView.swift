@@ -196,12 +196,26 @@ struct MealView: View {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 if bolusAmount > 0 {
                                     AuthService.authenticate(reason: "Confirm your identity to send bolus.") { result in
-                                        if case .success = result {
-                                            sendMealCommand()
+                                        DispatchQueue.main.async {
+                                            switch result {
+                                            case .success:
+                                                self.sendMealCommand()
+                                            case let .unavailable(message):
+                                                self.alertMessage = message
+                                                self.alertType = .validationError
+                                                self.showAlert = true
+                                            case .failed:
+                                                self.alertMessage = "Authentication failed"
+                                                self.alertType = .validationError
+                                                self.showAlert = true
+                                            case .canceled:
+                                                // User canceled, no alert
+                                                break
+                                            }
                                         }
                                     }
                                 } else {
-                                    sendMealCommand()
+                                    self.sendMealCommand()
                                 }
                             }
                         }),

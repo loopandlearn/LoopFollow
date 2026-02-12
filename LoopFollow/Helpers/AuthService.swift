@@ -7,7 +7,7 @@ import LocalAuthentication
 public enum AuthResult {
     case success
     case canceled
-    case unavailable
+    case unavailable(String)
     case failed
 }
 
@@ -29,7 +29,25 @@ public enum AuthService {
 
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
-            completion(.unavailable)
+            var message = "Device authentication is not available. "
+
+            if #available(iOS 11, *) {
+                let biometryType = context.biometryType
+                if biometryType == .none {
+                    message += "Please enable Face ID, Touch ID, or set up a device passcode in Settings."
+                } else if biometryType == .faceID {
+                    message += "Face ID is not available. Please set up a device passcode in Settings."
+                } else if biometryType == .touchID {
+                    message += "Touch ID is not available. Please set up a device passcode in Settings."
+                }
+            } else {
+                message += "Please enable Touch ID or set up a device passcode in Settings."
+            }
+
+
+            DispatchQueue.main.async {
+                completion(.unavailable(message))
+            }
             return
         }
 
