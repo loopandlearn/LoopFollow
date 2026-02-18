@@ -113,8 +113,22 @@ struct BolusView: View {
                         message: Text("Are you sure you want to send \(InsulinFormatter.shared.string(bolusAmount)) U?"),
                         primaryButton: .default(Text("Confirm"), action: {
                             AuthService.authenticate(reason: "Confirm your identity to send bolus.") { result in
-                                if case .success = result {
-                                    sendBolus()
+                                DispatchQueue.main.async {
+                                    switch result {
+                                    case .success:
+                                        self.sendBolus()
+                                    case let .unavailable(message):
+                                        self.alertMessage = message
+                                        self.alertType = .validation
+                                        self.showAlert = true
+                                    case .failed:
+                                        self.alertMessage = "Authentication failed"
+                                        self.alertType = .validation
+                                        self.showAlert = true
+                                    case .canceled:
+                                        // User canceled, no alert
+                                        break
+                                    }
                                 }
                             }
                         }),
