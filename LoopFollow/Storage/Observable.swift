@@ -22,6 +22,7 @@ class Observable {
     var bgTextColor = ObservableValue<Color>(default: .primary)
     var directionText = ObservableValue<String>(default: "-")
     var deltaText = ObservableValue<String>(default: "+0")
+    var iobText = ObservableValue<String>(default: "")
 
     var currentAlarm = ObservableValue<UUID?>(default: nil)
     var alarmSoundPlaying = ObservableValue<Bool>(default: false)

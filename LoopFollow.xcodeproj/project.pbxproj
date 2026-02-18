@@ -170,6 +170,7 @@
 		DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0CB2D35526E000D2A63 /* SearchBar.swift */; };
 		DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0CD2D355879000D2A63 /* LogEntry.swift */; };
 		DDA9ACA82D6A66E200E6F1A9 /* ContactColorOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */; };
+		DDA9ACA62D6A66D000E6F1A9 /* ContactColorMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA52D6A66C800E6F1A9 /* ContactColorMode.swift */; };
 		DDA9ACAA2D6A6B8300E6F1A9 /* ContactIncludeOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA92D6A6B8200E6F1A9 /* ContactIncludeOption.swift */; };
 		DDA9ACAC2D6B317100E6F1A9 /* ContactType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACAB2D6B316F00E6F1A9 /* ContactType.swift */; };
 		DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */; };
@@ -572,6 +573,7 @@
 		DD9ED0CB2D35526E000D2A63 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		DD9ED0CD2D355879000D2A63 /* LogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntry.swift; sourceTree = "<group>"; };
 		DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactColorOption.swift; sourceTree = "<group>"; };
+		DDA9ACA52D6A66C800E6F1A9 /* ContactColorMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactColorMode.swift; sourceTree = "<group>"; };
 		DDA9ACA92D6A6B8200E6F1A9 /* ContactIncludeOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactIncludeOption.swift; sourceTree = "<group>"; };
 		DDA9ACAB2D6B316F00E6F1A9 /* ContactType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactType.swift; sourceTree = "<group>"; };
 		DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RileyLinkHeartbeatBluetoothDevice.swift; sourceTree = "<group>"; };
@@ -1017,6 +1019,7 @@
 				DDA9ACAB2D6B316F00E6F1A9 /* ContactType.swift */,
 				DDA9ACA92D6A6B8200E6F1A9 /* ContactIncludeOption.swift */,
 				DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */,
+				DDA9ACA52D6A66C800E6F1A9 /* ContactColorMode.swift */,
 				DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */,
 			);
 			path = Contact;
@@ -2039,6 +2042,7 @@
 				DDC7E5462DBD8A1600EB1127 /* LowBgAlarmEditor.swift in Sources */,
 				DDC7E5472DBD8A1600EB1127 /* AlarmEditor.swift in Sources */,
 				DDA9ACA82D6A66E200E6F1A9 /* ContactColorOption.swift in Sources */,
+				DDA9ACA62D6A66D000E6F1A9 /* ContactColorMode.swift in Sources */,
 				DDC7E5382DBD887400EB1127 /* isOnPhoneCall.swift in Sources */,
 				DD7E19882ACDA5DA00DBD158 /* Notes.swift in Sources */,
 				FCEF87AC24A141A700AE6FA0 /* Localizer.swift in Sources */,
