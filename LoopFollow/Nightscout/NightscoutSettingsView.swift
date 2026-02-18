@@ -7,16 +7,14 @@ struct NightscoutSettingsView: View {
     @ObservedObject var viewModel: NightscoutSettingsViewModel
 
     var body: some View {
-        NavigationView {
-            Form {
-                urlSection
-                tokenSection
-                statusSection
-                importSection
-            }
-            .onDisappear {
-                viewModel.dismiss()
-            }
+        Form {
+            urlSection
+            tokenSection
+            statusSection
+            importSection
+        }
+        .onDisappear {
+            viewModel.dismiss()
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Nightscout Settings", displayMode: .inline)
@@ -25,7 +23,7 @@ struct NightscoutSettingsView: View {
     // MARK: - Subviews / Computed Properties
 
     private var urlSection: some View {
-        Section(header: Text("URL")) {
+        Section {
             TextField("Enter URL", text: $viewModel.nightscoutURL)
                 .textContentType(.username)
                 .autocapitalization(.none)
@@ -33,11 +31,15 @@ struct NightscoutSettingsView: View {
                 .onChange(of: viewModel.nightscoutURL) { newValue in
                     viewModel.processURL(newValue)
                 }
+        } header: {
+            Label("URL", systemImage: "globe")
+        } footer: {
+            Text("Enter your Nightscout site URL (e.g., https://yoursite.herokuapp.com or https://yoursite.ns.10be.de).")
         }
     }
 
     private var tokenSection: some View {
-        Section(header: Text("Token")) {
+        Section {
             HStack {
                 Text("Access Token")
                 TogglableSecureInput(
@@ -47,24 +49,32 @@ struct NightscoutSettingsView: View {
                     textContentType: .password
                 )
             }
+        } header: {
+            Label("Token", systemImage: "key")
+        } footer: {
+            Text("Optional: Enter an access token if your Nightscout site requires authentication.")
         }
     }
 
     private var statusSection: some View {
-        Section(header: Text("Status")) {
+        Section {
             Text(viewModel.nightscoutStatus)
+        } header: {
+            Label("Status", systemImage: "checkmark.circle")
         }
     }
 
     private var importSection: some View {
-        Section(header: Text("Import Settings")) {
+        Section {
             NavigationLink(destination: ImportExportSettingsView()) {
                 HStack {
                     Image(systemName: "square.and.arrow.down")
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                     Text("Import Settings from QR Code")
                 }
             }
+        } header: {
+            Label("Import Settings", systemImage: "square.and.arrow.down")
         }
     }
 }

@@ -9,67 +9,68 @@ struct ImportExportSettingsView: View {
     @StateObject private var viewModel = ImportExportSettingsViewModel()
 
     var body: some View {
-        NavigationView {
-            List {
-                // MARK: - Import Section
+        List {
+            // MARK: - Import Section
 
-                Section("Import Settings") {
+            Section {
+                Button(action: {
+                    viewModel.isShowingQRCodeScanner = true
+                }) {
+                    HStack {
+                        Image(systemName: "qrcode.viewfinder")
+                            .foregroundStyle(.blue)
+                        Text("Scan QR Code to Import Settings")
+                    }
+                }
+                .buttonStyle(.plain)
+            } header: {
+                Label("Import Settings", systemImage: "square.and.arrow.down")
+            }
+
+            // MARK: - Export Section
+
+            Section {
+                ForEach(ImportExportSettingsViewModel.ExportType.allCases, id: \.self) { exportType in
                     Button(action: {
-                        viewModel.isShowingQRCodeScanner = true
+                        if exportType == .alarms {
+                            viewModel.showAlarmSelection()
+                        } else {
+                            viewModel.exportType = exportType
+                            if let qrString = viewModel.generateQRCodeForExport() {
+                                viewModel.qrCodeString = qrString
+                                viewModel.isShowingQRCodeDisplay = true
+                            }
+                        }
                     }) {
                         HStack {
-                            Image(systemName: "qrcode.viewfinder")
-                                .foregroundColor(.blue)
-                            Text("Scan QR Code to Import Settings")
+                            Image(systemName: exportType.icon)
+                                .foregroundStyle(.blue)
+                            Text("Export \(exportType.rawValue)")
+                            Spacer()
+                            Image(systemName: exportType == .alarms ? "list.bullet" : "qrcode")
+                                .foregroundStyle(.secondary)
                         }
                     }
                     .buttonStyle(.plain)
                 }
+            } header: {
+                Label("Export Settings To QR Code", systemImage: "qrcode")
+            }
 
-                // MARK: - Export Section
+            // MARK: - Status Message
 
-                Section("Export Settings To QR Code") {
-                    ForEach(ImportExportSettingsViewModel.ExportType.allCases, id: \.self) { exportType in
-                        Button(action: {
-                            if exportType == .alarms {
-                                viewModel.showAlarmSelection()
-                            } else {
-                                viewModel.exportType = exportType
-                                if let qrString = viewModel.generateQRCodeForExport() {
-                                    viewModel.qrCodeString = qrString
-                                    viewModel.isShowingQRCodeDisplay = true
-                                }
-                            }
-                        }) {
-                            HStack {
-                                Image(systemName: exportType.icon)
-                                    .foregroundColor(.blue)
-                                Text("Export \(exportType.rawValue)")
-                                Spacer()
-                                Image(systemName: exportType == .alarms ? "list.bullet" : "qrcode")
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
+            if !viewModel.qrCodeErrorMessage.isEmpty {
+                Section {
+                    let isSuccess = viewModel.qrCodeErrorMessage.contains("successfully") || viewModel.qrCodeErrorMessage.contains("Successfully imported")
+                    let displayText = isSuccess ? "✅ \(viewModel.qrCodeErrorMessage)" : viewModel.qrCodeErrorMessage
 
-                // MARK: - Status Message
-
-                if !viewModel.qrCodeErrorMessage.isEmpty {
-                    Section {
-                        let isSuccess = viewModel.qrCodeErrorMessage.contains("successfully") || viewModel.qrCodeErrorMessage.contains("Successfully imported")
-                        let displayText = isSuccess ? "✅ \(viewModel.qrCodeErrorMessage)" : viewModel.qrCodeErrorMessage
-
-                        Text(displayText)
-                            .foregroundColor(isSuccess ? .green : .red)
-                            .font(.caption)
-                    }
+                    Text(displayText)
+                        .foregroundStyle(isSuccess ? .green : .red)
+                        .font(.caption)
                 }
             }
-            .navigationTitle("Import/Export Settings")
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .settingsStyle(title: "Import/Export Settings")
         .sheet(isPresented: $viewModel.isShowingQRCodeScanner) {
             SimpleQRCodeScannerView { result in
                 viewModel.handleQRCodeScanResult(result)
@@ -87,12 +88,12 @@ struct ImportExportSettingsView: View {
 
                         Text("Scan this QR code with another LoopFollow app to import \(viewModel.exportType.rawValue.lowercased())")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 20)
                     } else {
                         Text("Failed to generate QR code")
-                            .foregroundColor(.red)
+                            .foregroundStyle(.red)
                             .padding()
                     }
                 }
@@ -133,7 +134,7 @@ struct ImportConfirmationView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "square.and.arrow.down")
                         .font(.system(size: 50))
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
 
                     Text("Import Settings")
                         .font(.title2)
@@ -141,7 +142,7 @@ struct ImportConfirmationView: View {
 
                     Text("Review the settings that will be imported")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 20)
@@ -198,15 +199,15 @@ struct ImportConfirmationView: View {
                 VStack(spacing: 8) {
                     HStack {
                         Image(systemName: "exclamationmark.triangle")
-                            .foregroundColor(.orange)
+                            .foregroundStyle(.orange)
                         Text("Warning")
                             .fontWeight(.semibold)
-                            .foregroundColor(.orange)
+                            .foregroundStyle(.orange)
                     }
 
                     Text("This will overwrite your current settings")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal)
@@ -223,7 +224,7 @@ struct ImportConfirmationView: View {
                             Text("Import Settings")
                         }
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
@@ -238,7 +239,7 @@ struct ImportConfirmationView: View {
                             Text("Cancel")
                         }
                         .font(.headline)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color(.systemGray6))
@@ -263,7 +264,7 @@ struct SettingRowView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(color)
+                .foregroundStyle(color)
                 .frame(width: 30)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -273,7 +274,7 @@ struct SettingRowView: View {
 
                 Text(value)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .lineLimit(2)
             }
 

@@ -5,16 +5,19 @@ import SwiftUI
 import UIKit
 
 struct SettingsMenuView: View {
+    // MARK: - Init parameters
+
+    /// When true, shows a close button for modal dismissal
+    var isModal: Bool = false
+
+    // MARK: - Environment
+
+    @Environment(\.dismiss) private var dismiss
+
     // MARK: - Observed Objects
 
     @ObservedObject private var nightscoutURL = Storage.shared.url
     @ObservedObject private var settingsPath = Observable.shared.settingsPath
-
-    // MARK: – Local state
-
-    @State private var latestVersion: String?
-    @State private var versionTint: Color = .secondary
-    @State private var showingTabCustomization = false
 
     // MARK: – Observed objects
 
@@ -25,70 +28,61 @@ struct SettingsMenuView: View {
     var body: some View {
         NavigationStack(path: $settingsPath.value) {
             List {
-                // ───────── Data settings ─────────
-                dataSection
-
                 // ───────── App settings ─────────
                 Section("App Settings") {
-                    NavigationRow(title: "Background Refresh Settings",
-                                  icon: "arrow.clockwise")
-                    {
-                        settingsPath.value.append(Sheet.backgroundRefresh)
-                    }
-
-                    NavigationRow(title: "General Settings",
+                    NavigationRow(title: "General",
                                   icon: "gearshape")
                     {
                         settingsPath.value.append(Sheet.general)
                     }
 
-                    NavigationRow(title: "Graph Settings",
+                    NavigationRow(title: "Background Refresh",
+                                  icon: "arrow.clockwise")
+                    {
+                        settingsPath.value.append(Sheet.backgroundRefresh)
+                    }
+
+                    NavigationRow(title: "Graph",
                                   icon: "chart.xyaxis.line")
                     {
                         settingsPath.value.append(Sheet.graph)
                     }
 
-                    NavigationRow(title: "Tab Settings",
+                    NavigationRow(title: "Tabs",
                                   icon: "rectangle.3.group")
                     {
-                        showingTabCustomization = true
+                        settingsPath.value.append(Sheet.tabs)
                     }
 
-                    NavigationRow(title: "Import/Export Settings",
+                    NavigationRow(title: "Import/Export",
                                   icon: "square.and.arrow.down")
                     {
                         settingsPath.value.append(Sheet.importExport)
                     }
 
                     if !nightscoutURL.value.isEmpty {
-                        NavigationRow(title: "Information Display Settings",
+                        NavigationRow(title: "Information Display",
                                       icon: "info.circle")
                         {
                             settingsPath.value.append(Sheet.infoDisplay)
                         }
 
-                        NavigationRow(title: "Remote Settings",
+                        NavigationRow(title: "Remote",
                                       icon: "antenna.radiowaves.left.and.right")
                         {
                             settingsPath.value.append(Sheet.remote)
                         }
                     }
-                }
 
-                // ───────── Alarms ─────────
-                Section {
                     NavigationRow(title: "Alarms",
-                                  icon: "bell")
-                    {
-                        settingsPath.value.append(Sheet.alarmsList)
-                    }
-
-                    NavigationRow(title: "Alarm Settings",
                                   icon: "bell.badge")
                     {
                         settingsPath.value.append(Sheet.alarmSettings)
                     }
                 }
+
+                // ───────── Data settings ─────────
+                dataSection
 
                 // ───────── Integrations ─────────
                 Section("Integrations") {
@@ -106,8 +100,8 @@ struct SettingsMenuView: View {
                 }
 
                 // ───────── Advanced / Logs ─────────
-                Section("Advanced Settings") {
-                    NavigationRow(title: "Advanced Settings",
+                Section("Advanced") {
+                    NavigationRow(title: "Advanced",
                                   icon: "exclamationmark.shield")
                     {
                         settingsPath.value.append(Sheet.advanced)
@@ -125,30 +119,28 @@ struct SettingsMenuView: View {
                               icon: "square.and.arrow.up",
                               action: shareLogs)
                 }
-
-                // ───────── Community ─────────
-                Section("Community") {
-                    LinkRow(title: "LoopFollow Facebook Group",
-                            icon: "person.2.fill",
-                            url: URL(string: "https://www.facebook.com/groups/loopfollowlnl")!)
-                }
-
-                // ───────── Build info ─────────
-                buildInfoSection
             }
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: Sheet.self) { $0.destination }
-            .sheet(isPresented: $showingTabCustomization) {
-                TabCustomizationModal(
-                    isPresented: $showingTabCustomization,
-                    onApply: {
-                        // Dismiss any presented view controller and go to home tab
-                        handleTabReorganization()
+            .toolbar {
+                if isModal {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Close") {
+                            dismiss()
+                        }
                     }
-                )
+                } else {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "chevron.left")
+                        }
+                    }
+                }
             }
         }
-        .task { await refreshVersionInfo() }
     }
 
     // MARK: – Section builders
@@ -156,23 +148,13 @@ struct SettingsMenuView: View {
     @ViewBuilder
     private var dataSection: some View {
         Section("Data Settings") {
-            Picker("Units",
-                   selection: Binding(
-                       get: { Storage.shared.units.value },
-                       set: { Storage.shared.units.value = $0 }
-                   )) {
-                Text("mg/dL").tag("mg/dL")
-                Text("mmol/L").tag("mmol/L")
-            }
-            .pickerStyle(.segmented)
-
-            NavigationRow(title: "Nightscout Settings",
+            NavigationRow(title: "Nightscout",
                           icon: "network")
             {
                 settingsPath.value.append(Sheet.nightscout)
             }
 
-            NavigationRow(title: "Dexcom Settings",
+            NavigationRow(title: "Dexcom",
                           icon: "sensor.tag.radiowaves.forward")
             {
                 settingsPath.value.append(Sheet.dexcom)
@@ -180,49 +162,7 @@ struct SettingsMenuView: View {
         }
     }
 
-    @ViewBuilder
-    private var buildInfoSection: some View {
-        let build = BuildDetails.default
-        let ver = AppVersionManager().version()
-
-        Section("Build Information") {
-            keyValue("Version", ver, tint: versionTint)
-            keyValue("Latest version", latestVersion ?? "Fetching…")
-
-            if !(build.isMacApp() || build.isSimulatorBuild()) {
-                keyValue(build.expirationHeaderString,
-                         dateTimeUtils.formattedDate(from: build.calculateExpirationDate()))
-            }
-            keyValue("Built",
-                     dateTimeUtils.formattedDate(from: build.buildDate()))
-            keyValue("Branch", build.branchAndSha)
-        }
-    }
-
     // MARK: – Helpers
-
-    private func keyValue(_ key: String,
-                          _ value: String,
-                          tint: Color = .secondary) -> some View
-    {
-        HStack {
-            Text(key)
-            Spacer()
-            Text(value).foregroundColor(tint)
-        }
-    }
-
-    private func refreshVersionInfo() async {
-        let mgr = AppVersionManager()
-        let (latest, newer, blacklisted) = await mgr.checkForNewVersionAsync()
-        latestVersion = latest ?? "Unknown"
-
-        let current = mgr.version()
-        versionTint = blacklisted ? .red
-            : newer ? .orange
-            : latest == current ? .green
-            : .secondary
-    }
 
     private func shareLogs() {
         let files = LogManager.shared.logFilesForTodayAndYesterday()
@@ -237,37 +177,6 @@ struct SettingsMenuView: View {
                                            applicationActivities: nil)
         UIApplication.shared.topMost?.present(avc, animated: true)
     }
-
-    private func handleTabReorganization() {
-        // Find the root tab bar controller
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootVC = window.rootViewController else { return }
-
-        // Navigate through the hierarchy to find the tab bar controller
-        var tabBarController: UITabBarController?
-
-        if let tbc = rootVC as? UITabBarController {
-            tabBarController = tbc
-        } else if let nav = rootVC as? UINavigationController,
-                  let tbc = nav.viewControllers.first as? UITabBarController
-        {
-            tabBarController = tbc
-        }
-
-        guard let tabBar = tabBarController else { return }
-
-        // Dismiss any modals first
-        if let presented = tabBar.presentedViewController {
-            presented.dismiss(animated: false) {
-                // After dismissal, switch to home tab
-                tabBar.selectedIndex = 0
-            }
-        } else {
-            // No modal to dismiss, just switch to home
-            tabBar.selectedIndex = 0
-        }
-    }
 }
 
 // MARK: – Sheet routing
@@ -275,7 +184,7 @@ struct SettingsMenuView: View {
 private enum Sheet: Hashable, Identifiable {
     case nightscout, dexcom
     case backgroundRefresh
-    case general, graph
+    case general, graph, tabs
     case infoDisplay
     case alarmsList, alarmSettings
     case remote
@@ -294,6 +203,7 @@ private enum Sheet: Hashable, Identifiable {
         case .backgroundRefresh: BackgroundRefreshSettingsView(viewModel: .init())
         case .general: GeneralSettingsView()
         case .graph: GraphSettingsView()
+        case .tabs: TabSettingsView()
         case .infoDisplay: InfoDisplaySettingsView(viewModel: .init())
         case .alarmsList: AlarmListView()
         case .alarmSettings: AlarmSettingsView()

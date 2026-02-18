@@ -12,75 +12,79 @@ struct ContactSettingsView: View {
     @State private var alertMessage: String = ""
 
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Contact Integration")) {
-                    Text("Add the contact named '\(viewModel.contactName)' to your watch face to show the current BG value in real time. Make sure to give the app full access to Contacts when prompted.")
+        Form {
+            Section {
+                Text("Add the contact named '\(viewModel.contactName)' to your watch face to show the current BG value in real time. Make sure to give the app full access to Contacts when prompted.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 4)
+
+                Toggle("Enable Contact BG Updates", isOn: $viewModel.contactEnabled)
+                    .toggleStyle(.switch)
+                    .onChange(of: viewModel.contactEnabled) { isEnabled in
+                        if isEnabled {
+                            requestContactAccess()
+                        }
+                    }
+            } header: {
+                Label("Contact Integration", systemImage: "person.crop.circle")
+            }
+
+            if viewModel.contactEnabled {
+                Section {
+                    Text("Select the colors for your BG values.  Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
                         .font(.footnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .padding(.vertical, 4)
 
-                    Toggle("Enable Contact BG Updates", isOn: $viewModel.contactEnabled)
-                        .toggleStyle(SwitchToggleStyle())
-                        .onChange(of: viewModel.contactEnabled) { isEnabled in
-                            if isEnabled {
-                                requestContactAccess()
-                            }
-                        }
-                }
-
-                if viewModel.contactEnabled {
-                    Section(header: Text("Color Options")) {
-                        Text("Select the colors for your BG values.  Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                            .padding(.vertical, 4)
-
-                        Picker("Select Background Color", selection: $viewModel.contactBackgroundColor) {
-                            ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
-                                Text(option.rawValue.capitalized).tag(option.rawValue)
-                            }
-                        }
-
-                        Picker("Select Text Color", selection: $viewModel.contactTextColor) {
-                            ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
-                                Text(option.rawValue.capitalized).tag(option.rawValue)
-                            }
+                    Picker("Select Background Color", selection: $viewModel.contactBackgroundColor) {
+                        ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
+                            Text(option.rawValue.capitalized).tag(option.rawValue)
                         }
                     }
 
-                    Section(header: Text("Additional Information")) {
-                        Text("To see your trend or delta, include one in the original '\(viewModel.contactName)' contact, or create separate contacts ending in '- Trend' and '- Delta' for up to three contacts on your watch face.")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                            .padding(.vertical, 4)
-
-                        Text("Show Trend")
-                            .font(.subheadline)
-                        Picker("Show Trend", selection: $viewModel.contactTrend) {
-                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
-                                Text(option.rawValue).tag(option)
-                            }
+                    Picker("Select Text Color", selection: $viewModel.contactTextColor) {
+                        ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
+                            Text(option.rawValue.capitalized).tag(option.rawValue)
                         }
-                        .pickerStyle(SegmentedPickerStyle())
-
-                        Text("Show Delta")
-                            .font(.subheadline)
-                        Picker("Show Delta", selection: $viewModel.contactDelta) {
-                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
-                                Text(option.rawValue).tag(option)
-                            }
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
                     }
+                } header: {
+                    Label("Color Options", systemImage: "paintpalette")
                 }
-            }
-            .alert(isPresented: $showAlert) {
-                Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+
+                Section {
+                    Text("To see your trend or delta, include one in the original '\(viewModel.contactName)' contact, or create separate contacts ending in '- Trend' and '- Delta' for up to three contacts on your watch face.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .padding(.vertical, 4)
+
+                    Text("Show Trend")
+                        .font(.subheadline)
+                    Picker("Show Trend", selection: $viewModel.contactTrend) {
+                        ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    Text("Show Delta")
+                        .font(.subheadline)
+                    Picker("Show Delta", selection: $viewModel.contactDelta) {
+                        ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                } header: {
+                    Label("Additional Information", systemImage: "info.circle")
+                }
             }
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Contact", displayMode: .inline)
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+        }
     }
 
     private func requestContactAccess() {

@@ -25,110 +25,124 @@ struct GraphSettingsView: View {
     private var nightscoutEnabled: Bool { IsNightscoutEnabled() }
 
     var body: some View {
-        NavigationView {
-            Form {
-                // ── Graph Display ────────────────────────────────────────────
-                Section("Graph Display") {
-                    Toggle("Display Dots", isOn: $showDots.value)
-                        .onChange(of: showDots.value) { _ in markDirty() }
+        Form {
+            // ── Graph Display ────────────────────────────────────────────
+            Section {
+                Toggle("Display Dots", isOn: $showDots.value)
+                    .onChange(of: showDots.value) { _ in markDirty() }
 
-                    Toggle("Display Lines", isOn: $showLines.value)
-                        .onChange(of: showLines.value) { _ in markDirty() }
+                Toggle("Display Lines", isOn: $showLines.value)
+                    .onChange(of: showLines.value) { _ in markDirty() }
 
-                    if nightscoutEnabled {
-                        Toggle("Show DIA Lines", isOn: $showDIALines.value)
-                            .onChange(of: showDIALines.value) { _ in markDirty() }
-
-                        Toggle("Show −30 min Line", isOn: $show30MinLine.value)
-                            .onChange(of: show30MinLine.value) { _ in markDirty() }
-
-                        Toggle("Show −90 min Line", isOn: $show90MinLine.value)
-                            .onChange(of: show90MinLine.value) { _ in markDirty() }
-                    }
-
-                    Toggle("Show Midnight Lines", isOn: $showMidnightLines.value)
-                        .onChange(of: showMidnightLines.value) { _ in markDirty() }
-                }
-
-                // ── Treatments ───────────────────────────────────────────────
                 if nightscoutEnabled {
-                    Section("Treatments") {
-                        Toggle("Show Carb/Bolus Values", isOn: $showValues.value)
-                        Toggle("Show Carb Absorption", isOn: $showAbsorption.value)
-                        Toggle("Treatments on Small Graph",
-                               isOn: $smallGraphTreatments.value)
-                    }
+                    Toggle("Show DIA Lines", isOn: $showDIALines.value)
+                        .onChange(of: showDIALines.value) { _ in markDirty() }
+
+                    Toggle("Show −30 min Line", isOn: $show30MinLine.value)
+                        .onChange(of: show30MinLine.value) { _ in markDirty() }
+
+                    Toggle("Show −90 min Line", isOn: $show90MinLine.value)
+                        .onChange(of: show90MinLine.value) { _ in markDirty() }
                 }
 
-                // ── Small Graph ──────────────────────────────────────────────
-                Section("Small Graph") {
+                Toggle("Show Midnight Lines", isOn: $showMidnightLines.value)
+                    .onChange(of: showMidnightLines.value) { _ in markDirty() }
+            } header: {
+                Label("Graph Display", systemImage: "chart.line.uptrend.xyaxis")
+            }
+
+            // ── Treatments ───────────────────────────────────────────────
+            if nightscoutEnabled {
+                Section {
+                    Toggle("Show Carb/Bolus Values", isOn: $showValues.value)
+                    Toggle("Show Carb Absorption", isOn: $showAbsorption.value)
+                    Toggle("Treatments on Small Graph",
+                           isOn: $smallGraphTreatments.value)
+                } header: {
+                    Label("Treatments", systemImage: "pills")
+                }
+            }
+
+            // ── Small Graph ──────────────────────────────────────────────
+            Section {
+                SettingsStepperRow(
+                    title: "Height",
+                    range: 40 ... 80,
+                    step: 5,
+                    value: $smallGraphHeight.value,
+                    format: { "\(Int($0)) pt" }
+                )
+                .onChange(of: smallGraphHeight.value) { _ in markDirty() }
+            } header: {
+                Label("Small Graph", systemImage: "chart.bar.xaxis")
+            }
+
+            // ── Prediction ───────────────────────────────────────────────
+            if nightscoutEnabled {
+                Section {
                     SettingsStepperRow(
-                        title: "Height",
-                        range: 40 ... 80,
-                        step: 5,
-                        value: $smallGraphHeight.value,
-                        format: { "\(Int($0)) pt" }
+                        title: "Hours of Prediction",
+                        range: 0 ... 6,
+                        step: 0.25,
+                        value: $predictionToLoad.value,
+                        format: { "\($0.localized(maxFractionDigits: 2)) h" }
                     )
-                    .onChange(of: smallGraphHeight.value) { _ in markDirty() }
+                } header: {
+                    Label("Prediction", systemImage: "waveform.path.ecg")
                 }
+            }
 
-                // ── Prediction ───────────────────────────────────────────────
-                if nightscoutEnabled {
-                    Section("Prediction") {
-                        SettingsStepperRow(
-                            title: "Hours of Prediction",
-                            range: 0 ... 6,
-                            step: 0.25,
-                            value: $predictionToLoad.value,
-                            format: { "\($0.localized(maxFractionDigits: 2)) h" }
-                        )
-                    }
+            // ── Basal / BG scale ─────────────────────────────────────────
+            if nightscoutEnabled {
+                Section {
+                    SettingsStepperRow(
+                        title: "Min Basal",
+                        range: 0.5 ... 20,
+                        step: 0.5,
+                        value: $minBasalScale.value,
+                        format: { "\($0.localized(maxFractionDigits: 1)) U/h" }
+                    )
+
+                    BGPicker(
+                        title: "Min BG Scale",
+                        range: 40 ... 400,
+                        value: $minBGScale.value
+                    )
+                    .onChange(of: minBGScale.value) { _ in markDirty() }
+                } header: {
+                    Label("Basal / BG Scale", systemImage: "slider.horizontal.3")
                 }
+            }
 
-                // ── Basal / BG scale ─────────────────────────────────────────
-                if nightscoutEnabled {
-                    Section("Basal / BG Scale") {
-                        SettingsStepperRow(
-                            title: "Min Basal",
-                            range: 0.5 ... 20,
-                            step: 0.5,
-                            value: $minBasalScale.value,
-                            format: { "\($0.localized(maxFractionDigits: 1)) U/h" }
-                        )
+            // ── Target lines ─────────────────────────────────────────────
+            Section {
+                BGPicker(title: "Low BG Line",
+                         range: 40 ... 120,
+                         value: $lowLine.value)
+                    .onChange(of: lowLine.value) { _ in markDirty() }
 
-                        BGPicker(
-                            title: "Min BG Scale",
-                            range: 40 ... 400,
-                            value: $minBGScale.value
-                        )
-                        .onChange(of: minBGScale.value) { _ in markDirty() }
-                    }
-                }
+                BGPicker(title: "High BG Line",
+                         range: 120 ... 400,
+                         value: $highLine.value)
+                    .onChange(of: highLine.value) { _ in markDirty() }
+            } header: {
+                Label("Target Lines", systemImage: "target")
+            } footer: {
+                Text("Target lines show your desired blood glucose range on the graph. Values below the low line or above the high line indicate out-of-range readings.")
+            }
 
-                // ── Target lines ─────────────────────────────────────────────
-                Section("Target Lines") {
-                    BGPicker(title: "Low BG Line",
-                             range: 40 ... 120,
-                             value: $lowLine.value)
-                        .onChange(of: lowLine.value) { _ in markDirty() }
-
-                    BGPicker(title: "High BG Line",
-                             range: 120 ... 400,
-                             value: $highLine.value)
-                        .onChange(of: highLine.value) { _ in markDirty() }
-                }
-
-                // ── History window ───────────────────────────────────────────
-                if nightscoutEnabled {
-                    Section("History") {
-                        SettingsStepperRow(
-                            title: "Show Days Back",
-                            range: 1 ... 4,
-                            step: 1,
-                            value: $downloadDays.value,
-                            format: { "\(Int($0)) d" }
-                        )
-                    }
+            // ── History window ───────────────────────────────────────────
+            if nightscoutEnabled {
+                Section {
+                    SettingsStepperRow(
+                        title: "Show Days Back",
+                        range: 1 ... 4,
+                        step: 1,
+                        value: $downloadDays.value,
+                        format: { "\(Int($0)) d" }
+                    )
+                } header: {
+                    Label("History", systemImage: "clock.arrow.circlepath")
                 }
             }
         }

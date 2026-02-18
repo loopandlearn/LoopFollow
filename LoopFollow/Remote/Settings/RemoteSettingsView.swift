@@ -60,7 +60,11 @@ struct RemoteSettingsView: View {
 
                 Text("Nightscout should be used for Trio 0.2.x.")
                     .font(.footnote)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Label("Remote Type", systemImage: "antenna.radiowaves.left.and.right")
+            } footer: {
+                Text("Select how you want to send remote commands. Loop Remote Control uses APNS for Loop apps. Trio Remote Control uses APNS for Trio. Nightscout uses the Nightscout careportal.")
             }
 
             // MARK: - Import/Export Settings Section
@@ -69,26 +73,30 @@ struct RemoteSettingsView: View {
                 NavigationLink(destination: ImportExportSettingsView()) {
                     HStack {
                         Image(systemName: "square.and.arrow.down")
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
                         Text("Import/Export Settings")
                         Spacer()
                         Image(systemName: "chevron.right")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .font(.caption)
                     }
                 }
                 .buttonStyle(.plain)
+            } header: {
+                Label("Import/Export", systemImage: "square.and.arrow.up.on.square")
             }
 
             // MARK: - Meal Section (for TRC only)
 
             if viewModel.remoteType == .trc {
-                Section(header: Text("Meal Settings")) {
+                Section {
                     Toggle("Meal with Bolus", isOn: $viewModel.mealWithBolus)
-                        .toggleStyle(SwitchToggleStyle())
+                        .toggleStyle(.switch)
 
                     Toggle("Meal with Fat/Protein", isOn: $viewModel.mealWithFatProtein)
-                        .toggleStyle(SwitchToggleStyle())
+                        .toggleStyle(.switch)
+                } header: {
+                    Label("Meal Settings", systemImage: "fork.knife")
                 }
             }
 
@@ -99,7 +107,7 @@ struct RemoteSettingsView: View {
             }
 
             if !Storage.shared.bolusIncrementDetected.value {
-                Section(header: Text("Bolus Increment")) {
+                Section {
                     HStack {
                         Text("Increment")
                         Spacer()
@@ -116,15 +124,17 @@ struct RemoteSettingsView: View {
                         )
                         .frame(width: 100)
                         Text("U")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
+                } header: {
+                    Label("Bolus Increment", systemImage: "syringe")
                 }
             }
 
             // MARK: - User Information Section
 
             if viewModel.remoteType != .none && viewModel.remoteType != .loopAPNS {
-                Section(header: Text("User Information")) {
+                Section {
                     HStack {
                         Text("User")
                         TextField("Enter User", text: $viewModel.user)
@@ -132,13 +142,15 @@ struct RemoteSettingsView: View {
                             .disableAutocorrection(true)
                             .multilineTextAlignment(.trailing)
                     }
+                } header: {
+                    Label("User Information", systemImage: "person")
                 }
             }
 
             // MARK: - Trio Remote Control Settings
 
             if viewModel.remoteType == .trc {
-                Section(header: Text("Trio Remote Control Settings")) {
+                Section {
                     HStack {
                         Text("Shared Secret")
                         TogglableSecureInput(
@@ -166,11 +178,13 @@ struct RemoteSettingsView: View {
                         )
                         .frame(minHeight: 110)
                     }
+                } header: {
+                    Label("Trio Remote Control Settings", systemImage: "antenna.radiowaves.left.and.right")
                 }
 
                 // MARK: - Debug / Info
 
-                Section(header: Text("Debug / Info")) {
+                Section {
                     Text("Device Token: \(Storage.shared.deviceToken.value)")
                     Text("APNS Environment: \(Storage.shared.productionEnvironment.value ? "Production" : "Development")")
                     Text("Team ID: \(Storage.shared.teamId.value ?? "")")
@@ -178,13 +192,15 @@ struct RemoteSettingsView: View {
                     if Storage.shared.bolusIncrementDetected.value {
                         Text("Bolus Increment: \(Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()), specifier: "%.3f") U")
                     }
+                } header: {
+                    Label("Debug / Info", systemImage: "ladybug")
                 }
             }
 
             // MARK: - Loop APNS Settings
 
             if viewModel.remoteType == .loopAPNS {
-                Section(header: Text("Loop APNS Configuration")) {
+                Section {
                     HStack {
                         Text("Developer Team ID")
                         TogglableSecureInput(
@@ -237,23 +253,25 @@ struct RemoteSettingsView: View {
                         Text("Environment")
                         Spacer()
                         Toggle("Production", isOn: $viewModel.productionEnvironment)
-                            .toggleStyle(SwitchToggleStyle())
+                            .toggleStyle(.switch)
                     }
 
                     Text("Production is used for browser builders and should be switched off for Xcode builders")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
+                } header: {
+                    Label("Loop APNS Configuration", systemImage: "bell")
                 }
 
                 if let errorMessage = viewModel.loopAPNSErrorMessage, !errorMessage.isEmpty {
                     Section {
                         Text(errorMessage)
-                            .foregroundColor(.red)
+                            .foregroundStyle(.red)
                             .font(.caption)
                     }
                 }
 
-                Section(header: Text("Debug / Info")) {
+                Section {
                     Text("Device Token: \(Storage.shared.deviceToken.value)")
                     Text("Bundle ID: \(Storage.shared.bundleId.value)")
 
@@ -262,26 +280,28 @@ struct RemoteSettingsView: View {
                             Text("Current TOTP Code:")
                             Text(otpCode)
                                 .font(.system(.body, design: .monospaced))
-                                .foregroundColor(.green)
+                                .foregroundStyle(.green)
                                 .padding(.vertical, 2)
                                 .padding(.horizontal, 6)
                                 .background(Color.green.opacity(0.1))
                                 .cornerRadius(4)
                             Text("(" + (otpTimeRemaining.map { "\($0)s left" } ?? "-") + ")")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                     } else {
                         Text("TOTP Code: Invalid QR code URL")
-                            .foregroundColor(.red)
+                            .foregroundStyle(.red)
                     }
                     if Storage.shared.bolusIncrementDetected.value {
                         Text("Bolus Increment: \(Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()), specifier: "%.3f") U")
                     }
+                } header: {
+                    Label("Debug / Info", systemImage: "ladybug")
                 }
 
                 if viewModel.areTeamIdsDifferent {
-                    Section(header: Text("Return Notification Settings"), footer: Text("Because LoopFollow and the target app were built with different Team IDs, you must provide the APNS credentials for LoopFollow below.").font(.caption)) {
+                    Section {
                         HStack {
                             Text("Return APNS Key ID")
                             TogglableSecureInput(
@@ -300,6 +320,11 @@ struct RemoteSettingsView: View {
                             )
                             .frame(minHeight: 110)
                         }
+                    } header: {
+                        Label("Return Notification Settings", systemImage: "bell.badge")
+                    } footer: {
+                        Text("Because LoopFollow and the target app were built with different Team IDs, you must provide the APNS credentials for LoopFollow below.")
+                            .font(.caption)
                     }
                 }
             }
@@ -391,13 +416,13 @@ struct RemoteSettingsView: View {
                 Spacer()
                 if viewModel.remoteType == type {
                     Image(systemName: "checkmark")
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(Color.accentColor)
                 }
             }
         }
         // If isEnabled is false, user can see the row but not tap it.
         .disabled(!isEnabled)
-        .foregroundColor(isEnabled ? .primary : .gray)
+        .foregroundStyle(isEnabled ? Color.primary : Color.gray)
     }
 
     // MARK: - Validation Error Handler
@@ -409,7 +434,7 @@ struct RemoteSettingsView: View {
     }
 
     private var guardrailsSection: some View {
-        Section(header: Text("Guardrails")) {
+        Section {
             HStack {
                 Text("Max Bolus")
                 Spacer()
@@ -426,7 +451,7 @@ struct RemoteSettingsView: View {
                 )
                 .frame(width: 100)
                 Text("U")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
 
             HStack {
@@ -445,7 +470,7 @@ struct RemoteSettingsView: View {
                 )
                 .frame(width: 100)
                 Text("g")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
 
             if device.value == "Trio" {
@@ -465,7 +490,7 @@ struct RemoteSettingsView: View {
                     )
                     .frame(width: 100)
                     Text("g")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
 
                 HStack {
@@ -484,9 +509,13 @@ struct RemoteSettingsView: View {
                     )
                     .frame(width: 100)
                     Text("g")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
+        } header: {
+            Label("Guardrails", systemImage: "shield")
+        } footer: {
+            Text("Guardrails set maximum limits for remote commands to help prevent accidental overdoses. These limits apply to boluses and carbs sent via remote commands.")
         }
     }
 }
