@@ -2389,6 +2389,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
@@ -2412,6 +2413,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
