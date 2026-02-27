@@ -33,6 +33,7 @@ struct MealView: View {
     @State private var statusMessage: String? = nil
     @State private var selectedTime: Date? = nil
     @State private var isScheduling: Bool = false
+    @State private var showFatProteinOrderBanner = false
 
     enum AlertType {
         case confirmMeal
@@ -46,6 +47,24 @@ struct MealView: View {
             VStack {
                 Form {
                     Section(header: Text("Meal Data")) {
+                        // TODO: This banner can be deleted in March 2027. Check the commit for other places to cleanup.
+                        if showFatProteinOrderBanner {
+                            HStack {
+                                Image(systemName: "arrow.left.arrow.right")
+                                Text("The order of Fat and Protein inputs has changed.").font(.callout)
+                                Spacer()
+                                Button {
+                                    Storage.shared.hasSeenFatProteinOrderChange.value = true
+                                    withAnimation { showFatProteinOrderBanner = false }
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .listRowBackground(Color.orange.opacity(0.75))
+                            .transition(.opacity)
+                        }
+
                         HKQuantityInputView(
                             label: "Carbs",
                             quantity: $carbs,
@@ -61,19 +80,6 @@ struct MealView: View {
 
                         if mealWithFatProtein.value {
                             HKQuantityInputView(
-                                label: "Protein",
-                                quantity: $protein,
-                                unit: .gram(),
-                                maxLength: 4,
-                                minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                                maxValue: maxProtein.value,
-                                isFocused: $proteinFieldIsFocused,
-                                onValidationError: { message in
-                                    handleValidationError(message)
-                                }
-                            )
-
-                            HKQuantityInputView(
                                 label: "Fat",
                                 quantity: $fat,
                                 unit: .gram(),
@@ -81,6 +87,19 @@ struct MealView: View {
                                 minValue: HKQuantity(unit: .gram(), doubleValue: 0),
                                 maxValue: maxFat.value,
                                 isFocused: $fatFieldIsFocused,
+                                onValidationError: { message in
+                                    handleValidationError(message)
+                                }
+                            )
+
+                            HKQuantityInputView(
+                                label: "Protein",
+                                quantity: $protein,
+                                unit: .gram(),
+                                maxLength: 4,
+                                minValue: HKQuantity(unit: .gram(), doubleValue: 0),
+                                maxValue: maxProtein.value,
+                                isFocused: $proteinFieldIsFocused,
                                 onValidationError: { message in
                                     handleValidationError(message)
                                 }
@@ -153,6 +172,10 @@ struct MealView: View {
             .onAppear {
                 selectedTime = nil
                 isScheduling = false
+
+                if !Storage.shared.hasSeenFatProteinOrderChange.value {
+                    showFatProteinOrderBanner = true
+                }
             }
             .alert(isPresented: $showAlert) {
                 switch alertType {

@@ -29,6 +29,9 @@ class Storage {
     var mealWithBolus = StorageValue<Bool>(key: "mealWithBolus", defaultValue: false)
     var mealWithFatProtein = StorageValue<Bool>(key: "mealWithFatProtein", defaultValue: false)
 
+    // TODO: This flag can be deleted in March 2027. Check the commit for other places to cleanup.
+    var hasSeenFatProteinOrderChange = StorageValue<Bool>(key: "hasSeenFatProteinOrderChange", defaultValue: false)
+
     var cachedJWT = StorageValue<String?>(key: "cachedJWT", defaultValue: nil)
     var jwtExpirationDate = StorageValue<Date?>(key: "jwtExpirationDate", defaultValue: nil)
 
