@@ -56,8 +56,8 @@ struct GraphSettingsView: View {
 
                     if graphTimeZoneEnabled.value {
                         Picker("Time Zone", selection: $graphTimeZoneIdentifier.value) {
-                            ForEach(TimeZone.knownTimeZoneIdentifiers.sorted(), id: \.self) { tz in
-                                Text(tz).tag(tz)
+                            ForEach(Self.sortedTimeZones, id: \.identifier) { tz in
+                                Text(Self.timeZoneLabel(tz)).tag(tz.identifier)
                             }
                         }
                         .onChange(of: graphTimeZoneIdentifier.value) { _ in markDirty() }
@@ -153,5 +153,20 @@ struct GraphSettingsView: View {
     /// Marks the chart as needing a redraw
     private func markDirty() {
         Observable.shared.chartSettingsChanged.value = true
+    }
+
+    // MARK: - Time Zone Helpers
+
+    private static let sortedTimeZones: [TimeZone] = {
+        TimeZone.knownTimeZoneIdentifiers
+            .compactMap { TimeZone(identifier: $0) }
+            .sorted { $0.secondsFromGMT() < $1.secondsFromGMT() }
+    }()
+
+    private static func timeZoneLabel(_ tz: TimeZone) -> String {
+        let offsetMinutes = tz.secondsFromGMT() / 60
+        let sign = offsetMinutes >= 0 ? "+" : "-"
+        let offsetString = String(format: "UTC%@%02d:%02d", sign, abs(offsetMinutes) / 60, abs(offsetMinutes) % 60)
+        return "(\(offsetString)) \(tz.identifier)"
     }
 }
