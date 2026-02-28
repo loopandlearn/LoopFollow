@@ -3,6 +3,19 @@
 
 import SwiftUI
 
+private func formatBG(_ mgdl: Double, units: String = Storage.shared.units.value) -> String {
+    if units == "mg/dL" {
+        return "\(Int(round(mgdl))) mg/dL"
+    }
+
+    let mmolValue = mgdl * GlucoseConversion.mgDlToMmolL
+    return String(format: "%.1f mmol\u{2060}/\u{2060}L", mmolValue)
+}
+
+private func formatBG(_ mgdlValue: Int, units: String = Storage.shared.units.value) -> String {
+    formatBG(Double(mgdlValue), units: units)
+}
+
 struct TreatmentsView: View {
     @StateObject private var viewModel = TreatmentsViewModel()
     @State private var selectedFilter: TreatmentFilter = .all
@@ -301,7 +314,7 @@ struct TreatmentDetailView: View {
 
             if !viewModel.isLoading, let detail = viewModel.detail {
                 if detail.iob != nil || detail.cob != nil || detail.eventualBG != nil {
-                    Section(header: Text("Loop Data")) {
+                    Section(header: Text("Device Data")) {
                         HStack(spacing: 20) {
                             if let iob = detail.iob {
                                 VStack(alignment: .leading) {
@@ -435,16 +448,6 @@ struct TreatmentDetailView: View {
         return fullString.replacingOccurrences(of: " at ", with: " ")
     }
 
-    private func formatBG(_ mgdlValue: Int) -> String {
-        let units = Storage.shared.units.value
-
-        if units == "mg/dL" {
-            return "\(mgdlValue) mg/dL"
-        } else {
-            let mmolValue = Double(mgdlValue) * GlucoseConversion.mgDlToMmolL
-            return String(format: "%.1f mmol/L", mmolValue)
-        }
-    }
 }
 
 struct DeviceStatusData {
@@ -769,6 +772,8 @@ enum TreatmentType: CaseIterable, Hashable {
     case bolusAutomatic
     case smb
     case tempBasal
+    case override
+    case tempTarget
 
     var displayName: String {
         switch self {
@@ -777,6 +782,8 @@ enum TreatmentType: CaseIterable, Hashable {
         case .bolusAutomatic: return "Automatic"
         case .smb: return "SMB"
         case .tempBasal: return "Basal"
+        case .override: return "Override"
+        case .tempTarget: return "Temp Target"
         }
     }
 }
@@ -1166,6 +1173,69 @@ class TreatmentsViewModel: ObservableObject {
                     )
                     treatments.append(treatment)
                 }
+
+            case "Temporary Override", "Exercise":
+                let durationMinutes = (entry["duration"] as? Double) ?? Double(entry["duration"] as? Int ?? 0)
+                if durationMinutes == 0 {
+                    continue
+                }
+
+                let reason = (entry["notes"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                    ?? (entry["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                    ?? ""
+
+                let subtitleParts = ["Override", durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil].compactMap { $0 }
+                let subtitle = subtitleParts.joined(separator: " • ")
+                let title = reason.isEmpty ? "Temporary Override" : reason
+
+                let treatment = Treatment(
+                    id: "\(nsId)-override",
+                    type: .override,
+                    date: timestamp,
+                    title: title,
+                    subtitle: subtitle,
+                    icon: "slider.horizontal.3",
+                    color: .purple,
+                    bgValue: 0
+                )
+                treatments.append(treatment)
+
+            case "Temporary Target":
+                let durationMinutes = (entry["duration"] as? Double) ?? Double(entry["duration"] as? Int ?? 0)
+                if durationMinutes == 0 {
+                    continue
+                }
+
+                let targetBottom = (entry["targetBottom"] as? Double) ?? Double(entry["targetBottom"] as? Int ?? 0)
+                let targetTop = (entry["targetTop"] as? Double) ?? Double(entry["targetTop"] as? Int ?? 0)
+                let targetValue = targetBottom > 0 ? targetBottom : targetTop
+
+                guard targetValue > 0 else {
+                    continue
+                }
+
+                let title: String
+                if targetBottom > 0, targetTop > 0, abs(targetTop - targetBottom) >= 0.1 {
+                    title = "\(formatBG(targetBottom)) - \(formatBG(targetTop))"
+                } else {
+                    title = formatBG(targetValue)
+                }
+
+                let reason = (entry["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                let subtitleParts = ["Temp Target", durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil, reason?.isEmpty == false ? reason : nil].compactMap { $0 }
+                let subtitle = subtitleParts.joined(separator: " • ")
+
+                let treatment = Treatment(
+                    id: "\(nsId)-temp-target",
+                    type: .tempTarget,
+                    date: timestamp,
+                    title: title,
+                    subtitle: subtitle,
+                    icon: "scope",
+                    color: .green,
+                    bgValue: 0
+                )
+                treatments.append(treatment)
 
             default:
                 break
