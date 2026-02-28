@@ -6,6 +6,8 @@ import SwiftUI
 struct GRIView: View {
     @ObservedObject var viewModel: GRIViewModel
 
+    private let legendColumns = [GridItem(.adaptive(minimum: 90), spacing: 12, alignment: .leading)]
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -50,7 +52,7 @@ struct GRIView: View {
                         .foregroundColor(.secondary)
                 }
 
-                HStack(spacing: 12) {
+                LazyVGrid(columns: legendColumns, alignment: .leading, spacing: 8) {
                     ZoneLegendItem(color: .green, label: "A (0-20)")
                     ZoneLegendItem(color: .yellow, label: "B (21-40)")
                     ZoneLegendItem(color: .orange, label: "C (41-60)")
@@ -111,6 +113,7 @@ struct ZoneLegendItem: View {
                 .frame(width: 12, height: 12)
             Text(label)
                 .foregroundColor(.secondary)
+                .lineLimit(1)
         }
     }
 }

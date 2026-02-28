@@ -234,7 +234,7 @@ struct BasalComparisonCard: View {
                             .font(.title2)
                             .fontWeight(.semibold)
                             .foregroundColor(.blue)
-                        Text("U")
+                            + Text(" U")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -245,7 +245,7 @@ struct BasalComparisonCard: View {
                             .font(.title2)
                             .fontWeight(.semibold)
                             .foregroundColor(.green)
-                        Text("U")
+                            + Text(" U")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
