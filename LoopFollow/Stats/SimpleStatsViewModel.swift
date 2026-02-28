@@ -14,6 +14,8 @@ class SimpleStatsViewModel: ObservableObject {
     @Published var actualBasal: Double?
     @Published var avgBolus: Double?
     @Published var avgCarbs: Double?
+    @Published var totalNegativeBasal: Double?
+    @Published var totalPositiveBasal: Double?
 
     private let dataService: StatsDataService
 
@@ -31,6 +33,8 @@ class SimpleStatsViewModel: ObservableObject {
         actualBasal = nil
         avgBolus = nil
         avgCarbs = nil
+        totalNegativeBasal = nil
+        totalPositiveBasal = nil
     }
 
     func calculateStats() {
@@ -103,11 +107,19 @@ class SimpleStatsViewModel: ObservableObject {
 
         // Calculate actual basal using temp basal adjustments
         let tempBasalData = dataService.getTempBasalData()
-        let (totalActualBasal, actualBasalDays) = calculateActualBasalFromTempBasals(
+        let (totalActualBasal, actualBasalDays, totalPositiveAdjustment, totalNegativeAdjustment) = calculateActualBasalFromTempBasals(
             tempBasals: tempBasalData,
             basalProfile: basalProfile,
             dailyProgrammedBasal: dailyProgrammedBasal
         )
+
+        if actualBasalDays > 0 {
+            totalPositiveBasal = totalPositiveAdjustment / Double(actualBasalDays)
+            totalNegativeBasal = totalNegativeAdjustment / Double(actualBasalDays)
+        } else {
+            totalPositiveBasal = nil
+            totalNegativeBasal = nil
+        }
 
         var avgDailyBolus = 0.0
         var avgDailyBasal = 0.0
@@ -137,7 +149,7 @@ class SimpleStatsViewModel: ObservableObject {
         tempBasals: [StatsDataService.TempBasalEntry],
         basalProfile: [MainViewController.basalProfileStruct],
         dailyProgrammedBasal: Double
-    ) -> (totalBasal: Double, daysWithData: Int) {
+    ) -> (totalBasal: Double, daysWithData: Int, totalPositiveAdjustment: Double, totalNegativeAdjustment: Double) {
         let cutoffTime = dataService.startDate.timeIntervalSince1970
         let endTime = dataService.endDate.timeIntervalSince1970
 
@@ -149,11 +161,13 @@ class SimpleStatsViewModel: ObservableObject {
 
         guard !relevantTempBasals.isEmpty else {
             // No temp basals - return programmed basal for the period
-            return (dailyProgrammedBasal, dataService.daysToAnalyze)
+            return (dailyProgrammedBasal, dataService.daysToAnalyze, 0.0, 0.0)
         }
 
         // Calculate total adjustment from all temp basals
         var totalAdjustment = 0.0
+        var totalPositiveAdjustment = 0.0
+        var totalNegativeAdjustment = 0.0
 
         for tempBasal in relevantTempBasals {
             // Clamp temp basal to analysis window
@@ -164,12 +178,19 @@ class SimpleStatsViewModel: ObservableObject {
 
             // For each segment of this temp basal, calculate the adjustment
             // We need to handle cases where the temp basal spans multiple profile segments
-            totalAdjustment += calculateAdjustmentForTempBasal(
+            let adjustment = calculateAdjustmentForTempBasal(
                 tempRate: tempBasal.rate,
                 startTime: effectiveStart,
                 endTime: effectiveEnd,
                 profile: basalProfile
             )
+            totalAdjustment += adjustment
+
+            if adjustment > 0 {
+                totalPositiveAdjustment += adjustment
+            } else if adjustment < 0 {
+                totalNegativeAdjustment += adjustment
+            }
         }
 
         // Calculate days with data
@@ -185,7 +206,7 @@ class SimpleStatsViewModel: ObservableObject {
         // Actual = Programmed + Adjustments
         let totalActualBasal = (dailyProgrammedBasal * Double(daysWithData)) + totalAdjustment
 
-        return (totalActualBasal, daysWithData)
+        return (totalActualBasal, daysWithData, totalPositiveAdjustment, totalNegativeAdjustment)
     }
 
     /// Calculates the adjustment (positive or negative) for a single temp basal

@@ -205,71 +205,52 @@ struct StatCard: View {
     }
 }
 
-struct BasalComparisonCard: View {
-    let programmed: Double?
-    let actual: Double?
+struct InsulinTotalsCard: View {
+    let totalNegativeBasal: Double?
+    let totalPositiveBasal: Double?
+    let programmedBasal: Double?
+    let actualBasal: Double?
+    let avgBolus: Double?
+    let totalDailyDose: Double?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Basal Comparison")
+            Text("Insulin Totals")
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            VStack(spacing: 8) {
-                HStack {
-                    Text("Programmed")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-
-                    Text("Actual Delivered")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-
-                HStack {
-                    VStack(spacing: 2) {
-                        Text(formatBasal(programmed))
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.blue)
-                            + Text(" U")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                    VStack(spacing: 2) {
-                        Text(formatBasal(actual))
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.green)
-                            + Text(" U")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                }
-
-                if let prog = programmed, let act = actual, prog > 0 {
-                    let diff = act - prog
-                    let percentDiff = (diff / prog) * 100
-                    HStack {
-                        Spacer()
-                        Text(String(format: "%.2f U (%.1f%%)", diff, percentDiff))
-                            .font(.caption)
-                            .foregroundColor(diff > 0 ? .red : .green)
-                        Spacer()
-                    }
-                    .padding(.top, 4)
-                }
+            VStack(spacing: 10) {
+                metricRow(title: "Programmed Basal", value: programmedBasal, color: .indigo)
+                metricRow(title: "Total Negative Basal", value: totalNegativeBasal, color: .red)
+                metricRow(title: "Total Positive Basal", value: totalPositiveBasal, color: .green)
+                metricRow(title: "Actual Basal", value: actualBasal, color: .indigo)
+                metricRow(title: "Avg Bolus", value: avgBolus, color: .purple)
+                metricRow(title: "Total Daily Dose", value: totalDailyDose, color: .pink)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+    }
+
+    @ViewBuilder
+    private func metricRow(title: String, value: Double?, color: Color) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            Spacer()
+
+            Text(formatBasal(value))
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(color)
+                + Text(" U")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
     }
 
     private func formatBasal(_ value: Double?) -> String {
@@ -282,9 +263,10 @@ struct StatsGridView: View {
     @ObservedObject var simpleStats: SimpleStatsViewModel
     @Binding var showGMI: Bool
     @Binding var showStdDev: Bool
+    @State private var showInsulinBreakdown = false
 
     private var hasInsulinData: Bool {
-        simpleStats.totalDailyDose != nil || simpleStats.avgBolus != nil || simpleStats.actualBasal != nil
+        simpleStats.totalDailyDose != nil || simpleStats.avgBolus != nil || simpleStats.actualBasal != nil || simpleStats.programmedBasal != nil
     }
 
     private var hasCarbData: Bool {
@@ -293,7 +275,7 @@ struct StatsGridView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            HStack(spacing: 16) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                 Button(action: {
                     showGMI.toggle()
                 }) {
@@ -311,11 +293,9 @@ struct StatsGridView: View {
                     title: "Avg Glucose",
                     value: formatGlucose(simpleStats.avgGlucose),
                     unit: Storage.shared.units.value,
-                    color: .green
+                    color: Color(red: 0.20, green: 0.99, blue: 0.70)
                 )
-            }
 
-            HStack(spacing: 16) {
                 Button(action: {
                     showStdDev.toggle()
                 }) {
@@ -329,45 +309,56 @@ struct StatsGridView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
 
+                if hasCarbData {
+                    StatCard(
+                        title: "Avg Carbs",
+                        value: formatCarbs(simpleStats.avgCarbs),
+                        unit: "g/day",
+                        color: .yellow
+                    )
+                }
+
                 if hasInsulinData {
+                    StatCard(
+                        title: "Programmed Basal",
+                        value: formatInsulin(simpleStats.programmedBasal),
+                        unit: "U/day",
+                        color: .indigo
+                    )
+                    .onTapGesture(count: 3) {
+                        showInsulinBreakdown = true
+                    }
+
+                    StatCard(
+                        title: "Avg Bolus",
+                        value: formatInsulin(simpleStats.avgBolus),
+                        unit: "U/day",
+                        color: .purple
+                    )
+                    .onTapGesture(count: 3) {
+                        showInsulinBreakdown = true
+                    }
+
                     StatCard(
                         title: "Total Daily Dose",
                         value: formatInsulin(simpleStats.totalDailyDose),
                         unit: "U",
-                        color: .red
+                        color: .pink
                     )
-                } else {
-                    Color.clear
-                        .frame(maxWidth: .infinity)
-                }
-            }
-
-            if hasInsulinData || hasCarbData {
-                HStack(spacing: 16) {
-                    if hasInsulinData {
-                        StatCard(
-                            title: "Avg Bolus",
-                            value: formatInsulin(simpleStats.avgBolus),
-                            unit: "U/day",
-                            color: .purple
-                        )
-                    }
-
-                    if hasCarbData {
-                        StatCard(
-                            title: "Avg Carbs",
-                            value: formatCarbs(simpleStats.avgCarbs),
-                            unit: "g/day",
-                            color: .orange
-                        )
+                    .onTapGesture(count: 3) {
+                        showInsulinBreakdown = true
                     }
                 }
             }
 
-            if hasInsulinData {
-                BasalComparisonCard(
-                    programmed: simpleStats.programmedBasal,
-                    actual: simpleStats.actualBasal
+            if hasInsulinData && showInsulinBreakdown {
+                InsulinTotalsCard(
+                    totalNegativeBasal: simpleStats.totalNegativeBasal,
+                    totalPositiveBasal: simpleStats.totalPositiveBasal,
+                    programmedBasal: simpleStats.programmedBasal,
+                    actualBasal: simpleStats.actualBasal,
+                    avgBolus: simpleStats.avgBolus,
+                    totalDailyDose: simpleStats.totalDailyDose
                 )
             }
         }
