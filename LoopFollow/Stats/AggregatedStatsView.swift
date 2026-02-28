@@ -154,6 +154,12 @@ struct AggregatedStatsView: View {
             timeoutTimer?.invalidate()
             timeoutTimer = nil
         }
+        .onChange(of: showGMI) { newValue in
+            Storage.shared.showGMI.value = newValue
+        }
+        .onChange(of: showStdDev) { newValue in
+            Storage.shared.showStdDev.value = newValue
+        }
     }
 }
 
@@ -290,7 +296,6 @@ struct StatsGridView: View {
             HStack(spacing: 16) {
                 Button(action: {
                     showGMI.toggle()
-                    Storage.shared.showGMI.value = showGMI
                 }) {
                     StatCard(
                         title: showGMI ? "GMI" : "eHbA1c",
@@ -313,7 +318,6 @@ struct StatsGridView: View {
             HStack(spacing: 16) {
                 Button(action: {
                     showStdDev.toggle()
-                    Storage.shared.showStdDev.value = showStdDev
                 }) {
                     StatCard(
                         title: showStdDev ? "Std Deviation" : "CV",

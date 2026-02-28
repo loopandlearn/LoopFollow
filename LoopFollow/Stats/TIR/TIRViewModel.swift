@@ -6,7 +6,11 @@ import Foundation
 
 class TIRViewModel: ObservableObject {
     @Published var tirData: [TIRDataPoint] = []
-    @Published var showTITR: Bool
+    @Published var showTITR: Bool {
+        didSet {
+            Storage.shared.showTITR.value = showTITR
+        }
+    }
 
     private let dataService: StatsDataService
 
@@ -23,7 +27,6 @@ class TIRViewModel: ObservableObject {
 
     func toggleTIRMode() {
         showTITR.toggle()
-        Storage.shared.showTITR.value = showTITR
         calculateTIR()
     }
 
