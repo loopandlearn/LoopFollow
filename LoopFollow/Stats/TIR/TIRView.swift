@@ -32,29 +32,32 @@ struct TIRView: View {
 
                         VStack(alignment: .leading, spacing: 8) {
                             if let average = viewModel.tirData.first(where: { $0.period == .average }) {
+                                Text("Cutoffs in \(Storage.shared.units.value)")
+                                    .foregroundColor(.secondary)
+
                                 TIRLegendItem(
                                     color: .orange,
-                                    label: "Very High",
+                                    label: "Very High (\(veryHighCutoffText))",
                                     percentage: average.veryHigh
                                 )
                                 TIRLegendItem(
                                     color: .yellow,
-                                    label: "High",
+                                    label: "High (\(highCutoffText))",
                                     percentage: average.high
                                 )
                                 TIRLegendItem(
                                     color: .green,
-                                    label: "In Range",
+                                    label: "In Range (\(inRangeCutoffText))",
                                     percentage: average.inRange
                                 )
                                 TIRLegendItem(
                                     color: .red.opacity(0.5),
-                                    label: "Low",
+                                    label: "Low (\(lowCutoffText))",
                                     percentage: average.low
                                 )
                                 TIRLegendItem(
                                     color: .red.opacity(0.8),
-                                    label: "Very Low",
+                                    label: "Very Low (\(veryLowCutoffText))",
                                     percentage: average.veryLow
                                 )
                             }
@@ -94,6 +97,52 @@ struct TIRView: View {
         }
 
         return String(format: "%.1f – %.1f %@", lowThreshold, highThreshold, Storage.shared.units.value)
+    }
+
+    private var veryLowCutoffText: String {
+        "< \(formatThreshold(veryLowThreshold))"
+    }
+
+    private var lowCutoffText: String {
+        "\(formatThreshold(veryLowThreshold))–<\(formatThreshold(lowThreshold))"
+    }
+
+    private var inRangeCutoffText: String {
+        "\(formatThreshold(lowThreshold))–\(formatThreshold(highThreshold))"
+    }
+
+    private var highCutoffText: String {
+        ">\(formatThreshold(highThreshold))–\(formatThreshold(veryHighThreshold))"
+    }
+
+    private var veryHighCutoffText: String {
+        "> \(formatThreshold(veryHighThreshold))"
+    }
+
+    private var lowThreshold: Double {
+        Storage.shared.units.value == "mg/dL" ? 70.0 : 3.9
+    }
+
+    private var highThreshold: Double {
+        if Storage.shared.units.value == "mg/dL" {
+            return viewModel.showTITR ? 140.0 : 180.0
+        }
+        return viewModel.showTITR ? 7.8 : 10.0
+    }
+
+    private var veryLowThreshold: Double {
+        Storage.shared.units.value == "mg/dL" ? 54.0 : 3.0
+    }
+
+    private var veryHighThreshold: Double {
+        Storage.shared.units.value == "mg/dL" ? 250.0 : 13.9
+    }
+
+    private func formatThreshold(_ value: Double) -> String {
+        if Storage.shared.units.value == "mg/dL" {
+            return String(format: "%.0f", value)
+        }
+        return String(format: "%.1f", value)
     }
 }
 
