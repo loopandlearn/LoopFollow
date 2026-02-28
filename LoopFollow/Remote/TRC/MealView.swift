@@ -173,7 +173,7 @@ struct MealView: View {
                 selectedTime = nil
                 isScheduling = false
 
-                if !Storage.shared.hasSeenFatProteinOrderChange.value {
+                if !Storage.shared.hasSeenFatProteinOrderChange.value && Storage.shared.mealWithFatProtein.value {
                     showFatProteinOrderBanner = true
                 }
             }
