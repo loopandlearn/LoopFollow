@@ -13,6 +13,8 @@ struct GraphSettingsView: View {
     @ObservedObject private var show90MinLine = Storage.shared.show90MinLine
     @ObservedObject private var showMidnightLines = Storage.shared.showMidnightLines
     @ObservedObject private var smallGraphTreatments = Storage.shared.smallGraphTreatments
+    @ObservedObject private var graphTimeZoneEnabled = Storage.shared.graphTimeZoneEnabled
+    @ObservedObject private var graphTimeZoneIdentifier = Storage.shared.graphTimeZoneIdentifier
 
     @ObservedObject private var smallGraphHeight = Storage.shared.smallGraphHeight
     @ObservedObject private var predictionToLoad = Storage.shared.predictionToLoad
@@ -48,6 +50,18 @@ struct GraphSettingsView: View {
 
                     Toggle("Show Midnight Lines", isOn: $showMidnightLines.value)
                         .onChange(of: showMidnightLines.value) { _ in markDirty() }
+
+                    Toggle("Time Zone Override", isOn: $graphTimeZoneEnabled.value)
+                        .onChange(of: graphTimeZoneEnabled.value) { _ in markDirty() }
+
+                    if graphTimeZoneEnabled.value {
+                        Picker("Time Zone", selection: $graphTimeZoneIdentifier.value) {
+                            ForEach(TimeZone.knownTimeZoneIdentifiers.sorted(), id: \.self) { tz in
+                                Text(tz).tag(tz)
+                            }
+                        }
+                        .onChange(of: graphTimeZoneIdentifier.value) { _ in markDirty() }
+                    }
                 }
 
                 // ── Treatments ───────────────────────────────────────────────
