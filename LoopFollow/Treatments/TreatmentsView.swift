@@ -447,7 +447,6 @@ struct TreatmentDetailView: View {
         // Remove " at " if it exists (some locales use it)
         return fullString.replacingOccurrences(of: " at ", with: " ")
     }
-
 }
 
 struct DeviceStatusData {

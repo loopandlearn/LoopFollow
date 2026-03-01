@@ -114,34 +114,3 @@ class DataAvailabilityCalculator {
             dataQuality: quality
         )
     }
-
-    /// Identifies gaps in CGM data longer than a specified threshold
-    /// - Parameters:
-    ///   - bgData: Array of glucose readings
-    ///   - thresholdMinutes: Minimum gap duration to report (default: 60 minutes)
-    /// - Returns: Array of gaps as date ranges
-    static func findDataGaps(
-        bgData: [ShareGlucoseData],
-        thresholdMinutes: Double = 60.0
-    ) -> [(start: Date, end: Date, durationMinutes: Double)] {
-        guard bgData.count > 1 else { return [] }
-
-        let sortedData = bgData.sorted { $0.date < $1.date }
-        var gaps: [(start: Date, end: Date, durationMinutes: Double)] = []
-
-        for i in 0 ..< (sortedData.count - 1) {
-            let current = sortedData[i]
-            let next = sortedData[i + 1]
-
-            let gapMinutes = (next.date - current.date) / 60.0
-
-            if gapMinutes >= thresholdMinutes {
-                let gapStart = Date(timeIntervalSince1970: current.date)
-                let gapEnd = Date(timeIntervalSince1970: next.date)
-                gaps.append((start: gapStart, end: gapEnd, durationMinutes: gapMinutes))
-            }
-        }
-
-        return gaps
-    }
-}
