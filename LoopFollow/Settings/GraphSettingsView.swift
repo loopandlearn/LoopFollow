@@ -13,8 +13,6 @@ struct GraphSettingsView: View {
     @ObservedObject private var show90MinLine = Storage.shared.show90MinLine
     @ObservedObject private var showMidnightLines = Storage.shared.showMidnightLines
     @ObservedObject private var smallGraphTreatments = Storage.shared.smallGraphTreatments
-    @ObservedObject private var graphTimeZoneEnabled = Storage.shared.graphTimeZoneEnabled
-    @ObservedObject private var graphTimeZoneIdentifier = Storage.shared.graphTimeZoneIdentifier
 
     @ObservedObject private var smallGraphHeight = Storage.shared.smallGraphHeight
     @ObservedObject private var predictionToLoad = Storage.shared.predictionToLoad
@@ -50,18 +48,6 @@ struct GraphSettingsView: View {
 
                     Toggle("Show Midnight Lines", isOn: $showMidnightLines.value)
                         .onChange(of: showMidnightLines.value) { _ in markDirty() }
-
-                    Toggle("Time Zone Override", isOn: $graphTimeZoneEnabled.value)
-                        .onChange(of: graphTimeZoneEnabled.value) { _ in markDirty() }
-
-                    if graphTimeZoneEnabled.value {
-                        Picker("Time Zone", selection: $graphTimeZoneIdentifier.value) {
-                            ForEach(Self.sortedTimeZones, id: \.identifier) { tz in
-                                Text(Self.timeZoneLabel(tz)).tag(tz.identifier)
-                            }
-                        }
-                        .onChange(of: graphTimeZoneIdentifier.value) { _ in markDirty() }
-                    }
                 }
 
                 // ── Treatments ───────────────────────────────────────────────
@@ -153,18 +139,5 @@ struct GraphSettingsView: View {
     /// Marks the chart as needing a redraw
     private func markDirty() {
         Observable.shared.chartSettingsChanged.value = true
-    }
-
-    // MARK: - Time Zone Helpers
-
-    private static let sortedTimeZones: [TimeZone] = TimeZone.knownTimeZoneIdentifiers
-        .compactMap { TimeZone(identifier: $0) }
-        .sorted { $0.secondsFromGMT() < $1.secondsFromGMT() }
-
-    private static func timeZoneLabel(_ tz: TimeZone) -> String {
-        let offsetMinutes = tz.secondsFromGMT() / 60
-        let sign = offsetMinutes >= 0 ? "+" : "-"
-        let offsetString = String(format: "UTC%@%02d:%02d", sign, abs(offsetMinutes) / 60, abs(offsetMinutes) % 60)
-        return "(\(offsetString)) \(tz.identifier)"
     }
 }
