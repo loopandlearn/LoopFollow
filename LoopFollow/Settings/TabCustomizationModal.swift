@@ -177,6 +177,7 @@ struct TabCustomizationModal: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
+                        allItems = originalItems
                         isPresented = false
                     } label: {
                         HStack(spacing: 4) {
@@ -185,10 +186,16 @@ struct TabCustomizationModal: View {
                         }
                     }
                 }
-            }
-            .onDisappear {
-                if allItems != originalItems {
-                    applyChangesSilently()
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        applyChangesSilently()
+                        onApply()
+                        isPresented = false
+                    } label: {
+                        Image(systemName: "checkmark")
+                    }
+                    .disabled(allItems == originalItems)
+                    .foregroundColor(.blue)
                 }
             }
         }
