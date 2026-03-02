@@ -8,6 +8,7 @@ import UIKit
 class MoreMenuViewController: UIViewController {
     private var tableView: UITableView!
     private var cancellables = Set<AnyCancellable>()
+    private var fallbackMainViewController: MainViewController?
 
     struct MenuItem {
         let title: String
@@ -356,7 +357,18 @@ class MoreMenuViewController: UIViewController {
             }
         }
 
-        return nil
+        if let fallbackMainViewController {
+            return fallbackMainViewController
+        }
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let mainVC = storyboard.instantiateViewController(withIdentifier: "MainViewController") as? MainViewController else {
+            return nil
+        }
+
+        mainVC.isPresentedAsModal = true
+        fallbackMainViewController = mainVC
+        return mainVC
     }
 
     @objc private func dismissModal() {

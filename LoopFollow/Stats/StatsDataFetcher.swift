@@ -77,6 +77,49 @@ class StatsDataFetcher {
             return
         }
 
+        ensureBasalProfileLoaded(mainVC: mainVC) {
+            self.fetchAndMergeTreatments(days: days, mainVC: mainVC, completion: completion)
+        }
+    }
+
+    private func ensureBasalProfileLoaded(mainVC: MainViewController, completion: @escaping () -> Void) {
+        if !mainVC.basalProfile.isEmpty {
+            completion()
+            return
+        }
+
+        NightscoutUtils.executeRequest(eventType: .profile, parameters: [:]) { (result: Result<NSProfile, Error>) in
+            switch result {
+            case let .success(profileData):
+                let profileStore = profileData.store["default"] ??
+                    profileData.store["Default"] ??
+                    profileData.store[profileData.defaultProfile]
+
+                DispatchQueue.main.async {
+                    if let profileStore {
+                        mainVC.basalProfile = profileStore.basal.map {
+                            MainViewController.basalProfileStruct(
+                                value: $0.value,
+                                time: $0.time,
+                                timeAsSeconds: $0.timeAsSeconds
+                            )
+                        }
+                    }
+                    completion()
+                }
+            case let .failure(error):
+                LogManager.shared.log(
+                    category: .nightscout,
+                    message: "Failed to fetch profile data for stats basal calculations: \(error.localizedDescription)"
+                )
+                DispatchQueue.main.async {
+                    completion()
+                }
+            }
+        }
+    }
+
+    private func fetchAndMergeTreatments(days: Int, mainVC: MainViewController, completion: @escaping () -> Void) {
         let utcISODateFormatter = ISO8601DateFormatter()
         utcISODateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         utcISODateFormatter.timeZone = TimeZone(abbreviation: "UTC")
