@@ -157,11 +157,9 @@ struct GraphSettingsView: View {
 
     // MARK: - Time Zone Helpers
 
-    private static let sortedTimeZones: [TimeZone] = {
-        TimeZone.knownTimeZoneIdentifiers
-            .compactMap { TimeZone(identifier: $0) }
-            .sorted { $0.secondsFromGMT() < $1.secondsFromGMT() }
-    }()
+    private static let sortedTimeZones: [TimeZone] = TimeZone.knownTimeZoneIdentifiers
+        .compactMap { TimeZone(identifier: $0) }
+        .sorted { $0.secondsFromGMT() < $1.secondsFromGMT() }
 
     private static func timeZoneLabel(_ tz: TimeZone) -> String {
         let offsetMinutes = tz.secondsFromGMT() / 60

@@ -723,7 +723,8 @@ extension MainViewController {
         if Storage.shared.showMidnightLines.value {
             var midnightTimeInterval: TimeInterval
             if Storage.shared.graphTimeZoneEnabled.value,
-               let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value) {
+               let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+            {
                 var cal = Calendar.current
                 cal.timeZone = tz
                 midnightTimeInterval = cal.startOfDay(for: Date()).timeIntervalSince1970
@@ -1890,7 +1891,8 @@ extension MainViewController {
         }
 
         if Storage.shared.graphTimeZoneEnabled.value,
-           let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value) {
+           let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+        {
             dateFormatter.timeZone = tz
         }
 

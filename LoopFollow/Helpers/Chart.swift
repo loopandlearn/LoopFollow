@@ -29,7 +29,8 @@ final class ChartXValueFormatter: AxisValueFormatter {
         }
 
         if Storage.shared.graphTimeZoneEnabled.value,
-           let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value) {
+           let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+        {
             dateFormatter.timeZone = tz
         }
 
