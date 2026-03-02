@@ -8,7 +8,7 @@ class AGPCalculator {
         guard !bgData.isEmpty else { return [] }
 
         var hourData: [Int: [Double]] = [:]
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
 
         for reading in bgData {
             let date = Date(timeIntervalSince1970: reading.date)

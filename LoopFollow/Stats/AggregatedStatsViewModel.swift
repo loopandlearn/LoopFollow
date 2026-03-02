@@ -40,7 +40,7 @@ class AggregatedStatsViewModel: ObservableObject {
 
     func updatePeriod(_ days: Int, completion: @escaping () -> Void = {}) {
         let endDate = Date()
-        let startDate = Calendar.current.date(byAdding: .day, value: -days, to: endDate) ?? endDate
+        let startDate = dateTimeUtils.displayCalendar().date(byAdding: .day, value: -days, to: endDate) ?? endDate
         updateDateRange(start: startDate, end: endDate, completion: completion)
     }
 

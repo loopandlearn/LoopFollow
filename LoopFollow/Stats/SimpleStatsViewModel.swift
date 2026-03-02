@@ -78,7 +78,7 @@ class SimpleStatsViewModel: ObservableObject {
 
         let carbsInPeriod = dataService.getCarbData()
 
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
         var dailyCarbs: [Date: Double] = [:]
 
         for carb in carbsInPeriod {
@@ -194,7 +194,7 @@ class SimpleStatsViewModel: ObservableObject {
         }
 
         // Calculate days with data
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
         var uniqueDays = Set<Date>()
         for tempBasal in relevantTempBasals {
             let dateObj = Date(timeIntervalSince1970: tempBasal.startTime)
@@ -221,7 +221,7 @@ class SimpleStatsViewModel: ObservableObject {
 
         var totalAdjustment = 0.0
         let sortedProfile = profile.sorted { $0.timeAsSeconds < $1.timeAsSeconds }
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
 
         var currentTime = startTime
         while currentTime < endTime {
@@ -263,7 +263,7 @@ class SimpleStatsViewModel: ObservableObject {
     private func getScheduledBasalRate(for time: TimeInterval, profile: [MainViewController.basalProfileStruct]) -> Double {
         guard !profile.isEmpty else { return 0.0 }
 
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
         let date = Date(timeIntervalSince1970: time)
         let components = calendar.dateComponents([.hour, .minute, .second], from: date)
 
@@ -294,7 +294,7 @@ class SimpleStatsViewModel: ObservableObject {
     private func calculateActualDaysCovered(dates: [TimeInterval], requestedDays: Int) -> Int {
         guard !dates.isEmpty else { return requestedDays }
 
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
         let cutoffTime = Date().timeIntervalSince1970 - (Double(requestedDays) * 24 * 60 * 60)
         let filteredDates = dates.filter { $0 >= cutoffTime }
 

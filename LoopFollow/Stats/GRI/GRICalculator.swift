@@ -62,7 +62,7 @@ class GRICalculator {
         guard !bgData.isEmpty else { return [] }
 
         var dailyBGData: [Date: [ShareGlucoseData]] = [:]
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
 
         for reading in bgData {
             let date = Date(timeIntervalSince1970: reading.date)

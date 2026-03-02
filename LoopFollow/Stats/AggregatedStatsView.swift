@@ -22,7 +22,7 @@ struct AggregatedStatsView: View {
         _showGMI = State(initialValue: Storage.shared.showGMI.value)
         _showStdDev = State(initialValue: Storage.shared.showStdDev.value)
 
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
         let startOfToday = calendar.startOfDay(for: Date())
         let end = calendar.date(byAdding: .second, value: -1, to: startOfToday) ?? Date()
         let endDay = calendar.startOfDay(for: end)

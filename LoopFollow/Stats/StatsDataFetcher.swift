@@ -19,7 +19,7 @@ class StatsDataFetcher {
 
         var parameters: [String: String] = [:]
         let utcISODateFormatter = ISO8601DateFormatter()
-        let startDate = dataService?.startDate ?? Calendar.current.date(byAdding: .day, value: -1 * days, to: Date())!
+        let startDate = dataService?.startDate ?? dateTimeUtils.displayCalendar().date(byAdding: .day, value: -1 * days, to: Date())!
         parameters["count"] = "\(days * 2 * 24 * 60 / 5)"
         parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: startDate)
         parameters["find[type][$ne]"] = "cal"
@@ -124,7 +124,7 @@ class StatsDataFetcher {
         utcISODateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         utcISODateFormatter.timeZone = TimeZone(abbreviation: "UTC")
 
-        let startDate = dataService?.startDate ?? Calendar.current.date(byAdding: .day, value: -1 * days, to: Date())!
+        let startDate = dataService?.startDate ?? dateTimeUtils.displayCalendar().date(byAdding: .day, value: -1 * days, to: Date())!
         let endDate = dataService?.endDate ?? Date()
 
         let startTimeString = utcISODateFormatter.string(from: startDate)
@@ -518,7 +518,7 @@ class StatsDataFetcher {
 
         var entries: [MainViewController.basalGraphStruct] = []
         let sortedProfile = profile.sorted { $0.timeAsSeconds < $1.timeAsSeconds }
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
 
         var currentTime = startTime
         while currentTime < endTime {

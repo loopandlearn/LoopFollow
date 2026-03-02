@@ -7,7 +7,7 @@ class StatsDataService {
     weak var mainViewController: MainViewController?
 
     var daysToAnalyze: Int = 14 // Keep for backward compatibility
-    var startDate: Date = Calendar.current.date(byAdding: .day, value: -14, to: Date()) ?? Date()
+    var startDate: Date = dateTimeUtils.displayCalendar().date(byAdding: .day, value: -14, to: Date()) ?? Date()
     var endDate: Date = .init()
 
     private let dataFetcher: StatsDataFetcher
@@ -33,7 +33,7 @@ class StatsDataService {
         startDate = start
         endDate = end
         // Also update daysToAnalyze for compatibility with existing code
-        let daysBetween = Calendar.current.dateComponents([.day], from: start, to: end).day ?? 14
+        let daysBetween = dateTimeUtils.displayCalendar().dateComponents([.day], from: start, to: end).day ?? 14
         daysToAnalyze = max(daysBetween, 1)
     }
 

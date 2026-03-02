@@ -223,7 +223,8 @@ struct TreatmentsView: View {
         dateComponents.day = day
         dateComponents.hour = hour
 
-        return Calendar.current.date(from: dateComponents)
+        let calendar = dateTimeUtils.displayCalendar()
+        return calendar.date(from: dateComponents)
     }
 
     private func formatHourHeader(_ hourKey: String) -> String {
@@ -243,7 +244,9 @@ struct TreatmentsView: View {
         dateComponents.day = day
         dateComponents.hour = hour
 
-        guard let date = Calendar.current.date(from: dateComponents) else {
+        let calendar = dateTimeUtils.displayCalendar()
+
+        guard let date = calendar.date(from: dateComponents) else {
             return hourKey
         }
 
@@ -251,18 +254,20 @@ struct TreatmentsView: View {
         timeFormatter.locale = Locale.current
         timeFormatter.dateStyle = .none
         timeFormatter.timeStyle = .short // Respects user's 12/24-hour preference
+        dateTimeUtils.applyDisplayTimeZone(to: timeFormatter)
 
         let timeString = timeFormatter.string(from: date)
 
         // Create the full header string based on the day
-        if Calendar.current.isDateInToday(date) {
+        if calendar.isDateInToday(date) {
             return "Today \(timeString)"
-        } else if Calendar.current.isDateInYesterday(date) {
+        } else if calendar.isDateInYesterday(date) {
             return "Yesterday \(timeString)"
         } else {
             let dateFormatter = DateFormatter()
             dateFormatter.locale = Locale.current
             dateFormatter.dateFormat = "MMM d"
+            dateTimeUtils.applyDisplayTimeZone(to: dateFormatter)
             let dateString = dateFormatter.string(from: date)
             return "\(dateString), \(timeString)"
         }
@@ -443,6 +448,7 @@ struct TreatmentDetailView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
+        dateTimeUtils.applyDisplayTimeZone(to: formatter)
         let fullString = formatter.string(from: date)
         // Remove " at " if it exists (some locales use it)
         return fullString.replacingOccurrences(of: " at ", with: " ")
@@ -761,6 +767,7 @@ struct TreatmentRow: View {
         let date = Date(timeIntervalSince1970: timeInterval)
         let formatter = DateFormatter()
         formatter.timeStyle = .short
+        dateTimeUtils.applyDisplayTimeZone(to: formatter)
         return formatter.string(from: date)
     }
 }
@@ -855,7 +862,7 @@ struct Treatment: Identifiable {
 
     var hourKey: String {
         let date = Date(timeIntervalSince1970: self.date)
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
         let components = calendar.dateComponents([.year, .month, .day, .hour], from: date)
         return "\(components.year!)-\(components.month!)-\(components.day!)-\(components.hour!)"
     }

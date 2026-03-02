@@ -12,7 +12,7 @@ class TIRCalculator {
         let highThreshold = useTightRange ? 140.0 : 180.0
         let veryHighThreshold = 250.0
         var periodData: [TIRPeriod: [Double]] = [:]
-        let calendar = Calendar.current
+        let calendar = dateTimeUtils.displayCalendar()
 
         for reading in bgData {
             let date = Date(timeIntervalSince1970: reading.date)
