@@ -160,10 +160,12 @@ class MoreMenuViewController: UIViewController {
         navController.overrideUserInterfaceStyle = style
 
         settingsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
+            image: UIImage(systemName: "checkmark"),
+            style: .plain,
             target: self,
             action: #selector(dismissSettingsModal)
         )
+        settingsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
 
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
@@ -179,10 +181,12 @@ class MoreMenuViewController: UIViewController {
         navController.overrideUserInterfaceStyle = style
 
         alarmsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
+            image: UIImage(systemName: "checkmark"),
+            style: .plain,
             target: self,
             action: #selector(dismissModal)
         )
+        alarmsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
 
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
@@ -198,10 +202,12 @@ class MoreMenuViewController: UIViewController {
         navController.overrideUserInterfaceStyle = style
 
         remoteVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
+            image: UIImage(systemName: "checkmark"),
+            style: .plain,
             target: self,
             action: #selector(dismissModal)
         )
+        remoteVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
 
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
@@ -217,10 +223,12 @@ class MoreMenuViewController: UIViewController {
         navController.overrideUserInterfaceStyle = style
 
         nightscoutVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
+            image: UIImage(systemName: "checkmark"),
+            style: .plain,
             target: self,
             action: #selector(dismissModal)
         )
+        nightscoutVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
 
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
@@ -236,10 +244,12 @@ class MoreMenuViewController: UIViewController {
         navController.overrideUserInterfaceStyle = style
 
         snoozerVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
+            image: UIImage(systemName: "checkmark"),
+            style: .plain,
             target: self,
             action: #selector(dismissModal)
         )
+        snoozerVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
 
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
@@ -256,10 +266,12 @@ class MoreMenuViewController: UIViewController {
 
         // Add a close button
         treatmentsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
+            image: UIImage(systemName: "checkmark"),
+            style: .plain,
             target: self,
             action: #selector(dismissModal)
         )
+        treatmentsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
 
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
@@ -283,10 +295,12 @@ class MoreMenuViewController: UIViewController {
 
         // Add a close button
         statsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
+            image: UIImage(systemName: "checkmark"),
+            style: .plain,
             target: self,
             action: #selector(dismissModal)
         )
+        statsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
 
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)

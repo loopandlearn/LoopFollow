@@ -559,6 +559,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
               let tabBarController = window.rootViewController as? UITabBarController
         else { return }
 
+        let previousSelectedIndex = tabBarController.selectedIndex
+
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         var viewControllers: [UIViewController] = []
 
@@ -578,15 +580,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if let presented = tabBarController.presentedViewController {
             presented.dismiss(animated: false) {
                 tabBarController.setViewControllers(viewControllers, animated: false)
-                if !viewControllers.isEmpty {
-                    tabBarController.selectedIndex = 0
-                }
+                guard !viewControllers.isEmpty else { return }
+                let targetIndex = min(previousSelectedIndex, viewControllers.count - 1)
+                tabBarController.selectedIndex = targetIndex
             }
         } else {
             tabBarController.setViewControllers(viewControllers, animated: false)
-            if !viewControllers.isEmpty {
-                tabBarController.selectedIndex = 0
-            }
+            guard !viewControllers.isEmpty else { return }
+            let targetIndex = min(previousSelectedIndex, viewControllers.count - 1)
+            tabBarController.selectedIndex = targetIndex
         }
     }
 
@@ -636,6 +638,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     private func rebuildTabs(tabBarController: UITabBarController) {
+        let previousSelectedIndex = tabBarController.selectedIndex
+
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         var viewControllers: [UIViewController] = []
 
@@ -654,9 +658,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         tabBarController.setViewControllers(viewControllers, animated: false)
 
-        if !viewControllers.isEmpty {
-            tabBarController.selectedIndex = 0
-        }
+        guard !viewControllers.isEmpty else { return }
+        let targetIndex = min(previousSelectedIndex, viewControllers.count - 1)
+        tabBarController.selectedIndex = targetIndex
 
         updateNightscoutTabState()
     }
@@ -1354,10 +1358,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         // Add a Done button
         hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
+            image: UIImage(systemName: "checkmark"),
+            style: .plain,
             target: self,
             action: #selector(dismissModal)
         )
+        hostingController.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
 
         navController.modalPresentationStyle = .pageSheet
         present(navController, animated: true)
@@ -1375,10 +1381,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         // Add a Done button
         hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
+            image: UIImage(systemName: "checkmark"),
+            style: .plain,
             target: self,
             action: #selector(dismissModal)
         )
+        hostingController.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
 
         navController.modalPresentationStyle = .pageSheet
         present(navController, animated: true)
