@@ -98,6 +98,8 @@ class Storage {
     var lowLine = StorageValue<Double>(key: "lowLine", defaultValue: 70.0)
     var highLine = StorageValue<Double>(key: "highLine", defaultValue: 180.0)
     var downloadDays = StorageValue<Int>(key: "downloadDays", defaultValue: 1)
+    var graphTimeZoneEnabled = StorageValue<Bool>(key: "graphTimeZoneEnabled", defaultValue: false)
+    var graphTimeZoneIdentifier = StorageValue<String>(key: "graphTimeZoneIdentifier", defaultValue: TimeZone.current.identifier)
     // Graph Settings [END]
 
     // Calendar entries [BEGIN]
