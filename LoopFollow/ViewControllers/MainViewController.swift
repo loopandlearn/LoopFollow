@@ -308,6 +308,20 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
+        Storage.shared.graphTimeZoneEnabled.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.infoTable.reloadData()
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.graphTimeZoneIdentifier.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.infoTable.reloadData()
+            }
+            .store(in: &cancellables)
+
         Storage.shared.speakBG.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -824,6 +838,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     override func viewWillAppear(_: Bool) {
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
+        infoTable.reloadData()
 
         if Observable.shared.chartSettingsChanged.value {
             updateBGGraphSettings()
@@ -835,18 +850,42 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
+    private var timeZoneOverrideInfoValue: String? {
+        guard Storage.shared.graphTimeZoneEnabled.value,
+              let overrideTimeZone = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+        else {
+            return nil
+        }
+
+        return overrideTimeZone.identifier
+    }
+
     // Info Table Functions
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         guard let infoManager = infoManager else {
             return 0
         }
-        return infoManager.numberOfRows()
+        let overrideRowCount = timeZoneOverrideInfoValue == nil ? 0 : 1
+        return infoManager.numberOfRows() + overrideRowCount
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "LabelCell", for: indexPath)
 
-        if let values = infoManager.dataForIndexPath(indexPath) {
+        if indexPath.row == 0, let timeZoneOverrideInfoValue {
+            cell.textLabel?.text = "Time Zone"
+            cell.detailTextLabel?.text = timeZoneOverrideInfoValue
+            return cell
+        }
+
+        let adjustedIndexPath: IndexPath
+        if timeZoneOverrideInfoValue != nil {
+            adjustedIndexPath = IndexPath(row: indexPath.row - 1, section: indexPath.section)
+        } else {
+            adjustedIndexPath = indexPath
+        }
+
+        if let values = infoManager.dataForIndexPath(adjustedIndexPath) {
             cell.textLabel?.text = values.name
             cell.detailTextLabel?.text = values.value
         } else {
