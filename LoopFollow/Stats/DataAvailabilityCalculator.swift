@@ -114,3 +114,4 @@ class DataAvailabilityCalculator {
             dataQuality: quality
         )
     }
+}
