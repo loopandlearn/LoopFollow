@@ -721,7 +721,16 @@ extension MainViewController {
     func createMidnightLines() {
         // Draw a line at midnight: useful when showing multiple days of data
         if Storage.shared.showMidnightLines.value {
-            var midnightTimeInterval = dateTimeUtils.getTimeIntervalMidnightToday()
+            var midnightTimeInterval: TimeInterval
+            if Storage.shared.graphTimeZoneEnabled.value,
+               let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+            {
+                var cal = Calendar.current
+                cal.timeZone = tz
+                midnightTimeInterval = cal.startOfDay(for: Date()).timeIntervalSince1970
+            } else {
+                midnightTimeInterval = dateTimeUtils.getTimeIntervalMidnightToday()
+            }
             let graphHours = 24 * Storage.shared.downloadDays.value
             let graphStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
             while midnightTimeInterval > graphStart {
@@ -1879,6 +1888,12 @@ extension MainViewController {
             dateFormatter.setLocalizedDateFormatFromTemplate("HH:mm")
         } else {
             dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
+        }
+
+        if Storage.shared.graphTimeZoneEnabled.value,
+           let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+        {
+            dateFormatter.timeZone = tz
         }
 
         let wrappedLine1 = wrapText(line1, maxLineLength: 40)
