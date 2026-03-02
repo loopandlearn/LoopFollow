@@ -20,6 +20,8 @@ struct TreatmentsView: View {
     @StateObject private var viewModel = TreatmentsViewModel()
     @State private var selectedFilter: TreatmentFilter = .all
     @ObservedObject private var device = Storage.shared.device
+    @ObservedObject private var graphTimeZoneEnabled = Storage.shared.graphTimeZoneEnabled
+    @ObservedObject private var graphTimeZoneIdentifier = Storage.shared.graphTimeZoneIdentifier
 
     private var isLoopDevice: Bool {
         device.value == "Loop"
@@ -56,7 +58,7 @@ struct TreatmentsView: View {
                     .font(.largeTitle.weight(.bold))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
-                    .padding(.top, 4)
+                    .padding(.top, 1)
 
                 // Filter Pickers
                 VStack(spacing: 12) {
@@ -75,7 +77,21 @@ struct TreatmentsView: View {
                     .pickerStyle(SegmentedPickerStyle())
                 }
                 .padding(.horizontal)
-                .padding(.top, 8)
+                .padding(.top, 1)
+                .padding(.bottom, 1)
+
+                if let timeZoneNoticeText {
+                    HStack(spacing: 6) {
+                        Image(systemName: "globe")
+                        Text(timeZoneNoticeText)
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.bottom, 0)
+                    .background(Color(.systemBackground))
+                }
 
                 List {
                     if viewModel.isInitialLoading {
@@ -90,11 +106,32 @@ struct TreatmentsView: View {
                             .foregroundColor(.secondary)
                             .padding()
                     } else {
-                        ForEach(sortedHourKeys, id: \.self) { hourKey in
-                            Section(header: Text(formatHourHeader(hourKey))) {
-                                ForEach(filteredGroupedTreatments[hourKey] ?? []) { treatment in
-                                    TreatmentRow(treatment: treatment)
+                        ForEach(sortedDayKeys, id: \.self) { dayKey in
+                            Section {
+                                ForEach(dayRowsForDay(dayKey)) { row in
+                                    if let hourLabel = row.hourLabel {
+                                        Text(hourLabel)
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundColor(.secondary)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .padding(.horizontal, 16)
+                                            .padding(.top, 6)
+                                            .padding(.bottom, 2)
+                                            .background(Color(.systemBackground))
+                                    } else if let treatment = row.treatment {
+                                        TreatmentRow(treatment: treatment)
+                                    }
                                 }
+                            } header: {
+                                ZStack(alignment: .leading) {
+                                    Color(.systemBackground)
+                                    Text(formatDayHeader(dayKey))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.horizontal, 1)
+                                        .padding(.top, 1)
+                                        .padding(.bottom, 2)
+                                }
+                                .frame(maxWidth: .infinity)
                             }
                         }
 
@@ -127,6 +164,14 @@ struct TreatmentsView: View {
                             }
                         }
                     }
+                }
+                .listStyle(.plain)
+                .environment(\.defaultMinListHeaderHeight, 0)
+                .overlay(alignment: .top) {
+                    Color(.systemBackground)
+                        .frame(height: 12)
+                        .offset(y: -1)
+                        .allowsHitTesting(false)
                 }
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
@@ -188,22 +233,59 @@ struct TreatmentsView: View {
         }
     }
 
-    private var sortedHourKeys: [String] {
-        filteredGroupedTreatments.keys.sorted { lhs, rhs in
-            let lhsDate = hourKeyDate(lhs)
-            let rhsDate = hourKeyDate(rhs)
+    private var sortedDayKeys: [String] {
+        Array(Set(filteredGroupedTreatments.keys.compactMap(dayKey(from:))))
+            .sorted { lhs, rhs in
+                let lhsDate = dayKeyDate(lhs)
+                let rhsDate = dayKeyDate(rhs)
 
-            switch (lhsDate, rhsDate) {
-            case let (left?, right?):
-                return left > right
-            case (_?, nil):
-                return true
-            case (nil, _?):
-                return false
-            case (nil, nil):
-                return lhs > rhs
+                switch (lhsDate, rhsDate) {
+                case let (left?, right?):
+                    return left > right
+                case (_?, nil):
+                    return true
+                case (nil, _?):
+                    return false
+                case (nil, nil):
+                    return lhs > rhs
+                }
             }
+    }
+
+    private func treatmentsForDay(_ daySectionKey: String) -> [Treatment] {
+        let matchingHourKeys = filteredGroupedTreatments.keys.filter { dayKey(from: $0) == daySectionKey }
+        return matchingHourKeys
+            .flatMap { filteredGroupedTreatments[$0] ?? [] }
+            .sorted { $0.date > $1.date }
+    }
+
+    private func dayRowsForDay(_ daySectionKey: String) -> [DayRow] {
+        let treatments = treatmentsForDay(daySectionKey)
+        var rows: [DayRow] = []
+        var previousHourKey: String?
+
+        for treatment in treatments {
+            if treatment.hourKey != previousHourKey {
+                rows.append(
+                    DayRow(
+                        id: "hour-\(treatment.hourKey)",
+                        hourLabel: formatHourBanner(treatment.hourKey),
+                        treatment: nil
+                    )
+                )
+                previousHourKey = treatment.hourKey
+            }
+
+            rows.append(
+                DayRow(
+                    id: "treatment-\(treatment.id)",
+                    hourLabel: nil,
+                    treatment: treatment
+                )
+            )
         }
+
+        return rows
     }
 
     private func hourKeyDate(_ hourKey: String) -> Date? {
@@ -227,51 +309,75 @@ struct TreatmentsView: View {
         return calendar.date(from: dateComponents)
     }
 
-    private func formatHourHeader(_ hourKey: String) -> String {
+    private func formatHourBanner(_ hourKey: String) -> String {
+        guard let date = hourKeyDate(hourKey) else {
+            return hourKey
+        }
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale.current
+        if dateTimeUtils.is24Hour() {
+            formatter.dateFormat = "HH:mm"
+        } else {
+            formatter.dateFormat = "h a"
+        }
+        dateTimeUtils.applyDisplayTimeZone(to: formatter)
+        return formatter.string(from: date)
+    }
+
+    private func dayKey(from hourKey: String) -> String? {
         let components = hourKey.split(separator: "-")
-        guard components.count == 4,
+        guard components.count == 4 else { return nil }
+        return "\(components[0])-\(components[1])-\(components[2])"
+    }
+
+    private func dayKeyDate(_ dayKey: String) -> Date? {
+        let components = dayKey.split(separator: "-")
+        guard components.count == 3,
               let year = Int(components[0]),
               let month = Int(components[1]),
-              let day = Int(components[2]),
-              let hour = Int(components[3])
+              let day = Int(components[2])
         else {
-            return hourKey
+            return nil
         }
 
         var dateComponents = DateComponents()
         dateComponents.year = year
         dateComponents.month = month
         dateComponents.day = day
-        dateComponents.hour = hour
 
         let calendar = dateTimeUtils.displayCalendar()
-
-        guard let date = calendar.date(from: dateComponents) else {
-            return hourKey
-        }
-
-        let timeFormatter = DateFormatter()
-        timeFormatter.locale = Locale.current
-        timeFormatter.dateStyle = .none
-        timeFormatter.timeStyle = .short // Respects user's 12/24-hour preference
-        dateTimeUtils.applyDisplayTimeZone(to: timeFormatter)
-
-        let timeString = timeFormatter.string(from: date)
-
-        // Create the full header string based on the day
-        if calendar.isDateInToday(date) {
-            return "Today \(timeString)"
-        } else if calendar.isDateInYesterday(date) {
-            return "Yesterday \(timeString)"
-        } else {
-            let dateFormatter = DateFormatter()
-            dateFormatter.locale = Locale.current
-            dateFormatter.dateFormat = "MMM d"
-            dateTimeUtils.applyDisplayTimeZone(to: dateFormatter)
-            let dateString = dateFormatter.string(from: date)
-            return "\(dateString), \(timeString)"
-        }
+        return calendar.date(from: dateComponents)
     }
+
+    private func formatDayHeader(_ dayKey: String) -> String {
+        guard let date = dayKeyDate(dayKey) else {
+            return dayKey
+        }
+
+        let dayDateFormatter = DateFormatter()
+        dayDateFormatter.locale = Locale.current
+        dayDateFormatter.setLocalizedDateFormatFromTemplate("EEEE MMM d")
+        dateTimeUtils.applyDisplayTimeZone(to: dayDateFormatter)
+
+        return dayDateFormatter.string(from: date)
+    }
+
+    private var timeZoneNoticeText: String? {
+        guard graphTimeZoneEnabled.value,
+              let overrideTimeZone = TimeZone(identifier: graphTimeZoneIdentifier.value)
+        else {
+            return nil
+        }
+
+        return "Time Zone Override On: \(overrideTimeZone.identifier)"
+    }
+}
+
+private struct DayRow: Identifiable {
+    let id: String
+    let hourLabel: String?
+    let treatment: Treatment?
 }
 
 struct TreatmentDetailView: View {
