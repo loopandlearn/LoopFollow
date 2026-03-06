@@ -46,12 +46,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UIApplication.shared.registerForRemoteNotifications()
         }
         
-        // BARE BONES LA TEST
-        if #available(iOS 16.1, *) {
-            BareBonesActivityManager.shared.startIfNeeded()
-        }
-        
-        
         return true
     }
 
