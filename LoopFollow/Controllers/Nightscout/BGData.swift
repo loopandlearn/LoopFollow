@@ -263,6 +263,7 @@ extension MainViewController {
             // Mark BG data as loaded for initial loading state
             self.markDataLoaded("bg")
             
+            // BARE BONES LA TEST
             BareBonesActivityManager.shared.startIfNeeded()
             BareBonesActivityManager.shared.update()
 
@@ -278,6 +279,7 @@ extension MainViewController {
                     )
             }
             Storage.shared.lastBGChecked.value = Date()
+
         }
     }
 }
