@@ -17,9 +17,9 @@ var counter: Int
 var label: String
 }
 
-```
+
 /// Static attribute — required by ActivityAttributes.
 let name: String
-```
+
 
 }
