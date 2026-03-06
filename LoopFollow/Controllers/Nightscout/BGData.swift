@@ -262,6 +262,10 @@ extension MainViewController {
 
             // Mark BG data as loaded for initial loading state
             self.markDataLoaded("bg")
+            
+            BareBonesActivityManager.shared.startIfNeeded()
+            BareBonesActivityManager.shared.update()
+
 
             // Update contact
             if Storage.shared.contactEnabled.value {
