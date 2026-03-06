@@ -43,7 +43,7 @@ Text(”(context.state.counter)”)
 private struct BareBonesLockScreenView: View {
 let state: BareBonesAttributes.ContentState
 
-```
+
 var body: some View {
     VStack(spacing: 8) {
         Text("Counter: \(state.counter)")
