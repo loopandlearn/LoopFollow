@@ -14,7 +14,6 @@ import Foundation
 @available(iOS 16.1, *)
 final class BareBonesActivityManager {
 
-```
 static let shared = BareBonesActivityManager()
 private init() {}
 
