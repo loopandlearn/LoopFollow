@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		374A77972F5BD78700E96858 /* APNSJWTGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77962F5BD77500E96858 /* APNSJWTGenerator.swift */; };
 		374A77992F5BD8B200E96858 /* APNSClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77982F5BD8AB00E96858 /* APNSClient.swift */; };
-		374A779E2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 in Resources */ = {isa = PBXBuildFile; fileRef = 374A779D2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 */; };
 		374A77A42F5BE17000E96858 /* GlucoseUnitConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A22F5BE17000E96858 /* GlucoseUnitConversion.swift */; };
 		374A77A52F5BE17000E96858 /* AppGroupID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A779F2F5BE17000E96858 /* AppGroupID.swift */; };
 		374A77A62F5BE17000E96858 /* GlucoseSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A12F5BE17000E96858 /* GlucoseSnapshot.swift */; };
@@ -456,7 +455,6 @@
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
 		374A77962F5BD77500E96858 /* APNSJWTGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNSJWTGenerator.swift; sourceTree = "<group>"; };
 		374A77982F5BD8AB00E96858 /* APNSClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNSClient.swift; sourceTree = "<group>"; };
-		374A779D2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 */ = {isa = PBXFileReference; lastKnownFileType = text; path = AuthKey_K3M8FP3RXC.p8; sourceTree = "<group>"; };
 		374A779F2F5BE17000E96858 /* AppGroupID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupID.swift; sourceTree = "<group>"; };
 		374A77A02F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseLiveActivityAttributes.swift; sourceTree = "<group>"; };
 		374A77A12F5BE17000E96858 /* GlucoseSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseSnapshot.swift; sourceTree = "<group>"; };
@@ -909,7 +907,6 @@
 		374A779C2F5BDA6B00E96858 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				374A779D2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 */,
 			);
 			path = "Supporting Files";
 			sourceTree = "<group>";
@@ -1900,7 +1897,6 @@
 				FC7CE546248ABE37001F83B8 /* Cartoon_Uh_Oh.caf in Resources */,
 				FC9788262485969C00A7906C /* Assets.xcassets in Resources */,
 				FC7CE557248ABE37001F83B8 /* Soft_Marimba_Pad_Positive.caf in Resources */,
-				374A779E2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 in Resources */,
 				FC7CE54F248ABE37001F83B8 /* Cartoon_Machine_Clumsy_Loop.caf in Resources */,
 				FC7CE562248ABE37001F83B8 /* Soft_Warm_Airy_Reassuring.caf in Resources */,
 				FC7CE54B248ABE37001F83B8 /* Siri_Alert_Device_Muted.caf in Resources */,
