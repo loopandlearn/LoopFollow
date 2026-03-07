@@ -55,7 +55,8 @@ platform :ios do
       type: "appstore",
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
       app_identifier: [
-        "com.#{TEAMID}.LoopFollow"
+        "com.#{TEAMID}.LoopFollow",
+	"com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"
       ]
     )
 
@@ -68,6 +69,13 @@ platform :ios do
       profile_name: mapping["com.#{TEAMID}.LoopFollow"],
       code_sign_identity: "iPhone Distribution",
       targets: ["LoopFollow"]
+    )
+
+    update_code_signing_settings(
+      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",    
+      profile_name: mapping["com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"],
+      code_sign_identity: "iPhone Distribution",
+      targets: ["LoopFollowLAExtension"]
     )
 
     gym(
@@ -128,6 +136,8 @@ platform :ios do
       Spaceship::ConnectAPI::BundleIdCapability::Type::PUSH_NOTIFICATIONS
     ])
     
+    configure_bundle_id("LoopFollow Live Activity Extension", "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension", [])
+
   end
 
   desc "Provision Certificates"
@@ -148,6 +158,7 @@ platform :ios do
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
       app_identifier: [
         "com.#{TEAMID}.LoopFollow",
+	"com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"
       ]
     )
   end
