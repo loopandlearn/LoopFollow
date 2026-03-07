@@ -46,6 +46,7 @@ extension MainViewController {
 
         if IsNightscoutEnabled(), (now - lastLoopTime) >= nonLoopingTimeThreshold, lastLoopTime > 0 {
             IsNotLooping = true
+            Observable.shared.isNotLooping.value = true
             statusStackView.distribution = .fill
 
             PredictionLabel.isHidden = true
@@ -58,6 +59,7 @@ extension MainViewController {
 
         } else {
             IsNotLooping = false
+            Observable.shared.isNotLooping.value = false
             statusStackView.distribution = .fillEqually
             PredictionLabel.isHidden = false
 

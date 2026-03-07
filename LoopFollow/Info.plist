@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>APNSTeamID</key>
+	<string>$(DEVELOPMENT_TEAM)</string>
+	<key>APNSKeyID</key>
+	<string>K3M8FP3RXC</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>CFBundleIconFile</key>
+	<string> Activities</string>
 	<key>AppGroupIdentifier</key>
 	<string>group.com.$(unique_id).LoopFollow$(app_suffix)</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>

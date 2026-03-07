@@ -260,12 +260,18 @@ extension MainViewController {
                 Observable.shared.deltaText.value = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
 
+            // Live Activity storage
+            Storage.shared.lastBgReadingTimeSeconds.value = lastBGTime
+            Storage.shared.lastDeltaMgdl.value = Double(deltaBG)
+            Storage.shared.lastTrendCode.value = entries[latestEntryIndex].direction
+            
             // Mark BG data as loaded for initial loading state
             self.markDataLoaded("bg")
             
-            // BARE BONES LA TEST
-            BareBonesActivityManager.shared.startIfNeeded()
-            BareBonesActivityManager.shared.update()
+            // Live Activity update
+            if #available(iOS 16.1, *) {
+                LiveActivityManager.shared.refreshFromCurrentState(reason: "bg")
+            }
 
 
             // Update contact

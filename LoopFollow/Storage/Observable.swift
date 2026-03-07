@@ -42,6 +42,8 @@ class Observable {
     var lastSentTOTP = ObservableValue<String?>(default: nil)
 
     var loopFollowDeviceToken = ObservableValue<String>(default: "")
+    
+    var isNotLooping = ObservableValue<Bool>(default: false)
 
     private init() {}
 }

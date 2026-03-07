@@ -224,6 +224,11 @@ extension MainViewController {
                 LoopStatusLabel.text = "↻"
                 latestLoopStatusString = "↻"
             }
+
+            // Live Activity storage
+            Storage.shared.lastIOB.value = latestIOB?.value
+            Storage.shared.lastCOB.value = latestCOB?.value
+            Storage.shared.projectedBgMgdl.value = nil
         }
     }
 }

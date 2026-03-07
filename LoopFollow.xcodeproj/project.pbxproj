@@ -7,6 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		374A77972F5BD78700E96858 /* APNSJWTGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77962F5BD77500E96858 /* APNSJWTGenerator.swift */; };
+		374A77992F5BD8B200E96858 /* APNSClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77982F5BD8AB00E96858 /* APNSClient.swift */; };
+		374A779E2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 in Resources */ = {isa = PBXBuildFile; fileRef = 374A779D2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 */; };
+		374A77A42F5BE17000E96858 /* GlucoseUnitConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A22F5BE17000E96858 /* GlucoseUnitConversion.swift */; };
+		374A77A52F5BE17000E96858 /* AppGroupID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A779F2F5BE17000E96858 /* AppGroupID.swift */; };
+		374A77A62F5BE17000E96858 /* GlucoseSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A12F5BE17000E96858 /* GlucoseSnapshot.swift */; };
+		374A77A72F5BE17000E96858 /* LAAppGroupSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A32F5BE17000E96858 /* LAAppGroupSettings.swift */; };
+		374A77A82F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A02F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift */; };
+		374A77A92F5BE17000E96858 /* GlucoseUnitConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A22F5BE17000E96858 /* GlucoseUnitConversion.swift */; };
+		374A77AA2F5BE17000E96858 /* AppGroupID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A779F2F5BE17000E96858 /* AppGroupID.swift */; };
+		374A77AB2F5BE17000E96858 /* GlucoseSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A12F5BE17000E96858 /* GlucoseSnapshot.swift */; };
+		374A77AC2F5BE17000E96858 /* LAAppGroupSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A32F5BE17000E96858 /* LAAppGroupSettings.swift */; };
+		374A77AD2F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77A02F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift */; };
+		374A77B42F5BE1AC00E96858 /* StorageCurrentGlucoseStateProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77B32F5BE1AC00E96858 /* StorageCurrentGlucoseStateProvider.swift */; };
+		374A77B52F5BE1AC00E96858 /* GlucoseSnapshotBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77AE2F5BE1AC00E96858 /* GlucoseSnapshotBuilder.swift */; };
+		374A77B62F5BE1AC00E96858 /* LAThresholdSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77B02F5BE1AC00E96858 /* LAThresholdSync.swift */; };
+		374A77B72F5BE1AC00E96858 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77B12F5BE1AC00E96858 /* LiveActivityManager.swift */; };
+		374A77B82F5BE1AC00E96858 /* GlucoseSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77AF2F5BE1AC00E96858 /* GlucoseSnapshotStore.swift */; };
+		374A77B92F5BE1AC00E96858 /* PreferredGlucoseUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77B22F5BE1AC00E96858 /* PreferredGlucoseUnit.swift */; };
 		37A4BDDB2F5B6B4A00EEB289 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A4BDDA2F5B6B4A00EEB289 /* WidgetKit.framework */; };
 		37A4BDDD2F5B6B4A00EEB289 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A4BDDC2F5B6B4A00EEB289 /* SwiftUI.framework */; };
 		37A4BDE82F5B6B4C00EEB289 /* LoopFollowLAExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -435,6 +454,21 @@
 
 /* Begin PBXFileReference section */
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
+		374A77962F5BD77500E96858 /* APNSJWTGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNSJWTGenerator.swift; sourceTree = "<group>"; };
+		374A77982F5BD8AB00E96858 /* APNSClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNSClient.swift; sourceTree = "<group>"; };
+		374A779D2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 */ = {isa = PBXFileReference; lastKnownFileType = text; path = AuthKey_K3M8FP3RXC.p8; sourceTree = "<group>"; };
+		374A779F2F5BE17000E96858 /* AppGroupID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupID.swift; sourceTree = "<group>"; };
+		374A77A02F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseLiveActivityAttributes.swift; sourceTree = "<group>"; };
+		374A77A12F5BE17000E96858 /* GlucoseSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseSnapshot.swift; sourceTree = "<group>"; };
+		374A77A22F5BE17000E96858 /* GlucoseUnitConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseUnitConversion.swift; sourceTree = "<group>"; };
+		374A77A32F5BE17000E96858 /* LAAppGroupSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LAAppGroupSettings.swift; sourceTree = "<group>"; };
+		374A77AE2F5BE1AC00E96858 /* GlucoseSnapshotBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseSnapshotBuilder.swift; sourceTree = "<group>"; };
+		374A77AF2F5BE1AC00E96858 /* GlucoseSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseSnapshotStore.swift; sourceTree = "<group>"; };
+		374A77B02F5BE1AC00E96858 /* LAThresholdSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LAThresholdSync.swift; sourceTree = "<group>"; };
+		374A77B12F5BE1AC00E96858 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		374A77B22F5BE1AC00E96858 /* PreferredGlucoseUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferredGlucoseUnit.swift; sourceTree = "<group>"; };
+		374A77B32F5BE1AC00E96858 /* StorageCurrentGlucoseStateProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageCurrentGlucoseStateProvider.swift; sourceTree = "<group>"; };
+		374DAACA2F5B924B00BB663B /* LoopFollowLAExtensionExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LoopFollowLAExtensionExtension.entitlements; sourceTree = "<group>"; };
 		37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LoopFollowLAExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		37A4BDDA2F5B6B4A00EEB289 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
 		37A4BDDC2F5B6B4A00EEB289 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
@@ -836,18 +870,8 @@
 		FCFEECA1248857A600402A7F /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		37A4BDE92F5B6B4C00EEB289 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 37A4BDD82F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		37A4BDDE2F5B6B4A00EEB289 /* LoopFollowLAExtension */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (37A4BDE92F5B6B4C00EEB289 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = LoopFollowLAExtension; sourceTree = "<group>"; };
+		37A4BDDE2F5B6B4A00EEB289 /* LoopFollowLAExtension */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = LoopFollowLAExtension; sourceTree = "<group>"; };
 		DDCC3AD72DDE1790006F1C10 /* Tests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Tests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -882,6 +906,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		374A779C2F5BDA6B00E96858 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				374A779D2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 */,
+			);
+			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		6589CC552E9E7D1600BB18FE /* ImportExport */ = {
 			isa = PBXGroup;
 			children = (
@@ -1525,6 +1557,7 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				374A779C2F5BDA6B00E96858 /* Supporting Files */,
 				6589CC612E9E7D1600BB18FE /* Settings */,
 				DDCF9A7E2D85FCE6004DF4DD /* Alarm */,
 				FC16A97624995FEE003D6245 /* Application */,
@@ -1553,6 +1586,20 @@
 		FC97880B2485969B00A7906C = {
 			isa = PBXGroup;
 			children = (
+				374A77AE2F5BE1AC00E96858 /* GlucoseSnapshotBuilder.swift */,
+				374A77AF2F5BE1AC00E96858 /* GlucoseSnapshotStore.swift */,
+				374A77B02F5BE1AC00E96858 /* LAThresholdSync.swift */,
+				374A77B12F5BE1AC00E96858 /* LiveActivityManager.swift */,
+				374A77B22F5BE1AC00E96858 /* PreferredGlucoseUnit.swift */,
+				374A77B32F5BE1AC00E96858 /* StorageCurrentGlucoseStateProvider.swift */,
+				374A779F2F5BE17000E96858 /* AppGroupID.swift */,
+				374A77A02F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift */,
+				374A77A12F5BE17000E96858 /* GlucoseSnapshot.swift */,
+				374A77A22F5BE17000E96858 /* GlucoseUnitConversion.swift */,
+				374A77A32F5BE17000E96858 /* LAAppGroupSettings.swift */,
+				374A77982F5BD8AB00E96858 /* APNSClient.swift */,
+				374A77962F5BD77500E96858 /* APNSJWTGenerator.swift */,
+				374DAACA2F5B924B00BB663B /* LoopFollowLAExtensionExtension.entitlements */,
 				DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */,
 				DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */,
 				DDB0AF4F2BB1A81F00AFA48B /* Scripts */,
@@ -1853,6 +1900,7 @@
 				FC7CE546248ABE37001F83B8 /* Cartoon_Uh_Oh.caf in Resources */,
 				FC9788262485969C00A7906C /* Assets.xcassets in Resources */,
 				FC7CE557248ABE37001F83B8 /* Soft_Marimba_Pad_Positive.caf in Resources */,
+				374A779E2F5BDA8A00E96858 /* AuthKey_K3M8FP3RXC.p8 in Resources */,
 				FC7CE54F248ABE37001F83B8 /* Cartoon_Machine_Clumsy_Loop.caf in Resources */,
 				FC7CE562248ABE37001F83B8 /* Soft_Warm_Airy_Reassuring.caf in Resources */,
 				FC7CE54B248ABE37001F83B8 /* Siri_Alert_Device_Muted.caf in Resources */,
@@ -1999,6 +2047,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				374A77A92F5BE17000E96858 /* GlucoseUnitConversion.swift in Sources */,
+				374A77AA2F5BE17000E96858 /* AppGroupID.swift in Sources */,
+				374A77AB2F5BE17000E96858 /* GlucoseSnapshot.swift in Sources */,
+				374A77AC2F5BE17000E96858 /* LAAppGroupSettings.swift in Sources */,
+				374A77AD2F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2020,11 +2073,18 @@
 				DD7F4B9F2DD1F92700D449E9 /* AlarmActiveSection.swift in Sources */,
 				DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */,
 				DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */,
+				374A77972F5BD78700E96858 /* APNSJWTGenerator.swift in Sources */,
 				DD9ACA082D32F68B00415D8A /* BGTask.swift in Sources */,
 				DD9ACA102D34129200415D8A /* Task.swift in Sources */,
 				DD4AFB492DB576C200BB593F /* AlarmSettingsView.swift in Sources */,
 				DD7F4C032DD4B92E00D449E9 /* NotLoopingAlarmEditor.swift in Sources */,
 				DD7F4C1B2DD6501D00D449E9 /* COBCondition.swift in Sources */,
+				374A77B42F5BE1AC00E96858 /* StorageCurrentGlucoseStateProvider.swift in Sources */,
+				374A77B52F5BE1AC00E96858 /* GlucoseSnapshotBuilder.swift in Sources */,
+				374A77B62F5BE1AC00E96858 /* LAThresholdSync.swift in Sources */,
+				374A77B72F5BE1AC00E96858 /* LiveActivityManager.swift in Sources */,
+				374A77B82F5BE1AC00E96858 /* GlucoseSnapshotStore.swift in Sources */,
+				374A77B92F5BE1AC00E96858 /* PreferredGlucoseUnit.swift in Sources */,
 				DDE75D232DE5E505007C1FC1 /* Glyph.swift in Sources */,
 				DD4878202C7DAF890048F05C /* PushMessage.swift in Sources */,
 				DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */,
@@ -2105,6 +2165,7 @@
 				DDEF503A2D31615000999A5D /* LogManager.swift in Sources */,
 				DD4878172C7B75350048F05C /* BolusView.swift in Sources */,
 				DD026E592EA2C8A200A39CB5 /* InsulinPrecisionManager.swift in Sources */,
+				374A77992F5BD8B200E96858 /* APNSClient.swift in Sources */,
 				DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */,
 				DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
@@ -2230,6 +2291,11 @@
 				DD7F4C212DD66BB200D449E9 /* FastRiseAlarmEditor.swift in Sources */,
 				FC97881A2485969B00A7906C /* SceneDelegate.swift in Sources */,
 				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
+				374A77A42F5BE17000E96858 /* GlucoseUnitConversion.swift in Sources */,
+				374A77A52F5BE17000E96858 /* AppGroupID.swift in Sources */,
+				374A77A62F5BE17000E96858 /* GlucoseSnapshot.swift in Sources */,
+				374A77A72F5BE17000E96858 /* LAAppGroupSettings.swift in Sources */,
+				374A77A82F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift in Sources */,
 				DD58171C2D299F940041FB98 /* BluetoothDevice.swift in Sources */,
 				DD7E198A2ACDA62600DBD158 /* SensorStart.swift in Sources */,
 				DD026E5B2EA2C9C300A39CB5 /* InsulinFormatter.swift in Sources */,
@@ -2322,18 +2388,19 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = LoopFollowLAExtensionExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2HEY366Q6J;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LoopFollowLAExtension/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LoopFollowLAExtension/ExtensionInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LoopFollowLAExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Jon Fawcett. All rights reserved.";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2348,17 +2415,19 @@
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.2HEY366Q6J.LoopFollow.LoopFollowLAExtension;
+				PRODUCT_MODULE_NAME = LoopFollowLAExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 1;
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -2371,18 +2440,19 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = LoopFollowLAExtensionExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2HEY366Q6J;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LoopFollowLAExtension/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LoopFollowLAExtension/ExtensionInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LoopFollowLAExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Jon Fawcett. All rights reserved.";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2397,16 +2467,18 @@
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.2HEY366Q6J.LoopFollow.LoopFollowLAExtension;
+				PRODUCT_MODULE_NAME = LoopFollowLAExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 1;
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -2601,9 +2673,12 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.2HEY366Q6J.LoopFollow;
 				PRODUCT_NAME = "Loop Follow";
-				SUPPORTS_MACCATALYST = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -2624,9 +2699,12 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.2HEY366Q6J.LoopFollow;
 				PRODUCT_NAME = "Loop Follow";
-				SUPPORTS_MACCATALYST = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
