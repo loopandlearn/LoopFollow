@@ -119,6 +119,16 @@ extension MainViewController {
                 LoopStatusLabel.text = "↻"
                 latestLoopStatusString = "↻"
             }
+
+            // Live Activity storage
+            Storage.shared.lastIOB.value = latestIOB?.value
+            Storage.shared.lastCOB.value = latestCOB?.value
+            if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject],
+               let values = predictdata["values"] as? [Double] {
+                Storage.shared.projectedBgMgdl.value = values.last
+            } else {
+                Storage.shared.projectedBgMgdl.value = nil
+            }
         }
     }
 }

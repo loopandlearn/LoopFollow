@@ -59,7 +59,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var currentCage: cageData?
     var currentIage: iageData?
 
-    var backgroundTask = BackgroundTask()
+    var backgroundTask = BackgroundTask.shared
 
     var graphNowTimer = Timer()
 

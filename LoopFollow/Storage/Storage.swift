@@ -80,6 +80,14 @@ class Storage {
     var speakLanguage = StorageValue<String>(key: "speakLanguage", defaultValue: "en")
     // General Settings [END]
 
+    // Live Activity glucose state
+    var lastBgReadingTimeSeconds = StorageValue<TimeInterval?>(key: "lastBgReadingTimeSeconds", defaultValue: nil)
+    var lastDeltaMgdl = StorageValue<Double?>(key: "lastDeltaMgdl", defaultValue: nil)
+    var lastTrendCode = StorageValue<String?>(key: "lastTrendCode", defaultValue: nil)
+    var lastIOB = StorageValue<Double?>(key: "lastIOB", defaultValue: nil)
+    var lastCOB = StorageValue<Double?>(key: "lastCOB", defaultValue: nil)
+    var projectedBgMgdl = StorageValue<Double?>(key: "projectedBgMgdl", defaultValue: nil)
+    
     // Graph Settings [BEGIN]
     var showDots = StorageValue<Bool>(key: "showDots", defaultValue: true)
     var showLines = StorageValue<Bool>(key: "showLines", defaultValue: true)

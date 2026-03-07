@@ -8,6 +8,10 @@
 	<string>development</string>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.2HEY366Q6J.LoopFollow</string>
+	</array>
 	<key>com.apple.security.device.bluetooth</key>
 	<true/>
 	<key>com.apple.security.network.client</key>

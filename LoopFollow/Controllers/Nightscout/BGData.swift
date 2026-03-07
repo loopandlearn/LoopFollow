@@ -260,8 +260,19 @@ extension MainViewController {
                 Observable.shared.deltaText.value = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
 
+            // Live Activity storage
+            Storage.shared.lastBgReadingTimeSeconds.value = lastBGTime
+            Storage.shared.lastDeltaMgdl.value = Double(deltaBG)
+            Storage.shared.lastTrendCode.value = entries[latestEntryIndex].direction
+            
             // Mark BG data as loaded for initial loading state
             self.markDataLoaded("bg")
+            
+            // Live Activity update
+            if #available(iOS 16.1, *) {
+                LiveActivityManager.shared.refreshFromCurrentState(reason: "bg")
+            }
+
 
             // Update contact
             if Storage.shared.contactEnabled.value {
@@ -274,6 +285,7 @@ extension MainViewController {
                     )
             }
             Storage.shared.lastBGChecked.value = Date()
+
         }
     }
 }
