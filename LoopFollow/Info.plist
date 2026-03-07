@@ -2,14 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>APNSKeyContent</key>
+	<string>$(APNS_KEY_CONTENT)</string>
+	<key>APNSKeyID</key>
+	<string>$(APNS_KEY_ID)</string>
 	<key>APNSTeamID</key>
 	<string>$(DEVELOPMENT_TEAM)</string>
-	<key>APNSKeyID</key>
-	<string>K3M8FP3RXC</string>
-	<key>NSSupportsLiveActivities</key>
-	<true/>
-	<key>CFBundleIconFile</key>
-	<string> Activities</string>
 	<key>AppGroupIdentifier</key>
 	<string>group.com.$(unique_id).LoopFollow$(app_suffix)</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
@@ -24,6 +22,8 @@
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleGetInfoString</key>
 	<string></string>
+	<key>CFBundleIconFile</key>
+	<string> Activities</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -69,6 +69,8 @@
 	<string>This app requires Face ID for secure authentication.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -17,6 +17,10 @@ struct APNSJWTGenerator {
         Bundle.main.infoDictionary?["APNSTeamID"] as? String ?? ""
     }
 
+    static var keyContent: String {
+        Bundle.main.infoDictionary?["APNSKeyContent"] as? String ?? ""
+    }
+
     // MARK: - JWT Generation
 
     /// Generates a signed ES256 JWT for APNs authentication.
@@ -42,16 +46,20 @@ struct APNSJWTGenerator {
         guard !keyID.isEmpty else {
             throw APNSJWTError.keyIDNotConfigured
         }
-        guard let keyURL = Bundle.main.url(forResource: "AuthKey_\(keyID)", withExtension: "p8") else {
-            throw APNSJWTError.keyFileNotFound
+
+        guard !keyContent.isEmpty else {
+            throw APNSJWTError.keyContentNotConfigured
         }
-        let keyString = try String(contentsOf: keyURL, encoding: .utf8)
+
+        // Strip PEM headers/footers and whitespace if present
+        let cleaned = keyContent
             .replacingOccurrences(of: "-----BEGIN PRIVATE KEY-----", with: "")
             .replacingOccurrences(of: "-----END PRIVATE KEY-----", with: "")
             .replacingOccurrences(of: "\n", with: "")
+            .replacingOccurrences(of: "\r", with: "")
             .trimmingCharacters(in: .whitespaces)
 
-        guard let keyData = Data(base64Encoded: keyString) else {
+        guard let keyData = Data(base64Encoded: cleaned) else {
             throw APNSJWTError.keyDecodingFailed
         }
 
@@ -89,18 +97,18 @@ struct APNSJWTGenerator {
 
 enum APNSJWTError: Error, LocalizedError {
     case keyIDNotConfigured
-    case keyFileNotFound
+    case keyContentNotConfigured
     case keyDecodingFailed
     case encodingFailed
 
     var errorDescription: String? {
         switch self {
         case .keyIDNotConfigured:
-            return "APNSKeyID not set in Info.plist."
-        case .keyFileNotFound:
-            return "APNs p8 key file not found in app bundle. Add AuthKey_\(APNSJWTGenerator.keyID).p8 to the project."
+            return "APNSKeyID not set in Info.plist or LoopFollowConfigOverride.xcconfig."
+        case .keyContentNotConfigured:
+            return "APNSKeyContent not set. Add APNS_KEY_CONTENT to LoopFollowConfigOverride.xcconfig or GitHub Secrets."
         case .keyDecodingFailed:
-            return "Failed to decode APNs p8 key."
+            return "Failed to decode APNs p8 key content. Ensure it is valid base64 with no line breaks."
         case .encodingFailed:
             return "Failed to encode JWT signing input."
         }

@@ -203,13 +203,15 @@ jobs:
       - name: Sync clock
         run: sudo sntp -sS time.windows.com
 
-      - name: Write APNs Auth Key
+      - name: Inject APNs Key Content
         env:
           APNS_KEY: ${{ secrets.APNS_KEY }}
           APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
         run: |
-          mkdir -p "${GITHUB_WORKSPACE}/LoopFollow/Supporting Files"
-          echo "$APNS_KEY" > "${GITHUB_WORKSPACE}/LoopFollow/Supporting Files/AuthKey_${APNS_KEY_ID}.p8"
+          # Strip PEM headers, footers, and newlines — xcconfig requires single line
+          APNS_KEY_CONTENT=$(echo "$APNS_KEY" | grep -v "BEGIN\|END" | tr -d '\n\r ')
+          echo "APNS_KEY_ID = ${APNS_KEY_ID}" >> "${GITHUB_WORKSPACE}/LoopFollowConfigOverride.xcconfig"
+          echo "APNS_KEY_CONTENT = ${APNS_KEY_CONTENT}" >> "${GITHUB_WORKSPACE}/LoopFollowConfigOverride.xcconfig"
 
       # Build signed LoopFollow IPA file
       - name: Fastlane Build & Archive
