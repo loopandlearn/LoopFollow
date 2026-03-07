@@ -81,3 +81,4 @@ fastlane/FastlaneRunner
 
 LoopFollowConfigOverride.xcconfig
 .historyLoopFollow/Supporting\ Files/AuthKey_*.p8
+LoopFollow/Supporting Files/AuthKey_*.p8
