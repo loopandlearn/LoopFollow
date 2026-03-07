@@ -203,6 +203,14 @@ jobs:
       - name: Sync clock
         run: sudo sntp -sS time.windows.com
 
+      - name: Write APNs Auth Key
+        env:
+          APNS_KEY: ${{ secrets.APNS_KEY }}
+          APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/LoopFollow/Supporting Files"
+          echo "$APNS_KEY" > "${GITHUB_WORKSPACE}/LoopFollow/Supporting Files/AuthKey_${APNS_KEY_ID}.p8"
+
       # Build signed LoopFollow IPA file
       - name: Fastlane Build & Archive
         run: bundle exec fastlane build_LoopFollow
