@@ -174,13 +174,15 @@ class ContactImageUpdater {
 
         let fontSize = max(40, maxFontSize - CGFloat(primaryValue.count * 15))
 
+        let isBGStale = stale && contactType == .BG
+
         var primaryAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.boldSystemFont(ofSize: fontSize),
-            .foregroundColor: stale ? UIColor.gray : textColor,
+            .foregroundColor: isBGStale ? UIColor.gray : textColor,
             .paragraphStyle: paragraphStyle,
         ]
 
-        if stale {
+        if isBGStale {
             UIColor.black.setFill()
             context.fill(CGRect(origin: .zero, size: size))
             primaryAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
@@ -197,7 +199,7 @@ class ContactImageUpdater {
             let extraRect = CGRect(x: 0, y: size.height / 2 + 6, width: size.width, height: size.height / 2 - 20)
             let extraAttributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: extraFontSize),
-                .foregroundColor: stale ? UIColor.gray : textColor,
+                .foregroundColor: isBGStale ? UIColor.gray : textColor,
                 .paragraphStyle: paragraphStyle,
             ]
             extraString.draw(in: extraRect, withAttributes: extraAttributes)
