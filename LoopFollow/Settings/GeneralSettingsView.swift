@@ -52,14 +52,12 @@ struct GeneralSettingsView: View {
                     Toggle("Snoozer emoji", isOn: $snoozerEmoji.value)
                     Toggle("Force portrait mode", isOn: $forcePortraitMode.value)
                         .onChange(of: forcePortraitMode.value) { _ in
-                            if #available(iOS 16.0, *) {
-                                let window = UIApplication.shared.connectedScenes
-                                    .compactMap { $0 as? UIWindowScene }
-                                    .flatMap { $0.windows }
-                                    .first
+                            let window = UIApplication.shared.connectedScenes
+                                .compactMap { $0 as? UIWindowScene }
+                                .flatMap { $0.windows }
+                                .first
 
-                                window?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
-                            }
+                            window?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                         }
                 }
 
