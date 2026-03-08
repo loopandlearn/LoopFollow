@@ -34,13 +34,4 @@ enum ContactColorMode: String, Codable, CaseIterable {
             }
         }
     }
-
-    /// Parses a BG string value to Double, handling locale-specific decimal separators
-    static func parseBGValue(_ bgString: String) -> Double {
-        // Replace comma with period to handle European locales
-        let normalized = bgString.replacingOccurrences(of: ",", with: ".")
-        // Keep only numbers and decimal point
-        let numericString = normalized.filter { $0.isNumber || $0 == "." }
-        return Double(numericString) ?? 0
-    }
 }
