@@ -65,7 +65,7 @@ class Storage {
     // General Settings [BEGIN]
     var appBadge = StorageValue<Bool>(key: "appBadge", defaultValue: true)
     var colorBGText = StorageValue<Bool>(key: "colorBGText", defaultValue: true)
-    var appearanceMode = StorageValue<AppearanceMode>(key: "appearanceMode", defaultValue: .system)
+    var appearanceMode = StorageValue<AppearanceMode>(key: "appearanceMode", defaultValue: .dark)
     var showStats = StorageValue<Bool>(key: "showStats", defaultValue: true)
     var useIFCC = StorageValue<Bool>(key: "useIFCC", defaultValue: false)
     var showSmallGraph = StorageValue<Bool>(key: "showSmallGraph", defaultValue: true)
@@ -103,6 +103,8 @@ class Storage {
     var lowLine = StorageValue<Double>(key: "lowLine", defaultValue: 70.0)
     var highLine = StorageValue<Double>(key: "highLine", defaultValue: 180.0)
     var downloadDays = StorageValue<Int>(key: "downloadDays", defaultValue: 1)
+    var graphTimeZoneEnabled = StorageValue<Bool>(key: "graphTimeZoneEnabled", defaultValue: false)
+    var graphTimeZoneIdentifier = StorageValue<String>(key: "graphTimeZoneIdentifier", defaultValue: TimeZone.current.identifier)
     // Graph Settings [END]
 
     // Calendar entries [BEGIN]
