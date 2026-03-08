@@ -142,6 +142,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         loadDebugData()
 
+        // Capture before migrations run: true for existing users, false for fresh installs.
+        let isExistingUser = Storage.shared.migrationStep.exists
+
         if Storage.shared.migrationStep.value < 1 {
             Storage.shared.migrateStep1()
             Storage.shared.migrationStep.value = 1
@@ -155,6 +158,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if Storage.shared.migrationStep.value < 3 {
             Storage.shared.migrateStep3()
             Storage.shared.migrationStep.value = 3
+        }
+
+        // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
+        if Storage.shared.migrationStep.value < 4 {
+            // Existing users need to see the fat/protein order change banner.
+            // New users never saw the old order, so mark it as already seen.
+            Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
+            Storage.shared.migrationStep.value = 4
         }
 
         // Synchronize info types to ensure arrays are the correct size
