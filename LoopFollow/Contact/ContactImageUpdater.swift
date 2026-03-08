@@ -19,7 +19,8 @@ class ContactImageUpdater {
         return ContactColorOption(rawValue: rawValue)?.uiColor ?? .white
     }
 
-    private func textColor() -> UIColor {
+    private func textColor(for contactType: ContactType) -> UIColor {
+        guard contactType == .BG else { return savedTextUIColor }
         let colorMode = Storage.shared.contactColorMode.value
         // Use raw BG value in mg/dL (same units as highLine/lowLine)
         let bgNumeric = Double(Observable.shared.bg.value ?? 0)
@@ -52,7 +53,7 @@ class ContactImageUpdater {
 
                 let includedFields = self.getIncludedFields(for: contactType)
 
-                let dynamicTextColor = self.textColor()
+                let dynamicTextColor = self.textColor(for: contactType)
 
                 guard let imageData = self.generateContactImage(bgValue: bgValue, trend: trend, delta: delta, iob: iob, stale: stale, contactType: contactType, includedFields: includedFields, textColor: dynamicTextColor)?.pngData() else {
                     LogManager.shared.log(category: .contact, message: "Failed to generate contact image for \(contactName).")
