@@ -76,13 +76,7 @@ struct SettingsMenuView: View {
                 }
 
                 // ───────── Alarms ─────────
-                Section {
-                    NavigationRow(title: "Alarms",
-                                  icon: "bell")
-                    {
-                        settingsPath.value.append(Sheet.alarmsList)
-                    }
-
+                Section("Alarms") {
                     NavigationRow(title: "Alarm Settings",
                                   icon: "bell.badge")
                     {
@@ -126,13 +120,6 @@ struct SettingsMenuView: View {
                               action: shareLogs)
                 }
 
-                // ───────── Community ─────────
-                Section("Community") {
-                    LinkRow(title: "LoopFollow Facebook Group",
-                            icon: "person.2.fill",
-                            url: URL(string: "https://www.facebook.com/groups/loopfollowlnl")!)
-                }
-
                 // ───────── Build info ─────────
                 buildInfoSection
             }
@@ -142,8 +129,7 @@ struct SettingsMenuView: View {
                 TabCustomizationModal(
                     isPresented: $showingTabCustomization,
                     onApply: {
-                        // Dismiss any presented view controller and go to home tab
-                        handleTabReorganization()
+                        // No-op - changes are applied silently via observers
                     }
                 )
             }
@@ -239,34 +225,8 @@ struct SettingsMenuView: View {
     }
 
     private func handleTabReorganization() {
-        // Find the root tab bar controller
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootVC = window.rootViewController else { return }
-
-        // Navigate through the hierarchy to find the tab bar controller
-        var tabBarController: UITabBarController?
-
-        if let tbc = rootVC as? UITabBarController {
-            tabBarController = tbc
-        } else if let nav = rootVC as? UINavigationController,
-                  let tbc = nav.viewControllers.first as? UITabBarController
-        {
-            tabBarController = tbc
-        }
-
-        guard let tabBar = tabBarController else { return }
-
-        // Dismiss any modals first
-        if let presented = tabBar.presentedViewController {
-            presented.dismiss(animated: false) {
-                // After dismissal, switch to home tab
-                tabBar.selectedIndex = 0
-            }
-        } else {
-            // No modal to dismiss, just switch to home
-            tabBar.selectedIndex = 0
-        }
+        // Rebuild the tab bar with the new configuration
+        MainViewController.rebuildTabsIfNeeded()
     }
 }
 
@@ -277,12 +237,13 @@ private enum Sheet: Hashable, Identifiable {
     case backgroundRefresh
     case general, graph
     case infoDisplay
-    case alarmsList, alarmSettings
+    case alarmSettings
     case remote
     case importExport
     case calendar, contact
     case advanced
     case viewLog
+    case aggregatedStats
 
     var id: Self { self }
 
@@ -295,7 +256,6 @@ private enum Sheet: Hashable, Identifiable {
         case .general: GeneralSettingsView()
         case .graph: GraphSettingsView()
         case .infoDisplay: InfoDisplaySettingsView(viewModel: .init())
-        case .alarmsList: AlarmListView()
         case .alarmSettings: AlarmSettingsView()
         case .remote: RemoteSettingsView(viewModel: .init())
         case .importExport: ImportExportSettingsView()
@@ -303,7 +263,61 @@ private enum Sheet: Hashable, Identifiable {
         case .contact: ContactSettingsView(viewModel: .init())
         case .advanced: AdvancedSettingsView(viewModel: .init())
         case .viewLog: LogView(viewModel: .init())
+        case .aggregatedStats:
+            AggregatedStatsViewWrapper()
         }
+    }
+}
+
+// Helper view to access MainViewController
+struct AggregatedStatsViewWrapper: View {
+    @State private var mainViewController: MainViewController?
+
+    var body: some View {
+        Group {
+            if let mainVC = mainViewController {
+                AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
+            } else {
+                Text("Loading stats...")
+                    .onAppear {
+                        mainViewController = getMainViewController()
+                    }
+            }
+        }
+    }
+
+    private func getMainViewController() -> MainViewController? {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController
+        else {
+            return nil
+        }
+
+        if let mainVC = rootVC as? MainViewController {
+            return mainVC
+        }
+
+        if let navVC = rootVC as? UINavigationController,
+           let mainVC = navVC.viewControllers.first as? MainViewController
+        {
+            return mainVC
+        }
+
+        if let tabVC = rootVC as? UITabBarController {
+            for vc in tabVC.viewControllers ?? [] {
+                if let mainVC = vc as? MainViewController {
+                    return mainVC
+                }
+                if let navVC = vc as? UINavigationController,
+                   let mainVC = navVC.viewControllers.first as? MainViewController
+                {
+                    return mainVC
+                }
+            }
+        }
+
+        return nil
     }
 }
 
