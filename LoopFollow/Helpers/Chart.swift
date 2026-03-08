@@ -28,6 +28,12 @@ final class ChartXValueFormatter: AxisValueFormatter {
             dateFormatter.setLocalizedDateFormatFromTemplate("hh:mm")
         }
 
+        if Storage.shared.graphTimeZoneEnabled.value,
+           let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+        {
+            dateFormatter.timeZone = tz
+        }
+
         // let date = Date(timeIntervalSince1970: epochTimezoneOffset)
         let date = Date(timeIntervalSince1970: value)
         let formattedDate = dateFormatter.string(from: date)
