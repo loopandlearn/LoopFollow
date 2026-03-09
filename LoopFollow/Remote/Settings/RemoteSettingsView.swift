@@ -450,10 +450,10 @@ struct RemoteSettingsView: View {
 
             if device.value == "Trio" {
                 HStack {
-                    Text("Max Protein")
+                    Text("Max Fat")
                     Spacer()
                     TextFieldWithToolBar(
-                        quantity: $viewModel.maxProtein,
+                        quantity: $viewModel.maxFat,
                         maxLength: 4,
                         unit: HKUnit.gram(),
                         allowDecimalSeparator: true,
@@ -469,10 +469,10 @@ struct RemoteSettingsView: View {
                 }
 
                 HStack {
-                    Text("Max Fat")
+                    Text("Max Protein")
                     Spacer()
                     TextFieldWithToolBar(
-                        quantity: $viewModel.maxFat,
+                        quantity: $viewModel.maxProtein,
                         maxLength: 4,
                         unit: HKUnit.gram(),
                         allowDecimalSeparator: true,
