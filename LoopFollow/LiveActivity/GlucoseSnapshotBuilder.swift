@@ -66,19 +66,26 @@ enum GlucoseSnapshotBuilder {
         let trend = mapTrend(provider.trendCode)
 
         // Not Looping — read from Observable, set by evaluateNotLooping() in DeviceStatus.swift
-                let isNotLooping = Observable.shared.isNotLooping.value
+        let isNotLooping = Observable.shared.isNotLooping.value
 
-                return GlucoseSnapshot(
-                    glucose: glucose,
-                    delta: delta,
-                    trend: trend,
-                    updatedAt: updatedAt,
-                    iob: provider.iob,
-                    cob: provider.cob,
-                    projected: projected,
-                    unit: preferredUnit,
-                    isNotLooping: isNotLooping
-                )
+        
+        LogManager.shared.log(
+            category: .general,
+            message: "LA snapshot built: updatedAt=\(updatedAt) interval=\(updatedAt.timeIntervalSince1970)",
+            isDebug: true
+        )
+        
+        return GlucoseSnapshot(
+            glucose: glucose,
+            delta: delta,
+            trend: trend,
+            updatedAt: updatedAt,
+            iob: provider.iob,
+            cob: provider.cob,
+            projected: projected,
+            unit: preferredUnit,
+            isNotLooping: isNotLooping
+        )
     }
 
     private static func mapTrend(_ code: String?) -> GlucoseSnapshot.Trend {

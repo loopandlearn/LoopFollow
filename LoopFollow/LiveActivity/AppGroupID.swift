@@ -43,6 +43,7 @@ enum AppGroupID {
         let knownSuffixes = [
             ".LiveActivity",
             ".LiveActivityExtension",
+            ".LoopFollowLAExtension",
             ".Widget",
             ".WidgetExtension",
             ".Widgets",

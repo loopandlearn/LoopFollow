@@ -11,17 +11,30 @@ import Foundation
 struct GlucoseLiveActivityAttributes: ActivityAttributes {
 
     public struct ContentState: Codable, Hashable {
-        /// The latest snapshot, already converted into the user’s preferred unit.
         let snapshot: GlucoseSnapshot
-
-        /// Monotonic sequence for “did we update?” debugging and hung detection.
         let seq: Int
-
-        /// Reason the app refreshed (e.g., "bg", "deviceStatus").
         let reason: String
-
-        /// When the activity state was produced.
         let producedAt: Date
+
+        init(snapshot: GlucoseSnapshot, seq: Int, reason: String, producedAt: Date) {
+            self.snapshot = snapshot
+            self.seq = seq
+            self.reason = reason
+            self.producedAt = producedAt
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            snapshot = try container.decode(GlucoseSnapshot.self, forKey: .snapshot)
+            seq = try container.decode(Int.self, forKey: .seq)
+            reason = try container.decode(String.self, forKey: .reason)
+            let producedAtInterval = try container.decode(Double.self, forKey: .producedAt)
+            producedAt = Date(timeIntervalSince1970: producedAtInterval)
+        }
+        
+        private enum CodingKeys: String, CodingKey {
+            case snapshot, seq, reason, producedAt
+        }
     }
 
     /// Reserved for future metadata. Keep minimal for stability.

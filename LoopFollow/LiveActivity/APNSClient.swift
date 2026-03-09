@@ -61,9 +61,34 @@ class APNSClient {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             if let httpResponse = response as? HTTPURLResponse {
-                if httpResponse.statusCode == 200 {
+                switch httpResponse.statusCode {
+                case 200:
                     LogManager.shared.log(category: .general, message: "APNs push sent successfully", isDebug: true)
-                } else {
+
+                case 400:
+                    let responseBody = String(data: data, encoding: .utf8) ?? "empty"
+                    LogManager.shared.log(category: .general, message: "APNs bad request (400) — malformed payload: \(responseBody)")
+
+                case 403:
+                    // JWT rejected — force regenerate on next push
+                    cachedToken = nil
+                    tokenGeneratedAt = nil
+                    LogManager.shared.log(category: .general, message: "APNs JWT rejected (403) — token cache cleared, will regenerate")
+
+                case 404, 410:
+                    // Activity token not found or expired — end and restart on next refresh
+                    let reason = httpResponse.statusCode == 410 ? "expired (410)" : "not found (404)"
+                    LogManager.shared.log(category: .general, message: "APNs token \(reason) — restarting Live Activity")
+                    LiveActivityManager.shared.handleExpiredToken()
+
+                case 429:
+                    LogManager.shared.log(category: .general, message: "APNs rate limited (429) — will retry on next refresh")
+
+                case 500...599:
+                    let responseBody = String(data: data, encoding: .utf8) ?? "empty"
+                    LogManager.shared.log(category: .general, message: "APNs server error (\(httpResponse.statusCode)) — will retry on next refresh: \(responseBody)")
+
+                default:
                     let responseBody = String(data: data, encoding: .utf8) ?? "empty"
                     LogManager.shared.log(category: .general, message: "APNs push failed status=\(httpResponse.statusCode) body=\(responseBody)")
                 }

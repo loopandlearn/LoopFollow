@@ -22,6 +22,7 @@ final class LiveActivityManager {
     private var lastUpdateTime: Date?
     private var pushToken: String?
     private var tokenObservationTask: Task<Void, Never>?
+    private var refreshWorkItem: DispatchWorkItem?
 
     // MARK: - Public API
 
@@ -103,50 +104,59 @@ final class LiveActivityManager {
         }
     }
 
-    func refreshFromCurrentState(reason: String) {
+    func startFromCurrentState() {
         let provider = StorageCurrentGlucoseStateProvider()
-
+        if let snapshot = GlucoseSnapshotBuilder.build(from: provider) {
+            LAAppGroupSettings.setThresholds(
+                lowMgdl: Storage.shared.lowLine.value,
+                highMgdl: Storage.shared.highLine.value
+            )
+            GlucoseSnapshotStore.shared.save(snapshot)
+        }
+        startIfNeeded()
+    }
+    
+    func refreshFromCurrentState(reason: String) {
+        refreshWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.performRefresh(reason: reason)
+        }
+        refreshWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: workItem)
+    }
+    
+    private func performRefresh(reason: String) {
+        let provider = StorageCurrentGlucoseStateProvider()
         guard let snapshot = GlucoseSnapshotBuilder.build(from: provider) else {
             return
         }
-
         LogManager.shared.log(category: .general, message: "[LA] refresh g=\(snapshot.glucose) reason=\(reason)", isDebug: true)
-
         let fingerprint =
             "g=\(snapshot.glucose) d=\(snapshot.delta) t=\(snapshot.trend.rawValue) " +
             "at=\(snapshot.updatedAt.timeIntervalSince1970) iob=\(snapshot.iob?.description ?? "nil") " +
             "cob=\(snapshot.cob?.description ?? "nil") proj=\(snapshot.projected?.description ?? "nil") u=\(snapshot.unit.rawValue)"
-
         LogManager.shared.log(category: .general, message: "[LA] snapshot \(fingerprint) reason=\(reason)", isDebug: true)
-
         let now = Date()
         let timeSinceLastUpdate = now.timeIntervalSince(lastUpdateTime ?? .distantPast)
         let forceRefreshNeeded = timeSinceLastUpdate >= 5 * 60
-
         if let previous = GlucoseSnapshotStore.shared.load(), previous == snapshot, !forceRefreshNeeded {
             return
         }
-
         LAAppGroupSettings.setThresholds(
             lowMgdl: Storage.shared.lowLine.value,
             highMgdl: Storage.shared.highLine.value
         )
-
         GlucoseSnapshotStore.shared.save(snapshot)
-
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             return
         }
-
         if current == nil, let existing = Activity<GlucoseLiveActivityAttributes>.activities.first {
             bind(to: existing, logReason: "bind-existing")
         }
-
         if let _ = current {
             update(snapshot: snapshot, reason: reason)
             return
         }
-
         if isAppVisibleForLiveActivityStart() {
             startIfNeeded()
             if current != nil {
@@ -156,7 +166,7 @@ final class LiveActivityManager {
             LogManager.shared.log(category: .general, message: "LA start suppressed (not visible) reason=\(reason)", isDebug: true)
         }
     }
-
+    
     private func isAppVisibleForLiveActivityStart() -> Bool {
         let scenes = UIApplication.shared.connectedScenes
         return scenes.contains { $0.activationState == .foregroundActive }
@@ -198,7 +208,19 @@ final class LiveActivityManager {
 
             if Task.isCancelled { return }
 
-            await activity.update(content)
+            // Dual-path update strategy:
+            // - Foreground: direct ActivityKit update works reliably.
+            // - Background: direct update silently fails due to the audio session
+            //   limitation. APNs self-push is the only reliable delivery path.
+            //   Both paths are attempted when applicable; APNs is the authoritative
+            //   background mechanism.
+            let isForeground = await MainActor.run {
+                UIApplication.shared.applicationState == .active
+            }
+
+            if isForeground {
+                await activity.update(content)
+            }
 
             if Task.isCancelled { return }
 
@@ -237,6 +259,11 @@ final class LiveActivityManager {
         }
     }
 
+    func handleExpiredToken() {
+        end()
+        // Activity will restart on next BG refresh via refreshFromCurrentState()
+    }
+    
     private func attachStateObserver(to activity: Activity<GlucoseLiveActivityAttributes>) {
         stateObserverTask?.cancel()
         stateObserverTask = Task {

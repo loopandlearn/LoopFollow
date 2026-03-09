@@ -59,7 +59,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var currentCage: cageData?
     var currentIage: iageData?
 
-    var backgroundTask = BackgroundTask.shared
+    var backgroundTask = BackgroundTask()
 
     var graphNowTimer = Timer()
 
@@ -827,6 +827,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     @objc override func viewDidAppear(_: Bool) {
         showHideNSDetails()
+        if #available(iOS 16.1, *) {
+            LiveActivityManager.shared.startFromCurrentState()
+        }
     }
 
     func stringFromTimeInterval(interval: TimeInterval) -> String {

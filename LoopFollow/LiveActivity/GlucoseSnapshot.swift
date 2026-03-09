@@ -75,13 +75,30 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         self.isNotLooping = isNotLooping
     }
     
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(glucose, forKey: .glucose)
+        try container.encode(delta, forKey: .delta)
+        try container.encode(trend, forKey: .trend)
+        try container.encode(updatedAt.timeIntervalSince1970, forKey: .updatedAt)
+        try container.encodeIfPresent(iob, forKey: .iob)
+        try container.encodeIfPresent(cob, forKey: .cob)
+        try container.encodeIfPresent(projected, forKey: .projected)
+        try container.encode(unit, forKey: .unit)
+        try container.encode(isNotLooping, forKey: .isNotLooping)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case glucose, delta, trend, updatedAt, iob, cob, projected, unit, isNotLooping
+    }
+    
     // MARK: - Codable
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         glucose = try container.decode(Double.self, forKey: .glucose)
         delta = try container.decode(Double.self, forKey: .delta)
         trend = try container.decode(Trend.self, forKey: .trend)
-        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+        updatedAt = Date(timeIntervalSince1970: try container.decode(Double.self, forKey: .updatedAt))
         iob = try container.decodeIfPresent(Double.self, forKey: .iob)
         cob = try container.decodeIfPresent(Double.self, forKey: .cob)
         projected = try container.decodeIfPresent(Double.self, forKey: .projected)
