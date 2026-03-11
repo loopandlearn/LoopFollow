@@ -1,9 +1,5 @@
-//
-//  LoopFollowLiveActivity.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-24.
-//
+// LoopFollow
+// LoopFollowLiveActivity.swift
 
 import ActivityKit
 import SwiftUI
@@ -11,16 +7,15 @@ import WidgetKit
 
 @available(iOS 16.1, *)
 struct LoopFollowLiveActivityWidget: Widget {
-
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
             // LOCK SCREEN / BANNER UI
-            LockScreenLiveActivityView(state: context.state/*, activityID: context.activityID*/)
+            LockScreenLiveActivityView(state: context.state /* , activityID: context.activityID */ )
                 .id(context.state.seq) // force SwiftUI to re-render on every update
                 .activitySystemActionForegroundColor(.white)
                 .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
                 .applyActivityContentMarginsFixIfAvailable()
-            } dynamicIsland: { context in
+        } dynamicIsland: { context in
             // DYNAMIC ISLAND UI
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -65,16 +60,16 @@ private extension View {
 }
 
 // MARK: - Lock Screen Contract View
+
 @available(iOS 16.1, *)
 private struct LockScreenLiveActivityView: View {
     let state: GlucoseLiveActivityAttributes.ContentState
-    /*let activityID: String*/
-    
+    /* let activityID: String */
+
     var body: some View {
         let s = state.snapshot
 
         HStack(spacing: 12) {
-
             // LEFT: Glucose + trend, update time below
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -291,7 +286,6 @@ private struct DynamicIslandMinimalView: View {
 // MARK: - Formatting
 
 private enum LAFormat {
-
     // MARK: Glucose
 
     static func glucose(_ s: GlucoseSnapshot) -> String {
@@ -378,7 +372,7 @@ private enum LAFormat {
     static func hhmmss(_ date: Date) -> String {
         hhmmssFormatter.string(from: date)
     }
-    
+
     static func updated(_ s: GlucoseSnapshot) -> String {
         hhmmFormatter.string(from: s.updatedAt)
     }
@@ -387,14 +381,13 @@ private enum LAFormat {
 // MARK: - Threshold-driven colors (Option A, App Group-backed)
 
 private enum LAColors {
-
     static func backgroundTint(for snapshot: GlucoseSnapshot) -> Color {
         let mgdl = toMgdl(snapshot)
-    
+
         let t = LAAppGroupSettings.thresholdsMgdl()
         let low = t.low
         let high = t.high
-    
+
         if mgdl < low {
             let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / (low - 54.0))
             let opacity = min(max(raw, 0.48), 0.85)
@@ -404,13 +397,12 @@ private enum LAColors {
             let raw = 0.44 + (0.85 - 0.44) * ((mgdl - high) / (324.0 - high))
             let opacity = min(max(raw, 0.44), 0.85)
             return Color(uiColor: UIColor.systemOrange).opacity(opacity)
-            
+
         } else {
             // In range: fixed at your existing value
             return Color(uiColor: UIColor.systemGreen).opacity(0.36)
         }
     }
-
 
     static func keyline(for snapshot: GlucoseSnapshot) -> Color {
         let mgdl = toMgdl(snapshot)

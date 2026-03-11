@@ -1,16 +1,11 @@
-//
-//  StorageCurrentGlucoseStateProvider.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-24.
-//
+// LoopFollow
+// StorageCurrentGlucoseStateProvider.swift
 
 import Foundation
 
 /// Reads the latest glucose state from LoopFollow’s existing single source of truth.
 /// Provider remains source-agnostic (Nightscout vs Dexcom).
 struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
-
     var glucoseMgdl: Double? {
         guard
             let bg = Observable.shared.bg.value,

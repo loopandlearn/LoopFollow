@@ -1,15 +1,10 @@
-//
-//  PreferredGlucoseUnit.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-24.
-//
+// LoopFollow
+// PreferredGlucoseUnit.swift
 
 import Foundation
 import HealthKit
 
 enum PreferredGlucoseUnit {
-
     /// LoopFollow’s existing source of truth for unit selection.
     /// NOTE: Do not duplicate the string constant elsewhere—keep it here.
     static func hkUnit() -> HKUnit {

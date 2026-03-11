@@ -1,15 +1,10 @@
-//
-//  GlucoseLiveActivityAttributes.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-24.
-//
+// LoopFollow
+// GlucoseLiveActivityAttributes.swift
 
 import ActivityKit
 import Foundation
 
 struct GlucoseLiveActivityAttributes: ActivityAttributes {
-
     public struct ContentState: Codable, Hashable {
         let snapshot: GlucoseSnapshot
         let seq: Int
@@ -31,7 +26,7 @@ struct GlucoseLiveActivityAttributes: ActivityAttributes {
             let producedAtInterval = try container.decode(Double.self, forKey: .producedAt)
             producedAt = Date(timeIntervalSince1970: producedAtInterval)
         }
-        
+
         private enum CodingKeys: String, CodingKey {
             case snapshot, seq, reason, producedAt
         }

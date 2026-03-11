@@ -15,9 +15,12 @@ class Storage {
     var expirationDate = StorageValue<Date?>(key: "expirationDate", defaultValue: nil)
     var sharedSecret = StorageValue<String>(key: "sharedSecret", defaultValue: "")
     var productionEnvironment = StorageValue<Bool>(key: "productionEnvironment", defaultValue: false)
-    var apnsKey = StorageValue<String>(key: "apnsKey", defaultValue: "")
+    var remoteApnsKey = StorageValue<String>(key: "remoteApnsKey", defaultValue: "")
     var teamId = StorageValue<String?>(key: "teamId", defaultValue: nil)
-    var keyId = StorageValue<String>(key: "keyId", defaultValue: "")
+    var remoteKeyId = StorageValue<String>(key: "remoteKeyId", defaultValue: "")
+
+    var lfApnsKey = StorageValue<String>(key: "lfApnsKey", defaultValue: "")
+    var lfKeyId = StorageValue<String>(key: "lfKeyId", defaultValue: "")
     var bundleId = StorageValue<String>(key: "bundleId", defaultValue: "")
     var user = StorageValue<String>(key: "user", defaultValue: "")
 
@@ -31,9 +34,6 @@ class Storage {
 
     // TODO: This flag can be deleted in March 2027. Check the commit for other places to cleanup.
     var hasSeenFatProteinOrderChange = StorageValue<Bool>(key: "hasSeenFatProteinOrderChange", defaultValue: false)
-
-    var cachedJWT = StorageValue<String?>(key: "cachedJWT", defaultValue: nil)
-    var jwtExpirationDate = StorageValue<Date?>(key: "jwtExpirationDate", defaultValue: nil)
 
     var backgroundRefreshType = StorageValue<BackgroundRefreshType>(key: "backgroundRefreshType", defaultValue: .silentTune)
 
@@ -90,7 +90,7 @@ class Storage {
     var lastIOB = StorageValue<Double?>(key: "lastIOB", defaultValue: nil)
     var lastCOB = StorageValue<Double?>(key: "lastCOB", defaultValue: nil)
     var projectedBgMgdl = StorageValue<Double?>(key: "projectedBgMgdl", defaultValue: nil)
-    
+
     // Graph Settings [BEGIN]
     var showDots = StorageValue<Bool>(key: "showDots", defaultValue: true)
     var showLines = StorageValue<Bool>(key: "showLines", defaultValue: true)
@@ -185,9 +185,6 @@ class Storage {
     var treatmentsPosition = StorageValue<TabPosition>(key: "treatmentsPosition", defaultValue: .menu)
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
-
-    var returnApnsKey = StorageValue<String>(key: "returnApnsKey", defaultValue: "")
-    var returnKeyId = StorageValue<String>(key: "returnKeyId", defaultValue: "")
 
     var bolusIncrement = SecureStorageValue<HKQuantity>(key: "bolusIncrement", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05))
     var bolusIncrementDetected = StorageValue<Bool>(key: "bolusIncrementDetected", defaultValue: false)

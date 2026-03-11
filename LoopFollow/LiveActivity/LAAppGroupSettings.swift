@@ -1,9 +1,5 @@
-//
-//  LAAppGroupSettings.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-24.
-//
+// LoopFollow
+// LAAppGroupSettings.swift
 
 import Foundation
 
@@ -12,7 +8,6 @@ import Foundation
 /// We keep this separate from Storage.shared to avoid target-coupling and
 /// ensure the widget extension reads the same values as the app.
 enum LAAppGroupSettings {
-
     private enum Keys {
         static let lowLineMgdl = "la.lowLine.mgdl"
         static let highLineMgdl = "la.highLine.mgdl"

@@ -60,6 +60,12 @@ struct SettingsMenuView: View {
                         settingsPath.value.append(Sheet.importExport)
                     }
 
+                    NavigationRow(title: "APN",
+                                  icon: "bell.and.waves.left.and.right")
+                    {
+                        settingsPath.value.append(Sheet.apn)
+                    }
+
                     if !nightscoutURL.value.isEmpty {
                         NavigationRow(title: "Information Display Settings",
                                       icon: "info.circle")
@@ -238,6 +244,7 @@ private enum Sheet: Hashable, Identifiable {
     case general, graph
     case infoDisplay
     case alarmSettings
+    case apn
     case remote
     case importExport
     case calendar, contact
@@ -257,6 +264,7 @@ private enum Sheet: Hashable, Identifiable {
         case .graph: GraphSettingsView()
         case .infoDisplay: InfoDisplaySettingsView(viewModel: .init())
         case .alarmSettings: AlarmSettingsView()
+        case .apn: APNSettingsView()
         case .remote: RemoteSettingsView(viewModel: .init())
         case .importExport: ImportExportSettingsView()
         case .calendar: CalendarSettingsView()

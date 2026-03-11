@@ -1,17 +1,15 @@
+// LoopFollow
 // LiveActivityManager.swift
-// Philippe Achkar
-// 2026-03-07
 
-import Foundation
 @preconcurrency import ActivityKit
-import UIKit
+import Foundation
 import os
+import UIKit
 
 /// Live Activity manager for LoopFollow.
 
 @available(iOS 16.1, *)
 final class LiveActivityManager {
-
     static let shared = LiveActivityManager()
     private init() {}
 
@@ -77,7 +75,7 @@ final class LiveActivityManager {
 
         Task {
             let finalState = GlucoseLiveActivityAttributes.ContentState(
-                snapshot: (GlucoseSnapshotStore.shared.load() ?? GlucoseSnapshot(
+                snapshot: GlucoseSnapshotStore.shared.load() ?? GlucoseSnapshot(
                     glucose: 0,
                     delta: 0,
                     trend: .unknown,
@@ -87,7 +85,7 @@ final class LiveActivityManager {
                     projected: nil,
                     unit: .mgdl,
                     isNotLooping: false
-                )),
+                ),
                 seq: seq,
                 reason: "end",
                 producedAt: Date()
@@ -115,7 +113,7 @@ final class LiveActivityManager {
         }
         startIfNeeded()
     }
-    
+
     func refreshFromCurrentState(reason: String) {
         refreshWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
@@ -124,7 +122,7 @@ final class LiveActivityManager {
         refreshWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: workItem)
     }
-    
+
     private func performRefresh(reason: String) {
         let provider = StorageCurrentGlucoseStateProvider()
         guard let snapshot = GlucoseSnapshotBuilder.build(from: provider) else {
@@ -166,7 +164,7 @@ final class LiveActivityManager {
             LogManager.shared.log(category: .general, message: "LA start suppressed (not visible) reason=\(reason)", isDebug: true)
         }
     }
-    
+
     private func isAppVisibleForLiveActivityStart() -> Bool {
         let scenes = UIApplication.shared.connectedScenes
         return scenes.contains { $0.activationState == .foregroundActive }
@@ -263,7 +261,7 @@ final class LiveActivityManager {
         end()
         // Activity will restart on next BG refresh via refreshFromCurrentState()
     }
-    
+
     private func attachStateObserver(to activity: Activity<GlucoseLiveActivityAttributes>) {
         stateObserverTask?.cancel()
         stateObserverTask = Task {

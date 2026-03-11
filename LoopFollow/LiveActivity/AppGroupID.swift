@@ -1,9 +1,5 @@
-//
-//  AppGroupID.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-24.
-//
+// LoopFollow
+// AppGroupID.swift
 
 import Foundation
 
@@ -20,14 +16,14 @@ import Foundation
 ///   2) Otherwise, apply a conservative suffix-stripping heuristic.
 ///   3) Fall back to the current bundle identifier.
 enum AppGroupID {
-
     /// Optional Info.plist key you can set in *both* app + extension targets
     /// to force a shared base bundle id (recommended for reliability).
     private static let baseBundleIDPlistKey = "LFAppGroupBaseBundleID"
 
     static func current() -> String {
         if let base = Bundle.main.object(forInfoDictionaryKey: baseBundleIDPlistKey) as? String,
-           !base.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+           !base.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        {
             return "group.\(base)"
         }
 
@@ -53,7 +49,7 @@ enum AppGroupID {
             ".CarPlay",
             ".CarPlayExtension",
             ".Intents",
-            ".IntentsExtension"
+            ".IntentsExtension",
         ]
 
         for suffix in knownSuffixes {

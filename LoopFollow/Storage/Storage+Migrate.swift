@@ -4,6 +4,45 @@
 import Foundation
 
 extension Storage {
+    func migrateStep5() {
+        LogManager.shared.log(category: .general, message: "Running migrateStep5 — APNs credential separation")
+
+        let legacyReturnApnsKey = StorageValue<String>(key: "returnApnsKey", defaultValue: "")
+        let legacyReturnKeyId = StorageValue<String>(key: "returnKeyId", defaultValue: "")
+        let legacyApnsKey = StorageValue<String>(key: "apnsKey", defaultValue: "")
+        let legacyKeyId = StorageValue<String>(key: "keyId", defaultValue: "")
+
+        // 1. If returnApnsKey had a value, that was LoopFollow's own key (different team scenario)
+        if legacyReturnApnsKey.exists, !legacyReturnApnsKey.value.isEmpty {
+            lfApnsKey.value = legacyReturnApnsKey.value
+            lfKeyId.value = legacyReturnKeyId.value
+        }
+
+        // 2. If lfApnsKey is still empty and the old primary key exists,
+        //    check if same team — if so, the primary key was used for everything
+        if lfApnsKey.value.isEmpty, legacyApnsKey.exists, !legacyApnsKey.value.isEmpty {
+            let lfTeamId = BuildDetails.default.teamID ?? ""
+            let remoteTeamId = teamId.value ?? ""
+            let sameTeam = !lfTeamId.isEmpty && (remoteTeamId.isEmpty || lfTeamId == remoteTeamId)
+            if sameTeam {
+                lfApnsKey.value = legacyApnsKey.value
+                lfKeyId.value = legacyKeyId.value
+            }
+        }
+
+        // 3. Move old primary credentials to remoteApnsKey/remoteKeyId
+        if legacyApnsKey.exists, !legacyApnsKey.value.isEmpty {
+            remoteApnsKey.value = legacyApnsKey.value
+            remoteKeyId.value = legacyKeyId.value
+        }
+
+        // 4. Clean up old keys
+        legacyReturnApnsKey.remove()
+        legacyReturnKeyId.remove()
+        legacyApnsKey.remove()
+        legacyKeyId.remove()
+    }
+
     func migrateStep3() {
         LogManager.shared.log(category: .general, message: "Running migrateStep3 - this should only happen once!")
         let legacyForceDarkMode = StorageValue<Bool>(key: "forceDarkMode", defaultValue: true)

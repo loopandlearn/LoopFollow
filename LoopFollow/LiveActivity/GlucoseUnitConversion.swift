@@ -1,14 +1,9 @@
-//
-//  GlucoseUnitConversion.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-24.
-//
+// LoopFollow
+// GlucoseUnitConversion.swift
 
 import Foundation
 
 enum GlucoseUnitConversion {
-
     // 1 mmol/L glucose ≈ 18.0182 mg/dL (commonly rounded to 18)
     // Using 18.0182 is standard for glucose conversions.
     private static let mgdlPerMmol: Double = 18.0182

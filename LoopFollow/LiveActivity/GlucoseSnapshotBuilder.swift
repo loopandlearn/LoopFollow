@@ -1,9 +1,5 @@
-//
-//  GlucoseSnapshotBuilder.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-28.
-//
+// LoopFollow
+// GlucoseSnapshotBuilder.swift
 
 import Foundation
 
@@ -32,7 +28,6 @@ protocol CurrentGlucoseStateProviding {
 
 /// Builds a GlucoseSnapshot in the user’s preferred unit, without embedding provider logic.
 enum GlucoseSnapshotBuilder {
-
     static func build(from provider: CurrentGlucoseStateProviding) -> GlucoseSnapshot? {
         guard
             let glucoseMgdl = provider.glucoseMgdl,
@@ -68,13 +63,12 @@ enum GlucoseSnapshotBuilder {
         // Not Looping — read from Observable, set by evaluateNotLooping() in DeviceStatus.swift
         let isNotLooping = Observable.shared.isNotLooping.value
 
-        
         LogManager.shared.log(
             category: .general,
             message: "LA snapshot built: updatedAt=\(updatedAt) interval=\(updatedAt.timeIntervalSince1970)",
             isDebug: true
         )
-        
+
         return GlucoseSnapshot(
             glucose: glucose,
             delta: delta,
@@ -91,8 +85,8 @@ enum GlucoseSnapshotBuilder {
     private static func mapTrend(_ code: String?) -> GlucoseSnapshot.Trend {
         guard
             let raw = code?
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-                .lowercased(),
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased(),
             !raw.isEmpty
         else { return .unknown }
 

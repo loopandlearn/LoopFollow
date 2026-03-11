@@ -1,9 +1,5 @@
-//
-//  LAThresholdSync.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-25.
-//
+// LoopFollow
+// LAThresholdSync.swift
 
 import Foundation
 
@@ -12,7 +8,6 @@ import Foundation
 ///
 /// This file belongs ONLY to the main app target.
 enum LAThresholdSync {
-
     static func syncToAppGroup() {
         LAAppGroupSettings.setThresholds(
             lowMgdl: Storage.shared.lowLine.value,

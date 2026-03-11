@@ -168,6 +168,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             Storage.shared.migrationStep.value = 4
         }
 
+        if Storage.shared.migrationStep.value < 5 {
+            Storage.shared.migrateStep5()
+            Storage.shared.migrationStep.value = 5
+        }
+
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
 
@@ -385,29 +390,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
-        Storage.shared.apnsKey.$value
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { _ in
-                JWTManager.shared.invalidateCache()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.teamId.$value
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { _ in
-                JWTManager.shared.invalidateCache()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.keyId.$value
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { _ in
-                JWTManager.shared.invalidateCache()
-            }
-            .store(in: &cancellables)
+        Publishers.MergeMany(
+            Storage.shared.remoteApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.teamId.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.remoteKeyId.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lfApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lfKeyId.$value.map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { _ in JWTManager.shared.invalidateCache() }
+        .store(in: &cancellables)
 
         Storage.shared.device.$value
             .receive(on: DispatchQueue.main)

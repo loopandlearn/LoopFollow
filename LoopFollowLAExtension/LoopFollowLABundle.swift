@@ -1,18 +1,12 @@
-//
-//  LoopFollowLABundle.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-03-07.
-//  Copyright © 2026 Jon Fawcett. All rights reserved.
-//
-
+// LoopFollow
+// LoopFollowLABundle.swift
 
 // LoopFollowLABundle.swift
 // Philippe Achkar
 // 2026-03-07
 
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 @main
 struct LoopFollowLABundle: WidgetBundle {

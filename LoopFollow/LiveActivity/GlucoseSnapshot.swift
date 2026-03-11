@@ -1,9 +1,5 @@
-//
-//  GlucoseSnapshot.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-24.
-//
+// LoopFollow
+// GlucoseSnapshot.swift
 
 import Foundation
 
@@ -11,7 +7,6 @@ import Foundation
 /// Live Activity, future Watch complication, and CarPlay.
 ///
 struct GlucoseSnapshot: Codable, Equatable, Hashable {
-
     // MARK: - Units
 
     enum Unit: String, Codable, Hashable {
@@ -50,6 +45,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     let unit: Unit
 
     // MARK: - Loop Status
+
     /// True when LoopFollow detects the loop has not reported in 15+ minutes (Nightscout only).
     let isNotLooping: Bool
 
@@ -74,7 +70,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         self.unit = unit
         self.isNotLooping = isNotLooping
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(glucose, forKey: .glucose)
@@ -91,21 +87,22 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case glucose, delta, trend, updatedAt, iob, cob, projected, unit, isNotLooping
     }
-    
+
     // MARK: - Codable
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         glucose = try container.decode(Double.self, forKey: .glucose)
         delta = try container.decode(Double.self, forKey: .delta)
         trend = try container.decode(Trend.self, forKey: .trend)
-        updatedAt = Date(timeIntervalSince1970: try container.decode(Double.self, forKey: .updatedAt))
+        updatedAt = try Date(timeIntervalSince1970: container.decode(Double.self, forKey: .updatedAt))
         iob = try container.decodeIfPresent(Double.self, forKey: .iob)
         cob = try container.decodeIfPresent(Double.self, forKey: .cob)
         projected = try container.decodeIfPresent(Double.self, forKey: .projected)
         unit = try container.decode(Unit.self, forKey: .unit)
         isNotLooping = try container.decodeIfPresent(Bool.self, forKey: .isNotLooping) ?? false
     }
-    
+
     // MARK: - Derived Convenience
 
     /// Age of reading in seconds.
@@ -114,11 +111,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     }
 }
 
-
 // MARK: - Trend
 
 extension GlucoseSnapshot {
-
     enum Trend: String, Codable, Hashable {
         case up
         case upFast

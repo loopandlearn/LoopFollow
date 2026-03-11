@@ -1,38 +1,26 @@
+// LoopFollow
 // APNSClient.swift
-// Philippe Achkar
-// 2026-03-07
 
 import Foundation
 
 class APNSClient {
-
     static let shared = APNSClient()
     private init() {}
 
     // MARK: - Configuration
 
     private let bundleID = Bundle.main.bundleIdentifier ?? "com.apple.unknown"
-    private let apnsHost = "https://api.push.apple.com"
 
-    // MARK: - JWT Cache
-
-    private var cachedToken: String?
-    private var tokenGeneratedAt: Date?
-    private let tokenTTL: TimeInterval = 55 * 60
-
-    private func validToken() throws -> String {
-        let now = Date()
-        if let token = cachedToken,
-           let generatedAt = tokenGeneratedAt,
-           now.timeIntervalSince(generatedAt) < tokenTTL {
-            return token
-        }
-        let newToken = try APNSJWTGenerator.generateToken()
-        cachedToken = newToken
-        tokenGeneratedAt = now
-        LogManager.shared.log(category: .general, message: "APNs JWT refreshed", isDebug: true)
-        return newToken
+    private var apnsHost: String {
+        let isProduction = BuildDetails.default.isTestFlightBuild()
+        return isProduction
+            ? "https://api.push.apple.com"
+            : "https://api.sandbox.push.apple.com"
     }
+
+    private var lfKeyId: String { Storage.shared.lfKeyId.value }
+    private var lfTeamId: String { BuildDetails.default.teamID ?? "" }
+    private var lfApnsKey: String { Storage.shared.lfApnsKey.value }
 
     // MARK: - Send Live Activity Update
 
@@ -40,24 +28,28 @@ class APNSClient {
         pushToken: String,
         state: GlucoseLiveActivityAttributes.ContentState
     ) async {
+        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: lfKeyId, teamId: lfTeamId, apnsKey: lfApnsKey) else {
+            LogManager.shared.log(category: .general, message: "APNs failed to generate JWT for Live Activity push")
+            return
+        }
+
+        let payload = buildPayload(state: state)
+
+        guard let url = URL(string: "\(apnsHost)/3/device/\(pushToken)") else {
+            LogManager.shared.log(category: .general, message: "APNs invalid URL", isDebug: true)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("bearer \(jwt)", forHTTPHeaderField: "authorization")
+        request.setValue("application/json", forHTTPHeaderField: "content-type")
+        request.setValue("\(bundleID).push-type.liveactivity", forHTTPHeaderField: "apns-topic")
+        request.setValue("liveactivity", forHTTPHeaderField: "apns-push-type")
+        request.setValue("10", forHTTPHeaderField: "apns-priority")
+        request.httpBody = payload
+
         do {
-            let jwt = try validToken()
-            let payload = buildPayload(state: state)
-
-            guard let url = URL(string: "\(apnsHost)/3/device/\(pushToken)") else {
-                LogManager.shared.log(category: .general, message: "APNs invalid URL", isDebug: true)
-                return
-            }
-
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue("bearer \(jwt)", forHTTPHeaderField: "authorization")
-            request.setValue("application/json", forHTTPHeaderField: "content-type")
-            request.setValue("\(bundleID).push-type.liveactivity", forHTTPHeaderField: "apns-topic")
-            request.setValue("liveactivity", forHTTPHeaderField: "apns-push-type")
-            request.setValue("10", forHTTPHeaderField: "apns-priority")
-            request.httpBody = payload
-
             let (data, response) = try await URLSession.shared.data(for: request)
 
             if let httpResponse = response as? HTTPURLResponse {
@@ -71,8 +63,7 @@ class APNSClient {
 
                 case 403:
                     // JWT rejected — force regenerate on next push
-                    cachedToken = nil
-                    tokenGeneratedAt = nil
+                    JWTManager.shared.invalidateCache()
                     LogManager.shared.log(category: .general, message: "APNs JWT rejected (403) — token cache cleared, will regenerate")
 
                 case 404, 410:
@@ -84,7 +75,7 @@ class APNSClient {
                 case 429:
                     LogManager.shared.log(category: .general, message: "APNs rate limited (429) — will retry on next refresh")
 
-                case 500...599:
+                case 500 ... 599:
                     let responseBody = String(data: data, encoding: .utf8) ?? "empty"
                     LogManager.shared.log(category: .general, message: "APNs server error (\(httpResponse.statusCode)) — will retry on next refresh: \(responseBody)")
 
@@ -109,7 +100,7 @@ class APNSClient {
             "delta": snapshot.delta,
             "trend": snapshot.trend.rawValue,
             "updatedAt": snapshot.updatedAt.timeIntervalSince1970,
-            "unit": snapshot.unit.rawValue
+            "unit": snapshot.unit.rawValue,
         ]
 
         if let iob = snapshot.iob { snapshotDict["iob"] = iob }
@@ -120,15 +111,15 @@ class APNSClient {
             "snapshot": snapshotDict,
             "seq": state.seq,
             "reason": state.reason,
-            "producedAt": state.producedAt.timeIntervalSince1970
+            "producedAt": state.producedAt.timeIntervalSince1970,
         ]
 
         let payload: [String: Any] = [
             "aps": [
                 "timestamp": Int(Date().timeIntervalSince1970),
                 "event": "update",
-                "content-state": contentState
-            ]
+                "content-state": contentState,
+            ],
         ]
 
         return try? JSONSerialization.data(withJSONObject: payload)

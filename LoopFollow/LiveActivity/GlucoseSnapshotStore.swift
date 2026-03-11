@@ -1,9 +1,5 @@
-//
-//  GlucoseSnapshotStore.swift
-//  LoopFollow
-//
-//  Created by Philippe Achkar on 2026-02-24.
-//
+// LoopFollow
+// GlucoseSnapshotStore.swift
 
 import Foundation
 
@@ -13,7 +9,6 @@ import Foundation
 ///
 /// Uses an atomic JSON file write to avoid partial/corrupt reads across processes.
 final class GlucoseSnapshotStore {
-
     static let shared = GlucoseSnapshotStore()
     private init() {}
 
