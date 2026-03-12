@@ -46,17 +46,7 @@ enum GlucoseSnapshotBuilder {
 
         let preferredUnit = PreferredGlucoseUnit.snapshotUnit()
 
-        let glucose = GlucoseUnitConversion.convertGlucose(glucoseMgdl, from: .mgdl, to: preferredUnit)
-
         let deltaMgdl = provider.deltaMgdl ?? 0.0
-        let delta = GlucoseUnitConversion.convertGlucose(deltaMgdl, from: .mgdl, to: preferredUnit)
-
-        let projected: Double?
-        if let projMgdl = provider.projectedMgdl {
-            projected = GlucoseUnitConversion.convertGlucose(projMgdl, from: .mgdl, to: preferredUnit)
-        } else {
-            projected = nil
-        }
 
         let trend = mapTrend(provider.trendCode)
 
@@ -70,13 +60,13 @@ enum GlucoseSnapshotBuilder {
         )
 
         return GlucoseSnapshot(
-            glucose: glucose,
-            delta: delta,
+            glucose: glucoseMgdl,
+            delta: deltaMgdl,
             trend: trend,
             updatedAt: updatedAt,
             iob: provider.iob,
             cob: provider.cob,
-            projected: projected,
+            projected: provider.projectedMgdl,
             unit: preferredUnit,
             isNotLooping: isNotLooping
         )
@@ -98,7 +88,10 @@ enum GlucoseSnapshotBuilder {
         if raw.contains("doubleup") || raw.contains("rapidrise") || raw == "up2" || raw == "upfast" {
             return .upFast
         }
-        if raw.contains("singleup") || raw.contains("fortyfiveup") || raw == "up" || raw == "up1" || raw == "rising" {
+        if raw.contains("fortyfiveup") {
+            return .upSlight
+        }
+        if raw.contains("singleup") || raw == "up" || raw == "up1" || raw == "rising" {
             return .up
         }
 
@@ -109,7 +102,10 @@ enum GlucoseSnapshotBuilder {
         if raw.contains("doubledown") || raw.contains("rapidfall") || raw == "down2" || raw == "downfast" {
             return .downFast
         }
-        if raw.contains("singledown") || raw.contains("fortyfivedown") || raw == "down" || raw == "down1" || raw == "falling" {
+        if raw.contains("fortyfivedown") {
+            return .downSlight
+        }
+        if raw.contains("singledown") || raw == "down" || raw == "down1" || raw == "falling" {
             return .down
         }
 

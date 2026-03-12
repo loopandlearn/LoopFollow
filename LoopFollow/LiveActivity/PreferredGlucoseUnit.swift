@@ -6,15 +6,8 @@ import HealthKit
 
 enum PreferredGlucoseUnit {
     /// LoopFollow’s existing source of truth for unit selection.
-    /// NOTE: Do not duplicate the string constant elsewhere—keep it here.
     static func hkUnit() -> HKUnit {
-        let unitString = Storage.shared.units.value
-        switch unitString {
-        case "mmol/L":
-            return .millimolesPerLiter
-        default:
-            return .milligramsPerDeciliter
-        }
+        Localizer.getPreferredUnit()
     }
 
     /// Maps HKUnit -> GlucoseSnapshot.Unit (our cross-platform enum).

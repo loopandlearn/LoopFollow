@@ -103,6 +103,7 @@ class APNSClient {
             "unit": snapshot.unit.rawValue,
         ]
 
+        snapshotDict["isNotLooping"] = snapshot.isNotLooping
         if let iob = snapshot.iob { snapshotDict["iob"] = iob }
         if let cob = snapshot.cob { snapshotDict["cob"] = cob }
         if let projected = snapshot.projected { snapshotDict["projected"] = projected }

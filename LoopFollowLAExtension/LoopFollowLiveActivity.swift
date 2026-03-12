@@ -286,16 +286,39 @@ private struct DynamicIslandMinimalView: View {
 // MARK: - Formatting
 
 private enum LAFormat {
+    // MARK: - NumberFormatters (locale-aware)
+
+    private static let mgdlFormatter: NumberFormatter = {
+        let nf = NumberFormatter()
+        nf.numberStyle = .decimal
+        nf.maximumFractionDigits = 0
+        nf.locale = .current
+        return nf
+    }()
+
+    private static let mmolFormatter: NumberFormatter = {
+        let nf = NumberFormatter()
+        nf.numberStyle = .decimal
+        nf.minimumFractionDigits = 1
+        nf.maximumFractionDigits = 1
+        nf.locale = .current
+        return nf
+    }()
+
+    private static func formatGlucoseValue(_ mgdl: Double, unit: GlucoseSnapshot.Unit) -> String {
+        switch unit {
+        case .mgdl:
+            return mgdlFormatter.string(from: NSNumber(value: round(mgdl))) ?? "\(Int(round(mgdl)))"
+        case .mmol:
+            let mmol = GlucoseConversion.toMmol(mgdl)
+            return mmolFormatter.string(from: NSNumber(value: mmol)) ?? String(format: "%.1f", mmol)
+        }
+    }
+
     // MARK: Glucose
 
     static func glucose(_ s: GlucoseSnapshot) -> String {
-        switch s.unit {
-        case .mgdl:
-            return String(Int(round(s.glucose)))
-        case .mmol:
-            // 1 decimal always (contract: clinical, consistent)
-            return String(format: "%.1f", s.glucose)
-        }
+        formatGlucoseValue(s.glucose, unit: s.unit)
     }
 
     static func delta(_ s: GlucoseSnapshot) -> String {
@@ -306,21 +329,23 @@ private enum LAFormat {
             return v > 0 ? "+\(v)" : "\(v)"
 
         case .mmol:
-            // Treat tiny fluctuations as 0.0 to avoid “+0.0” noise
-            let d = (abs(s.delta) < 0.05) ? 0.0 : s.delta
-            if d == 0 { return "0.0" }
-            return d > 0 ? String(format: "+%.1f", d) : String(format: "%.1f", d)
+            let mmol = GlucoseConversion.toMmol(s.delta)
+            let d = (abs(mmol) < 0.05) ? 0.0 : mmol
+            if d == 0 { return mmolFormatter.string(from: 0) ?? "0.0" }
+            let formatted = mmolFormatter.string(from: NSNumber(value: abs(d))) ?? String(format: "%.1f", abs(d))
+            return d > 0 ? "+\(formatted)" : "-\(formatted)"
         }
     }
 
     // MARK: Trend
 
     static func trendArrow(_ s: GlucoseSnapshot) -> String {
-        // Map to the common clinical arrows; keep unknown as a neutral dash.
         switch s.trend {
         case .upFast: return "↑↑"
         case .up: return "↑"
+        case .upSlight: return "↗"
         case .flat: return "→"
+        case .downSlight: return "↘︎"
         case .down: return "↓"
         case .downFast: return "↓↓"
         case .unknown: return "–"
@@ -331,24 +356,17 @@ private enum LAFormat {
 
     static func iob(_ s: GlucoseSnapshot) -> String {
         guard let v = s.iob else { return "—" }
-        // Contract-friendly: one decimal, no unit suffix
         return String(format: "%.1f", v)
     }
 
     static func cob(_ s: GlucoseSnapshot) -> String {
         guard let v = s.cob else { return "—" }
-        // Contract-friendly: whole grams
         return String(Int(round(v)))
     }
 
     static func projected(_ s: GlucoseSnapshot) -> String {
         guard let v = s.projected else { return "—" }
-        switch s.unit {
-        case .mgdl:
-            return String(Int(round(v)))
-        case .mmol:
-            return String(format: "%.1f", v)
-        }
+        return formatGlucoseValue(v, unit: s.unit)
     }
 
     // MARK: Update time
@@ -382,7 +400,7 @@ private enum LAFormat {
 
 private enum LAColors {
     static func backgroundTint(for snapshot: GlucoseSnapshot) -> Color {
-        let mgdl = toMgdl(snapshot)
+        let mgdl = snapshot.glucose
 
         let t = LAAppGroupSettings.thresholdsMgdl()
         let low = t.low
@@ -399,13 +417,12 @@ private enum LAColors {
             return Color(uiColor: UIColor.systemOrange).opacity(opacity)
 
         } else {
-            // In range: fixed at your existing value
             return Color(uiColor: UIColor.systemGreen).opacity(0.36)
         }
     }
 
     static func keyline(for snapshot: GlucoseSnapshot) -> Color {
-        let mgdl = toMgdl(snapshot)
+        let mgdl = snapshot.glucose
 
         let t = LAAppGroupSettings.thresholdsMgdl()
         let low = t.low
@@ -417,16 +434,6 @@ private enum LAColors {
             return Color(uiColor: UIColor.systemOrange)
         } else {
             return Color(uiColor: UIColor.systemGreen)
-        }
-    }
-
-    private static func toMgdl(_ snapshot: GlucoseSnapshot) -> Double {
-        switch snapshot.unit {
-        case .mgdl:
-            return snapshot.glucose
-        case .mmol:
-            // Convert mmol/L → mg/dL for threshold comparison
-            return GlucoseUnitConversion.convertGlucose(snapshot.glucose, from: .mmol, to: .mgdl)
         }
     }
 }

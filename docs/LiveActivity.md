@@ -89,7 +89,6 @@ Because `liveactivitiesd` receives the update via APNs rather than via an inter-
 | `GlucoseSnapshotBuilder.swift` | Pure data transformation — builds `GlucoseSnapshot` from storage |
 | `StorageCurrentGlucoseStateProvider.swift` | Thin abstraction over `Storage.shared` and `Observable.shared` |
 | `GlucoseSnapshotStore.swift` | App Group persistence — saves/loads latest snapshot |
-| `LAThresholdSync.swift` | Reads threshold config from Storage for widget color |
 | `PreferredGlucoseUnit.swift` | Reads user unit preference, converts mg/dL ↔ mmol/L |
 | `APNSClient.swift` | Sends APNs self-push with Live Activity content state |
 | `APNSJWTGenerator.swift` | Generates ES256-signed JWT for APNs authentication |
@@ -100,7 +99,7 @@ Because `liveactivitiesd` receives the update via APNs rather than via an inter-
 |---|---|
 | `GlucoseLiveActivityAttributes.swift` | ActivityKit attributes and content state definition |
 | `GlucoseSnapshot.swift` | Canonical cross-platform glucose data struct |
-| `GlucoseUnitConversion.swift` | Unit conversion helpers |
+| `GlucoseConversion.swift` | Single source of truth for mg/dL ↔ mmol/L conversion |
 | `LAAppGroupSettings.swift` | App Group UserDefaults access |
 | `AppGroupID.swift` | Derives App Group ID dynamically from bundle identifier |
 

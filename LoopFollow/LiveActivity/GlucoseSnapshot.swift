@@ -16,10 +16,10 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
 
     // MARK: - Core Glucose
 
-    /// Raw glucose value in the user-selected unit.
+    /// Glucose value in mg/dL (canonical internal unit).
     let glucose: Double
 
-    /// Raw delta in the user-selected unit. May be 0.0 if unchanged.
+    /// Delta in mg/dL. May be 0.0 if unchanged.
     let delta: Double
 
     /// Trend direction (mapped from LoopFollow state).
@@ -36,12 +36,13 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     /// Carbs On Board
     let cob: Double?
 
-    /// Projected glucose (if available)
+    /// Projected glucose in mg/dL (if available)
     let projected: Double?
 
     // MARK: - Unit Context
 
-    /// Unit selected by the user in LoopFollow settings.
+    /// User's preferred display unit. Values are always stored in mg/dL;
+    /// this tells the display layer which unit to render.
     let unit: Unit
 
     // MARK: - Loop Status
@@ -116,10 +117,18 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
 extension GlucoseSnapshot {
     enum Trend: String, Codable, Hashable {
         case up
+        case upSlight
         case upFast
         case flat
         case down
+        case downSlight
         case downFast
         case unknown
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            let raw = try container.decode(String.self)
+            self = Trend(rawValue: raw) ?? .unknown
+        }
     }
 }
