@@ -21,14 +21,17 @@ struct LoopFollowLiveActivityWidget: Widget {
                 DynamicIslandExpandedRegion(.leading) {
                     DynamicIslandLeadingView(snapshot: context.state.snapshot)
                         .id(context.state.seq)
+                        .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     DynamicIslandTrailingView(snapshot: context.state.snapshot)
                         .id(context.state.seq)
+                        .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     DynamicIslandBottomView(snapshot: context.state.snapshot)
                         .id(context.state.seq)
+                        .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay, showText: true))
                 }
             } compactLeading: {
                 DynamicIslandCompactLeadingView(snapshot: context.state.snapshot)
@@ -130,6 +133,35 @@ private struct LockScreenLiveActivityView: View {
                 }
             }
         )
+        .overlay(
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.gray.opacity(0.6))
+                Text("Tap to update")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .opacity(state.snapshot.showRenewalOverlay ? 1 : 0)
+        )
+    }
+}
+
+/// Full-size gray overlay shown 30 minutes before the LA renewal deadline.
+/// Applied to both the lock screen view and each expanded Dynamic Island region.
+private struct RenewalOverlayView: View {
+    let show: Bool
+    var showText: Bool = false
+
+    var body: some View {
+        ZStack {
+            Color.gray.opacity(0.6)
+            if showText {
+                Text("Tap to update")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+        }
+        .opacity(show ? 1 : 0)
     }
 }
 

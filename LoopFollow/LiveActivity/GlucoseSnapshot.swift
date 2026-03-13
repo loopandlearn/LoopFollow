@@ -50,6 +50,12 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     /// True when LoopFollow detects the loop has not reported in 15+ minutes (Nightscout only).
     let isNotLooping: Bool
 
+    // MARK: - Renewal
+
+    /// True when the Live Activity is within 30 minutes of its renewal deadline.
+    /// The extension renders a "Tap to update" overlay so the user knows renewal is imminent.
+    let showRenewalOverlay: Bool
+
     init(
         glucose: Double,
         delta: Double,
@@ -59,7 +65,8 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         cob: Double?,
         projected: Double?,
         unit: Unit,
-        isNotLooping: Bool
+        isNotLooping: Bool,
+        showRenewalOverlay: Bool = false
     ) {
         self.glucose = glucose
         self.delta = delta
@@ -70,6 +77,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         self.projected = projected
         self.unit = unit
         self.isNotLooping = isNotLooping
+        self.showRenewalOverlay = showRenewalOverlay
     }
 
     func encode(to encoder: Encoder) throws {
@@ -83,10 +91,11 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         try container.encodeIfPresent(projected, forKey: .projected)
         try container.encode(unit, forKey: .unit)
         try container.encode(isNotLooping, forKey: .isNotLooping)
+        try container.encode(showRenewalOverlay, forKey: .showRenewalOverlay)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case glucose, delta, trend, updatedAt, iob, cob, projected, unit, isNotLooping
+        case glucose, delta, trend, updatedAt, iob, cob, projected, unit, isNotLooping, showRenewalOverlay
     }
 
     // MARK: - Codable
@@ -102,6 +111,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         projected = try container.decodeIfPresent(Double.self, forKey: .projected)
         unit = try container.decode(Unit.self, forKey: .unit)
         isNotLooping = try container.decodeIfPresent(Bool.self, forKey: .isNotLooping) ?? false
+        showRenewalOverlay = try container.decodeIfPresent(Bool.self, forKey: .showRenewalOverlay) ?? false
     }
 
     // MARK: - Derived Convenience

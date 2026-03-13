@@ -91,6 +91,10 @@ class Storage {
     var lastCOB = StorageValue<Double?>(key: "lastCOB", defaultValue: nil)
     var projectedBgMgdl = StorageValue<Double?>(key: "projectedBgMgdl", defaultValue: nil)
 
+    // Live Activity renewal
+    var laRenewBy = StorageValue<TimeInterval>(key: "laRenewBy", defaultValue: 0)
+    var laRenewalFailed = StorageValue<Bool>(key: "laRenewalFailed", defaultValue: false)
+
     // Graph Settings [BEGIN]
     var showDots = StorageValue<Bool>(key: "showDots", defaultValue: true)
     var showLines = StorageValue<Bool>(key: "showLines", defaultValue: true)
