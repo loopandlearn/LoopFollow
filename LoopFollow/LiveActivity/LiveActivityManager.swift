@@ -21,9 +21,32 @@ final class LiveActivityManager {
     }
 
     @objc private func handleForeground() {
+        LogManager.shared.log(category: .general, message: "[LA] foreground notification received, laRenewalFailed=\(Storage.shared.laRenewalFailed.value)")
         guard Storage.shared.laRenewalFailed.value else { return }
-        LogManager.shared.log(category: .general, message: "[LA] retrying Live Activity start after previous renewal failure")
-        startIfNeeded()
+
+        // Renewal previously failed — end the stale LA and start a fresh one.
+        // We cannot call startIfNeeded() here: it finds the existing activity in
+        // Activity.activities and reuses it rather than replacing it.
+        LogManager.shared.log(category: .general, message: "[LA] ending stale LA and restarting after renewal failure")
+        if let activity = current {
+            current = nil
+            updateTask?.cancel()
+            updateTask = nil
+            tokenObservationTask?.cancel()
+            tokenObservationTask = nil
+            stateObserverTask?.cancel()
+            stateObserverTask = nil
+            pushToken = nil
+            Task {
+                await activity.end(nil, dismissalPolicy: .immediate)
+                await MainActor.run {
+                    self.startFromCurrentState()
+                    LogManager.shared.log(category: .general, message: "[LA] Live Activity restarted after foreground retry")
+                }
+            }
+        } else {
+            startFromCurrentState()
+        }
     }
 
     private static let renewalThreshold: TimeInterval = 7.5 * 3600
@@ -157,7 +180,8 @@ final class LiveActivityManager {
         let renewBy = Storage.shared.laRenewBy.value
         guard renewBy > 0, Date().timeIntervalSince1970 >= renewBy else { return false }
 
-        LogManager.shared.log(category: .general, message: "[LA] renewal deadline passed, requesting new LA")
+        let overdueBy = Date().timeIntervalSince1970 - renewBy
+        LogManager.shared.log(category: .general, message: "[LA] renewal deadline passed by \(Int(overdueBy))s, requesting new LA")
 
         let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
         let attributes = GlucoseLiveActivityAttributes(title: "LoopFollow")
@@ -211,6 +235,10 @@ final class LiveActivityManager {
 
         // Check if the Live Activity is approaching Apple's 8-hour limit and renew if so.
         if renewIfNeeded(snapshot: snapshot) { return }
+
+        if snapshot.showRenewalOverlay {
+            LogManager.shared.log(category: .general, message: "[LA] sending update with renewal overlay visible")
+        }
 
         let now = Date()
         let timeSinceLastUpdate = now.timeIntervalSince(lastUpdateTime ?? .distantPast)

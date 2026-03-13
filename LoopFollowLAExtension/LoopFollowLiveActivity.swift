@@ -134,17 +134,14 @@ private struct LockScreenLiveActivityView: View {
             }
         )
         .overlay(
-            Group {
-                if state.snapshot.showRenewalOverlay {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.gray.opacity(0.6))
-                        Text("Tap to update")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.white)
-                    }
-                }
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.gray.opacity(0.6))
+                Text("Tap to update")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
             }
+            .opacity(state.snapshot.showRenewalOverlay ? 1 : 0)
         )
     }
 }
@@ -156,16 +153,15 @@ private struct RenewalOverlayView: View {
     var showText: Bool = false
 
     var body: some View {
-        if show {
-            ZStack {
-                Color.gray.opacity(0.6)
-                if showText {
-                    Text("Tap to update")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
+        ZStack {
+            Color.gray.opacity(0.6)
+            if showText {
+                Text("Tap to update")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white)
             }
         }
+        .opacity(show ? 1 : 0)
     }
 }
 
