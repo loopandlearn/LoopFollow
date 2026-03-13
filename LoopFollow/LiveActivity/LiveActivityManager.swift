@@ -49,7 +49,7 @@ final class LiveActivityManager {
         }
     }
 
-    private static let renewalThreshold: TimeInterval = 7.5 * 3600
+    private static let renewalThreshold: TimeInterval = 20 * 60
 
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
