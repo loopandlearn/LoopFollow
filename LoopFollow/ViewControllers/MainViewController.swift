@@ -992,9 +992,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     @objc override func viewDidAppear(_: Bool) {
         showHideNSDetails()
-        if #available(iOS 16.1, *) {
+        #if !targetEnvironment(macCatalyst)
             LiveActivityManager.shared.startFromCurrentState()
-        }
+        #endif
     }
 
     func stringFromTimeInterval(interval: TimeInterval) -> String {

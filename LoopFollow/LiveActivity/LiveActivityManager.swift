@@ -1,6 +1,9 @@
 // LoopFollow
 // LiveActivityManager.swift
 
+// swiftformat:disable indent
+#if !targetEnvironment(macCatalyst)
+
 @preconcurrency import ActivityKit
 import Foundation
 import os
@@ -8,7 +11,6 @@ import UIKit
 
 /// Live Activity manager for LoopFollow.
 
-@available(iOS 16.1, *)
 final class LiveActivityManager {
     static let shared = LiveActivityManager()
     private init() {}
@@ -277,3 +279,5 @@ final class LiveActivityManager {
         }
     }
 }
+
+#endif
