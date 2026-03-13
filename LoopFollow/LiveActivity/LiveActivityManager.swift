@@ -13,6 +13,8 @@ final class LiveActivityManager {
     static let shared = LiveActivityManager()
     private init() {}
 
+    private static let renewalThreshold: TimeInterval = 7.5 * 3600
+
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
     private var updateTask: Task<Void, Never>?
@@ -61,6 +63,7 @@ final class LiveActivityManager {
             let activity = try Activity.request(attributes: attributes, content: content, pushType: .token)
 
             bind(to: activity, logReason: "start-new")
+            Storage.shared.laRenewBy.value = Date().timeIntervalSince1970 + LiveActivityManager.renewalThreshold
             LogManager.shared.log(category: .general, message: "Live Activity started id=\(activity.id)")
         } catch {
             LogManager.shared.log(category: .general, message: "Live Activity failed to start: \(error)")
@@ -98,11 +101,13 @@ final class LiveActivityManager {
 
             if current?.id == activity.id {
                 current = nil
+                Storage.shared.laRenewBy.value = 0
             }
         }
     }
 
     func startFromCurrentState() {
+        endOrphanedActivities()
         let provider = StorageCurrentGlucoseStateProvider()
         if let snapshot = GlucoseSnapshotBuilder.build(from: provider) {
             LAAppGroupSettings.setThresholds(
@@ -123,6 +128,40 @@ final class LiveActivityManager {
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: workItem)
     }
 
+    // MARK: - Renewal
+
+    /// Ends the current Live Activity immediately and re-requests a fresh one,
+    /// working around Apple's 8-hour maximum LA lifetime.
+    /// Returns true if renewal was performed (caller should return early).
+    private func renewIfNeeded(snapshot: GlucoseSnapshot) -> Bool {
+        guard let activity = current else { return false }
+
+        let renewBy = Storage.shared.laRenewBy.value
+        guard renewBy > 0, Date().timeIntervalSince1970 >= renewBy else { return false }
+
+        LogManager.shared.log(category: .general, message: "[LA] renewal deadline passed, renewing")
+
+        // Clear our reference before re-requesting so startIfNeeded() creates a fresh one
+        current = nil
+        updateTask?.cancel()
+        updateTask = nil
+        tokenObservationTask?.cancel()
+        tokenObservationTask = nil
+        stateObserverTask?.cancel()
+        stateObserverTask = nil
+        pushToken = nil
+
+        Task {
+            // .immediate clears the stale Lock Screen card before the new one appears
+            await activity.end(nil, dismissalPolicy: .immediate)
+            await MainActor.run {
+                self.startFromCurrentState()
+            }
+        }
+
+        return true
+    }
+
     private func performRefresh(reason: String) {
         let provider = StorageCurrentGlucoseStateProvider()
         guard let snapshot = GlucoseSnapshotBuilder.build(from: provider) else {
@@ -134,6 +173,10 @@ final class LiveActivityManager {
             "at=\(snapshot.updatedAt.timeIntervalSince1970) iob=\(snapshot.iob?.description ?? "nil") " +
             "cob=\(snapshot.cob?.description ?? "nil") proj=\(snapshot.projected?.description ?? "nil") u=\(snapshot.unit.rawValue)"
         LogManager.shared.log(category: .general, message: "[LA] snapshot \(fingerprint) reason=\(reason)", isDebug: true)
+
+        // Check if the Live Activity is approaching Apple's 8-hour limit and renew if so.
+        if renewIfNeeded(snapshot: snapshot) { return }
+
         let now = Date()
         let timeSinceLastUpdate = now.timeIntervalSince(lastUpdateTime ?? .distantPast)
         let forceRefreshNeeded = timeSinceLastUpdate >= 5 * 60
@@ -237,6 +280,19 @@ final class LiveActivityManager {
     }
 
     // MARK: - Binding / Lifecycle
+
+    /// Ends any Live Activities of this type that are not the one currently tracked.
+    /// Called on app launch to clean up cards left behind by a previous crash.
+    private func endOrphanedActivities() {
+        for activity in Activity<GlucoseLiveActivityAttributes>.activities {
+            guard activity.id != current?.id else { continue }
+            let orphanID = activity.id
+            Task {
+                await activity.end(nil, dismissalPolicy: .immediate)
+                LogManager.shared.log(category: .general, message: "Ended orphaned Live Activity id=\(orphanID)")
+            }
+        }
+    }
 
     private func bind(to activity: Activity<GlucoseLiveActivityAttributes>, logReason: String) {
         if current?.id == activity.id { return }
