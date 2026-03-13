@@ -13,7 +13,7 @@ final class LiveActivityManager {
     static let shared = LiveActivityManager()
     private init() {}
 
-    private static let renewalThreshold: TimeInterval = 7.5 * 3600
+    private static let renewalThreshold: TimeInterval = 20 * 60
 
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
@@ -156,6 +156,7 @@ final class LiveActivityManager {
             await activity.end(nil, dismissalPolicy: .immediate)
             await MainActor.run {
                 self.startFromCurrentState()
+                LogManager.shared.log(category: .general, message: "[LA] Live Activity renewed successfully")
             }
         }
 
