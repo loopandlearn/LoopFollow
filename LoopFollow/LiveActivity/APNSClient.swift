@@ -104,6 +104,7 @@ class APNSClient {
         ]
 
         snapshotDict["isNotLooping"] = snapshot.isNotLooping
+        snapshotDict["showRenewalOverlay"] = snapshot.showRenewalOverlay
         if let iob = snapshot.iob { snapshotDict["iob"] = iob }
         if let cob = snapshot.cob { snapshotDict["cob"] = cob }
         if let projected = snapshot.projected { snapshotDict["projected"] = projected }

@@ -28,6 +28,9 @@ final class LiveActivityManager {
         // We cannot call startIfNeeded() here: it finds the existing activity in
         // Activity.activities and reuses it rather than replacing it.
         LogManager.shared.log(category: .general, message: "[LA] ending stale LA and restarting after renewal failure")
+        // Clear the expired deadline synchronously so any snapshot built between now
+        // and when the new LA is started computes showRenewalOverlay = false.
+        Storage.shared.laRenewBy.value = 0
         if let activity = current {
             current = nil
             updateTask?.cancel()
@@ -40,9 +43,6 @@ final class LiveActivityManager {
             Task {
                 await activity.end(nil, dismissalPolicy: .immediate)
                 await MainActor.run {
-                    // Clear the expired deadline before rebuilding the snapshot so
-                    // GlucoseSnapshotBuilder computes showRenewalOverlay = false.
-                    Storage.shared.laRenewBy.value = 0
                     self.startFromCurrentState()
                     LogManager.shared.log(category: .general, message: "[LA] Live Activity restarted after foreground retry")
                 }
