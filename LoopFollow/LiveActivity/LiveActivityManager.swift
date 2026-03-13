@@ -52,7 +52,11 @@ final class LiveActivityManager {
         }
     }
 
-    private static let renewalThreshold: TimeInterval = 20 * 60
+    // TEST VALUES — restore both to production before merging:
+    //   renewalThreshold = 7.5 * 3600
+    //   renewalWarning   = 20 * 60
+    static let renewalThreshold: TimeInterval = 20 * 60
+    static let renewalWarning: TimeInterval = 5 * 60
 
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
