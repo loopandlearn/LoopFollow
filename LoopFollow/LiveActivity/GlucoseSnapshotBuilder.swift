@@ -53,6 +53,11 @@ enum GlucoseSnapshotBuilder {
         // Not Looping — read from Observable, set by evaluateNotLooping() in DeviceStatus.swift
         let isNotLooping = Observable.shared.isNotLooping.value
 
+        // Renewal overlay — show 30 minutes before the renewal deadline so the user
+        // knows the LA is about to be replaced.
+        let renewBy = Storage.shared.laRenewBy.value
+        let showRenewalOverlay = renewBy > 0 && Date().timeIntervalSince1970 >= renewBy - 1800
+
         LogManager.shared.log(
             category: .general,
             message: "LA snapshot built: updatedAt=\(updatedAt) interval=\(updatedAt.timeIntervalSince1970)",
@@ -68,7 +73,8 @@ enum GlucoseSnapshotBuilder {
             cob: provider.cob,
             projected: provider.projectedMgdl,
             unit: preferredUnit,
-            isNotLooping: isNotLooping
+            isNotLooping: isNotLooping,
+            showRenewalOverlay: showRenewalOverlay
         )
     }
 
