@@ -93,6 +93,7 @@ class Storage {
 
     // Live Activity renewal
     var laRenewBy = StorageValue<TimeInterval>(key: "laRenewBy", defaultValue: 0)
+    var laRenewalFailed = StorageValue<Bool>(key: "laRenewalFailed", defaultValue: false)
 
     // Graph Settings [BEGIN]
     var showDots = StorageValue<Bool>(key: "showDots", defaultValue: true)

@@ -11,7 +11,20 @@ import UIKit
 @available(iOS 16.1, *)
 final class LiveActivityManager {
     static let shared = LiveActivityManager()
-    private init() {}
+    private init() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleForeground() {
+        guard Storage.shared.laRenewalFailed.value else { return }
+        LogManager.shared.log(category: .general, message: "[LA] retrying Live Activity start after previous renewal failure")
+        startIfNeeded()
+    }
 
     private static let renewalThreshold: TimeInterval = 20 * 60
 
@@ -34,6 +47,7 @@ final class LiveActivityManager {
 
         if let existing = Activity<GlucoseLiveActivityAttributes>.activities.first {
             bind(to: existing, logReason: "reuse")
+            Storage.shared.laRenewalFailed.value = false
             return
         }
 
@@ -59,11 +73,13 @@ final class LiveActivityManager {
                 producedAt: Date()
             )
 
-            let content = ActivityContent(state: initialState, staleDate: Date().addingTimeInterval(15 * 60))
+            let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
+            let content = ActivityContent(state: initialState, staleDate: renewDeadline)
             let activity = try Activity.request(attributes: attributes, content: content, pushType: .token)
 
             bind(to: activity, logReason: "start-new")
-            Storage.shared.laRenewBy.value = Date().timeIntervalSince1970 + LiveActivityManager.renewalThreshold
+            Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
+            Storage.shared.laRenewalFailed.value = false
             LogManager.shared.log(category: .general, message: "Live Activity started id=\(activity.id)")
         } catch {
             LogManager.shared.log(category: .general, message: "Live Activity failed to start: \(error)")
@@ -130,37 +146,55 @@ final class LiveActivityManager {
 
     // MARK: - Renewal
 
-    /// Ends the current Live Activity immediately and re-requests a fresh one,
-    /// working around Apple's 8-hour maximum LA lifetime.
+    /// Requests a fresh Live Activity to replace the current one when the renewal
+    /// deadline has passed, working around Apple's 8-hour maximum LA lifetime.
+    /// The new LA is requested FIRST — the old one is only ended if that succeeds,
+    /// so the user keeps live data if Activity.request() throws.
     /// Returns true if renewal was performed (caller should return early).
     private func renewIfNeeded(snapshot: GlucoseSnapshot) -> Bool {
-        guard let activity = current else { return false }
+        guard let oldActivity = current else { return false }
 
         let renewBy = Storage.shared.laRenewBy.value
         guard renewBy > 0, Date().timeIntervalSince1970 >= renewBy else { return false }
 
-        LogManager.shared.log(category: .general, message: "[LA] renewal deadline passed, renewing")
+        LogManager.shared.log(category: .general, message: "[LA] renewal deadline passed, requesting new LA")
 
-        // Clear our reference before re-requesting so startIfNeeded() creates a fresh one
-        current = nil
-        updateTask?.cancel()
-        updateTask = nil
-        tokenObservationTask?.cancel()
-        tokenObservationTask = nil
-        stateObserverTask?.cancel()
-        stateObserverTask = nil
-        pushToken = nil
+        let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
+        let attributes = GlucoseLiveActivityAttributes(title: "LoopFollow")
+        let state = GlucoseLiveActivityAttributes.ContentState(
+            snapshot: snapshot,
+            seq: seq,
+            reason: "renew",
+            producedAt: Date()
+        )
+        let content = ActivityContent(state: state, staleDate: renewDeadline)
 
-        Task {
-            // .immediate clears the stale Lock Screen card before the new one appears
-            await activity.end(nil, dismissalPolicy: .immediate)
-            await MainActor.run {
-                self.startFromCurrentState()
-                LogManager.shared.log(category: .general, message: "[LA] Live Activity renewed successfully")
+        do {
+            let newActivity = try Activity.request(attributes: attributes, content: content, pushType: .token)
+
+            // New LA is live — now it's safe to remove the old card.
+            Task {
+                await oldActivity.end(nil, dismissalPolicy: .immediate)
             }
-        }
 
-        return true
+            updateTask?.cancel()
+            updateTask = nil
+            tokenObservationTask?.cancel()
+            tokenObservationTask = nil
+            stateObserverTask?.cancel()
+            stateObserverTask = nil
+            pushToken = nil
+
+            bind(to: newActivity, logReason: "renew")
+            Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
+            Storage.shared.laRenewalFailed.value = false
+            LogManager.shared.log(category: .general, message: "[LA] Live Activity renewed successfully id=\(newActivity.id)")
+            return true
+        } catch {
+            Storage.shared.laRenewalFailed.value = true
+            LogManager.shared.log(category: .general, message: "[LA] renewal failed, keeping existing LA: \(error)")
+            return false
+        }
     }
 
     private func performRefresh(reason: String) {
@@ -244,7 +278,7 @@ final class LiveActivityManager {
 
             let content = ActivityContent(
                 state: state,
-                staleDate: Date().addingTimeInterval(15 * 60),
+                staleDate: Date(timeIntervalSince1970: Storage.shared.laRenewBy.value),
                 relevanceScore: 100.0
             )
 
