@@ -40,6 +40,9 @@ final class LiveActivityManager {
             Task {
                 await activity.end(nil, dismissalPolicy: .immediate)
                 await MainActor.run {
+                    // Clear the expired deadline before rebuilding the snapshot so
+                    // GlucoseSnapshotBuilder computes showRenewalOverlay = false.
+                    Storage.shared.laRenewBy.value = 0
                     self.startFromCurrentState()
                     LogManager.shared.log(category: .general, message: "[LA] Live Activity restarted after foreground retry")
                 }
@@ -185,8 +188,23 @@ final class LiveActivityManager {
 
         let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
         let attributes = GlucoseLiveActivityAttributes(title: "LoopFollow")
+
+        // Strip the overlay flag — the new LA has a fresh deadline so it should
+        // open clean, without the warning visible from the first frame.
+        let freshSnapshot = GlucoseSnapshot(
+            glucose: snapshot.glucose,
+            delta: snapshot.delta,
+            trend: snapshot.trend,
+            updatedAt: snapshot.updatedAt,
+            iob: snapshot.iob,
+            cob: snapshot.cob,
+            projected: snapshot.projected,
+            unit: snapshot.unit,
+            isNotLooping: snapshot.isNotLooping,
+            showRenewalOverlay: false
+        )
         let state = GlucoseLiveActivityAttributes.ContentState(
-            snapshot: snapshot,
+            snapshot: freshSnapshot,
             seq: seq,
             reason: "renew",
             producedAt: Date()
@@ -212,6 +230,8 @@ final class LiveActivityManager {
             bind(to: newActivity, logReason: "renew")
             Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
             Storage.shared.laRenewalFailed.value = false
+            // Update the store so the next duplicate check has the correct baseline.
+            GlucoseSnapshotStore.shared.save(freshSnapshot)
             LogManager.shared.log(category: .general, message: "[LA] Live Activity renewed successfully id=\(newActivity.id)")
             return true
         } catch {
