@@ -28,27 +28,37 @@ final class LiveActivityManager {
         // We cannot call startIfNeeded() here: it finds the existing activity in
         // Activity.activities and reuses it rather than replacing it.
         LogManager.shared.log(category: .general, message: "[LA] ending stale LA and restarting after renewal failure")
-        // Clear the expired deadline synchronously so any snapshot built between now
-        // and when the new LA is started computes showRenewalOverlay = false.
+        // Clear state synchronously so any snapshot built between now and when the
+        // new LA is started computes showRenewalOverlay = false.
         Storage.shared.laRenewBy.value = 0
-        if let activity = current {
-            current = nil
-            updateTask?.cancel()
-            updateTask = nil
-            tokenObservationTask?.cancel()
-            tokenObservationTask = nil
-            stateObserverTask?.cancel()
-            stateObserverTask = nil
-            pushToken = nil
-            Task {
-                await activity.end(nil, dismissalPolicy: .immediate)
-                await MainActor.run {
-                    self.startFromCurrentState()
-                    LogManager.shared.log(category: .general, message: "[LA] Live Activity restarted after foreground retry")
-                }
-            }
-        } else {
+        Storage.shared.laRenewalFailed.value = false
+
+        guard let activity = current else {
             startFromCurrentState()
+            return
+        }
+
+        current = nil
+        updateTask?.cancel()
+        updateTask = nil
+        tokenObservationTask?.cancel()
+        tokenObservationTask = nil
+        stateObserverTask?.cancel()
+        stateObserverTask = nil
+        pushToken = nil
+
+        Task {
+            // Await end so the activity is removed from Activity.activities before
+            // startIfNeeded() runs — otherwise it hits the reuse path and skips
+            // writing a new laRenewBy deadline.
+            await activity.end(nil, dismissalPolicy: .immediate)
+            await MainActor.run {
+                // startFromCurrentState rebuilds the snapshot (showRenewalOverlay = false
+                // since laRenewBy is 0), saves it to the store, then calls startIfNeeded()
+                // which finds no existing activity and requests a fresh LA with a new deadline.
+                self.startFromCurrentState()
+                LogManager.shared.log(category: .general, message: "[LA] Live Activity restarted after foreground retry")
+            }
         }
     }
 
