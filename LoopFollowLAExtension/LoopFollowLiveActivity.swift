@@ -15,23 +15,30 @@ struct LoopFollowLiveActivityWidget: Widget {
                 .activitySystemActionForegroundColor(.white)
                 .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
                 .applyActivityContentMarginsFixIfAvailable()
+                .widgetURL(URL(string: "loopfollow://la-tap")!)
         } dynamicIsland: { context in
             // DYNAMIC ISLAND UI
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    DynamicIslandLeadingView(snapshot: context.state.snapshot)
-                        .id(context.state.seq)
-                        .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
+                    Link(destination: URL(string: "loopfollow://la-tap")!) {
+                        DynamicIslandLeadingView(snapshot: context.state.snapshot)
+                            .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
+                    }
+                    .id(context.state.seq)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    DynamicIslandTrailingView(snapshot: context.state.snapshot)
-                        .id(context.state.seq)
-                        .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
+                    Link(destination: URL(string: "loopfollow://la-tap")!) {
+                        DynamicIslandTrailingView(snapshot: context.state.snapshot)
+                            .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
+                    }
+                    .id(context.state.seq)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    DynamicIslandBottomView(snapshot: context.state.snapshot)
-                        .id(context.state.seq)
-                        .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay, showText: true))
+                    Link(destination: URL(string: "loopfollow://la-tap")!) {
+                        DynamicIslandBottomView(snapshot: context.state.snapshot)
+                            .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay, showText: true))
+                    }
+                    .id(context.state.seq)
                 }
             } compactLeading: {
                 DynamicIslandCompactLeadingView(snapshot: context.state.snapshot)

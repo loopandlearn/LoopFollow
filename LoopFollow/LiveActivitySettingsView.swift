@@ -31,7 +31,9 @@ struct LiveActivitySettingsView: View {
         }
         .onChange(of: laEnabled) { newValue in
             Storage.shared.laEnabled.value = newValue
-            if !newValue {
+            if newValue {
+                LiveActivityManager.shared.startFromCurrentState()
+            } else {
                 LiveActivityManager.shared.end(dismissalPolicy: .immediate)
             }
         }

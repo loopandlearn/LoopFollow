@@ -97,6 +97,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         completionHandler(.newData)
     }
 
+    // MARK: - URL handling
+
+    func application(_: UIApplication, open url: URL, options _: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        if url.scheme == "loopfollow" && url.host == "la-tap" {
+            NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
+            return true
+        }
+        return false
+    }
+
     // MARK: UISceneSession Lifecycle
 
     func application(_: UIApplication, willFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {

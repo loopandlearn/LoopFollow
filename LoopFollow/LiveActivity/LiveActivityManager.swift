@@ -82,7 +82,6 @@ final class LiveActivityManager {
         guard Storage.shared.laEnabled.value else { return }
         Task { @MainActor in
             self.startFromCurrentState()
-            NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
         }
     }
 
@@ -513,7 +512,14 @@ final class LiveActivityManager {
                 if state == .ended || state == .dismissed {
                     if current?.id == activity.id {
                         current = nil
+                        Storage.shared.laRenewBy.value = 0
                         LogManager.shared.log(category: .general, message: "Live Activity cleared id=\(activity.id)", isDebug: true)
+                    }
+                    if state == .dismissed {
+                        // User manually swiped away the LA — treat as an implicit disable
+                        // so it does not auto-restart when the app foregrounds.
+                        Storage.shared.laEnabled.value = false
+                        LogManager.shared.log(category: .general, message: "Live Activity dismissed by user — laEnabled set to false")
                     }
                 }
             }
@@ -521,10 +527,10 @@ final class LiveActivityManager {
     }
 }
 
+#endif
+
 extension Notification.Name {
-    /// Posted on the main actor after the Live Activity manager handles a didBecomeActive event.
-    /// MainViewController observes this to navigate to the Home or Snoozer tab.
+    /// Posted when the user taps the Live Activity or Dynamic Island.
+    /// Observers navigate to the Home or Snoozer tab as appropriate.
     static let liveActivityDidForeground = Notification.Name("liveActivityDidForeground")
 }
-
-#endif
