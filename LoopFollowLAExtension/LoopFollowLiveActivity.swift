@@ -214,9 +214,9 @@ private struct DynamicIslandLeadingView: View {
                         .monospacedDigit()
                         .foregroundStyle(.white.opacity(0.9))
                     Text("Proj: \(LAFormat.projected(snapshot))")
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.75))
+                        .foregroundStyle(.white.opacity(0.9))
                 }
             }
         }
@@ -240,6 +240,7 @@ private struct DynamicIslandTrailingView: View {
                     .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.95))
             }
+            .padding(.trailing, 6)
         }
     }
 }
