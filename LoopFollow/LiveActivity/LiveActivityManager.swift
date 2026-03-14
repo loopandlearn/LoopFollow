@@ -28,7 +28,7 @@ final class LiveActivityManager {
 
     @objc private func handleDidBecomeActive() {
         guard Storage.shared.laEnabled.value else { return }
-        forceRestart()
+        Task { @MainActor in self.forceRestart() }
     }
 
     @objc private func handleForeground() {

@@ -5,7 +5,7 @@ import AppIntents
 import UIKit
 
 @available(iOS 16.4, *)
-struct RestartLiveActivityIntent: AppIntent, ForegroundContinuableIntent {
+struct RestartLiveActivityIntent: AppIntent {
     static var title: LocalizedStringResource = "Restart Live Activity"
     static var description = IntentDescription("Starts or restarts the LoopFollow Live Activity.")
 
@@ -21,8 +21,6 @@ struct RestartLiveActivityIntent: AppIntent, ForegroundContinuableIntent {
             }
             return .result(dialog: "Please enter your APNs credentials in LoopFollow settings to use the Live Activity.")
         }
-
-        try await continueInForeground()
 
         await MainActor.run { LiveActivityManager.shared.forceRestart() }
 
