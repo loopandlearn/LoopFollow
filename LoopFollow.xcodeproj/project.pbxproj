@@ -22,6 +22,7 @@
 		374A77B82F5BE1AC00E96858 /* GlucoseSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77AF2F5BE1AC00E96858 /* GlucoseSnapshotStore.swift */; };
 		374A77B92F5BE1AC00E96858 /* PreferredGlucoseUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77B22F5BE1AC00E96858 /* PreferredGlucoseUnit.swift */; };
 		379BECAA2F6588300069DC62 /* RestartLiveActivityIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379BECA92F6588300069DC62 /* RestartLiveActivityIntent.swift */; };
+		379BECB02F65DA4B0069DC62 /* LiveActivitySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379BECAF2F65DA4B0069DC62 /* LiveActivitySettingsView.swift */; };
 		37A4BDDB2F5B6B4A00EEB289 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A4BDDA2F5B6B4A00EEB289 /* WidgetKit.framework */; };
 		37A4BDDD2F5B6B4A00EEB289 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A4BDDC2F5B6B4A00EEB289 /* SwiftUI.framework */; };
 		37A4BDE82F5B6B4C00EEB289 /* LoopFollowLAExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -464,6 +465,7 @@
 		374A77B32F5BE1AC00E96858 /* StorageCurrentGlucoseStateProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageCurrentGlucoseStateProvider.swift; sourceTree = "<group>"; };
 		374DAACA2F5B924B00BB663B /* LoopFollowLAExtensionExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LoopFollowLAExtensionExtension.entitlements; sourceTree = "<group>"; };
 		379BECA92F6588300069DC62 /* RestartLiveActivityIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestartLiveActivityIntent.swift; sourceTree = "<group>"; };
+		379BECAF2F65DA4B0069DC62 /* LiveActivitySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivitySettingsView.swift; sourceTree = "<group>"; };
 		37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LoopFollowLAExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		37A4BDDA2F5B6B4A00EEB289 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
 		37A4BDDC2F5B6B4A00EEB289 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
@@ -1566,6 +1568,7 @@
 		FC8DEEE32485D1680075863F /* LoopFollow */ = {
 			isa = PBXGroup;
 			children = (
+				379BECAF2F65DA4B0069DC62 /* LiveActivitySettingsView.swift */,
 				376310762F5CD65100656488 /* LiveActivity */,
 				6589CC612E9E7D1600BB18FE /* Settings */,
 				65AC26702ED245DF00421360 /* Treatments */,
@@ -2257,6 +2260,7 @@
 				DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */,
 				DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */,
 				DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */,
+				379BECB02F65DA4B0069DC62 /* LiveActivitySettingsView.swift in Sources */,
 				DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */,
 				DDE75D2B2DE5E613007C1FC1 /* NavigationRow.swift in Sources */,
 				DD4AFB3B2DB55CB600BB593F /* TimeOfDay.swift in Sources */,
