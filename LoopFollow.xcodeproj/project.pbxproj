@@ -25,7 +25,7 @@
 		379BECB02F65DA4B0069DC62 /* LiveActivitySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379BECAF2F65DA4B0069DC62 /* LiveActivitySettingsView.swift */; };
 		37A4BDDB2F5B6B4A00EEB289 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A4BDDA2F5B6B4A00EEB289 /* WidgetKit.framework */; };
 		37A4BDDD2F5B6B4A00EEB289 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A4BDDC2F5B6B4A00EEB289 /* SwiftUI.framework */; };
-		37A4BDE82F5B6B4C00EEB289 /* LoopFollowLAExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		37A4BDE82F5B6B4C00EEB289 /* LoopFollowLAExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
 		5544D8C363FB5D3B9BF8CE4A /* APNSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C2676561D686C6459CAA2D /* APNSettingsView.swift */; };
 		654132E72E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */; };
@@ -2353,6 +2353,7 @@
 /* Begin PBXTargetDependency section */
 		37A4BDE72F5B6B4C00EEB289 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 37A4BDD82F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension */;
 			targetProxy = 37A4BDE62F5B6B4C00EEB289 /* PBXContainerItemProxy */;
 		};

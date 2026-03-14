@@ -269,9 +269,9 @@ extension MainViewController {
             self.markDataLoaded("bg")
 
             // Live Activity update
-            if #available(iOS 16.1, *) {
+            #if !targetEnvironment(macCatalyst)
                 LiveActivityManager.shared.refreshFromCurrentState(reason: "bg")
-            }
+            #endif
 
             // Update contact
             if Storage.shared.contactEnabled.value {

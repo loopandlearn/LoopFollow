@@ -56,9 +56,9 @@ extension MainViewController {
             LoopStatusLabel.text = "⚠️ Not Looping!"
             LoopStatusLabel.textColor = UIColor.systemYellow
             LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
-            if #available(iOS 16.1, *) {
+            #if !targetEnvironment(macCatalyst)
                 LiveActivityManager.shared.refreshFromCurrentState(reason: "notLooping")
-            }
+            #endif
 
         } else {
             IsNotLooping = false
@@ -77,9 +77,9 @@ extension MainViewController {
             case .system:
                 LoopStatusLabel.textColor = UIColor.label
             }
-            if #available(iOS 16.1, *) {
+            #if !targetEnvironment(macCatalyst)
                 LiveActivityManager.shared.refreshFromCurrentState(reason: "loopingResumed")
-            }
+            #endif
         }
     }
 

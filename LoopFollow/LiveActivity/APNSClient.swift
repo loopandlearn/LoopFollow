@@ -1,6 +1,9 @@
 // LoopFollow
 // APNSClient.swift
 
+// swiftformat:disable indent
+#if !targetEnvironment(macCatalyst)
+
 import Foundation
 
 class APNSClient {
@@ -127,3 +130,5 @@ class APNSClient {
         return try? JSONSerialization.data(withJSONObject: payload)
     }
 }
+
+#endif

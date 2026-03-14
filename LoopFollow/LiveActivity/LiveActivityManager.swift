@@ -1,6 +1,9 @@
 // LoopFollow
 // LiveActivityManager.swift
 
+// swiftformat:disable indent
+#if !targetEnvironment(macCatalyst)
+
 @preconcurrency import ActivityKit
 import Foundation
 import os
@@ -8,7 +11,6 @@ import UIKit
 
 /// Live Activity manager for LoopFollow.
 
-@available(iOS 16.1, *)
 final class LiveActivityManager {
     static let shared = LiveActivityManager()
     private init() {
@@ -524,3 +526,5 @@ extension Notification.Name {
     /// MainViewController observes this to navigate to the Home or Snoozer tab.
     static let liveActivityDidForeground = Notification.Name("liveActivityDidForeground")
 }
+
+#endif

@@ -1,6 +1,9 @@
 // LoopFollow
 // GlucoseLiveActivityAttributes.swift
 
+// swiftformat:disable indent
+#if !targetEnvironment(macCatalyst)
+
 import ActivityKit
 import Foundation
 
@@ -35,3 +38,5 @@ struct GlucoseLiveActivityAttributes: ActivityAttributes {
     /// Reserved for future metadata. Keep minimal for stability.
     let title: String
 }
+
+#endif
