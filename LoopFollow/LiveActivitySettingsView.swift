@@ -32,7 +32,7 @@ struct LiveActivitySettingsView: View {
         .onChange(of: laEnabled) { newValue in
             Storage.shared.laEnabled.value = newValue
             if newValue {
-                LiveActivityManager.shared.startFromCurrentState()
+                LiveActivityManager.shared.forceRestart()
             } else {
                 LiveActivityManager.shared.end(dismissalPolicy: .immediate)
             }

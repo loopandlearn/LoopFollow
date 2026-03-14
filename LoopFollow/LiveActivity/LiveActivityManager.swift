@@ -139,6 +139,11 @@ final class LiveActivityManager {
     private var pushToken: String?
     private var tokenObservationTask: Task<Void, Never>?
     private var refreshWorkItem: DispatchWorkItem?
+    /// Set when the user manually swipes away the LA. Blocks auto-restart until
+    /// an explicit user action (Restart button, App Intent) clears it.
+    /// In-memory only — resets to false on app relaunch, so a kill + relaunch
+    /// starts fresh as expected.
+    private var dismissedByUser = false
 
     // MARK: - Public API
 
@@ -247,6 +252,7 @@ final class LiveActivityManager {
     func forceRestart() {
         guard Storage.shared.laEnabled.value else { return }
         LogManager.shared.log(category: .general, message: "[LA] forceRestart called")
+        dismissedByUser = false
         Storage.shared.laRenewBy.value = 0
         Storage.shared.laRenewalFailed.value = false
         current = nil
@@ -266,7 +272,7 @@ final class LiveActivityManager {
     }
 
     func startFromCurrentState() {
-        guard Storage.shared.laEnabled.value else { return }
+        guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
         endOrphanedActivities()
         let provider = StorageCurrentGlucoseStateProvider()
         if let snapshot = GlucoseSnapshotBuilder.build(from: provider) {
@@ -532,10 +538,11 @@ final class LiveActivityManager {
                         LogManager.shared.log(category: .general, message: "Live Activity cleared id=\(activity.id)", isDebug: true)
                     }
                     if state == .dismissed {
-                        // User manually swiped away the LA — treat as an implicit disable
-                        // so it does not auto-restart when the app foregrounds.
-                        Storage.shared.laEnabled.value = false
-                        LogManager.shared.log(category: .general, message: "Live Activity dismissed by user — laEnabled set to false")
+                        // User manually swiped away the LA. Block auto-restart until
+                        // the user explicitly restarts via button or App Intent.
+                        // laEnabled is left true — the user's preference is preserved.
+                        dismissedByUser = true
+                        LogManager.shared.log(category: .general, message: "Live Activity dismissed by user — auto-restart blocked until explicit restart")
                     }
                 }
             }
