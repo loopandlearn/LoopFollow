@@ -22,7 +22,9 @@ struct RestartLiveActivityIntent: AppIntent, ForegroundContinuableIntent {
             return .result(dialog: "Please enter your APNs credentials in LoopFollow settings to use the Live Activity.")
         }
 
-        try await continueInForeground()
+        if #available(iOS 26.0, *) {
+            try await continueInForeground()
+        }
 
         await MainActor.run { LiveActivityManager.shared.forceRestart() }
 
