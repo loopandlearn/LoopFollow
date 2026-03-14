@@ -60,7 +60,7 @@ struct SettingsMenuView: View {
                         settingsPath.value.append(Sheet.importExport)
                     }
 
-                    NavigationRow(title: "APN",
+                    NavigationRow(title: "Live Activity",
                                   icon: "bell.and.waves.left.and.right")
                     {
                         settingsPath.value.append(Sheet.apn)

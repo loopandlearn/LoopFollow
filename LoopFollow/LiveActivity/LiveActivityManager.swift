@@ -18,9 +18,21 @@ final class LiveActivityManager {
             name: UIApplication.willEnterForegroundNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleDidBecomeActive() {
+        guard Storage.shared.laEnabled.value else { return }
+        forceRestart()
     }
 
     @objc private func handleForeground() {
+        guard Storage.shared.laEnabled.value else { return }
         LogManager.shared.log(category: .general, message: "[LA] foreground notification received, laRenewalFailed=\(Storage.shared.laRenewalFailed.value)")
         guard Storage.shared.laRenewalFailed.value else { return }
 
@@ -159,7 +171,32 @@ final class LiveActivityManager {
         }
     }
 
+    /// Ends all running Live Activities and starts a fresh one from the current state.
+    /// Intended for the "Restart Live Activity" button and the AppIntent.
+    @MainActor
+    func forceRestart() {
+        guard Storage.shared.laEnabled.value else { return }
+        LogManager.shared.log(category: .general, message: "[LA] forceRestart called")
+        Storage.shared.laRenewBy.value = 0
+        Storage.shared.laRenewalFailed.value = false
+        current = nil
+        updateTask?.cancel(); updateTask = nil
+        tokenObservationTask?.cancel(); tokenObservationTask = nil
+        stateObserverTask?.cancel(); stateObserverTask = nil
+        pushToken = nil
+        Task {
+            for activity in Activity<GlucoseLiveActivityAttributes>.activities {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+            await MainActor.run {
+                self.startFromCurrentState()
+                LogManager.shared.log(category: .general, message: "[LA] forceRestart: Live Activity restarted")
+            }
+        }
+    }
+
     func startFromCurrentState() {
+        guard Storage.shared.laEnabled.value else { return }
         endOrphanedActivities()
         let provider = StorageCurrentGlucoseStateProvider()
         if let snapshot = GlucoseSnapshotBuilder.build(from: provider) {
@@ -173,6 +210,7 @@ final class LiveActivityManager {
     }
 
     func refreshFromCurrentState(reason: String) {
+        guard Storage.shared.laEnabled.value else { return }
         refreshWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             self?.performRefresh(reason: reason)
