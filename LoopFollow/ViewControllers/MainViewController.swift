@@ -686,11 +686,21 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @objc private func navigateOnLAForeground() {
         guard let tabBarController = tabBarController,
               let vcs = tabBarController.viewControllers, !vcs.isEmpty else { return }
+
+        let targetIndex: Int
         if Observable.shared.currentAlarm.value != nil,
            let snoozerIndex = getSnoozerTabIndex(), snoozerIndex < vcs.count {
-            tabBarController.selectedIndex = snoozerIndex
+            targetIndex = snoozerIndex
         } else {
-            tabBarController.selectedIndex = 0
+            targetIndex = 0
+        }
+
+        if let presented = tabBarController.presentedViewController {
+            presented.dismiss(animated: false) {
+                tabBarController.selectedIndex = targetIndex
+            }
+        } else {
+            tabBarController.selectedIndex = targetIndex
         }
     }
 
