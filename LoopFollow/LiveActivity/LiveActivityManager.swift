@@ -24,6 +24,56 @@ final class LiveActivityManager {
             name: UIApplication.didBecomeActiveNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleWillResignActive),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+    }
+
+    /// Fires before the app loses focus (lock screen, home button, etc.).
+    /// Cancels any pending debounced refresh and pushes the latest snapshot
+    /// directly to the Live Activity while the app is still foreground-active,
+    /// ensuring the LA is up to date the moment the lock screen appears.
+    @objc private func handleWillResignActive() {
+        guard Storage.shared.laEnabled.value, let activity = current else { return }
+
+        refreshWorkItem?.cancel()
+        refreshWorkItem = nil
+
+        let provider = StorageCurrentGlucoseStateProvider()
+        guard let snapshot = GlucoseSnapshotBuilder.build(from: provider) else { return }
+
+        LAAppGroupSettings.setThresholds(
+            lowMgdl: Storage.shared.lowLine.value,
+            highMgdl: Storage.shared.highLine.value
+        )
+        GlucoseSnapshotStore.shared.save(snapshot)
+
+        seq += 1
+        let nextSeq = seq
+        let state = GlucoseLiveActivityAttributes.ContentState(
+            snapshot: snapshot,
+            seq: nextSeq,
+            reason: "resign-active",
+            producedAt: Date()
+        )
+        let content = ActivityContent(
+            state: state,
+            staleDate: Date(timeIntervalSince1970: Storage.shared.laRenewBy.value),
+            relevanceScore: 100.0
+        )
+
+        Task {
+            // Direct ActivityKit update — app is still active at this point.
+            await activity.update(content)
+            LogManager.shared.log(category: .general, message: "[LA] resign-active flush sent seq=\(nextSeq)", isDebug: true)
+            // Also send APNs so the extension receives the latest token-based update.
+            if let token = pushToken {
+                await APNSClient.shared.sendLiveActivityUpdate(pushToken: token, state: state)
+            }
+        }
     }
 
     @objc private func handleDidBecomeActive() {
