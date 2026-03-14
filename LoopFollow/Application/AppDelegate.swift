@@ -48,7 +48,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    func applicationWillTerminate(_: UIApplication) {}
+    func applicationWillTerminate(_: UIApplication) {
+        #if !targetEnvironment(macCatalyst)
+        LiveActivityManager.shared.endOnTerminate()
+        #endif
+    }
 
     // MARK: - Remote Notifications
 

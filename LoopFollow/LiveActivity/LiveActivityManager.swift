@@ -189,6 +189,22 @@ final class LiveActivityManager {
         }
     }
 
+    /// Called from applicationWillTerminate. Ends the LA synchronously (blocking
+    /// up to 3 s) so it clears from the lock screen before the process exits.
+    /// Does not clear laEnabled — the user's preference is preserved for relaunch.
+    func endOnTerminate() {
+        guard let activity = current else { return }
+        current = nil
+        Storage.shared.laRenewBy.value = 0
+        let semaphore = DispatchSemaphore(value: 0)
+        Task.detached {
+            await activity.end(nil, dismissalPolicy: .immediate)
+            semaphore.signal()
+        }
+        _ = semaphore.wait(timeout: .now() + 3)
+        LogManager.shared.log(category: .general, message: "[LA] ended on app terminate")
+    }
+
     func end(dismissalPolicy: ActivityUIDismissalPolicy = .default) {
         updateTask?.cancel()
         updateTask = nil
