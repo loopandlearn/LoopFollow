@@ -28,7 +28,10 @@ final class LiveActivityManager {
 
     @objc private func handleDidBecomeActive() {
         guard Storage.shared.laEnabled.value else { return }
-        Task { @MainActor in self.startFromCurrentState() }
+        Task { @MainActor in
+            self.startFromCurrentState()
+            NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
+        }
     }
 
     @objc private func handleForeground() {
@@ -464,4 +467,10 @@ final class LiveActivityManager {
             }
         }
     }
+}
+
+extension Notification.Name {
+    /// Posted on the main actor after the Live Activity manager handles a didBecomeActive event.
+    /// MainViewController observes this to navigate to the Home or Snoozer tab.
+    static let liveActivityDidForeground = Notification.Name("liveActivityDidForeground")
 }

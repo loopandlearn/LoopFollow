@@ -7,6 +7,7 @@ struct APNSettingsView: View {
     @State private var laEnabled: Bool = Storage.shared.laEnabled.value
     @State private var keyId: String = Storage.shared.lfKeyId.value
     @State private var apnsKey: String = Storage.shared.lfApnsKey.value
+    @State private var restartConfirmed = false
 
     var body: some View {
         Form {
@@ -37,11 +38,19 @@ struct APNSettingsView: View {
                 }
 
                 Section {
-                    Button("Restart Live Activity") {
+                    Button(restartConfirmed ? "Live Activity Restarted" : "Restart Live Activity") {
                         LiveActivityManager.shared.forceRestart()
+                        restartConfirmed = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            restartConfirmed = false
+                        }
                     }
+                    .disabled(restartConfirmed)
                 }
             }
+        }
+        .onReceive(Storage.shared.laEnabled.$value) { newValue in
+            if newValue != laEnabled { laEnabled = newValue }
         }
         .onChange(of: laEnabled) { newValue in
             Storage.shared.laEnabled.value = newValue
