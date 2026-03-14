@@ -193,30 +193,31 @@ private struct DynamicIslandLeadingView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
         if snapshot.isNotLooping {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("⚠️ Not Looping")
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .tracking(1.0)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
+            Text("⚠️ Not Looping")
+                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .tracking(1.0)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         } else {
             VStack(alignment: .leading, spacing: 2) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(LAFormat.glucose(snapshot))
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(.white)
-                    Text(LAFormat.trendArrow(snapshot))
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.95))
-                        .padding(.top, 2)
-                }
-                Text(LAFormat.delta(snapshot))
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                Text(LAFormat.glucose(snapshot))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
                     .monospacedDigit()
-                    .foregroundStyle(.white.opacity(0.9))
+                    .foregroundStyle(.white)
+                HStack(spacing: 5) {
+                    Text(LAFormat.trendArrow(snapshot))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.9))
+                    Text(LAFormat.delta(snapshot))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.white.opacity(0.9))
+                    Text("Proj: \(LAFormat.projected(snapshot))")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.white.opacity(0.75))
+                }
             }
         }
     }
@@ -230,10 +231,11 @@ private struct DynamicIslandTrailingView: View {
             EmptyView()
         } else {
             VStack(alignment: .trailing, spacing: 3) {
-                Text("Upd \(LAFormat.updated(snapshot))")
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
-                Text("Proj \(LAFormat.projected(snapshot))")
+                Text("IOB \(LAFormat.iob(snapshot))")
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.95))
+                Text("COB \(LAFormat.cob(snapshot))")
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.95))
@@ -253,14 +255,11 @@ private struct DynamicIslandBottomView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
         } else {
-            HStack(spacing: 14) {
-                Text("IOB \(LAFormat.iob(snapshot))")
-                Text("COB \(LAFormat.cob(snapshot))")
-            }
-            .font(.system(size: 13, weight: .semibold, design: .rounded))
-            .foregroundStyle(.white.opacity(0.92))
-            .lineLimit(1)
-            .minimumScaleFactor(0.85)
+            Text("Updated at: \(LAFormat.updated(snapshot))")
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.92))
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
         }
     }
 }
@@ -276,8 +275,9 @@ private struct DynamicIslandCompactTrailingView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         } else {
-            Text(LAFormat.trendArrow(snapshot))
+            Text(LAFormat.delta(snapshot))
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .monospacedDigit()
                 .foregroundStyle(.white.opacity(0.95))
         }
     }
