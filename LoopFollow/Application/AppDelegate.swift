@@ -102,34 +102,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // MARK: - URL handling
-
-    /// Set when loopfollow://la-tap arrives while the app is still transitioning
-    /// from background. Consumed in applicationDidBecomeActive once the view
-    /// hierarchy is fully restored and the modal can actually be dismissed.
-    private var pendingLATapNavigation = false
-
-    func application(_ app: UIApplication, open url: URL, options _: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        if url.scheme == "loopfollow" && url.host == "la-tap" {
-            if app.applicationState == .active {
-                // App already fully active — safe to navigate immediately.
-                NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
-            } else {
-                // URL arrived during the background→foreground transition.
-                // Defer until applicationDidBecomeActive so UIKit has finished
-                // restoring the view hierarchy (including any presented modals).
-                pendingLATapNavigation = true
-            }
-            return true
-        }
-        return false
-    }
-
-    func applicationDidBecomeActive(_: UIApplication) {
-        if pendingLATapNavigation {
-            pendingLATapNavigation = false
-            NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
-        }
-    }
+    // Note: with scene-based lifecycle (iOS 13+), URLs are delivered to
+    // SceneDelegate.scene(_:openURLContexts:) — not here. The scene delegate
+    // handles loopfollow://la-tap for Live Activity tap navigation.
 
     // MARK: UISceneSession Lifecycle
 
