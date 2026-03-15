@@ -50,7 +50,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_: UIApplication) {
         #if !targetEnvironment(macCatalyst)
-        LiveActivityManager.shared.endOnTerminate()
+            LiveActivityManager.shared.endOnTerminate()
         #endif
     }
 
@@ -102,6 +102,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // MARK: - URL handling
+
     // Note: with scene-based lifecycle (iOS 13+), URLs are delivered to
     // SceneDelegate.scene(_:openURLContexts:) — not here. The scene delegate
     // handles loopfollow://la-tap for Live Activity tap navigation.

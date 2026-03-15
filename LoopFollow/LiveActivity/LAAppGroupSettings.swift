@@ -109,7 +109,7 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
 
 // MARK: - Default slot assignments
 
-struct LiveActivitySlotDefaults {
+enum LiveActivitySlotDefaults {
     /// Top-left slot
     static let slot1: LiveActivitySlotOption = .iob
     /// Bottom-left slot
