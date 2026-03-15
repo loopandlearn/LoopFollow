@@ -95,23 +95,3 @@ Each data-fetching controller now writes one additional `Storage.shared` value a
 | `IAge.swift` | `iageInsertTime` |
 
 ---
-
-## What was not changed
-
-- APNs push infrastructure — no changes to `APNSClient`, `JWTManager`, or the push payload format beyond what was already present
-- Dynamic Island layout — compact, expanded, and minimal presentations are unchanged
-- Threshold-driven background color logic — unchanged
-- "Not Looping" banner logic — unchanged
-- All existing `LAFormat` methods — unchanged; new methods were added alongside
-
----
-
-## Testing
-
-- Build and run on a device with Live Activity enabled
-- Open Settings → Live Activity → Grid slots; verify four pickers appear with all options
-- Select a metric in one slot; verify it is cleared from any other slot that had it
-- Verify the lock screen shows the new layout: large BG + arrow left, delta below, configurable grid right, footer bottom
-- For Loop users: verify IOB, COB, basal, ISF, CR, target, TDD, autosens, projected BG, pump, override, profile name all populate correctly
-- For Dexcom-only users: verify optional slots show `—` rather than crashing
-- Verify SAGE, CAGE, IAGE display as `D:HH` age strings
