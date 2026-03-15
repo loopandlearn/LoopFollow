@@ -49,7 +49,6 @@ class MoreMenuViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "Menu"
         view.backgroundColor = .systemBackground
 
         // Apply appearance mode
@@ -105,6 +104,25 @@ class MoreMenuViewController: UIViewController {
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
 
+        // Large-title style header
+        let header = UIView()
+        let label = UILabel()
+        label.text = "Menu"
+        label.font = .systemFont(ofSize: 34, weight: .bold)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        header.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 20),
+            label.topAnchor.constraint(equalTo: header.topAnchor, constant: 8),
+            label.bottomAnchor.constraint(equalTo: header.bottomAnchor, constant: -8),
+        ])
+        header.frame.size = header.systemLayoutSizeFitting(
+            CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        tableView.tableHeaderView = header
+
         view.addSubview(tableView)
 
         NSLayoutConstraint.activate([
@@ -130,7 +148,7 @@ class MoreMenuViewController: UIViewController {
             ]),
 
             // Section 1: All tab items (static)
-            MenuSection(title: nil, items: TabItem.allCases.map { item in
+            MenuSection(title: "Features", items: TabItem.allCases.map { item in
                 MenuItem(title: item.displayName, icon: item.icon) { [weak self] in
                     self?.openItem(item)
                 }
@@ -152,7 +170,7 @@ class MoreMenuViewController: UIViewController {
                     self?.openURL("https://loopfollowdocs.org/")
                 },
                 MenuItem(title: "Loop and Learn Discord", icon: "bubble.left.and.bubble.right", style: .externalLink) { [weak self] in
-                    self?.openURL("https://discord.gg/TKTuX3dA")
+                    self?.openURL("https://discord.gg/KQgk3gzuYU")
                 },
                 MenuItem(title: "LoopFollow Facebook Group", icon: "person.2.fill", style: .externalLink) { [weak self] in
                     self?.openURL("https://www.facebook.com/groups/loopfollowlnl")

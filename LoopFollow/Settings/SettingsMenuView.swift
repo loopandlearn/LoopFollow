@@ -28,19 +28,19 @@ struct SettingsMenuView: View {
 
                 // ───────── App settings ─────────
                 Section("App Settings") {
-                    NavigationRow(title: "Background Refresh Settings",
+                    NavigationRow(title: "Background Refresh",
                                   icon: "arrow.clockwise")
                     {
                         settingsPath.value.append(Sheet.backgroundRefresh)
                     }
 
-                    NavigationRow(title: "General Settings",
+                    NavigationRow(title: "General",
                                   icon: "gearshape")
                     {
                         settingsPath.value.append(Sheet.general)
                     }
 
-                    NavigationRow(title: "Graph Settings",
+                    NavigationRow(title: "Graph",
                                   icon: "chart.xyaxis.line")
                     {
                         settingsPath.value.append(Sheet.graph)
@@ -52,20 +52,20 @@ struct SettingsMenuView: View {
                         showingTabCustomization = true
                     }
 
-                    NavigationRow(title: "Import/Export Settings",
+                    NavigationRow(title: "Import/Export",
                                   icon: "square.and.arrow.down")
                     {
                         settingsPath.value.append(Sheet.importExport)
                     }
 
                     if !nightscoutURL.value.isEmpty {
-                        NavigationRow(title: "Information Display Settings",
+                        NavigationRow(title: "Information Display",
                                       icon: "info.circle")
                         {
                             settingsPath.value.append(Sheet.infoDisplay)
                         }
 
-                        NavigationRow(title: "Remote Settings",
+                        NavigationRow(title: "Remote",
                                       icon: "antenna.radiowaves.left.and.right")
                         {
                             settingsPath.value.append(Sheet.remote)
@@ -75,7 +75,7 @@ struct SettingsMenuView: View {
 
                 // ───────── Alarms ─────────
                 Section("Alarms") {
-                    NavigationRow(title: "Alarm Settings",
+                    NavigationRow(title: "Alarms",
                                   icon: "bell.badge")
                     {
                         settingsPath.value.append(Sheet.alarmSettings)
@@ -99,7 +99,7 @@ struct SettingsMenuView: View {
 
                 // ───────── Advanced ─────────
                 Section("Advanced Settings") {
-                    NavigationRow(title: "Advanced Settings",
+                    NavigationRow(title: "Advanced",
                                   icon: "exclamationmark.shield")
                     {
                         settingsPath.value.append(Sheet.advanced)
@@ -134,13 +134,13 @@ struct SettingsMenuView: View {
             }
             .pickerStyle(.segmented)
 
-            NavigationRow(title: "Nightscout Settings",
+            NavigationRow(title: "Nightscout",
                           icon: "network")
             {
                 settingsPath.value.append(Sheet.nightscout)
             }
 
-            NavigationRow(title: "Dexcom Settings",
+            NavigationRow(title: "Dexcom",
                           icon: "sensor.tag.radiowaves.forward")
             {
                 settingsPath.value.append(Sheet.dexcom)
