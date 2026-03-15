@@ -286,7 +286,7 @@ final class LiveActivityManager {
     }
 
     func refreshFromCurrentState(reason: String) {
-        guard Storage.shared.laEnabled.value else { return }
+        guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
         refreshWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             self?.performRefresh(reason: reason)
