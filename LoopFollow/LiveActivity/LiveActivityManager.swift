@@ -20,9 +20,73 @@ final class LiveActivityManager {
             name: UIApplication.willEnterForegroundNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleWillResignActive),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+    }
+
+    /// Fires before the app loses focus (lock screen, home button, etc.).
+    /// Cancels any pending debounced refresh and pushes the latest snapshot
+    /// directly to the Live Activity while the app is still foreground-active,
+    /// ensuring the LA is up to date the moment the lock screen appears.
+    @objc private func handleWillResignActive() {
+        guard Storage.shared.laEnabled.value, let activity = current else { return }
+
+        refreshWorkItem?.cancel()
+        refreshWorkItem = nil
+
+        let provider = StorageCurrentGlucoseStateProvider()
+        guard let snapshot = GlucoseSnapshotBuilder.build(from: provider) else { return }
+
+        LAAppGroupSettings.setThresholds(
+            lowMgdl: Storage.shared.lowLine.value,
+            highMgdl: Storage.shared.highLine.value
+        )
+        GlucoseSnapshotStore.shared.save(snapshot)
+
+        seq += 1
+        let nextSeq = seq
+        let state = GlucoseLiveActivityAttributes.ContentState(
+            snapshot: snapshot,
+            seq: nextSeq,
+            reason: "resign-active",
+            producedAt: Date()
+        )
+        let content = ActivityContent(
+            state: state,
+            staleDate: Date(timeIntervalSince1970: Storage.shared.laRenewBy.value),
+            relevanceScore: 100.0
+        )
+
+        Task {
+            // Direct ActivityKit update — app is still active at this point.
+            await activity.update(content)
+            LogManager.shared.log(category: .general, message: "[LA] resign-active flush sent seq=\(nextSeq)", isDebug: true)
+            // Also send APNs so the extension receives the latest token-based update.
+            if let token = pushToken {
+                await APNSClient.shared.sendLiveActivityUpdate(pushToken: token, state: state)
+            }
+        }
+    }
+
+    @objc private func handleDidBecomeActive() {
+        guard Storage.shared.laEnabled.value else { return }
+        Task { @MainActor in
+            self.startFromCurrentState()
+        }
     }
 
     @objc private func handleForeground() {
+        guard Storage.shared.laEnabled.value else { return }
         LogManager.shared.log(category: .general, message: "[LA] foreground notification received, laRenewalFailed=\(Storage.shared.laRenewalFailed.value)")
         guard Storage.shared.laRenewalFailed.value else { return }
 
@@ -75,6 +139,11 @@ final class LiveActivityManager {
     private var pushToken: String?
     private var tokenObservationTask: Task<Void, Never>?
     private var refreshWorkItem: DispatchWorkItem?
+    /// Set when the user manually swipes away the LA. Blocks auto-restart until
+    /// an explicit user action (Restart button, App Intent) clears it.
+    /// In-memory only — resets to false on app relaunch, so a kill + relaunch
+    /// starts fresh as expected.
+    private var dismissedByUser = false
 
     // MARK: - Public API
 
@@ -125,6 +194,22 @@ final class LiveActivityManager {
         }
     }
 
+    /// Called from applicationWillTerminate. Ends the LA synchronously (blocking
+    /// up to 3 s) so it clears from the lock screen before the process exits.
+    /// Does not clear laEnabled — the user's preference is preserved for relaunch.
+    func endOnTerminate() {
+        guard let activity = current else { return }
+        current = nil
+        Storage.shared.laRenewBy.value = 0
+        let semaphore = DispatchSemaphore(value: 0)
+        Task.detached {
+            await activity.end(nil, dismissalPolicy: .immediate)
+            semaphore.signal()
+        }
+        _ = semaphore.wait(timeout: .now() + 3)
+        LogManager.shared.log(category: .general, message: "[LA] ended on app terminate")
+    }
+
     func end(dismissalPolicy: ActivityUIDismissalPolicy = .default) {
         updateTask?.cancel()
         updateTask = nil
@@ -161,7 +246,33 @@ final class LiveActivityManager {
         }
     }
 
+    /// Ends all running Live Activities and starts a fresh one from the current state.
+    /// Intended for the "Restart Live Activity" button and the AppIntent.
+    @MainActor
+    func forceRestart() {
+        guard Storage.shared.laEnabled.value else { return }
+        LogManager.shared.log(category: .general, message: "[LA] forceRestart called")
+        dismissedByUser = false
+        Storage.shared.laRenewBy.value = 0
+        Storage.shared.laRenewalFailed.value = false
+        current = nil
+        updateTask?.cancel(); updateTask = nil
+        tokenObservationTask?.cancel(); tokenObservationTask = nil
+        stateObserverTask?.cancel(); stateObserverTask = nil
+        pushToken = nil
+        Task {
+            for activity in Activity<GlucoseLiveActivityAttributes>.activities {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+            await MainActor.run {
+                self.startFromCurrentState()
+                LogManager.shared.log(category: .general, message: "[LA] forceRestart: Live Activity restarted")
+            }
+        }
+    }
+
     func startFromCurrentState() {
+        guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
         endOrphanedActivities()
         let provider = StorageCurrentGlucoseStateProvider()
         if let snapshot = GlucoseSnapshotBuilder.build(from: provider) {
@@ -175,6 +286,7 @@ final class LiveActivityManager {
     }
 
     func refreshFromCurrentState(reason: String) {
+        guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
         refreshWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             self?.performRefresh(reason: reason)
@@ -422,7 +534,15 @@ final class LiveActivityManager {
                 if state == .ended || state == .dismissed {
                     if current?.id == activity.id {
                         current = nil
+                        Storage.shared.laRenewBy.value = 0
                         LogManager.shared.log(category: .general, message: "Live Activity cleared id=\(activity.id)", isDebug: true)
+                    }
+                    if state == .dismissed {
+                        // User manually swiped away the LA. Block auto-restart until
+                        // the user explicitly restarts via button or App Intent.
+                        // laEnabled is left true — the user's preference is preserved.
+                        dismissedByUser = true
+                        LogManager.shared.log(category: .general, message: "Live Activity dismissed by user — auto-restart blocked until explicit restart")
                     }
                 }
             }
@@ -431,3 +551,9 @@ final class LiveActivityManager {
 }
 
 #endif
+
+extension Notification.Name {
+    /// Posted when the user taps the Live Activity or Dynamic Island.
+    /// Observers navigate to the Home or Snoozer tab as appropriate.
+    static let liveActivityDidForeground = Notification.Name("liveActivityDidForeground")
+}

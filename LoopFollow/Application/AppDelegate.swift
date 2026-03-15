@@ -48,7 +48,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    func applicationWillTerminate(_: UIApplication) {}
+    func applicationWillTerminate(_: UIApplication) {
+        #if !targetEnvironment(macCatalyst)
+        LiveActivityManager.shared.endOnTerminate()
+        #endif
+    }
 
     // MARK: - Remote Notifications
 
@@ -96,6 +100,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Call completion handler
         completionHandler(.newData)
     }
+
+    // MARK: - URL handling
+    // Note: with scene-based lifecycle (iOS 13+), URLs are delivered to
+    // SceneDelegate.scene(_:openURLContexts:) — not here. The scene delegate
+    // handles loopfollow://la-tap for Live Activity tap navigation.
 
     // MARK: UISceneSession Lifecycle
 

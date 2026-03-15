@@ -206,6 +206,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
 
         // Setup the Graph
         if firstGraphLoad {
@@ -680,6 +681,27 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         tabBarController.selectedIndex = targetIndex
 
         updateNightscoutTabState()
+    }
+
+    @objc private func navigateOnLAForeground() {
+        guard let tabBarController = tabBarController,
+              let vcs = tabBarController.viewControllers, !vcs.isEmpty else { return }
+
+        let targetIndex: Int
+        if Observable.shared.currentAlarm.value != nil,
+           let snoozerIndex = getSnoozerTabIndex(), snoozerIndex < vcs.count {
+            targetIndex = snoozerIndex
+        } else {
+            targetIndex = 0
+        }
+
+        if let presented = tabBarController.presentedViewController {
+            presented.dismiss(animated: false) {
+                tabBarController.selectedIndex = targetIndex
+            }
+        } else {
+            tabBarController.selectedIndex = targetIndex
+        }
     }
 
     private func getSnoozerTabIndex() -> Int? {
