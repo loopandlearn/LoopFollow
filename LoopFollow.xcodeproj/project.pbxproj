@@ -96,7 +96,6 @@
 		DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */; };
 		DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */; };
 		DD485F142E454B2600CE8CBF /* SecureMessenger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD485F132E454B2600CE8CBF /* SecureMessenger.swift */; };
-		DD485F162E46631000CE8CBF /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DD485F152E46631000CE8CBF /* CryptoSwift */; };
 		DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878022C7B297E0048F05C /* StorageValue.swift */; };
 		DD4878052C7B2C970048F05C /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878042C7B2C970048F05C /* Storage.swift */; };
 		DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */; };
@@ -898,7 +897,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */,
-				DD485F162E46631000CE8CBF /* CryptoSwift in Frameworks */,
 				3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1763,7 +1761,6 @@
 			);
 			name = LoopFollow;
 			packageProductDependencies = (
-				DD485F152E46631000CE8CBF /* CryptoSwift */,
 			);
 			productName = LoopFollow;
 			productReference = FC9788142485969B00A7906C /* Loop Follow.app */;
@@ -1801,7 +1798,6 @@
 			);
 			mainGroup = FC97880B2485969B00A7906C;
 			packageReferences = (
-				DD485F0B2E4547C800CE8CBF /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 			);
 			productRefGroup = FC9788152485969B00A7906C /* Products */;
 			projectDirPath = "";
@@ -2751,23 +2747,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		DD485F0B2E4547C800CE8CBF /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/krzyzanowskim/CryptoSwift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.9.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		DD485F152E46631000CE8CBF /* CryptoSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = CryptoSwift;
-		};
-/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		FC3AE7B3249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld */ = {
