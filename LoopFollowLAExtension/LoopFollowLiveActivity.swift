@@ -95,7 +95,7 @@ private struct LockScreenLiveActivityView: View {
                             .foregroundStyle(.white.opacity(0.95))
                     }
 
-                    Text(LAFormat.delta(s))
+                    Text("Delta: \(LAFormat.delta(s))")
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(.white.opacity(0.80))
@@ -124,7 +124,7 @@ private struct LockScreenLiveActivityView: View {
             }
 
             // Footer: last update time
-            Text(LAFormat.updated(s))
+            Text("Last Update: \(LAFormat.updated(s))")
                 .font(.system(size: 11, weight: .regular, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(.white.opacity(0.65))
