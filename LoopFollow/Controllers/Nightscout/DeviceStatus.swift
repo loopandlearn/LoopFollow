@@ -132,9 +132,11 @@ extension MainViewController {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
                     infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U")
+                    Storage.shared.lastPumpReservoirU.value = reservoirData
                 } else {
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U")
+                    Storage.shared.lastPumpReservoirU.value = nil
                 }
             }
 

@@ -23,6 +23,7 @@ extension MainViewController {
         }
         profileManager.loadProfile(from: profileData)
         infoManager.updateInfoData(type: .profile, value: profileData.defaultProfile)
+        Storage.shared.lastProfileName.value = profileData.defaultProfile
 
         // Mark profile data as loaded for initial loading state
         markDataLoaded("profile")

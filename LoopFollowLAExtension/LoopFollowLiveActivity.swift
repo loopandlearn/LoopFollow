@@ -78,50 +78,62 @@ private struct LockScreenLiveActivityView: View {
 
     var body: some View {
         let s = state.snapshot
+        let slotConfig = LAAppGroupSettings.slots()
 
-        HStack(spacing: 12) {
-            // LEFT: Glucose + trend, update time below
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(LAFormat.glucose(s))
-                        .font(.system(size: 46, weight: .bold, design: .rounded))
+        VStack(spacing: 6) {
+            HStack(spacing: 12) {
+                // LEFT: Glucose + trend arrow, delta below
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(LAFormat.glucose(s))
+                            .font(.system(size: 46, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(.white)
+
+                        Text(LAFormat.trendArrow(s))
+                            .font(.system(size: 46, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.95))
+                    }
+
+                    Text("Delta: \(LAFormat.delta(s))")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .monospacedDigit()
-                        .foregroundStyle(.white)
-
-                    Text(LAFormat.trendArrow(s))
-                        .font(.system(size: 46, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.95))
+                        .foregroundStyle(.white.opacity(0.80))
                 }
+                .frame(width: 168, alignment: .leading)
+                .layoutPriority(2)
 
-                Text("Last Update: \(LAFormat.updated(s))")
-                    .font(.system(size: 13, weight: .regular, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.75))
+                // Divider
+                Rectangle()
+                    .fill(Color.white.opacity(0.20))
+                    .frame(width: 1)
+                    .padding(.vertical, 8)
+
+                // RIGHT: configurable 2×2 grid
+                VStack(spacing: 10) {
+                    HStack(spacing: 16) {
+                        SlotView(option: slotConfig[0], snapshot: s)
+                        SlotView(option: slotConfig[1], snapshot: s)
+                    }
+                    HStack(spacing: 16) {
+                        SlotView(option: slotConfig[2], snapshot: s)
+                        SlotView(option: slotConfig[3], snapshot: s)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .frame(width: 168, alignment: .leading)
-            .layoutPriority(2)
 
-            // Divider
-            Rectangle()
-                .fill(Color.white.opacity(0.20))
-                .frame(width: 1)
-                .padding(.vertical, 8)
-
-            // RIGHT: 2x2 grid — delta/proj | iob/cob
-            VStack(spacing: 10) {
-                HStack(spacing: 16) {
-                    MetricBlock(label: "Delta", value: LAFormat.delta(s))
-                    MetricBlock(label: "IOB", value: LAFormat.iob(s))
-                }
-                HStack(spacing: 16) {
-                    MetricBlock(label: "Proj", value: LAFormat.projected(s))
-                    MetricBlock(label: "COB", value: LAFormat.cob(s))
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            // Footer: last update time
+            Text("Last Update: \(LAFormat.updated(s))")
+                .font(.system(size: 11, weight: .regular, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(.white.opacity(0.65))
+                .frame(maxWidth: .infinity, alignment: .center)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(Color.white.opacity(0.20), lineWidth: 1)
@@ -190,6 +202,50 @@ private struct MetricBlock: View {
                 .minimumScaleFactor(0.85)
         }
         .frame(width: 64, alignment: .leading) // consistent 2×2 columns
+    }
+}
+
+/// Renders one configurable slot in the lock screen 2×2 grid.
+/// Shows nothing (invisible placeholder) when the slot option is `.none`.
+private struct SlotView: View {
+    let option: LiveActivitySlotOption
+    let snapshot: GlucoseSnapshot
+
+    var body: some View {
+        if option == .none {
+            // Invisible spacer — preserves grid alignment
+            Color.clear
+                .frame(width: 64, height: 36)
+        } else {
+            MetricBlock(label: option.gridLabel, value: value(for: option))
+        }
+    }
+
+    private func value(for option: LiveActivitySlotOption) -> String {
+        switch option {
+        case .none: return ""
+        case .delta: return LAFormat.delta(snapshot)
+        case .projectedBG: return LAFormat.projected(snapshot)
+        case .minMax: return LAFormat.minMax(snapshot)
+        case .iob: return LAFormat.iob(snapshot)
+        case .cob: return LAFormat.cob(snapshot)
+        case .recBolus: return LAFormat.recBolus(snapshot)
+        case .autosens: return LAFormat.autosens(snapshot)
+        case .tdd: return LAFormat.tdd(snapshot)
+        case .basal: return LAFormat.basal(snapshot)
+        case .pump: return LAFormat.pump(snapshot)
+        case .pumpBattery: return LAFormat.pumpBattery(snapshot)
+        case .battery: return LAFormat.battery(snapshot)
+        case .target: return LAFormat.target(snapshot)
+        case .isf: return LAFormat.isf(snapshot)
+        case .carbRatio: return LAFormat.carbRatio(snapshot)
+        case .sage: return LAFormat.age(insertTime: snapshot.sageInsertTime)
+        case .cage: return LAFormat.age(insertTime: snapshot.cageInsertTime)
+        case .iage: return LAFormat.age(insertTime: snapshot.iageInsertTime)
+        case .carbsToday: return LAFormat.carbsToday(snapshot)
+        case .override: return LAFormat.override(snapshot)
+        case .profile: return LAFormat.profileName(snapshot)
+        }
     }
 }
 
@@ -407,6 +463,94 @@ private enum LAFormat {
     static func projected(_ s: GlucoseSnapshot) -> String {
         guard let v = s.projected else { return "—" }
         return formatGlucoseValue(v, unit: s.unit)
+    }
+
+    // MARK: Extended InfoType formatters
+
+    private static let ageFormatter: DateComponentsFormatter = {
+        let f = DateComponentsFormatter()
+        f.unitsStyle = .positional
+        f.allowedUnits = [.day, .hour]
+        f.zeroFormattingBehavior = [.pad]
+        return f
+    }()
+
+    /// Formats an insert-time epoch into "D:HH" age string. Returns "—" if time is 0.
+    static func age(insertTime: TimeInterval) -> String {
+        guard insertTime > 0 else { return "—" }
+        let secondsAgo = Date().timeIntervalSince1970 - insertTime
+        return ageFormatter.string(from: secondsAgo) ?? "—"
+    }
+
+    static func recBolus(_ s: GlucoseSnapshot) -> String {
+        guard let v = s.recBolus else { return "—" }
+        return String(format: "%.2fU", v)
+    }
+
+    static func autosens(_ s: GlucoseSnapshot) -> String {
+        guard let v = s.autosens else { return "—" }
+        return String(format: "%.0f%%", v * 100)
+    }
+
+    static func tdd(_ s: GlucoseSnapshot) -> String {
+        guard let v = s.tdd else { return "—" }
+        return String(format: "%.1fU", v)
+    }
+
+    static func basal(_ s: GlucoseSnapshot) -> String {
+        s.basalRate.isEmpty ? "—" : s.basalRate
+    }
+
+    static func pump(_ s: GlucoseSnapshot) -> String {
+        guard let v = s.pumpReservoirU else { return "50+U" }
+        return "\(Int(round(v)))U"
+    }
+
+    static func pumpBattery(_ s: GlucoseSnapshot) -> String {
+        guard let v = s.pumpBattery else { return "—" }
+        return String(format: "%.0f%%", v)
+    }
+
+    static func battery(_ s: GlucoseSnapshot) -> String {
+        guard let v = s.battery else { return "—" }
+        return String(format: "%.0f%%", v)
+    }
+
+    static func target(_ s: GlucoseSnapshot) -> String {
+        guard let low = s.targetLowMgdl, low > 0 else { return "—" }
+        let lowStr = formatGlucoseValue(low, unit: s.unit)
+        if let high = s.targetHighMgdl, high > 0, abs(high - low) > 0.5 {
+            return "\(lowStr)-\(formatGlucoseValue(high, unit: s.unit))"
+        }
+        return lowStr
+    }
+
+    static func isf(_ s: GlucoseSnapshot) -> String {
+        guard let v = s.isfMgdlPerU, v > 0 else { return "—" }
+        return formatGlucoseValue(v, unit: s.unit)
+    }
+
+    static func carbRatio(_ s: GlucoseSnapshot) -> String {
+        guard let v = s.carbRatio, v > 0 else { return "—" }
+        return String(format: "%.0fg", v)
+    }
+
+    static func carbsToday(_ s: GlucoseSnapshot) -> String {
+        guard let v = s.carbsToday else { return "—" }
+        return "\(Int(round(v)))g"
+    }
+
+    static func minMax(_ s: GlucoseSnapshot) -> String {
+        guard let mn = s.minBgMgdl, let mx = s.maxBgMgdl else { return "—" }
+        return "\(formatGlucoseValue(mn, unit: s.unit))/\(formatGlucoseValue(mx, unit: s.unit))"
+    }
+
+    static func override(_ s: GlucoseSnapshot) -> String {
+        s.override ?? "—"
+    }
+
+    static func profileName(_ s: GlucoseSnapshot) -> String {
+        s.profileName ?? "—"
     }
 
     // MARK: Update time
