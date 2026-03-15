@@ -111,6 +111,25 @@ class APNSClient {
         if let iob = snapshot.iob { snapshotDict["iob"] = iob }
         if let cob = snapshot.cob { snapshotDict["cob"] = cob }
         if let projected = snapshot.projected { snapshotDict["projected"] = projected }
+        if let override = snapshot.override { snapshotDict["override"] = override }
+        if let recBolus = snapshot.recBolus { snapshotDict["recBolus"] = recBolus }
+        if let battery = snapshot.battery { snapshotDict["battery"] = battery }
+        if let pumpBattery = snapshot.pumpBattery { snapshotDict["pumpBattery"] = pumpBattery }
+        if !snapshot.basalRate.isEmpty { snapshotDict["basalRate"] = snapshot.basalRate }
+        if let pumpReservoirU = snapshot.pumpReservoirU { snapshotDict["pumpReservoirU"] = pumpReservoirU }
+        if let autosens = snapshot.autosens { snapshotDict["autosens"] = autosens }
+        if let tdd = snapshot.tdd { snapshotDict["tdd"] = tdd }
+        if let targetLowMgdl = snapshot.targetLowMgdl { snapshotDict["targetLowMgdl"] = targetLowMgdl }
+        if let targetHighMgdl = snapshot.targetHighMgdl { snapshotDict["targetHighMgdl"] = targetHighMgdl }
+        if let isfMgdlPerU = snapshot.isfMgdlPerU { snapshotDict["isfMgdlPerU"] = isfMgdlPerU }
+        if let carbRatio = snapshot.carbRatio { snapshotDict["carbRatio"] = carbRatio }
+        if let carbsToday = snapshot.carbsToday { snapshotDict["carbsToday"] = carbsToday }
+        if let profileName = snapshot.profileName { snapshotDict["profileName"] = profileName }
+        if snapshot.sageInsertTime > 0 { snapshotDict["sageInsertTime"] = snapshot.sageInsertTime }
+        if snapshot.cageInsertTime > 0 { snapshotDict["cageInsertTime"] = snapshot.cageInsertTime }
+        if snapshot.iageInsertTime > 0 { snapshotDict["iageInsertTime"] = snapshot.iageInsertTime }
+        if let minBgMgdl = snapshot.minBgMgdl { snapshotDict["minBgMgdl"] = minBgMgdl }
+        if let maxBgMgdl = snapshot.maxBgMgdl { snapshotDict["maxBgMgdl"] = maxBgMgdl }
 
         let contentState: [String: Any] = [
             "snapshot": snapshotDict,
