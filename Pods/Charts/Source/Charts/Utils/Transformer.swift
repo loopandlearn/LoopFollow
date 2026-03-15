@@ -165,6 +165,11 @@ open class Transformer: NSObject
     
     @objc open var pixelToValueMatrix: CGAffineTransform
     {
-        return valueToPixelMatrix.inverted()
+        let matrix = valueToPixelMatrix
+        // Guard against singular matrix when chart has zero dimensions (before layout)
+        guard matrix.a * matrix.d - matrix.b * matrix.c != 0 else {
+            return .identity
+        }
+        return matrix.inverted()
     }
 }
