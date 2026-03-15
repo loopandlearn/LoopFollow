@@ -12,9 +12,8 @@ struct SettingsMenuView: View {
 
     // MARK: – Local state
 
-    @State private var latestVersion: String?
-    @State private var versionTint: Color = .secondary
     @State private var showingTabCustomization = false
+    var onDismiss: (() -> Void)?
 
     // MARK: – Observed objects
 
@@ -30,19 +29,19 @@ struct SettingsMenuView: View {
 
                 // ───────── App settings ─────────
                 Section("App Settings") {
-                    NavigationRow(title: "Background Refresh Settings",
+                    NavigationRow(title: "Background Refresh",
                                   icon: "arrow.clockwise")
                     {
                         settingsPath.value.append(Sheet.backgroundRefresh)
                     }
 
-                    NavigationRow(title: "General Settings",
+                    NavigationRow(title: "General",
                                   icon: "gearshape")
                     {
                         settingsPath.value.append(Sheet.general)
                     }
 
-                    NavigationRow(title: "Graph Settings",
+                    NavigationRow(title: "Graph",
                                   icon: "chart.xyaxis.line")
                     {
                         settingsPath.value.append(Sheet.graph)
@@ -54,20 +53,20 @@ struct SettingsMenuView: View {
                         showingTabCustomization = true
                     }
 
-                    NavigationRow(title: "Import/Export Settings",
+                    NavigationRow(title: "Import/Export",
                                   icon: "square.and.arrow.down")
                     {
                         settingsPath.value.append(Sheet.importExport)
                     }
 
                     if !nightscoutURL.value.isEmpty {
-                        NavigationRow(title: "Information Display Settings",
+                        NavigationRow(title: "Information Display",
                                       icon: "info.circle")
                         {
                             settingsPath.value.append(Sheet.infoDisplay)
                         }
 
-                        NavigationRow(title: "Remote Settings",
+                        NavigationRow(title: "Remote",
                                       icon: "antenna.radiowaves.left.and.right")
                         {
                             settingsPath.value.append(Sheet.remote)
@@ -77,7 +76,7 @@ struct SettingsMenuView: View {
 
                 // ───────── Alarms ─────────
                 Section("Alarms") {
-                    NavigationRow(title: "Alarm Settings",
+                    NavigationRow(title: "Alarms",
                                   icon: "bell.badge")
                     {
                         settingsPath.value.append(Sheet.alarmSettings)
@@ -99,32 +98,26 @@ struct SettingsMenuView: View {
                     }
                 }
 
-                // ───────── Advanced / Logs ─────────
+                // ───────── Advanced ─────────
                 Section("Advanced Settings") {
-                    NavigationRow(title: "Advanced Settings",
+                    NavigationRow(title: "Advanced",
                                   icon: "exclamationmark.shield")
                     {
                         settingsPath.value.append(Sheet.advanced)
                     }
                 }
-
-                Section("Logging") {
-                    NavigationRow(title: "View Log",
-                                  icon: "doc.text.magnifyingglass")
-                    {
-                        settingsPath.value.append(Sheet.viewLog)
-                    }
-
-                    ActionRow(title: "Share Logs",
-                              icon: "square.and.arrow.up",
-                              action: shareLogs)
-                }
-
-                // ───────── Build info ─────────
-                buildInfoSection
             }
             .navigationTitle("Settings")
             .navigationDestination(for: Sheet.self) { $0.destination }
+            .toolbar {
+                if let onDismiss {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: onDismiss) {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
             .sheet(isPresented: $showingTabCustomization) {
                 TabCustomizationModal(
                     isPresented: $showingTabCustomization,
@@ -134,7 +127,6 @@ struct SettingsMenuView: View {
                 )
             }
         }
-        .task { await refreshVersionInfo() }
     }
 
     // MARK: – Section builders
@@ -152,76 +144,18 @@ struct SettingsMenuView: View {
             }
             .pickerStyle(.segmented)
 
-            NavigationRow(title: "Nightscout Settings",
+            NavigationRow(title: "Nightscout",
                           icon: "network")
             {
                 settingsPath.value.append(Sheet.nightscout)
             }
 
-            NavigationRow(title: "Dexcom Settings",
+            NavigationRow(title: "Dexcom",
                           icon: "sensor.tag.radiowaves.forward")
             {
                 settingsPath.value.append(Sheet.dexcom)
             }
         }
-    }
-
-    @ViewBuilder
-    private var buildInfoSection: some View {
-        let build = BuildDetails.default
-        let ver = AppVersionManager().version()
-
-        Section("Build Information") {
-            keyValue("Version", ver, tint: versionTint)
-            keyValue("Latest version", latestVersion ?? "Fetching…")
-
-            if !(build.isMacApp() || build.isSimulatorBuild()) {
-                keyValue(build.expirationHeaderString,
-                         dateTimeUtils.formattedDate(from: build.calculateExpirationDate()))
-            }
-            keyValue("Built",
-                     dateTimeUtils.formattedDate(from: build.buildDate()))
-            keyValue("Branch", build.branchAndSha)
-        }
-    }
-
-    // MARK: – Helpers
-
-    private func keyValue(_ key: String,
-                          _ value: String,
-                          tint: Color = .secondary) -> some View
-    {
-        HStack {
-            Text(key)
-            Spacer()
-            Text(value).foregroundColor(tint)
-        }
-    }
-
-    private func refreshVersionInfo() async {
-        let mgr = AppVersionManager()
-        let (latest, newer, blacklisted) = await mgr.checkForNewVersionAsync()
-        latestVersion = latest ?? "Unknown"
-
-        let current = mgr.version()
-        versionTint = blacklisted ? .red
-            : newer ? .orange
-            : latest == current ? .green
-            : .secondary
-    }
-
-    private func shareLogs() {
-        let files = LogManager.shared.logFilesForTodayAndYesterday()
-        guard !files.isEmpty else {
-            UIApplication.shared.topMost?.presentSimpleAlert(
-                title: "No Logs Available",
-                message: "There are no logs to share."
-            )
-            return
-        }
-        let avc = UIActivityViewController(activityItems: files,
-                                           applicationActivities: nil)
-        UIApplication.shared.topMost?.present(avc, animated: true)
     }
 
     private func handleTabReorganization() {
@@ -242,7 +176,6 @@ private enum Sheet: Hashable, Identifiable {
     case importExport
     case calendar, contact
     case advanced
-    case viewLog
     case aggregatedStats
 
     var id: Self { self }
@@ -262,7 +195,6 @@ private enum Sheet: Hashable, Identifiable {
         case .calendar: CalendarSettingsView()
         case .contact: ContactSettingsView(viewModel: .init())
         case .advanced: AdvancedSettingsView(viewModel: .init())
-        case .viewLog: LogView(viewModel: .init())
         case .aggregatedStats:
             AggregatedStatsViewWrapper()
         }
