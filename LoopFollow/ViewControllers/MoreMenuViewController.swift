@@ -261,44 +261,31 @@ class MoreMenuViewController: UIViewController {
     }
 
     private func openSettings() {
-        let settingsVC = UIHostingController(rootView: SettingsMenuView())
-        let navController = UINavigationController(rootViewController: settingsVC)
+        let settingsView = SettingsMenuView(onDismiss: { [weak self] in
+            self?.dismiss(animated: true) {
+                MainViewController.rebuildTabsIfNeeded()
+            }
+        })
+        let settingsVC = UIHostingController(rootView: settingsView)
 
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         settingsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
 
-        settingsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissSettingsModal)
-        )
-        settingsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        settingsVC.modalPresentationStyle = .fullScreen
+        present(settingsVC, animated: true)
     }
 
     private func openAlarmsConfig() {
-        let alarmsVC = UIHostingController(rootView: AlarmsContainerView())
-        alarmsVC.title = "Alarms"
-        let navController = UINavigationController(rootViewController: alarmsVC)
+        let alarmsView = AlarmsContainerView(onDismiss: { [weak self] in
+            self?.dismiss(animated: true)
+        })
+        let alarmsVC = UIHostingController(rootView: alarmsView)
 
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         alarmsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
 
-        alarmsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        alarmsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        alarmsVC.modalPresentationStyle = .fullScreen
+        present(alarmsVC, animated: true)
     }
 
     private func openRemote() {
@@ -457,13 +444,6 @@ class MoreMenuViewController: UIViewController {
     }
 
     // MARK: - Helpers
-
-    @objc private func dismissSettingsModal() {
-        dismiss(animated: true) {
-            // Rebuild tabs after settings is dismissed to apply any tab order changes
-            MainViewController.rebuildTabsIfNeeded()
-        }
-    }
 
     private func getMainViewController() -> MainViewController? {
         guard let tabBarController = tabBarController else { return nil }

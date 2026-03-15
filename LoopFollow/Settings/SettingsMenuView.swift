@@ -13,6 +13,7 @@ struct SettingsMenuView: View {
     // MARK: – Local state
 
     @State private var showingTabCustomization = false
+    var onDismiss: (() -> Void)?
 
     // MARK: – Observed objects
 
@@ -108,6 +109,15 @@ struct SettingsMenuView: View {
             }
             .navigationTitle("Settings")
             .navigationDestination(for: Sheet.self) { $0.destination }
+            .toolbar {
+                if let onDismiss {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: onDismiss) {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
             .sheet(isPresented: $showingTabCustomization) {
                 TabCustomizationModal(
                     isPresented: $showingTabCustomization,
