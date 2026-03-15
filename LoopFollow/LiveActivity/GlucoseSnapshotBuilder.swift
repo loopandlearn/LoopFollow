@@ -70,6 +70,7 @@ enum GlucoseSnapshotBuilder {
             isDebug: true
         )
 
+        let profileNameRaw = Storage.shared.lastProfileName.value
         return GlucoseSnapshot(
             glucose: glucoseMgdl,
             delta: deltaMgdl,
@@ -78,6 +79,25 @@ enum GlucoseSnapshotBuilder {
             iob: provider.iob,
             cob: provider.cob,
             projected: provider.projectedMgdl,
+            override: Observable.shared.override.value,
+            recBolus: Observable.shared.deviceRecBolus.value,
+            battery: Observable.shared.deviceBatteryLevel.value,
+            pumpBattery: Observable.shared.pumpBatteryLevel.value,
+            basalRate: Storage.shared.lastBasal.value,
+            pumpReservoirU: Storage.shared.lastPumpReservoirU.value,
+            autosens: Storage.shared.lastAutosens.value,
+            tdd: Storage.shared.lastTdd.value,
+            targetLowMgdl: Storage.shared.lastTargetLowMgdl.value,
+            targetHighMgdl: Storage.shared.lastTargetHighMgdl.value,
+            isfMgdlPerU: Storage.shared.lastIsfMgdlPerU.value,
+            carbRatio: Storage.shared.lastCarbRatio.value,
+            carbsToday: Storage.shared.lastCarbsToday.value,
+            profileName: profileNameRaw.isEmpty ? nil : profileNameRaw,
+            sageInsertTime: Storage.shared.sageInsertTime.value,
+            cageInsertTime: Storage.shared.cageInsertTime.value,
+            iageInsertTime: Storage.shared.iageInsertTime.value,
+            minBgMgdl: Storage.shared.lastMinBgMgdl.value,
+            maxBgMgdl: Storage.shared.lastMaxBgMgdl.value,
             unit: preferredUnit,
             isNotLooping: isNotLooping,
             showRenewalOverlay: showRenewalOverlay

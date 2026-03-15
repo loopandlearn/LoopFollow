@@ -91,6 +91,21 @@ class Storage {
     var lastCOB = StorageValue<Double?>(key: "lastCOB", defaultValue: nil)
     var projectedBgMgdl = StorageValue<Double?>(key: "projectedBgMgdl", defaultValue: nil)
 
+    // Live Activity extended InfoType data
+    var lastBasal = StorageValue<String>(key: "lastBasal", defaultValue: "")
+    var lastPumpReservoirU = StorageValue<Double?>(key: "lastPumpReservoirU", defaultValue: nil)
+    var lastAutosens = StorageValue<Double?>(key: "lastAutosens", defaultValue: nil)
+    var lastTdd = StorageValue<Double?>(key: "lastTdd", defaultValue: nil)
+    var lastTargetLowMgdl = StorageValue<Double?>(key: "lastTargetLowMgdl", defaultValue: nil)
+    var lastTargetHighMgdl = StorageValue<Double?>(key: "lastTargetHighMgdl", defaultValue: nil)
+    var lastIsfMgdlPerU = StorageValue<Double?>(key: "lastIsfMgdlPerU", defaultValue: nil)
+    var lastCarbRatio = StorageValue<Double?>(key: "lastCarbRatio", defaultValue: nil)
+    var lastCarbsToday = StorageValue<Double?>(key: "lastCarbsToday", defaultValue: nil)
+    var lastProfileName = StorageValue<String>(key: "lastProfileName", defaultValue: "")
+    var iageInsertTime = StorageValue<TimeInterval>(key: "iageInsertTime", defaultValue: 0)
+    var lastMinBgMgdl = StorageValue<Double?>(key: "lastMinBgMgdl", defaultValue: nil)
+    var lastMaxBgMgdl = StorageValue<Double?>(key: "lastMaxBgMgdl", defaultValue: nil)
+
     // Live Activity
     var laEnabled = StorageValue<Bool>(key: "laEnabled", defaultValue: false)
     var laRenewBy = StorageValue<TimeInterval>(key: "laRenewBy", defaultValue: 0)

@@ -6,6 +6,9 @@ import SwiftUI
 struct LiveActivitySettingsView: View {
     @State private var laEnabled: Bool = Storage.shared.laEnabled.value
     @State private var restartConfirmed = false
+    @State private var slots: [LiveActivitySlotOption] = LAAppGroupSettings.slots()
+
+    private let slotLabels = ["Top left", "Top right", "Bottom left", "Bottom right"]
 
     var body: some View {
         Form {
@@ -25,6 +28,19 @@ struct LiveActivitySettingsView: View {
                     .disabled(restartConfirmed)
                 }
             }
+
+            Section(header: Text("Grid slots")) {
+                ForEach(0 ..< 4, id: \.self) { index in
+                    Picker(slotLabels[index], selection: Binding(
+                        get: { slots[index] },
+                        set: { selectSlot($0, at: index) }
+                    )) {
+                        ForEach(LiveActivitySlotOption.allCases, id: \.self) { option in
+                            Text(option.displayName).tag(option)
+                        }
+                    }
+                }
+            }
         }
         .onReceive(Storage.shared.laEnabled.$value) { newValue in
             if newValue != laEnabled { laEnabled = newValue }
@@ -40,5 +56,20 @@ struct LiveActivitySettingsView: View {
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationTitle("Live Activity")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// Selects an option for the given slot index, enforcing uniqueness:
+    /// if the chosen option is already in another slot, that slot is cleared to `.none`.
+    private func selectSlot(_ option: LiveActivitySlotOption, at index: Int) {
+        if option != .none {
+            for i in 0 ..< slots.count where i != index && slots[i] == option {
+                slots[i] = .none
+            }
+        }
+        slots[index] = option
+        LAAppGroupSettings.setSlots(slots)
+        Task {
+            await LiveActivityManager.shared.refreshFromCurrentState(reason: "slot config changed")
+        }
     }
 }
