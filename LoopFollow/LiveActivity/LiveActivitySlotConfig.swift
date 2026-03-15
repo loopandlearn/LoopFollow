@@ -2,6 +2,7 @@
 // LiveActivitySlotConfig.swift
 
 // MARK: - Information Display Settings audit
+
 //
 // LoopFollow exposes 20 items in Information Display Settings (InfoType.swift).
 // The table below maps each item to its availability as a Live Activity grid slot.

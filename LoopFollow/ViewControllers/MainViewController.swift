@@ -689,7 +689,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         let targetIndex: Int
         if Observable.shared.currentAlarm.value != nil,
-           let snoozerIndex = getSnoozerTabIndex(), snoozerIndex < vcs.count {
+           let snoozerIndex = getSnoozerTabIndex(), snoozerIndex < vcs.count
+        {
             targetIndex = snoozerIndex
         } else {
             targetIndex = 0
