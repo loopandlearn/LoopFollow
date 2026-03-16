@@ -213,7 +213,7 @@ private struct LockScreenLiveActivityView: View {
         .overlay(
             ZStack {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.gray.opacity(0.6))
+                    .fill(Color.gray.opacity(0.9))
                 Text("Tap to update")
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(.white)
@@ -231,7 +231,7 @@ private struct RenewalOverlayView: View {
 
     var body: some View {
         ZStack {
-            Color.gray.opacity(0.6)
+            Color.gray.opacity(0.9)
             if showText {
                 Text("Tap to update")
                     .font(.system(size: 14, weight: .semibold))
