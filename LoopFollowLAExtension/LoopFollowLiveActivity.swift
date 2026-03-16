@@ -9,13 +9,10 @@ import WidgetKit
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-            // LOCK SCREEN / BANNER UI
-            LockScreenLiveActivityView(state: context.state /* , activityID: context.activityID */ )
-                .id(context.state.seq) // force SwiftUI to re-render on every update
-                .activitySystemActionForegroundColor(.white)
-                .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
-                .applyActivityContentMarginsFixIfAvailable()
-                .widgetURL(URL(string: "loopfollow://la-tap")!)
+            // LOCK SCREEN / BANNER UI — also used for CarPlay Dashboard and Watch Smart Stack
+            // (small family) via supplementalActivityFamilies([.small])
+            LockScreenFamilyAdaptiveView(state: context.state)
+                .id(context.state.seq)
         } dynamicIsland: { context in
             // DYNAMIC ISLAND UI
             DynamicIsland {
@@ -52,6 +49,7 @@ struct LoopFollowLiveActivityWidget: Widget {
             }
             .keylineTint(LAColors.keyline(for: context.state.snapshot).opacity(0.75))
         }
+        .supplementalActivityFamilies([.small])
     }
 }
 
@@ -66,6 +64,66 @@ private extension View {
         } else {
             self
         }
+    }
+}
+
+// MARK: - Family-adaptive wrapper (Lock Screen / CarPlay / Watch Smart Stack)
+
+/// Reads the activityFamily environment value and routes to the appropriate layout.
+/// - `.small` → CarPlay Dashboard & Watch Smart Stack: compact glucose-only view
+/// - everything else → full lock screen layout with configurable grid
+@available(iOS 16.1, *)
+private struct LockScreenFamilyAdaptiveView: View {
+    let state: GlucoseLiveActivityAttributes.ContentState
+
+    @Environment(\.activityFamily) var activityFamily
+
+    var body: some View {
+        if activityFamily == .small {
+            SmallFamilyView(snapshot: state.snapshot)
+        } else {
+            LockScreenLiveActivityView(state: state)
+                .activitySystemActionForegroundColor(.white)
+                .activityBackgroundTint(LAColors.backgroundTint(for: state.snapshot))
+                .applyActivityContentMarginsFixIfAvailable()
+                .widgetURL(URL(string: "loopfollow://la-tap")!)
+        }
+    }
+}
+
+// MARK: - Small family view (CarPlay Dashboard + Watch Smart Stack)
+
+/// Compact view shown on CarPlay Dashboard (iOS 26+) and Apple Watch Smart Stack (watchOS 11+).
+/// Hardcoded to glucose + trend arrow + delta + time since last reading.
+@available(iOS 16.1, *)
+private struct SmallFamilyView: View {
+    let snapshot: GlucoseSnapshot
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(LAFormat.glucose(snapshot))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white)
+                Text(LAFormat.trendArrow(snapshot))
+                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+            }
+            HStack(spacing: 8) {
+                Text(LAFormat.delta(snapshot))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.85))
+                Text(LAFormat.updated(snapshot))
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.65))
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(10)
+        .activityBackgroundTint(LAColors.backgroundTint(for: snapshot))
     }
 }
 
