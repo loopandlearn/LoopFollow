@@ -72,6 +72,7 @@ jobs:
           fi
 
           # Check if ENABLE_NUKE_CERTS is not set to true when certs are valid
+          # Note: ${VAR,,} is bash syntax for lowercase conversion, ensuring case-insensitive comparison
           if [ "$CERT_STATUS" != "true" ] && [ "${ENABLE_NUKE_CERTS,,}" != "true" ]; then
             echo "::notice::🔔 Automated renewal of certificates is disabled because the repository variable ENABLE_NUKE_CERTS is not set to 'true'."
           fi
