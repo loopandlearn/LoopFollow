@@ -68,8 +68,6 @@ struct LiveActivitySettingsView: View {
         }
         slots[index] = option
         LAAppGroupSettings.setSlots(slots)
-        Task {
-            await LiveActivityManager.shared.refreshFromCurrentState(reason: "slot config changed")
-        }
+        LiveActivityManager.shared.refreshFromCurrentState(reason: "slot config changed")
     }
 }

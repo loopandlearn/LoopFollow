@@ -5,49 +5,71 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
+/// Builds the shared Dynamic Island content used by both widget variants.
+@available(iOS 16.1, *)
+private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityAttributes>) -> DynamicIsland {
+    DynamicIsland {
+        DynamicIslandExpandedRegion(.leading) {
+            Link(destination: URL(string: "loopfollow://la-tap")!) {
+                DynamicIslandLeadingView(snapshot: context.state.snapshot)
+                    .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
+            }
+            .id(context.state.seq)
+        }
+        DynamicIslandExpandedRegion(.trailing) {
+            Link(destination: URL(string: "loopfollow://la-tap")!) {
+                DynamicIslandTrailingView(snapshot: context.state.snapshot)
+                    .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
+            }
+            .id(context.state.seq)
+        }
+        DynamicIslandExpandedRegion(.bottom) {
+            Link(destination: URL(string: "loopfollow://la-tap")!) {
+                DynamicIslandBottomView(snapshot: context.state.snapshot)
+                    .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay, showText: true))
+            }
+            .id(context.state.seq)
+        }
+    } compactLeading: {
+        DynamicIslandCompactLeadingView(snapshot: context.state.snapshot)
+            .id(context.state.seq)
+    } compactTrailing: {
+        DynamicIslandCompactTrailingView(snapshot: context.state.snapshot)
+            .id(context.state.seq)
+    } minimal: {
+        DynamicIslandMinimalView(snapshot: context.state.snapshot)
+            .id(context.state.seq)
+    }
+    .keylineTint(LAColors.keyline(for: context.state.snapshot).opacity(0.75))
+}
+
+/// Primary widget (iOS 16.1+) — Lock Screen + Dynamic Island for all iOS versions.
 @available(iOS 16.1, *)
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-            // LOCK SCREEN / BANNER UI — also used for CarPlay Dashboard and Watch Smart Stack
-            // (small family) via supplementalActivityFamilies([.small])
+            LockScreenLiveActivityView(state: context.state)
+                .id(context.state.seq)
+                .activitySystemActionForegroundColor(.white)
+                .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
+                .applyActivityContentMarginsFixIfAvailable()
+                .widgetURL(URL(string: "loopfollow://la-tap")!)
+        } dynamicIsland: { context in
+            makeDynamicIsland(context: context)
+        }
+    }
+}
+
+/// Supplemental widget (iOS 18.0+) — adds CarPlay Dashboard + Watch Smart Stack
+/// via supplementalActivityFamilies([.small]).
+@available(iOS 18.0, *)
+struct LoopFollowLiveActivityWidgetWithCarPlay: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
             LockScreenFamilyAdaptiveView(state: context.state)
                 .id(context.state.seq)
         } dynamicIsland: { context in
-            // DYNAMIC ISLAND UI
-            DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) {
-                    Link(destination: URL(string: "loopfollow://la-tap")!) {
-                        DynamicIslandLeadingView(snapshot: context.state.snapshot)
-                            .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
-                    }
-                    .id(context.state.seq)
-                }
-                DynamicIslandExpandedRegion(.trailing) {
-                    Link(destination: URL(string: "loopfollow://la-tap")!) {
-                        DynamicIslandTrailingView(snapshot: context.state.snapshot)
-                            .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
-                    }
-                    .id(context.state.seq)
-                }
-                DynamicIslandExpandedRegion(.bottom) {
-                    Link(destination: URL(string: "loopfollow://la-tap")!) {
-                        DynamicIslandBottomView(snapshot: context.state.snapshot)
-                            .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay, showText: true))
-                    }
-                    .id(context.state.seq)
-                }
-            } compactLeading: {
-                DynamicIslandCompactLeadingView(snapshot: context.state.snapshot)
-                    .id(context.state.seq)
-            } compactTrailing: {
-                DynamicIslandCompactTrailingView(snapshot: context.state.snapshot)
-                    .id(context.state.seq)
-            } minimal: {
-                DynamicIslandMinimalView(snapshot: context.state.snapshot)
-                    .id(context.state.seq)
-            }
-            .keylineTint(LAColors.keyline(for: context.state.snapshot).opacity(0.75))
+            makeDynamicIsland(context: context)
         }
         .supplementalActivityFamilies([.small])
     }
@@ -72,7 +94,7 @@ private extension View {
 /// Reads the activityFamily environment value and routes to the appropriate layout.
 /// - `.small` → CarPlay Dashboard & Watch Smart Stack: compact glucose-only view
 /// - everything else → full lock screen layout with configurable grid
-@available(iOS 16.1, *)
+@available(iOS 18.0, *)
 private struct LockScreenFamilyAdaptiveView: View {
     let state: GlucoseLiveActivityAttributes.ContentState
 
@@ -95,7 +117,7 @@ private struct LockScreenFamilyAdaptiveView: View {
 
 /// Compact view shown on CarPlay Dashboard (iOS 26+) and Apple Watch Smart Stack (watchOS 11+).
 /// Hardcoded to glucose + trend arrow + delta + time since last reading.
-@available(iOS 16.1, *)
+@available(iOS 18.0, *)
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
 
