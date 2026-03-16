@@ -14,5 +14,8 @@ struct LoopFollowLABundle: WidgetBundle {
         if #available(iOS 16.1, *) {
             LoopFollowLiveActivityWidget()
         }
+        if #available(iOS 18.0, *) {
+            LoopFollowLiveActivityWidgetWithCarPlay()
+        }
     }
 }
