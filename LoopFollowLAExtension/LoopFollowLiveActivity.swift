@@ -43,32 +43,36 @@ private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityA
     .keylineTint(LAColors.keyline(for: context.state.snapshot).opacity(0.75))
 }
 
-/// Single widget — handles all iOS versions.
-/// On iOS 18+, adds CarPlay Dashboard + Watch Smart Stack via supplementalActivityFamilies([.small]).
-/// @WidgetConfigurationBuilder supports if #available { } else { } so the conditional is safe here.
+/// Primary widget (iOS 16.1+) — Lock Screen + Dynamic Island for all iOS versions.
 @available(iOS 16.1, *)
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
-        if #available(iOS 18.0, *) {
-            ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-                LockScreenFamilyAdaptiveView(state: context.state)
-                    .id(context.state.seq)
-            } dynamicIsland: { context in
-                makeDynamicIsland(context: context)
-            }
-            .supplementalActivityFamilies([.small])
-        } else {
-            ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-                LockScreenLiveActivityView(state: context.state)
-                    .id(context.state.seq)
-                    .activitySystemActionForegroundColor(.white)
-                    .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
-                    .applyActivityContentMarginsFixIfAvailable()
-                    .widgetURL(URL(string: "loopfollow://la-tap")!)
-            } dynamicIsland: { context in
-                makeDynamicIsland(context: context)
-            }
+        ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
+            LockScreenLiveActivityView(state: context.state)
+                .id(context.state.seq)
+                .activitySystemActionForegroundColor(.white)
+                .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
+                .applyActivityContentMarginsFixIfAvailable()
+                .widgetURL(URL(string: "loopfollow://la-tap")!)
+        } dynamicIsland: { context in
+            makeDynamicIsland(context: context)
         }
+    }
+}
+
+/// Supplemental widget (iOS 18.0+) — adds CarPlay Dashboard + Watch Smart Stack.
+/// Registered alongside the primary widget; ActivityKit uses this for the small
+/// activity family surfaces and the primary widget for lock screen / Dynamic Island.
+@available(iOS 18.0, *)
+struct LoopFollowLiveActivityWidgetWithCarPlay: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
+            LockScreenFamilyAdaptiveView(state: context.state)
+                .id(context.state.seq)
+        } dynamicIsland: { context in
+            makeDynamicIsland(context: context)
+        }
+        .supplementalActivityFamilies([.small])
     }
 }
 
