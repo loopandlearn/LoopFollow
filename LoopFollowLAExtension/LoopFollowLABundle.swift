@@ -11,10 +11,7 @@ import WidgetKit
 @main
 struct LoopFollowLABundle: WidgetBundle {
     var body: some Widget {
-        if #available(iOS 18.0, *) {
-            // CarPlay Dashboard + Watch Smart Stack support (iOS 18+)
-            LoopFollowLiveActivityWidgetWithCarPlay()
-        } else {
+        if #available(iOS 16.1, *) {
             LoopFollowLiveActivityWidget()
         }
     }
