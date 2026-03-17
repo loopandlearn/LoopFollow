@@ -6,7 +6,6 @@ import SwiftUI
 import WidgetKit
 
 /// Builds the shared Dynamic Island content used by both widget variants.
-@available(iOS 16.1, *)
 private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityAttributes>) -> DynamicIsland {
     DynamicIsland {
         DynamicIslandExpandedRegion(.leading) {
@@ -43,8 +42,7 @@ private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityA
     .keylineTint(LAColors.keyline(for: context.state.snapshot).opacity(0.75))
 }
 
-/// Primary widget (iOS 16.1+) — Lock Screen + Dynamic Island for all iOS versions.
-@available(iOS 16.1, *)
+/// Primary widget — Lock Screen + Dynamic Island.
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
@@ -151,7 +149,6 @@ private struct SmallFamilyView: View {
 
 // MARK: - Lock Screen Contract View
 
-@available(iOS 16.1, *)
 private struct LockScreenLiveActivityView: View {
     let state: GlucoseLiveActivityAttributes.ContentState
     /* let activityID: String */
@@ -334,7 +331,6 @@ private struct SlotView: View {
 
 // MARK: - Dynamic Island
 
-@available(iOS 16.1, *)
 private struct DynamicIslandLeadingView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -369,7 +365,6 @@ private struct DynamicIslandLeadingView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandTrailingView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -391,7 +386,6 @@ private struct DynamicIslandTrailingView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandBottomView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -411,7 +405,6 @@ private struct DynamicIslandBottomView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandCompactTrailingView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -430,7 +423,6 @@ private struct DynamicIslandCompactTrailingView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandCompactLeadingView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -446,7 +438,6 @@ private struct DynamicIslandCompactLeadingView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandMinimalView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {

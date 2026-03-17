@@ -11,9 +11,7 @@ import WidgetKit
 @main
 struct LoopFollowLABundle: WidgetBundle {
     var body: some Widget {
-        if #available(iOS 16.1, *) {
-            LoopFollowLiveActivityWidget()
-        }
+        LoopFollowLiveActivityWidget()
         if #available(iOS 18.0, *) {
             LoopFollowLiveActivityWidgetWithCarPlay()
         }
