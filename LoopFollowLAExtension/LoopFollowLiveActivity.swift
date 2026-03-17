@@ -164,15 +164,18 @@ private struct LockScreenLiveActivityView: View {
             HStack(spacing: 12) {
                 // LEFT: Glucose + trend arrow, delta below
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text(LAFormat.glucose(s))
                             .font(.system(size: 46, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .foregroundStyle(.white)
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(1)
 
                         Text(LAFormat.trendArrow(s))
-                            .font(.system(size: 46, weight: .bold, design: .rounded))
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.95))
+                            .lineLimit(1)
                     }
 
                     Text("Delta: \(LAFormat.delta(s))")
