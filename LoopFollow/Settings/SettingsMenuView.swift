@@ -12,7 +12,6 @@ struct SettingsMenuView: View {
 
     // MARK: – Local state
 
-    @State private var showingTabCustomization = false
     var onDismiss: (() -> Void)?
 
     // MARK: – Observed objects
@@ -47,10 +46,10 @@ struct SettingsMenuView: View {
                         settingsPath.value.append(Sheet.graph)
                     }
 
-                    NavigationRow(title: "Tab Settings",
+                    NavigationRow(title: "Tabs",
                                   icon: "rectangle.3.group")
                     {
-                        showingTabCustomization = true
+                        settingsPath.value.append(Sheet.tabSettings)
                     }
 
                     NavigationRow(title: "Import/Export",
@@ -118,14 +117,6 @@ struct SettingsMenuView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingTabCustomization) {
-                TabCustomizationModal(
-                    isPresented: $showingTabCustomization,
-                    onApply: {
-                        // No-op - changes are applied silently via observers
-                    }
-                )
-            }
         }
     }
 
@@ -157,11 +148,6 @@ struct SettingsMenuView: View {
             }
         }
     }
-
-    private func handleTabReorganization() {
-        // Rebuild the tab bar with the new configuration
-        MainViewController.rebuildTabsIfNeeded()
-    }
 }
 
 // MARK: – Sheet routing
@@ -170,6 +156,7 @@ private enum Sheet: Hashable, Identifiable {
     case nightscout, dexcom
     case backgroundRefresh
     case general, graph
+    case tabSettings
     case infoDisplay
     case alarmSettings
     case remote
@@ -188,6 +175,9 @@ private enum Sheet: Hashable, Identifiable {
         case .backgroundRefresh: BackgroundRefreshSettingsView(viewModel: .init())
         case .general: GeneralSettingsView()
         case .graph: GraphSettingsView()
+        case .tabSettings: TabCustomizationModal(onApply: {
+                MainViewController.rebuildTabsIfNeeded()
+            })
         case .infoDisplay: InfoDisplaySettingsView(viewModel: .init())
         case .alarmSettings: AlarmSettingsView()
         case .remote: RemoteSettingsView(viewModel: .init())
