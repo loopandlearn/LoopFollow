@@ -26,18 +26,17 @@ struct SettingsMenuView: View {
                 // ───────── Data settings ─────────
                 dataSection
 
-                // ───────── App settings ─────────
-                Section("App Settings") {
-                    NavigationRow(title: "Background Refresh",
-                                  icon: "arrow.clockwise")
-                    {
-                        settingsPath.value.append(Sheet.backgroundRefresh)
-                    }
-
+                // ───────── Display settings ─────────
+                Section("Display Settings") {
                     NavigationRow(title: "General",
                                   icon: "gearshape")
                     {
                         settingsPath.value.append(Sheet.general)
+                    }
+                    NavigationRow(title: "Tabs",
+                                  icon: "rectangle.3.group")
+                    {
+                        settingsPath.value.append(Sheet.tabSettings)
                     }
 
                     NavigationRow(title: "Graph",
@@ -46,10 +45,21 @@ struct SettingsMenuView: View {
                         settingsPath.value.append(Sheet.graph)
                     }
 
-                    NavigationRow(title: "Tabs",
-                                  icon: "rectangle.3.group")
+                    if !nightscoutURL.value.isEmpty {
+                        NavigationRow(title: "Information Display",
+                                      icon: "info.circle")
+                        {
+                            settingsPath.value.append(Sheet.infoDisplay)
+                        }
+                    }
+                }
+
+                // ───────── App settings ─────────
+                Section("App Settings") {
+                    NavigationRow(title: "Background Refresh",
+                                  icon: "arrow.clockwise")
                     {
-                        settingsPath.value.append(Sheet.tabSettings)
+                        settingsPath.value.append(Sheet.backgroundRefresh)
                     }
 
                     NavigationRow(title: "Import/Export",
@@ -59,12 +69,6 @@ struct SettingsMenuView: View {
                     }
 
                     if !nightscoutURL.value.isEmpty {
-                        NavigationRow(title: "Information Display",
-                                      icon: "info.circle")
-                        {
-                            settingsPath.value.append(Sheet.infoDisplay)
-                        }
-
                         NavigationRow(title: "Remote",
                                       icon: "antenna.radiowaves.left.and.right")
                         {
