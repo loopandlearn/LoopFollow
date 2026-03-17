@@ -32,6 +32,12 @@ final class LiveActivityManager {
             name: UIApplication.willResignActiveNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleBackgroundAudioFailed),
+            name: .backgroundAudioFailed,
+            object: nil
+        )
     }
 
     /// Fires before the app loses focus (lock screen, home button, etc.).
@@ -132,6 +138,16 @@ final class LiveActivityManager {
                 LogManager.shared.log(category: .general, message: "[LA] Live Activity restarted after foreground retry")
             }
         }
+    }
+
+    @objc private func handleBackgroundAudioFailed() {
+        guard Storage.shared.laEnabled.value, current != nil else { return }
+        // The background audio session has permanently failed — the app will lose its
+        // background keep-alive. Immediately push the renewal overlay so the user sees
+        // "Tap to update" on the lock screen and knows to foreground the app.
+        LogManager.shared.log(category: .general, message: "[LA] background audio failed — forcing renewal overlay")
+        Storage.shared.laRenewBy.value = Date().timeIntervalSince1970
+        refreshFromCurrentState(reason: "audio-session-failed")
     }
 
     static let renewalThreshold: TimeInterval = 7.5 * 3600

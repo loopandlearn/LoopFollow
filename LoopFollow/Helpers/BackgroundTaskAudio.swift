@@ -9,26 +9,37 @@ class BackgroundTask {
     var player = AVAudioPlayer()
     var timer = Timer()
 
+    private var retryCount = 0
+    private let maxRetries = 3
+    private var retryTimer: Timer?
+
     // MARK: - Methods
 
     func startBackgroundTask() {
         NotificationCenter.default.addObserver(self, selector: #selector(interruptedAudio), name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance())
+        retryCount = 0
         playAudio()
     }
 
     func stopBackgroundTask() {
         NotificationCenter.default.removeObserver(self, name: AVAudioSession.interruptionNotification, object: nil)
+        retryTimer?.invalidate()
+        retryTimer = nil
         player.stop()
         LogManager.shared.log(category: .general, message: "Silent audio stopped", isDebug: true)
     }
 
     @objc fileprivate func interruptedAudio(_ notification: Notification) {
         LogManager.shared.log(category: .general, message: "Silent audio interrupted")
-        if notification.name == AVAudioSession.interruptionNotification, notification.userInfo != nil {
-            var info = notification.userInfo!
-            var intValue = 0
-            (info[AVAudioSessionInterruptionTypeKey]! as AnyObject).getValue(&intValue)
-            if intValue == 1 { playAudio() }
+        guard notification.name == AVAudioSession.interruptionNotification,
+              let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue)
+        else { return }
+
+        if type == .ended {
+            retryCount = 0
+            playAudio()
         }
     }
 
@@ -36,7 +47,6 @@ class BackgroundTask {
         do {
             let bundle = Bundle.main.path(forResource: "blank", ofType: "wav")
             let alertSound = URL(fileURLWithPath: bundle!)
-            // try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback)
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: .mixWithOthers)
             try AVAudioSession.sharedInstance().setActive(true)
             try player = AVAudioPlayer(contentsOf: alertSound)
@@ -45,9 +55,25 @@ class BackgroundTask {
             player.volume = 0.01
             player.prepareToPlay()
             player.play()
+            retryCount = 0
             LogManager.shared.log(category: .general, message: "Silent audio playing", isDebug: true)
         } catch {
             LogManager.shared.log(category: .general, message: "playAudio, error: \(error)")
+            if retryCount < maxRetries {
+                retryCount += 1
+                LogManager.shared.log(category: .general, message: "playAudio retry \(retryCount)/\(maxRetries) in 2s")
+                retryTimer?.invalidate()
+                retryTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
+                    self?.playAudio()
+                }
+            } else {
+                LogManager.shared.log(category: .general, message: "playAudio failed after \(maxRetries) retries — posting BackgroundAudioFailed")
+                NotificationCenter.default.post(name: .backgroundAudioFailed, object: nil)
+            }
         }
     }
+}
+
+extension Notification.Name {
+    static let backgroundAudioFailed = Notification.Name("BackgroundAudioFailed")
 }
