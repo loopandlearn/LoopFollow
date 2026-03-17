@@ -33,12 +33,6 @@ struct SettingsMenuView: View {
                     {
                         settingsPath.value.append(Sheet.general)
                     }
-                    NavigationRow(title: "Tabs",
-                                  icon: "rectangle.3.group")
-                    {
-                        settingsPath.value.append(Sheet.tabSettings)
-                    }
-
                     NavigationRow(title: "Graph",
                                   icon: "chart.xyaxis.line")
                     {
@@ -51,6 +45,12 @@ struct SettingsMenuView: View {
                         {
                             settingsPath.value.append(Sheet.infoDisplay)
                         }
+                    }
+
+                    NavigationRow(title: "Tabs",
+                                  icon: "rectangle.3.group")
+                    {
+                        settingsPath.value.append(Sheet.tabSettings)
                     }
                 }
 
