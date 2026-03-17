@@ -159,6 +159,8 @@ struct RemoteSettingsExport: Codable {
     let mealWithFatProtein: Bool
     let productionEnvironment: Bool
     let loopAPNSQrCodeURL: String
+    let aapsPhoneNumber: String?
+    let aapsQrCodeURL: String?
     let device: String
 
     static func fromCurrentStorage() -> RemoteSettingsExport {
@@ -166,7 +168,7 @@ struct RemoteSettingsExport: Codable {
         return RemoteSettingsExport(
             version: AppVersionManager().version(),
             remoteType: storage.remoteType.value,
-            user: storage.user.value,
+            user: storage.remoteType.value == .aaps ? storage.aapsPhoneNumber.value : storage.user.value,
             sharedSecret: storage.sharedSecret.value,
             apnsKey: storage.apnsKey.value,
             keyId: storage.keyId.value,
@@ -179,15 +181,18 @@ struct RemoteSettingsExport: Codable {
             mealWithFatProtein: storage.mealWithFatProtein.value,
             productionEnvironment: storage.productionEnvironment.value,
             loopAPNSQrCodeURL: storage.loopAPNSQrCodeURL.value,
+            aapsPhoneNumber: storage.aapsPhoneNumber.value,
+            aapsQrCodeURL: storage.aapsQrCodeURL.value,
             device: storage.device.value
         )
     }
 
     func applyToStorage() {
         let storage = Storage.shared
+        let resolvedAAPSPhoneNumber = aapsPhoneNumber ?? user
 
         storage.remoteType.value = remoteType
-        storage.user.value = user
+        storage.user.value = remoteType == .aaps ? resolvedAAPSPhoneNumber : user
         storage.sharedSecret.value = sharedSecret
         storage.apnsKey.value = apnsKey
         storage.keyId.value = keyId
@@ -200,6 +205,8 @@ struct RemoteSettingsExport: Codable {
         storage.mealWithFatProtein.value = mealWithFatProtein
         storage.productionEnvironment.value = productionEnvironment
         storage.loopAPNSQrCodeURL.value = loopAPNSQrCodeURL
+        storage.aapsPhoneNumber.value = resolvedAAPSPhoneNumber
+        storage.aapsQrCodeURL.value = aapsQrCodeURL ?? ""
 
         // Set device temporarily from import (will be overridden by Nightscout connection)
         if !device.isEmpty {
@@ -215,6 +222,8 @@ struct RemoteSettingsExport: Codable {
                 // For Nightscout, we don't automatically set device type
                 // as it should be determined by the actual connection
                 break
+            case .aaps:
+                storage.device.value = "AndroidAPS"
             case .none:
                 break
             }
@@ -231,15 +240,19 @@ struct RemoteSettingsExport: Codable {
     }
 
     func hasValidSettings() -> Bool {
+        let resolvedAAPSPhoneNumber = aapsPhoneNumber ?? user
+
         switch remoteType {
         case .none:
             return true
         case .nightscout:
             return !user.isEmpty
+        case .aaps:
+            return TOTPGenerator.isValidPhoneNumber(resolvedAAPSPhoneNumber) && TOTPGenerator.isValidOTPURL(aapsQrCodeURL ?? "")
         case .trc:
             return !user.isEmpty && !sharedSecret.isEmpty && !apnsKey.isEmpty && !keyId.isEmpty
         case .loopAPNS:
-            return !keyId.isEmpty && !apnsKey.isEmpty && teamId != nil && !loopAPNSQrCodeURL.isEmpty
+            return !keyId.isEmpty && !apnsKey.isEmpty && !(teamId?.isEmpty ?? true) && TOTPGenerator.isValidOTPURL(loopAPNSQrCodeURL)
         }
     }
 
@@ -297,6 +310,20 @@ struct RemoteSettingsExport: Codable {
 
             if !currentQrCodeURL.isEmpty, currentQrCodeURL != loopAPNSQrCodeURL {
                 message += "Loop APNS QR Code URL is changing. This may affect your remote commands.\n"
+            }
+        }
+
+        if remoteType == .aaps {
+            let currentPhoneNumber = storage.aapsPhoneNumber.value
+            let currentQrCodeURL = storage.aapsQrCodeURL.value
+            let incomingPhoneNumber = aapsPhoneNumber ?? user
+
+            if !currentPhoneNumber.isEmpty, currentPhoneNumber != incomingPhoneNumber {
+                message += "AndroidAPS phone number is changing. This may affect your remote commands.\n"
+            }
+
+            if !currentQrCodeURL.isEmpty, currentQrCodeURL != (aapsQrCodeURL ?? "") {
+                message += "AndroidAPS QR Code URL is changing. This may affect your remote commands.\n"
             }
         }
 

@@ -17,10 +17,13 @@ class LogManager {
     private var shouldLogVersionHeader: Bool = true
 
     enum Category: String, CaseIterable {
+        case general = "General"
         case bluetooth = "Bluetooth"
         case nightscout = "Nightscout"
+        case trc = "Trio Remote Control"
+        case loopAPNS = "Loop APNS"
         case apns = "APNS"
-        case general = "General"
+        case aaps = "AndroidAPS"
         case contact = "Contact"
         case taskScheduler = "Task Scheduler"
         case dexcom = "Dexcom"

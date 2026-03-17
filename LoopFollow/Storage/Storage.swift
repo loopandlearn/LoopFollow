@@ -188,6 +188,15 @@ class Storage {
     var showStdDev = StorageValue<Bool>(key: "showStdDev", defaultValue: true)
     var showTITR = StorageValue<Bool>(key: "showTITR", defaultValue: false)
 
+    // MARK: - AndroidAPS Remote Settings
+
+    // These keep the legacy storage keys so existing AndroidAPS settings are preserved.
+    var aapsEnabled = StorageValue<Bool>(key: "smsEnabled", defaultValue: false)
+    var aapsPhoneNumber = StorageValue<String>(key: "smsPhoneNumber", defaultValue: "")
+    var aapsQrCodeURL = StorageValue<String>(key: "smsQrCodeURL", defaultValue: "")
+    var aapsBolusDelayMinutes = StorageValue<Int>(key: "smsBolusDelayMinutes", defaultValue: 15)
+    var aapsLastBolusTime = StorageValue<Date?>(key: "smsLastBolusTime", defaultValue: nil)
+
     static let shared = Storage()
     private init() {}
 

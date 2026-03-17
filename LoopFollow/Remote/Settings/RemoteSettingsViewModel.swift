@@ -64,11 +64,19 @@ class RemoteSettingsViewModel: ObservableObject {
             // Return true if the IDs are different.
             return loopFollowTeamID != targetTeamId
 
-        case .loopAPNS, .none, .nightscout:
+        case .loopAPNS, .none, .nightscout, .aaps:
             // For other remote types, this check is not applicable.
             return false
         }
     }
+
+    // MARK: - AndroidAPS Setup Properties
+
+    @Published var aapsPhoneNumber: String
+    @Published var aapsQrCodeURL: String
+    @Published var aapsBolusDelayMinutes: Int
+    @Published var isShowingAAPSScanner: Bool = false
+    @Published var aapsErrorMessage: String?
 
     // MARK: - Computed property for Loop APNS Setup validation
 
@@ -76,9 +84,15 @@ class RemoteSettingsViewModel: ObservableObject {
         !keyId.isEmpty &&
             !apnsKey.isEmpty &&
             !loopDeveloperTeamId.isEmpty &&
-            !loopAPNSQrCodeURL.isEmpty &&
+            TOTPGenerator.isValidOTPURL(loopAPNSQrCodeURL) &&
             !Storage.shared.deviceToken.value.isEmpty &&
             !Storage.shared.bundleId.value.isEmpty
+    }
+
+    // MARK: - Computed property for AndroidAPS setup validation
+
+    var aapsSetup: Bool {
+        TOTPGenerator.isValidPhoneNumber(aapsPhoneNumber) && TOTPGenerator.isValidOTPURL(aapsQrCodeURL)
     }
 
     private var storage = Storage.shared
@@ -104,6 +118,10 @@ class RemoteSettingsViewModel: ObservableObject {
 
         returnApnsKey = storage.returnApnsKey.value
         returnKeyId = storage.returnKeyId.value
+        // Initialize AndroidAPS properties
+        aapsPhoneNumber = storage.aapsPhoneNumber.value
+        aapsQrCodeURL = storage.aapsQrCodeURL.value
+        aapsBolusDelayMinutes = storage.aapsBolusDelayMinutes.value
 
         setupBindings()
     }
@@ -205,6 +223,22 @@ class RemoteSettingsViewModel: ObservableObject {
             .dropFirst()
             .sink { [weak self] in self?.storage.returnKeyId.value = $0 }
             .store(in: &cancellables)
+
+        // AndroidAPS bindings
+        $aapsPhoneNumber
+            .dropFirst()
+            .sink { [weak self] in self?.storage.aapsPhoneNumber.value = $0 }
+            .store(in: &cancellables)
+
+        $aapsQrCodeURL
+            .dropFirst()
+            .sink { [weak self] in self?.storage.aapsQrCodeURL.value = $0 }
+            .store(in: &cancellables)
+
+        $aapsBolusDelayMinutes
+            .dropFirst()
+            .sink { [weak self] in self?.storage.aapsBolusDelayMinutes.value = $0 }
+            .store(in: &cancellables)
     }
 
     func handleLoopAPNSQRCodeScanResult(_ result: Result<String, Error>) {
@@ -250,5 +284,21 @@ class RemoteSettingsViewModel: ObservableObject {
         // Update device-related properties
         isTrioDevice = (storage.device.value == "Trio")
         isLoopDevice = (storage.device.value == "Loop")
+        aapsPhoneNumber = storage.aapsPhoneNumber.value
+        aapsQrCodeURL = storage.aapsQrCodeURL.value
+        aapsBolusDelayMinutes = storage.aapsBolusDelayMinutes.value
+    }
+
+    func handleAAPSQRCodeScanResult(_ result: Result<String, Error>) {
+        DispatchQueue.main.async {
+            switch result {
+            case let .success(code):
+                self.aapsQrCodeURL = code
+                LogManager.shared.log(category: .aaps, message: "AndroidAPS QR code scanned: \(code)")
+            case let .failure(error):
+                self.aapsErrorMessage = "Scanning failed: \(error.localizedDescription)"
+            }
+            self.isShowingAAPSScanner = false
+        }
     }
 }

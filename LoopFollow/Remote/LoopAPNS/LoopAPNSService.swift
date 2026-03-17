@@ -110,7 +110,7 @@ class LoopAPNSService {
     func validateSetup() -> Bool {
         let hasKeyId = !storage.keyId.value.isEmpty
         let hasAPNSKey = !storage.apnsKey.value.isEmpty
-        let hasQrCode = !storage.loopAPNSQrCodeURL.value.isEmpty
+        let hasQrCode = TOTPGenerator.isValidOTPURL(storage.loopAPNSQrCodeURL.value)
         let hasDeviceToken = !Storage.shared.deviceToken.value.isEmpty
         let hasBundleIdentifier = !Storage.shared.bundleId.value.isEmpty
 

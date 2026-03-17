@@ -78,6 +78,8 @@ class RemoteViewController: UIViewController {
             }
         } else if remoteType == .loopAPNS {
             hostingController = UIHostingController(rootView: AnyView(LoopAPNSRemoteView()))
+        } else if remoteType == .aaps {
+            hostingController = UIHostingController(rootView: AnyView(AAPSRemoteView()))
         } else {
             hostingController = UIHostingController(rootView: AnyView(Text("Please select a Remote Type in Settings.")))
         }

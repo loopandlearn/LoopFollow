@@ -19,6 +19,8 @@ struct RemoteCommandSettings: Codable {
     let mealWithFatProtein: Bool
     let productionEnvironment: Bool
     let loopAPNSQrCodeURL: String
+    let aapsPhoneNumber: String?
+    let aapsQrCodeURL: String?
     let url: String
     let token: String
     let version: String
@@ -38,6 +40,8 @@ struct RemoteCommandSettings: Codable {
         mealWithFatProtein: Bool,
         productionEnvironment: Bool,
         loopAPNSQrCodeURL: String,
+        aapsPhoneNumber: String? = nil,
+        aapsQrCodeURL: String? = nil,
         url: String,
         token: String
     ) {
@@ -55,6 +59,8 @@ struct RemoteCommandSettings: Codable {
         self.mealWithFatProtein = mealWithFatProtein
         self.productionEnvironment = productionEnvironment
         self.loopAPNSQrCodeURL = loopAPNSQrCodeURL
+        self.aapsPhoneNumber = aapsPhoneNumber
+        self.aapsQrCodeURL = aapsQrCodeURL
         self.url = url
         self.token = token
         version = "1.0"
@@ -66,7 +72,7 @@ struct RemoteCommandSettings: Codable {
 
         return RemoteCommandSettings(
             remoteType: storage.remoteType.value,
-            user: storage.user.value,
+            user: storage.remoteType.value == .aaps ? storage.aapsPhoneNumber.value : storage.user.value,
             sharedSecret: storage.sharedSecret.value,
             apnsKey: storage.apnsKey.value,
             keyId: storage.keyId.value,
@@ -79,6 +85,8 @@ struct RemoteCommandSettings: Codable {
             mealWithFatProtein: storage.mealWithFatProtein.value,
             productionEnvironment: storage.productionEnvironment.value,
             loopAPNSQrCodeURL: storage.loopAPNSQrCodeURL.value,
+            aapsPhoneNumber: storage.aapsPhoneNumber.value,
+            aapsQrCodeURL: storage.aapsQrCodeURL.value,
             url: storage.url.value,
             token: storage.token.value
         )
@@ -87,9 +95,10 @@ struct RemoteCommandSettings: Codable {
     /// Applies the settings to the current Storage
     func applyToStorage() {
         let storage = Storage.shared
+        let resolvedAAPSPhoneNumber = aapsPhoneNumber ?? user
 
         storage.remoteType.value = remoteType
-        storage.user.value = user
+        storage.user.value = remoteType == .aaps ? resolvedAAPSPhoneNumber : user
         storage.sharedSecret.value = sharedSecret
         storage.apnsKey.value = apnsKey
         storage.keyId.value = keyId
@@ -102,6 +111,8 @@ struct RemoteCommandSettings: Codable {
         storage.mealWithFatProtein.value = mealWithFatProtein
         storage.productionEnvironment.value = productionEnvironment
         storage.loopAPNSQrCodeURL.value = loopAPNSQrCodeURL
+        storage.aapsPhoneNumber.value = resolvedAAPSPhoneNumber
+        storage.aapsQrCodeURL.value = aapsQrCodeURL ?? ""
         storage.url.value = url
         storage.token.value = token
 
@@ -111,6 +122,8 @@ struct RemoteCommandSettings: Codable {
             storage.device.value = "Loop"
         case .trc:
             storage.device.value = "Trio"
+        case .aaps:
+            storage.device.value = "AndroidAPS"
         case .nightscout:
             // For Nightscout, we don't automatically set device type
             // as it should be determined by the actual connection
@@ -146,6 +159,8 @@ struct RemoteCommandSettings: Codable {
 
     /// Checks if the settings are valid for the given remote type
     func hasValidSettings() -> Bool {
+        let resolvedAAPSPhoneNumber = aapsPhoneNumber ?? user
+
         switch remoteType {
         case .none:
             return true
@@ -154,7 +169,9 @@ struct RemoteCommandSettings: Codable {
         case .trc:
             return !user.isEmpty && !sharedSecret.isEmpty && !apnsKey.isEmpty && !keyId.isEmpty
         case .loopAPNS:
-            return !keyId.isEmpty && !apnsKey.isEmpty && teamId != nil && !loopAPNSQrCodeURL.isEmpty
+            return !keyId.isEmpty && !apnsKey.isEmpty && !(teamId?.isEmpty ?? true) && TOTPGenerator.isValidOTPURL(loopAPNSQrCodeURL)
+        case .aaps:
+            return TOTPGenerator.isValidPhoneNumber(resolvedAAPSPhoneNumber) && TOTPGenerator.isValidOTPURL(aapsQrCodeURL ?? "")
         }
     }
 

@@ -5,6 +5,8 @@ import CommonCrypto
 import Foundation
 
 enum TOTPGenerator {
+    private static let base32CharacterSet = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=")
+
     /// Generates a TOTP code from a base32 secret
     /// - Parameter secret: The base32 encoded secret
     /// - Returns: A 6-digit TOTP code as a string
@@ -68,6 +70,73 @@ enum TOTPGenerator {
         }
 
         return nil
+    }
+
+    /// Validates whether a QR code URL contains a usable OTP configuration
+    /// - Parameter urlString: The QR code URL to validate
+    /// - Returns: True when the URL contains either a valid otpauth secret or a non-empty otp query item
+    static func isValidOTPURL(_ urlString: String) -> Bool {
+        let trimmedURL = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedURL.isEmpty,
+              let url = URL(string: trimmedURL),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        else {
+            return false
+        }
+
+        if url.scheme?.lowercased() == "otpauth" {
+            guard let secretItem = components.queryItems?.first(where: { $0.name.lowercased() == "secret" }),
+                  let secret = secretItem.value
+            else {
+                return false
+            }
+
+            return isValidBase32Secret(secret)
+        }
+
+        if let otpItem = components.queryItems?.first(where: { $0.name.lowercased() == "otp" }),
+           let otpValue = otpItem.value?.trimmingCharacters(in: .whitespacesAndNewlines)
+        {
+            return !otpValue.isEmpty
+        }
+
+        return false
+    }
+
+    /// Validates a phone number intended for SMS-based remote control
+    /// - Parameter phoneNumber: The phone number to validate
+    /// - Returns: True for broadly valid SMS phone numbers
+    static func isValidPhoneNumber(_ phoneNumber: String) -> Bool {
+        let trimmedNumber = phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedNumber.isEmpty else {
+            return false
+        }
+
+        let allowedCharacters = CharacterSet(charactersIn: "+0123456789 -()")
+        guard trimmedNumber.unicodeScalars.allSatisfy(allowedCharacters.contains) else {
+            return false
+        }
+
+        let plusCount = trimmedNumber.filter { $0 == "+" }.count
+        if plusCount > 1 || (plusCount == 1 && trimmedNumber.first != "+") {
+            return false
+        }
+
+        let digitCount = trimmedNumber.unicodeScalars.filter(CharacterSet.decimalDigits.contains).count
+        return (7 ... 15).contains(digitCount)
+    }
+
+    private static func isValidBase32Secret(_ secret: String) -> Bool {
+        let normalizedSecret = secret
+            .uppercased()
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "-", with: "")
+
+        guard normalizedSecret.count >= 8 else {
+            return false
+        }
+
+        return normalizedSecret.unicodeScalars.allSatisfy(base32CharacterSet.contains)
     }
 
     /// Decodes a base32 string to bytes
