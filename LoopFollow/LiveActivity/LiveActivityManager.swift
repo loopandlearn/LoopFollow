@@ -87,13 +87,19 @@ final class LiveActivityManager {
 
     @objc private func handleForeground() {
         guard Storage.shared.laEnabled.value else { return }
-        LogManager.shared.log(category: .general, message: "[LA] foreground notification received, laRenewalFailed=\(Storage.shared.laRenewalFailed.value)")
-        guard Storage.shared.laRenewalFailed.value else { return }
 
-        // Renewal previously failed — end the stale LA and start a fresh one.
+        let renewalFailed = Storage.shared.laRenewalFailed.value
+        let renewBy = Storage.shared.laRenewBy.value
+        let now = Date().timeIntervalSince1970
+        let overlayIsShowing = renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
+
+        LogManager.shared.log(category: .general, message: "[LA] foreground notification received, laRenewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing)")
+        guard renewalFailed || overlayIsShowing else { return }
+
+        // Overlay is showing or renewal previously failed — end the stale LA and start a fresh one.
         // We cannot call startIfNeeded() here: it finds the existing activity in
         // Activity.activities and reuses it rather than replacing it.
-        LogManager.shared.log(category: .general, message: "[LA] ending stale LA and restarting after renewal failure")
+        LogManager.shared.log(category: .general, message: "[LA] ending stale LA and restarting (renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing))")
         // Clear state synchronously so any snapshot built between now and when the
         // new LA is started computes showRenewalOverlay = false.
         Storage.shared.laRenewBy.value = 0
