@@ -161,30 +161,26 @@ private struct LockScreenLiveActivityView: View {
             HStack(spacing: 12) {
                 // LEFT: Glucose + trend arrow, delta below
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text(LAFormat.glucose(s))
                             .font(.system(size: 46, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .foregroundStyle(.white)
+                            .minimumScaleFactor(0.7)
                             .lineLimit(1)
-                            .minimumScaleFactor(0.78)
-                            .allowsTightening(true)
-                            .layoutPriority(3)
 
                         Text(LAFormat.trendArrow(s))
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.95))
                             .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
                     }
 
                     Text("Delta: \(LAFormat.delta(s))")
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(.white.opacity(0.80))
-                        .lineLimit(1)
                 }
-                .frame(minWidth: 168, maxWidth: 190, alignment: .leading)
+                .frame(width: 168, alignment: .leading)
                 .layoutPriority(2)
 
                 // Divider
@@ -194,12 +190,12 @@ private struct LockScreenLiveActivityView: View {
                     .padding(.vertical, 8)
 
                 // RIGHT: configurable 2×2 grid
-                VStack(spacing: 8) {
-                    HStack(spacing: 12) {
+                VStack(spacing: 10) {
+                    HStack(spacing: 16) {
                         SlotView(option: slotConfig[0], snapshot: s)
                         SlotView(option: slotConfig[1], snapshot: s)
                     }
-                    HStack(spacing: 12) {
+                    HStack(spacing: 16) {
                         SlotView(option: slotConfig[2], snapshot: s)
                         SlotView(option: slotConfig[3], snapshot: s)
                     }
@@ -285,7 +281,7 @@ private struct MetricBlock: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
         }
-        .frame(width: 60, alignment: .leading) // slightly tighter columns to free space for glucose
+        .frame(width: 64, alignment: .leading) // consistent 2×2 columns
     }
 }
 
@@ -299,7 +295,7 @@ private struct SlotView: View {
         if option == .none {
             // Invisible spacer — preserves grid alignment
             Color.clear
-                .frame(width: 60, height: 36)
+                .frame(width: 64, height: 36)
         } else {
             MetricBlock(label: option.gridLabel, value: value(for: option))
         }
