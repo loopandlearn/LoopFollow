@@ -4,6 +4,20 @@
 import Foundation
 
 extension Storage {
+    func migrateStep5() {
+        let isLegacyDefaultTabBarOrder = homePosition.value.normalized == .position1
+            && alarmsPosition.value.normalized == .position2
+            && remotePosition.value.normalized == .position3
+            && nightscoutPosition.value.normalized == .position4
+            && snoozerPosition.value.normalized == .menu
+
+        guard isLegacyDefaultTabBarOrder else { return }
+
+        LogManager.shared.log(category: .general, message: "migrateStep5: Reordering default tabs to Home, Alarms, Nightscout, Remote")
+        nightscoutPosition.value = .position3
+        remotePosition.value = .position4
+    }
+
     func migrateStep3() {
         LogManager.shared.log(category: .general, message: "Running migrateStep3 - this should only happen once!")
         let legacyForceDarkMode = StorageValue<Bool>(key: "forceDarkMode", defaultValue: true)
