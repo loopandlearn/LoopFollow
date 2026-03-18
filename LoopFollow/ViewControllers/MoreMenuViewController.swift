@@ -50,6 +50,8 @@ class MoreMenuViewController: UIViewController {
         super.viewDidLoad()
 
         view.backgroundColor = .systemBackground
+        navigationItem.title = "Menu"
+        navigationItem.largeTitleDisplayMode = .always
 
         // Apply appearance mode
         overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
@@ -80,6 +82,7 @@ class MoreMenuViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
         updateMenuItems()
         tableView.reloadData()
         Observable.shared.settingsPath.set(NavigationPath())
@@ -103,30 +106,12 @@ class MoreMenuViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-
-        // Large-title style header
-        let header = UIView()
-        let label = UILabel()
-        label.text = "Menu"
-        label.font = .systemFont(ofSize: 34, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        header.addSubview(label)
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 20),
-            label.topAnchor.constraint(equalTo: header.topAnchor, constant: 8),
-            label.bottomAnchor.constraint(equalTo: header.bottomAnchor, constant: -8),
-        ])
-        header.frame.size = header.systemLayoutSizeFitting(
-            CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-        tableView.tableHeaderView = header
+        tableView.contentInsetAdjustmentBehavior = .automatic
 
         view.addSubview(tableView)
 
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
@@ -139,22 +124,23 @@ class MoreMenuViewController: UIViewController {
         let build = BuildDetails.default
         let ver = AppVersionManager().version()
 
-        menuSections = [
-            // Section 0: Settings
+        var sections: [MenuSection] = [
             MenuSection(title: nil, items: [
-                MenuItem(title: "Settings", icon: "gear") { [weak self] in
+                MenuItem(title: "Settings", icon: "gearshape") { [weak self] in
                     self?.openSettings()
                 },
             ]),
+        ]
 
-            // Section 1: All tab items (static)
+        sections.append(
             MenuSection(title: "Features", items: TabItem.allCases.map { item in
                 MenuItem(title: item.displayName, icon: item.icon) { [weak self] in
                     self?.openItem(item)
                 }
-            }),
+            })
+        )
 
-            // Section 2: Logging
+        sections.append(contentsOf: [
             MenuSection(title: "Logging", items: [
                 MenuItem(title: "View Log", icon: "doc.text.magnifyingglass") { [weak self] in
                     self?.openViewLog()
@@ -205,7 +191,9 @@ class MoreMenuViewController: UIViewController {
 
                 return items
             }()),
-        ]
+        ])
+
+        menuSections = sections
     }
 
     // MARK: - Version fetching
@@ -293,20 +281,7 @@ class MoreMenuViewController: UIViewController {
         let remoteVC = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
         let navController = UINavigationController(rootViewController: remoteVC)
 
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        remoteVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        remoteVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        remoteVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        presentModal(navController, rootViewController: remoteVC)
     }
 
     private func openNightscout() {
@@ -314,20 +289,7 @@ class MoreMenuViewController: UIViewController {
         let nightscoutVC = storyboard.instantiateViewController(withIdentifier: "NightscoutViewController")
         let navController = UINavigationController(rootViewController: nightscoutVC)
 
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        nightscoutVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        nightscoutVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        nightscoutVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        presentModal(navController, rootViewController: nightscoutVC)
     }
 
     private func openSnoozer() {
@@ -335,40 +297,14 @@ class MoreMenuViewController: UIViewController {
         let snoozerVC = storyboard.instantiateViewController(withIdentifier: "SnoozerViewController")
         let navController = UINavigationController(rootViewController: snoozerVC)
 
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        snoozerVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        snoozerVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        snoozerVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        presentModal(navController, rootViewController: snoozerVC)
     }
 
     private func openTreatments() {
         let treatmentsVC = UIHostingController(rootView: TreatmentsView())
         let navController = UINavigationController(rootViewController: treatmentsVC)
 
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        treatmentsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        treatmentsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        treatmentsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        presentModal(navController, rootViewController: treatmentsVC)
     }
 
     private func openAggregatedStats() {
@@ -382,20 +318,7 @@ class MoreMenuViewController: UIViewController {
         )
         let navController = UINavigationController(rootViewController: statsVC)
 
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        statsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        statsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        statsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        presentModal(navController, rootViewController: statsVC)
     }
 
     private func openHome() {
@@ -411,20 +334,7 @@ class MoreMenuViewController: UIViewController {
         logVC.title = "Log"
         let navController = UINavigationController(rootViewController: logVC)
 
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        logVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        logVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        logVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        presentModal(navController, rootViewController: logVC)
     }
 
     private func shareLogs() {
@@ -471,6 +381,21 @@ class MoreMenuViewController: UIViewController {
         mainVC.isPresentedAsModal = true
         fallbackMainViewController = mainVC
         return mainVC
+    }
+
+    private func presentModal(_ navController: UINavigationController, rootViewController: UIViewController) {
+        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+        rootViewController.overrideUserInterfaceStyle = style
+        rootViewController.navigationItem.rightBarButtonItem = makeCloseButton()
+        navController.overrideUserInterfaceStyle = style
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
+    }
+
+    private func makeCloseButton() -> UIBarButtonItem {
+        let button = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(dismissModal))
+        button.tintColor = .systemBlue
+        return button
     }
 
     @objc private func dismissModal() {

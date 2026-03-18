@@ -32,15 +32,12 @@ enum TabCustomizationItem: Identifiable, Equatable, Hashable {
 
 struct TabCustomizationModal: View {
     @Environment(\.dismiss) private var dismiss
-    let onApply: () -> Void
 
     // All items including Settings - top 4 go to tab bar, rest to menu
     @State private var allItems: [TabCustomizationItem]
     private let originalItems: [TabCustomizationItem]
 
-    init(onApply: @escaping () -> Void) {
-        self.onApply = onApply
-
+    init() {
         let sortedTabItems = TabItem.movableItems.sorted { item1, item2 in
             let pos1 = Storage.shared.position(for: item1).normalized
             let pos2 = Storage.shared.position(for: item2).normalized
@@ -90,7 +87,7 @@ struct TabCustomizationModal: View {
                     Text("Drag to reorder")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                    Text("The top 4 items appear in the tab bar. Items 5+ appear in the Menu.")
+                    Text("The top 4 items appear in the tab bar. The Menu can always open every feature.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -177,12 +174,11 @@ struct TabCustomizationModal: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button {
                     applyChangesSilently()
-                    onApply()
                     dismiss()
-                } label: {
-                    Image(systemName: "checkmark")
                 }
-                .foregroundColor(.blue)
+                label: {
+                    Text("Done")
+                }
             }
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)

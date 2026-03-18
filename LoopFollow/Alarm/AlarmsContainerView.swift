@@ -11,9 +11,9 @@ struct AlarmsContainerView: View {
             AlarmListView()
                 .toolbar {
                     if let onDismiss {
-                        ToolbarItem(placement: .navigationBarLeading) {
+                        ToolbarItem(placement: .cancellationAction) {
                             Button(action: onDismiss) {
-                                Image(systemName: "checkmark")
+                                Image(systemName: "xmark")
                             }
                         }
                     }

@@ -598,9 +598,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         }
 
-        let menuVC = MoreMenuViewController()
-        menuVC.tabBarItem = UITabBarItem(title: "Menu", image: UIImage(systemName: "line.3.horizontal"), tag: 4)
-        viewControllers.append(menuVC)
+        viewControllers.append(Self.makeMenuViewController(tag: 4))
 
         if let presented = tabBarController.presentedViewController {
             presented.dismiss(animated: false) {
@@ -677,9 +675,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         }
 
-        let menuVC = MoreMenuViewController()
-        menuVC.tabBarItem = UITabBarItem(title: "Menu", image: UIImage(systemName: "line.3.horizontal"), tag: 4)
-        viewControllers.append(menuVC)
+        viewControllers.append(Self.makeMenuViewController(tag: 4))
 
         tabBarController.setViewControllers(viewControllers, animated: false)
 
@@ -741,6 +737,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             statsVC.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return statsVC
         }
+    }
+
+    private static func makeMenuViewController(tag: Int) -> UIViewController {
+        let menuVC = MoreMenuViewController()
+        let navController = UINavigationController(rootViewController: menuVC)
+        navController.navigationBar.prefersLargeTitles = true
+        navController.tabBarItem = UITabBarItem(title: "Menu", image: UIImage(systemName: "line.3.horizontal"), tag: tag)
+        navController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        return navController
     }
 
     private func createComingSoonViewController(title: String, icon: String) -> UIViewController {
@@ -1406,14 +1411,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         hostingController.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
 
-        // Add a Done button
-        hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        hostingController.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
+        hostingController.navigationItem.rightBarButtonItem = makeCloseBarButtonItem()
 
         navController.modalPresentationStyle = .pageSheet
         present(navController, animated: true)
@@ -1429,14 +1427,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         hostingController.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
 
-        // Add a Done button
-        hostingController.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        hostingController.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
+        hostingController.navigationItem.rightBarButtonItem = makeCloseBarButtonItem()
 
         navController.modalPresentationStyle = .pageSheet
         present(navController, animated: true)
@@ -1449,6 +1440,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     private func showGraphs() {
         updateGraphVisibility()
+    }
+
+    private func makeCloseBarButtonItem() -> UIBarButtonItem {
+        let button = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(dismissModal))
+        button.tintColor = .systemBlue
+        return button
     }
 
     private func hideAllDataUI() {

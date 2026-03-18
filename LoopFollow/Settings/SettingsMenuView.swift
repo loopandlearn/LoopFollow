@@ -23,10 +23,8 @@ struct SettingsMenuView: View {
     var body: some View {
         NavigationStack(path: $settingsPath.value) {
             List {
-                // ───────── Data settings ─────────
                 dataSection
 
-                // ───────── Display settings ─────────
                 Section("Display Settings") {
                     NavigationRow(title: "General",
                                   icon: "gearshape")
@@ -54,7 +52,6 @@ struct SettingsMenuView: View {
                     }
                 }
 
-                // ───────── App settings ─────────
                 Section("App Settings") {
                     NavigationRow(title: "Background Refresh",
                                   icon: "arrow.clockwise")
@@ -77,7 +74,6 @@ struct SettingsMenuView: View {
                     }
                 }
 
-                // ───────── Alarms ─────────
                 Section("Alarms") {
                     NavigationRow(title: "Alarms",
                                   icon: "bell.badge")
@@ -86,7 +82,6 @@ struct SettingsMenuView: View {
                     }
                 }
 
-                // ───────── Integrations ─────────
                 Section("Integrations") {
                     NavigationRow(title: "Calendar",
                                   icon: "calendar")
@@ -101,7 +96,6 @@ struct SettingsMenuView: View {
                     }
                 }
 
-                // ───────── Advanced ─────────
                 Section("Advanced Settings") {
                     NavigationRow(title: "Advanced",
                                   icon: "exclamationmark.shield")
@@ -111,12 +105,13 @@ struct SettingsMenuView: View {
                 }
             }
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: Sheet.self) { $0.destination }
             .toolbar {
                 if let onDismiss {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItem(placement: .cancellationAction) {
                         Button(action: onDismiss) {
-                            Image(systemName: "checkmark")
+                            Image(systemName: "xmark")
                         }
                     }
                 }
@@ -179,9 +174,7 @@ private enum Sheet: Hashable, Identifiable {
         case .backgroundRefresh: BackgroundRefreshSettingsView(viewModel: .init())
         case .general: GeneralSettingsView()
         case .graph: GraphSettingsView()
-        case .tabSettings: TabCustomizationModal(onApply: {
-                MainViewController.rebuildTabsIfNeeded()
-            })
+        case .tabSettings: TabCustomizationModal()
         case .infoDisplay: InfoDisplaySettingsView(viewModel: .init())
         case .alarmSettings: AlarmSettingsView()
         case .remote: RemoteSettingsView(viewModel: .init())
