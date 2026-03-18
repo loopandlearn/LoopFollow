@@ -31,8 +31,6 @@ enum TabCustomizationItem: Identifiable, Equatable, Hashable {
 }
 
 struct TabCustomizationModal: View {
-    @Environment(\.dismiss) private var dismiss
-
     // All items including Settings - top 4 go to tab bar, rest to menu
     @State private var allItems: [TabCustomizationItem]
     private let originalItems: [TabCustomizationItem]
@@ -160,6 +158,7 @@ struct TabCustomizationModal: View {
                     }
 
                     allItems = newItems
+                    persistTabOrder(tabItemsOnly)
                 }
             } header: {
                 Text("Tab Order")
@@ -169,49 +168,24 @@ struct TabCustomizationModal: View {
         .environment(\.editMode, .constant(.active))
         .navigationTitle("Tabs")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button {
-                    applyChangesSilently()
-                    dismiss()
-                }
-                label: {
-                    Text("Done")
-                }
-            }
-        }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 
     // MARK: - Actions
 
-    private func applyChangesSilently() {
-        // Count only TabItems (not Settings) to determine tab bar positions
-        // First 4 TabItems go to tab bar, rest go to menu
-        var tabItemCount = 0
-        for item in allItems {
-            switch item {
-            case let .tabItem(tabItem):
-                let position: TabPosition
-                if tabItemCount < 4 {
-                    switch tabItemCount {
-                    case 0: position = .position1
-                    case 1: position = .position2
-                    case 2: position = .position3
-                    case 3: position = .position4
-                    default: position = .menu
-                    }
-                } else {
-                    position = .menu
-                }
-                Storage.shared.setPosition(position, for: tabItem)
-                tabItemCount += 1
-            case .settings:
-                break
+    private func persistTabOrder(_ tabItems: [TabItem]) {
+        for (index, tabItem) in tabItems.enumerated() {
+            let position: TabPosition
+            switch index {
+            case 0: position = .position1
+            case 1: position = .position2
+            case 2: position = .position3
+            case 3: position = .position4
+            default: position = .menu
             }
+
+            Storage.shared.setPosition(position, for: tabItem)
         }
-        // Don't call onApply() - let the tab position observers handle the rebuild naturally
     }
 }
 
