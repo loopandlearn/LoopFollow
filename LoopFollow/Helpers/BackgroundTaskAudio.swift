@@ -88,7 +88,6 @@ class BackgroundTask {
             }
         }
     }
-
 }
 
 extension Notification.Name {
