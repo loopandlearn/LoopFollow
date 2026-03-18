@@ -3,9 +3,12 @@
 
 import AVFoundation
 
+extension Notification.Name {
+    static let backgroundAudioFailed = Notification.Name(“BackgroundAudioFailed”)
+}
+
 class BackgroundTask {
     // MARK: - Vars
-    
     var player = AVAudioPlayer()
     
     private var retryCount = 0
@@ -88,9 +91,4 @@ class BackgroundTask {
             }
         }
     }
-
-}
-
-extension Notification.Name {
-    static let backgroundAudioFailed = Notification.Name(“BackgroundAudioFailed”)
 }
