@@ -667,10 +667,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            // You may need to provide a MainViewController or view model as needed
             let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: nil)))
-            statsVC.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
-            return statsVC
+            let navController = UINavigationController(rootViewController: statsVC)
+            navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
+            return navController
         }
     }
 
@@ -757,8 +757,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         case .stats:
             let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: self)))
-            statsVC.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
-            return statsVC
+            let navController = UINavigationController(rootViewController: statsVC)
+            navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
+            return navController
         }
     }
 

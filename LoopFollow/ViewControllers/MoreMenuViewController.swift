@@ -53,6 +53,7 @@ class MoreMenuViewController: UIViewController {
         view.backgroundColor = .systemBackground
         navigationItem.title = "Menu"
         navigationItem.largeTitleDisplayMode = .always
+        navigationItem.backButtonDisplayMode = .minimal
 
         // Apply appearance mode
         overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
