@@ -6,7 +6,6 @@ import SwiftUI
 import WidgetKit
 
 /// Builds the shared Dynamic Island content used by both widget variants.
-@available(iOS 16.1, *)
 private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityAttributes>) -> DynamicIsland {
     DynamicIsland {
         DynamicIslandExpandedRegion(.leading) {
@@ -43,8 +42,7 @@ private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityA
     .keylineTint(LAColors.keyline(for: context.state.snapshot).opacity(0.75))
 }
 
-/// Primary widget (iOS 16.1+) — Lock Screen + Dynamic Island for all iOS versions.
-@available(iOS 16.1, *)
+/// Primary widget — Lock Screen + Dynamic Island.
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
@@ -151,7 +149,6 @@ private struct SmallFamilyView: View {
 
 // MARK: - Lock Screen Contract View
 
-@available(iOS 16.1, *)
 private struct LockScreenLiveActivityView: View {
     let state: GlucoseLiveActivityAttributes.ContentState
     /* let activityID: String */
@@ -164,26 +161,30 @@ private struct LockScreenLiveActivityView: View {
             HStack(spacing: 12) {
                 // LEFT: Glucose + trend arrow, delta below
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
                         Text(LAFormat.glucose(s))
                             .font(.system(size: 46, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .foregroundStyle(.white)
-                            .minimumScaleFactor(0.7)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.78)
+                            .allowsTightening(true)
+                            .layoutPriority(3)
 
                         Text(LAFormat.trendArrow(s))
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.95))
                             .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
                     }
 
                     Text("Delta: \(LAFormat.delta(s))")
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(.white.opacity(0.80))
+                        .lineLimit(1)
                 }
-                .frame(width: 168, alignment: .leading)
+                .frame(minWidth: 168, maxWidth: 190, alignment: .leading)
                 .layoutPriority(2)
 
                 // Divider
@@ -193,12 +194,12 @@ private struct LockScreenLiveActivityView: View {
                     .padding(.vertical, 8)
 
                 // RIGHT: configurable 2×2 grid
-                VStack(spacing: 10) {
-                    HStack(spacing: 16) {
+                VStack(spacing: 8) {
+                    HStack(spacing: 12) {
                         SlotView(option: slotConfig[0], snapshot: s)
                         SlotView(option: slotConfig[1], snapshot: s)
                     }
-                    HStack(spacing: 16) {
+                    HStack(spacing: 12) {
                         SlotView(option: slotConfig[2], snapshot: s)
                         SlotView(option: slotConfig[3], snapshot: s)
                     }
@@ -284,7 +285,7 @@ private struct MetricBlock: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
         }
-        .frame(width: 64, alignment: .leading) // consistent 2×2 columns
+        .frame(width: 60, alignment: .leading) // slightly tighter columns to free space for glucose
     }
 }
 
@@ -298,7 +299,7 @@ private struct SlotView: View {
         if option == .none {
             // Invisible spacer — preserves grid alignment
             Color.clear
-                .frame(width: 64, height: 36)
+                .frame(width: 60, height: 36)
         } else {
             MetricBlock(label: option.gridLabel, value: value(for: option))
         }
@@ -334,7 +335,6 @@ private struct SlotView: View {
 
 // MARK: - Dynamic Island
 
-@available(iOS 16.1, *)
 private struct DynamicIslandLeadingView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -369,7 +369,6 @@ private struct DynamicIslandLeadingView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandTrailingView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -391,7 +390,6 @@ private struct DynamicIslandTrailingView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandBottomView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -411,7 +409,6 @@ private struct DynamicIslandBottomView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandCompactTrailingView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -430,7 +427,6 @@ private struct DynamicIslandCompactTrailingView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandCompactLeadingView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {
@@ -446,7 +442,6 @@ private struct DynamicIslandCompactLeadingView: View {
     }
 }
 
-@available(iOS 16.1, *)
 private struct DynamicIslandMinimalView: View {
     let snapshot: GlucoseSnapshot
     var body: some View {

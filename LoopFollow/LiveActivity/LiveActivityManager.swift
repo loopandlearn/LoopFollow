@@ -32,6 +32,12 @@ final class LiveActivityManager {
             name: UIApplication.willResignActiveNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleBackgroundAudioFailed),
+            name: .backgroundAudioFailed,
+            object: nil
+        )
     }
 
     /// Fires before the app loses focus (lock screen, home button, etc.).
@@ -87,13 +93,19 @@ final class LiveActivityManager {
 
     @objc private func handleForeground() {
         guard Storage.shared.laEnabled.value else { return }
-        LogManager.shared.log(category: .general, message: "[LA] foreground notification received, laRenewalFailed=\(Storage.shared.laRenewalFailed.value)")
-        guard Storage.shared.laRenewalFailed.value else { return }
 
-        // Renewal previously failed — end the stale LA and start a fresh one.
+        let renewalFailed = Storage.shared.laRenewalFailed.value
+        let renewBy = Storage.shared.laRenewBy.value
+        let now = Date().timeIntervalSince1970
+        let overlayIsShowing = renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
+
+        LogManager.shared.log(category: .general, message: "[LA] foreground notification received, laRenewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing)")
+        guard renewalFailed || overlayIsShowing else { return }
+
+        // Overlay is showing or renewal previously failed — end the stale LA and start a fresh one.
         // We cannot call startIfNeeded() here: it finds the existing activity in
         // Activity.activities and reuses it rather than replacing it.
-        LogManager.shared.log(category: .general, message: "[LA] ending stale LA and restarting after renewal failure")
+        LogManager.shared.log(category: .general, message: "[LA] ending stale LA and restarting (renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing))")
         // Clear state synchronously so any snapshot built between now and when the
         // new LA is started computes showRenewalOverlay = false.
         Storage.shared.laRenewBy.value = 0
@@ -126,6 +138,16 @@ final class LiveActivityManager {
                 LogManager.shared.log(category: .general, message: "[LA] Live Activity restarted after foreground retry")
             }
         }
+    }
+
+    @objc private func handleBackgroundAudioFailed() {
+        guard Storage.shared.laEnabled.value, current != nil else { return }
+        // The background audio session has permanently failed — the app will lose its
+        // background keep-alive. Immediately push the renewal overlay so the user sees
+        // "Tap to update" on the lock screen and knows to foreground the app.
+        LogManager.shared.log(category: .general, message: "[LA] background audio failed — forcing renewal overlay")
+        Storage.shared.laRenewBy.value = Date().timeIntervalSince1970
+        refreshFromCurrentState(reason: "audio-session-failed")
     }
 
     static let renewalThreshold: TimeInterval = 7.5 * 3600
