@@ -5,37 +5,37 @@ import AVFoundation
 
 class BackgroundTask {
     // MARK: - Vars
-    
+
     var player = AVAudioPlayer()
-    
+
     private var retryCount = 0
     private let maxRetries = 3
-    
+
     // MARK: - Methods
-    
+
     func startBackgroundTask() {
         NotificationCenter.default.addObserver(self, selector: #selector(interruptedAudio), name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance())
         retryCount = 0
         playAudio()
     }
-    
+
     func stopBackgroundTask() {
         NotificationCenter.default.removeObserver(self, name: AVAudioSession.interruptionNotification, object: nil)
         player.stop()
         LogManager.shared.log(category: .general, message: "Silent audio stopped", isDebug: true)
     }
-    
+
     @objc fileprivate func interruptedAudio(_ notification: Notification) {
         guard notification.name == AVAudioSession.interruptionNotification,
               let userInfo = notification.userInfo,
               let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
               let type = AVAudioSession.InterruptionType(rawValue: typeValue)
         else { return }
-    
+
         switch type {
         case .began:
             LogManager.shared.log(category: .general, message: "[LA] Silent audio session interrupted (began)")
-    
+
         case .ended:
             // Check shouldResume hint — skip restart if iOS says not to
             if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
@@ -53,12 +53,12 @@ class BackgroundTask {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.playAudio()
             }
-    
+
         @unknown default:
             break
         }
     }
-    
+
     fileprivate func playAudio() {
         let attemptDesc = retryCount == 0 ? "initial attempt" : "retry \(retryCount)/\(maxRetries)"
         do {
@@ -92,5 +92,5 @@ class BackgroundTask {
 }
 
 extension Notification.Name {
-    static let backgroundAudioFailed = Notification.Name(“BackgroundAudioFailed”)
+    static let backgroundAudioFailed = Notification.Name("BackgroundAudioFailed")
 }
