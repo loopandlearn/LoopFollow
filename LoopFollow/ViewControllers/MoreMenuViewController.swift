@@ -9,6 +9,7 @@ class MoreMenuViewController: UIViewController {
     private var tableView: UITableView!
     private var cancellables = Set<AnyCancellable>()
     private var fallbackMainViewController: MainViewController?
+    var needsTabRebuild = false
 
     // Build Information state
     private var latestVersion: String?
@@ -82,10 +83,16 @@ class MoreMenuViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = true
         updateMenuItems()
         tableView.reloadData()
         Observable.shared.settingsPath.set(NavigationPath())
+
+        if needsTabRebuild {
+            needsTabRebuild = false
+            MainViewController.rebuildTabsIfNeeded()
+        }
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -225,11 +232,11 @@ class MoreMenuViewController: UIViewController {
             tabVC.selectedIndex = index
             return
         }
-        // Otherwise present as modal
-        presentItemAsModal(item)
+        // Otherwise push onto navigation stack
+        pushItem(item)
     }
 
-    private func presentItemAsModal(_ item: TabItem) {
+    private func pushItem(_ item: TabItem) {
         switch item {
         case .home:
             openHome()
@@ -249,62 +256,52 @@ class MoreMenuViewController: UIViewController {
     }
 
     private func openSettings() {
-        let settingsView = SettingsMenuView(onDismiss: { [weak self] in
-            self?.dismiss(animated: true) {
-                MainViewController.rebuildTabsIfNeeded()
-            }
+        needsTabRebuild = true
+        let settingsView = SettingsMenuView(onBack: { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
         })
-        let settingsVC = UIHostingController(rootView: settingsView)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        settingsVC.overrideUserInterfaceStyle = style
-
-        settingsVC.modalPresentationStyle = .fullScreen
-        present(settingsVC, animated: true)
+        let settingsVC = NavBarHidingHostingController(rootView: settingsView)
+        settingsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(settingsVC, animated: true)
     }
 
     private func openAlarmsConfig() {
-        let alarmsView = AlarmsContainerView(onDismiss: { [weak self] in
-            self?.dismiss(animated: true)
+        let alarmsView = AlarmsContainerView(onBack: { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
         })
-        let alarmsVC = UIHostingController(rootView: alarmsView)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        alarmsVC.overrideUserInterfaceStyle = style
-
-        alarmsVC.modalPresentationStyle = .fullScreen
-        present(alarmsVC, animated: true)
+        let alarmsVC = NavBarHidingHostingController(rootView: alarmsView)
+        alarmsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(alarmsVC, animated: true)
     }
 
     private func openRemote() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let remoteVC = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
-        let navController = UINavigationController(rootViewController: remoteVC)
-
-        presentModal(navController, rootViewController: remoteVC)
+        remoteVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(remoteVC, animated: true)
     }
 
     private func openNightscout() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let nightscoutVC = storyboard.instantiateViewController(withIdentifier: "NightscoutViewController")
-        let navController = UINavigationController(rootViewController: nightscoutVC)
-
-        presentModal(navController, rootViewController: nightscoutVC)
+        nightscoutVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(nightscoutVC, animated: true)
     }
 
     private func openSnoozer() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let snoozerVC = storyboard.instantiateViewController(withIdentifier: "SnoozerViewController")
-        let navController = UINavigationController(rootViewController: snoozerVC)
-
-        presentModal(navController, rootViewController: snoozerVC)
+        snoozerVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(snoozerVC, animated: true)
     }
 
     private func openTreatments() {
-        let treatmentsVC = UIHostingController(rootView: TreatmentsView())
-        let navController = UINavigationController(rootViewController: treatmentsVC)
-
-        presentModal(navController, rootViewController: treatmentsVC)
+        let treatmentsView = TreatmentsView(onBack: { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        })
+        let treatmentsVC = NavBarHidingHostingController(rootView: treatmentsView)
+        treatmentsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(treatmentsVC, animated: true)
     }
 
     private func openAggregatedStats() {
@@ -316,25 +313,24 @@ class MoreMenuViewController: UIViewController {
         let statsVC = UIHostingController(
             rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
         )
-        let navController = UINavigationController(rootViewController: statsVC)
-
-        presentModal(navController, rootViewController: statsVC)
+        statsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(statsVC, animated: true)
     }
 
     private func openHome() {
-        let homeModalView = HomeModalView()
-        let hostingController = UIHostingController(rootView: homeModalView)
-        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
-        hostingController.modalPresentationStyle = .fullScreen
-        present(hostingController, animated: true)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let mainVC = storyboard.instantiateViewController(withIdentifier: "MainViewController") as? MainViewController else { return }
+        mainVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(mainVC, animated: true)
     }
 
     private func openViewLog() {
-        let logVC = UIHostingController(rootView: LogView())
-        logVC.title = "Log"
-        let navController = UINavigationController(rootViewController: logVC)
-
-        presentModal(navController, rootViewController: logVC)
+        let logView = LogView(onBack: { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        })
+        let logVC = NavBarHidingHostingController(rootView: logView)
+        logVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(logVC, animated: true)
     }
 
     private func shareLogs() {
@@ -382,24 +378,17 @@ class MoreMenuViewController: UIViewController {
         fallbackMainViewController = mainVC
         return mainVC
     }
+}
 
-    private func presentModal(_ navController: UINavigationController, rootViewController: UIViewController) {
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        rootViewController.overrideUserInterfaceStyle = style
-        rootViewController.navigationItem.rightBarButtonItem = makeCloseButton()
-        navController.overrideUserInterfaceStyle = style
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
-    }
+// MARK: - NavBarHidingHostingController
 
-    private func makeCloseButton() -> UIBarButtonItem {
-        let button = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(dismissModal))
-        button.tintColor = .systemBlue
-        return button
-    }
-
-    @objc private func dismissModal() {
-        dismiss(animated: true)
+/// A UIHostingController subclass that hides the UIKit navigation bar.
+/// Used for SwiftUI views that have their own NavigationStack/NavigationView
+/// to prevent double navigation bars when pushed onto a UINavigationController.
+private class NavBarHidingHostingController<Content: View>: UIHostingController<Content> {
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
     }
 }
 

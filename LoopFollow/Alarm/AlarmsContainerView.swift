@@ -4,16 +4,16 @@
 import SwiftUI
 
 struct AlarmsContainerView: View {
-    var onDismiss: (() -> Void)?
+    var onBack: (() -> Void)?
 
     var body: some View {
         NavigationStack {
             AlarmListView()
                 .toolbar {
-                    if let onDismiss {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button(action: onDismiss) {
-                                Image(systemName: "xmark")
+                    if let onBack {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button(action: onBack) {
+                                Image(systemName: "chevron.left")
                             }
                         }
                     }

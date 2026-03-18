@@ -598,7 +598,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         }
 
-        viewControllers.append(Self.makeMenuViewController(tag: 4))
+        // Preserve existing Menu nav controller to keep its push stack intact
+        let existingMenuNav = (tabBarController.viewControllers ?? []).first(where: {
+            $0.tabBarItem.title == "Menu"
+        })
+        if let menuNav = existingMenuNav {
+            menuNav.tabBarItem = UITabBarItem(title: "Menu", image: UIImage(systemName: "line.3.horizontal"), tag: 4)
+            viewControllers.append(menuNav)
+        } else {
+            viewControllers.append(Self.makeMenuViewController(tag: 4))
+        }
 
         if let presented = tabBarController.presentedViewController {
             presented.dismiss(animated: false) {
@@ -675,7 +684,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         }
 
-        viewControllers.append(Self.makeMenuViewController(tag: 4))
+        // Preserve existing Menu nav controller to keep its push stack intact
+        let existingMenuNav = (tabBarController.viewControllers ?? []).first(where: {
+            $0.tabBarItem.title == "Menu"
+        })
+        if let menuNav = existingMenuNav {
+            menuNav.tabBarItem = UITabBarItem(title: "Menu", image: UIImage(systemName: "line.3.horizontal"), tag: 4)
+            viewControllers.append(menuNav)
+        } else {
+            viewControllers.append(Self.makeMenuViewController(tag: 4))
+        }
 
         tabBarController.setViewControllers(viewControllers, animated: false)
 

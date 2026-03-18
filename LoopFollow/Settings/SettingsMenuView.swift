@@ -12,7 +12,7 @@ struct SettingsMenuView: View {
 
     // MARK: – Local state
 
-    var onDismiss: (() -> Void)?
+    var onBack: (() -> Void)?
 
     // MARK: – Observed objects
 
@@ -108,10 +108,10 @@ struct SettingsMenuView: View {
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: Sheet.self) { $0.destination }
             .toolbar {
-                if let onDismiss {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(action: onDismiss) {
-                            Image(systemName: "xmark")
+                if let onBack {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: onBack) {
+                            Image(systemName: "chevron.left")
                         }
                     }
                 }

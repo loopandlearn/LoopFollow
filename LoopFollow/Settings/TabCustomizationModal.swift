@@ -31,8 +31,6 @@ enum TabCustomizationItem: Identifiable, Equatable, Hashable {
 }
 
 struct TabCustomizationModal: View {
-    @Environment(\.dismiss) private var dismiss
-
     // All items including Settings - top 4 go to tab bar, rest to menu
     @State private var allItems: [TabCustomizationItem]
     private let originalItems: [TabCustomizationItem]
@@ -169,17 +167,8 @@ struct TabCustomizationModal: View {
         .environment(\.editMode, .constant(.active))
         .navigationTitle("Tabs")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button {
-                    applyChangesSilently()
-                    dismiss()
-                }
-                label: {
-                    Text("Done")
-                }
-            }
+        .onDisappear {
+            applyChangesSilently()
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
