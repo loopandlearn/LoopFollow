@@ -35,7 +35,7 @@ final class LiveActivityManager {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleBackgroundAudioFailed),
-            name: .backgroundAudioFailed,
+            name: .backgroundAudioFailedNotification,
             object: nil
         )
     }
