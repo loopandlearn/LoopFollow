@@ -279,6 +279,7 @@ class MoreMenuViewController: UIViewController {
         let remoteVC = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
         remoteVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
         navigationController?.pushViewController(remoteVC, animated: true)
+        remoteVC.navigationItem.largeTitleDisplayMode = .never
     }
 
     private func openNightscout() {
@@ -286,6 +287,7 @@ class MoreMenuViewController: UIViewController {
         let nightscoutVC = storyboard.instantiateViewController(withIdentifier: "NightscoutViewController")
         nightscoutVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
         navigationController?.pushViewController(nightscoutVC, animated: true)
+        nightscoutVC.navigationItem.largeTitleDisplayMode = .never
     }
 
     private func openSnoozer() {
@@ -293,6 +295,7 @@ class MoreMenuViewController: UIViewController {
         let snoozerVC = storyboard.instantiateViewController(withIdentifier: "SnoozerViewController")
         snoozerVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
         navigationController?.pushViewController(snoozerVC, animated: true)
+        snoozerVC.navigationItem.largeTitleDisplayMode = .never
     }
 
     private func openTreatments() {
@@ -321,6 +324,7 @@ class MoreMenuViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         guard let mainVC = storyboard.instantiateViewController(withIdentifier: "MainViewController") as? MainViewController else { return }
         mainVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        mainVC.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(mainVC, animated: true)
     }
 
