@@ -133,7 +133,7 @@ class MoreMenuViewController: UIViewController {
         ]
 
         sections.append(
-            MenuSection(title: "Features", items: TabItem.allCases.map { item in
+            MenuSection(title: "Features", items: TabItem.featureOrder.map { item in
                 MenuItem(title: item.displayName, icon: item.icon) { [weak self] in
                     self?.openItem(item)
                 }
