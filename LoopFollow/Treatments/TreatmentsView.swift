@@ -17,6 +17,8 @@ private func formatBG(_ mgdlValue: Int, units: String = Storage.shared.units.val
 }
 
 struct TreatmentsView: View {
+    var onBack: (() -> Void)?
+
     @StateObject private var viewModel = TreatmentsViewModel()
     @State private var selectedFilter: TreatmentFilter = .all
     @ObservedObject private var device = Storage.shared.device
@@ -175,6 +177,15 @@ struct TreatmentsView: View {
                 }
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    if let onBack {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button(action: onBack) {
+                                Image(systemName: "chevron.left")
+                            }
+                        }
+                    }
+                }
                 .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
                 .refreshable {
                     viewModel.refreshTreatments()

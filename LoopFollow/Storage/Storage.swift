@@ -198,9 +198,9 @@ class Storage {
     // Tab positions - which position each item is in (positions 1-4 are customizable, 5 is always Menu)
     var homePosition = StorageValue<TabPosition>(key: "homePosition", defaultValue: .position1)
     var alarmsPosition = StorageValue<TabPosition>(key: "alarmsPosition", defaultValue: .position2)
-    var snoozerPosition = StorageValue<TabPosition>(key: "snoozerPosition", defaultValue: .position3)
-    var nightscoutPosition = StorageValue<TabPosition>(key: "nightscoutPosition", defaultValue: .position4)
-    var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .menu)
+    var snoozerPosition = StorageValue<TabPosition>(key: "snoozerPosition", defaultValue: .menu)
+    var nightscoutPosition = StorageValue<TabPosition>(key: "nightscoutPosition", defaultValue: .position3)
+    var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .position4)
     var statisticsPosition = StorageValue<TabPosition>(key: "statisticsPosition", defaultValue: .menu)
     var treatmentsPosition = StorageValue<TabPosition>(key: "treatmentsPosition", defaultValue: .menu)
 
@@ -257,7 +257,7 @@ class Storage {
 
     /// Get all items in the Menu (position 5)
     func itemsInMenu() -> [TabItem] {
-        TabItem.allCases.filter { position(for: $0).normalized == .menu }
+        TabItem.featureOrder.filter { position(for: $0).normalized == .menu }
     }
 
     /// Get items ordered by their position in the tab bar (positions 1-4)

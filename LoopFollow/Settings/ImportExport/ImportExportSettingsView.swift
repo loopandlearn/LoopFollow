@@ -98,7 +98,7 @@ struct ImportExportSettingsView: View {
                 }
                 .navigationTitle("Export \(viewModel.exportType.rawValue)")
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationBarItems(trailing: Button("Done") {
+                .navigationBarItems(trailing: Button("Close") {
                     viewModel.isShowingQRCodeDisplay = false
                 })
             }

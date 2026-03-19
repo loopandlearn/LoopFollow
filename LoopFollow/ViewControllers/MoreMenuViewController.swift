@@ -9,6 +9,7 @@ class MoreMenuViewController: UIViewController {
     private var tableView: UITableView!
     private var cancellables = Set<AnyCancellable>()
     private var fallbackMainViewController: MainViewController?
+    var needsTabRebuild = false
 
     // Build Information state
     private var latestVersion: String?
@@ -50,6 +51,9 @@ class MoreMenuViewController: UIViewController {
         super.viewDidLoad()
 
         view.backgroundColor = .systemBackground
+        navigationItem.title = "Menu"
+        navigationItem.largeTitleDisplayMode = .always
+        navigationItem.backButtonDisplayMode = .minimal
 
         // Apply appearance mode
         overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
@@ -80,9 +84,16 @@ class MoreMenuViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
         updateMenuItems()
         tableView.reloadData()
         Observable.shared.settingsPath.set(NavigationPath())
+
+        if needsTabRebuild {
+            needsTabRebuild = false
+            MainViewController.rebuildTabsIfNeeded()
+        }
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -103,30 +114,12 @@ class MoreMenuViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-
-        // Large-title style header
-        let header = UIView()
-        let label = UILabel()
-        label.text = "Menu"
-        label.font = .systemFont(ofSize: 34, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        header.addSubview(label)
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 20),
-            label.topAnchor.constraint(equalTo: header.topAnchor, constant: 8),
-            label.bottomAnchor.constraint(equalTo: header.bottomAnchor, constant: -8),
-        ])
-        header.frame.size = header.systemLayoutSizeFitting(
-            CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-        tableView.tableHeaderView = header
+        tableView.contentInsetAdjustmentBehavior = .automatic
 
         view.addSubview(tableView)
 
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
@@ -139,22 +132,23 @@ class MoreMenuViewController: UIViewController {
         let build = BuildDetails.default
         let ver = AppVersionManager().version()
 
-        menuSections = [
-            // Section 0: Settings
+        var sections: [MenuSection] = [
             MenuSection(title: nil, items: [
-                MenuItem(title: "Settings", icon: "gear") { [weak self] in
+                MenuItem(title: "Settings", icon: "gearshape") { [weak self] in
                     self?.openSettings()
                 },
             ]),
+        ]
 
-            // Section 1: All tab items (static)
-            MenuSection(title: "Features", items: TabItem.allCases.map { item in
+        sections.append(
+            MenuSection(title: "Features", items: TabItem.featureOrder.map { item in
                 MenuItem(title: item.displayName, icon: item.icon) { [weak self] in
                     self?.openItem(item)
                 }
-            }),
+            })
+        )
 
-            // Section 2: Logging
+        sections.append(contentsOf: [
             MenuSection(title: "Logging", items: [
                 MenuItem(title: "View Log", icon: "doc.text.magnifyingglass") { [weak self] in
                     self?.openViewLog()
@@ -205,7 +199,9 @@ class MoreMenuViewController: UIViewController {
 
                 return items
             }()),
-        ]
+        ])
+
+        menuSections = sections
     }
 
     // MARK: - Version fetching
@@ -237,11 +233,11 @@ class MoreMenuViewController: UIViewController {
             tabVC.selectedIndex = index
             return
         }
-        // Otherwise present as modal
-        presentItemAsModal(item)
+        // Otherwise push onto navigation stack
+        pushItem(item)
     }
 
-    private func presentItemAsModal(_ item: TabItem) {
+    private func pushItem(_ item: TabItem) {
         switch item {
         case .home:
             openHome()
@@ -261,114 +257,55 @@ class MoreMenuViewController: UIViewController {
     }
 
     private func openSettings() {
-        let settingsView = SettingsMenuView(onDismiss: { [weak self] in
-            self?.dismiss(animated: true) {
-                MainViewController.rebuildTabsIfNeeded()
-            }
+        needsTabRebuild = true
+        let settingsView = SettingsMenuView(onBack: { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
         })
-        let settingsVC = UIHostingController(rootView: settingsView)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        settingsVC.overrideUserInterfaceStyle = style
-
-        settingsVC.modalPresentationStyle = .fullScreen
-        present(settingsVC, animated: true)
+        let settingsVC = NavBarHidingHostingController(rootView: settingsView)
+        settingsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(settingsVC, animated: true)
     }
 
     private func openAlarmsConfig() {
-        let alarmsView = AlarmsContainerView(onDismiss: { [weak self] in
-            self?.dismiss(animated: true)
+        let alarmsView = AlarmsContainerView(onBack: { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
         })
-        let alarmsVC = UIHostingController(rootView: alarmsView)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        alarmsVC.overrideUserInterfaceStyle = style
-
-        alarmsVC.modalPresentationStyle = .fullScreen
-        present(alarmsVC, animated: true)
+        let alarmsVC = NavBarHidingHostingController(rootView: alarmsView)
+        alarmsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(alarmsVC, animated: true)
     }
 
     private func openRemote() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let remoteVC = storyboard.instantiateViewController(withIdentifier: "RemoteViewController")
-        let navController = UINavigationController(rootViewController: remoteVC)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        remoteVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        remoteVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        remoteVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        remoteVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(remoteVC, animated: true)
+        remoteVC.navigationItem.largeTitleDisplayMode = .never
     }
 
     private func openNightscout() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let nightscoutVC = storyboard.instantiateViewController(withIdentifier: "NightscoutViewController")
-        let navController = UINavigationController(rootViewController: nightscoutVC)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        nightscoutVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        nightscoutVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        nightscoutVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        nightscoutVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(nightscoutVC, animated: true)
+        nightscoutVC.navigationItem.largeTitleDisplayMode = .never
     }
 
     private func openSnoozer() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let snoozerVC = storyboard.instantiateViewController(withIdentifier: "SnoozerViewController")
-        let navController = UINavigationController(rootViewController: snoozerVC)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        snoozerVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        snoozerVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        snoozerVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        snoozerVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(snoozerVC, animated: true)
+        snoozerVC.navigationItem.largeTitleDisplayMode = .never
     }
 
     private func openTreatments() {
-        let treatmentsVC = UIHostingController(rootView: TreatmentsView())
-        let navController = UINavigationController(rootViewController: treatmentsVC)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        treatmentsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        treatmentsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        treatmentsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        let treatmentsView = TreatmentsView(onBack: { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        })
+        let treatmentsVC = NavBarHidingHostingController(rootView: treatmentsView)
+        treatmentsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(treatmentsVC, animated: true)
     }
 
     private func openAggregatedStats() {
@@ -380,51 +317,25 @@ class MoreMenuViewController: UIViewController {
         let statsVC = UIHostingController(
             rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
         )
-        let navController = UINavigationController(rootViewController: statsVC)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        statsVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        statsVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        statsVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        statsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(statsVC, animated: true)
     }
 
     private func openHome() {
-        let homeModalView = HomeModalView()
-        let hostingController = UIHostingController(rootView: homeModalView)
-        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
-        hostingController.modalPresentationStyle = .fullScreen
-        present(hostingController, animated: true)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let mainVC = storyboard.instantiateViewController(withIdentifier: "MainViewController") as? MainViewController else { return }
+        mainVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        mainVC.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(mainVC, animated: true)
     }
 
     private func openViewLog() {
-        let logVC = UIHostingController(rootView: LogView())
-        logVC.title = "Log"
-        let navController = UINavigationController(rootViewController: logVC)
-
-        let style = Storage.shared.appearanceMode.value.userInterfaceStyle
-        logVC.overrideUserInterfaceStyle = style
-        navController.overrideUserInterfaceStyle = style
-
-        logVC.navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "checkmark"),
-            style: .plain,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        logVC.navigationItem.rightBarButtonItem?.tintColor = .systemBlue
-
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        let logView = LogView(onBack: { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        })
+        let logVC = NavBarHidingHostingController(rootView: logView)
+        logVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        navigationController?.pushViewController(logVC, animated: true)
     }
 
     private func shareLogs() {
@@ -472,9 +383,17 @@ class MoreMenuViewController: UIViewController {
         fallbackMainViewController = mainVC
         return mainVC
     }
+}
 
-    @objc private func dismissModal() {
-        dismiss(animated: true)
+// MARK: - NavBarHidingHostingController
+
+/// A UIHostingController subclass that hides the UIKit navigation bar.
+/// Used for SwiftUI views that have their own NavigationStack/NavigationView
+/// to prevent double navigation bars when pushed onto a UINavigationController.
+private class NavBarHidingHostingController<Content: View>: UIHostingController<Content> {
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
     }
 }
 
