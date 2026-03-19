@@ -55,13 +55,12 @@ struct HomeModalView: View {
                 .navigationTitle("Home")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItem(placement: .cancellationAction) {
                         Button {
                             dismiss()
                         } label: {
-                            Image(systemName: "checkmark")
+                            Image(systemName: "xmark")
                         }
-                        .foregroundColor(.blue)
                     }
                 }
         }

@@ -89,8 +89,13 @@ enum TabItem: String, CaseIterable, Codable, Identifiable {
         }
     }
 
+    /// Canonical feature order used by menus and customization screens.
+    static var featureOrder: [TabItem] {
+        [.home, .alarms, .nightscout, .remote, .snoozer, .stats, .treatments]
+    }
+
     /// Items that can be moved between tab bar and menu (all except settings which doesn't exist as a tab)
     static var movableItems: [TabItem] {
-        [.home, .alarms, .remote, .nightscout, .snoozer, .treatments, .stats]
+        featureOrder
     }
 }

@@ -12,8 +12,7 @@ struct SettingsMenuView: View {
 
     // MARK: – Local state
 
-    @State private var showingTabCustomization = false
-    var onDismiss: (() -> Void)?
+    var onBack: (() -> Void)?
 
     // MARK: – Observed objects
 
@@ -24,33 +23,40 @@ struct SettingsMenuView: View {
     var body: some View {
         NavigationStack(path: $settingsPath.value) {
             List {
-                // ───────── Data settings ─────────
                 dataSection
 
-                // ───────── App settings ─────────
-                Section("App Settings") {
-                    NavigationRow(title: "Background Refresh",
-                                  icon: "arrow.clockwise")
-                    {
-                        settingsPath.value.append(Sheet.backgroundRefresh)
-                    }
-
+                Section("Display Settings") {
                     NavigationRow(title: "General",
                                   icon: "gearshape")
                     {
                         settingsPath.value.append(Sheet.general)
                     }
-
                     NavigationRow(title: "Graph",
                                   icon: "chart.xyaxis.line")
                     {
                         settingsPath.value.append(Sheet.graph)
                     }
 
-                    NavigationRow(title: "Tab Settings",
+                    if !nightscoutURL.value.isEmpty {
+                        NavigationRow(title: "Information Display",
+                                      icon: "info.circle")
+                        {
+                            settingsPath.value.append(Sheet.infoDisplay)
+                        }
+                    }
+
+                    NavigationRow(title: "Tabs",
                                   icon: "rectangle.3.group")
                     {
-                        showingTabCustomization = true
+                        settingsPath.value.append(Sheet.tabSettings)
+                    }
+                }
+
+                Section("App Settings") {
+                    NavigationRow(title: "Background Refresh",
+                                  icon: "arrow.clockwise")
+                    {
+                        settingsPath.value.append(Sheet.backgroundRefresh)
                     }
 
                     NavigationRow(title: "Import/Export",
@@ -60,12 +66,6 @@ struct SettingsMenuView: View {
                     }
 
                     if !nightscoutURL.value.isEmpty {
-                        NavigationRow(title: "Information Display",
-                                      icon: "info.circle")
-                        {
-                            settingsPath.value.append(Sheet.infoDisplay)
-                        }
-
                         NavigationRow(title: "Remote",
                                       icon: "antenna.radiowaves.left.and.right")
                         {
@@ -74,7 +74,6 @@ struct SettingsMenuView: View {
                     }
                 }
 
-                // ───────── Alarms ─────────
                 Section("Alarms") {
                     NavigationRow(title: "Alarms",
                                   icon: "bell.badge")
@@ -83,7 +82,6 @@ struct SettingsMenuView: View {
                     }
                 }
 
-                // ───────── Integrations ─────────
                 Section("Integrations") {
                     NavigationRow(title: "Calendar",
                                   icon: "calendar")
@@ -98,7 +96,6 @@ struct SettingsMenuView: View {
                     }
                 }
 
-                // ───────── Advanced ─────────
                 Section("Advanced Settings") {
                     NavigationRow(title: "Advanced",
                                   icon: "exclamationmark.shield")
@@ -108,23 +105,16 @@ struct SettingsMenuView: View {
                 }
             }
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: Sheet.self) { $0.destination }
             .toolbar {
-                if let onDismiss {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: onDismiss) {
-                            Image(systemName: "checkmark")
+                if let onBack {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: onBack) {
+                            Image(systemName: "chevron.left")
                         }
                     }
                 }
-            }
-            .sheet(isPresented: $showingTabCustomization) {
-                TabCustomizationModal(
-                    isPresented: $showingTabCustomization,
-                    onApply: {
-                        // No-op - changes are applied silently via observers
-                    }
-                )
             }
         }
     }
@@ -157,11 +147,6 @@ struct SettingsMenuView: View {
             }
         }
     }
-
-    private func handleTabReorganization() {
-        // Rebuild the tab bar with the new configuration
-        MainViewController.rebuildTabsIfNeeded()
-    }
 }
 
 // MARK: – Sheet routing
@@ -170,6 +155,7 @@ private enum Sheet: Hashable, Identifiable {
     case nightscout, dexcom
     case backgroundRefresh
     case general, graph
+    case tabSettings
     case infoDisplay
     case alarmSettings
     case remote
@@ -188,6 +174,7 @@ private enum Sheet: Hashable, Identifiable {
         case .backgroundRefresh: BackgroundRefreshSettingsView(viewModel: .init())
         case .general: GeneralSettingsView()
         case .graph: GraphSettingsView()
+        case .tabSettings: TabCustomizationModal()
         case .infoDisplay: InfoDisplaySettingsView(viewModel: .init())
         case .alarmSettings: AlarmSettingsView()
         case .remote: RemoteSettingsView(viewModel: .init())

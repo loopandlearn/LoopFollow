@@ -4,6 +4,7 @@
 import SwiftUI
 
 struct LogView: View {
+    var onBack: (() -> Void)?
     @ObservedObject var viewModel = LogViewModel()
 
     var body: some View {
@@ -35,8 +36,17 @@ struct LogView: View {
             .onAppear {
                 viewModel.loadLogEntries()
             }
+            .navigationBarTitle("Today's Logs", displayMode: .inline)
+            .toolbar {
+                if let onBack {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: onBack) {
+                            Image(systemName: "chevron.left")
+                        }
+                    }
+                }
+            }
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
-        .navigationBarTitle("Today's Logs", displayMode: .inline)
     }
 }
