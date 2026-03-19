@@ -37,22 +37,18 @@ class BackgroundTask {
             LogManager.shared.log(category: .general, message: "[LA] Silent audio session interrupted (began)")
 
         case .ended:
-            // Check shouldResume hint — skip restart if iOS says not to
             if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
                 let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
-                guard options.contains(.shouldResume) else {
-                    LogManager.shared.log(category: .general, message: "[LA] Silent audio interruption ended — shouldResume not set, skipping restart")
-                    return
+                if !options.contains(.shouldResume) {
+                    LogManager.shared.log(category: .general, message: "[LA] Silent audio interruption ended — shouldResume not set, attempting restart anyway")
                 }
             }
             LogManager.shared.log(category: .general, message: "[LA] Silent audio interruption ended — scheduling restart in 0.5s")
             retryCount = 0
-            // Brief delay to let the interrupting app (e.g. Clock alarm) fully release the audio
-            // session before we attempt to reactivate. Without this, setActive(true) races with
-            // the alarm and fails with AVAudioSession.ErrorCode.cannotInterruptOthers (560557684).
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.playAudio()
             }
+
 
         @unknown default:
             break
