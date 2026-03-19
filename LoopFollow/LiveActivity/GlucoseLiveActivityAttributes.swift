@@ -32,16 +32,12 @@ struct GlucoseLiveActivityAttributes: ActivityAttributes {
         
         func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(glucose, forKey: .glucose)
-            try container.encode(trend, forKey: .trend)
-            try container.encodeIfPresent(delta, forKey: .delta)
-            try container.encodeIfPresent(iob, forKey: .iob)
-            try container.encodeIfPresent(cob, forKey: .cob)
-            try container.encodeIfPresent(predictedGlucose, forKey: .predictedGlucose)
-            try container.encode(unit, forKey: .unit)
-            try container.encode(thresholdClassification, forKey: .thresholdClassification)
+            try container.encode(snapshot, forKey: .snapshot)
+            try container.encode(seq, forKey: .seq)
+            try container.encode(reason, forKey: .reason)
             try container.encode(producedAt.timeIntervalSince1970, forKey: .producedAt)
         }
+
 
 
         private enum CodingKeys: String, CodingKey {
