@@ -45,6 +45,9 @@ class BackgroundTask {
             }
             LogManager.shared.log(category: .general, message: "[LA] Silent audio interruption ended — scheduling restart in 0.5s")
             retryCount = 0
+            // Brief delay to let the interrupting app (e.g. Clock alarm) fully release the audio
+            // session before we attempt to reactivate. Without this, setActive(true) races with
+            // the alarm and fails with AVAudioSession.ErrorCode.cannotInterruptOthers (560557684).
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.playAudio()
             }
