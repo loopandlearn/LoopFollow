@@ -4,11 +4,71 @@
 import Foundation
 
 extension Storage {
+    func migrateStep5() {
+        // Users upgrading from main had snoozer hardcoded at position 3, but that
+        // key never existed in UserDefaults. On dev the default for snoozerPosition
+        // is .menu, so an unstored value silently becomes .menu and snoozer
+        // disappears from the tab bar.
+        //
+        // Detect this by checking .exists: if snoozerPosition was never stored,
+        // the user expects snoozer at position 3 (where it always was on main).
+        guard !snoozerPosition.exists else { return }
+
+        LogManager.shared.log(category: .general, message: "migrateStep5: snoozerPosition not stored, restoring snoozer to position 3")
+
+        // If position 3 is occupied by another item whose position also wasn't
+        // stored (e.g. nightscout landing there from a changed default), move
+        // that item out first.
+        for item in TabItem.allCases where item != .snoozer {
+            if position(for: item).normalized == .position3,
+               !migratePositionExists(for: item)
+            {
+                setPosition(.menu, for: item)
+            }
+        }
+
+        if tabItem(at: .position3) == nil {
+            snoozerPosition.value = .position3
+        }
+    }
+
     func migrateStep3() {
+        LogManager.shared.log(category: .general, message: "Running migrateStep3 - this should only happen once!")
         let legacyForceDarkMode = StorageValue<Bool>(key: "forceDarkMode", defaultValue: true)
         if legacyForceDarkMode.exists {
             Storage.shared.appearanceMode.value = legacyForceDarkMode.value ? .dark : .system
             legacyForceDarkMode.remove()
+        }
+
+        if !TabPosition.customizablePositions.contains(homePosition.value.normalized) {
+            LogManager.shared.log(category: .general, message: "migrateStep3: Setting home to position1 (was \(homePosition.value.rawValue))")
+            homePosition.value = .position1
+        }
+
+        if !TabPosition.customizablePositions.contains(snoozerPosition.value.normalized) {
+            // Move any unstored occupant at position 3 to menu before placing snoozer,
+            // to avoid a collision when dev defaults differ from main.
+            for item in TabItem.allCases where item != .snoozer {
+                if position(for: item).normalized == .position3,
+                   !migratePositionExists(for: item)
+                {
+                    setPosition(.menu, for: item)
+                }
+            }
+
+            if tabItem(at: .position3) == nil {
+                snoozerPosition.value = .position3
+            }
+        }
+
+        if alarmsPosition.value == .more {
+            alarmsPosition.value = .menu
+        }
+        if remotePosition.value == .more {
+            remotePosition.value = .menu
+        }
+        if nightscoutPosition.value == .more {
+            nightscoutPosition.value = .menu
         }
     }
 
@@ -16,10 +76,10 @@ extension Storage {
         // Migrate from old system to new position-based system
         if remoteType.value != .none {
             remotePosition.value = .position2
-            alarmsPosition.value = .more
+            alarmsPosition.value = .menu
         } else {
             alarmsPosition.value = .position2
-            remotePosition.value = .more
+            remotePosition.value = .menu
         }
         nightscoutPosition.value = .position4
     }
@@ -67,6 +127,7 @@ extension Storage {
 
         let legacyForceDarkMode = UserDefaultsValue<Bool>(key: "forceDarkMode", default: true)
         if legacyForceDarkMode.exists {
+            // Migrate from Bool to AppearanceMode: true -> .dark, false -> .system
             Storage.shared.appearanceMode.value = legacyForceDarkMode.value ? .dark : .system
             legacyForceDarkMode.setNil(key: "forceDarkMode")
         }
@@ -1683,5 +1744,21 @@ extension Storage {
         alarm.activeOption = .always
 
         Storage.shared.alarms.value.append(alarm)
+    }
+
+    // MARK: - Migration helpers (can be removed when step 5 is removed)
+
+    /// Check whether a tab item's position was explicitly stored in UserDefaults
+    /// (as opposed to using the StorageValue default).
+    private func migratePositionExists(for item: TabItem) -> Bool {
+        switch item {
+        case .home: return homePosition.exists
+        case .alarms: return alarmsPosition.exists
+        case .remote: return remotePosition.exists
+        case .nightscout: return nightscoutPosition.exists
+        case .snoozer: return snoozerPosition.exists
+        case .stats: return statisticsPosition.exists
+        case .treatments: return treatmentsPosition.exists
+        }
     }
 }

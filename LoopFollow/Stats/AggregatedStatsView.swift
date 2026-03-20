@@ -1,0 +1,424 @@
+// LoopFollow
+// AggregatedStatsView.swift
+
+import SwiftUI
+import UIKit
+
+struct AggregatedStatsView: View {
+    @ObservedObject var viewModel: AggregatedStatsViewModel
+    @Environment(\.dismiss) var dismiss
+    @State private var showGMI: Bool
+    @State private var showStdDev: Bool
+    @State private var startDate: Date
+    @State private var endDate: Date
+    @State private var isLoadingData = false
+    @State private var showLoadingMessage = false
+    @State private var loadingError = false
+    @State private var loadingTimer: Timer?
+    @State private var timeoutTimer: Timer?
+
+    init(viewModel: AggregatedStatsViewModel) {
+        self.viewModel = viewModel
+        _showGMI = State(initialValue: Storage.shared.showGMI.value)
+        _showStdDev = State(initialValue: Storage.shared.showStdDev.value)
+
+        let calendar = dateTimeUtils.displayCalendar()
+        let startOfToday = calendar.startOfDay(for: Date())
+        let end = calendar.date(byAdding: .second, value: -1, to: startOfToday) ?? Date()
+        let endDay = calendar.startOfDay(for: end)
+        let startDay = calendar.date(byAdding: .day, value: -7, to: endDay) ?? endDay
+        let start = calendar.startOfDay(for: startDay)
+        _startDate = State(initialValue: start)
+        _endDate = State(initialValue: end)
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                VStack(spacing: 12) {
+                    Text("Statistics")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+
+                    DateRangePicker(
+                        startDate: $startDate,
+                        endDate: $endDate,
+                        availability: viewModel.dataAvailability,
+                        onDateChange: {
+                            loadingError = false
+                            isLoadingData = true
+                            viewModel.updateDateRange(start: startDate, end: endDate) {
+                                isLoadingData = false
+                            }
+                        }
+                    )
+                    .padding(.horizontal)
+                }
+                .padding(.top)
+
+                if loadingError {
+                    VStack(spacing: 8) {
+                        Text("#WeAreNotWaitingAnymore")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.orange)
+                        Text("...because the data could not be loaded")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                } else if isLoadingData {
+                    VStack(spacing: 12) {
+                        ProgressView("Loading data...")
+                        if showLoadingMessage {
+                            Text("#WeAreWaitingForData")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding()
+                }
+
+                StatsGridView(
+                    simpleStats: viewModel.simpleStats,
+                    showGMI: $showGMI,
+                    showStdDev: $showStdDev
+                )
+                .padding(.horizontal)
+                .opacity(isLoadingData ? 0.4 : 1.0)
+                .disabled(isLoadingData)
+
+                AGPView(viewModel: viewModel.agpStats)
+                    .padding(.horizontal)
+                    .opacity(isLoadingData ? 0.4 : 1.0)
+
+                TIRView(viewModel: viewModel.tirStats)
+                    .padding(.horizontal)
+                    .opacity(isLoadingData ? 0.4 : 1.0)
+
+                GRIView(viewModel: viewModel.griStats)
+                    .padding(.horizontal)
+                    .opacity(isLoadingData ? 0.4 : 1.0)
+            }
+            .padding(.bottom)
+            .frame(maxWidth: .infinity)
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Refresh") {
+                    loadingError = false
+                    isLoadingData = true
+                    viewModel.updateDateRange(start: startDate, end: endDate) {
+                        isLoadingData = false
+                    }
+                }
+            }
+        }
+        .onAppear {
+            loadingError = false
+            isLoadingData = true
+            viewModel.updateDateRange(start: startDate, end: endDate) {
+                isLoadingData = false
+            }
+        }
+        .onChange(of: isLoadingData) { newValue in
+            if newValue {
+                showLoadingMessage = false
+                loadingError = false
+
+                // Show "still waiting" message after 3 seconds
+                loadingTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+                    showLoadingMessage = true
+                }
+
+                // Timeout after 30 seconds
+                timeoutTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: false) { _ in
+                    if self.isLoadingData {
+                        self.isLoadingData = false
+                        self.loadingError = true
+                        self.viewModel.clearAllStats()
+                    }
+                }
+            } else {
+                loadingTimer?.invalidate()
+                loadingTimer = nil
+                timeoutTimer?.invalidate()
+                timeoutTimer = nil
+                showLoadingMessage = false
+            }
+        }
+        .onDisappear {
+            loadingTimer?.invalidate()
+            loadingTimer = nil
+            timeoutTimer?.invalidate()
+            timeoutTimer = nil
+        }
+        .onChange(of: showGMI) { newValue in
+            Storage.shared.showGMI.value = newValue
+        }
+        .onChange(of: showStdDev) { newValue in
+            Storage.shared.showStdDev.value = newValue
+        }
+    }
+}
+
+struct StatCard: View {
+    let title: String
+    let value: String
+    let unit: String?
+    let color: Color
+    var isInteractive: Bool = false
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(value)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(color)
+
+                    if let unit = unit {
+                        Text(unit)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+
+            if isInteractive {
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2)
+                    .foregroundColor(.secondary.opacity(0.5))
+                    .padding(8)
+            }
+        }
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+}
+
+struct InsulinTotalsCard: View {
+    let totalNegativeBasal: Double?
+    let totalPositiveBasal: Double?
+    let programmedBasal: Double?
+    let actualBasal: Double?
+    let avgBolus: Double?
+    let totalDailyDose: Double?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Insulin Totals")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            VStack(spacing: 10) {
+                metricRow(title: "Programmed Basal", value: programmedBasal, color: .indigo)
+                metricRow(title: "Total Negative Basal", value: totalNegativeBasal, color: .red)
+                metricRow(title: "Total Positive Basal", value: totalPositiveBasal, color: .green)
+                metricRow(title: "Actual Basal", value: actualBasal, color: .indigo)
+                metricRow(title: "Avg Bolus", value: avgBolus, color: .purple)
+                metricRow(title: "Total Daily Dose", value: totalDailyDose, color: .pink)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+
+    @ViewBuilder
+    private func metricRow(title: String, value: Double?, color: Color) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            Spacer()
+
+            Text(formatBasal(value))
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(color)
+                + Text(" U")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private func formatBasal(_ value: Double?) -> String {
+        guard let value = value else { return "---" }
+        return String(format: "%.2f", value)
+    }
+}
+
+struct StatsGridView: View {
+    @ObservedObject var simpleStats: SimpleStatsViewModel
+    @Binding var showGMI: Bool
+    @Binding var showStdDev: Bool
+    @State private var showInsulinBreakdown = false
+
+    private var hasInsulinData: Bool {
+        simpleStats.totalDailyDose != nil || simpleStats.avgBolus != nil || simpleStats.actualBasal != nil || simpleStats.programmedBasal != nil
+    }
+
+    private var hasCarbData: Bool {
+        simpleStats.avgCarbs != nil
+    }
+
+    var body: some View {
+        VStack(spacing: 16) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                Button(action: {
+                    showGMI.toggle()
+                }) {
+                    StatCard(
+                        title: showGMI ? "GMI" : "eHbA1c",
+                        value: showGMI ? formatGMI(simpleStats.gmi) : formatEhbA1c(simpleStats.avgGlucose),
+                        unit: showGMI ? "%" : (Storage.shared.units.value == "mg/dL" ? "%" : "mmol/mol"),
+                        color: .blue,
+                        isInteractive: true
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+
+                StatCard(
+                    title: "Avg Glucose",
+                    value: formatGlucose(simpleStats.avgGlucose),
+                    unit: Storage.shared.units.value,
+                    color: Color(red: 0.20, green: 0.99, blue: 0.70)
+                )
+
+                Button(action: {
+                    showStdDev.toggle()
+                }) {
+                    StatCard(
+                        title: showStdDev ? "Std Deviation" : "CV",
+                        value: showStdDev ? formatStdDev(simpleStats.stdDeviation) : formatCV(simpleStats.coefficientOfVariation),
+                        unit: showStdDev ? Storage.shared.units.value : "%",
+                        color: .orange,
+                        isInteractive: true
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+
+                if hasCarbData {
+                    StatCard(
+                        title: "Avg Carbs",
+                        value: formatCarbs(simpleStats.avgCarbs),
+                        unit: "g/day",
+                        color: .yellow
+                    )
+                }
+
+                if hasInsulinData {
+                    StatCard(
+                        title: "Programmed Basal",
+                        value: formatInsulin(simpleStats.programmedBasal),
+                        unit: "U/day",
+                        color: .indigo
+                    )
+                    .onTapGesture(count: 3) {
+                        showInsulinBreakdown = true
+                    }
+
+                    StatCard(
+                        title: "Avg Bolus",
+                        value: formatInsulin(simpleStats.avgBolus),
+                        unit: "U/day",
+                        color: .purple
+                    )
+                    .onTapGesture(count: 3) {
+                        showInsulinBreakdown = true
+                    }
+
+                    StatCard(
+                        title: "Total Daily Dose",
+                        value: formatInsulin(simpleStats.totalDailyDose),
+                        unit: "U",
+                        color: .pink
+                    )
+                    .onTapGesture(count: 3) {
+                        showInsulinBreakdown = true
+                    }
+                }
+            }
+
+            if hasInsulinData && showInsulinBreakdown {
+                InsulinTotalsCard(
+                    totalNegativeBasal: simpleStats.totalNegativeBasal,
+                    totalPositiveBasal: simpleStats.totalPositiveBasal,
+                    programmedBasal: simpleStats.programmedBasal,
+                    actualBasal: simpleStats.actualBasal,
+                    avgBolus: simpleStats.avgBolus,
+                    totalDailyDose: simpleStats.totalDailyDose
+                )
+            }
+        }
+    }
+
+    private func formatGMI(_ value: Double?) -> String {
+        guard let value = value else { return "---" }
+        return String(format: "%.1f", value)
+    }
+
+    private func formatEhbA1c(_ avgGlucose: Double?) -> String {
+        guard let avgGlucose = avgGlucose else { return "---" }
+
+        let avgGlucoseMgdL: Double
+        if Storage.shared.units.value == "mg/dL" {
+            avgGlucoseMgdL = avgGlucose
+        } else {
+            avgGlucoseMgdL = avgGlucose * 18.0182
+        }
+
+        let ehba1cPercent = (avgGlucoseMgdL + 46.7) / 28.7
+
+        if Storage.shared.units.value == "mg/dL" {
+            return String(format: "%.1f", ehba1cPercent)
+        } else {
+            let ehba1cMmolMol = (ehba1cPercent - 2.15) * 10.929
+            return String(format: "%.0f", ehba1cMmolMol)
+        }
+    }
+
+    private func formatGlucose(_ value: Double?) -> String {
+        guard let value = value else { return "---" }
+        if Storage.shared.units.value == "mg/dL" {
+            return String(format: "%.0f", value)
+        } else {
+            return String(format: "%.1f", value)
+        }
+    }
+
+    private func formatStdDev(_ value: Double?) -> String {
+        guard let value = value else { return "---" }
+        if Storage.shared.units.value == "mg/dL" {
+            return String(format: "%.0f", value)
+        } else {
+            return String(format: "%.1f", value)
+        }
+    }
+
+    private func formatInsulin(_ value: Double?) -> String {
+        guard let value = value else { return "---" }
+        return String(format: "%.2f", value)
+    }
+
+    private func formatCarbs(_ value: Double?) -> String {
+        guard let value = value else { return "---" }
+        return String(format: "%.0f", value)
+    }
+
+    private func formatCV(_ value: Double?) -> String {
+        guard let value = value else { return "---" }
+        return String(format: "%.1f", value)
+    }
+}

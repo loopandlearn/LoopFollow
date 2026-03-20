@@ -4,6 +4,25 @@
 import Foundation
 
 class dateTimeUtils {
+    static func displayTimeZone() -> TimeZone {
+        if Storage.shared.graphTimeZoneEnabled.value,
+           let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+        {
+            return tz
+        }
+        return .current
+    }
+
+    static func displayCalendar() -> Calendar {
+        var calendar = Calendar.current
+        calendar.timeZone = displayTimeZone()
+        return calendar
+    }
+
+    static func applyDisplayTimeZone(to formatter: DateFormatter) {
+        formatter.timeZone = displayTimeZone()
+    }
+
     static func getTimeIntervalMidnightToday() -> TimeInterval {
         let now = Date()
         let formatter = DateFormatter()

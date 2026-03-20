@@ -4,9 +4,25 @@
 import Foundation
 
 struct EncryptedPushMessage: Encodable {
-    let aps: [String: Int] = ["content-available": 1]
-
+    let aps: APSPayload
     let encryptedData: String
+
+    init(encryptedData: String, commandType: TRCCommandType) {
+        self.encryptedData = encryptedData
+        aps = APSPayload(alert: "Remote Command: \(commandType.displayName)")
+    }
+
+    struct APSPayload: Encodable {
+        let contentAvailable: Int = 1
+        let interruptionLevel: String = "time-sensitive"
+        let alert: String
+
+        enum CodingKeys: String, CodingKey {
+            case contentAvailable = "content-available"
+            case interruptionLevel = "interruption-level"
+            case alert
+        }
+    }
 
     enum CodingKeys: String, CodingKey {
         case aps
