@@ -52,7 +52,6 @@ class BackgroundTask {
                 self?.playAudio()
             }
 
-
         @unknown default:
             break
         }
