@@ -30,6 +30,7 @@ class BackgroundRefreshManager {
             if let mainVC = self.getMainViewController() {
                 if !mainVC.backgroundTask.player.isPlaying {
                     LogManager.shared.log(category: .general, message: "audio dead, attempting restart")
+                    mainVC.backgroundTask.stopBackgroundTask()
                     mainVC.backgroundTask.startBackgroundTask()
                 } else {
                     LogManager.shared.log(category: .general, message: "audio alive, no action needed", isDebug: true)

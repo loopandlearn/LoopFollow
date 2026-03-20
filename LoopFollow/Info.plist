@@ -88,6 +88,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<string>fetch</string>
 		<string>processing</string>
 		<string>bluetooth-central</string>
 		<string>remote-notification</string>
