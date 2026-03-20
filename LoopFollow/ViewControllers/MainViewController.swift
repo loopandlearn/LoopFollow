@@ -145,22 +145,25 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Capture before migrations run: true for existing users, false for fresh installs.
         let isExistingUser = Storage.shared.migrationStep.exists
 
+        // Step 1: Merged to main 2025-06-07 (v3.0.0, 2025-07-07). Can be removed after 2026-07-07.
         if Storage.shared.migrationStep.value < 1 {
             Storage.shared.migrateStep1()
             Storage.shared.migrationStep.value = 1
         }
 
+        // Step 2: Merged to main 2025-07-17 (v3.1.0, 2025-07-21). Can be removed after 2026-07-21.
         if Storage.shared.migrationStep.value < 2 {
             Storage.shared.migrateStep2()
             Storage.shared.migrationStep.value = 2
         }
 
+        // Step 3: Merged to main 2026-03-20 (v5.0.0, 2026-03-20). Can be removed after 2027-03-20.
         if Storage.shared.migrationStep.value < 3 {
             Storage.shared.migrateStep3()
             Storage.shared.migrationStep.value = 3
         }
 
-        // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
+        // Step 4: Merged to main 2026-03-20 (v5.0.0, 2026-03-20). Can be removed after 2027-03-20.
         if Storage.shared.migrationStep.value < 4 {
             // Existing users need to see the fat/protein order change banner.
             // New users never saw the old order, so mark it as already seen.
@@ -168,6 +171,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             Storage.shared.migrationStep.value = 4
         }
 
+        // Step 5: Merged to main 2026-03-20 (v5.0.0, 2026-03-20). Can be removed after 2027-03-20.
         if Storage.shared.migrationStep.value < 5 {
             Storage.shared.migrateStep5()
             Storage.shared.migrationStep.value = 5
