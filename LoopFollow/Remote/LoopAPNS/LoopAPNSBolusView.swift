@@ -326,20 +326,22 @@ struct LoopAPNSBolusView: View {
 
     private func authenticateAndSendInsulin() {
         AuthService.authenticate(reason: "Confirm your identity to send insulin.") { result in
-            switch result {
-            case .success:
-                sendInsulinConfirmed()
-            case .unavailable:
-                alertMessage = "Authentication not available"
-                alertType = .error
-                showAlert = true
-            case .failed:
-                alertMessage = "Authentication failed"
-                alertType = .error
-                showAlert = true
-            case .canceled:
-                // User canceled: no alert to avoid spammy UX
-                break
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.sendInsulinConfirmed()
+                case let .unavailable(message):
+                    self.alertMessage = message
+                    self.alertType = .error
+                    self.showAlert = true
+                case .failed:
+                    self.alertMessage = "Authentication failed"
+                    self.alertType = .error
+                    self.showAlert = true
+                case .canceled:
+                    // User canceled: no alert to avoid spammy UX
+                    break
+                }
             }
         }
     }
