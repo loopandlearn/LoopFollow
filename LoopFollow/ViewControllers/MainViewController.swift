@@ -959,6 +959,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         if Storage.shared.backgroundRefreshType.value == .silentTune {
             backgroundTask.startBackgroundTask()
+            BackgroundRefreshManager.shared.scheduleRefresh()
         }
 
         if Storage.shared.backgroundRefreshType.value != .none {
