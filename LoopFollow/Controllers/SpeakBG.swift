@@ -73,6 +73,13 @@ extension MainViewController {
 
         static func forLanguage(_ language: String) -> AnnouncementTexts {
             switch language {
+            case "fr":
+                return AnnouncementTexts(
+                    stable: "et c'est stable",
+                    increase: "et c'est monté de",
+                    decrease: "et c'est descendu de",
+                    currentBGIs: "La glycémie est"
+                )
             case "it":
                 return AnnouncementTexts(
                     stable: "ed è stabile",
@@ -109,6 +116,7 @@ extension MainViewController {
     enum LanguageVoiceMapping {
         static let voiceLanguageMap: [String: String] = [
             "en": "en-US",
+            "fr": "fr-FR",
             "it": "it-IT",
             "sk": "sk-SK",
             "sv": "sv-SE",
