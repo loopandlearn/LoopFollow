@@ -8,7 +8,7 @@ class TIRViewModel: ObservableObject {
     @Published var tirData: [TIRDataPoint] = []
     @Published var showTITR: Bool {
         didSet {
-            Storage.shared.showTITR.value = showTITR
+            UnitSettingsStore.shared.timeInRangeMode = showTITR ? .titr : .tir
         }
     }
 
@@ -16,7 +16,7 @@ class TIRViewModel: ObservableObject {
 
     init(dataService: StatsDataService) {
         self.dataService = dataService
-        showTITR = Storage.shared.showTITR.value
+        showTITR = UnitSettingsStore.shared.timeInRangeMode == .titr
         calculateTIR()
     }
 
