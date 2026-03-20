@@ -14,6 +14,7 @@ class BackgroundTask {
     // MARK: - Methods
 
     func startBackgroundTask() {
+        NotificationCenter.default.removeObserver(self, name: AVAudioSession.interruptionNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(interruptedAudio), name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance())
         retryCount = 0
         playAudio()
@@ -72,7 +73,7 @@ class BackgroundTask {
             player.prepareToPlay()
             player.play()
             retryCount = 0
-            LogManager.shared.log(category: .general, message: "Silent audio playing (\(attemptDesc))", isDebug: true)
+            LogManager.shared.log(category: .general, message: "Silent audio playing (\(attemptDesc))")
         } catch {
             LogManager.shared.log(category: .general, message: "playAudio failed (\(attemptDesc)), error: \(error)")
             if retryCount < maxRetries {

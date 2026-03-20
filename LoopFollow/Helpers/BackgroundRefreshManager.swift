@@ -32,6 +32,7 @@ class BackgroundRefreshManager {
                     LogManager.shared.log(category: .general, message: "audio dead, attempting restart")
                     mainVC.backgroundTask.stopBackgroundTask()
                     mainVC.backgroundTask.startBackgroundTask()
+                    LogManager.shared.log(category: .general, message: "audio restart initiated")
                 } else {
                     LogManager.shared.log(category: .general, message: "audio alive, no action needed", isDebug: true)
                 }
