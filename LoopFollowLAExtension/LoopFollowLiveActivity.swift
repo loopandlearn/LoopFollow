@@ -80,7 +80,7 @@ private extension View {
     func applyActivityContentMarginsFixIfAvailable() -> some View {
         if #available(iOS 17.0, *) {
             // Use the generic SwiftUI API available in iOS 17+ (no placement enum)
-            self.contentMargins(Edge.Set.all, 0)
+            contentMargins(Edge.Set.all, 0)
         } else {
             self
         }
@@ -151,7 +151,6 @@ private struct SmallFamilyView: View {
 
 private struct LockScreenLiveActivityView: View {
     let state: GlucoseLiveActivityAttributes.ContentState
-    /* let activityID: String */
 
     var body: some View {
         let s = state.snapshot
@@ -220,7 +219,7 @@ private struct LockScreenLiveActivityView: View {
         .padding(.bottom, 8)
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                .stroke(Color.white.opacity(0.20), lineWidth: 1),
         )
         .overlay(
             Group {
@@ -234,7 +233,7 @@ private struct LockScreenLiveActivityView: View {
                             .tracking(1.5)
                     }
                 }
-            }
+            },
         )
         .overlay(
             ZStack {
@@ -244,7 +243,7 @@ private struct LockScreenLiveActivityView: View {
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(.white)
             }
-            .opacity(state.snapshot.showRenewalOverlay ? 1 : 0)
+            .opacity(state.snapshot.showRenewalOverlay ? 1 : 0),
         )
     }
 }
@@ -307,28 +306,28 @@ private struct SlotView: View {
 
     private func value(for option: LiveActivitySlotOption) -> String {
         switch option {
-        case .none: return ""
-        case .delta: return LAFormat.delta(snapshot)
-        case .projectedBG: return LAFormat.projected(snapshot)
-        case .minMax: return LAFormat.minMax(snapshot)
-        case .iob: return LAFormat.iob(snapshot)
-        case .cob: return LAFormat.cob(snapshot)
-        case .recBolus: return LAFormat.recBolus(snapshot)
-        case .autosens: return LAFormat.autosens(snapshot)
-        case .tdd: return LAFormat.tdd(snapshot)
-        case .basal: return LAFormat.basal(snapshot)
-        case .pump: return LAFormat.pump(snapshot)
-        case .pumpBattery: return LAFormat.pumpBattery(snapshot)
-        case .battery: return LAFormat.battery(snapshot)
-        case .target: return LAFormat.target(snapshot)
-        case .isf: return LAFormat.isf(snapshot)
-        case .carbRatio: return LAFormat.carbRatio(snapshot)
-        case .sage: return LAFormat.age(insertTime: snapshot.sageInsertTime)
-        case .cage: return LAFormat.age(insertTime: snapshot.cageInsertTime)
-        case .iage: return LAFormat.age(insertTime: snapshot.iageInsertTime)
-        case .carbsToday: return LAFormat.carbsToday(snapshot)
-        case .override: return LAFormat.override(snapshot)
-        case .profile: return LAFormat.profileName(snapshot)
+        case .none: ""
+        case .delta: LAFormat.delta(snapshot)
+        case .projectedBG: LAFormat.projected(snapshot)
+        case .minMax: LAFormat.minMax(snapshot)
+        case .iob: LAFormat.iob(snapshot)
+        case .cob: LAFormat.cob(snapshot)
+        case .recBolus: LAFormat.recBolus(snapshot)
+        case .autosens: LAFormat.autosens(snapshot)
+        case .tdd: LAFormat.tdd(snapshot)
+        case .basal: LAFormat.basal(snapshot)
+        case .pump: LAFormat.pump(snapshot)
+        case .pumpBattery: LAFormat.pumpBattery(snapshot)
+        case .battery: LAFormat.battery(snapshot)
+        case .target: LAFormat.target(snapshot)
+        case .isf: LAFormat.isf(snapshot)
+        case .carbRatio: LAFormat.carbRatio(snapshot)
+        case .sage: LAFormat.age(insertTime: snapshot.sageInsertTime)
+        case .cage: LAFormat.age(insertTime: snapshot.cageInsertTime)
+        case .iage: LAFormat.age(insertTime: snapshot.iageInsertTime)
+        case .carbsToday: LAFormat.carbsToday(snapshot)
+        case .override: LAFormat.override(snapshot)
+        case .profile: LAFormat.profileName(snapshot)
         }
     }
 }
@@ -515,14 +514,14 @@ private enum LAFormat {
 
     static func trendArrow(_ s: GlucoseSnapshot) -> String {
         switch s.trend {
-        case .upFast: return "↑↑"
-        case .up: return "↑"
-        case .upSlight: return "↗"
-        case .flat: return "→"
-        case .downSlight: return "↘︎"
-        case .down: return "↓"
-        case .downFast: return "↓↓"
-        case .unknown: return "–"
+        case .upFast: "↑↑"
+        case .up: "↑"
+        case .upSlight: "↗"
+        case .flat: "→"
+        case .downSlight: "↘︎"
+        case .down: "↓"
+        case .downFast: "↓↓"
+        case .unknown: "–"
         }
     }
 

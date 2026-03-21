@@ -26,7 +26,7 @@ class BackgroundTask {
         LogManager.shared.log(category: .general, message: "Silent audio stopped", isDebug: true)
     }
 
-    @objc fileprivate func interruptedAudio(_ notification: Notification) {
+    @objc private func interruptedAudio(_ notification: Notification) {
         guard notification.name == AVAudioSession.interruptionNotification,
               let userInfo = notification.userInfo,
               let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
@@ -53,13 +53,12 @@ class BackgroundTask {
                 self?.playAudio()
             }
 
-
         @unknown default:
             break
         }
     }
 
-    fileprivate func playAudio() {
+    private func playAudio() {
         let attemptDesc = retryCount == 0 ? "initial attempt" : "retry \(retryCount)/\(maxRetries)"
         do {
             let bundle = Bundle.main.path(forResource: "blank", ofType: "wav")
@@ -73,7 +72,7 @@ class BackgroundTask {
             player.prepareToPlay()
             player.play()
             retryCount = 0
-            LogManager.shared.log(category: .general, message: "Silent audio playing (\(attemptDesc))")
+            LogManager.shared.log(category: .general, message: "Silent audio playing (\(attemptDesc))", isDebug: true)
         } catch {
             LogManager.shared.log(category: .general, message: "playAudio failed (\(attemptDesc)), error: \(error)")
             if retryCount < maxRetries {

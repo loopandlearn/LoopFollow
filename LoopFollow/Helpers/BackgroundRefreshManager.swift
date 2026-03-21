@@ -18,10 +18,10 @@ class BackgroundRefreshManager {
     }
 
     private func handleRefreshTask(_ task: BGAppRefreshTask) {
-        LogManager.shared.log(category: .general, message: "BGAppRefreshTask fired")
+        LogManager.shared.log(category: .taskScheduler, message: "BGAppRefreshTask fired")
 
         task.expirationHandler = {
-            LogManager.shared.log(category: .general, message: "BGAppRefreshTask expired")
+            LogManager.shared.log(category: .taskScheduler, message: "BGAppRefreshTask expired")
             task.setTaskCompleted(success: false)
             self.scheduleRefresh()
         }
@@ -29,12 +29,12 @@ class BackgroundRefreshManager {
         DispatchQueue.main.async {
             if let mainVC = self.getMainViewController() {
                 if !mainVC.backgroundTask.player.isPlaying {
-                    LogManager.shared.log(category: .general, message: "audio dead, attempting restart")
+                    LogManager.shared.log(category: .taskScheduler, message: "audio dead, attempting restart")
                     mainVC.backgroundTask.stopBackgroundTask()
                     mainVC.backgroundTask.startBackgroundTask()
-                    LogManager.shared.log(category: .general, message: "audio restart initiated")
+                    LogManager.shared.log(category: .taskScheduler, message: "audio restart initiated")
                 } else {
-                    LogManager.shared.log(category: .general, message: "audio alive, no action needed", isDebug: true)
+                    LogManager.shared.log(category: .taskScheduler, message: "audio alive, no action needed", isDebug: true)
                 }
             }
             self.scheduleRefresh()
@@ -48,7 +48,7 @@ class BackgroundRefreshManager {
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
-            LogManager.shared.log(category: .general, message: "Failed to schedule BGAppRefreshTask: \(error)")
+            LogManager.shared.log(category: .taskScheduler, message: "Failed to schedule BGAppRefreshTask: \(error)")
         }
     }
 

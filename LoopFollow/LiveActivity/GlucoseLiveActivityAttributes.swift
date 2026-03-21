@@ -8,7 +8,7 @@ import ActivityKit
 import Foundation
 
 struct GlucoseLiveActivityAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
+    struct ContentState: Codable, Hashable {
         let snapshot: GlucoseSnapshot
         let seq: Int
         let reason: String
@@ -29,7 +29,7 @@ struct GlucoseLiveActivityAttributes: ActivityAttributes {
             let producedAtInterval = try container.decode(Double.self, forKey: .producedAt)
             producedAt = Date(timeIntervalSince1970: producedAtInterval)
         }
-        
+
         func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(snapshot, forKey: .snapshot)

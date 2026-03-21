@@ -7,7 +7,6 @@ import Foundation
 /// Live Activity, future Watch complication, and CarPlay.
 ///
 struct GlucoseSnapshot: Codable, Equatable, Hashable {
-
     // MARK: - Units
 
     enum Unit: String, Codable, Hashable {
@@ -147,7 +146,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         maxBgMgdl: Double? = nil,
         unit: Unit,
         isNotLooping: Bool,
-        showRenewalOverlay: Bool = false
+        showRenewalOverlay: Bool = false,
     ) {
         self.glucose = glucose
         self.delta = delta
@@ -220,7 +219,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
             maxBgMgdl: maxBgMgdl,
             unit: unit,
             isNotLooping: isNotLooping,
-            showRenewalOverlay: value
+            showRenewalOverlay: value,
         )
     }
 

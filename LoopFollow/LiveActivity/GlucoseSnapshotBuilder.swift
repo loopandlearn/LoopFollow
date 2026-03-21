@@ -1,12 +1,11 @@
+// LoopFollow
 // GlucoseSnapshotBuilder.swift
-// 2026-03-21
 
 import Foundation
 
 /// Provides the latest glucose-relevant values from LoopFollow's single source of truth.
 /// Intentionally provider-agnostic (Nightscout vs Dexcom doesn't matter).
 protocol CurrentGlucoseStateProviding {
-
     // MARK: - Core Glucose
 
     /// Canonical glucose value in mg/dL.
@@ -114,7 +113,7 @@ enum GlucoseSnapshotBuilder {
             LogManager.shared.log(
                 category: .general,
                 message: "GlucoseSnapshotBuilder: missing/invalid core values glucoseMgdl=\(provider.glucoseMgdl?.description ?? "nil") updatedAt=\(provider.updatedAt?.description ?? "nil")",
-                isDebug: true
+                isDebug: true,
             )
             return nil
         }
@@ -130,7 +129,7 @@ enum GlucoseSnapshotBuilder {
         LogManager.shared.log(
             category: .general,
             message: "LA snapshot built: updatedAt=\(updatedAt) interval=\(updatedAt.timeIntervalSince1970)",
-            isDebug: true
+            isDebug: true,
         )
 
         return GlucoseSnapshot(
@@ -162,7 +161,7 @@ enum GlucoseSnapshotBuilder {
             maxBgMgdl: provider.maxBgMgdl,
             unit: preferredUnit,
             isNotLooping: provider.isNotLooping,
-            showRenewalOverlay: provider.showRenewalOverlay
+            showRenewalOverlay: provider.showRenewalOverlay,
         )
     }
 
@@ -171,8 +170,8 @@ enum GlucoseSnapshotBuilder {
     private static func mapTrend(_ code: String?) -> GlucoseSnapshot.Trend {
         guard
             let raw = code?
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-                .lowercased(),
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased(),
             !raw.isEmpty
         else { return .unknown }
 
