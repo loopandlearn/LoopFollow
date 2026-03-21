@@ -32,15 +32,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
-        if pendingLATapNavigation {
-            pendingLATapNavigation = false
-            NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
-        }
     }
-
-    /// Set when loopfollow://la-tap arrives before the scene is fully active.
-    /// Consumed in sceneDidBecomeActive once the view hierarchy is restored.
-    private var pendingLATapNavigation = false
 
     func scene(_: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard URLContexts.contains(where: { $0.url.scheme == "loopfollow" && $0.url.host == "la-tap" }) else { return }
