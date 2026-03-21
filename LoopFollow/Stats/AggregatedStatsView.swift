@@ -172,6 +172,38 @@ struct AggregatedStatsView: View {
     }
 }
 
+struct AggregatedStatsContentView: View {
+    @StateObject private var viewModel: AggregatedStatsViewModel
+    private let onDismiss: (() -> Void)?
+
+    init(mainViewController: MainViewController?, onDismiss: (() -> Void)? = nil) {
+        _viewModel = StateObject(wrappedValue: AggregatedStatsViewModel(mainViewController: mainViewController))
+        self.onDismiss = onDismiss
+    }
+
+    var body: some View {
+        AggregatedStatsView(viewModel: viewModel, onDismiss: onDismiss)
+            .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
+    }
+}
+
+struct AggregatedStatsModalView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let mainViewController: MainViewController?
+
+    var body: some View {
+        NavigationView {
+            AggregatedStatsContentView(
+                mainViewController: mainViewController,
+                onDismiss: { dismiss() }
+            )
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
+    }
+}
+
 struct StatCard: View {
     let title: String
     let value: String

@@ -314,11 +314,11 @@ class MoreMenuViewController: UIViewController {
             return
         }
 
-        let statsVC = UIHostingController(
-            rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
-        )
-        statsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
-        navigationController?.pushViewController(statsVC, animated: true)
+        let statsModalView = AggregatedStatsModalView(mainViewController: mainVC)
+        let hostingController = UIHostingController(rootView: statsModalView)
+        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.modalPresentationStyle = .fullScreen
+        present(hostingController, animated: true)
     }
 
     private func openHome() {

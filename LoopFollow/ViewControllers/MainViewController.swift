@@ -671,7 +671,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: nil)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: nil))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController
@@ -735,17 +735,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         #endif
 
-        let statsView = AggregatedStatsView(
-            viewModel: AggregatedStatsViewModel(mainViewController: self),
-            onDismiss: { [weak self] in
-                self?.dismiss(animated: true)
-            }
-        )
-        let statsVC = UIHostingController(rootView: statsView)
-        statsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
-        let navController = UINavigationController(rootViewController: statsVC)
-        navController.modalPresentationStyle = .pageSheet
-        present(navController, animated: true)
+        let statsModalView = AggregatedStatsModalView(mainViewController: self)
+        let hostingController = UIHostingController(rootView: statsModalView)
+        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.modalPresentationStyle = .fullScreen
+        present(hostingController, animated: true)
     }
 
     private func createViewController(for item: TabItem, position: TabPosition, storyboard: UIStoryboard) -> UIViewController? {
@@ -782,7 +776,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: self)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: self))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController
