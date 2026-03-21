@@ -8,7 +8,7 @@ struct UnitsSettingsView: View {
         Form {
             UnitsConfigurationView()
         }
-        .navigationTitle("Metrics and Units")
+        .navigationTitle("Units and Metrics")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

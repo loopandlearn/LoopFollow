@@ -45,7 +45,7 @@ struct SettingsMenuView: View {
                             settingsPath.value.append(Sheet.infoDisplay)
                         }
                     }
-                     NavigationRow(title: "Units and Metrics",
+                    NavigationRow(title: "Units and Metrics",
                                   icon: "scalemass")
                     {
                         settingsPath.value.append(Sheet.units)
