@@ -92,6 +92,12 @@ Always rename your branch (that is aligned with `dev`) to a name suitable for yo
 
 After a PR is merged to `dev`, there is an automatic bump up the version number - please do not modify the version in your branch.
 
+### Pull Request Guidelines
+
+Each pull request should focus on a **single concern** — one bug fix, one feature, or one improvement. Avoid combining unrelated changes in the same PR.
+
+Focused PRs are easier to review, simpler to test, and safer to revert if needed. If your work touches multiple areas, consider splitting it into separate PRs that can be reviewed and merged independently.
+
 ### Commit Guidelines
 
 Write commit messages that complete the sentence: **"If applied, this commit will..."**
