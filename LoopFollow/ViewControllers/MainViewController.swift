@@ -196,6 +196,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         updateGraphVisibility()
         statsView.isHidden = !Storage.shared.showStats.value
 
+        // Tap on stats view to open full statistics screen
+        let statsTap = UITapGestureRecognizer(target: self, action: #selector(statsViewTapped))
+        statsView.addGestureRecognizer(statsTap)
+
         BGChart.delegate = self
         BGChartFull.delegate = self
 
@@ -720,6 +724,28 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
         return nil
+    }
+
+    @objc private func statsViewTapped() {
+        #if !targetEnvironment(macCatalyst)
+            let position = Storage.shared.position(for: .stats).normalized
+            if position != .menu, let tabIndex = position.tabIndex, let tbc = tabBarController {
+                tbc.selectedIndex = tabIndex
+                return
+            }
+        #endif
+
+        let statsView = AggregatedStatsView(
+            viewModel: AggregatedStatsViewModel(mainViewController: self),
+            onDismiss: { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        )
+        let statsVC = UIHostingController(rootView: statsView)
+        statsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        let navController = UINavigationController(rootViewController: statsVC)
+        navController.modalPresentationStyle = .pageSheet
+        present(navController, animated: true)
     }
 
     private func createViewController(for item: TabItem, position: TabPosition, storyboard: UIStoryboard) -> UIViewController? {

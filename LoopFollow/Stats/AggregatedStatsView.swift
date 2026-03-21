@@ -7,6 +7,7 @@ import UIKit
 struct AggregatedStatsView: View {
     @ObservedObject var viewModel: AggregatedStatsViewModel
     @Environment(\.dismiss) var dismiss
+    var onDismiss: (() -> Void)?
     @State private var showGMI: Bool
     @State private var showStdDev: Bool
     @State private var startDate: Date
@@ -17,8 +18,9 @@ struct AggregatedStatsView: View {
     @State private var loadingTimer: Timer?
     @State private var timeoutTimer: Timer?
 
-    init(viewModel: AggregatedStatsViewModel) {
+    init(viewModel: AggregatedStatsViewModel, onDismiss: (() -> Void)? = nil) {
         self.viewModel = viewModel
+        self.onDismiss = onDismiss
         _showGMI = State(initialValue: Storage.shared.showGMI.value)
         _showStdDev = State(initialValue: Storage.shared.showStdDev.value)
 
@@ -105,6 +107,13 @@ struct AggregatedStatsView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            if let onDismiss {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Done") {
+                        onDismiss()
+                    }
+                }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Refresh") {
                     loadingError = false
