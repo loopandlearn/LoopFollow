@@ -23,7 +23,11 @@ struct NightscoutSettingsView: View {
 
             importSection
         }
-        .background(unitsNavigationLink)
+        .navigationDestination(isPresented: $showUnitsSetup) {
+            UnitsOnboardingView {
+                dismiss()
+            }
+        }
         .navigationBarTitle("Nightscout Settings", displayMode: .inline)
         .navigationBarBackButtonHidden(usesModalCloseButton)
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
@@ -113,14 +117,5 @@ struct NightscoutSettingsView: View {
                 }
             }
         }
-    }
-
-    private var unitsNavigationLink: some View {
-        NavigationLink(destination: UnitsOnboardingView {
-            dismiss()
-        }, isActive: $showUnitsSetup) {
-            EmptyView()
-        }
-        .hidden()
     }
 }
