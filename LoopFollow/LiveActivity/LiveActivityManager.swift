@@ -174,39 +174,45 @@ final class LiveActivityManager {
             LogManager.shared.log(category: .general, message: "Live Activity not authorized")
             return
         }
-
+    
         if let existing = Activity<GlucoseLiveActivityAttributes>.activities.first {
             bind(to: existing, logReason: "reuse")
             Storage.shared.laRenewalFailed.value = false
             return
         }
-
+    
         do {
             let attributes = GlucoseLiveActivityAttributes(title: "LoopFollow")
-
-            let seedSnapshot = GlucoseSnapshotStore.shared.load() ?? GlucoseSnapshot(
-                glucose: 0,
-                delta: 0,
-                trend: .unknown,
-                updatedAt: Date(),
-                iob: nil,
-                cob: nil,
-                projected: nil,
-                unit: .mgdl,
-                isNotLooping: false
-            )
-
+    
+            // Prefer a freshly built snapshot so all extended fields are populated.
+            // Fall back to the persisted store (covers cold-start with real data),
+            // then to a zero seed (true first-ever launch with no data yet).
+            let provider = StorageCurrentGlucoseStateProvider()
+            let seedSnapshot = GlucoseSnapshotBuilder.build(from: provider)
+                ?? GlucoseSnapshotStore.shared.load()
+                ?? GlucoseSnapshot(
+                    glucose: 0,
+                    delta: 0,
+                    trend: .unknown,
+                    updatedAt: Date(),
+                    iob: nil,
+                    cob: nil,
+                    projected: nil,
+                    unit: .mgdl,
+                    isNotLooping: false
+                )
+    
             let initialState = GlucoseLiveActivityAttributes.ContentState(
                 snapshot: seedSnapshot,
                 seq: 0,
                 reason: "start",
                 producedAt: Date()
             )
-
+    
             let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
             let content = ActivityContent(state: initialState, staleDate: renewDeadline)
             let activity = try Activity.request(attributes: attributes, content: content, pushType: .token)
-
+    
             bind(to: activity, logReason: "start-new")
             Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
             Storage.shared.laRenewalFailed.value = false
@@ -215,6 +221,7 @@ final class LiveActivityManager {
             LogManager.shared.log(category: .general, message: "Live Activity failed to start: \(error)")
         }
     }
+
 
     /// Called from applicationWillTerminate. Ends the LA synchronously (blocking
     /// up to 3 s) so it clears from the lock screen before the process exits.
@@ -326,30 +333,57 @@ final class LiveActivityManager {
     /// Returns true if renewal was performed (caller should return early).
     private func renewIfNeeded(snapshot: GlucoseSnapshot) -> Bool {
         guard let oldActivity = current else { return false }
-
+    
         let renewBy = Storage.shared.laRenewBy.value
         guard renewBy > 0, Date().timeIntervalSince1970 >= renewBy else { return false }
-
+    
         let overdueBy = Date().timeIntervalSince1970 - renewBy
         LogManager.shared.log(category: .general, message: "[LA] renewal deadline passed by \(Int(overdueBy))s, requesting new LA")
-
+    
         let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
         let attributes = GlucoseLiveActivityAttributes(title: "LoopFollow")
-
-        // Strip the overlay flag — the new LA has a fresh deadline so it should
-        // open clean, without the warning visible from the first frame.
-        let freshSnapshot = GlucoseSnapshot(
-            glucose: snapshot.glucose,
-            delta: snapshot.delta,
-            trend: snapshot.trend,
-            updatedAt: snapshot.updatedAt,
-            iob: snapshot.iob,
-            cob: snapshot.cob,
-            projected: snapshot.projected,
-            unit: snapshot.unit,
-            isNotLooping: snapshot.isNotLooping,
+    
+        // Build a fresh snapshot from the provider so all extended fields are populated.
+        // Strip the renewal overlay — the new LA has a clean deadline and should open
+        // without the warning visible on its first frame.
+        // Fall back to the passed-in snapshot if the provider build fails (e.g. stale data).
+        let provider = StorageCurrentGlucoseStateProvider()
+        let builtSnapshot = GlucoseSnapshotBuilder.build(from: provider) ?? snapshot
+        Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
+    
+        // Re-build with overlay suppressed now that the deadline has been reset.
+        let freshSnapshot = GlucoseSnapshotBuilder.build(from: provider) ?? GlucoseSnapshot(
+            glucose: builtSnapshot.glucose,
+            delta: builtSnapshot.delta,
+            trend: builtSnapshot.trend,
+            updatedAt: builtSnapshot.updatedAt,
+            iob: builtSnapshot.iob,
+            cob: builtSnapshot.cob,
+            projected: builtSnapshot.projected,
+            override: builtSnapshot.override,
+            recBolus: builtSnapshot.recBolus,
+            battery: builtSnapshot.battery,
+            pumpBattery: builtSnapshot.pumpBattery,
+            basalRate: builtSnapshot.basalRate,
+            pumpReservoirU: builtSnapshot.pumpReservoirU,
+            autosens: builtSnapshot.autosens,
+            tdd: builtSnapshot.tdd,
+            targetLowMgdl: builtSnapshot.targetLowMgdl,
+            targetHighMgdl: builtSnapshot.targetHighMgdl,
+            isfMgdlPerU: builtSnapshot.isfMgdlPerU,
+            carbRatio: builtSnapshot.carbRatio,
+            carbsToday: builtSnapshot.carbsToday,
+            profileName: builtSnapshot.profileName,
+            sageInsertTime: builtSnapshot.sageInsertTime,
+            cageInsertTime: builtSnapshot.cageInsertTime,
+            iageInsertTime: builtSnapshot.iageInsertTime,
+            minBgMgdl: builtSnapshot.minBgMgdl,
+            maxBgMgdl: builtSnapshot.maxBgMgdl,
+            unit: builtSnapshot.unit,
+            isNotLooping: builtSnapshot.isNotLooping,
             showRenewalOverlay: false
         )
+    
         let state = GlucoseLiveActivityAttributes.ContentState(
             snapshot: freshSnapshot,
             seq: seq,
@@ -357,15 +391,14 @@ final class LiveActivityManager {
             producedAt: Date()
         )
         let content = ActivityContent(state: state, staleDate: renewDeadline)
-
+    
         do {
             let newActivity = try Activity.request(attributes: attributes, content: content, pushType: .token)
-
-            // New LA is live — now it's safe to remove the old card.
+    
             Task {
                 await oldActivity.end(nil, dismissalPolicy: .immediate)
             }
-
+    
             updateTask?.cancel()
             updateTask = nil
             tokenObservationTask?.cancel()
@@ -373,11 +406,9 @@ final class LiveActivityManager {
             stateObserverTask?.cancel()
             stateObserverTask = nil
             pushToken = nil
-
+    
             bind(to: newActivity, logReason: "renew")
-            Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
             Storage.shared.laRenewalFailed.value = false
-            // Update the store so the next duplicate check has the correct baseline.
             GlucoseSnapshotStore.shared.save(freshSnapshot)
             LogManager.shared.log(category: .general, message: "[LA] Live Activity renewed successfully id=\(newActivity.id)")
             return true
@@ -387,6 +418,7 @@ final class LiveActivityManager {
             return false
         }
     }
+
 
     private func performRefresh(reason: String) {
         let provider = StorageCurrentGlucoseStateProvider()
