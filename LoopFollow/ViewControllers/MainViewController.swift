@@ -277,7 +277,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         Storage.shared.colorBGText.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.setBGTextColor()
+                self?.updateBGTextAppearance()
             }
             .store(in: &cancellables)
 
@@ -1085,7 +1085,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
-    func setBGTextColor() {
+    func updateBGTextAppearance() {
         if bgData.count > 0 {
             let latestBG = bgData[bgData.count - 1].sgv
             var color = NSUIColor.label
@@ -1105,6 +1105,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
 
             BGText.textColor = color
+
+            if latestBG <= 39 || latestBG >= 400 {
+                BGText.font = UIFont.systemFont(ofSize: 65, weight: .black)
+            } else {
+                BGText.font = UIFont.systemFont(ofSize: 85, weight: .black)
+            }
         }
     }
 
