@@ -72,11 +72,9 @@ extension MainViewController {
                     while i <= toLoad {
                         if i < prediction.count {
                             let sgvValue = Int(round(prediction[i]))
-                            // Skip values higher than 600
-                            if sgvValue <= 600 {
-                                let prediction = ShareGlucoseData(sgv: sgvValue, date: predictionTime, direction: "flat")
-                                predictionData.append(prediction)
-                            }
+                            let clampedValue = min(max(sgvValue, 39), 400)
+                            let prediction = ShareGlucoseData(sgv: clampedValue, date: predictionTime, direction: "flat")
+                            predictionData.append(prediction)
                             predictionTime += 300
                         }
                         i += 1
