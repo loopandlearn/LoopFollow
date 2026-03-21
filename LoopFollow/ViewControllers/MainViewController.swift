@@ -16,6 +16,29 @@ func IsNightscoutEnabled() -> Bool {
 }
 
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
+    private struct RemoteCommandDataSignature {
+        let carbTimestamp: TimeInterval?
+        let bolusTimestamp: TimeInterval?
+        let overrideTimestamp: TimeInterval?
+        let overrideStateKey: String
+
+        func detectsFreshData(comparedTo baseline: RemoteCommandDataSignature) -> Bool {
+            if let carbTimestamp, carbTimestamp > (baseline.carbTimestamp ?? 0) {
+                return true
+            }
+
+            if let bolusTimestamp, bolusTimestamp > (baseline.bolusTimestamp ?? 0) {
+                return true
+            }
+
+            if let overrideTimestamp, overrideTimestamp > (baseline.overrideTimestamp ?? 0) {
+                return true
+            }
+
+            return overrideStateKey != baseline.overrideStateKey
+        }
+    }
+
     var isPresentedAsModal: Bool = false
 
     @IBOutlet var BGText: UILabel!
@@ -138,6 +161,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         "deviceStatus": false,
     ]
     private var loadingTimeoutTimer: Timer?
+    private var remoteCommandPollingTimer: Timer?
+    private var remoteCommandPollingStartedAt: Date?
+    private var remoteCommandPollingBaseline: RemoteCommandDataSignature?
+    private let remoteCommandPollingInterval: TimeInterval = 3
+    private let remoteCommandPollingDuration: TimeInterval = 30
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -240,6 +268,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         refreshScrollView.delegate = self
         NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
+
+        NotificationCenter.default.publisher(for: .remoteCommandSucceeded)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.startRemoteCommandPolling()
+            }
+            .store(in: &cancellables)
 
         Observable.shared.bgText.$value
             .receive(on: DispatchQueue.main)
@@ -839,6 +874,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     deinit {
+        remoteCommandPollingTimer?.invalidate()
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("refresh"), object: nil)
     }
 
@@ -877,6 +913,75 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         currentSage = nil
         currentIage = nil
         refreshControl.endRefreshing()
+    }
+
+    private func startRemoteCommandPolling() {
+        guard IsNightscoutEnabled() else { return }
+
+        remoteCommandPollingBaseline = currentRemoteCommandDataSignature()
+        remoteCommandPollingStartedAt = Date()
+        remoteCommandPollingTimer?.invalidate()
+
+        performRemoteCommandPollingTick()
+
+        let timer = Timer.scheduledTimer(withTimeInterval: remoteCommandPollingInterval, repeats: true) { [weak self] _ in
+            self?.performRemoteCommandPollingTick()
+        }
+        timer.tolerance = 0.5
+        remoteCommandPollingTimer = timer
+
+        LogManager.shared.log(category: .general, message: "Started aggressive polling after remote command success")
+    }
+
+    private func stopRemoteCommandPolling(reason: String) {
+        guard remoteCommandPollingTimer != nil || remoteCommandPollingStartedAt != nil else { return }
+
+        remoteCommandPollingTimer?.invalidate()
+        remoteCommandPollingTimer = nil
+        remoteCommandPollingStartedAt = nil
+        remoteCommandPollingBaseline = nil
+
+        LogManager.shared.log(category: .general, message: "Stopped aggressive polling: \(reason)")
+    }
+
+    private func performRemoteCommandPollingTick() {
+        guard let remoteCommandPollingStartedAt else { return }
+
+        if Date().timeIntervalSince(remoteCommandPollingStartedAt) >= remoteCommandPollingDuration {
+            stopRemoteCommandPolling(reason: "timeout reached")
+            return
+        }
+
+        bgTaskAction()
+        deviceStatusAction()
+        treatmentsTaskAction()
+    }
+
+    private func currentRemoteCommandDataSignature() -> RemoteCommandDataSignature {
+        let latestBolusTimestamp = max(bolusData.last?.date ?? 0, smbData.last?.date ?? 0)
+        let overrideNote = Observable.shared.override.value ?? ""
+        let overrideStateKey: String
+
+        if currentOverride != 1.0 || !overrideNote.isEmpty {
+            overrideStateKey = "\(currentOverride)|\(overrideNote)"
+        } else {
+            overrideStateKey = ""
+        }
+
+        return RemoteCommandDataSignature(
+            carbTimestamp: carbData.last?.date,
+            bolusTimestamp: latestBolusTimestamp > 0 ? latestBolusTimestamp : nil,
+            overrideTimestamp: overrideGraphData.last?.date,
+            overrideStateKey: overrideStateKey
+        )
+    }
+
+    func evaluateRemoteCommandPollingCompletion() {
+        guard let remoteCommandPollingBaseline else { return }
+
+        if currentRemoteCommandDataSignature().detectsFreshData(comparedTo: remoteCommandPollingBaseline) {
+            stopRemoteCommandPolling(reason: "fresh remote data received")
+        }
     }
 
     // Scroll down BGText when refreshing

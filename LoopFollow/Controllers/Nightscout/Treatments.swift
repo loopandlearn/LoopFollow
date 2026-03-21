@@ -184,5 +184,6 @@ extension MainViewController {
             }
         }
         processCage(entries: pumpSiteChange)
+        evaluateRemoteCommandPollingCompletion()
     }
 }

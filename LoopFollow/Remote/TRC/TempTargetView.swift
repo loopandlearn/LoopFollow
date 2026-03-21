@@ -255,6 +255,7 @@ struct TempTargetView: View {
                     self.statusMessage = "Temp target command successfully sent."
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendTempTargetPushNotification succeeded with target: \(newHKTarget), duration: \(duration)")
+                    NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                 } else {
                     self.statusMessage = errorMessage ?? "Failed to send temp target command."
                     self.alertType = .statusFailure
@@ -275,6 +276,7 @@ struct TempTargetView: View {
                     self.statusMessage = "Cancel temp target command successfully sent."
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendCancelTempTargetPushNotification succeeded")
+                    NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                 } else {
                     self.statusMessage = errorMessage ?? "Failed to send cancel temp target command."
                     self.alertType = .statusFailure

@@ -373,6 +373,7 @@ struct LoopAPNSBolusView: View {
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
                     self.alertMessage = "Insulin sent successfully!"
                     self.alertType = .success
+                    NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                     LogManager.shared.log(
                         category: .apns,
                         message: "Insulin sent - Amount: \(insulinAmount.doubleValue(for: .internationalUnit()))U"
