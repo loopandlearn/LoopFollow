@@ -403,6 +403,7 @@ struct LoopAPNSCarbsView: View {
                     timeFormatter.timeStyle = .short
                     self.alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"
                     self.alertType = .success
+                    NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                     LogManager.shared.log(
                         category: .apns,
                         message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionTimeString)h, Time: \(adjustedConsumedDate)"

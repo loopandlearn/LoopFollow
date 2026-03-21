@@ -220,6 +220,7 @@ extension MainViewController {
                 )
 
             } else if secondsAgo >= (5 * 60) {
+                self.evaluateRemoteCommandPollingCompletion()
                 TaskScheduler.shared.rescheduleTask(
                     id: .deviceStatus,
                     to: Date().addingTimeInterval(10)
