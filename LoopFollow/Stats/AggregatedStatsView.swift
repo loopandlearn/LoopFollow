@@ -109,9 +109,7 @@ struct AggregatedStatsView: View {
         .toolbar {
             if let onDismiss {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: onDismiss) {
-                        Image(systemName: "chevron.left")
-                    }
+                    Button("Done", action: onDismiss)
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
