@@ -8,6 +8,7 @@
 import Foundation
 import os
 import UIKit
+import UserNotifications
 
 /// Live Activity manager for LoopFollow.
 
@@ -284,6 +285,7 @@ final class LiveActivityManager {
         dismissedByUser = false
         Storage.shared.laRenewBy.value = 0
         Storage.shared.laRenewalFailed.value = false
+        cancelRenewalFailedNotification()
         current = nil
         updateTask?.cancel(); updateTask = nil
         tokenObservationTask?.cancel(); tokenObservationTask = nil
@@ -378,14 +380,19 @@ final class LiveActivityManager {
     
             bind(to: newActivity, logReason: "renew")
             Storage.shared.laRenewalFailed.value = false
+            cancelRenewalFailedNotification()
             GlucoseSnapshotStore.shared.save(freshSnapshot)
             LogManager.shared.log(category: .general, message: "[LA] Live Activity renewed successfully id=\(newActivity.id)")
             return true
         } catch {
             // Renewal failed — roll back the deadline so the next refresh retries.
             Storage.shared.laRenewBy.value = renewBy
+            let isFirstFailure = !Storage.shared.laRenewalFailed.value
             Storage.shared.laRenewalFailed.value = true
             LogManager.shared.log(category: .general, message: "[LA] renewal failed, keeping existing LA: \(error)")
+            if isFirstFailure {
+                scheduleRenewalFailedNotification()
+            }
             return false
         }
     }
@@ -550,6 +557,33 @@ final class LiveActivityManager {
         // Activity will restart on next BG refresh via refreshFromCurrentState()
     }
 
+    // MARK: - Renewal Notifications
+
+    private func scheduleRenewalFailedNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Live Activity Expiring"
+        content.body = "Live Activity will expire soon. Open LoopFollow to restart."
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: "loopfollow.la.renewal.failed",
+            content: content,
+            trigger: trigger
+        )
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                LogManager.shared.log(category: .general, message: "[LA] failed to schedule renewal notification: \(error)")
+            }
+        }
+        LogManager.shared.log(category: .general, message: "[LA] renewal failed notification scheduled")
+    }
+
+    private func cancelRenewalFailedNotification() {
+        let id = "loopfollow.la.renewal.failed"
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [id])
+    }
+
     private func attachStateObserver(to activity: Activity<GlucoseLiveActivityAttributes>) {
         stateObserverTask?.cancel()
         stateObserverTask = Task {
@@ -562,11 +596,17 @@ final class LiveActivityManager {
                         LogManager.shared.log(category: .general, message: "Live Activity cleared id=\(activity.id)", isDebug: true)
                     }
                     if state == .dismissed {
-                        // User manually swiped away the LA. Block auto-restart until
-                        // the user explicitly restarts via button or App Intent.
-                        // laEnabled is left true — the user's preference is preserved.
-                        dismissedByUser = true
-                        LogManager.shared.log(category: .general, message: "Live Activity dismissed by user — auto-restart blocked until explicit restart")
+                        if Storage.shared.laRenewalFailed.value {
+                            // iOS force-dismissed after 8-hour limit with a failed renewal.
+                            // Allow auto-restart when the user opens the app.
+                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by iOS after expiry — auto-restart enabled")
+                        } else {
+                            // User manually swiped away the LA. Block auto-restart until
+                            // the user explicitly restarts via button or App Intent.
+                            // laEnabled is left true — the user's preference is preserved.
+                            dismissedByUser = true
+                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by user — auto-restart blocked until explicit restart")
+                        }
                     }
                 }
             }
