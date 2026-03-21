@@ -150,11 +150,8 @@ final class LiveActivityManager {
         refreshFromCurrentState(reason: "audio-session-failed")
     }
 
-    // static let renewalThreshold: TimeInterval = 7.5 * 3600
-    // static let renewalWarning: TimeInterval = 20 * 60
-
-    static let renewalThreshold: TimeInterval = 15 * 60
-    static let renewalWarning: TimeInterval = 10 * 60
+    static let renewalThreshold: TimeInterval = 7.5 * 3600
+    static let renewalWarning: TimeInterval = 20 * 60
 
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
