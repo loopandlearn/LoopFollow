@@ -7,12 +7,10 @@ import SwiftUI
 struct LoopAPNSCarbsView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0.0)
-    @State private var absorptionHours = 3
-    @State private var absorptionMinutes = 0
+    @State private var absorptionTimeString = "3.0"
     @State private var foodType = ""
     @State private var consumedDate = Date()
     @State private var showDatePickerSheet = false
-    @State private var showAbsorptionPickerSheet = false
     @State private var isLoading = false
     @State private var showAlert = false
     @State private var alertMessage = ""
@@ -20,50 +18,14 @@ struct LoopAPNSCarbsView: View {
     @State private var otpTimeRemaining: Int? = nil
     @State private var showTOTPWarning = false
     private let otpPeriod: TimeInterval = 30
-    private let timeAdjustmentStepMinutes = 5
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     @FocusState private var carbsFieldIsFocused: Bool
+    @FocusState private var absorptionFieldIsFocused: Bool
 
     // Computed property to check if TOTP should be blocked
     private var isTOTPBlocked: Bool {
         TOTPService.shared.isTOTPBlocked(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
-    }
-
-    private var absorptionTimeValue: Double {
-        Double(absorptionHours) + (Double(absorptionMinutes) / 60.0)
-    }
-
-    private var absorptionTimeText: String {
-        if absorptionMinutes == 0 {
-            return "\(absorptionHours) hr"
-        }
-
-        return "\(absorptionHours) hr \(absorptionMinutes) min"
-    }
-
-    private var absorptionConfirmationText: String {
-        String(format: "%.1f", absorptionTimeValue)
-    }
-
-    private var absorptionMinuteOptions: [Int] {
-        if absorptionHours == 0 {
-            return [30]
-        }
-
-        if absorptionHours == 8 {
-            return [0]
-        }
-
-        return [0, 30]
-    }
-
-    private var oldestAcceptedDate: Date {
-        Date().addingTimeInterval(-60 * 60 * 12)
-    }
-
-    private var latestAcceptedDate: Date {
-        Date().addingTimeInterval(60 * 60)
     }
 
     enum AlertType {
@@ -92,118 +54,112 @@ struct LoopAPNSCarbsView: View {
                             }
                         )
 
-                        HStack(spacing: 8) {
-                            Text("Time")
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Food Type")
+                                .font(.headline)
 
-                            Spacer()
+                            HStack(spacing: 12) {
+                                // Fast carb entry emoji (0.5 hours)
+                                Button(action: {
+                                    foodType = "🍭"
+                                    absorptionTimeString = "0.5"
+                                }) {
+                                    Text("🍭")
+                                        .font(.title)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
 
-                            Button(action: {
-                                adjustConsumedDate(byMinutes: -timeAdjustmentStepMinutes)
-                            }) {
-                                Image(systemName: "minus")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundColor(Color(.systemGray6))
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.blue)
-                                    .clipShape(Circle())
+                                // Medium carb entry emoji (3 hours)
+                                Button(action: {
+                                    foodType = "🌮"
+                                    absorptionTimeString = "3.0"
+                                }) {
+                                    Text("🌮")
+                                        .font(.title)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
+                                // Slow carb entry emoji (5 hours)
+                                Button(action: {
+                                    foodType = "🍕"
+                                    absorptionTimeString = "5.0"
+                                }) {
+                                    Text("🍕")
+                                        .font(.title)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
+                                // Custom carb entry emoji (clears and focuses absorption)
+                                Button(action: {
+                                    foodType = "🍽️"
+                                    absorptionTimeString = ""
+                                    absorptionFieldIsFocused = true
+                                }) {
+                                    Text("🍽️")
+                                        .font(.title)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
+                                Spacer()
                             }
-                            .buttonStyle(.plain)
+                        }
+
+                        HStack {
+                            Text("Absorption Time")
+                            Spacer()
+                            TextField("0.0", text: $absorptionTimeString)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .focused($absorptionFieldIsFocused)
+                                .onChange(of: absorptionTimeString) { newValue in
+                                    // Only allow numbers and decimal point
+                                    let filtered = newValue.filter { "0123456789.".contains($0) }
+                                    // Ensure only one decimal point
+                                    let components = filtered.components(separatedBy: ".")
+                                    if components.count > 2 {
+                                        absorptionTimeString = String(filtered.dropLast())
+                                    } else {
+                                        absorptionTimeString = filtered
+                                    }
+                                }
+                            Text("hr")
+                                .foregroundColor(.secondary)
+                        }
+
+                        // Time input section
+                        VStack(alignment: .leading) {
+                            Text("Time")
+                                .font(.headline)
 
                             Button(action: {
                                 showDatePickerSheet = true
                             }) {
-                                Text(consumedDate, format: Date.FormatStyle().hour().minute())
-                                    .font(.body.monospacedDigit())
-                                    .foregroundColor(.primary)
-                                    .frame(minWidth: 58)
-                            }
-                            .buttonStyle(.plain)
-
-                            Button(action: {
-                                adjustConsumedDate(byMinutes: timeAdjustmentStepMinutes)
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundColor(Color(.systemGray6))
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.blue)
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                        HStack(alignment: .center, spacing: 12) {
-                            Text("Food Type")
-
-                            Spacer()
-
-                            HStack(spacing: 10) {
-                                Button(action: {
-                                    foodType = "🍭"
-                                    setAbsorptionTime(hours: 0, minutes: 30)
-                                }) {
-                                    Text("🍭")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🍭" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
+                                HStack {
+                                    Text(consumedDate, format: Date.FormatStyle().hour().minute())
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
-                                .buttonStyle(.plain)
-
-                                Button(action: {
-                                    foodType = "🌮"
-                                    setAbsorptionTime(hours: 3, minutes: 0)
-                                }) {
-                                    Text("🌮")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🌮" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
-
-                                Button(action: {
-                                    foodType = "🍕"
-                                    setAbsorptionTime(hours: 5, minutes: 0)
-                                }) {
-                                    Text("🍕")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🍕" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
-
-                                Button(action: {
-                                    foodType = "🍽️"
-                                    showAbsorptionPickerSheet = true
-                                }) {
-                                    Text("🍽️")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🍽️" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
                             }
-                        }
-
-                        HStack(spacing: 8) {
-                            Text("Absorption Time")
-
-                            Image(systemName: "info.circle")
-                                .foregroundColor(.blue)
-                                .font(.subheadline)
-
-                            Spacer()
-
-                            Button(action: {
-                                showAbsorptionPickerSheet = true
-                            }) {
-                                Text(absorptionTimeText)
-                                    .foregroundColor(.secondary)
-                            }
-                            .buttonStyle(.plain)
                         }
                     }
                     Section {
@@ -270,74 +226,16 @@ struct LoopAPNSCarbsView: View {
                 .navigationBarTitleDisplayMode(.inline)
             }
             .sheet(isPresented: $showDatePickerSheet) {
-                VStack(spacing: 16) {
+                VStack {
                     Text("Consumption Time")
                         .font(.headline)
-                        .padding(.top)
-
-                    DatePicker(
-                        "Time",
-                        selection: Binding(
-                            get: { consumedDate },
-                            set: { consumedDate = clampedConsumedDate($0) }
-                        ),
-                        in: oldestAcceptedDate ... latestAcceptedDate,
-                        displayedComponents: [.hourAndMinute, .date]
-                    )
-                    .datePickerStyle(.wheel)
-                    .labelsHidden()
-
-                    Button("Done") {
-                        consumedDate = clampedConsumedDate(consumedDate)
-                        showDatePickerSheet = false
+                        .padding()
+                    Form {
+                        DatePicker("Time", selection: $consumedDate, displayedComponents: [.hourAndMinute, .date])
+                            .datePickerStyle(.automatic)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.horizontal)
-                    .padding(.bottom)
                 }
-                .presentationDetents([.fraction(0.4)])
-                .presentationDragIndicator(.visible)
-            }
-            .sheet(isPresented: $showAbsorptionPickerSheet) {
-                VStack(spacing: 16) {
-                    Text("Absorption Time")
-                        .font(.headline)
-                        .padding(.top)
-
-                    HStack(spacing: 0) {
-                        Picker("Hours", selection: $absorptionHours) {
-                            ForEach(0 ... 8, id: \.self) { hour in
-                                Text("\(hour) hr")
-                                    .tag(hour)
-                            }
-                        }
-
-                        Picker("Minutes", selection: $absorptionMinutes) {
-                            ForEach(absorptionMinuteOptions, id: \.self) { minute in
-                                Text("\(minute) min")
-                                    .tag(minute)
-                            }
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 180)
-
-                    Button("Done") {
-                        normalizeAbsorptionTime()
-                        showAbsorptionPickerSheet = false
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.horizontal)
-                    .padding(.bottom)
-                }
-                .presentationDetents([.fraction(0.35)])
-                .presentationDragIndicator(.visible)
-                .onAppear {
-                    normalizeAbsorptionTime()
-                }
-                .onChange(of: absorptionHours) { _ in
-                    normalizeAbsorptionTime()
-                }
+                .presentationDetents([.fraction(1 / 4)])
             }
             .onAppear {
                 // Validate APNS setup
@@ -405,7 +303,7 @@ struct LoopAPNSCarbsView: View {
                     timeFormatter.dateStyle = .short
                     return Alert(
                         title: Text("Confirm Carbs"),
-                        message: Text("Send \(Int(carbsAmount.doubleValue(for: .gram())))g of carbs with \(absorptionConfirmationText)h absorption time at \(timeFormatter.string(from: consumedDate))?"),
+                        message: Text("Send \(Int(carbsAmount.doubleValue(for: .gram())))g of carbs with \(absorptionTimeString)h absorption time at \(timeFormatter.string(from: consumedDate))?"),
                         primaryButton: .default(Text("Send")) {
                             sendCarbsConfirmed()
                         },
@@ -472,8 +370,8 @@ struct LoopAPNSCarbsView: View {
             return
         }
 
-        let selectedAbsorptionTime = absorptionTimeValue
-        guard selectedAbsorptionTime >= 0.5, selectedAbsorptionTime <= 8.0 else {
+        // Parse absorption time string to double
+        guard let absorptionTimeValue = Double(absorptionTimeString), absorptionTimeValue >= 0.5, absorptionTimeValue <= 8.0 else {
             alertMessage = "Please enter a valid absorption time between 0.5 and 8.0 hours"
             alertType = .error
             isLoading = false
@@ -488,7 +386,7 @@ struct LoopAPNSCarbsView: View {
         let payload = LoopAPNSPayload(
             type: .carbs,
             carbsAmount: carbsAmount.doubleValue(for: .gram()),
-            absorptionTime: selectedAbsorptionTime,
+            absorptionTime: absorptionTimeValue,
             foodType: foodType.isEmpty ? nil : foodType,
             consumedDate: adjustedConsumedDate,
             otp: otpCode
@@ -507,7 +405,7 @@ struct LoopAPNSCarbsView: View {
                     self.alertType = .success
                     LogManager.shared.log(
                         category: .apns,
-                        message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionConfirmationText)h, Time: \(adjustedConsumedDate)"
+                        message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionTimeString)h, Time: \(adjustedConsumedDate)"
                     )
                 } else {
                     self.alertMessage = errorMessage ?? "Failed to send carbs. Check your Loop APNS configuration."
@@ -520,39 +418,6 @@ struct LoopAPNSCarbsView: View {
                 self.showAlert = true
             }
         }
-    }
-
-    private func setAbsorptionTime(hours: Int, minutes: Int) {
-        absorptionHours = min(max(hours, 0), 8)
-        absorptionMinutes = minutes
-        normalizeAbsorptionTime()
-    }
-
-    private func normalizeAbsorptionTime() {
-        if absorptionHours <= 0 && absorptionMinutes <= 0 {
-            absorptionHours = 0
-            absorptionMinutes = 30
-            return
-        }
-
-        if absorptionHours >= 8 {
-            absorptionHours = 8
-            absorptionMinutes = 0
-            return
-        }
-
-        if !absorptionMinuteOptions.contains(absorptionMinutes) {
-            absorptionMinutes = absorptionMinuteOptions.first ?? 0
-        }
-    }
-
-    private func adjustConsumedDate(byMinutes minutes: Int) {
-        let adjustedDate = Calendar.current.date(byAdding: .minute, value: minutes, to: consumedDate) ?? consumedDate
-        consumedDate = clampedConsumedDate(adjustedDate)
-    }
-
-    private func clampedConsumedDate(_ date: Date) -> Date {
-        min(max(date, oldestAcceptedDate), latestAcceptedDate)
     }
 }
 
