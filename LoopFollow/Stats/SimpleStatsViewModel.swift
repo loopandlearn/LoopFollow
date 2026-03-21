@@ -38,21 +38,22 @@ class SimpleStatsViewModel: ObservableObject {
     }
 
     func calculateStats() {
+        let unitSettings = UnitSettingsStore.shared
         let bgData = dataService.getBGData()
         guard !bgData.isEmpty else { return }
 
         let totalGlucose = bgData.reduce(0) { $0 + $1.sgv }
         let avgBGmgdL = Double(totalGlucose) / Double(bgData.count)
-        avgGlucose = Storage.shared.units.value == "mg/dL" ? avgBGmgdL : avgBGmgdL * GlucoseConversion.mgDlToMmolL
+        avgGlucose = unitSettings.convertMgdlToDisplay(avgBGmgdL)
 
         let variance = bgData.reduce(0.0) { sum, reading in
             let diff = Double(reading.sgv) - avgBGmgdL
             return sum + (diff * diff)
         }
         let stdDevMgdL = sqrt(variance / Double(bgData.count))
-        stdDeviation = Storage.shared.units.value == "mg/dL" ? stdDevMgdL : stdDevMgdL * GlucoseConversion.mgDlToMmolL
+        stdDeviation = unitSettings.convertMgdlToDisplay(stdDevMgdL)
 
-        gmi = 3.31 + (0.02392 * avgBGmgdL)
+        gmi = GlycemicMetricCalculator.calculateGMI(avgGlucoseInDisplayUnits: avgGlucose)
 
         if avgBGmgdL > 0 {
             coefficientOfVariation = (stdDevMgdL / avgBGmgdL) * 100.0

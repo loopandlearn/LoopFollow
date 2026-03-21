@@ -32,6 +32,8 @@
 		6589CC6C2E9E7D1600BB18FE /* GraphSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC5E2E9E7D1600BB18FE /* GraphSettingsView.swift */; };
 		6589CC6D2E9E7D1600BB18FE /* CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC582E9E7D1600BB18FE /* CalendarSettingsView.swift */; };
 		6589CC6E2E9E7D1600BB18FE /* SettingsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC5F2E9E7D1600BB18FE /* SettingsMenuView.swift */; };
+		65A100012F5AA00000AA1001 /* UnitsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A100002F5AA00000AA1001 /* UnitsSettingsView.swift */; };
+		65A100032F5AA00000AA1002 /* UnitsConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A100022F5AA00000AA1002 /* UnitsConfigurationView.swift */; };
 		6589CC6F2E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC572E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift */; };
 		6589CC712E9E814F00BB18FE /* AlarmSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC702E9E814F00BB18FE /* AlarmSelectionView.swift */; };
 		6589CC752E9EAFB700BB18FE /* SettingsMigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC742E9EAFB700BB18FE /* SettingsMigrationManager.swift */; };
@@ -437,6 +439,8 @@
 		6589CC5D2E9E7D1600BB18FE /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		6589CC5E2E9E7D1600BB18FE /* GraphSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSettingsView.swift; sourceTree = "<group>"; };
 		6589CC5F2E9E7D1600BB18FE /* SettingsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMenuView.swift; sourceTree = "<group>"; };
+		65A100002F5AA00000AA1001 /* UnitsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitsSettingsView.swift; sourceTree = "<group>"; };
+		65A100022F5AA00000AA1002 /* UnitsConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitsConfigurationView.swift; sourceTree = "<group>"; };
 		6589CC602E9E7D1600BB18FE /* TabCustomizationModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCustomizationModal.swift; sourceTree = "<group>"; };
 		6589CC702E9E814F00BB18FE /* AlarmSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSelectionView.swift; sourceTree = "<group>"; };
 		6589CC742E9EAFB700BB18FE /* SettingsMigrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMigrationManager.swift; sourceTree = "<group>"; };
@@ -868,6 +872,8 @@
 				6589CC5E2E9E7D1600BB18FE /* GraphSettingsView.swift */,
 				657F98172F043D8100F732BD /* HomeContentView.swift */,
 				6589CC5F2E9E7D1600BB18FE /* SettingsMenuView.swift */,
+				65A100002F5AA00000AA1001 /* UnitsSettingsView.swift */,
+				65A100022F5AA00000AA1002 /* UnitsConfigurationView.swift */,
 				6589CC602E9E7D1600BB18FE /* TabCustomizationModal.swift */,
 			);
 			path = Settings;
@@ -2077,6 +2083,8 @@
 				6589CC6C2E9E7D1600BB18FE /* GraphSettingsView.swift in Sources */,
 				6589CC6D2E9E7D1600BB18FE /* CalendarSettingsView.swift in Sources */,
 				6589CC6E2E9E7D1600BB18FE /* SettingsMenuView.swift in Sources */,
+				65A100012F5AA00000AA1001 /* UnitsSettingsView.swift in Sources */,
+				65A100032F5AA00000AA1002 /* UnitsConfigurationView.swift in Sources */,
 				657F98182F043D8100F732BD /* HomeContentView.swift in Sources */,
 				6589CC6F2E9E7D1600BB18FE /* AdvancedSettingsViewModel.swift in Sources */,
 				DD493ADF2ACF22BB009A6922 /* SAge.swift in Sources */,

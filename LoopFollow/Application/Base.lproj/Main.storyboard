@@ -223,7 +223,7 @@
                                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="xGF-Pj-QE0">
                                                                         <rect key="frame" x="102.66666666666666" y="0.0" width="92.666666666666657" height="45"/>
                                                                         <subviews>
-                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Est A1C:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WV0-Jy-FPs" userLabel="Est A1C:">
+                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Est. A1C:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WV0-Jy-FPs" userLabel="Est. A1C:">
                                                                                 <rect key="frame" x="18.333333333333346" y="0.0" width="56.333333333333343" height="18"/>
                                                                                 <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                                                                 <nil key="textColor"/>
@@ -306,11 +306,13 @@
                         <outlet property="smallGraphHeightConstraint" destination="qmO-ga-QWl" id="VsZ-zJ-LsJ"/>
                         <outlet property="statsAvgBG" destination="jpA-Nb-pU7" id="Uo8-a4-Aus"/>
                         <outlet property="statsEstA1C" destination="7Jx-XF-1vS" id="4RD-nm-JxO"/>
+                        <outlet property="statsEstA1CTitle" destination="WV0-Jy-FPs" id="WnU-h8-2hf"/>
                         <outlet property="statsHighPercent" destination="HON-rt-8pC" id="283-3S-PCR"/>
                         <outlet property="statsInRangePercent" destination="7mH-Np-j0L" id="vUp-Pv-Mva"/>
                         <outlet property="statsLowPercent" destination="TzL-hn-9qu" id="0QR-Mz-KJe"/>
                         <outlet property="statsPieChart" destination="Hhh-F1-s1p" id="Rhh-Up-Kr0"/>
                         <outlet property="statsStdDev" destination="wAI-Tp-784" id="BUZ-lS-JfA"/>
+                        <outlet property="statsStdDevTitle" destination="iXC-Mz-I09" id="QHf-Q8-J7B"/>
                         <outlet property="statsView" destination="ikj-at-auF" id="7AQ-VA-Pw2"/>
                     </connections>
                 </viewController>

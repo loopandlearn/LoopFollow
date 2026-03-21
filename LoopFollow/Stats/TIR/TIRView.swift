@@ -32,7 +32,7 @@ struct TIRView: View {
 
                         VStack(alignment: .leading, spacing: 8) {
                             if let average = viewModel.tirData.first(where: { $0.period == .average }) {
-                                Text("Cutoffs in \(Storage.shared.units.value)")
+                                Text("Cutoffs in \(UnitSettingsStore.shared.glucoseUnit.rawValue)")
                                     .foregroundColor(.secondary)
 
                                 TIRLegendItem(
@@ -85,10 +85,11 @@ struct TIRView: View {
     }
 
     private func formatRange(_: Double) -> String {
+        let glucoseUnit = UnitSettingsStore.shared.glucoseUnit
         let lowThreshold: Double
         let highThreshold: Double
 
-        if Storage.shared.units.value == "mg/dL" {
+        if glucoseUnit == .mgdL {
             lowThreshold = 70.0
             highThreshold = viewModel.showTITR ? 140.0 : 180.0
         } else {
@@ -96,7 +97,7 @@ struct TIRView: View {
             highThreshold = viewModel.showTITR ? 7.8 : 10.0
         }
 
-        return String(format: "%.1f – %.1f %@", lowThreshold, highThreshold, Storage.shared.units.value)
+        return String(format: "%.1f – %.1f %@", lowThreshold, highThreshold, glucoseUnit.rawValue)
     }
 
     private var veryLowCutoffText: String {
@@ -120,26 +121,26 @@ struct TIRView: View {
     }
 
     private var lowThreshold: Double {
-        Storage.shared.units.value == "mg/dL" ? 70.0 : 3.9
+        UnitSettingsStore.shared.glucoseUnit == .mgdL ? 70.0 : 3.9
     }
 
     private var highThreshold: Double {
-        if Storage.shared.units.value == "mg/dL" {
+        if UnitSettingsStore.shared.glucoseUnit == .mgdL {
             return viewModel.showTITR ? 140.0 : 180.0
         }
         return viewModel.showTITR ? 7.8 : 10.0
     }
 
     private var veryLowThreshold: Double {
-        Storage.shared.units.value == "mg/dL" ? 54.0 : 3.0
+        UnitSettingsStore.shared.glucoseUnit == .mgdL ? 54.0 : 3.0
     }
 
     private var veryHighThreshold: Double {
-        Storage.shared.units.value == "mg/dL" ? 250.0 : 13.9
+        UnitSettingsStore.shared.glucoseUnit == .mgdL ? 250.0 : 13.9
     }
 
     private func formatThreshold(_ value: Double) -> String {
-        if Storage.shared.units.value == "mg/dL" {
+        if UnitSettingsStore.shared.glucoseUnit == .mgdL {
             return String(format: "%.0f", value)
         }
         return String(format: "%.1f", value)
