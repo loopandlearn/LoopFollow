@@ -272,7 +272,6 @@ struct BolusView: View {
                         category: .apns,
                         message: "sendBolusPushNotification succeeded - Bolus: \(InsulinFormatter.shared.string(bolusAmount)) U"
                     )
-                    NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                     bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
                     alertType = .statusSuccess
                 } else {
