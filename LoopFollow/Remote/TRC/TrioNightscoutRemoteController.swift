@@ -19,6 +19,7 @@ class TrioNightscoutRemoteController {
                 let response: [TreatmentCancelResponse] = try await NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody)
                 Observable.shared.tempTarget.value = nil
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
+                NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                 completion(true)
             } catch {
                 completion(false)
@@ -42,6 +43,7 @@ class TrioNightscoutRemoteController {
                 let response: [TreatmentResponse] = try await NightscoutUtils.executePostRequest(eventType: .treatments, body: tempTargetBody)
                 Observable.shared.tempTarget.value = newTarget
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
+                NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                 completion(true)
             } catch {
                 completion(false)

@@ -9,3 +9,7 @@ enum RemoteType: String, Codable {
     case trc = "Trio Remote Control"
     case loopAPNS = "Loop APNS"
 }
+
+extension Notification.Name {
+    static let remoteCommandSucceeded = Notification.Name("remoteCommandSucceeded")
+}
