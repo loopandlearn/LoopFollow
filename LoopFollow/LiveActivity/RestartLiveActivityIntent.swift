@@ -4,7 +4,6 @@
 import AppIntents
 import UIKit
 
-@available(iOS 16.4, *)
 struct RestartLiveActivityIntent: AppIntent {
     static var title: LocalizedStringResource = "Restart Live Activity"
     static var description = IntentDescription("Starts or restarts the LoopFollow Live Activity.")
@@ -28,7 +27,6 @@ struct RestartLiveActivityIntent: AppIntent {
     }
 }
 
-@available(iOS 16.4, *)
 struct LoopFollowAppShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
