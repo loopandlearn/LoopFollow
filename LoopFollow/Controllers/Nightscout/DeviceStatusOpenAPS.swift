@@ -182,7 +182,8 @@ extension MainViewController {
                                 minPredBG = min(minPredBG, predictionValue)
                                 maxPredBG = max(maxPredBG, predictionValue)
 
-                                let prediction = ShareGlucoseData(sgv: Int(round(predictionValue)), date: predictionTime, direction: "flat")
+                                let clampedValue = min(max(Int(round(predictionValue)), 39), 400)
+                                let prediction = ShareGlucoseData(sgv: clampedValue, date: predictionTime, direction: "flat")
                                 predictionData.append(prediction)
                                 predictionTime += 300
                             }
