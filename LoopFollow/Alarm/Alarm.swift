@@ -309,6 +309,11 @@ struct Alarm: Identifiable, Codable, Equatable {
             predictiveMinutes = 15
             delta = 0.1
             threshold = 4
+        case .futureCarbs:
+            soundFile = .alertToneRingtone1
+            threshold = 45 // max lookahead minutes
+            delta = 5 // min grams
+            repeatSoundOption = .never
         case .sensorChange:
             soundFile = .wakeUpWillYou
             threshold = 12
@@ -364,7 +369,7 @@ extension AlarmType {
         switch self {
         case .low, .high, .fastDrop, .fastRise, .missedReading, .temporary:
             return .glucose
-        case .iob, .cob, .missedBolus, .recBolus:
+        case .iob, .cob, .missedBolus, .futureCarbs, .recBolus:
             return .insulin
         case .battery, .batteryDrop, .pump, .pumpBattery, .pumpChange,
              .sensorChange, .notLooping, .buildExpire:
@@ -384,6 +389,7 @@ extension AlarmType {
         case .iob: return "syringe"
         case .cob: return "fork.knife"
         case .missedBolus: return "exclamationmark.arrow.triangle.2.circlepath"
+        case .futureCarbs: return "clock.arrow.circlepath"
         case .recBolus: return "bolt.horizontal"
         case .battery: return "battery.25"
         case .batteryDrop: return "battery.100.bolt"
@@ -411,6 +417,7 @@ extension AlarmType {
         case .iob: return "High insulin-on-board."
         case .cob: return "High carbs-on-board."
         case .missedBolus: return "Carbs without bolus."
+        case .futureCarbs: return "Reminder when future carbs are due."
         case .recBolus: return "Recommended bolus issued."
         case .battery: return "Phone battery low."
         case .batteryDrop: return "Battery drops quickly."
