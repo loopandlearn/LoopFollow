@@ -105,7 +105,7 @@ struct AggregatedStatsView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Refresh") {
                     loadingError = false
                     isLoadingData = true

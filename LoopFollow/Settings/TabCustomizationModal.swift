@@ -31,17 +31,11 @@ enum TabCustomizationItem: Identifiable, Equatable, Hashable {
 }
 
 struct TabCustomizationModal: View {
-    @Binding var isPresented: Bool
-    let onApply: () -> Void
-
     // All items including Settings - top 4 go to tab bar, rest to menu
     @State private var allItems: [TabCustomizationItem]
     private let originalItems: [TabCustomizationItem]
 
-    init(isPresented: Binding<Bool>, onApply: @escaping () -> Void) {
-        _isPresented = isPresented
-        self.onApply = onApply
-
+    init() {
         let sortedTabItems = TabItem.movableItems.sorted { item1, item2 in
             let pos1 = Storage.shared.position(for: item1).normalized
             let pos2 = Storage.shared.position(for: item2).normalized
@@ -84,152 +78,114 @@ struct TabCustomizationModal: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                // Instructions
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Drag to reorder")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Text("The top 4 items appear in the tab bar. Items 5+ appear in the Menu.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.vertical, 4)
+        List {
+            // Instructions
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Drag to reorder")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    Text("The top 4 items appear in the tab bar. The Menu can always open every feature.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 4)
+            }
+
+            // All items - Settings appears at position 5 as a divider
+            Section {
+                // Build display list: first 4 TabItems, then Settings, then remaining TabItems
+                let tabItems = allItems.compactMap { item -> TabItem? in
+                    if case let .tabItem(tabItem) = item { return tabItem }
+                    return nil
                 }
 
-                // All items - Settings appears at position 5 as a divider
-                Section {
-                    // Build display list: first 4 TabItems, then Settings, then remaining TabItems
-                    let tabItems = allItems.compactMap { item -> TabItem? in
+                // Display items in order: tab bar items, Settings, menu items
+                ForEach(Array(allItems.enumerated()), id: \.element) { _, item in
+                    switch item {
+                    case let .tabItem(tabItem):
+                        // Determine if this TabItem is in tab bar or menu
+                        let tabItemIndex = tabItems.firstIndex(of: tabItem) ?? 0
+                        let isInTabBar = tabItemIndex < 4
+
+                        TabItemRow(
+                            item : tabItem,
+                            position: isInTabBar ? tabItemIndex + 1: nil,
+                            isInMenu: !isInTabBar
+                        )
+                    case .settings:
+                        SettingsRow()
+                            .moveDisabled(true)
+                    }
+                }
+                .onMove { source, destination in
+                    // Check if Settings (at index 4) is being moved - prevent it
+                    if source.contains(4) {
+                        return
+                    }
+
+                    // Get all TabItems (excluding Settings)
+                    var tabItemsOnly: [TabItem] = allItems.compactMap { item -> TabItem? in
                         if case let .tabItem(tabItem) = item { return tabItem }
                         return nil
                     }
 
-                    // Display items in order: tab bar items, Settings, menu items
-                    ForEach(Array(allItems.enumerated()), id: \.element) { _, item in
-                        switch item {
-                        case let .tabItem(tabItem):
-                            // Determine if this TabItem is in tab bar or menu
-                            let tabItemIndex = tabItems.firstIndex(of: tabItem) ?? 0
-                            let isInTabBar = tabItemIndex < 4
-
-                            TabItemRow(
-                                item : tabItem,
-                                position: isInTabBar ? tabItemIndex + 1: nil,
-                                isInMenu: !isInTabBar
-                            )
-                        case .settings:
-                            SettingsRow()
-                                .moveDisabled(true)
-                        }
+                    // Adjust source indices: if any are after Settings (index 4), subtract 1
+                    var adjustedSource = source
+                    if source.contains(where: { $0 > 4 }) {
+                        adjustedSource = IndexSet(source.map { $0 > 4 ? $0 - 1 : $0 })
                     }
-                    .onMove { source, destination in
-                        // Check if Settings (at index 4) is being moved - prevent it
-                        if source.contains(4) {
-                            return
-                        }
 
-                        // Get all TabItems (excluding Settings)
-                        var tabItemsOnly: [TabItem] = allItems.compactMap { item -> TabItem? in
-                            if case let .tabItem(tabItem) = item { return tabItem }
-                            return nil
-                        }
+                    // Adjust destination: if it's after Settings (position 5), subtract 1
+                    let adjustedDestination = destination > 4 ? destination - 1 : destination
 
-                        // Adjust source indices: if any are after Settings (index 4), subtract 1
-                        var adjustedSource = source
-                        if source.contains(where: { $0 > 4 }) {
-                            adjustedSource = IndexSet(source.map { $0 > 4 ? $0 - 1 : $0 })
-                        }
+                    // Move TabItems
+                    tabItemsOnly.move(fromOffsets: adjustedSource, toOffset: adjustedDestination)
 
-                        // Adjust destination: if it's after Settings (position 5), subtract 1
-                        let adjustedDestination = destination > 4 ? destination - 1 : destination
-
-                        // Move TabItems
-                        tabItemsOnly.move(fromOffsets: adjustedSource, toOffset: adjustedDestination)
-
-                        // Rebuild allItems with Settings at position 5
-                        var newItems: [TabCustomizationItem] = []
-                        for (index, tabItem) in tabItemsOnly.enumerated() {
-                            newItems.append(.tabItem(tabItem))
-                            // Insert Settings after the 4th TabItem (at position 5)
-                            if index == 3 {
-                                newItems.append(.settings)
-                            }
-                        }
-
-                        // If there are fewer than 4 TabItems, add Settings after the last one
-                        if tabItemsOnly.count < 4 {
+                    // Rebuild allItems with Settings at position 5
+                    var newItems: [TabCustomizationItem] = []
+                    for (index, tabItem) in tabItemsOnly.enumerated() {
+                        newItems.append(.tabItem(tabItem))
+                        // Insert Settings after the 4th TabItem (at position 5)
+                        if index == 3 {
                             newItems.append(.settings)
                         }
+                    }
 
-                        allItems = newItems
+                    // If there are fewer than 4 TabItems, add Settings after the last one
+                    if tabItemsOnly.count < 4 {
+                        newItems.append(.settings)
                     }
-                } header: {
-                    Text("Tab Order")
+
+                    allItems = newItems
+                    persistTabOrder(tabItemsOnly)
                 }
-            }
-            .listStyle(.insetGrouped)
-            .environment(\.editMode, .constant(.active))
-            .navigationTitle("Tab Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        allItems = originalItems
-                        isPresented = false
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("Back")
-                        }
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        applyChangesSilently()
-                        onApply()
-                        isPresented = false
-                    } label: {
-                        Image(systemName: "checkmark")
-                    }
-                    .disabled(allItems == originalItems)
-                    .foregroundColor(.blue)
-                }
+            } header: {
+                Text("Tab Order")
             }
         }
+        .listStyle(.insetGrouped)
+        .environment(\.editMode, .constant(.active))
+        .navigationTitle("Tabs")
+        .navigationBarTitleDisplayMode(.inline)
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 
     // MARK: - Actions
 
-    private func applyChangesSilently() {
-        // Count only TabItems (not Settings) to determine tab bar positions
-        // First 4 TabItems go to tab bar, rest go to menu
-        var tabItemCount = 0
-        for item in allItems {
-            switch item {
-            case let .tabItem(tabItem):
-                let position: TabPosition
-                if tabItemCount < 4 {
-                    switch tabItemCount {
-                    case 0: position = .position1
-                    case 1: position = .position2
-                    case 2: position = .position3
-                    case 3: position = .position4
-                    default: position = .menu
-                    }
-                } else {
-                    position = .menu
-                }
-                Storage.shared.setPosition(position, for: tabItem)
-                tabItemCount += 1
-            case .settings:
-                break
+    private func persistTabOrder(_ tabItems: [TabItem]) {
+        for (index, tabItem) in tabItems.enumerated() {
+            let position: TabPosition
+            switch index {
+            case 0: position = .position1
+            case 1: position = .position2
+            case 2: position = .position3
+            case 3: position = .position4
+            default: position = .menu
             }
+
+            Storage.shared.setPosition(position, for: tabItem)
         }
-        // Don't call onApply() - let the tab position observers handle the rebuild naturally
     }
 }
 
