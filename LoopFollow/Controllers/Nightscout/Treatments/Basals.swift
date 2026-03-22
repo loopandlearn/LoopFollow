@@ -147,5 +147,6 @@ extension MainViewController {
             latestBasal = "\(profileBasal) → \(latestBasal)"
         }
         infoManager.updateInfoData(type: .basal, value: latestBasal)
+        Storage.shared.lastBasal.value = latestBasal
     }
 }

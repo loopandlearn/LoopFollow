@@ -173,6 +173,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             Storage.shared.migrationStep.value = 5
         }
 
+        if Storage.shared.migrationStep.value < 6 {
+            Storage.shared.migrateStep6()
+            Storage.shared.migrationStep.value = 6
+        }
+
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
 
@@ -206,6 +211,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
 
         // Setup the Graph
         if firstGraphLoad {
@@ -390,29 +396,16 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
-        Storage.shared.apnsKey.$value
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { _ in
-                JWTManager.shared.invalidateCache()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.teamId.$value
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { _ in
-                JWTManager.shared.invalidateCache()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.keyId.$value
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { _ in
-                JWTManager.shared.invalidateCache()
-            }
-            .store(in: &cancellables)
+        Publishers.MergeMany(
+            Storage.shared.remoteApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.teamId.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.remoteKeyId.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lfApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lfKeyId.$value.map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { _ in JWTManager.shared.invalidateCache() }
+        .store(in: &cancellables)
 
         Storage.shared.device.$value
             .receive(on: DispatchQueue.main)
@@ -709,6 +702,28 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         updateNightscoutTabState()
     }
 
+    @objc private func navigateOnLAForeground() {
+        guard let tabBarController = tabBarController,
+              let vcs = tabBarController.viewControllers, !vcs.isEmpty else { return }
+
+        let targetIndex: Int
+        if Observable.shared.currentAlarm.value != nil,
+           let snoozerIndex = getSnoozerTabIndex(), snoozerIndex < vcs.count
+        {
+            targetIndex = snoozerIndex
+        } else {
+            targetIndex = 0
+        }
+
+        if let presented = tabBarController.presentedViewController {
+            presented.dismiss(animated: false) {
+                tabBarController.selectedIndex = targetIndex
+            }
+        } else {
+            tabBarController.selectedIndex = targetIndex
+        }
+    }
+
     private func getSnoozerTabIndex() -> Int? {
         guard let tabBarController = tabBarController,
               let viewControllers = tabBarController.viewControllers else { return nil }
@@ -949,6 +964,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         if Storage.shared.backgroundRefreshType.value == .silentTune {
             backgroundTask.startBackgroundTask()
+            BackgroundRefreshManager.shared.scheduleRefresh()
         }
 
         if Storage.shared.backgroundRefreshType.value != .none {
@@ -1029,6 +1045,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     @objc override func viewDidAppear(_: Bool) {
         showHideNSDetails()
+        #if !targetEnvironment(macCatalyst)
+            LiveActivityManager.shared.startFromCurrentState()
+        #endif
     }
 
     func stringFromTimeInterval(interval: TimeInterval) -> String {

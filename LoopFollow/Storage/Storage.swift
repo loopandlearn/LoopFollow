@@ -15,9 +15,12 @@ class Storage {
     var expirationDate = StorageValue<Date?>(key: "expirationDate", defaultValue: nil)
     var sharedSecret = StorageValue<String>(key: "sharedSecret", defaultValue: "")
     var productionEnvironment = StorageValue<Bool>(key: "productionEnvironment", defaultValue: false)
-    var apnsKey = StorageValue<String>(key: "apnsKey", defaultValue: "")
+    var remoteApnsKey = StorageValue<String>(key: "remoteApnsKey", defaultValue: "")
     var teamId = StorageValue<String?>(key: "teamId", defaultValue: nil)
-    var keyId = StorageValue<String>(key: "keyId", defaultValue: "")
+    var remoteKeyId = StorageValue<String>(key: "remoteKeyId", defaultValue: "")
+
+    var lfApnsKey = StorageValue<String>(key: "lfApnsKey", defaultValue: "")
+    var lfKeyId = StorageValue<String>(key: "lfKeyId", defaultValue: "")
     var bundleId = StorageValue<String>(key: "bundleId", defaultValue: "")
     var user = StorageValue<String>(key: "user", defaultValue: "")
 
@@ -31,9 +34,6 @@ class Storage {
 
     // TODO: This flag can be deleted in March 2027. Check the commit for other places to cleanup.
     var hasSeenFatProteinOrderChange = StorageValue<Bool>(key: "hasSeenFatProteinOrderChange", defaultValue: false)
-
-    var cachedJWT = StorageValue<String?>(key: "cachedJWT", defaultValue: nil)
-    var jwtExpirationDate = StorageValue<Date?>(key: "jwtExpirationDate", defaultValue: nil)
 
     var backgroundRefreshType = StorageValue<BackgroundRefreshType>(key: "backgroundRefreshType", defaultValue: .silentTune)
 
@@ -82,6 +82,34 @@ class Storage {
     var speakHighBG = StorageValue<Bool>(key: "speakHighBG", defaultValue: false)
     var speakLanguage = StorageValue<String>(key: "speakLanguage", defaultValue: "en")
     // General Settings [END]
+
+    // Live Activity glucose state
+    var lastBgReadingTimeSeconds = StorageValue<TimeInterval?>(key: "lastBgReadingTimeSeconds", defaultValue: nil)
+    var lastDeltaMgdl = StorageValue<Double?>(key: "lastDeltaMgdl", defaultValue: nil)
+    var lastTrendCode = StorageValue<String?>(key: "lastTrendCode", defaultValue: nil)
+    var lastIOB = StorageValue<Double?>(key: "lastIOB", defaultValue: nil)
+    var lastCOB = StorageValue<Double?>(key: "lastCOB", defaultValue: nil)
+    var projectedBgMgdl = StorageValue<Double?>(key: "projectedBgMgdl", defaultValue: nil)
+
+    // Live Activity extended InfoType data
+    var lastBasal = StorageValue<String>(key: "lastBasal", defaultValue: "")
+    var lastPumpReservoirU = StorageValue<Double?>(key: "lastPumpReservoirU", defaultValue: nil)
+    var lastAutosens = StorageValue<Double?>(key: "lastAutosens", defaultValue: nil)
+    var lastTdd = StorageValue<Double?>(key: "lastTdd", defaultValue: nil)
+    var lastTargetLowMgdl = StorageValue<Double?>(key: "lastTargetLowMgdl", defaultValue: nil)
+    var lastTargetHighMgdl = StorageValue<Double?>(key: "lastTargetHighMgdl", defaultValue: nil)
+    var lastIsfMgdlPerU = StorageValue<Double?>(key: "lastIsfMgdlPerU", defaultValue: nil)
+    var lastCarbRatio = StorageValue<Double?>(key: "lastCarbRatio", defaultValue: nil)
+    var lastCarbsToday = StorageValue<Double?>(key: "lastCarbsToday", defaultValue: nil)
+    var lastProfileName = StorageValue<String>(key: "lastProfileName", defaultValue: "")
+    var iageInsertTime = StorageValue<TimeInterval>(key: "iageInsertTime", defaultValue: 0)
+    var lastMinBgMgdl = StorageValue<Double?>(key: "lastMinBgMgdl", defaultValue: nil)
+    var lastMaxBgMgdl = StorageValue<Double?>(key: "lastMaxBgMgdl", defaultValue: nil)
+
+    // Live Activity
+    var laEnabled = StorageValue<Bool>(key: "laEnabled", defaultValue: false)
+    var laRenewBy = StorageValue<TimeInterval>(key: "laRenewBy", defaultValue: 0)
+    var laRenewalFailed = StorageValue<Bool>(key: "laRenewalFailed", defaultValue: false)
 
     // Graph Settings [BEGIN]
     var showDots = StorageValue<Bool>(key: "showDots", defaultValue: true)
@@ -151,8 +179,8 @@ class Storage {
     var token = StorageValue<String>(key: "token", defaultValue: "")
     var units = StorageValue<String>(key: "units", defaultValue: "mg/dL")
 
-    var infoSort = StorageValue<[Int]>(key: "infoSort", defaultValue: InfoType.allCases.map { $0.sortOrder })
-    var infoVisible = StorageValue<[Bool]>(key: "infoVisible", defaultValue: InfoType.allCases.map { $0.defaultVisible })
+    var infoSort = StorageValue<[Int]>(key: "infoSort", defaultValue: InfoType.allCases.map(\.sortOrder))
+    var infoVisible = StorageValue<[Bool]>(key: "infoVisible", defaultValue: InfoType.allCases.map(\.defaultVisible))
 
     var url = StorageValue<String>(key: "url", defaultValue: "")
     var device = StorageValue<String>(key: "device", defaultValue: "")
@@ -178,9 +206,6 @@ class Storage {
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 
-    var returnApnsKey = StorageValue<String>(key: "returnApnsKey", defaultValue: "")
-    var returnKeyId = StorageValue<String>(key: "returnKeyId", defaultValue: "")
-
     var bolusIncrement = SecureStorageValue<HKQuantity>(key: "bolusIncrement", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05))
     var bolusIncrementDetected = StorageValue<Bool>(key: "bolusIncrementDetected", defaultValue: false)
     // Statistics display preferences
@@ -196,13 +221,13 @@ class Storage {
     /// Get the position for a given tab item
     func position(for item: TabItem) -> TabPosition {
         switch item {
-        case .home: return homePosition.value
-        case .alarms: return alarmsPosition.value
-        case .remote: return remotePosition.value
-        case .nightscout: return nightscoutPosition.value
-        case .snoozer: return snoozerPosition.value
-        case .stats: return statisticsPosition.value
-        case .treatments: return treatmentsPosition.value
+        case .home: homePosition.value
+        case .alarms: alarmsPosition.value
+        case .remote: remotePosition.value
+        case .nightscout: nightscoutPosition.value
+        case .snoozer: snoozerPosition.value
+        case .stats: statisticsPosition.value
+        case .treatments: treatmentsPosition.value
         }
     }
 

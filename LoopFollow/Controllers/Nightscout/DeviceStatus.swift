@@ -46,6 +46,7 @@ extension MainViewController {
 
         if IsNightscoutEnabled(), (now - lastLoopTime) >= nonLoopingTimeThreshold, lastLoopTime > 0 {
             IsNotLooping = true
+            Observable.shared.isNotLooping.value = true
             statusStackView.distribution = .fill
 
             PredictionLabel.isHidden = true
@@ -55,9 +56,13 @@ extension MainViewController {
             LoopStatusLabel.text = "⚠️ Not Looping!"
             LoopStatusLabel.textColor = UIColor.systemYellow
             LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
+            #if !targetEnvironment(macCatalyst)
+                LiveActivityManager.shared.refreshFromCurrentState(reason: "notLooping")
+            #endif
 
         } else {
             IsNotLooping = false
+            Observable.shared.isNotLooping.value = false
             statusStackView.distribution = .fillEqually
             PredictionLabel.isHidden = false
 
@@ -72,6 +77,9 @@ extension MainViewController {
             case .system:
                 LoopStatusLabel.textColor = UIColor.label
             }
+            #if !targetEnvironment(macCatalyst)
+                LiveActivityManager.shared.refreshFromCurrentState(reason: "loopingResumed")
+            #endif
         }
     }
 
@@ -124,9 +132,11 @@ extension MainViewController {
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
                     infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U")
+                    Storage.shared.lastPumpReservoirU.value = reservoirData
                 } else {
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U")
+                    Storage.shared.lastPumpReservoirU.value = nil
                 }
             }
 
