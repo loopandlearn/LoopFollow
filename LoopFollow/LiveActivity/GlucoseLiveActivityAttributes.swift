@@ -8,7 +8,7 @@ import ActivityKit
 import Foundation
 
 struct GlucoseLiveActivityAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
+    struct ContentState: Codable, Hashable {
         let snapshot: GlucoseSnapshot
         let seq: Int
         let reason: String

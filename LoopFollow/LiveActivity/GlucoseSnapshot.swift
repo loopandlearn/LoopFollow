@@ -111,9 +111,11 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
 
     // MARK: - Renewal
 
-    /// True when the Live Activity is within 30 minutes of its renewal deadline.
+    /// True when the Live Activity is within renewalWarning seconds of its renewal deadline.
     /// The extension renders a "Tap to update" overlay so the user knows renewal is imminent.
     let showRenewalOverlay: Bool
+
+    // MARK: - Init
 
     init(
         glucose: Double,
@@ -144,7 +146,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         maxBgMgdl: Double? = nil,
         unit: Unit,
         isNotLooping: Bool,
-        showRenewalOverlay: Bool = false
+        showRenewalOverlay: Bool = false,
     ) {
         self.glucose = glucose
         self.delta = delta
@@ -176,6 +178,52 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         self.isNotLooping = isNotLooping
         self.showRenewalOverlay = showRenewalOverlay
     }
+
+    // MARK: - Derived Convenience
+
+    /// Age of reading in seconds.
+    var age: TimeInterval {
+        Date().timeIntervalSince(updatedAt)
+    }
+
+    /// Returns a copy of this snapshot with `showRenewalOverlay` set to the given value.
+    /// All other fields are preserved exactly. Use this instead of manually copying
+    /// every field when only the overlay flag needs to change.
+    func withRenewalOverlay(_ value: Bool) -> GlucoseSnapshot {
+        GlucoseSnapshot(
+            glucose: glucose,
+            delta: delta,
+            trend: trend,
+            updatedAt: updatedAt,
+            iob: iob,
+            cob: cob,
+            projected: projected,
+            override: override,
+            recBolus: recBolus,
+            battery: battery,
+            pumpBattery: pumpBattery,
+            basalRate: basalRate,
+            pumpReservoirU: pumpReservoirU,
+            autosens: autosens,
+            tdd: tdd,
+            targetLowMgdl: targetLowMgdl,
+            targetHighMgdl: targetHighMgdl,
+            isfMgdlPerU: isfMgdlPerU,
+            carbRatio: carbRatio,
+            carbsToday: carbsToday,
+            profileName: profileName,
+            sageInsertTime: sageInsertTime,
+            cageInsertTime: cageInsertTime,
+            iageInsertTime: iageInsertTime,
+            minBgMgdl: minBgMgdl,
+            maxBgMgdl: maxBgMgdl,
+            unit: unit,
+            isNotLooping: isNotLooping,
+            showRenewalOverlay: value,
+        )
+    }
+
+    // MARK: - Codable
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -210,17 +258,6 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         try container.encode(showRenewalOverlay, forKey: .showRenewalOverlay)
     }
 
-    private enum CodingKeys: String, CodingKey {
-        case glucose, delta, trend, updatedAt
-        case iob, cob, projected
-        case override, recBolus, battery, pumpBattery, basalRate, pumpReservoirU
-        case autosens, tdd, targetLowMgdl, targetHighMgdl, isfMgdlPerU, carbRatio, carbsToday
-        case profileName, sageInsertTime, cageInsertTime, iageInsertTime, minBgMgdl, maxBgMgdl
-        case unit, isNotLooping, showRenewalOverlay
-    }
-
-    // MARK: - Codable
-
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         glucose = try container.decode(Double.self, forKey: .glucose)
@@ -254,11 +291,13 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         showRenewalOverlay = try container.decodeIfPresent(Bool.self, forKey: .showRenewalOverlay) ?? false
     }
 
-    // MARK: - Derived Convenience
-
-    /// Age of reading in seconds.
-    var age: TimeInterval {
-        Date().timeIntervalSince(updatedAt)
+    private enum CodingKeys: String, CodingKey {
+        case glucose, delta, trend, updatedAt
+        case iob, cob, projected
+        case override, recBolus, battery, pumpBattery, basalRate, pumpReservoirU
+        case autosens, tdd, targetLowMgdl, targetHighMgdl, isfMgdlPerU, carbRatio, carbsToday
+        case profileName, sageInsertTime, cageInsertTime, iageInsertTime, minBgMgdl, maxBgMgdl
+        case unit, isNotLooping, showRenewalOverlay
     }
 }
 

@@ -67,7 +67,7 @@ final class GlucoseSnapshotStore {
             throw NSError(
                 domain: "GlucoseSnapshotStore",
                 code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "App Group containerURL is nil for id=\(groupID)"]
+                userInfo: [NSLocalizedDescriptionKey: "App Group containerURL is nil for id=\(groupID)"],
             )
         }
         return containerURL.appendingPathComponent(fileName, isDirectory: false)

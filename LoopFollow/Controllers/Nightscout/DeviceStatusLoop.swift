@@ -66,7 +66,7 @@ extension MainViewController {
 
             if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject] {
                 let prediction = predictdata["values"] as! [Double]
-                PredictionLabel.text = Localizer.toDisplayUnits(String(Int(prediction.last!)))
+                PredictionLabel.text = Localizer.toDisplayUnits(String(Int(round(prediction.last!))))
                 PredictionLabel.textColor = UIColor.systemPurple
                 if Storage.shared.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
                     predictionData.removeAll()

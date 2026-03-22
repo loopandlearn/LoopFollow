@@ -14,9 +14,9 @@ enum PreferredGlucoseUnit {
     static func snapshotUnit() -> GlucoseSnapshot.Unit {
         switch hkUnit() {
         case .millimolesPerLiter:
-            return .mmol
+            .mmol
         default:
-            return .mgdl
+            .mgdl
         }
     }
 }

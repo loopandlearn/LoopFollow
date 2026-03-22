@@ -33,7 +33,7 @@ struct LoopFollowAppShortcuts: AppShortcutsProvider {
             intent: RestartLiveActivityIntent(),
             phrases: ["Restart Live Activity in \(.applicationName)"],
             shortTitle: "Restart Live Activity",
-            systemImageName: "dot.radiowaves.left.and.right"
+            systemImageName: "dot.radiowaves.left.and.right",
         )
     }
 }

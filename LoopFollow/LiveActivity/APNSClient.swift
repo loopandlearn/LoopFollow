@@ -21,25 +21,33 @@ class APNSClient {
             : "https://api.sandbox.push.apple.com"
     }
 
-    private var lfKeyId: String { Storage.shared.lfKeyId.value }
-    private var lfTeamId: String { BuildDetails.default.teamID ?? "" }
-    private var lfApnsKey: String { Storage.shared.lfApnsKey.value }
+    private var lfKeyId: String {
+        Storage.shared.lfKeyId.value
+    }
+
+    private var lfTeamId: String {
+        BuildDetails.default.teamID ?? ""
+    }
+
+    private var lfApnsKey: String {
+        Storage.shared.lfApnsKey.value
+    }
 
     // MARK: - Send Live Activity Update
 
     func sendLiveActivityUpdate(
         pushToken: String,
-        state: GlucoseLiveActivityAttributes.ContentState
+        state: GlucoseLiveActivityAttributes.ContentState,
     ) async {
         guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: lfKeyId, teamId: lfTeamId, apnsKey: lfApnsKey) else {
-            LogManager.shared.log(category: .general, message: "APNs failed to generate JWT for Live Activity push")
+            LogManager.shared.log(category: .apns, message: "APNs failed to generate JWT for Live Activity push")
             return
         }
 
         let payload = buildPayload(state: state)
 
         guard let url = URL(string: "\(apnsHost)/3/device/\(pushToken)") else {
-            LogManager.shared.log(category: .general, message: "APNs invalid URL", isDebug: true)
+            LogManager.shared.log(category: .apns, message: "APNs invalid URL", isDebug: true)
             return
         }
 
@@ -58,38 +66,38 @@ class APNSClient {
             if let httpResponse = response as? HTTPURLResponse {
                 switch httpResponse.statusCode {
                 case 200:
-                    LogManager.shared.log(category: .general, message: "APNs push sent successfully", isDebug: true)
+                    LogManager.shared.log(category: .apns, message: "APNs push sent successfully", isDebug: true)
 
                 case 400:
                     let responseBody = String(data: data, encoding: .utf8) ?? "empty"
-                    LogManager.shared.log(category: .general, message: "APNs bad request (400) — malformed payload: \(responseBody)")
+                    LogManager.shared.log(category: .apns, message: "APNs bad request (400) — malformed payload: \(responseBody)")
 
                 case 403:
                     // JWT rejected — force regenerate on next push
                     JWTManager.shared.invalidateCache()
-                    LogManager.shared.log(category: .general, message: "APNs JWT rejected (403) — token cache cleared, will regenerate")
+                    LogManager.shared.log(category: .apns, message: "APNs JWT rejected (403) — token cache cleared, will regenerate")
 
                 case 404, 410:
                     // Activity token not found or expired — end and restart on next refresh
                     let reason = httpResponse.statusCode == 410 ? "expired (410)" : "not found (404)"
-                    LogManager.shared.log(category: .general, message: "APNs token \(reason) — restarting Live Activity")
+                    LogManager.shared.log(category: .apns, message: "APNs token \(reason) — restarting Live Activity")
                     LiveActivityManager.shared.handleExpiredToken()
 
                 case 429:
-                    LogManager.shared.log(category: .general, message: "APNs rate limited (429) — will retry on next refresh")
+                    LogManager.shared.log(category: .apns, message: "APNs rate limited (429) — will retry on next refresh")
 
                 case 500 ... 599:
                     let responseBody = String(data: data, encoding: .utf8) ?? "empty"
-                    LogManager.shared.log(category: .general, message: "APNs server error (\(httpResponse.statusCode)) — will retry on next refresh: \(responseBody)")
+                    LogManager.shared.log(category: .apns, message: "APNs server error (\(httpResponse.statusCode)) — will retry on next refresh: \(responseBody)")
 
                 default:
                     let responseBody = String(data: data, encoding: .utf8) ?? "empty"
-                    LogManager.shared.log(category: .general, message: "APNs push failed status=\(httpResponse.statusCode) body=\(responseBody)")
+                    LogManager.shared.log(category: .apns, message: "APNs push failed status=\(httpResponse.statusCode) body=\(responseBody)")
                 }
             }
 
         } catch {
-            LogManager.shared.log(category: .general, message: "APNs error: \(error.localizedDescription)")
+            LogManager.shared.log(category: .apns, message: "APNs error: \(error.localizedDescription)")
         }
     }
 

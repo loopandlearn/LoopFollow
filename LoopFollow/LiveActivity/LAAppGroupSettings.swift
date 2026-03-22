@@ -44,56 +44,56 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
     /// Human-readable label shown in the slot picker in Settings.
     var displayName: String {
         switch self {
-        case .none: return "Empty"
-        case .delta: return "Delta"
-        case .projectedBG: return "Projected BG"
-        case .minMax: return "Min/Max"
-        case .iob: return "IOB"
-        case .cob: return "COB"
-        case .recBolus: return "Rec. Bolus"
-        case .autosens: return "Autosens"
-        case .tdd: return "TDD"
-        case .basal: return "Basal"
-        case .pump: return "Pump"
-        case .pumpBattery: return "Pump Battery"
-        case .battery: return "Battery"
-        case .target: return "Target"
-        case .isf: return "ISF"
-        case .carbRatio: return "CR"
-        case .sage: return "SAGE"
-        case .cage: return "CAGE"
-        case .iage: return "IAGE"
-        case .carbsToday: return "Carbs today"
-        case .override: return "Override"
-        case .profile: return "Profile"
+        case .none: "Empty"
+        case .delta: "Delta"
+        case .projectedBG: "Projected BG"
+        case .minMax: "Min/Max"
+        case .iob: "IOB"
+        case .cob: "COB"
+        case .recBolus: "Rec. Bolus"
+        case .autosens: "Autosens"
+        case .tdd: "TDD"
+        case .basal: "Basal"
+        case .pump: "Pump"
+        case .pumpBattery: "Pump Battery"
+        case .battery: "Battery"
+        case .target: "Target"
+        case .isf: "ISF"
+        case .carbRatio: "CR"
+        case .sage: "SAGE"
+        case .cage: "CAGE"
+        case .iage: "IAGE"
+        case .carbsToday: "Carbs today"
+        case .override: "Override"
+        case .profile: "Profile"
         }
     }
 
     /// Short label used inside the MetricBlock on the Live Activity card.
     var gridLabel: String {
         switch self {
-        case .none: return ""
-        case .delta: return "Delta"
-        case .projectedBG: return "Proj"
-        case .minMax: return "Min/Max"
-        case .iob: return "IOB"
-        case .cob: return "COB"
-        case .recBolus: return "Rec."
-        case .autosens: return "Sens"
-        case .tdd: return "TDD"
-        case .basal: return "Basal"
-        case .pump: return "Pump"
-        case .pumpBattery: return "Pump%"
-        case .battery: return "Bat."
-        case .target: return "Target"
-        case .isf: return "ISF"
-        case .carbRatio: return "CR"
-        case .sage: return "SAGE"
-        case .cage: return "CAGE"
-        case .iage: return "IAGE"
-        case .carbsToday: return "Carbs"
-        case .override: return "Ovrd"
-        case .profile: return "Prof"
+        case .none: ""
+        case .delta: "Delta"
+        case .projectedBG: "Proj"
+        case .minMax: "Min/Max"
+        case .iob: "IOB"
+        case .cob: "COB"
+        case .recBolus: "Rec."
+        case .autosens: "Sens"
+        case .tdd: "TDD"
+        case .basal: "Basal"
+        case .pump: "Pump"
+        case .pumpBattery: "Pump%"
+        case .battery: "Bat."
+        case .target: "Target"
+        case .isf: "ISF"
+        case .carbRatio: "CR"
+        case .sage: "SAGE"
+        case .cage: "CAGE"
+        case .iage: "IAGE"
+        case .carbsToday: "Carbs"
+        case .override: "Ovrd"
+        case .profile: "Prof"
         }
     }
 
@@ -101,8 +101,8 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
     /// no Loop data). The widget renders "—" in those cases.
     var isOptional: Bool {
         switch self {
-        case .none, .delta: return false
-        default: return true
+        case .none, .delta: false
+        default: true
         }
     }
 }
@@ -162,7 +162,7 @@ enum LAAppGroupSettings {
     /// - Parameter slots: Array of exactly 4 `LiveActivitySlotOption` values;
     ///   extra elements are ignored, missing elements are filled with `.none`.
     static func setSlots(_ slots: [LiveActivitySlotOption]) {
-        let raw = slots.prefix(4).map { $0.rawValue }
+        let raw = slots.prefix(4).map(\.rawValue)
         defaults?.set(raw, forKey: Keys.slots)
     }
 

@@ -8,8 +8,9 @@
 import Foundation
 import os
 import UIKit
+import UserNotifications
 
-/// Live Activity manager for LoopFollow.
+// Live Activity manager for LoopFollow.
 
 final class LiveActivityManager {
     static let shared = LiveActivityManager()
@@ -18,25 +19,25 @@ final class LiveActivityManager {
             self,
             selector: #selector(handleForeground),
             name: UIApplication.willEnterForegroundNotification,
-            object: nil
+            object: nil,
         )
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleDidBecomeActive),
             name: UIApplication.didBecomeActiveNotification,
-            object: nil
+            object: nil,
         )
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleWillResignActive),
             name: UIApplication.willResignActiveNotification,
-            object: nil
+            object: nil,
         )
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleBackgroundAudioFailed),
             name: .backgroundAudioFailed,
-            object: nil
+            object: nil,
         )
     }
 
@@ -55,7 +56,7 @@ final class LiveActivityManager {
 
         LAAppGroupSettings.setThresholds(
             lowMgdl: Storage.shared.lowLine.value,
-            highMgdl: Storage.shared.highLine.value
+            highMgdl: Storage.shared.highLine.value,
         )
         GlucoseSnapshotStore.shared.save(snapshot)
 
@@ -65,12 +66,12 @@ final class LiveActivityManager {
             snapshot: snapshot,
             seq: nextSeq,
             reason: "resign-active",
-            producedAt: Date()
+            producedAt: Date(),
         )
         let content = ActivityContent(
             state: state,
             staleDate: Date(timeIntervalSince1970: Storage.shared.laRenewBy.value),
-            relevanceScore: 100.0
+            relevanceScore: 100.0,
         )
 
         Task {
@@ -184,23 +185,29 @@ final class LiveActivityManager {
         do {
             let attributes = GlucoseLiveActivityAttributes(title: "LoopFollow")
 
-            let seedSnapshot = GlucoseSnapshotStore.shared.load() ?? GlucoseSnapshot(
-                glucose: 0,
-                delta: 0,
-                trend: .unknown,
-                updatedAt: Date(),
-                iob: nil,
-                cob: nil,
-                projected: nil,
-                unit: .mgdl,
-                isNotLooping: false
-            )
+            // Prefer a freshly built snapshot so all extended fields are populated.
+            // Fall back to the persisted store (covers cold-start with real data),
+            // then to a zero seed (true first-ever launch with no data yet).
+            let provider = StorageCurrentGlucoseStateProvider()
+            let seedSnapshot = GlucoseSnapshotBuilder.build(from: provider)
+                ?? GlucoseSnapshotStore.shared.load()
+                ?? GlucoseSnapshot(
+                    glucose: 0,
+                    delta: 0,
+                    trend: .unknown,
+                    updatedAt: Date(),
+                    iob: nil,
+                    cob: nil,
+                    projected: nil,
+                    unit: .mgdl,
+                    isNotLooping: false,
+                )
 
             let initialState = GlucoseLiveActivityAttributes.ContentState(
                 snapshot: seedSnapshot,
                 seq: 0,
                 reason: "start",
-                producedAt: Date()
+                producedAt: Date(),
             )
 
             let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
@@ -249,11 +256,11 @@ final class LiveActivityManager {
                     cob: nil,
                     projected: nil,
                     unit: .mgdl,
-                    isNotLooping: false
+                    isNotLooping: false,
                 ),
                 seq: seq,
                 reason: "end",
-                producedAt: Date()
+                producedAt: Date(),
             )
 
             let content = ActivityContent(state: finalState, staleDate: nil)
@@ -277,6 +284,7 @@ final class LiveActivityManager {
         dismissedByUser = false
         Storage.shared.laRenewBy.value = 0
         Storage.shared.laRenewalFailed.value = false
+        cancelRenewalFailedNotification()
         current = nil
         updateTask?.cancel(); updateTask = nil
         tokenObservationTask?.cancel(); tokenObservationTask = nil
@@ -300,7 +308,7 @@ final class LiveActivityManager {
         if let snapshot = GlucoseSnapshotBuilder.build(from: provider) {
             LAAppGroupSettings.setThresholds(
                 lowMgdl: Storage.shared.lowLine.value,
-                highMgdl: Storage.shared.highLine.value
+                highMgdl: Storage.shared.highLine.value,
             )
             GlucoseSnapshotStore.shared.save(snapshot)
         }
@@ -336,32 +344,24 @@ final class LiveActivityManager {
         let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
         let attributes = GlucoseLiveActivityAttributes(title: "LoopFollow")
 
-        // Strip the overlay flag — the new LA has a fresh deadline so it should
-        // open clean, without the warning visible from the first frame.
-        let freshSnapshot = GlucoseSnapshot(
-            glucose: snapshot.glucose,
-            delta: snapshot.delta,
-            trend: snapshot.trend,
-            updatedAt: snapshot.updatedAt,
-            iob: snapshot.iob,
-            cob: snapshot.cob,
-            projected: snapshot.projected,
-            unit: snapshot.unit,
-            isNotLooping: snapshot.isNotLooping,
-            showRenewalOverlay: false
-        )
+        // Build the fresh snapshot with showRenewalOverlay: false — the new LA has a
+        // fresh deadline so no overlay is needed from the first frame. We pass the
+        // deadline as staleDate to ActivityContent below, not to Storage yet; Storage
+        // is only updated after Activity.request succeeds so a crash between the two
+        // can't leave the deadline permanently stuck in the future.
+        let freshSnapshot = snapshot.withRenewalOverlay(false)
+
         let state = GlucoseLiveActivityAttributes.ContentState(
             snapshot: freshSnapshot,
             seq: seq,
             reason: "renew",
-            producedAt: Date()
+            producedAt: Date(),
         )
         let content = ActivityContent(state: state, staleDate: renewDeadline)
 
         do {
             let newActivity = try Activity.request(attributes: attributes, content: content, pushType: .token)
 
-            // New LA is live — now it's safe to remove the old card.
             Task {
                 await oldActivity.end(nil, dismissalPolicy: .immediate)
             }
@@ -374,16 +374,23 @@ final class LiveActivityManager {
             stateObserverTask = nil
             pushToken = nil
 
-            bind(to: newActivity, logReason: "renew")
+            // Write deadline only on success — avoids a stuck future deadline if we crash
+            // between the write and the Activity.request call.
             Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
+            bind(to: newActivity, logReason: "renew")
             Storage.shared.laRenewalFailed.value = false
-            // Update the store so the next duplicate check has the correct baseline.
+            cancelRenewalFailedNotification()
             GlucoseSnapshotStore.shared.save(freshSnapshot)
             LogManager.shared.log(category: .general, message: "[LA] Live Activity renewed successfully id=\(newActivity.id)")
             return true
         } catch {
+            // Renewal failed — deadline was never written, so no rollback needed.
+            let isFirstFailure = !Storage.shared.laRenewalFailed.value
             Storage.shared.laRenewalFailed.value = true
             LogManager.shared.log(category: .general, message: "[LA] renewal failed, keeping existing LA: \(error)")
+            if isFirstFailure {
+                scheduleRenewalFailedNotification()
+            }
             return false
         }
     }
@@ -415,7 +422,7 @@ final class LiveActivityManager {
         }
         LAAppGroupSettings.setThresholds(
             lowMgdl: Storage.shared.lowLine.value,
-            highMgdl: Storage.shared.highLine.value
+            highMgdl: Storage.shared.highLine.value,
         )
         GlucoseSnapshotStore.shared.save(snapshot)
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
@@ -460,21 +467,21 @@ final class LiveActivityManager {
             snapshot: snapshot,
             seq: nextSeq,
             reason: reason,
-            producedAt: Date()
+            producedAt: Date(),
         )
 
         updateTask = Task { [weak self] in
             guard let self else { return }
 
             if activity.activityState == .ended || activity.activityState == .dismissed {
-                if self.current?.id == activityID { self.current = nil }
+                if current?.id == activityID { current = nil }
                 return
             }
 
             let content = ActivityContent(
                 state: state,
                 staleDate: Date(timeIntervalSince1970: Storage.shared.laRenewBy.value),
-                relevanceScore: 100.0
+                relevanceScore: 100.0,
             )
 
             if Task.isCancelled { return }
@@ -495,15 +502,15 @@ final class LiveActivityManager {
 
             if Task.isCancelled { return }
 
-            guard self.current?.id == activityID else {
+            guard current?.id == activityID else {
                 LogManager.shared.log(category: .general, message: "Live Activity update — activity ID mismatch, discarding")
                 return
             }
 
-            self.lastUpdateTime = Date()
+            lastUpdateTime = Date()
             LogManager.shared.log(category: .general, message: "[LA] updated id=\(activityID) seq=\(nextSeq) reason=\(reason)", isDebug: true)
 
-            if let token = self.pushToken {
+            if let token = pushToken {
                 await APNSClient.shared.sendLiveActivityUpdate(pushToken: token, state: state)
             }
         }
@@ -548,6 +555,33 @@ final class LiveActivityManager {
         // Activity will restart on next BG refresh via refreshFromCurrentState()
     }
 
+    // MARK: - Renewal Notifications
+
+    private func scheduleRenewalFailedNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Live Activity Expiring"
+        content.body = "Live Activity will expire soon. Open LoopFollow to restart."
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: "loopfollow.la.renewal.failed",
+            content: content,
+            trigger: trigger,
+        )
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                LogManager.shared.log(category: .general, message: "[LA] failed to schedule renewal notification: \(error)")
+            }
+        }
+        LogManager.shared.log(category: .general, message: "[LA] renewal failed notification scheduled")
+    }
+
+    private func cancelRenewalFailedNotification() {
+        let id = "loopfollow.la.renewal.failed"
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [id])
+    }
+
     private func attachStateObserver(to activity: Activity<GlucoseLiveActivityAttributes>) {
         stateObserverTask?.cancel()
         stateObserverTask = Task {
@@ -560,11 +594,17 @@ final class LiveActivityManager {
                         LogManager.shared.log(category: .general, message: "Live Activity cleared id=\(activity.id)", isDebug: true)
                     }
                     if state == .dismissed {
-                        // User manually swiped away the LA. Block auto-restart until
-                        // the user explicitly restarts via button or App Intent.
-                        // laEnabled is left true — the user's preference is preserved.
-                        dismissedByUser = true
-                        LogManager.shared.log(category: .general, message: "Live Activity dismissed by user — auto-restart blocked until explicit restart")
+                        if Storage.shared.laRenewalFailed.value {
+                            // iOS force-dismissed after 8-hour limit with a failed renewal.
+                            // Allow auto-restart when the user opens the app.
+                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by iOS after expiry — auto-restart enabled")
+                        } else {
+                            // User manually swiped away the LA. Block auto-restart until
+                            // the user explicitly restarts via button or App Intent.
+                            // laEnabled is left true — the user's preference is preserved.
+                            dismissedByUser = true
+                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by user — auto-restart blocked until explicit restart")
+                        }
                     }
                 }
             }

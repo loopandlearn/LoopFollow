@@ -179,8 +179,8 @@ class Storage {
     var token = StorageValue<String>(key: "token", defaultValue: "")
     var units = StorageValue<String>(key: "units", defaultValue: "mg/dL")
 
-    var infoSort = StorageValue<[Int]>(key: "infoSort", defaultValue: InfoType.allCases.map { $0.sortOrder })
-    var infoVisible = StorageValue<[Bool]>(key: "infoVisible", defaultValue: InfoType.allCases.map { $0.defaultVisible })
+    var infoSort = StorageValue<[Int]>(key: "infoSort", defaultValue: InfoType.allCases.map(\.sortOrder))
+    var infoVisible = StorageValue<[Bool]>(key: "infoVisible", defaultValue: InfoType.allCases.map(\.defaultVisible))
 
     var url = StorageValue<String>(key: "url", defaultValue: "")
     var device = StorageValue<String>(key: "device", defaultValue: "")
@@ -221,13 +221,13 @@ class Storage {
     /// Get the position for a given tab item
     func position(for item: TabItem) -> TabPosition {
         switch item {
-        case .home: return homePosition.value
-        case .alarms: return alarmsPosition.value
-        case .remote: return remotePosition.value
-        case .nightscout: return nightscoutPosition.value
-        case .snoozer: return snoozerPosition.value
-        case .stats: return statisticsPosition.value
-        case .treatments: return treatmentsPosition.value
+        case .home: homePosition.value
+        case .alarms: alarmsPosition.value
+        case .remote: remotePosition.value
+        case .nightscout: nightscoutPosition.value
+        case .snoozer: snoozerPosition.value
+        case .stats: statisticsPosition.value
+        case .treatments: treatmentsPosition.value
         }
     }
 

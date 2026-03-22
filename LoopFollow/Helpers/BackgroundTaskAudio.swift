@@ -14,6 +14,7 @@ class BackgroundTask {
     // MARK: - Methods
 
     func startBackgroundTask() {
+        NotificationCenter.default.removeObserver(self, name: AVAudioSession.interruptionNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(interruptedAudio), name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance())
         retryCount = 0
         playAudio()
@@ -25,7 +26,7 @@ class BackgroundTask {
         LogManager.shared.log(category: .general, message: "Silent audio stopped", isDebug: true)
     }
 
-    @objc fileprivate func interruptedAudio(_ notification: Notification) {
+    @objc private func interruptedAudio(_ notification: Notification) {
         guard notification.name == AVAudioSession.interruptionNotification,
               let userInfo = notification.userInfo,
               let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
@@ -57,7 +58,7 @@ class BackgroundTask {
         }
     }
 
-    fileprivate func playAudio() {
+    private func playAudio() {
         let attemptDesc = retryCount == 0 ? "initial attempt" : "retry \(retryCount)/\(maxRetries)"
         do {
             let bundle = Bundle.main.path(forResource: "blank", ofType: "wav")
