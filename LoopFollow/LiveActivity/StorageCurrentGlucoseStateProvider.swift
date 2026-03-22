@@ -1,5 +1,5 @@
+// LoopFollow
 // StorageCurrentGlucoseStateProvider.swift
-// 2026-03-21
 
 import Foundation
 
@@ -7,7 +7,6 @@ import Foundation
 /// This is the only file in the pipeline that is allowed to touch Storage.shared
 /// or Observable.shared — all other layers read exclusively from this provider.
 struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
-
     // MARK: - Core Glucose
 
     var glucoseMgdl: Double? {

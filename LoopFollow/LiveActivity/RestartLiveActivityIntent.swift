@@ -15,7 +15,7 @@ struct RestartLiveActivityIntent: AppIntent {
         let apnsKey = Storage.shared.lfApnsKey.value
 
         if keyId.isEmpty || apnsKey.isEmpty {
-            if let url = URL(string: "loopfollow://settings/live-activity") {
+            if let url = URL(string: "\(AppGroupID.urlScheme)://settings/live-activity") {
                 await MainActor.run { UIApplication.shared.open(url) }
             }
             return .result(dialog: "Please enter your APNs credentials in LoopFollow settings to use the Live Activity.")
