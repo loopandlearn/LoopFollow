@@ -20,13 +20,21 @@ class BackgroundRefreshManager {
     private func handleRefreshTask(_ task: BGAppRefreshTask) {
         LogManager.shared.log(category: .taskScheduler, message: "BGAppRefreshTask fired")
 
+        // Guard against double setTaskCompleted if expiration fires while the
+        // main-queue block is in-flight (Apple documents this as a programming error).
+        var completed = false
+
         task.expirationHandler = {
+            guard !completed else { return }
+            completed = true
             LogManager.shared.log(category: .taskScheduler, message: "BGAppRefreshTask expired")
             task.setTaskCompleted(success: false)
             self.scheduleRefresh()
         }
 
         DispatchQueue.main.async {
+            guard !completed else { return }
+            completed = true
             if let mainVC = self.getMainViewController() {
                 if !mainVC.backgroundTask.player.isPlaying {
                     LogManager.shared.log(category: .taskScheduler, message: "audio dead, attempting restart")

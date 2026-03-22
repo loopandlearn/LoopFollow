@@ -341,18 +341,15 @@ final class LiveActivityManager {
         let overdueBy = Date().timeIntervalSince1970 - renewBy
         LogManager.shared.log(category: .general, message: "[LA] renewal deadline passed by \(Int(overdueBy))s, requesting new LA")
 
-        // Reset the deadline before building the snapshot so the provider's
-        // showRenewalOverlay computation returns false for the new activity.
         let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
-        Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
-
         let attributes = GlucoseLiveActivityAttributes(title: "LoopFollow")
 
-        // Build fresh from the provider now that the deadline has been pushed forward.
-        // Fall back to the passed-in snapshot with the overlay stripped if the build fails.
-        let provider = StorageCurrentGlucoseStateProvider()
-        let freshSnapshot = GlucoseSnapshotBuilder.build(from: provider)
-            ?? snapshot.withRenewalOverlay(false)
+        // Build the fresh snapshot with showRenewalOverlay: false — the new LA has a
+        // fresh deadline so no overlay is needed from the first frame. We pass the
+        // deadline as staleDate to ActivityContent below, not to Storage yet; Storage
+        // is only updated after Activity.request succeeds so a crash between the two
+        // can't leave the deadline permanently stuck in the future.
+        let freshSnapshot = snapshot.withRenewalOverlay(false)
 
         let state = GlucoseLiveActivityAttributes.ContentState(
             snapshot: freshSnapshot,
@@ -377,6 +374,9 @@ final class LiveActivityManager {
             stateObserverTask = nil
             pushToken = nil
 
+            // Write deadline only on success — avoids a stuck future deadline if we crash
+            // between the write and the Activity.request call.
+            Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
             bind(to: newActivity, logReason: "renew")
             Storage.shared.laRenewalFailed.value = false
             cancelRenewalFailedNotification()
@@ -384,8 +384,7 @@ final class LiveActivityManager {
             LogManager.shared.log(category: .general, message: "[LA] Live Activity renewed successfully id=\(newActivity.id)")
             return true
         } catch {
-            // Renewal failed — roll back the deadline so the next refresh retries.
-            Storage.shared.laRenewBy.value = renewBy
+            // Renewal failed — deadline was never written, so no rollback needed.
             let isFirstFailure = !Storage.shared.laRenewalFailed.value
             Storage.shared.laRenewalFailed.value = true
             LogManager.shared.log(category: .general, message: "[LA] renewal failed, keeping existing LA: \(error)")
