@@ -142,6 +142,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         loadDebugData()
 
+        // Migrations must only run in the foreground. When the app is launched in the
+        // background (e.g. BGAppRefreshTask after a reboot), the device may be in a
+        // Before-First-Unlock state where UserDefaults files are still encrypted.
+        // Reading in that state returns default values (0 / ""), causing migrations to
+        // re-run and overwrite stored settings with empty strings.
+        guard UIApplication.shared.applicationState != .background else { return }
+
         // Capture before migrations run: true for existing users, false for fresh installs.
         let isExistingUser = Storage.shared.migrationStep.exists
 
