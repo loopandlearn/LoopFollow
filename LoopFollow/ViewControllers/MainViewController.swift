@@ -147,42 +147,42 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Before-First-Unlock state where UserDefaults files are still encrypted.
         // Reading in that state returns default values (0 / ""), causing migrations to
         // re-run and overwrite stored settings with empty strings.
-        guard UIApplication.shared.applicationState != .background else { return }
+        if UIApplication.shared.applicationState != .background {
+            // Capture before migrations run: true for existing users, false for fresh installs.
+            let isExistingUser = Storage.shared.migrationStep.exists
 
-        // Capture before migrations run: true for existing users, false for fresh installs.
-        let isExistingUser = Storage.shared.migrationStep.exists
+            if Storage.shared.migrationStep.value < 1 {
+                Storage.shared.migrateStep1()
+                Storage.shared.migrationStep.value = 1
+            }
 
-        if Storage.shared.migrationStep.value < 1 {
-            Storage.shared.migrateStep1()
-            Storage.shared.migrationStep.value = 1
-        }
+            if Storage.shared.migrationStep.value < 2 {
+                Storage.shared.migrateStep2()
+                Storage.shared.migrationStep.value = 2
+            }
 
-        if Storage.shared.migrationStep.value < 2 {
-            Storage.shared.migrateStep2()
-            Storage.shared.migrationStep.value = 2
-        }
+            if Storage.shared.migrationStep.value < 3 {
+                Storage.shared.migrateStep3()
+                Storage.shared.migrationStep.value = 3
+            }
 
-        if Storage.shared.migrationStep.value < 3 {
-            Storage.shared.migrateStep3()
-            Storage.shared.migrationStep.value = 3
-        }
+            // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
+            if Storage.shared.migrationStep.value < 4 {
+                // Existing users need to see the fat/protein order change banner.
+                // New users never saw the old order, so mark it as already seen.
+                Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
+                Storage.shared.migrationStep.value = 4
+            }
 
-        // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
-        if Storage.shared.migrationStep.value < 4 {
-            // Existing users need to see the fat/protein order change banner.
-            // New users never saw the old order, so mark it as already seen.
-            Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
-            Storage.shared.migrationStep.value = 4
-        }
+            if Storage.shared.migrationStep.value < 5 {
+                Storage.shared.migrateStep5()
+                Storage.shared.migrationStep.value = 5
+            }
 
-        if Storage.shared.migrationStep.value < 5 {
-            Storage.shared.migrateStep5()
-            Storage.shared.migrationStep.value = 5
-        }
-
-        if Storage.shared.migrationStep.value < 6 {
-            Storage.shared.migrateStep6()
-            Storage.shared.migrationStep.value = 6
+            if Storage.shared.migrationStep.value < 6 {
+                Storage.shared.migrateStep6()
+                Storage.shared.migrationStep.value = 6
+            }
         }
 
         // Synchronize info types to ensure arrays are the correct size
