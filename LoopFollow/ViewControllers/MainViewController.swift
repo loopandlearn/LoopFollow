@@ -142,48 +142,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         loadDebugData()
 
-        // Migrations must only run in the foreground. When the app is launched in the
-        // background (e.g. BGAppRefreshTask after a reboot), the device may be in a
-        // Before-First-Unlock state where UserDefaults files are still encrypted.
-        // Reading in that state returns default values (0 / ""), causing migrations to
-        // re-run and overwrite stored settings with empty strings.
-        if UIApplication.shared.applicationState != .background {
-            // Capture before migrations run: true for existing users, false for fresh installs.
-            let isExistingUser = Storage.shared.migrationStep.exists
-
-            if Storage.shared.migrationStep.value < 1 {
-                Storage.shared.migrateStep1()
-                Storage.shared.migrationStep.value = 1
-            }
-
-            if Storage.shared.migrationStep.value < 2 {
-                Storage.shared.migrateStep2()
-                Storage.shared.migrationStep.value = 2
-            }
-
-            if Storage.shared.migrationStep.value < 3 {
-                Storage.shared.migrateStep3()
-                Storage.shared.migrationStep.value = 3
-            }
-
-            // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
-            if Storage.shared.migrationStep.value < 4 {
-                // Existing users need to see the fat/protein order change banner.
-                // New users never saw the old order, so mark it as already seen.
-                Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
-                Storage.shared.migrationStep.value = 4
-            }
-
-            if Storage.shared.migrationStep.value < 5 {
-                Storage.shared.migrateStep5()
-                Storage.shared.migrationStep.value = 5
-            }
-
-            if Storage.shared.migrationStep.value < 6 {
-                Storage.shared.migrateStep6()
-                Storage.shared.migrationStep.value = 6
-            }
-        }
+        // Migrations run in foreground only — see runMigrationsIfNeeded() for details.
+        runMigrationsIfNeeded()
 
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
@@ -979,7 +939,54 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
+    // Migrations must only run when UserDefaults is accessible (i.e. after first unlock).
+    // When the app is launched in the background by BGAppRefreshTask immediately after a
+    // reboot, the device may be in Before-First-Unlock (BFU) state: UserDefaults files are
+    // still encrypted, so every read returns the default value (0 / ""). Running migrations
+    // in that state would overwrite real settings with empty strings.
+    //
+    // Strategy: skip migrations if applicationState == .background; call this method again
+    // from appCameToForeground() so they run on the first foreground after a BFU launch.
+    func runMigrationsIfNeeded() {
+        guard UIApplication.shared.applicationState != .background else { return }
+
+        // Capture before migrations run: true for existing users, false for fresh installs.
+        let isExistingUser = Storage.shared.migrationStep.exists
+
+        if Storage.shared.migrationStep.value < 1 {
+            Storage.shared.migrateStep1()
+            Storage.shared.migrationStep.value = 1
+        }
+        if Storage.shared.migrationStep.value < 2 {
+            Storage.shared.migrateStep2()
+            Storage.shared.migrationStep.value = 2
+        }
+        if Storage.shared.migrationStep.value < 3 {
+            Storage.shared.migrateStep3()
+            Storage.shared.migrationStep.value = 3
+        }
+        // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
+        if Storage.shared.migrationStep.value < 4 {
+            // Existing users need to see the fat/protein order change banner.
+            // New users never saw the old order, so mark it as already seen.
+            Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
+            Storage.shared.migrationStep.value = 4
+        }
+        if Storage.shared.migrationStep.value < 5 {
+            Storage.shared.migrateStep5()
+            Storage.shared.migrationStep.value = 5
+        }
+        if Storage.shared.migrationStep.value < 6 {
+            Storage.shared.migrateStep6()
+            Storage.shared.migrationStep.value = 6
+        }
+    }
+
     @objc func appCameToForeground() {
+        // Complete any migrations that were deferred because the app launched in background
+        // (BGAppRefreshTask) while the device was in Before-First-Unlock state.
+        runMigrationsIfNeeded()
+
         // reset screenlock state if needed
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
 
