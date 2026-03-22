@@ -2,6 +2,7 @@
 // Storage+Migrate.swift
 
 import Foundation
+import UserNotifications
 
 extension Storage {
     func migrateStep5() {
@@ -30,6 +31,21 @@ extension Storage {
         if tabItem(at: .position3) == nil {
             snoozerPosition.value = .position3
         }
+    }
+
+    func migrateStep7() {
+        // Cancel notifications scheduled with old hardcoded identifiers.
+        // Replaced with bundle-ID-scoped identifiers for multi-instance support.
+        LogManager.shared.log(category: .general, message: "Running migrateStep7 — cancel legacy notification identifiers")
+
+        let legacyNotificationIDs = [
+            "loopfollow.background.alert.6min",
+            "loopfollow.background.alert.12min",
+            "loopfollow.background.alert.18min",
+            "loopfollow.la.renewal.failed",
+        ]
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: legacyNotificationIDs)
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: legacyNotificationIDs)
     }
 
     func migrateStep6() {
