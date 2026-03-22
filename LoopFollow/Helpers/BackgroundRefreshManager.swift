@@ -8,7 +8,7 @@ class BackgroundRefreshManager {
     static let shared = BackgroundRefreshManager()
     private init() {}
 
-    private let taskIdentifier = "com.loopfollow.audiorefresh"
+    private let taskIdentifier = "\(Bundle.main.bundleIdentifier ?? "com.loopfollow").audiorefresh"
 
     func register() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { task in

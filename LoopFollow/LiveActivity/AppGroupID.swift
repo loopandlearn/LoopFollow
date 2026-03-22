@@ -20,19 +20,33 @@ enum AppGroupID {
     /// to force a shared base bundle id (recommended for reliability).
     private static let baseBundleIDPlistKey = "LFAppGroupBaseBundleID"
 
-    static func current() -> String {
+    /// The base bundle identifier for the main app, with extension suffixes stripped.
+    /// Usable from both the main app and extensions.
+    static var baseBundleID: String {
         if let base = Bundle.main.object(forInfoDictionaryKey: baseBundleIDPlistKey) as? String,
            !base.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         {
-            return "group.\(base)"
+            return base
         }
-
         let bundleID = Bundle.main.bundleIdentifier ?? "unknown"
+        return stripLikelyExtensionSuffixes(from: bundleID)
+    }
 
-        // Heuristic: strip common extension suffixes so the extension can land on the main app’s group id.
-        let base = stripLikelyExtensionSuffixes(from: bundleID)
+    /// URL scheme derived from the bundle identifier. Works across app and extensions.
+    /// Default build: "loopfollow", second: "loopfollow2", third: "loopfollow3", etc.
+    static var urlScheme: String {
+        let base = baseBundleID
+        // Extract the suffix after "LoopFollow" in the bundle ID
+        // e.g. "com.TEAM.LoopFollow2" → "2", "com.TEAM.LoopFollow" → ""
+        if let range = base.range(of: "LoopFollow", options: .backwards) {
+            let suffix = base[range.upperBound...]
+            return "loopfollow\(suffix)"
+        }
+        return "loopfollow"
+    }
 
-        return "group.\(base)"
+    static func current() -> String {
+        "group.\(baseBundleID)"
     }
 
     private static func stripLikelyExtensionSuffixes(from bundleID: String) -> String {
