@@ -322,7 +322,7 @@ final class LiveActivityManager {
             self?.performRefresh(reason: reason)
         }
         refreshWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 20.0, execute: workItem)
     }
 
     // MARK: - Renewal
