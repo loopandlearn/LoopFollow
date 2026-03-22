@@ -69,16 +69,20 @@ class dateTimeUtils {
         return utcTime
     }
 
-    static func getDateTimeString(addingHours hours: Int? = nil, addingDays days: Int? = nil) -> String {
+    static func getDateTimeString(addingMinutes minutes: Int? = nil, addingHours hours: Int? = nil, addingDays days: Int? = nil) -> String {
         let currentDate = Date()
         var date = currentDate
 
+        if let minutesToAdd = minutes {
+            date = Calendar.current.date(byAdding: .minute, value: minutesToAdd, to: date)!
+        }
+
         if let hoursToAdd = hours {
-            date = Calendar.current.date(byAdding: .hour, value: hoursToAdd, to: currentDate)!
+            date = Calendar.current.date(byAdding: .hour, value: hoursToAdd, to: date)!
         }
 
         if let daysToAdd = days {
-            date = Calendar.current.date(byAdding: .day, value: daysToAdd, to: currentDate)!
+            date = Calendar.current.date(byAdding: .day, value: daysToAdd, to: date)!
         }
 
         let dateFormatter = DateFormatter()
