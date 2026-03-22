@@ -313,6 +313,7 @@ struct Alarm: Identifiable, Codable, Equatable {
             soundFile = .alertToneRingtone1
             threshold = 45 // max lookahead minutes
             delta = 5 // min grams
+            snoozeDuration = 0
             repeatSoundOption = .never
         case .sensorChange:
             soundFile = .wakeUpWillYou
