@@ -178,6 +178,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        // didBecomeActive is used (not willEnterForeground) to ensure applicationState == .active
+        // when runMigrationsIfNeeded() is called. This catches migrations deferred by a
+        // background BGAppRefreshTask launch in Before-First-Unlock state.
+        notificationCenter.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
 
         // Setup the Graph
@@ -982,11 +986,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
-    @objc func appCameToForeground() {
-        // Complete any migrations that were deferred because the app launched in background
-        // (BGAppRefreshTask) while the device was in Before-First-Unlock state.
+    @objc func appDidBecomeActive() {
+        // applicationState == .active is guaranteed here, so the BFU guard in
+        // runMigrationsIfNeeded() will always pass. Catches the case where viewDidLoad
+        // ran during a BGAppRefreshTask background launch and deferred migrations.
         runMigrationsIfNeeded()
+    }
 
+    @objc func appCameToForeground() {
         // reset screenlock state if needed
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
 
