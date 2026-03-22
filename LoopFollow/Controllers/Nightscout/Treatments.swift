@@ -10,7 +10,8 @@ extension MainViewController {
         if !Storage.shared.downloadTreatments.value { return }
 
         let startTimeString = dateTimeUtils.getDateTimeString(addingDays: -1 * Storage.shared.downloadDays.value)
-        let currentTimeString = dateTimeUtils.getDateTimeString()
+        let lookaheadMinutes = Int(Storage.shared.predictionToLoad.value * 60)
+        let currentTimeString = dateTimeUtils.getDateTimeString(addingMinutes: lookaheadMinutes)
         let estimatedCount = max(Storage.shared.downloadDays.value * 100, 5000)
         let parameters: [String: String] = [
             "find[created_at][$gte]": startTimeString,
