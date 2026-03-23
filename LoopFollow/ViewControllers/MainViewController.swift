@@ -994,6 +994,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     @objc func appCameToForeground() {
+        // Re-read critical StorageValues from disk. If the app was cold-launched by BGAppRefreshTask
+        // while the device was locked (Before-First-Unlock), Storage.shared was initialized while
+        // UserDefaults was encrypted, caching "" for url and other strings. Now that the user has
+        // unlocked the device and foregrounded the app, reload from disk so Combine observers fire
+        // and the UI reflects the actual saved configuration.
+        Storage.shared.url.reload()
+        Storage.shared.shareUserName.reload()
+        Storage.shared.sharePassword.reload()
+
         // reset screenlock state if needed
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
 
