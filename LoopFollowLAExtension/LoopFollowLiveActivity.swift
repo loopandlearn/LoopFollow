@@ -58,15 +58,15 @@ struct LoopFollowLiveActivityWidget: Widget {
     }
 }
 
-/// Supplemental widget (iOS 18.0+) — adds CarPlay Dashboard + Watch Smart Stack
-/// via supplementalActivityFamilies([.small]).
-/// This widget is ONLY shown in .small contexts (CarPlay, Watch Smart Stack),
-/// so SmallFamilyView is used directly — no family-detection indirection needed.
+/// Supplemental widget (iOS 18.0+) — handles ALL rendering contexts:
+/// Lock Screen (via LockScreenFamilyAdaptiveView → LockScreenLiveActivityView),
+/// CarPlay Dashboard and Watch Smart Stack (via LockScreenFamilyAdaptiveView → SmallFamilyView).
+/// Registered exclusively on iOS 18+; LoopFollowLiveActivityWidget is not registered on iOS 18+.
 @available(iOS 18.0, *)
 struct LoopFollowLiveActivityWidgetWithCarPlay: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-            SmallFamilyView(snapshot: context.state.snapshot)
+            LockScreenFamilyAdaptiveView(state: context.state)
                 .id(context.state.seq)
         } dynamicIsland: { context in
             makeDynamicIsland(context: context)
