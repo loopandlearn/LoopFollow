@@ -7,7 +7,7 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.$(unique_id).LoopFollow$(app_suffix)</string>
-		<string>com.loopfollow.audiorefresh</string>
+		<string>com.$(unique_id).LoopFollow$(app_suffix).audiorefresh</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
@@ -34,7 +34,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>loopfollow</string>
+				<string>loopfollow$(app_suffix)</string>
 			</array>
 		</dict>
 	</array>

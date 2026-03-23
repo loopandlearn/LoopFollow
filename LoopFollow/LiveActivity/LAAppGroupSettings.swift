@@ -135,6 +135,8 @@ enum LAAppGroupSettings {
         static let lowLineMgdl = "la.lowLine.mgdl"
         static let highLineMgdl = "la.highLine.mgdl"
         static let slots = "la.slots"
+        static let displayName = "la.displayName"
+        static let showDisplayName = "la.showDisplayName"
     }
 
     private static var defaults: UserDefaults? {
@@ -175,5 +177,20 @@ enum LAAppGroupSettings {
             return LiveActivitySlotDefaults.all
         }
         return raw.map { LiveActivitySlotOption(rawValue: $0) ?? .none }
+    }
+
+    // MARK: - Display Name
+
+    static func setDisplayName(_ name: String, show: Bool) {
+        defaults?.set(name, forKey: Keys.displayName)
+        defaults?.set(show, forKey: Keys.showDisplayName)
+    }
+
+    static func displayName() -> String {
+        defaults?.string(forKey: Keys.displayName) ?? "LoopFollow"
+    }
+
+    static func showDisplayName() -> Bool {
+        defaults?.bool(forKey: Keys.showDisplayName) ?? false
     }
 }

@@ -9,21 +9,21 @@ import WidgetKit
 private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityAttributes>) -> DynamicIsland {
     DynamicIsland {
         DynamicIslandExpandedRegion(.leading) {
-            Link(destination: URL(string: "loopfollow://la-tap")!) {
+            Link(destination: URL(string: "\(AppGroupID.urlScheme)://la-tap")!) {
                 DynamicIslandLeadingView(snapshot: context.state.snapshot)
                     .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
             }
             .id(context.state.seq)
         }
         DynamicIslandExpandedRegion(.trailing) {
-            Link(destination: URL(string: "loopfollow://la-tap")!) {
+            Link(destination: URL(string: "\(AppGroupID.urlScheme)://la-tap")!) {
                 DynamicIslandTrailingView(snapshot: context.state.snapshot)
                     .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
             }
             .id(context.state.seq)
         }
         DynamicIslandExpandedRegion(.bottom) {
-            Link(destination: URL(string: "loopfollow://la-tap")!) {
+            Link(destination: URL(string: "\(AppGroupID.urlScheme)://la-tap")!) {
                 DynamicIslandBottomView(snapshot: context.state.snapshot)
                     .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay, showText: true))
             }
@@ -56,7 +56,7 @@ struct LoopFollowLiveActivityWidget: Widget {
                     .id(context.state.seq)
                     .activitySystemActionForegroundColor(.white)
                     .applyActivityContentMarginsFixIfAvailable()
-                    .widgetURL(URL(string: "loopfollow://la-tap")!)
+                    .widgetURL(URL(string: "\(AppGroupID.urlScheme)://la-tap")!)
             } dynamicIsland: { context in
                 makeDynamicIsland(context: context)
             }
@@ -68,7 +68,7 @@ struct LoopFollowLiveActivityWidget: Widget {
                     .activitySystemActionForegroundColor(.white)
                     .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
                     .applyActivityContentMarginsFixIfAvailable()
-                    .widgetURL(URL(string: "loopfollow://la-tap")!)
+                    .widgetURL(URL(string: "\(AppGroupID.urlScheme)://la-tap")!)
             } dynamicIsland: { context in
                 makeDynamicIsland(context: context)
             }
@@ -217,7 +217,9 @@ private struct LockScreenLiveActivityView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
 
-            Text("Last Update: \(LAFormat.updated(s))")
+            Text(LAAppGroupSettings.showDisplayName()
+                ? "\(LAAppGroupSettings.displayName()) — \(LAFormat.updated(s))"
+                : "Last Update: \(LAFormat.updated(s))")
                 .font(.system(size: 11, weight: .regular, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(.white.opacity(0.65))

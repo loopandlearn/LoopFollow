@@ -145,6 +145,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Migrations run in foreground only — see runMigrationsIfNeeded() for details.
         runMigrationsIfNeeded()
 
+        if Storage.shared.migrationStep.value < 7 {
+            Storage.shared.migrateStep7()
+            Storage.shared.migrationStep.value = 7
+        }
+
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
 
