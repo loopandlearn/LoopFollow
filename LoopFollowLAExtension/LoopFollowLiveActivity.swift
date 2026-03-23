@@ -119,25 +119,39 @@ private struct LockScreenFamilyAdaptiveView: View {
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
 
+    private var unitLabel: String {
+        switch snapshot.unit {
+        case .mgdl: return "mg/dL"
+        case .mmol: return "mmol/L"
+        }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(LAFormat.glucose(snapshot))
+        HStack(alignment: .center, spacing: 0) {
+            // Left: BG + trend arrow, delta with unit — colored by glucose threshold
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(LAFormat.glucose(snapshot))
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                    Text(LAFormat.trendArrow(snapshot))
+                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                }
+                .foregroundStyle(LAColors.keyline(for: snapshot))
+                Text("\(LAFormat.delta(snapshot)) \(unitLabel)")
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(LAColors.keyline(for: snapshot).opacity(0.85))
+            }
+            Spacer()
+            // Right: Projected BG with unit label
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(LAFormat.projected(snapshot))
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.white)
-                Text(LAFormat.trendArrow(snapshot))
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.9))
-            }
-            HStack(spacing: 8) {
-                Text(LAFormat.delta(snapshot))
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white.opacity(0.85))
-                Text(LAFormat.updated(snapshot))
+                Text(unitLabel)
                     .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.65))
             }
         }
