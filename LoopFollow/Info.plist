@@ -7,7 +7,6 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.$(unique_id).LoopFollow$(app_suffix)</string>
-		<string>com.loopfollow.audiorefresh</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
@@ -88,7 +87,6 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
-		<string>fetch</string>
 		<string>processing</string>
 		<string>bluetooth-central</string>
 		<string>remote-notification</string>

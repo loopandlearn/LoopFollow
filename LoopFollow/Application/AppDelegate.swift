@@ -46,7 +46,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UIApplication.shared.registerForRemoteNotifications()
         }
 
-        BackgroundRefreshManager.shared.register()
         return true
     }
 
