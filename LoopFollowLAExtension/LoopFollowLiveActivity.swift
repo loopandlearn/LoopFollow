@@ -111,7 +111,6 @@ private struct LockScreenFamilyAdaptiveView: View {
 }
 
 // MARK: - Small family view (CarPlay Dashboard + Watch Smart Stack)
-
 @available(iOS 18.0, *)
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
@@ -130,16 +129,17 @@ private struct SmallFamilyView: View {
                     Text(LAFormat.glucose(snapshot))
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .monospacedDigit()
+                        .foregroundStyle(LAColors.keyline(for: snapshot))
 
                     Text(LAFormat.trendArrow(snapshot))
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .foregroundStyle(LAColors.keyline(for: snapshot))
                 }
-                .foregroundStyle(LAColors.keyline(for: snapshot))
 
                 Text("\(LAFormat.delta(snapshot)) \(unitLabel)")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .monospacedDigit()
-                    .foregroundStyle(LAColors.keyline(for: snapshot).opacity(0.85))
+                    .foregroundStyle(.white.opacity(0.85))
             }
 
             Spacer()
