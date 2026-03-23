@@ -66,6 +66,7 @@ struct LoopFollowLiveActivityWidget: Widget {
 /// CarPlay Dashboard and Watch Smart Stack (via LockScreenFamilyAdaptiveView → SmallFamilyView).
 /// Registered exclusively on iOS 18+; LoopFollowLiveActivityWidget is not registered on iOS 18+.
 
+/*
 @available(iOS 18.0, *)
 struct LoopFollowLiveActivityWidgetWithCarPlay: Widget {
     var body: some WidgetConfiguration {
@@ -78,6 +79,52 @@ struct LoopFollowLiveActivityWidgetWithCarPlay: Widget {
                 .widgetURL(URL(string: "loopfollow://la-tap")!)
         } dynamicIsland: { context in
             makeDynamicIsland(context: context)
+        }
+        .supplementalActivityFamilies([.small])
+    }
+}
+*/
+
+@available(iOS 18.0, *)
+struct LoopFollowLiveActivityWidgetWithCarPlay: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
+            ZStack {
+                Color.blue
+
+                VStack(spacing: 8) {
+                    Text("NEW")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                    Text("WIDGET")
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                    Text("iOS 18+")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                }
+                .foregroundStyle(.white)
+            }
+            .id(context.state.seq)
+            .widgetURL(URL(string: "loopfollow://la-tap")!)
+        } dynamicIsland: { context in
+            DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    Text("NEW")
+                        .font(.headline)
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    Text("WGT")
+                        .font(.headline)
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    Text("UPDATED BUILD")
+                        .font(.headline)
+                }
+            } compactLeading: {
+                Text("N")
+            } compactTrailing: {
+                Text("W")
+            } minimal: {
+                Text("U")
+            }
         }
         .supplementalActivityFamilies([.small])
     }
