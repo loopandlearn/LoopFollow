@@ -125,10 +125,21 @@ extension Storage {
     }
 
     func migrateStep1() {
-        Storage.shared.url.value = ObservableUserDefaults.shared.old_url.value
-        Storage.shared.device.value = ObservableUserDefaults.shared.old_device.value
-        Storage.shared.nsWriteAuth.value = ObservableUserDefaults.shared.old_nsWriteAuth.value
-        Storage.shared.nsAdminAuth.value = ObservableUserDefaults.shared.old_nsAdminAuth.value
+        // Guard each field with .exists so that if the App Group suite is unreadable
+        // (e.g. Before-First-Unlock state after a reboot), we skip the write rather
+        // than overwriting the already-migrated Standard value with an empty default.
+        if ObservableUserDefaults.shared.old_url.exists {
+            Storage.shared.url.value = ObservableUserDefaults.shared.old_url.value
+        }
+        if ObservableUserDefaults.shared.old_device.exists {
+            Storage.shared.device.value = ObservableUserDefaults.shared.old_device.value
+        }
+        if ObservableUserDefaults.shared.old_nsWriteAuth.exists {
+            Storage.shared.nsWriteAuth.value = ObservableUserDefaults.shared.old_nsWriteAuth.value
+        }
+        if ObservableUserDefaults.shared.old_nsAdminAuth.exists {
+            Storage.shared.nsAdminAuth.value = ObservableUserDefaults.shared.old_nsAdminAuth.value
+        }
 
         // Helper: 1-to-1 type -----------------------------------------------------------------
         func move<T: AnyConvertible & Equatable>(
