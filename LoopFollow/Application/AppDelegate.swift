@@ -47,6 +47,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         BackgroundRefreshManager.shared.register()
+
+        // Detect Before-First-Unlock launch. If protected data is unavailable here,
+        // StorageValues were cached from encrypted UserDefaults and need a reload
+        // on the first foreground after the user unlocks.
+        Storage.shared.needsBFUReload = !UIApplication.shared.isProtectedDataAvailable
+
         return true
     }
 
