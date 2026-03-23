@@ -1004,6 +1004,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             LogManager.shared.log(category: .general, message: "BFU reload triggered — reloading all StorageValues")
             Storage.shared.reloadAll()
             LogManager.shared.log(category: .general, message: "BFU reload complete: url='\(Storage.shared.url.value)'")
+            // Show the loading overlay so the user sees feedback during the 2-5s
+            // while tasks re-run with the now-correct credentials.
+            loadingStates = ["bg": false, "profile": false, "deviceStatus": false]
+            isInitialLoad = true
+            setupLoadingState()
+            showLoadingOverlay()
             // Tasks were scheduled during BFU viewDidLoad with url="" — they fired, found no
             // data source, and rescheduled themselves 60s out. Reset them now so they run
             // within their normal 2-5s initial delay using the now-correct credentials.
