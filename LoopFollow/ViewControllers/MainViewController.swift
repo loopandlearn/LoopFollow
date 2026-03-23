@@ -1000,6 +1000,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // unlocked the device and foregrounded the app, reload from disk so Combine observers fire
         // and the UI reflects the actual saved configuration.
         Storage.shared.url.reload()
+        Storage.shared.token.reload()
+        Storage.shared.sharedSecret.reload()
+        Storage.shared.nsWriteAuth.reload()
+        Storage.shared.nsAdminAuth.reload()
         Storage.shared.shareUserName.reload()
         Storage.shared.sharePassword.reload()
 
