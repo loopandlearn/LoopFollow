@@ -51,7 +51,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Detect Before-First-Unlock launch. If protected data is unavailable here,
         // StorageValues were cached from encrypted UserDefaults and need a reload
         // on the first foreground after the user unlocks.
-        Storage.shared.needsBFUReload = !UIApplication.shared.isProtectedDataAvailable
+        let bfu = !UIApplication.shared.isProtectedDataAvailable
+        Storage.shared.needsBFUReload = bfu
+        LogManager.shared.log(category: .general, message: "BFU check: isProtectedDataAvailable=\(!bfu), needsBFUReload=\(bfu)")
 
         return true
     }
