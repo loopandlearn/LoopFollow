@@ -55,7 +55,6 @@ struct LoopFollowLiveActivityWidget: Widget {
                 LockScreenFamilyAdaptiveView(state: context.state)
                     .id(context.state.seq)
                     .activitySystemActionForegroundColor(.white)
-                    .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
                     .applyActivityContentMarginsFixIfAvailable()
                     .widgetURL(URL(string: "loopfollow://la-tap")!)
             } dynamicIsland: { context in
@@ -104,8 +103,10 @@ private struct LockScreenFamilyAdaptiveView: View {
     var body: some View {
         if activityFamily == .small {
             SmallFamilyView(snapshot: state.snapshot)
+                .activityBackgroundTint(Color.black.opacity(0.25))
         } else {
             LockScreenLiveActivityView(state: state)
+                .activityBackgroundTint(LAColors.backgroundTint(for: state.snapshot))
         }
     }
 }
