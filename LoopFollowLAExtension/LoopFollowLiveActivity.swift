@@ -45,20 +45,16 @@ private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityA
 /// Primary widget — Lock Screen + Dynamic Island.
 /// On iOS 18+, uses LockScreenFamilyAdaptiveView so that if the system selects this widget
 /// for a .small context (CarPlay/Watch), SmallFamilyView is shown correctly.
+@available(iOS, introduced: 16.1, obsoleted: 18.0)
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-            if #available(iOS 18.0, *) {
-                LockScreenFamilyAdaptiveView(state: context.state)
-                    .id(context.state.seq)
-            } else {
-                LockScreenLiveActivityView(state: context.state)
-                    .id(context.state.seq)
-                    .activitySystemActionForegroundColor(.white)
-                    .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
-                    .applyActivityContentMarginsFixIfAvailable()
-                    .widgetURL(URL(string: "loopfollow://la-tap")!)
-            }
+            LockScreenLiveActivityView(state: context.state)
+                .id(context.state.seq)
+                .activitySystemActionForegroundColor(.white)
+                .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
+                .applyActivityContentMarginsFixIfAvailable()
+                .widgetURL(URL(string: "loopfollow://la-tap")!)
         } dynamicIsland: { context in
             makeDynamicIsland(context: context)
         }
@@ -69,12 +65,17 @@ struct LoopFollowLiveActivityWidget: Widget {
 /// Lock Screen (via LockScreenFamilyAdaptiveView → LockScreenLiveActivityView),
 /// CarPlay Dashboard and Watch Smart Stack (via LockScreenFamilyAdaptiveView → SmallFamilyView).
 /// Registered exclusively on iOS 18+; LoopFollowLiveActivityWidget is not registered on iOS 18+.
+
 @available(iOS 18.0, *)
 struct LoopFollowLiveActivityWidgetWithCarPlay: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
             LockScreenFamilyAdaptiveView(state: context.state)
                 .id(context.state.seq)
+                .activitySystemActionForegroundColor(.white)
+                .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
+                .applyActivityContentMarginsFixIfAvailable()
+                .widgetURL(URL(string: "loopfollow://la-tap")!)
         } dynamicIsland: { context in
             makeDynamicIsland(context: context)
         }
@@ -120,10 +121,26 @@ private struct LockScreenFamilyAdaptiveView: View {
     }
 }
 
+@available(iOS 18.0, *)
+private struct SmallFamilyView: View {
+    let snapshot: GlucoseSnapshot
+
+    var body: some View {
+        ZStack {
+            Color.red
+            Text("SMALL")
+                .font(.headline)
+                .foregroundStyle(.white)
+        }
+    }
+}
+
 // MARK: - Small family view (CarPlay Dashboard + Watch Smart Stack)
 
 /// Compact view shown on CarPlay Dashboard (iOS 26+) and Apple Watch Smart Stack (watchOS 11+).
 /// Hardcoded to glucose + trend arrow + delta + time since last reading.
+
+/*
 @available(iOS 18.0, *)
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
@@ -169,6 +186,7 @@ private struct SmallFamilyView: View {
         .activityBackgroundTint(LAColors.backgroundTint(for: snapshot))
     }
 }
+*/
 
 // MARK: - Lock Screen Contract View
 

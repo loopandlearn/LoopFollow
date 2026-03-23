@@ -8,6 +8,7 @@ import WidgetKit
 struct LoopFollowLABundle: WidgetBundle {
     var body: some Widget {
         LoopFollowLiveActivityWidget()
+
         if #available(iOS 18.0, *) {
             LoopFollowLiveActivityWidgetWithCarPlay()
         }
