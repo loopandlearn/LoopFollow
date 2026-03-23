@@ -6,14 +6,11 @@ import WidgetKit
 
 @main
 struct LoopFollowLABundle: WidgetBundle {
-    @WidgetBundleBuilder
     var body: some Widget {
+        LoopFollowLiveActivityWidget()
+
         if #available(iOSApplicationExtension 18.0, *) {
             LoopFollowLiveActivityWidgetWithCarPlay()
-        }
-
-        if #unavailable(iOSApplicationExtension 18.0) {
-            LoopFollowLiveActivityWidget()
         }
     }
 }
