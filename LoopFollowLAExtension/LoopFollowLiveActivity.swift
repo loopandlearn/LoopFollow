@@ -121,6 +121,7 @@ private struct LockScreenFamilyAdaptiveView: View {
     }
 }
 
+/*
 @available(iOS 18.0, *)
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
@@ -134,13 +135,12 @@ private struct SmallFamilyView: View {
         }
     }
 }
-
+*/
 // MARK: - Small family view (CarPlay Dashboard + Watch Smart Stack)
 
 /// Compact view shown on CarPlay Dashboard (iOS 26+) and Apple Watch Smart Stack (watchOS 11+).
 /// Hardcoded to glucose + trend arrow + delta + time since last reading.
 
-/*
 @available(iOS 18.0, *)
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
@@ -186,7 +186,6 @@ private struct SmallFamilyView: View {
         .activityBackgroundTint(LAColors.backgroundTint(for: snapshot))
     }
 }
-*/
 
 // MARK: - Lock Screen Contract View
 
