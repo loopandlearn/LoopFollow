@@ -43,15 +43,22 @@ private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityA
 }
 
 /// Primary widget — Lock Screen + Dynamic Island.
+/// On iOS 18+, uses LockScreenFamilyAdaptiveView so that if the system selects this widget
+/// for a .small context (CarPlay/Watch), SmallFamilyView is shown correctly.
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-            LockScreenLiveActivityView(state: context.state)
-                .id(context.state.seq)
-                .activitySystemActionForegroundColor(.white)
-                .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
-                .applyActivityContentMarginsFixIfAvailable()
-                .widgetURL(URL(string: "loopfollow://la-tap")!)
+            if #available(iOS 18.0, *) {
+                LockScreenFamilyAdaptiveView(state: context.state)
+                    .id(context.state.seq)
+            } else {
+                LockScreenLiveActivityView(state: context.state)
+                    .id(context.state.seq)
+                    .activitySystemActionForegroundColor(.white)
+                    .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
+                    .applyActivityContentMarginsFixIfAvailable()
+                    .widgetURL(URL(string: "loopfollow://la-tap")!)
+            }
         } dynamicIsland: { context in
             makeDynamicIsland(context: context)
         }
