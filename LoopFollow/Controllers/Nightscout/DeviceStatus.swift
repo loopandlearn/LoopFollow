@@ -127,6 +127,7 @@ extension MainViewController {
                 let storedTime = Observable.shared.alertLastLoopTime.value ?? 0
                 if lastPumpTime > storedTime {
                     Observable.shared.alertLastLoopTime.value = lastPumpTime
+                    Storage.shared.lastLoopTime.value = lastPumpTime
                 }
 
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
