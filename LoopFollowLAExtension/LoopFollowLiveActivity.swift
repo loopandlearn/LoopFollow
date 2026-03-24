@@ -112,6 +112,7 @@ private struct LockScreenFamilyAdaptiveView: View {
 }
 
 // MARK: - Small family view (CarPlay Dashboard + Watch Smart Stack)
+
 @available(iOS 18.0, *)
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
