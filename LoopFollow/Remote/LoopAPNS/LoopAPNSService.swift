@@ -429,6 +429,7 @@ class LoopAPNSService {
                         LogManager.shared.log(category: .apns, message: "APNS error 400: \(responseBodyMessage) - Check device token and environment settings")
                         completion(false, errorMessage)
                     case 403:
+                        JWTManager.shared.invalidateCache()
                         let errorMessage = "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)"
                         LogManager.shared.log(category: .apns, message: "APNS error 403: \(responseBodyMessage) - Check APNS key permissions for bundle ID")
                         completion(false, errorMessage)

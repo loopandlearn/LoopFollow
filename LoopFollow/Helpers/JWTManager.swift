@@ -15,11 +15,15 @@ class JWTManager {
     /// Cache keyed by "keyId:teamId", 55 min TTL
     private var cache: [String: CachedToken] = [:]
     private let ttl: TimeInterval = 55 * 60
+    private let lock = NSLock()
 
     private init() {}
 
     func getOrGenerateJWT(keyId: String, teamId: String, apnsKey: String) -> String? {
         let cacheKey = "\(keyId):\(teamId)"
+
+        lock.lock()
+        defer { lock.unlock() }
 
         if let cached = cache[cacheKey], Date() < cached.expiresAt {
             return cached.jwt
@@ -41,6 +45,7 @@ class JWTManager {
             let signedJWT = "\(signingInput).\(signatureBase64)"
 
             cache[cacheKey] = CachedToken(jwt: signedJWT, expiresAt: Date().addingTimeInterval(ttl))
+            LogManager.shared.log(category: .apns, message: "JWT generated for key \(keyId) (TTL 55 min)")
             return signedJWT
         } catch {
             LogManager.shared.log(category: .apns, message: "Failed to sign JWT: \(error.localizedDescription)")
@@ -49,7 +54,10 @@ class JWTManager {
     }
 
     func invalidateCache() {
+        lock.lock()
+        defer { lock.unlock() }
         cache.removeAll()
+        LogManager.shared.log(category: .apns, message: "JWT cache invalidated")
     }
 
     // MARK: - Private Helpers

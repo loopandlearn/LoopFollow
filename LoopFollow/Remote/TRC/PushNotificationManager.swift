@@ -295,6 +295,7 @@ class PushNotificationManager {
                     case 400:
                         completion(false, "Bad request. The request was invalid or malformed. \(responseBodyMessage)")
                     case 403:
+                        JWTManager.shared.invalidateCache()
                         completion(false, "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)")
                     case 404:
                         completion(false, "Invalid request: The :path value was incorrect. \(responseBodyMessage)")
