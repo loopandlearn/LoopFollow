@@ -35,7 +35,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func scene(_: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        guard URLContexts.contains(where: { $0.url.scheme == "loopfollow" && $0.url.host == "la-tap" }) else { return }
+        guard URLContexts.contains(where: { $0.url.scheme == AppGroupID.urlScheme && $0.url.host == "la-tap" }) else { return }
         // scene(_:openURLContexts:) fires after sceneDidBecomeActive when the app
         // foregrounds from background. Post on the next run loop so the view
         // hierarchy (including any presented modals) is fully settled.

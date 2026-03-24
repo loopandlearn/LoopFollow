@@ -2,6 +2,7 @@
 // Storage+Migrate.swift
 
 import Foundation
+import UserNotifications
 
 extension Storage {
     func migrateStep5() {
@@ -30,6 +31,21 @@ extension Storage {
         if tabItem(at: .position3) == nil {
             snoozerPosition.value = .position3
         }
+    }
+
+    func migrateStep7() {
+        // Cancel notifications scheduled with old hardcoded identifiers.
+        // Replaced with bundle-ID-scoped identifiers for multi-instance support.
+        LogManager.shared.log(category: .general, message: "Running migrateStep7 — cancel legacy notification identifiers")
+
+        let legacyNotificationIDs = [
+            "loopfollow.background.alert.6min",
+            "loopfollow.background.alert.12min",
+            "loopfollow.background.alert.18min",
+            "loopfollow.la.renewal.failed",
+        ]
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: legacyNotificationIDs)
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: legacyNotificationIDs)
     }
 
     func migrateStep6() {
@@ -125,10 +141,21 @@ extension Storage {
     }
 
     func migrateStep1() {
-        Storage.shared.url.value = ObservableUserDefaults.shared.old_url.value
-        Storage.shared.device.value = ObservableUserDefaults.shared.old_device.value
-        Storage.shared.nsWriteAuth.value = ObservableUserDefaults.shared.old_nsWriteAuth.value
-        Storage.shared.nsAdminAuth.value = ObservableUserDefaults.shared.old_nsAdminAuth.value
+        // Guard each field with .exists so that if the App Group suite is unreadable
+        // (e.g. Before-First-Unlock state after a reboot), we skip the write rather
+        // than overwriting the already-migrated Standard value with an empty default.
+        if ObservableUserDefaults.shared.old_url.exists {
+            Storage.shared.url.value = ObservableUserDefaults.shared.old_url.value
+        }
+        if ObservableUserDefaults.shared.old_device.exists {
+            Storage.shared.device.value = ObservableUserDefaults.shared.old_device.value
+        }
+        if ObservableUserDefaults.shared.old_nsWriteAuth.exists {
+            Storage.shared.nsWriteAuth.value = ObservableUserDefaults.shared.old_nsWriteAuth.value
+        }
+        if ObservableUserDefaults.shared.old_nsAdminAuth.exists {
+            Storage.shared.nsAdminAuth.value = ObservableUserDefaults.shared.old_nsAdminAuth.value
+        }
 
         // Helper: 1-to-1 type -----------------------------------------------------------------
         func move<T: AnyConvertible & Equatable>(

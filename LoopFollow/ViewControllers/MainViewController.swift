@@ -142,40 +142,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         loadDebugData()
 
-        // Capture before migrations run: true for existing users, false for fresh installs.
-        let isExistingUser = Storage.shared.migrationStep.exists
+        // Migrations run in foreground only — see runMigrationsIfNeeded() for details.
+        runMigrationsIfNeeded()
 
-        if Storage.shared.migrationStep.value < 1 {
-            Storage.shared.migrateStep1()
-            Storage.shared.migrationStep.value = 1
-        }
-
-        if Storage.shared.migrationStep.value < 2 {
-            Storage.shared.migrateStep2()
-            Storage.shared.migrationStep.value = 2
-        }
-
-        if Storage.shared.migrationStep.value < 3 {
-            Storage.shared.migrateStep3()
-            Storage.shared.migrationStep.value = 3
-        }
-
-        // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
-        if Storage.shared.migrationStep.value < 4 {
-            // Existing users need to see the fat/protein order change banner.
-            // New users never saw the old order, so mark it as already seen.
-            Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
-            Storage.shared.migrationStep.value = 4
-        }
-
-        if Storage.shared.migrationStep.value < 5 {
-            Storage.shared.migrateStep5()
-            Storage.shared.migrationStep.value = 5
-        }
-
-        if Storage.shared.migrationStep.value < 6 {
-            Storage.shared.migrateStep6()
-            Storage.shared.migrationStep.value = 6
+        if Storage.shared.migrationStep.value < 7 {
+            Storage.shared.migrateStep7()
+            Storage.shared.migrationStep.value = 7
         }
 
         // Synchronize info types to ensure arrays are the correct size
@@ -211,6 +183,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        // didBecomeActive is used (not willEnterForeground) to ensure applicationState == .active
+        // when runMigrationsIfNeeded() is called. This catches migrations deferred by a
+        // background BGAppRefreshTask launch in Before-First-Unlock state.
+        notificationCenter.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
 
         // Setup the Graph
@@ -972,7 +948,79 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
+    // Migrations must only run when UserDefaults is accessible (i.e. after first unlock).
+    // When the app is launched in the background by BGAppRefreshTask immediately after a
+    // reboot, the device may be in Before-First-Unlock (BFU) state: UserDefaults files are
+    // still encrypted, so every read returns the default value (0 / ""). Running migrations
+    // in that state would overwrite real settings with empty strings.
+    //
+    // Strategy: skip migrations if applicationState == .background; call this method again
+    // from appCameToForeground() so they run on the first foreground after a BFU launch.
+    func runMigrationsIfNeeded() {
+        guard UIApplication.shared.applicationState != .background else { return }
+
+        // Capture before migrations run: true for existing users, false for fresh installs.
+        let isExistingUser = Storage.shared.migrationStep.exists
+
+        if Storage.shared.migrationStep.value < 1 {
+            Storage.shared.migrateStep1()
+            Storage.shared.migrationStep.value = 1
+        }
+        if Storage.shared.migrationStep.value < 2 {
+            Storage.shared.migrateStep2()
+            Storage.shared.migrationStep.value = 2
+        }
+        if Storage.shared.migrationStep.value < 3 {
+            Storage.shared.migrateStep3()
+            Storage.shared.migrationStep.value = 3
+        }
+        // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
+        if Storage.shared.migrationStep.value < 4 {
+            // Existing users need to see the fat/protein order change banner.
+            // New users never saw the old order, so mark it as already seen.
+            Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
+            Storage.shared.migrationStep.value = 4
+        }
+        if Storage.shared.migrationStep.value < 5 {
+            Storage.shared.migrateStep5()
+            Storage.shared.migrationStep.value = 5
+        }
+        if Storage.shared.migrationStep.value < 6 {
+            Storage.shared.migrateStep6()
+            Storage.shared.migrationStep.value = 6
+        }
+    }
+
+    @objc func appDidBecomeActive() {
+        // applicationState == .active is guaranteed here, so the BFU guard in
+        // runMigrationsIfNeeded() will always pass. Catches the case where viewDidLoad
+        // ran during a BGAppRefreshTask background launch and deferred migrations.
+        runMigrationsIfNeeded()
+    }
+
     @objc func appCameToForeground() {
+        // If the app was cold-launched in Before-First-Unlock state (e.g. by BGAppRefreshTask
+        // after a reboot), all StorageValues were cached from encrypted UserDefaults and hold
+        // their defaults. Reload everything from disk now that the device is unlocked, firing
+        // Combine observers only for values that actually changed.
+        LogManager.shared.log(category: .general, message: "appCameToForeground: needsBFUReload=\(Storage.shared.needsBFUReload), url='\(Storage.shared.url.value)'")
+        if Storage.shared.needsBFUReload {
+            Storage.shared.needsBFUReload = false
+            LogManager.shared.log(category: .general, message: "BFU reload triggered — reloading all StorageValues")
+            Storage.shared.reloadAll()
+            LogManager.shared.log(category: .general, message: "BFU reload complete: url='\(Storage.shared.url.value)'")
+            // Show the loading overlay so the user sees feedback during the 2-5s
+            // while tasks re-run with the now-correct credentials.
+            loadingStates = ["bg": false, "profile": false, "deviceStatus": false]
+            isInitialLoad = true
+            setupLoadingState()
+            showLoadingOverlay()
+            // Tasks were scheduled during BFU viewDidLoad with url="" — they fired, found no
+            // data source, and rescheduled themselves 60s out. Reset them now so they run
+            // within their normal 2-5s initial delay using the now-correct credentials.
+            scheduleAllTasks()
+        }
+
         // reset screenlock state if needed
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
 

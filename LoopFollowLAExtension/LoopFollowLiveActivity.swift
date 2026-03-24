@@ -5,25 +5,25 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-/// Builds the shared Dynamic Island content used by both widget variants.
+/// Builds the shared Dynamic Island content used by the Live Activity widget.
 private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityAttributes>) -> DynamicIsland {
     DynamicIsland {
         DynamicIslandExpandedRegion(.leading) {
-            Link(destination: URL(string: "loopfollow://la-tap")!) {
+            Link(destination: URL(string: "\(AppGroupID.urlScheme)://la-tap")!) {
                 DynamicIslandLeadingView(snapshot: context.state.snapshot)
                     .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
             }
             .id(context.state.seq)
         }
         DynamicIslandExpandedRegion(.trailing) {
-            Link(destination: URL(string: "loopfollow://la-tap")!) {
+            Link(destination: URL(string: "\(AppGroupID.urlScheme)://la-tap")!) {
                 DynamicIslandTrailingView(snapshot: context.state.snapshot)
                     .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay))
             }
             .id(context.state.seq)
         }
         DynamicIslandExpandedRegion(.bottom) {
-            Link(destination: URL(string: "loopfollow://la-tap")!) {
+            Link(destination: URL(string: "\(AppGroupID.urlScheme)://la-tap")!) {
                 DynamicIslandBottomView(snapshot: context.state.snapshot)
                     .overlay(RenewalOverlayView(show: context.state.snapshot.showRenewalOverlay, showText: true))
             }
@@ -42,34 +42,37 @@ private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityA
     .keylineTint(LAColors.keyline(for: context.state.snapshot).opacity(0.75))
 }
 
-/// Primary widget — Lock Screen + Dynamic Island.
+// MARK: - Live Activity widget
+
+/// Single widget for all supported OS versions.
+/// - iOS 18+: enables supplemental `.small` family and routes via `LockScreenFamilyAdaptiveView`.
+/// - iOS 16.1–17.x: uses the regular lock screen view.
+@available(iOSApplicationExtension 16.1, *)
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-            LockScreenLiveActivityView(state: context.state)
-                .id(context.state.seq)
-                .activitySystemActionForegroundColor(.white)
-                .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
-                .applyActivityContentMarginsFixIfAvailable()
-                .widgetURL(URL(string: "loopfollow://la-tap")!)
-        } dynamicIsland: { context in
-            makeDynamicIsland(context: context)
+        if #available(iOSApplicationExtension 18.0, *) {
+            return ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
+                LockScreenFamilyAdaptiveView(state: context.state)
+                    .id(context.state.seq)
+                    .activitySystemActionForegroundColor(.white)
+                    .applyActivityContentMarginsFixIfAvailable()
+                    .widgetURL(URL(string: "\(AppGroupID.urlScheme)://la-tap")!)
+            } dynamicIsland: { context in
+                makeDynamicIsland(context: context)
+            }
+            .supplementalActivityFamilies([.small])
+        } else {
+            return ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
+                LockScreenLiveActivityView(state: context.state)
+                    .id(context.state.seq)
+                    .activitySystemActionForegroundColor(.white)
+                    .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
+                    .applyActivityContentMarginsFixIfAvailable()
+                    .widgetURL(URL(string: "\(AppGroupID.urlScheme)://la-tap")!)
+            } dynamicIsland: { context in
+                makeDynamicIsland(context: context)
+            }
         }
-    }
-}
-
-/// Supplemental widget (iOS 18.0+) — adds CarPlay Dashboard + Watch Smart Stack
-/// via supplementalActivityFamilies([.small]).
-@available(iOS 18.0, *)
-struct LoopFollowLiveActivityWidgetWithCarPlay: Widget {
-    var body: some WidgetConfiguration {
-        ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-            LockScreenFamilyAdaptiveView(state: context.state)
-                .id(context.state.seq)
-        } dynamicIsland: { context in
-            makeDynamicIsland(context: context)
-        }
-        .supplementalActivityFamilies([.small])
     }
 }
 
@@ -79,7 +82,6 @@ private extension View {
     @ViewBuilder
     func applyActivityContentMarginsFixIfAvailable() -> some View {
         if #available(iOS 17.0, *) {
-            // Use the generic SwiftUI API available in iOS 17+ (no placement enum)
             contentMargins(Edge.Set.all, 0)
         } else {
             self
@@ -90,60 +92,72 @@ private extension View {
 // MARK: - Family-adaptive wrapper (Lock Screen / CarPlay / Watch Smart Stack)
 
 /// Reads the activityFamily environment value and routes to the appropriate layout.
-/// - `.small` → CarPlay Dashboard & Watch Smart Stack: compact glucose-only view
-/// - everything else → full lock screen layout with configurable grid
+/// - `.small` → CarPlay Dashboard & Watch Smart Stack
+/// - everything else → full lock screen layout
 @available(iOS 18.0, *)
 private struct LockScreenFamilyAdaptiveView: View {
     let state: GlucoseLiveActivityAttributes.ContentState
 
-    @Environment(\.activityFamily) var activityFamily
+    @Environment(\.activityFamily) private var activityFamily
 
     var body: some View {
         if activityFamily == .small {
             SmallFamilyView(snapshot: state.snapshot)
+                .activityBackgroundTint(Color.black.opacity(0.25))
         } else {
             LockScreenLiveActivityView(state: state)
-                .activitySystemActionForegroundColor(.white)
                 .activityBackgroundTint(LAColors.backgroundTint(for: state.snapshot))
-                .applyActivityContentMarginsFixIfAvailable()
-                .widgetURL(URL(string: "loopfollow://la-tap")!)
         }
     }
 }
 
 // MARK: - Small family view (CarPlay Dashboard + Watch Smart Stack)
-
-/// Compact view shown on CarPlay Dashboard (iOS 26+) and Apple Watch Smart Stack (watchOS 11+).
-/// Hardcoded to glucose + trend arrow + delta + time since last reading.
 @available(iOS 18.0, *)
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
 
+    private var unitLabel: String {
+        switch snapshot.unit {
+        case .mgdl: return "mg/dL"
+        case .mmol: return "mmol/L"
+        }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(LAFormat.glucose(snapshot))
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white)
-                Text(LAFormat.trendArrow(snapshot))
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.9))
-            }
-            HStack(spacing: 8) {
-                Text(LAFormat.delta(snapshot))
+        HStack(alignment: .center, spacing: 0) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(LAFormat.glucose(snapshot))
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(LAColors.keyline(for: snapshot))
+
+                    Text(LAFormat.trendArrow(snapshot))
+                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .foregroundStyle(LAColors.keyline(for: snapshot))
+                }
+
+                Text("\(LAFormat.delta(snapshot)) \(unitLabel)")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.85))
-                Text(LAFormat.updated(snapshot))
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(LAFormat.projected(snapshot))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
                     .monospacedDigit()
+                    .foregroundStyle(.white)
+
+                Text(unitLabel)
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
                     .foregroundStyle(.white.opacity(0.65))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .padding(10)
-        .activityBackgroundTint(LAColors.backgroundTint(for: snapshot))
     }
 }
 
@@ -158,7 +172,6 @@ private struct LockScreenLiveActivityView: View {
 
         VStack(spacing: 6) {
             HStack(spacing: 12) {
-                // LEFT: Glucose + trend arrow, delta below
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
                         Text(LAFormat.glucose(s))
@@ -186,13 +199,11 @@ private struct LockScreenLiveActivityView: View {
                 .frame(minWidth: 168, maxWidth: 190, alignment: .leading)
                 .layoutPriority(2)
 
-                // Divider
                 Rectangle()
                     .fill(Color.white.opacity(0.20))
                     .frame(width: 1)
                     .padding(.vertical, 8)
 
-                // RIGHT: configurable 2×2 grid
                 VStack(spacing: 8) {
                     HStack(spacing: 12) {
                         SlotView(option: slotConfig[0], snapshot: s)
@@ -206,8 +217,9 @@ private struct LockScreenLiveActivityView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
 
-            // Footer: last update time
-            Text("Last Update: \(LAFormat.updated(s))")
+            Text(LAAppGroupSettings.showDisplayName()
+                ? "\(LAAppGroupSettings.displayName()) — \(LAFormat.updated(s))"
+                : "Last Update: \(LAFormat.updated(s))")
                 .font(.system(size: 11, weight: .regular, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(.white.opacity(0.65))
@@ -219,7 +231,7 @@ private struct LockScreenLiveActivityView: View {
         .padding(.bottom, 8)
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.20), lineWidth: 1),
+                .stroke(Color.white.opacity(0.20), lineWidth: 1)
         )
         .overlay(
             Group {
@@ -227,23 +239,25 @@ private struct LockScreenLiveActivityView: View {
                     ZStack {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(Color(uiColor: UIColor.systemRed).opacity(0.85))
+
                         Text("Not Looping")
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .tracking(1.5)
                     }
                 }
-            },
+            }
         )
         .overlay(
             ZStack {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color.gray.opacity(0.9))
+
                 Text("Tap to update")
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(.white)
             }
-            .opacity(state.snapshot.showRenewalOverlay ? 1 : 0),
+            .opacity(state.snapshot.showRenewalOverlay ? 1 : 0)
         )
     }
 }
@@ -284,19 +298,16 @@ private struct MetricBlock: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
         }
-        .frame(width: 60, alignment: .leading) // slightly tighter columns to free space for glucose
+        .frame(width: 60, alignment: .leading)
     }
 }
 
-/// Renders one configurable slot in the lock screen 2×2 grid.
-/// Shows nothing (invisible placeholder) when the slot option is `.none`.
 private struct SlotView: View {
     let option: LiveActivitySlotOption
     let snapshot: GlucoseSnapshot
 
     var body: some View {
         if option == .none {
-            // Invisible spacer — preserves grid alignment
             Color.clear
                 .frame(width: 60, height: 36)
         } else {
@@ -336,6 +347,7 @@ private struct SlotView: View {
 
 private struct DynamicIslandLeadingView: View {
     let snapshot: GlucoseSnapshot
+
     var body: some View {
         if snapshot.isNotLooping {
             Text("⚠️ Not Looping")
@@ -350,14 +362,17 @@ private struct DynamicIslandLeadingView: View {
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.white)
+
                 HStack(spacing: 5) {
                     Text(LAFormat.trendArrow(snapshot))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
+
                     Text(LAFormat.delta(snapshot))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(.white.opacity(0.9))
+
                     Text("Proj: \(LAFormat.projected(snapshot))")
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .monospacedDigit()
@@ -370,6 +385,7 @@ private struct DynamicIslandLeadingView: View {
 
 private struct DynamicIslandTrailingView: View {
     let snapshot: GlucoseSnapshot
+
     var body: some View {
         if snapshot.isNotLooping {
             EmptyView()
@@ -379,6 +395,7 @@ private struct DynamicIslandTrailingView: View {
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.95))
+
                 Text("COB \(LAFormat.cob(snapshot))")
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .monospacedDigit()
@@ -391,6 +408,7 @@ private struct DynamicIslandTrailingView: View {
 
 private struct DynamicIslandBottomView: View {
     let snapshot: GlucoseSnapshot
+
     var body: some View {
         if snapshot.isNotLooping {
             Text("Loop has not reported in 15+ minutes")
@@ -410,6 +428,7 @@ private struct DynamicIslandBottomView: View {
 
 private struct DynamicIslandCompactTrailingView: View {
     let snapshot: GlucoseSnapshot
+
     var body: some View {
         if snapshot.isNotLooping {
             Text("Not Looping")
@@ -428,6 +447,7 @@ private struct DynamicIslandCompactTrailingView: View {
 
 private struct DynamicIslandCompactLeadingView: View {
     let snapshot: GlucoseSnapshot
+
     var body: some View {
         if snapshot.isNotLooping {
             Text("⚠️")
@@ -443,6 +463,7 @@ private struct DynamicIslandCompactLeadingView: View {
 
 private struct DynamicIslandMinimalView: View {
     let snapshot: GlucoseSnapshot
+
     var body: some View {
         if snapshot.isNotLooping {
             Text("⚠️")
@@ -459,8 +480,6 @@ private struct DynamicIslandMinimalView: View {
 // MARK: - Formatting
 
 private enum LAFormat {
-    // MARK: - NumberFormatters (locale-aware)
-
     private static let mgdlFormatter: NumberFormatter = {
         let nf = NumberFormatter()
         nf.numberStyle = .decimal
@@ -488,8 +507,6 @@ private enum LAFormat {
         }
     }
 
-    // MARK: Glucose
-
     static func glucose(_ s: GlucoseSnapshot) -> String {
         formatGlucoseValue(s.glucose, unit: s.unit)
     }
@@ -500,7 +517,6 @@ private enum LAFormat {
             let v = Int(round(s.delta))
             if v == 0 { return "0" }
             return v > 0 ? "+\(v)" : "\(v)"
-
         case .mmol:
             let mmol = GlucoseConversion.toMmol(s.delta)
             let d = (abs(mmol) < 0.05) ? 0.0 : mmol
@@ -509,8 +525,6 @@ private enum LAFormat {
             return d > 0 ? "+\(formatted)" : "-\(formatted)"
         }
     }
-
-    // MARK: Trend
 
     static func trendArrow(_ s: GlucoseSnapshot) -> String {
         switch s.trend {
@@ -524,8 +538,6 @@ private enum LAFormat {
         case .unknown: "–"
         }
     }
-
-    // MARK: Secondary
 
     static func iob(_ s: GlucoseSnapshot) -> String {
         guard let v = s.iob else { return "—" }
@@ -542,8 +554,6 @@ private enum LAFormat {
         return formatGlucoseValue(v, unit: s.unit)
     }
 
-    // MARK: Extended InfoType formatters
-
     private static let ageFormatter: DateComponentsFormatter = {
         let f = DateComponentsFormatter()
         f.unitsStyle = .positional
@@ -552,7 +562,6 @@ private enum LAFormat {
         return f
     }()
 
-    /// Formats an insert-time epoch into "D:HH" age string. Returns "—" if time is 0.
     static func age(insertTime: TimeInterval) -> String {
         guard insertTime > 0 else { return "—" }
         let secondsAgo = Date().timeIntervalSince1970 - insertTime
@@ -630,13 +639,11 @@ private enum LAFormat {
         s.profileName ?? "—"
     }
 
-    // MARK: Update time
-
     private static let hhmmFormatter: DateFormatter = {
         let df = DateFormatter()
         df.locale = .current
         df.timeZone = .current
-        df.dateFormat = "HH:mm" // 24h format
+        df.dateFormat = "HH:mm"
         return df
     }()
 
@@ -657,12 +664,11 @@ private enum LAFormat {
     }
 }
 
-// MARK: - Threshold-driven colors (Option A, App Group-backed)
+// MARK: - Threshold-driven colors
 
 private enum LAColors {
     static func backgroundTint(for snapshot: GlucoseSnapshot) -> Color {
         let mgdl = snapshot.glucose
-
         let t = LAAppGroupSettings.thresholdsMgdl()
         let low = t.low
         let high = t.high
@@ -671,12 +677,10 @@ private enum LAColors {
             let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / (low - 54.0))
             let opacity = min(max(raw, 0.48), 0.85)
             return Color(uiColor: UIColor.systemRed).opacity(opacity)
-
         } else if mgdl > high {
             let raw = 0.44 + (0.85 - 0.44) * ((mgdl - high) / (324.0 - high))
             let opacity = min(max(raw, 0.44), 0.85)
             return Color(uiColor: UIColor.systemOrange).opacity(opacity)
-
         } else {
             return Color(uiColor: UIColor.systemGreen).opacity(0.36)
         }
@@ -684,7 +688,6 @@ private enum LAColors {
 
     static func keyline(for snapshot: GlucoseSnapshot) -> Color {
         let mgdl = snapshot.glucose
-
         let t = LAAppGroupSettings.thresholdsMgdl()
         let low = t.low
         let high = t.high

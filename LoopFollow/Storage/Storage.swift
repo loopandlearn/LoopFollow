@@ -216,6 +216,191 @@ class Storage {
     static let shared = Storage()
     private init() {}
 
+    /// Set to true at launch if isProtectedDataAvailable was false (BFU state).
+    /// Consumed and cleared on the first foreground after that launch.
+    var needsBFUReload = false
+
+    /// Re-reads every StorageValue from UserDefaults, firing @Published only where the value
+    /// actually changed. Call this when foregrounding after a Before-First-Unlock (BFU) background
+    /// launch, where Storage was initialized while UserDefaults was encrypted and all values were
+    /// cached as their defaults.
+    ///
+    /// `migrationStep` is intentionally excluded: viewDidLoad writes it to 6 during the BFU
+    /// launch; if we reloaded it and the flush had somehow not landed yet, migrations would re-run.
+    ///
+    /// SecureStorageValue properties (maxBolus, maxCarbs, maxProtein, maxFat, bolusIncrement) are
+    /// not covered here — SecureStorageValue does not implement reload() and Keychain has the same
+    /// BFU inaccessibility; that is a separate problem.
+    func reloadAll() {
+        remoteType.reload()
+        deviceToken.reload()
+        expirationDate.reload()
+        sharedSecret.reload()
+        productionEnvironment.reload()
+        remoteApnsKey.reload()
+        teamId.reload()
+        remoteKeyId.reload()
+
+        lfApnsKey.reload()
+        lfKeyId.reload()
+        bundleId.reload()
+        user.reload()
+
+        mealWithBolus.reload()
+        mealWithFatProtein.reload()
+        hasSeenFatProteinOrderChange.reload()
+
+        backgroundRefreshType.reload()
+        selectedBLEDevice.reload()
+        debugLogLevel.reload()
+
+        contactTrend.reload()
+        contactDelta.reload()
+        contactEnabled.reload()
+        contactBackgroundColor.reload()
+        contactTextColor.reload()
+
+        sensorScheduleOffset.reload()
+        alarms.reload()
+        alarmConfiguration.reload()
+
+        lastOverrideStartNotified.reload()
+        lastOverrideEndNotified.reload()
+        lastTempTargetStartNotified.reload()
+        lastTempTargetEndNotified.reload()
+        lastRecBolusNotified.reload()
+        lastCOBNotified.reload()
+        lastMissedBolusNotified.reload()
+
+        appBadge.reload()
+        colorBGText.reload()
+        appearanceMode.reload()
+        showStats.reload()
+        useIFCC.reload()
+        showSmallGraph.reload()
+        screenlockSwitchState.reload()
+        showDisplayName.reload()
+        snoozerEmoji.reload()
+        forcePortraitMode.reload()
+
+        speakBG.reload()
+        speakBGAlways.reload()
+        speakLowBG.reload()
+        speakProactiveLowBG.reload()
+        speakFastDropDelta.reload()
+        speakLowBGLimit.reload()
+        speakHighBGLimit.reload()
+        speakHighBG.reload()
+        speakLanguage.reload()
+
+        lastBgReadingTimeSeconds.reload()
+        lastDeltaMgdl.reload()
+        lastTrendCode.reload()
+        lastIOB.reload()
+        lastCOB.reload()
+        projectedBgMgdl.reload()
+
+        lastBasal.reload()
+        lastPumpReservoirU.reload()
+        lastAutosens.reload()
+        lastTdd.reload()
+        lastTargetLowMgdl.reload()
+        lastTargetHighMgdl.reload()
+        lastIsfMgdlPerU.reload()
+        lastCarbRatio.reload()
+        lastCarbsToday.reload()
+        lastProfileName.reload()
+        iageInsertTime.reload()
+        lastMinBgMgdl.reload()
+        lastMaxBgMgdl.reload()
+
+        laEnabled.reload()
+        laRenewBy.reload()
+        laRenewalFailed.reload()
+
+        showDots.reload()
+        showLines.reload()
+        showValues.reload()
+        showAbsorption.reload()
+        showDIALines.reload()
+        show30MinLine.reload()
+        show90MinLine.reload()
+        showMidnightLines.reload()
+        smallGraphTreatments.reload()
+        smallGraphHeight.reload()
+        predictionToLoad.reload()
+        minBasalScale.reload()
+        minBGScale.reload()
+        lowLine.reload()
+        highLine.reload()
+        downloadDays.reload()
+        graphTimeZoneEnabled.reload()
+        graphTimeZoneIdentifier.reload()
+
+        writeCalendarEvent.reload()
+        calendarIdentifier.reload()
+        watchLine1.reload()
+        watchLine2.reload()
+
+        shareUserName.reload()
+        sharePassword.reload()
+        shareServer.reload()
+
+        chartScaleX.reload()
+
+        downloadTreatments.reload()
+        downloadPrediction.reload()
+        graphOtherTreatments.reload()
+        graphBasal.reload()
+        graphBolus.reload()
+        graphCarbs.reload()
+        bgUpdateDelay.reload()
+
+        cageInsertTime.reload()
+        sageInsertTime.reload()
+
+        cachedForVersion.reload()
+        latestVersion.reload()
+        latestVersionChecked.reload()
+        currentVersionBlackListed.reload()
+        lastBlacklistNotificationShown.reload()
+        lastVersionUpdateNotificationShown.reload()
+        lastExpirationNotificationShown.reload()
+
+        hideInfoTable.reload()
+        token.reload()
+        units.reload()
+        infoSort.reload()
+        infoVisible.reload()
+
+        url.reload()
+        device.reload()
+        nsWriteAuth.reload()
+        nsAdminAuth.reload()
+
+        // migrationStep intentionally excluded — see method comment above.
+
+        persistentNotification.reload()
+        persistentNotificationLastBGTime.reload()
+
+        lastLoopingChecked.reload()
+        lastBGChecked.reload()
+
+        homePosition.reload()
+        alarmsPosition.reload()
+        snoozerPosition.reload()
+        nightscoutPosition.reload()
+        remotePosition.reload()
+        statisticsPosition.reload()
+        treatmentsPosition.reload()
+
+        loopAPNSQrCodeURL.reload()
+        bolusIncrementDetected.reload()
+        showGMI.reload()
+        showStdDev.reload()
+        showTITR.reload()
+    }
+
     // MARK: - Tab Position Helpers
 
     /// Get the position for a given tab item

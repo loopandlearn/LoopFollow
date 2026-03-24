@@ -32,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         let action = UNNotificationAction(identifier: "OPEN_APP_ACTION", title: "Open App", options: .foreground)
-        let category = UNNotificationCategory(identifier: "loopfollow.background.alert", actions: [action], intentIdentifiers: [], options: [])
+        let category = UNNotificationCategory(identifier: BackgroundAlertIdentifier.categoryIdentifier, actions: [action], intentIdentifiers: [], options: [])
         UNUserNotificationCenter.current().setNotificationCategories([category])
 
         UNUserNotificationCenter.current().delegate = self
@@ -47,6 +47,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         BackgroundRefreshManager.shared.register()
+
+        // Detect Before-First-Unlock launch. If protected data is unavailable here,
+        // StorageValues were cached from encrypted UserDefaults and need a reload
+        // on the first foreground after the user unlocks.
+        let bfu = !UIApplication.shared.isProtectedDataAvailable
+        Storage.shared.needsBFUReload = bfu
+        LogManager.shared.log(category: .general, message: "BFU check: isProtectedDataAvailable=\(!bfu), needsBFUReload=\(bfu)")
+
         return true
     }
 
@@ -107,7 +115,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Note: with scene-based lifecycle (iOS 13+), URLs are delivered to
     // SceneDelegate.scene(_:openURLContexts:) — not here. The scene delegate
-    // handles loopfollow://la-tap for Live Activity tap navigation.
+    // handles <urlScheme>://la-tap for Live Activity tap navigation.
 
     // MARK: UISceneSession Lifecycle
 

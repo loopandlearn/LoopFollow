@@ -310,6 +310,10 @@ final class LiveActivityManager {
                 lowMgdl: Storage.shared.lowLine.value,
                 highMgdl: Storage.shared.highLine.value,
             )
+            LAAppGroupSettings.setDisplayName(
+                Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "LoopFollow",
+                show: Storage.shared.showDisplayName.value
+            )
             GlucoseSnapshotStore.shared.save(snapshot)
         }
         startIfNeeded()
@@ -322,7 +326,7 @@ final class LiveActivityManager {
             self?.performRefresh(reason: reason)
         }
         refreshWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 20.0, execute: workItem)
     }
 
     // MARK: - Renewal
@@ -557,6 +561,8 @@ final class LiveActivityManager {
 
     // MARK: - Renewal Notifications
 
+    private static let renewalNotificationID = "\(Bundle.main.bundleIdentifier ?? "loopfollow").la.renewal.failed"
+
     private func scheduleRenewalFailedNotification() {
         let content = UNMutableNotificationContent()
         content.title = "Live Activity Expiring"
@@ -564,7 +570,7 @@ final class LiveActivityManager {
         content.sound = .default
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(
-            identifier: "loopfollow.la.renewal.failed",
+            identifier: LiveActivityManager.renewalNotificationID,
             content: content,
             trigger: trigger,
         )
@@ -577,7 +583,7 @@ final class LiveActivityManager {
     }
 
     private func cancelRenewalFailedNotification() {
-        let id = "loopfollow.la.renewal.failed"
+        let id = LiveActivityManager.renewalNotificationID
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [id])
     }
