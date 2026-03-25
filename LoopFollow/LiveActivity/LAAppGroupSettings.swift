@@ -119,7 +119,7 @@ enum LiveActivitySlotDefaults {
     /// Bottom-right slot — intentionally empty until the user configures it
     static let slot4: LiveActivitySlotOption = .none
     /// Small widget (CarPlay / Watch Smart Stack) right slot
-    static let smallWidgetSlot: LiveActivitySlotOption = .iob
+    static let smallWidgetSlot: LiveActivitySlotOption = .projectedBG
 
     static var all: [LiveActivitySlotOption] {
         [slot1, slot2, slot3, slot4]
