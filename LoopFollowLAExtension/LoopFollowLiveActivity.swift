@@ -124,6 +124,8 @@ private struct SmallFamilyView: View {
     }
 
     var body: some View {
+        let rightSlot = LAAppGroupSettings.smallWidgetSlot()
+
         HStack(alignment: .center, spacing: 0) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
@@ -145,15 +147,19 @@ private struct SmallFamilyView: View {
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(LAFormat.projected(snapshot))
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white)
+            if rightSlot != .none {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(rightSlot.gridLabel)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.65))
 
-                Text(unitLabel)
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.65))
+                    Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -302,6 +308,33 @@ private struct MetricBlock: View {
     }
 }
 
+private func slotFormattedValue(option: LiveActivitySlotOption, snapshot: GlucoseSnapshot) -> String {
+    switch option {
+    case .none: ""
+    case .delta: LAFormat.delta(snapshot)
+    case .projectedBG: LAFormat.projected(snapshot)
+    case .minMax: LAFormat.minMax(snapshot)
+    case .iob: LAFormat.iob(snapshot)
+    case .cob: LAFormat.cob(snapshot)
+    case .recBolus: LAFormat.recBolus(snapshot)
+    case .autosens: LAFormat.autosens(snapshot)
+    case .tdd: LAFormat.tdd(snapshot)
+    case .basal: LAFormat.basal(snapshot)
+    case .pump: LAFormat.pump(snapshot)
+    case .pumpBattery: LAFormat.pumpBattery(snapshot)
+    case .battery: LAFormat.battery(snapshot)
+    case .target: LAFormat.target(snapshot)
+    case .isf: LAFormat.isf(snapshot)
+    case .carbRatio: LAFormat.carbRatio(snapshot)
+    case .sage: LAFormat.age(insertTime: snapshot.sageInsertTime)
+    case .cage: LAFormat.age(insertTime: snapshot.cageInsertTime)
+    case .iage: LAFormat.age(insertTime: snapshot.iageInsertTime)
+    case .carbsToday: LAFormat.carbsToday(snapshot)
+    case .override: LAFormat.override(snapshot)
+    case .profile: LAFormat.profileName(snapshot)
+    }
+}
+
 private struct SlotView: View {
     let option: LiveActivitySlotOption
     let snapshot: GlucoseSnapshot
@@ -311,34 +344,7 @@ private struct SlotView: View {
             Color.clear
                 .frame(width: 60, height: 36)
         } else {
-            MetricBlock(label: option.gridLabel, value: value(for: option))
-        }
-    }
-
-    private func value(for option: LiveActivitySlotOption) -> String {
-        switch option {
-        case .none: ""
-        case .delta: LAFormat.delta(snapshot)
-        case .projectedBG: LAFormat.projected(snapshot)
-        case .minMax: LAFormat.minMax(snapshot)
-        case .iob: LAFormat.iob(snapshot)
-        case .cob: LAFormat.cob(snapshot)
-        case .recBolus: LAFormat.recBolus(snapshot)
-        case .autosens: LAFormat.autosens(snapshot)
-        case .tdd: LAFormat.tdd(snapshot)
-        case .basal: LAFormat.basal(snapshot)
-        case .pump: LAFormat.pump(snapshot)
-        case .pumpBattery: LAFormat.pumpBattery(snapshot)
-        case .battery: LAFormat.battery(snapshot)
-        case .target: LAFormat.target(snapshot)
-        case .isf: LAFormat.isf(snapshot)
-        case .carbRatio: LAFormat.carbRatio(snapshot)
-        case .sage: LAFormat.age(insertTime: snapshot.sageInsertTime)
-        case .cage: LAFormat.age(insertTime: snapshot.cageInsertTime)
-        case .iage: LAFormat.age(insertTime: snapshot.iageInsertTime)
-        case .carbsToday: LAFormat.carbsToday(snapshot)
-        case .override: LAFormat.override(snapshot)
-        case .profile: LAFormat.profileName(snapshot)
+            MetricBlock(label: option.gridLabel, value: slotFormattedValue(option: option, snapshot: snapshot))
         }
     }
 }

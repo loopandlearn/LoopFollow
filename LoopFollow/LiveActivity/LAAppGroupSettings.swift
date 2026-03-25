@@ -118,6 +118,8 @@ enum LiveActivitySlotDefaults {
     static let slot3: LiveActivitySlotOption = .projectedBG
     /// Bottom-right slot — intentionally empty until the user configures it
     static let slot4: LiveActivitySlotOption = .none
+    /// Small widget (CarPlay / Watch Smart Stack) right slot
+    static let smallWidgetSlot: LiveActivitySlotOption = .iob
 
     static var all: [LiveActivitySlotOption] {
         [slot1, slot2, slot3, slot4]
@@ -135,6 +137,7 @@ enum LAAppGroupSettings {
         static let lowLineMgdl = "la.lowLine.mgdl"
         static let highLineMgdl = "la.highLine.mgdl"
         static let slots = "la.slots"
+        static let smallWidgetSlot = "la.smallWidgetSlot"
         static let displayName = "la.displayName"
         static let showDisplayName = "la.showDisplayName"
     }
@@ -177,6 +180,21 @@ enum LAAppGroupSettings {
             return LiveActivitySlotDefaults.all
         }
         return raw.map { LiveActivitySlotOption(rawValue: $0) ?? .none }
+    }
+
+    // MARK: - Small widget slot (Write)
+
+    static func setSmallWidgetSlot(_ slot: LiveActivitySlotOption) {
+        defaults?.set(slot.rawValue, forKey: Keys.smallWidgetSlot)
+    }
+
+    // MARK: - Small widget slot (Read)
+
+    static func smallWidgetSlot() -> LiveActivitySlotOption {
+        guard let raw = defaults?.string(forKey: Keys.smallWidgetSlot) else {
+            return LiveActivitySlotDefaults.smallWidgetSlot
+        }
+        return LiveActivitySlotOption(rawValue: raw) ?? LiveActivitySlotDefaults.smallWidgetSlot
     }
 
     // MARK: - Display Name
