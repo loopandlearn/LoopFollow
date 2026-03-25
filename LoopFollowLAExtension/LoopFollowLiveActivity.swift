@@ -128,7 +128,6 @@ private struct SmallFamilyView: View {
     var body: some View {
         let rightSlot = LAAppGroupSettings.smallWidgetSlot()
 
-
         HStack(alignment: .center, spacing: 0) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {

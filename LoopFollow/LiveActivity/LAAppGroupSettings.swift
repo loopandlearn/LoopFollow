@@ -206,7 +206,6 @@ enum LAAppGroupSettings {
         return LiveActivitySlotOption(rawValue: raw) ?? LiveActivitySlotDefaults.smallWidgetSlot
     }
 
-
     // MARK: - Display Name
 
     static func setDisplayName(_ name: String, show: Bool) {
