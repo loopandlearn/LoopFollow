@@ -116,11 +116,18 @@ private struct LockScreenFamilyAdaptiveView: View {
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
 
-    private var unitLabel: String {
-        switch snapshot.unit {
-        case .mgdl: return "mg/dL"
-        case .mmol: return "mmol/L"
-        }
+    private var glucoseUnitLabel: String {
+        snapshot.unit == .mmol ? "mmol/L" : "mg/dL"
+    }
+
+    private var deltaUnitLabel: String { glucoseUnitLabel }
+
+    /// Unit label for the right slot — ISF appends "/U", other glucose slots
+    /// use the plain glucose unit, non-glucose slots return nil.
+    private func rightSlotUnitLabel(for slot: LiveActivitySlotOption) -> String? {
+        guard slot.isGlucoseUnit else { return nil }
+        if slot == .isf { return glucoseUnitLabel + "/U" }
+        return glucoseUnitLabel
     }
 
     var body: some View {
@@ -139,16 +146,17 @@ private struct SmallFamilyView: View {
                         .foregroundStyle(LAColors.keyline(for: snapshot))
                 }
 
-                Text("\(LAFormat.delta(snapshot)) \(unitLabel)")
+                Text("\(LAFormat.delta(snapshot)) \(deltaUnitLabel)")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.85))
             }
+            .layoutPriority(1)
 
             Spacer()
 
             if rightSlot != .none {
-                if rightSlot.isGlucoseUnit {
+                if let unitLabel = rightSlotUnitLabel(for: rightSlot) {
                     // Use ViewThatFits so the unit label appears on surfaces with
                     // enough vertical space (CarPlay) and is omitted where it doesn't
                     // fit (Watch Smart Stack).
@@ -158,7 +166,7 @@ private struct SmallFamilyView: View {
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.65))
                             Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .monospacedDigit()
                                 .foregroundStyle(.white)
                                 .lineLimit(1)
@@ -172,7 +180,7 @@ private struct SmallFamilyView: View {
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.65))
                             Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .monospacedDigit()
                                 .foregroundStyle(.white)
                                 .lineLimit(1)
@@ -185,7 +193,7 @@ private struct SmallFamilyView: View {
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.65))
                         Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .foregroundStyle(.white)
                             .lineLimit(1)
