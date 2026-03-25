@@ -30,7 +30,7 @@ struct LiveActivitySettingsView: View {
                 }
             }
 
-            Section(header: Text("Grid slots")) {
+            Section(header: Text("Grid Slots - Live Activity")) {
                 ForEach(0 ..< 4, id: \.self) { index in
                     Picker(slotLabels[index], selection: Binding(
                         get: { slots[index] },
@@ -43,7 +43,7 @@ struct LiveActivitySettingsView: View {
                 }
             }
 
-            Section(header: Text("Small widget (CarPlay / Watch)")) {
+            Section(header: Text("Grid Slot - CarPlay / Watch")) {
                 Picker("Right slot", selection: Binding(
                     get: { smallWidgetSlot },
                     set: { newValue in
