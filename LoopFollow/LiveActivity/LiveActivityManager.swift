@@ -87,6 +87,10 @@ final class LiveActivityManager {
 
     @objc private func handleDidBecomeActive() {
         guard Storage.shared.laEnabled.value else { return }
+        if skipNextDidBecomeActive {
+            skipNextDidBecomeActive = false
+            return
+        }
         Task { @MainActor in
             self.startFromCurrentState()
         }
@@ -107,6 +111,11 @@ final class LiveActivityManager {
         // We cannot call startIfNeeded() here: it finds the existing activity in
         // Activity.activities and reuses it rather than replacing it.
         LogManager.shared.log(category: .general, message: "[LA] ending stale LA and restarting (renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing))")
+        // Suppress the handleDidBecomeActive() call that always fires after willEnterForeground.
+        // Without this, the two methods race: didBecomeActive binds to the old (dying) activity
+        // and observes its push token, while handleForeground's async end+restart creates a new
+        // activity — leaving pushToken nil when the new activity tries to start.
+        skipNextDidBecomeActive = true
         // Clear state synchronously so any snapshot built between now and when the
         // new LA is started computes showRenewalOverlay = false.
         Storage.shared.laRenewBy.value = 0
@@ -167,6 +176,9 @@ final class LiveActivityManager {
     /// In-memory only — resets to false on app relaunch, so a kill + relaunch
     /// starts fresh as expected.
     private var dismissedByUser = false
+    /// Set by handleForeground() when it takes ownership of the restart sequence.
+    /// Prevents handleDidBecomeActive() from racing with an in-flight end+restart.
+    private var skipNextDidBecomeActive = false
 
     // MARK: - Public API
 
