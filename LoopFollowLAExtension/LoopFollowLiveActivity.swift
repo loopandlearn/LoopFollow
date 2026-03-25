@@ -116,18 +116,12 @@ private struct LockScreenFamilyAdaptiveView: View {
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
 
-    private var glucoseUnitLabel: String {
-        snapshot.unit == .mmol ? "mmol/L" : "mg/dL"
-    }
-
-    private var deltaUnitLabel: String { glucoseUnitLabel }
-
     /// Unit label for the right slot — ISF appends "/U", other glucose slots
     /// use the plain glucose unit, non-glucose slots return nil.
     private func rightSlotUnitLabel(for slot: LiveActivitySlotOption) -> String? {
         guard slot.isGlucoseUnit else { return nil }
-        if slot == .isf { return glucoseUnitLabel + "/U" }
-        return glucoseUnitLabel
+        if slot == .isf { return snapshot.unit.displayName + "/U" }
+        return snapshot.unit.displayName
     }
 
     var body: some View {
@@ -146,7 +140,7 @@ private struct SmallFamilyView: View {
                         .foregroundStyle(LAColors.keyline(for: snapshot))
                 }
 
-                Text("\(LAFormat.delta(snapshot)) \(deltaUnitLabel)")
+                Text("\(LAFormat.delta(snapshot)) \(snapshot.unit.displayName)")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.85))
