@@ -12,6 +12,14 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     enum Unit: String, Codable, Hashable {
         case mgdl
         case mmol
+
+        /// Human-readable display string for the unit (e.g. "mg/dL" or "mmol/L").
+        var displayName: String {
+            switch self {
+            case .mgdl: return "mg/dL"
+            case .mmol: return "mmol/L"
+            }
+        }
     }
 
     // MARK: - Core Glucose

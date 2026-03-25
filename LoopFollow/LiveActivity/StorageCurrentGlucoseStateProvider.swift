@@ -123,7 +123,9 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
     // MARK: - Loop Status
 
     var isNotLooping: Bool {
-        Observable.shared.isNotLooping.value
+        let lastLoopTime = Storage.shared.lastLoopTime.value
+        guard lastLoopTime > 0, !Storage.shared.url.value.isEmpty else { return false }
+        return Date().timeIntervalSince1970 - lastLoopTime >= 15 * 60
     }
 
     // MARK: - Renewal

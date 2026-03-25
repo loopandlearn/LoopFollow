@@ -1,6 +1,3 @@
-// LoopFollow
-// LoopFollowLABundle.swift
-
 import SwiftUI
 import WidgetKit
 

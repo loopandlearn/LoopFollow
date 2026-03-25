@@ -194,6 +194,7 @@ class Storage {
 
     var lastLoopingChecked = StorageValue<Date?>(key: "lastLoopingChecked", defaultValue: nil)
     var lastBGChecked = StorageValue<Date?>(key: "lastBGChecked", defaultValue: nil)
+    var lastLoopTime = StorageValue<TimeInterval>(key: "lastLoopTime", defaultValue: 0)
 
     // Tab positions - which position each item is in (positions 1-4 are customizable, 5 is always Menu)
     var homePosition = StorageValue<TabPosition>(key: "homePosition", defaultValue: .position1)
@@ -385,6 +386,7 @@ class Storage {
 
         lastLoopingChecked.reload()
         lastBGChecked.reload()
+        lastLoopTime.reload()
 
         homePosition.reload()
         alarmsPosition.reload()
