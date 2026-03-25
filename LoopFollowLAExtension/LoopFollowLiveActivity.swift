@@ -159,6 +159,12 @@ private struct SmallFamilyView: View {
                         .foregroundStyle(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
+
+                    if rightSlot.isGlucoseUnit {
+                        Text(unitLabel)
+                            .font(.system(size: 11, weight: .regular, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.55))
+                    }
                 }
             }
         }

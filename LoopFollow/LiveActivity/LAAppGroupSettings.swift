@@ -97,6 +97,15 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
         }
     }
 
+    /// True when the value is a glucose measurement and should be followed by
+    /// the user's preferred unit label (mg/dL or mmol/L) in compact displays.
+    var isGlucoseUnit: Bool {
+        switch self {
+        case .projectedBG, .delta, .minMax, .target, .isf: return true
+        default: return false
+        }
+    }
+
     /// True when the underlying value may be nil (e.g. Dexcom-only users who have
     /// no Loop data). The widget renders "—" in those cases.
     var isOptional: Bool {
