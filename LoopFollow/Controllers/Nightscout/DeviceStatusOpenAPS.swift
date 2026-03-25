@@ -117,6 +117,9 @@ extension MainViewController {
             if let eventualBGValue = enactedOrSuggested["eventualBG"] as? Double {
                 let eventualBGQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: eventualBGValue)
                 PredictionLabel.text = Localizer.formatQuantity(eventualBGQuantity)
+                Storage.shared.projectedBgMgdl.value = eventualBGValue
+            } else {
+                Storage.shared.projectedBgMgdl.value = nil
             }
 
             // Target
@@ -243,7 +246,6 @@ extension MainViewController {
             // Live Activity storage
             Storage.shared.lastIOB.value = latestIOB?.value
             Storage.shared.lastCOB.value = latestCOB?.value
-            Storage.shared.projectedBgMgdl.value = nil
         }
     }
 }
