@@ -148,22 +148,48 @@ private struct SmallFamilyView: View {
             Spacer()
 
             if rightSlot != .none {
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(rightSlot.gridLabel)
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.65))
-
-                    Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-
-                    if rightSlot.isGlucoseUnit {
-                        Text(unitLabel)
-                            .font(.system(size: 11, weight: .regular, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.55))
+                if rightSlot.isGlucoseUnit {
+                    // Use ViewThatFits so the unit label appears on surfaces with
+                    // enough vertical space (CarPlay) and is omitted where it doesn't
+                    // fit (Watch Smart Stack).
+                    ViewThatFits(in: .vertical) {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(rightSlot.gridLabel)
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.65))
+                            Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .monospacedDigit()
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                            Text(unitLabel)
+                                .font(.system(size: 11, weight: .regular, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.55))
+                        }
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(rightSlot.gridLabel)
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.65))
+                            Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .monospacedDigit()
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                    }
+                } else {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(rightSlot.gridLabel)
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.65))
+                        Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
                 }
             }
