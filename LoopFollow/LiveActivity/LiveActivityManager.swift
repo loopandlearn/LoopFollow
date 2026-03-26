@@ -120,6 +120,7 @@ final class LiveActivityManager {
         // new LA is started computes showRenewalOverlay = false.
         Storage.shared.laRenewBy.value = 0
         Storage.shared.laRenewalFailed.value = false
+        cancelRenewalFailedNotification()
 
         guard let activity = current else {
             startFromCurrentState()
@@ -189,6 +190,28 @@ final class LiveActivityManager {
         }
 
         if let existing = Activity<GlucoseLiveActivityAttributes>.activities.first {
+            // Before reusing, check whether this activity needs a restart. This covers cold
+            // starts (app was killed while the overlay was showing — willEnterForeground is
+            // never sent, so handleForeground never runs) and any other path that lands here
+            // without first going through handleForeground.
+            let renewBy = Storage.shared.laRenewBy.value
+            let now = Date().timeIntervalSince1970
+            let staleDatePassed = existing.content.staleDate.map { $0 <= Date() } ?? false
+            let inRenewalWindow = renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
+            let needsRestart = Storage.shared.laRenewalFailed.value || inRenewalWindow || staleDatePassed
+
+            if needsRestart {
+                LogManager.shared.log(category: .general, message: "[LA] existing activity is stale on startIfNeeded — ending and restarting (staleDatePassed=\(staleDatePassed), inRenewalWindow=\(inRenewalWindow))")
+                Storage.shared.laRenewBy.value = 0
+                Storage.shared.laRenewalFailed.value = false
+                cancelRenewalFailedNotification()
+                Task {
+                    await existing.end(nil, dismissalPolicy: .immediate)
+                    await MainActor.run { self.startIfNeeded() }
+                }
+                return
+            }
+
             bind(to: existing, logReason: "reuse")
             Storage.shared.laRenewalFailed.value = false
             return
