@@ -142,6 +142,10 @@ final class LiveActivityManager {
             // writing a new laRenewBy deadline.
             await activity.end(nil, dismissalPolicy: .immediate)
             await MainActor.run {
+                // Reset dismissedByUser in case the state observer fired .dismissed during
+                // our own end() call (before its Task cancellation took effect) and
+                // incorrectly set it to true — startFromCurrentState guards on this flag.
+                self.dismissedByUser = false
                 // startFromCurrentState rebuilds the snapshot (showRenewalOverlay = false
                 // since laRenewBy is 0), saves it to the store, then calls startIfNeeded()
                 // which finds no existing activity and requests a fresh LA with a new deadline.
@@ -635,10 +639,14 @@ final class LiveActivityManager {
                         LogManager.shared.log(category: .general, message: "Live Activity cleared id=\(activity.id)", isDebug: true)
                     }
                     if state == .dismissed {
-                        if Storage.shared.laRenewalFailed.value {
-                            // iOS force-dismissed after 8-hour limit with a failed renewal.
-                            // Allow auto-restart when the user opens the app.
-                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by iOS after expiry — auto-restart enabled")
+                        // Distinguish system-initiated dismissal from a user swipe.
+                        // iOS dismisses the activity when (a) the renewal limit was reached
+                        // with a failed renewal, or (b) the staleDate passed and iOS decided
+                        // to remove the activity. In both cases auto-restart is appropriate.
+                        // Only a true user swipe (activity still fresh) should block restart.
+                        let staleDatePassed = activity.content.staleDate.map { $0 <= Date() } ?? false
+                        if Storage.shared.laRenewalFailed.value || staleDatePassed {
+                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by iOS (renewalFailed=\(Storage.shared.laRenewalFailed.value), staleDatePassed=\(staleDatePassed)) — auto-restart enabled")
                         } else {
                             // User manually swiped away the LA. Block auto-restart until
                             // the user explicitly restarts via button or App Intent.
