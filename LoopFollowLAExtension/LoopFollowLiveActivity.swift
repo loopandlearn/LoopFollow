@@ -102,8 +102,20 @@ private struct LockScreenFamilyAdaptiveView: View {
 
     var body: some View {
         if activityFamily == .small {
-            SmallFamilyView(snapshot: state.snapshot)
-                .activityBackgroundTint(Color.black.opacity(0.25))
+            // Use canvas height to distinguish Watch Smart Stack from CarPlay Dashboard.
+            // Watch Smart Stack height is ≤ ~65 pt even on the largest Ultra model;
+            // CarPlay is considerably taller. A 75 pt threshold (≈10% buffer above the
+            // max Watch height) gives reliable separation without relying on exact sizes.
+            GeometryReader { geo in
+                let isWatch = geo.size.height <= 75
+                let enabled = isWatch ? LAAppGroupSettings.watchEnabled() : LAAppGroupSettings.carPlayEnabled()
+                if enabled {
+                    SmallFamilyView(snapshot: state.snapshot)
+                        .activityBackgroundTint(Color.black.opacity(0.25))
+                } else {
+                    Color.clear
+                }
+            }
         } else {
             LockScreenLiveActivityView(state: state)
                 .activityBackgroundTint(LAColors.backgroundTint(for: state.snapshot))

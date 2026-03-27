@@ -147,6 +147,8 @@ enum LAAppGroupSettings {
         static let highLineMgdl = "la.highLine.mgdl"
         static let slots = "la.slots"
         static let smallWidgetSlot = "la.smallWidgetSlot"
+        static let watchEnabled = "la.watchEnabled"
+        static let carPlayEnabled = "la.carPlayEnabled"
         static let displayName = "la.displayName"
         static let showDisplayName = "la.showDisplayName"
     }
@@ -204,6 +206,34 @@ enum LAAppGroupSettings {
             return LiveActivitySlotDefaults.smallWidgetSlot
         }
         return LiveActivitySlotOption(rawValue: raw) ?? LiveActivitySlotDefaults.smallWidgetSlot
+    }
+
+    // MARK: - Watch / CarPlay enabled (Write)
+
+    static func setWatchEnabled(_ enabled: Bool) {
+        defaults?.set(enabled, forKey: Keys.watchEnabled)
+    }
+
+    static func setCarPlayEnabled(_ enabled: Bool) {
+        defaults?.set(enabled, forKey: Keys.carPlayEnabled)
+    }
+
+    // MARK: - Watch / CarPlay enabled (Read)
+
+    /// Whether the Watch Smart Stack Live Activity is enabled.
+    /// Detected at render time by canvas height (≤ 75 pt → Watch).
+    /// Defaults to `true`.
+    static func watchEnabled() -> Bool {
+        guard defaults?.object(forKey: Keys.watchEnabled) != nil else { return true }
+        return defaults?.bool(forKey: Keys.watchEnabled) ?? true
+    }
+
+    /// Whether the CarPlay Dashboard Live Activity is enabled.
+    /// Detected at render time by canvas height (> 75 pt → CarPlay).
+    /// Defaults to `true`.
+    static func carPlayEnabled() -> Bool {
+        guard defaults?.object(forKey: Keys.carPlayEnabled) != nil else { return true }
+        return defaults?.bool(forKey: Keys.carPlayEnabled) ?? true
     }
 
     // MARK: - Display Name
