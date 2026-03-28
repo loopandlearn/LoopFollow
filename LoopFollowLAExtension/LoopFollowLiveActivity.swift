@@ -399,26 +399,19 @@ private struct DynamicIslandLeadingView: View {
                 .minimumScaleFactor(0.7)
         } else {
             VStack(alignment: .leading, spacing: 2) {
-                Text(LAFormat.glucose(snapshot))
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white)
-
-                HStack(spacing: 5) {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(LAFormat.glucose(snapshot))
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(LAColors.keyline(for: snapshot))
                     Text(LAFormat.trendArrow(snapshot))
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.9))
-
-                    Text(LAFormat.delta(snapshot))
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.9))
-
-                    Text("Proj: \(LAFormat.projected(snapshot))")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.9))
+                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .foregroundStyle(LAColors.keyline(for: snapshot))
                 }
+                Text("\(LAFormat.delta(snapshot)) \(snapshot.unit.displayName)")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.85))
             }
         }
     }
@@ -431,18 +424,21 @@ private struct DynamicIslandTrailingView: View {
         if snapshot.isNotLooping {
             EmptyView()
         } else {
-            VStack(alignment: .trailing, spacing: 3) {
-                Text("IOB \(LAFormat.iob(snapshot))")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white.opacity(0.95))
-
-                Text("COB \(LAFormat.cob(snapshot))")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white.opacity(0.95))
+            let slot = LAAppGroupSettings.smallWidgetSlot()
+            if slot != .none {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(slot.gridLabel)
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.65))
+                    Text(slotFormattedValue(option: slot, snapshot: snapshot))
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .padding(.trailing, 6)
             }
-            .padding(.trailing, 6)
         }
     }
 }
