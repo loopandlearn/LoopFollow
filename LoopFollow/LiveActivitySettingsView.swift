@@ -51,7 +51,7 @@ struct LiveActivitySettingsView: View {
                     set: { newValue in
                         watchEnabled = newValue
                         LAAppGroupSettings.setWatchEnabled(newValue)
-                        LiveActivityManager.shared.refreshFromCurrentState(reason: "watch enabled changed")
+                        LiveActivityManager.shared.forceRestart()
                     }
                 ))
 
@@ -60,7 +60,7 @@ struct LiveActivitySettingsView: View {
                     set: { newValue in
                         carPlayEnabled = newValue
                         LAAppGroupSettings.setCarPlayEnabled(newValue)
-                        LiveActivityManager.shared.refreshFromCurrentState(reason: "carplay enabled changed")
+                        LiveActivityManager.shared.forceRestart()
                     }
                 ))
 
