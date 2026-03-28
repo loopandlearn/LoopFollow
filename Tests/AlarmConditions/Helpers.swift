@@ -17,6 +17,13 @@ extension Alarm {
         alarm.threshold = threshold
         return alarm
     }
+
+    static func sensorChange(threshold: Double?, lifetimeDays: Int? = 10) -> Self {
+        var alarm = Alarm(type: .sensorChange)
+        alarm.threshold = threshold
+        alarm.sensorLifetimeDays = lifetimeDays
+        return alarm
+    }
 }
 
 // MARK: - AlarmData helpers
@@ -40,6 +47,31 @@ extension AlarmData {
             IOB: nil,
             recentBoluses: [],
             latestBattery: level,
+            latestPumpBattery: nil,
+            batteryHistory: [],
+            recentCarbs: []
+        )
+    }
+
+    static func withSensorInsertTime(_ insertTime: TimeInterval?) -> Self {
+        AlarmData(
+            bgReadings: [],
+            predictionData: [],
+            expireDate: nil,
+            lastLoopTime: nil,
+            latestOverrideStart: nil,
+            latestOverrideEnd: nil,
+            latestTempTargetStart: nil,
+            latestTempTargetEnd: nil,
+            recBolus: nil,
+            COB: nil,
+            sageInsertTime: insertTime,
+            pumpInsertTime: nil,
+            latestPumpVolume: nil,
+            IOB: nil,
+            recentBoluses: [],
+            latestBattery: nil,
+            latestPumpBattery: nil,
             batteryHistory: [],
             recentCarbs: []
         )
