@@ -6,13 +6,15 @@ import Foundation
 /// Fires once when a future-dated carb entry's scheduled time arrives.
 ///
 /// **How it works:**
-/// 1. Each alarm tick scans `recentCarbs` for entries whose `date` is in the future
-///    (within a configurable max lookahead window). New ones are added to a persistent
-///    "pending" list.
+/// 1. Each alarm tick scans `recentCarbs` for entries whose `date` is in the future.
+///    New ones are added to a persistent "pending" list regardless of lookahead distance,
+///    capturing the moment they were first observed (`observedAt`).
 /// 2. When a pending entry's `carbDate` passes (i.e. `carbDate <= now`), verify the
-///    carb still exists in `recentCarbs`. If so, fire the alarm. If the carb was
-///    deleted, silently remove it.
-/// 3. Stale entries (observed > 2 hours ago) are cleaned up automatically.
+///    carb still exists in `recentCarbs` **and** that the original distance
+///    (`carbDate − observedAt`) was within the max lookahead window. If both hold,
+///    fire the alarm. Otherwise silently remove the entry.
+/// 3. Stale entries (observed > 2 hours ago) whose carb no longer exists in
+///    `recentCarbs` are cleaned up automatically.
 struct FutureCarbsCondition: AlarmCondition {
     static let type: AlarmType = .futureCarbs
     init() {}
@@ -36,9 +38,11 @@ struct FutureCarbsCondition: AlarmCondition {
         for carb in data.recentCarbs {
             let carbTI = carb.date.timeIntervalSince1970
 
-            // Must be in the future and within the lookahead window
+            // Must be in the future and meet the minimum grams threshold.
+            // We track ALL future carbs (not just those within the lookahead
+            // window) so that carbs originally outside the window cannot
+            // drift in later with a fresh observedAt.
             guard carbTI > nowTI,
-                  carbTI - nowTI <= maxLookaheadSec,
                   carb.grams >= minGrams
             else { continue }
 
@@ -61,27 +65,30 @@ struct FutureCarbsCondition: AlarmCondition {
         var fired = false
 
         pending.removeAll { entry in
-            // Cleanup stale entries (observed > 2 hours ago)
-            if nowTI - entry.observedAt > 7200 {
+            let stillExists = data.recentCarbs.contains { carb in
+                abs(carb.date.timeIntervalSince1970 - entry.carbDate) < tolerance
+                    && carb.grams == entry.grams
+            }
+
+            // Cleanup stale entries (observed > 2 hours ago) only if
+            // the carb no longer exists — prevents eviction and
+            // re-observation with a fresh observedAt.
+            if nowTI - entry.observedAt > 7200, !stillExists {
                 return true
             }
 
             // Not yet due
             guard entry.carbDate <= nowTI else { return false }
 
-            // Due — verify carb still exists in recentCarbs
-            let stillExists = data.recentCarbs.contains { carb in
-                abs(carb.date.timeIntervalSince1970 - entry.carbDate) < tolerance
-                    && carb.grams == entry.grams
-            }
+            // Carb was deleted — remove silently
+            if !stillExists { return true }
 
-            if stillExists, !fired {
+            // Carb was originally outside the lookahead window — remove without firing
+            if entry.carbDate - entry.observedAt > maxLookaheadSec { return true }
+
+            // Fire (one per tick)
+            if !fired {
                 fired = true
-                return true // remove from pending after firing
-            }
-
-            // Carb was deleted or we already fired this tick — remove silently
-            if !stillExists {
                 return true
             }
 

@@ -74,10 +74,10 @@ struct FutureCarbsConditionTests {
         #expect(Storage.shared.pendingFutureCarbs.value.isEmpty)
     }
 
-    // MARK: - 4. Beyond lookahead — carb ignored
+    // MARK: - 4. Beyond lookahead — tracked but does not fire
 
-    @Test("#beyond lookahead — carb ignored")
-    func beyondLookaheadIgnored() {
+    @Test("#beyond lookahead — tracked but does not fire")
+    func beyondLookaheadTrackedButNoFire() {
         resetPending()
         let now = Date()
         let alarm = Alarm.futureCarbs(threshold: 45)
@@ -86,7 +86,9 @@ struct FutureCarbsConditionTests {
         let result = cond.evaluate(alarm: alarm, data: data, now: now)
 
         #expect(!result)
-        #expect(Storage.shared.pendingFutureCarbs.value.isEmpty)
+        // Carb is tracked (to prevent re-observation with fresh observedAt)
+        // but will never fire because original distance > lookahead
+        #expect(Storage.shared.pendingFutureCarbs.value.count == 1)
     }
 
     // MARK: - 5. Below min grams — carb ignored
@@ -210,6 +212,89 @@ struct FutureCarbsConditionTests {
         #expect(Storage.shared.pendingFutureCarbs.value.count == 1)
 
         _ = cond.evaluate(alarm: alarm, data: data, now: now)
+        #expect(Storage.shared.pendingFutureCarbs.value.count == 1)
+    }
+
+    // MARK: - 11. Sliding window — carb outside lookahead never fires
+
+    @Test("#sliding window — carb outside lookahead never fires")
+    func slidingWindowNeverFires() {
+        resetPending()
+        let t0 = Date()
+        let alarm = Alarm.futureCarbs(threshold: 10) // 10-minute lookahead
+        let carbDate = t0.addingTimeInterval(15 * 60) // 15 min in future
+        let carbSample = CarbSample(grams: 20, date: carbDate)
+
+        // Tick at T+0: carb is 15 min away, outside 10-min window but tracked
+        let data = AlarmData.withCarbs([carbSample])
+        let r0 = cond.evaluate(alarm: alarm, data: data, now: t0)
+        #expect(!r0)
+        #expect(Storage.shared.pendingFutureCarbs.value.count == 1)
+
+        // Tick at T+5min: carb is now 10 min away (inside window), but
+        // original distance was 15 min — must NOT fire
+        let t1 = t0.addingTimeInterval(5 * 60)
+        let r1 = cond.evaluate(alarm: alarm, data: data, now: t1)
+        #expect(!r1)
+
+        // Tick at T+15min: carb is due — still must NOT fire
+        let t2 = t0.addingTimeInterval(15 * 60)
+        let r2 = cond.evaluate(alarm: alarm, data: data, now: t2)
+        #expect(!r2)
+        // Entry should be removed (due, outside original window)
+        #expect(Storage.shared.pendingFutureCarbs.value.isEmpty)
+    }
+
+    // MARK: - 12. Due entry outside original window removed without firing
+
+    @Test("#due entry outside original window removed without firing")
+    func dueOutsideWindowRemovedNoFire() {
+        resetPending()
+        let now = Date()
+        let pastDate = now.addingTimeInterval(-60) // 1 min ago
+
+        // Entry was observed 20 min before its carb date (outside 10-min window)
+        Storage.shared.pendingFutureCarbs.value = [
+            PendingFutureCarb(
+                carbDate: pastDate.timeIntervalSince1970,
+                grams: 20,
+                observedAt: pastDate.timeIntervalSince1970 - 20 * 60
+            ),
+        ]
+
+        let alarm = Alarm.futureCarbs(threshold: 10)
+        let data = AlarmData.withCarbs([CarbSample(grams: 20, date: pastDate)])
+
+        let result = cond.evaluate(alarm: alarm, data: data, now: now)
+
+        #expect(!result)
+        #expect(Storage.shared.pendingFutureCarbs.value.isEmpty)
+    }
+
+    // MARK: - 13. Stale entry with existing carb is not evicted
+
+    @Test("#stale entry with existing carb is not evicted")
+    func staleWithExistingCarbNotEvicted() {
+        resetPending()
+        let now = Date()
+        let futureDate = now.addingTimeInterval(300) // 5 min in the future
+
+        // Entry observed 3 hours ago, but carb still exists in recentCarbs
+        Storage.shared.pendingFutureCarbs.value = [
+            PendingFutureCarb(
+                carbDate: futureDate.timeIntervalSince1970,
+                grams: 20,
+                observedAt: now.addingTimeInterval(-3 * 3600).timeIntervalSince1970
+            ),
+        ]
+
+        let alarm = Alarm.futureCarbs()
+        let data = AlarmData.withCarbs([CarbSample(grams: 20, date: futureDate)])
+
+        let result = cond.evaluate(alarm: alarm, data: data, now: now)
+
+        #expect(!result)
+        // Entry must survive — carb still exists, don't evict
         #expect(Storage.shared.pendingFutureCarbs.value.count == 1)
     }
 }
