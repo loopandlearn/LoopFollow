@@ -8,8 +8,6 @@ struct LiveActivitySettingsView: View {
     @State private var restartConfirmed = false
     @State private var slots: [LiveActivitySlotOption] = LAAppGroupSettings.slots()
     @State private var smallWidgetSlot: LiveActivitySlotOption = LAAppGroupSettings.smallWidgetSlot()
-    @State private var watchEnabled: Bool = LAAppGroupSettings.watchEnabled()
-    @State private var carPlayEnabled: Bool = LAAppGroupSettings.carPlayEnabled()
 
     private let slotLabels = ["Top left", "Top right", "Bottom left", "Bottom right"]
 
@@ -45,37 +43,17 @@ struct LiveActivitySettingsView: View {
                 }
             }
 
-            Section(header: Text("CarPlay / Watch Smart Stack")) {
-                Toggle("Show on Apple Watch", isOn: Binding(
-                    get: { watchEnabled },
+            Section(header: Text("Grid Slot - CarPlay / Watch")) {
+                Picker("Right slot", selection: Binding(
+                    get: { smallWidgetSlot },
                     set: { newValue in
-                        watchEnabled = newValue
-                        LAAppGroupSettings.setWatchEnabled(newValue)
-                        LiveActivityManager.shared.forceRestart()
+                        smallWidgetSlot = newValue
+                        LAAppGroupSettings.setSmallWidgetSlot(newValue)
+                        LiveActivityManager.shared.refreshFromCurrentState(reason: "small widget slot changed")
                     }
-                ))
-
-                Toggle("Show on CarPlay", isOn: Binding(
-                    get: { carPlayEnabled },
-                    set: { newValue in
-                        carPlayEnabled = newValue
-                        LAAppGroupSettings.setCarPlayEnabled(newValue)
-                        LiveActivityManager.shared.forceRestart()
-                    }
-                ))
-
-                if watchEnabled || carPlayEnabled {
-                    Picker("Right slot", selection: Binding(
-                        get: { smallWidgetSlot },
-                        set: { newValue in
-                            smallWidgetSlot = newValue
-                            LAAppGroupSettings.setSmallWidgetSlot(newValue)
-                            LiveActivityManager.shared.refreshFromCurrentState(reason: "small widget slot changed")
-                        }
-                    )) {
-                        ForEach(LiveActivitySlotOption.allCases, id: \.self) { option in
-                            Text(option.displayName).tag(option)
-                        }
+                )) {
+                    ForEach(LiveActivitySlotOption.allCases, id: \.self) { option in
+                        Text(option.displayName).tag(option)
                     }
                 }
             }
