@@ -136,15 +136,18 @@ final class LiveActivityManager {
         stateObserverTask = nil
         pushToken = nil
 
+        // Signal the state observer that the upcoming .dismissed event is our own
+        // end() call, not a user swipe. This must be set synchronously before end()
+        // is awaited so the observer sees it regardless of MainActor scheduling order.
+        endingForRestart = true
+
         Task {
             // Await end so the activity is removed from Activity.activities before
             // startIfNeeded() runs — otherwise it hits the reuse path and skips
             // writing a new laRenewBy deadline.
             await activity.end(nil, dismissalPolicy: .immediate)
             await MainActor.run {
-                // Reset dismissedByUser in case the state observer fired .dismissed during
-                // our own end() call (before its Task cancellation took effect) and
-                // incorrectly set it to true — startFromCurrentState guards on this flag.
+                self.endingForRestart = false
                 self.dismissedByUser = false
                 // startFromCurrentState rebuilds the snapshot (showRenewalOverlay = false
                 // since laRenewBy is 0), saves it to the store, then calls startIfNeeded()
@@ -181,6 +184,11 @@ final class LiveActivityManager {
     /// In-memory only — resets to false on app relaunch, so a kill + relaunch
     /// starts fresh as expected.
     private var dismissedByUser = false
+    /// Set to true immediately before we call activity.end() as part of a planned restart.
+    /// Cleared after the restart completes. The state observer checks this flag so that
+    /// a .dismissed delivery triggered by our own end() call is never misclassified as a
+    /// user swipe — regardless of the order in which the MainActor executes the two writes.
+    private var endingForRestart = false
     /// Set by handleForeground() when it takes ownership of the restart sequence.
     /// Prevents handleDidBecomeActive() from racing with an in-flight end+restart.
     private var skipNextDidBecomeActive = false
@@ -640,13 +648,16 @@ final class LiveActivityManager {
                     }
                     if state == .dismissed {
                         // Distinguish system-initiated dismissal from a user swipe.
-                        // iOS dismisses the activity when (a) the renewal limit was reached
-                        // with a failed renewal, or (b) the staleDate passed and iOS decided
-                        // to remove the activity. In both cases auto-restart is appropriate.
-                        // Only a true user swipe (activity still fresh) should block restart.
+                        // (a) endingForRestart: we called end() ourselves as part of a restart
+                        //     — must be checked first since handleForeground() clears
+                        //     laRenewalFailed before calling end(), so renewalFailed would
+                        //     read false even though we initiated the dismissal.
+                        // (b) laRenewalFailed: iOS force-dismissed after 8-hour limit.
+                        // (c) staleDatePassed: iOS removed the activity after staleDate.
+                        // Only a true user swipe (none of the above) should block auto-restart.
                         let staleDatePassed = activity.content.staleDate.map { $0 <= Date() } ?? false
-                        if Storage.shared.laRenewalFailed.value || staleDatePassed {
-                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by iOS (renewalFailed=\(Storage.shared.laRenewalFailed.value), staleDatePassed=\(staleDatePassed)) — auto-restart enabled")
+                        if endingForRestart || Storage.shared.laRenewalFailed.value || staleDatePassed {
+                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by iOS (endingForRestart=\(endingForRestart), renewalFailed=\(Storage.shared.laRenewalFailed.value), staleDatePassed=\(staleDatePassed)) — auto-restart enabled")
                         } else {
                             // User manually swiped away the LA. Block auto-restart until
                             // the user explicitly restarts via button or App Intent.
