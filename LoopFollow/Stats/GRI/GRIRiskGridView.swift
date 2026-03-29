@@ -52,6 +52,9 @@ struct GRIRiskGridView: UIViewRepresentable {
 
         chartView.data = nil
 
+        let xHypoValue = hypoComponent
+        let yHyperValue = hyperComponent
+
         var zoneAEntries: [ChartDataEntry] = []
         var zoneBEntries: [ChartDataEntry] = []
         var zoneCEntries: [ChartDataEntry] = []
@@ -106,7 +109,7 @@ struct GRIRiskGridView: UIViewRepresentable {
         zoneEDataSet.scatterShapeSize = 4
         zoneEDataSet.drawValuesEnabled = false
 
-        let currentPoint = ChartDataEntry(x: hypoComponent, y: hyperComponent)
+        let currentPoint = ChartDataEntry(x: xHypoValue, y: yHyperValue)
         let currentDataSet = ScatterChartDataSet(entries: [currentPoint], label: "Current GRI")
         currentDataSet.setColor(NSUIColor.label)
         currentDataSet.scatterShapeSize = 12
