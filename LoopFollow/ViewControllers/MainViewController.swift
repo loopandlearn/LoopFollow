@@ -15,6 +15,14 @@ func IsNightscoutEnabled() -> Bool {
     return !Storage.shared.url.value.isEmpty
 }
 
+private struct APNSCredentialSnapshot: Equatable {
+    let remoteApnsKey: String
+    let teamId: String?
+    let remoteKeyId: String
+    let lfApnsKey: String
+    let lfKeyId: String
+}
+
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
     var isPresentedAsModal: Bool = false
 
@@ -372,14 +380,25 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
-        Publishers.MergeMany(
-            Storage.shared.remoteApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.teamId.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.remoteKeyId.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.lfApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.lfKeyId.$value.map { _ in () }.eraseToAnyPublisher()
+        Publishers.CombineLatest4(
+            Storage.shared.remoteApnsKey.$value,
+            Storage.shared.teamId.$value,
+            Storage.shared.remoteKeyId.$value,
+            Storage.shared.lfApnsKey.$value
         )
-        .receive(on: DispatchQueue.main)
+        .combineLatest(Storage.shared.lfKeyId.$value)
+        .map { values, lfKeyId in
+            APNSCredentialSnapshot(
+                remoteApnsKey: values.0,
+                teamId: values.1,
+                remoteKeyId: values.2,
+                lfApnsKey: values.3,
+                lfKeyId: lfKeyId
+            )
+        }
+        .removeDuplicates()
+        .dropFirst()
+        .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
         .sink { _ in JWTManager.shared.invalidateCache() }
         .store(in: &cancellables)
 
