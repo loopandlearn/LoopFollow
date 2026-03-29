@@ -407,7 +407,6 @@ class OverridePresetsViewModel: ObservableObject {
                 self.isActivating = false
                 self.statusMessage = "\(preset.name) override activated successfully."
                 self.alertType = .statusSuccess
-                NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                 self.showAlert = true
             }
         } catch {
@@ -431,7 +430,6 @@ class OverridePresetsViewModel: ObservableObject {
                 self.isActivating = false
                 self.statusMessage = "Active override cancelled successfully."
                 self.alertType = .statusSuccess
-                NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                 self.showAlert = true
             }
         } catch {

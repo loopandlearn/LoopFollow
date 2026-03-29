@@ -305,7 +305,6 @@ struct MealView: View {
                         category: .apns,
                         message: "sendMealPushNotification succeeded - Carbs: \(carbs.doubleValue(for: .gram())) g, Protein: \(protein.doubleValue(for: .gram())) g, Fat: \(fat.doubleValue(for: .gram())) g, Bolus: \(bolusAmount.doubleValue(for: .internationalUnit())) U, Scheduled: \(scheduledDate != nil ? formatDate(scheduledDate!) : "now")"
                     )
-                    NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
 
                     // Reset meal values and scheduled data after success
                     carbs = HKQuantity(unit: .gram(), doubleValue: 0.0)

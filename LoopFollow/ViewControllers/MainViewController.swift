@@ -20,7 +20,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let carbTimestamp: TimeInterval?
         let bolusTimestamp: TimeInterval?
         let overrideTimestamp: TimeInterval?
+        let tempTargetTimestamp: TimeInterval?
         let overrideStateKey: String
+        let tempTargetStateKey: String
 
         func detectsFreshData(comparedTo baseline: RemoteCommandDataSignature) -> Bool {
             if let carbTimestamp, carbTimestamp > (baseline.carbTimestamp ?? 0) {
@@ -35,7 +37,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 return true
             }
 
-            return overrideStateKey != baseline.overrideStateKey
+            if let tempTargetTimestamp, tempTargetTimestamp > (baseline.tempTargetTimestamp ?? 0) {
+                return true
+            }
+
+            if overrideStateKey != baseline.overrideStateKey {
+                return true
+            }
+
+            return tempTargetStateKey != baseline.tempTargetStateKey
         }
     }
 
@@ -915,7 +925,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         timer.tolerance = 0.5
         remoteCommandPollingTimer = timer
 
-        LogManager.shared.log(category: .general, message: "Started aggressive polling after remote command success")
+        LogManager.shared.log(category: .general, message: "Started aggressive polling after remote command result notification")
     }
 
     private func stopRemoteCommandPolling(reason: String) {
@@ -945,19 +955,22 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     private func currentRemoteCommandDataSignature() -> RemoteCommandDataSignature {
         let latestBolusTimestamp = max(bolusData.last?.date ?? 0, smbData.last?.date ?? 0)
         let overrideNote = Observable.shared.override.value ?? ""
-        let overrideStateKey: String
+        let overrideStateKey = overrideNote
+        let tempTargetStateKey: String
 
-        if currentOverride != 1.0 || !overrideNote.isEmpty {
-            overrideStateKey = "\(currentOverride)|\(overrideNote)"
+        if let tempTarget = Observable.shared.tempTarget.value {
+            tempTargetStateKey = Localizer.formatQuantity(tempTarget)
         } else {
-            overrideStateKey = ""
+            tempTargetStateKey = ""
         }
 
         return RemoteCommandDataSignature(
             carbTimestamp: carbData.last?.date,
             bolusTimestamp: latestBolusTimestamp > 0 ? latestBolusTimestamp : nil,
             overrideTimestamp: overrideGraphData.last?.date,
-            overrideStateKey: overrideStateKey
+            tempTargetTimestamp: tempTargetGraphData.last?.date,
+            overrideStateKey: overrideStateKey,
+            tempTargetStateKey: tempTargetStateKey
         )
     }
 

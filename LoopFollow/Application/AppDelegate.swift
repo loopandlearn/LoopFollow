@@ -11,6 +11,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     let notificationCenter = UNUserNotificationCenter.current()
 
+    private func logRemoteCommandNotificationDetails(userInfo: [AnyHashable: Any]) -> Bool {
+        let commandStatus = userInfo["command_status"] as? String
+        let commandType = userInfo["command_type"] as? String
+
+        if let commandStatus {
+            LogManager.shared.log(category: .general, message: "Command status: \(commandStatus)")
+        }
+
+        if let commandType {
+            LogManager.shared.log(category: .general, message: "Command type: \(commandType)")
+        }
+
+        return commandStatus != nil || commandType != nil
+    }
+
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         LogManager.shared.log(category: .general, message: "App started")
         LogManager.shared.cleanupOldLogs()
@@ -82,14 +97,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // Handle silent notification (content-available)
             if let contentAvailable = aps["content-available"] as? Int, contentAvailable == 1 {
                 // This is a silent push, nothing implemented but logging for now
-
-                if let commandStatus = userInfo["command_status"] as? String {
-                    LogManager.shared.log(category: .general, message: "Command status: \(commandStatus)")
-                }
-
-                if let commandType = userInfo["command_type"] as? String {
-                    LogManager.shared.log(category: .general, message: "Command type: \(commandType)")
-                }
+                _ = logRemoteCommandNotificationDetails(userInfo: userInfo)
             }
         }
 
@@ -198,6 +206,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         // Log the notification
         let userInfo = notification.request.content.userInfo
         LogManager.shared.log(category: .general, message: "Will present notification: \(userInfo)")
+
+        if logRemoteCommandNotificationDetails(userInfo: userInfo) {
+            NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
+            LogManager.shared.log(category: .general, message: "Started remote command polling from foreground result notification")
+        }
 
         // Show the notification even when app is in foreground
         completionHandler([.banner, .sound, .badge])

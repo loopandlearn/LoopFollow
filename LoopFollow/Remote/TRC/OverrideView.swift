@@ -175,7 +175,6 @@ struct OverrideView: View {
                     self.statusMessage = "Override command sent successfully."
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendOverridePushNotification succeeded for override: \(override.name)")
-                    NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                 } else {
                     self.statusMessage = errorMessage ?? "Failed to send override command."
                     self.alertType = .statusFailure
@@ -196,7 +195,6 @@ struct OverrideView: View {
                     self.statusMessage = "Cancel override command sent successfully."
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendCancelOverridePushNotification succeeded")
-                    NotificationCenter.default.post(name: .remoteCommandSucceeded, object: nil)
                 } else {
                     self.statusMessage = errorMessage ?? "Failed to send cancel override command."
                     self.alertType = .statusFailure
