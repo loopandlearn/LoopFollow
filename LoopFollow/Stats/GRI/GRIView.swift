@@ -59,7 +59,7 @@ struct GRIView: View {
                         Spacer()
                             .frame(width: yAxisLabelInset)
 
-                        Text("X: Hypoglycemia Component (%)")
+                        Text("Hypoglycemia Component (%)")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .center)
