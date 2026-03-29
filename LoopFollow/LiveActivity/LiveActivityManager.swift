@@ -377,7 +377,8 @@ final class LiveActivityManager {
     }
 
     func refreshFromCurrentState(reason: String) {
-        guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
+        // No LA guard here — Watch and store must update regardless of LA state.
+        // LA-specific gating (laEnabled, dismissedByUser) is applied inside performRefresh.
         refreshWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             self?.performRefresh(reason: reason)
@@ -478,14 +479,20 @@ final class LiveActivityManager {
         let now = Date()
         let timeSinceLastUpdate = now.timeIntervalSince(lastUpdateTime ?? .distantPast)
         let forceRefreshNeeded = timeSinceLastUpdate >= 5 * 60
-        if let previous = GlucoseSnapshotStore.shared.load(), previous == snapshot, !forceRefreshNeeded {
-            return
-        }
+        // Capture dedup result BEFORE saving so the store comparison is valid.
+        let snapshotUnchanged = GlucoseSnapshotStore.shared.load() == snapshot
+
+        // Store + Watch: always update, independent of LA state.
         LAAppGroupSettings.setThresholds(
             lowMgdl: Storage.shared.lowLine.value,
             highMgdl: Storage.shared.highLine.value,
         )
         GlucoseSnapshotStore.shared.save(snapshot)
+        WatchConnectivityManager.shared.send(snapshot: snapshot)
+
+        // LA update: gated on LA being active, snapshot having changed, and activities enabled.
+        guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
+        guard !snapshotUnchanged || forceRefreshNeeded else { return }
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             return
         }
