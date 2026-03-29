@@ -88,9 +88,11 @@ final class LiveActivityManager {
     @objc private func handleDidBecomeActive() {
         guard Storage.shared.laEnabled.value else { return }
         if skipNextDidBecomeActive {
+            LogManager.shared.log(category: .general, message: "[LA] didBecomeActive: skipped (handleForeground owns restart)", isDebug: true)
             skipNextDidBecomeActive = false
             return
         }
+        LogManager.shared.log(category: .general, message: "[LA] didBecomeActive: calling startFromCurrentState, dismissedByUser=\(dismissedByUser)", isDebug: true)
         Task { @MainActor in
             self.startFromCurrentState()
         }
@@ -104,8 +106,11 @@ final class LiveActivityManager {
         let now = Date().timeIntervalSince1970
         let overlayIsShowing = renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
 
-        LogManager.shared.log(category: .general, message: "[LA] foreground notification received, laRenewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing)")
-        guard renewalFailed || overlayIsShowing else { return }
+        LogManager.shared.log(category: .general, message: "[LA] foreground: renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing), current=\(current?.id ?? "nil"), dismissedByUser=\(dismissedByUser), renewBy=\(renewBy), now=\(now)")
+        guard renewalFailed || overlayIsShowing else {
+            LogManager.shared.log(category: .general, message: "[LA] foreground: no action needed (not in renewal window)")
+            return
+        }
 
         // Overlay is showing or renewal previously failed — end the stale LA and start a fresh one.
         // We cannot call startIfNeeded() here: it finds the existing activity in
@@ -123,6 +128,11 @@ final class LiveActivityManager {
         cancelRenewalFailedNotification()
 
         guard let activity = current else {
+            // LA was already gone (ended by iOS or user). If the user explicitly swiped,
+            // laRenewBy was cleared to 0 at that point, so overlayIsShowing would be false
+            // and we would never reach here. Reaching here means iOS ended it while the
+            // renewal window was open — restart is correct.
+            LogManager.shared.log(category: .general, message: "[LA] foreground restart: current=nil (iOS-ended during renewal window), dismissedByUser=\(dismissedByUser), restarting")
             startFromCurrentState()
             return
         }
@@ -169,7 +179,7 @@ final class LiveActivityManager {
     }
 
     static let renewalThreshold: TimeInterval = 7.5 * 3600
-    static let renewalWarning: TimeInterval = 20 * 60
+    static let renewalWarning: TimeInterval = 30 * 60
 
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
@@ -643,27 +653,50 @@ final class LiveActivityManager {
                 if state == .ended || state == .dismissed {
                     if current?.id == activity.id {
                         current = nil
-                        Storage.shared.laRenewBy.value = 0
-                        LogManager.shared.log(category: .general, message: "Live Activity cleared id=\(activity.id)", isDebug: true)
+                        // Do NOT clear laRenewBy here. Preserving it means handleForeground()
+                        // can detect the renewal window on the next foreground event and restart
+                        // automatically — whether the LA ended normally (.ended) or was
+                        // system-dismissed (.dismissed). laRenewBy is only set to 0 when:
+                        //   • the user explicitly swipes (below) — renewal intent cancelled
+                        //   • a new LA starts (startIfNeeded writes the new deadline)
+                        //   • handleForeground() clears it synchronously before restarting
+                        //   • the user disables LA or calls forceRestart
+                        LogManager.shared.log(category: .general, message: "[LA] activity cleared id=\(activity.id) state=\(state)", isDebug: true)
                     }
                     if state == .dismissed {
-                        // Distinguish system-initiated dismissal from a user swipe.
-                        // (a) endingForRestart: we called end() ourselves as part of a restart
-                        //     — must be checked first since handleForeground() clears
-                        //     laRenewalFailed before calling end(), so renewalFailed would
-                        //     read false even though we initiated the dismissal.
-                        // (b) laRenewalFailed: iOS force-dismissed after 8-hour limit.
-                        // (c) staleDatePassed: iOS removed the activity after staleDate.
-                        // Only a true user swipe (none of the above) should block auto-restart.
-                        let staleDatePassed = activity.content.staleDate.map { $0 <= Date() } ?? false
-                        if endingForRestart || Storage.shared.laRenewalFailed.value || staleDatePassed {
-                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by iOS (endingForRestart=\(endingForRestart), renewalFailed=\(Storage.shared.laRenewalFailed.value), staleDatePassed=\(staleDatePassed)) — auto-restart enabled")
+                        // Three possible sources of .dismissed — only the third blocks restart:
+                        //
+                        // (a) endingForRestart: our own end() during a planned restart.
+                        //     Must be checked first: handleForeground() clears laRenewalFailed
+                        //     and laRenewBy synchronously before calling end(), so those flags
+                        //     would read as "no problem" even though we initiated the dismissal.
+                        //
+                        // (b) iOS system force-dismiss: either laRenewalFailed is set (our 8-hour
+                        //     renewal logic marked it) or the renewal deadline has already passed
+                        //     (laRenewBy > 0 && now >= laRenewBy). In both cases iOS acted, not
+                        //     the user. laRenewBy is preserved so handleForeground() restarts on
+                        //     the next foreground.
+                        //
+                        // (c) User decision: the user explicitly swiped the LA away. Block
+                        //     auto-restart until forceRestart() is called. Clear laRenewBy so
+                        //     handleForeground() does NOT re-enter the renewal path on the next
+                        //     foreground — the renewal intent is cancelled by the user's choice.
+                        let now = Date().timeIntervalSince1970
+                        let renewBy = Storage.shared.laRenewBy.value
+                        let renewalFailed = Storage.shared.laRenewalFailed.value
+                        let pastDeadline = renewBy > 0 && now >= renewBy
+                        LogManager.shared.log(category: .general, message: "[LA] .dismissed: endingForRestart=\(endingForRestart), renewalFailed=\(renewalFailed), pastDeadline=\(pastDeadline), renewBy=\(renewBy), now=\(now)")
+                        if endingForRestart {
+                            // (a) Our own restart — do nothing, Task handles the rest.
+                            LogManager.shared.log(category: .general, message: "[LA] dismissed by self (endingForRestart) — restart in-flight, no action")
+                        } else if renewalFailed || pastDeadline {
+                            // (b) iOS system force-dismiss — allow auto-restart on next foreground.
+                            LogManager.shared.log(category: .general, message: "[LA] dismissed by iOS (renewalFailed=\(renewalFailed), pastDeadline=\(pastDeadline)) — auto-restart on next foreground")
                         } else {
-                            // User manually swiped away the LA. Block auto-restart until
-                            // the user explicitly restarts via button or App Intent.
-                            // laEnabled is left true — the user's preference is preserved.
+                            // (c) User decision — cancel renewal intent, block auto-restart.
                             dismissedByUser = true
-                            LogManager.shared.log(category: .general, message: "Live Activity dismissed by user — auto-restart blocked until explicit restart")
+                            Storage.shared.laRenewBy.value = 0
+                            LogManager.shared.log(category: .general, message: "[LA] dismissed by USER (renewBy=\(renewBy), now=\(now)) — laRenewBy cleared, auto-restart BLOCKED until forceRestart")
                         }
                     }
                 }
