@@ -44,11 +44,12 @@ final class ChartXValueFormatter: AxisValueFormatter {
 
 final class ChartYDataValueFormatter: ValueFormatter {
     func stringForValue(_: Double, entry: ChartDataEntry, dataSetIndex _: Int, viewPortHandler _: ViewPortHandler?) -> String {
-        if entry.data != nil {
-            return entry.data as? String ?? ""
-        } else {
-            return ""
+        guard let text = entry.data as? String else { return "" }
+        // Treatment entries store "label\r\rpillText" — extract only the label portion.
+        if let range = text.range(of: "\r\r") {
+            return String(text[..<range.lowerBound])
         }
+        return text
     }
 }
 
@@ -119,11 +120,16 @@ class PillMarker: MarkerImage {
         labelText.draw(with: rectangle, options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
     }
 
+    private static let pillSeparator = "\r\r"
+
     override func refreshContent(entry: ChartDataEntry, highlight _: Highlight) {
-        if entry.data != nil {
-            // var multiplier = entry.data as! Double * 100.0
-            // labelText = String(format: "%.0f%%", multiplier)
-            labelText = entry.data as? String ?? ""
+        if let text = entry.data as? String {
+            // Treatment entries use pillSeparator to separate the value label from the marker text.
+            if let range = text.range(of: Self.pillSeparator) {
+                labelText = String(text[range.upperBound...])
+            } else {
+                labelText = text
+            }
         } else {
             labelText = String(entry.y)
         }
