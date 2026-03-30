@@ -10,8 +10,8 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
     // MARK: - Core Glucose
 
     var glucoseMgdl: Double? {
-        guard let bg = Observable.shared.bg.value, bg > 0 else { return nil }
-        return Double(bg)
+        guard let bg = Storage.shared.lastBgMgdl.value, bg > 0 else { return nil }
+        return bg
     }
 
     var deltaMgdl: Double? {

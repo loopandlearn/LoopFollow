@@ -56,7 +56,8 @@ platform :ios do
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
       app_identifier: [
         "com.#{TEAMID}.LoopFollow",
-	"com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"
+        "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension",
+        "com.#{TEAMID}.LoopFollow.watchkitapp"
       ]
     )
 
@@ -72,10 +73,17 @@ platform :ios do
     )
 
     update_code_signing_settings(
-      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",    
+      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
       profile_name: mapping["com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"],
       code_sign_identity: "iPhone Distribution",
       targets: ["LoopFollowLAExtensionExtension"]
+    )
+
+    update_code_signing_settings(
+      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
+      profile_name: mapping["com.#{TEAMID}.LoopFollow.watchkitapp"],
+      code_sign_identity: "iPhone Distribution",
+      targets: ["LoopFollowWatch Watch App"]
     )
 
     gym(
@@ -88,9 +96,10 @@ platform :ios do
       export_options: {
         provisioningProfiles: {
           "com.#{TEAMID}.LoopFollow" => mapping["com.#{TEAMID}.LoopFollow"],
-          "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension" => mapping["com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"]
+          "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension" => mapping["com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"],
+          "com.#{TEAMID}.LoopFollow.watchkitapp" => mapping["com.#{TEAMID}.LoopFollow.watchkitapp"]
         }
-      }	
+      }
     )
 
     copy_artifacts(
@@ -141,8 +150,10 @@ platform :ios do
     configure_bundle_id("LoopFollow", "com.#{TEAMID}.LoopFollow", [
       Spaceship::ConnectAPI::BundleIdCapability::Type::PUSH_NOTIFICATIONS
     ])
-    
+
     configure_bundle_id("LoopFollow Live Activity Extension", "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension", [])
+
+    configure_bundle_id("LoopFollow Watch App", "com.#{TEAMID}.LoopFollow.watchkitapp", [])
 
   end
 
@@ -164,7 +175,8 @@ platform :ios do
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
       app_identifier: [
         "com.#{TEAMID}.LoopFollow",
-	"com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"
+        "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension",
+        "com.#{TEAMID}.LoopFollow.watchkitapp"
       ]
     )
   end

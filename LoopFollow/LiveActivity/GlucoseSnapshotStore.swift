@@ -17,7 +17,7 @@ final class GlucoseSnapshotStore {
 
     // MARK: - Public API
 
-    func save(_ snapshot: GlucoseSnapshot) {
+    func save(_ snapshot: GlucoseSnapshot, completion: (() -> Void)? = nil) {
         queue.async {
             do {
                 let url = try self.fileURL()
@@ -28,6 +28,7 @@ final class GlucoseSnapshotStore {
             } catch {
                 // Intentionally silent (extension-safe, no dependencies).
             }
+            completion?()
         }
     }
 
