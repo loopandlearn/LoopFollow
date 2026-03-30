@@ -196,6 +196,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         updateGraphVisibility()
         statsView.isHidden = !Storage.shared.showStats.value
 
+        // Tap on stats view to open full statistics screen
+        let statsTap = UITapGestureRecognizer(target: self, action: #selector(statsViewTapped))
+        statsView.addGestureRecognizer(statsTap)
+
         BGChart.delegate = self
         BGChartFull.delegate = self
 
@@ -667,7 +671,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: nil)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: nil))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController
@@ -722,6 +726,22 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return nil
     }
 
+    @objc private func statsViewTapped() {
+        #if !targetEnvironment(macCatalyst)
+            let position = Storage.shared.position(for: .stats).normalized
+            if position != .menu, let tabIndex = position.tabIndex, let tbc = tabBarController {
+                tbc.selectedIndex = tabIndex
+                return
+            }
+        #endif
+
+        let statsModalView = AggregatedStatsModalView(mainViewController: self)
+        let hostingController = UIHostingController(rootView: statsModalView)
+        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.modalPresentationStyle = .fullScreen
+        present(hostingController, animated: true)
+    }
+
     private func createViewController(for item: TabItem, position: TabPosition, storyboard: UIStoryboard) -> UIViewController? {
         let tag = position.tabIndex ?? 0
 
@@ -756,7 +776,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: self)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: self))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController
