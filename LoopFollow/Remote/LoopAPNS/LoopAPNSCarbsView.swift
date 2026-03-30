@@ -5,6 +5,8 @@ import HealthKit
 import SwiftUI
 
 struct LoopAPNSCarbsView: View {
+    private typealias AbsorptionPreset = (hours: Int, minutes: Int)
+
     @Environment(\.presentationMode) var presentationMode
     @State private var carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var absorptionHours = 3
@@ -23,6 +25,11 @@ struct LoopAPNSCarbsView: View {
     private let timeAdjustmentStepMinutes = 5
     private let maxPastHours = 12
     private let maxFutureHours = 1
+    private let minAllowedAbsorptionTime = 0.5
+    private let maxAllowedAbsorptionTime = 8.0
+    private let lollipopStandardAbsorption: AbsorptionPreset = (0, 30)
+    private let tacoStandardAbsorption: AbsorptionPreset = (3, 0)
+    private let pizzaStandardAbsorption: AbsorptionPreset = (5, 0)
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     @FocusState private var carbsFieldIsFocused: Bool
@@ -48,12 +55,29 @@ struct LoopAPNSCarbsView: View {
         String(format: "%.1f", absorptionTimeValue)
     }
 
+    private var minimumAbsorptionPreset: AbsorptionPreset {
+        let minimumAbsorptionMinutes = Int(minAllowedAbsorptionTime * 60)
+        return (minimumAbsorptionMinutes / 60, minimumAbsorptionMinutes % 60)
+    }
+
+    private var maximumAbsorptionHours: Int {
+        Int(maxAllowedAbsorptionTime)
+    }
+
+    private var absorptionValidationMessage: String {
+        String(
+            format: "Please enter a valid absorption time between %.1f and %.1f hours",
+            minAllowedAbsorptionTime,
+            maxAllowedAbsorptionTime
+        )
+    }
+
     private var absorptionMinuteOptions: [Int] {
-        if absorptionHours == 0 {
-            return [30]
+        if absorptionHours == minimumAbsorptionPreset.hours {
+            return [minimumAbsorptionPreset.minutes]
         }
 
-        if absorptionHours == 8 {
+        if absorptionHours == maximumAbsorptionHours {
             return [0]
         }
 
@@ -142,7 +166,7 @@ struct LoopAPNSCarbsView: View {
                             HStack(spacing: 10) {
                                 Button(action: {
                                     foodType = "🍭"
-                                    setAbsorptionTime(hours: 0, minutes: 30)
+                                    setAbsorptionTime(hours: lollipopStandardAbsorption.hours, minutes: lollipopStandardAbsorption.minutes)
                                 }) {
                                     Text("🍭")
                                         .font(.title3)
@@ -154,7 +178,7 @@ struct LoopAPNSCarbsView: View {
 
                                 Button(action: {
                                     foodType = "🌮"
-                                    setAbsorptionTime(hours: 3, minutes: 0)
+                                    setAbsorptionTime(hours: tacoStandardAbsorption.hours, minutes: tacoStandardAbsorption.minutes)
                                 }) {
                                     Text("🌮")
                                         .font(.title3)
@@ -166,7 +190,7 @@ struct LoopAPNSCarbsView: View {
 
                                 Button(action: {
                                     foodType = "🍕"
-                                    setAbsorptionTime(hours: 5, minutes: 0)
+                                    setAbsorptionTime(hours: pizzaStandardAbsorption.hours, minutes: pizzaStandardAbsorption.minutes)
                                 }) {
                                     Text("🍕")
                                         .font(.title3)
@@ -308,7 +332,7 @@ struct LoopAPNSCarbsView: View {
                     VStack {
                         HStack(spacing: 0) {
                             Picker("Hours", selection: $absorptionHours) {
-                                ForEach(0 ... 8, id: \.self) { hour in
+                                ForEach(0 ... maximumAbsorptionHours, id: \.self) { hour in
                                     Text("\(hour) hr")
                                         .tag(hour)
                                 }
@@ -479,8 +503,8 @@ struct LoopAPNSCarbsView: View {
         }
 
         let selectedAbsorptionTime = absorptionTimeValue
-        guard selectedAbsorptionTime >= 0.5, selectedAbsorptionTime <= 8.0 else {
-            alertMessage = "Please enter a valid absorption time between 0.5 and 8.0 hours"
+        guard selectedAbsorptionTime >= minAllowedAbsorptionTime, selectedAbsorptionTime <= maxAllowedAbsorptionTime else {
+            alertMessage = absorptionValidationMessage
             alertType = .error
             isLoading = false
             showAlert = true
@@ -529,20 +553,20 @@ struct LoopAPNSCarbsView: View {
     }
 
     private func setAbsorptionTime(hours: Int, minutes: Int) {
-        absorptionHours = min(max(hours, 0), 8)
+        absorptionHours = min(max(hours, 0), maximumAbsorptionHours)
         absorptionMinutes = minutes
         normalizeAbsorptionTime()
     }
 
     private func normalizeAbsorptionTime() {
-        if absorptionHours <= 0 && absorptionMinutes <= 0 {
-            absorptionHours = 0
-            absorptionMinutes = 30
+        if absorptionTimeValue < minAllowedAbsorptionTime {
+            absorptionHours = minimumAbsorptionPreset.hours
+            absorptionMinutes = minimumAbsorptionPreset.minutes
             return
         }
 
-        if absorptionHours >= 8 {
-            absorptionHours = 8
+        if absorptionTimeValue >= maxAllowedAbsorptionTime {
+            absorptionHours = maximumAbsorptionHours
             absorptionMinutes = 0
             return
         }
