@@ -21,6 +21,8 @@ struct LoopAPNSCarbsView: View {
     @State private var showTOTPWarning = false
     private let otpPeriod: TimeInterval = 30
     private let timeAdjustmentStepMinutes = 5
+    private let maxPastHours = 12
+    private let maxFutureHours = 1
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     @FocusState private var carbsFieldIsFocused: Bool
@@ -59,11 +61,11 @@ struct LoopAPNSCarbsView: View {
     }
 
     private var oldestAcceptedDate: Date {
-        Date().addingTimeInterval(-60 * 60 * 12)
+        Date().addingTimeInterval(-TimeInterval(maxPastHours) * 60 * 60)
     }
 
     private var latestAcceptedDate: Date {
-        Date().addingTimeInterval(60 * 60)
+        Date().addingTimeInterval(TimeInterval(maxFutureHours) * 60 * 60)
     }
 
     enum AlertType {
@@ -443,8 +445,6 @@ struct LoopAPNSCarbsView: View {
 
         // Validate time constraints (similar to LoopCaregiver)
         let now = Date()
-        let maxPastHours = 12
-        let maxFutureHours = 1
         let oldestAcceptedDate = now.addingTimeInterval(-60 * 60 * Double(maxPastHours))
         let latestAcceptedDate = now.addingTimeInterval(60 * 60 * Double(maxFutureHours))
 
