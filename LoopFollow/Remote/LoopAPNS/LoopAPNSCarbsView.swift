@@ -270,67 +270,73 @@ struct LoopAPNSCarbsView: View {
                 .navigationBarTitleDisplayMode(.inline)
             }
             .sheet(isPresented: $showDatePickerSheet) {
-                VStack(spacing: 16) {
-                    Text("Consumption Time")
-                        .font(.headline)
-                        .padding(.top)
+                NavigationStack {
+                    VStack {
+                        DatePicker(
+                            "Time",
+                            selection: Binding(
+                                get: { consumedDate },
+                                set: { consumedDate = clampedConsumedDate($0) }
+                            ),
+                            in: oldestAcceptedDate ... latestAcceptedDate,
+                            displayedComponents: [.hourAndMinute, .date]
+                        )
+                        .datePickerStyle(.wheel)
+                        .labelsHidden()
+                        .padding()
 
-                    DatePicker(
-                        "Time",
-                        selection: Binding(
-                            get: { consumedDate },
-                            set: { consumedDate = clampedConsumedDate($0) }
-                        ),
-                        in: oldestAcceptedDate ... latestAcceptedDate,
-                        displayedComponents: [.hourAndMinute, .date]
-                    )
-                    .datePickerStyle(.wheel)
-                    .labelsHidden()
-
-                    Button("Done") {
-                        consumedDate = clampedConsumedDate(consumedDate)
-                        showDatePickerSheet = false
+                        Spacer()
                     }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.horizontal)
-                    .padding(.bottom)
+                    .navigationTitle("Consumption Time")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") {
+                                consumedDate = clampedConsumedDate(consumedDate)
+                                showDatePickerSheet = false
+                            }
+                        }
+                    }
                 }
-                .presentationDetents([.fraction(0.4)])
+                .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showAbsorptionPickerSheet) {
-                VStack(spacing: 16) {
-                    Text("Absorption Time")
-                        .font(.headline)
-                        .padding(.top)
+                NavigationStack {
+                    VStack {
+                        HStack(spacing: 0) {
+                            Picker("Hours", selection: $absorptionHours) {
+                                ForEach(0 ... 8, id: \.self) { hour in
+                                    Text("\(hour) hr")
+                                        .tag(hour)
+                                }
+                            }
 
-                    HStack(spacing: 0) {
-                        Picker("Hours", selection: $absorptionHours) {
-                            ForEach(0 ... 8, id: \.self) { hour in
-                                Text("\(hour) hr")
-                                    .tag(hour)
+                            Picker("Minutes", selection: $absorptionMinutes) {
+                                ForEach(absorptionMinuteOptions, id: \.self) { minute in
+                                    Text("\(minute) min")
+                                        .tag(minute)
+                                }
                             }
                         }
+                        .pickerStyle(.wheel)
+                        .frame(height: 180)
+                        .padding(.horizontal)
 
-                        Picker("Minutes", selection: $absorptionMinutes) {
-                            ForEach(absorptionMinuteOptions, id: \.self) { minute in
-                                Text("\(minute) min")
-                                    .tag(minute)
+                        Spacer()
+                    }
+                    .navigationTitle("Absorption Time")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") {
+                                normalizeAbsorptionTime()
+                                showAbsorptionPickerSheet = false
                             }
                         }
                     }
-                    .pickerStyle(.wheel)
-                    .frame(height: 180)
-
-                    Button("Done") {
-                        normalizeAbsorptionTime()
-                        showAbsorptionPickerSheet = false
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.horizontal)
-                    .padding(.bottom)
                 }
-                .presentationDetents([.fraction(0.35)])
+                .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
                 .onAppear {
                     normalizeAbsorptionTime()
