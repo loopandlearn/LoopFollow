@@ -1,7 +1,16 @@
+//
+//  LALivenessStore.swift
+//  LoopFollow
+//
+//  Created by Philippe Achkar on 2026-04-01.
+//  Copyright © 2026 Jon Fawcett. All rights reserved.
+//
+
+
 import Foundation
 
 enum LALivenessStore {
-    private static let defaults = UserDefaults(suiteName: AppGroupID.value)
+    private static let defaults = UserDefaults(suiteName: AppGroupID.baseBundleID)
 
     private enum Key {
         static let lastExtensionSeenAt = "la.liveness.lastExtensionSeenAt"
@@ -20,7 +29,7 @@ enum LALivenessStore {
     }
 
     static var lastExtensionSeq: Int {
-        defaults?.integer(forKey: Key.lastExtensionSeq)
+        defaults?.integer(forKey: Key.lastExtensionSeq) ?? 0
     }
 
     static var lastExtensionProducedAt: TimeInterval {

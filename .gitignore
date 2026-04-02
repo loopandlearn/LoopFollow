@@ -83,3 +83,8 @@ LoopFollowConfigOverride.xcconfig
 .history*.xcuserstate
 docs/PR_configurable_slots.md
 docs/LiveActivityTestPlan.md
+
+# Claude
+CLAUDE.md
+
+node_modules/
