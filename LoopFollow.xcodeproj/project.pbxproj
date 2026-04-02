@@ -27,6 +27,9 @@
 		37A4BDDB2F5B6B4A00EEB289 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A4BDDA2F5B6B4A00EEB289 /* WidgetKit.framework */; };
 		37A4BDDD2F5B6B4A00EEB289 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A4BDDC2F5B6B4A00EEB289 /* SwiftUI.framework */; };
 		37A4BDE82F5B6B4C00EEB289 /* LoopFollowLAExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		37E4DD0D2F7E0967000511C8 /* LALivenessStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E4DD0C2F7E0967000511C8 /* LALivenessStore.swift */; };
+		37E4DD0E2F7E097D000511C8 /* LALivenessStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E4DD0C2F7E0967000511C8 /* LALivenessStore.swift */; };
+		37E4DD112F7E0D35000511C8 /* LALivenessMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E4DD0F2F7E0985000511C8 /* LALivenessMarker.swift */; };
 		3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */; };
 		5544D8C363FB5D3B9BF8CE4A /* APNSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C2676561D686C6459CAA2D /* APNSettingsView.swift */; };
 		654132E72E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */; };
@@ -58,6 +61,7 @@
 		6589CC752E9EAFB700BB18FE /* SettingsMigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6589CC742E9EAFB700BB18FE /* SettingsMigrationManager.swift */; };
 		65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */; };
 		65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */; };
+		66E3D12E66AA4534A144A54B /* BackgroundRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */; };
 		ACE7F6DE0D065BEB52CDC0DB /* FutureCarbsAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D2A4EFD18B7B7748B6669E /* FutureCarbsAlarmEditor.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
@@ -142,7 +146,6 @@
 		DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */; };
 		DD608A0A2C23593900F91132 /* SMB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A092C23593900F91132 /* SMB.swift */; };
 		DD608A0C2C27415C00F91132 /* BackgroundAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */; };
-		66E3D12E66AA4534A144A54B /* BackgroundRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */; };
 		DD6A935E2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6A935D2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift */; };
 		DD7B0D442D730A3B0063DCB6 /* CycleHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7B0D432D730A320063DCB6 /* CycleHelper.swift */; };
 		DD7E19842ACDA50C00DBD158 /* Overrides.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7E19832ACDA50C00DBD158 /* Overrides.swift */; };
@@ -474,6 +477,8 @@
 		37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LoopFollowLAExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		37A4BDDA2F5B6B4A00EEB289 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
 		37A4BDDC2F5B6B4A00EEB289 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
+		37E4DD0C2F7E0967000511C8 /* LALivenessStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LALivenessStore.swift; sourceTree = "<group>"; };
+		37E4DD0F2F7E0985000511C8 /* LALivenessMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LALivenessMarker.swift; sourceTree = "<group>"; };
 		654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleQRCodeScannerView.swift; sourceTree = "<group>"; };
 		654132E92E19F24800BDBE08 /* TOTPGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPGenerator.swift; sourceTree = "<group>"; };
 		654134172E1DC09700BDBE08 /* OverridePresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetsView.swift; sourceTree = "<group>"; };
@@ -504,6 +509,7 @@
 		65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTokenValidationView.swift; sourceTree = "<group>"; };
 		65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonHandler.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshManager.swift; sourceTree = "<group>"; };
 		B7D2A4EFD18B7B7748B6669E /* FutureCarbsAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureCarbsAlarmEditor.swift; sourceTree = "<group>"; };
 		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
 		DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireCondition.swift; sourceTree = "<group>"; };
@@ -588,7 +594,6 @@
 		DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusLoop.swift; sourceTree = "<group>"; };
 		DD608A092C23593900F91132 /* SMB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMB.swift; sourceTree = "<group>"; };
 		DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundAlertManager.swift; sourceTree = "<group>"; };
-		A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshManager.swift; sourceTree = "<group>"; };
 		DD6A935D2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusOpenAPS.swift; sourceTree = "<group>"; };
 		DD7B0D432D730A320063DCB6 /* CycleHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleHelper.swift; sourceTree = "<group>"; };
 		DD7E19832ACDA50C00DBD158 /* Overrides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Overrides.swift; sourceTree = "<group>"; };
@@ -915,6 +920,8 @@
 		376310762F5CD65100656488 /* LiveActivity */ = {
 			isa = PBXGroup;
 			children = (
+				37E4DD0F2F7E0985000511C8 /* LALivenessMarker.swift */,
+				37E4DD0C2F7E0967000511C8 /* LALivenessStore.swift */,
 				374A77AE2F5BE1AC00E96858 /* GlucoseSnapshotBuilder.swift */,
 				374A77AF2F5BE1AC00E96858 /* GlucoseSnapshotStore.swift */,
 				374A77B12F5BE1AC00E96858 /* LiveActivityManager.swift */,
@@ -2059,7 +2066,9 @@
 			files = (
 				DD91E4DE2BDEC3F8002D9E97 /* GlucoseConversion.swift in Sources */,
 				374A77AA2F5BE17000E96858 /* AppGroupID.swift in Sources */,
+				37E4DD0E2F7E097D000511C8 /* LALivenessStore.swift in Sources */,
 				374A77AB2F5BE17000E96858 /* GlucoseSnapshot.swift in Sources */,
+				37E4DD112F7E0D35000511C8 /* LALivenessMarker.swift in Sources */,
 				374A77AC2F5BE17000E96858 /* LAAppGroupSettings.swift in Sources */,
 				374A77AD2F5BE17000E96858 /* GlucoseLiveActivityAttributes.swift in Sources */,
 			);
@@ -2220,6 +2229,7 @@
 				6589CC632E9E7D1600BB18FE /* GeneralSettingsView.swift in Sources */,
 				5544D8C363FB5D3B9BF8CE4A /* APNSettingsView.swift in Sources */,
 				6589CC642E9E7D1600BB18FE /* ContactSettingsView.swift in Sources */,
+				37E4DD0D2F7E0967000511C8 /* LALivenessStore.swift in Sources */,
 				6589CC652E9E7D1600BB18FE /* DexcomSettingsViewModel.swift in Sources */,
 				6589CC662E9E7D1600BB18FE /* AdvancedSettingsView.swift in Sources */,
 				6589CC672E9E7D1600BB18FE /* ImportExportSettingsViewModel.swift in Sources */,
@@ -2407,7 +2417,7 @@
 				CODE_SIGN_ENTITLEMENTS = LoopFollowLAExtensionExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = 2HEY366Q6J;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -2459,7 +2469,7 @@
 				CODE_SIGN_ENTITLEMENTS = LoopFollowLAExtensionExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = 2HEY366Q6J;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -2693,7 +2703,7 @@
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = 2HEY366Q6J;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2718,7 +2728,7 @@
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = 2HEY366Q6J;
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2774,7 +2784,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 
 /* Begin XCVersionGroup section */
 		FC3AE7B3249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld */ = {

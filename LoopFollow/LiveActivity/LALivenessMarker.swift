@@ -1,3 +1,12 @@
+//
+//  LALivenessMarker.swift
+//  LoopFollow
+//
+//  Created by Philippe Achkar on 2026-04-01.
+//  Copyright © 2026 Jon Fawcett. All rights reserved.
+//
+
+
 import SwiftUI
 
 struct LALivenessMarker: View {
