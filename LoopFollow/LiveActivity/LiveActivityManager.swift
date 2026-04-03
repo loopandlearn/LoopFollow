@@ -143,14 +143,27 @@ final class LiveActivityManager {
         Storage.shared.laRenewBy.value = 0
         Storage.shared.laRenewalFailed.value = false
         cancelRenewalFailedNotification()
-
+        
         guard let activity = current else {
             LogManager.shared.log(
                 category: .general,
-                message: "[LA] foreground restart: current=nil (old activity not bound locally), restarting"
+                message: "[LA] foreground restart: current=nil (old activity not bound locally), ending all existing LAs before restart"
             )
             current = nil
-            startFromCurrentState(cleanupOrphans: false)
+        
+            Task {
+                for activity in Activity<GlucoseLiveActivityAttributes>.activities {
+                    await activity.end(nil, dismissalPolicy: .immediate)
+                }
+                await MainActor.run {
+                    self.dismissedByUser = false
+                    self.startFromCurrentState(cleanupOrphans: false)
+                    LogManager.shared.log(
+                        category: .general,
+                        message: "[LA] foreground restart: fresh LA started after ending unbound existing activity"
+                    )
+                }
+            }
             return
         }
 
