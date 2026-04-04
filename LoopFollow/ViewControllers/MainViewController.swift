@@ -704,8 +704,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if Observable.shared.currentAlarm.value != nil,
            let snoozerIndex = getSnoozerTabIndex(), snoozerIndex < vcs.count
         {
+            LogManager.shared.log(category: .general, message: "[LA] tap nav: alarm active → snoozer at index \(snoozerIndex)", isDebug: true)
             targetIndex = snoozerIndex
         } else {
+            LogManager.shared.log(category: .general, message: "[LA] tap nav: no alarm (or snoozer not found) → home", isDebug: true)
             targetIndex = 0
         }
 
@@ -722,10 +724,21 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         guard let tabBarController = tabBarController,
               let viewControllers = tabBarController.viewControllers else { return nil }
 
+        // First: search for SnoozerViewController directly in the tab bar.
         for (index, vc) in viewControllers.enumerated() {
             if let _ = vc as? SnoozerViewController {
                 return index
             }
+        }
+
+        // Fallback: derive the expected index from the stored snoozer position.
+        // When snoozer is in the menu (.menu), tabIndex == 4 — the Menu tab.
+        // This is better than falling back to Home (0) because the user can at
+        // least reach the snoozer from the menu tab in one tap.
+        let position = Storage.shared.snoozerPosition.value.normalized
+        if let tabIndex = position.tabIndex, tabIndex < viewControllers.count {
+            LogManager.shared.log(category: .general, message: "[LA] tap nav: snoozer not a direct tab — using stored position tabIndex=\(tabIndex)", isDebug: true)
+            return tabIndex
         }
 
         return nil

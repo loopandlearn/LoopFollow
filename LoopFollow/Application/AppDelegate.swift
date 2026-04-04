@@ -50,12 +50,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         BackgroundRefreshManager.shared.register()
 
-        // Detect Before-First-Unlock launch. If protected data is unavailable here,
-        // StorageValues were cached from encrypted UserDefaults and need a reload
-        // on the first foreground after the user unlocks.
-        let bfu = !UIApplication.shared.isProtectedDataAvailable
+        // Detect Before-First-Unlock launch. isProtectedDataAvailable returns false
+        // for ANY locked-screen background launch, not only post-reboot. Standard
+        // UserDefaults use NSFileProtectionCompleteUntilFirstUserAuthentication —
+        // they stay readable after the first unlock even when the screen is locked.
+        // True BFU (boot before first unlock) is the only case where UserDefaults
+        // is actually inaccessible; in that state every StorageValue reads as its
+        // default — including migrationStep, which is always ≥ 1 for existing users.
+        // Guard against false positives by checking that migrationStep is still 0
+        // (its default), meaning the real value couldn't be read from disk.
+        let protectedDataUnavailable = !UIApplication.shared.isProtectedDataAvailable
+        let bfu = protectedDataUnavailable && Storage.shared.migrationStep.value == 0
         Storage.shared.needsBFUReload = bfu
-        LogManager.shared.log(category: .general, message: "BFU check: isProtectedDataAvailable=\(!bfu), needsBFUReload=\(bfu)")
+        LogManager.shared.log(category: .general, message: "BFU check: isProtectedDataAvailable=\(!protectedDataUnavailable), migrationStep=\(Storage.shared.migrationStep.value), needsBFUReload=\(bfu)")
 
         return true
     }
