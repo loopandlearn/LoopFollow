@@ -11,14 +11,13 @@ enum ComplicationID {
     static let gaugeCorner = "LoopFollowGaugeCorner"
     /// graphicCorner stacked text only (Complication 2).
     static let stackCorner = "LoopFollowStackCorner"
-    // DEBUG COMPLICATION — commented out, not deleted.
+    // DEBUG COMPLICATION — enabled for pipeline diagnostics.
     // Shows two timestamps to isolate pipeline failures:
     //   outer (top):  HH:mm of snapshot.updatedAt — when CGM data last reached the Watch
     //   inner (↺):    HH:mm when ClockKit last called getCurrentTimelineEntry
     // If outer changes but inner is stale → reloadTimeline() not firing or ClockKit ignoring it.
     // If inner changes but outer is stale → data delivery broken, complication rebuilding with old data.
-    // To re-enable: uncomment this line and the three switch cases below, and the descriptor in WatchComplicationProvider.
-    // static let debugCorner = "LoopFollowDebugCorner"
+    static let debugCorner = "LoopFollowDebugCorner"
 }
 
 // MARK: - Entry builder
@@ -38,7 +37,7 @@ enum ComplicationEntryBuilder {
         case .graphicCorner:
             switch identifier {
             case ComplicationID.stackCorner:  return graphicCornerStackTemplate(snapshot: snapshot)
-            // case ComplicationID.debugCorner:  return graphicCornerDebugTemplate(snapshot: snapshot)
+            case ComplicationID.debugCorner:  return graphicCornerDebugTemplate(snapshot: snapshot)
             default:                          return graphicCornerGaugeTemplate(snapshot: snapshot)
             }
         default:
@@ -62,11 +61,11 @@ enum ComplicationEntryBuilder {
                     innerTextProvider: CLKSimpleTextProvider(text: ""),
                     outerTextProvider: CLKSimpleTextProvider(text: "--")
                 )
-            // case ComplicationID.debugCorner:
-            //     return CLKComplicationTemplateGraphicCornerStackText(
-            //         innerTextProvider: CLKSimpleTextProvider(text: "STALE"),
-            //         outerTextProvider: CLKSimpleTextProvider(text: "--:--")
-            //     )
+            case ComplicationID.debugCorner:
+                return CLKComplicationTemplateGraphicCornerStackText(
+                    innerTextProvider: CLKSimpleTextProvider(text: "STALE"),
+                    outerTextProvider: CLKSimpleTextProvider(text: "--:--")
+                )
             default:
                 return staleGaugeTemplate()
             }
@@ -93,11 +92,11 @@ enum ComplicationEntryBuilder {
                     innerTextProvider: CLKSimpleTextProvider(text: "→ --"),
                     outerTextProvider: outer
                 )
-            // case ComplicationID.debugCorner:
-            //     return CLKComplicationTemplateGraphicCornerStackText(
-            //         innerTextProvider: CLKSimpleTextProvider(text: "DEBUG"),
-            //         outerTextProvider: CLKSimpleTextProvider(text: "--:--")
-            //     )
+            case ComplicationID.debugCorner:
+                return CLKComplicationTemplateGraphicCornerStackText(
+                    innerTextProvider: CLKSimpleTextProvider(text: "DEBUG"),
+                    outerTextProvider: CLKSimpleTextProvider(text: "--:--")
+                )
             default:
                 let outer = CLKSimpleTextProvider(text: "---")
                 outer.tintColor = .green

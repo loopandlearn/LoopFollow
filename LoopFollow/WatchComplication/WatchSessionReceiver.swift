@@ -25,6 +25,11 @@ final class WatchSessionReceiver: NSObject {
     /// Completed after the snapshot is saved to disk.
     var pendingConnectivityTask: WKWatchConnectivityRefreshBackgroundTask?
 
+    /// In-memory cache of the last received snapshot. Used by WatchComplicationProvider as a
+    /// fallback when GlucoseSnapshotStore.load() returns nil (e.g. file write race or first launch).
+    /// Always reflects the most recently delivered snapshot regardless of file-store state.
+    private(set) var lastSnapshot: GlucoseSnapshot?
+
     // MARK: - Init
 
     private override init() {
@@ -119,7 +124,10 @@ extension WatchSessionReceiver: WCSessionDelegate {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let snapshot = try decoder.decode(GlucoseSnapshot.self, from: data)
-            os_log("WatchSessionReceiver: %{public}@ snapshot decoded, saving", log: watchLog, type: .debug, source)
+            // Cache in memory immediately — complication provider can use this as a
+            // fallback if the App Group file store hasn't flushed yet.
+            lastSnapshot = snapshot
+            os_log("WatchSessionReceiver: %{public}@ snapshot decoded g=%d, saving", log: watchLog, type: .debug, source, Int(snapshot.glucose))
             GlucoseSnapshotStore.shared.save(snapshot) { [weak self] in
                 os_log("WatchSessionReceiver: %{public}@ snapshot saved, reloading complications", log: watchLog, type: .debug, source)
                 // ACK to iPhone so it can detect missed deliveries.
@@ -133,9 +141,9 @@ extension WatchSessionReceiver: WCSessionDelegate {
                     let server = CLKComplicationServer.sharedInstance()
                     if let complications = server.activeComplications, !complications.isEmpty {
                         for complication in complications { server.reloadTimeline(for: complication) }
-                        os_log("WatchSessionReceiver: reloaded %d complication(s)", log: watchLog, type: .debug, complications.count)
+                        os_log("WatchSessionReceiver: reloaded %d complication(s)", log: watchLog, type: .info, complications.count)
                     } else {
-                        os_log("WatchSessionReceiver: no active complications to reload", log: watchLog, type: .debug)
+                        os_log("WatchSessionReceiver: no active complications to reload", log: watchLog, type: .error)
                     }
                     // Complete background task only after reloadTimeline() has been called.
                     task?.setTaskCompletedWithSnapshot(false)
@@ -167,11 +175,11 @@ extension WatchSessionReceiver: WCSessionDelegate {
         DispatchQueue.main.async {
             let server = CLKComplicationServer.sharedInstance()
             guard let complications = server.activeComplications, !complications.isEmpty else {
-                os_log("WatchSessionReceiver: no active complications to reload", log: watchLog, type: .debug)
+                os_log("WatchSessionReceiver: no active complications to reload", log: watchLog, type: .error)
                 return
             }
             for complication in complications { server.reloadTimeline(for: complication) }
-            os_log("WatchSessionReceiver: reloaded %d complication(s)", log: watchLog, type: .debug, complications.count)
+            os_log("WatchSessionReceiver: reloaded %d complication(s)", log: watchLog, type: .info, complications.count)
         }
     }
 

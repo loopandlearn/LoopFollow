@@ -2,6 +2,9 @@
 // GlucoseSnapshotStore.swift
 
 import Foundation
+import os.log
+
+private let storeLog = OSLog(subsystem: Bundle.main.bundleIdentifier ?? "com.loopfollow", category: "GlucoseSnapshotStore")
 
 /// Persists the latest GlucoseSnapshot into the App Group container so that:
 /// - the Live Activity extension can read it
@@ -25,8 +28,9 @@ final class GlucoseSnapshotStore {
                 encoder.dateEncodingStrategy = .iso8601
                 let data = try encoder.encode(snapshot)
                 try data.write(to: url, options: [.atomic])
+                os_log("GlucoseSnapshotStore: saved snapshot g=%d to %{public}@", log: storeLog, type: .debug, Int(snapshot.glucose), url.lastPathComponent)
             } catch {
-                // Intentionally silent (extension-safe, no dependencies).
+                os_log("GlucoseSnapshotStore: save failed — %{public}@", log: storeLog, type: .error, error.localizedDescription)
             }
             completion?()
         }
@@ -35,14 +39,18 @@ final class GlucoseSnapshotStore {
     func load() -> GlucoseSnapshot? {
         do {
             let url = try fileURL()
-            guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                os_log("GlucoseSnapshotStore: file not found at %{public}@", log: storeLog, type: .debug, url.lastPathComponent)
+                return nil
+            }
 
             let data = try Data(contentsOf: url)
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            return try decoder.decode(GlucoseSnapshot.self, from: data)
+            let snapshot = try decoder.decode(GlucoseSnapshot.self, from: data)
+            return snapshot
         } catch {
-            // Intentionally silent (extension-safe, no dependencies).
+            os_log("GlucoseSnapshotStore: load failed — %{public}@", log: storeLog, type: .error, error.localizedDescription)
             return nil
         }
     }

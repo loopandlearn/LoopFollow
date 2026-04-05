@@ -29,13 +29,12 @@ final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
                 displayName: "LoopFollow Text",
                 supportedFamilies: [.graphicCorner]
             ),
-            // DEBUG COMPLICATION — commented out. To re-enable, uncomment this descriptor
-            // and the corresponding cases in ComplicationEntryBuilder + the debugCorner ID.
-            // CLKComplicationDescriptor(
-            //     identifier: ComplicationID.debugCorner,
-            //     displayName: "LoopFollow Debug",
-            //     supportedFamilies: [.graphicCorner]
-            // )
+            // DEBUG COMPLICATION — enabled for pipeline diagnostics.
+            CLKComplicationDescriptor(
+                identifier: ComplicationID.debugCorner,
+                displayName: "LoopFollow Debug",
+                supportedFamilies: [.graphicCorner]
+            )
         ]
         handler(descriptors)
     }
@@ -46,11 +45,17 @@ final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
         for complication: CLKComplication,
         withHandler handler: @escaping (CLKComplicationTimelineEntry?) -> Void
     ) {
-        guard let snapshot = GlucoseSnapshotStore.shared.load() else {
-            os_log("WatchComplicationProvider: no snapshot available", log: watchLog, type: .debug)
+        // Prefer the file store (persists across launches); fall back to the in-memory
+        // cache in case the file write hasn't completed or the store is unavailable.
+        guard let snapshot = GlucoseSnapshotStore.shared.load()
+                          ?? WatchSessionReceiver.shared.lastSnapshot
+        else {
+            os_log("WatchComplicationProvider: no snapshot available (store and cache both nil)", log: watchLog, type: .error)
             handler(nil)
             return
         }
+
+        os_log("WatchComplicationProvider: getCurrentTimelineEntry g=%d age=%ds id=%{public}@", log: watchLog, type: .info, Int(snapshot.glucose), Int(snapshot.age), complication.identifier)
 
         guard snapshot.age < 900 else {
             os_log("WatchComplicationProvider: snapshot stale (%d s)", log: watchLog, type: .debug, Int(snapshot.age))
