@@ -92,6 +92,39 @@ Always rename your branch (that is aligned with `dev`) to a name suitable for yo
 
 After a PR is merged to `dev`, there is an automatic bump up the version number - please do not modify the version in your branch.
 
+### Pull Request Guidelines
+
+Each pull request should focus on a **single concern** — one bug fix, one feature, or one improvement. Avoid combining unrelated changes in the same PR.
+
+Focused PRs are easier to review, simpler to test, and safer to revert if needed. If your work touches multiple areas, consider splitting it into separate PRs that can be reviewed and merged independently.
+
+### Commit Guidelines
+
+Write commit messages that complete the sentence: **"If applied, this commit will..."**
+
+For example:
+* "Add alarm snooze functionality" ✓
+* "Fix crash when loading empty profile" ✓
+* "Update documentation for build process" ✓
+* "Remove deprecated API calls" ✓
+
+**Commit message structure:**
+
+```
+<subject line - 50 chars or less>
+
+<optional body - wrap at 72 chars>
+```
+
+**Best practices:**
+* Use imperative mood in the subject line (Add, Fix, Update, Remove, Refactor)
+* Keep the subject line concise (50 characters or less)
+* Capitalize the first letter of the subject
+* Do not end the subject line with a period
+* Separate subject from body with a blank line
+* Use the body to explain *what* and *why*, not *how*
+* Reference related issues when applicable (e.g., "Fixes #123")
+
 ### Version Updates
 
 Only the maintainers for LoopFollow will update version numbers.
