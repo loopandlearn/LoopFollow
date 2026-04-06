@@ -126,6 +126,10 @@ extension WatchSessionReceiver: WCSessionDelegate {
         process(payload: userInfo, source: "userInfo")
     }
 
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+        process(payload: applicationContext, source: "applicationContext")
+    }
+    
     // MARK: - Private
 
     private func process(payload: [String: Any], source: String) {
