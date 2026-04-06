@@ -1,8 +1,6 @@
-//
 //  WatchConnectivityManager.swift
 //  LoopFollow
 //
-//  Created by Philippe Achkar on 2026-03-10.
 //  Copyright © 2026 Jon Fawcett. All rights reserved.
 //
 
@@ -81,11 +79,21 @@ final class WatchConnectivityManager: NSObject {
             }
 
             // Cancel outstanding transfers before queuing — only the latest snapshot matters.
-            session.outstandingUserInfoTransfers.forEach { $0.cancel() }
+            // session.outstandingUserInfoTransfers.forEach { $0.cancel() }
 
             // transferUserInfo: guaranteed queued delivery for background wakes.
             session.transferUserInfo(payload)
-            try? session.updateApplicationContext(payload)
+            
+            // applicationContext: latest-state mirror for next launch / scheduled refresh.
+            do {
+                try session.updateApplicationContext(payload)
+            } catch {
+                LogManager.shared.log(
+                    category: .watch,
+                    message: "WatchConnectivityManager: failed to update applicationContext — \(error)"
+                )
+            }
+            
             LogManager.shared.log(category: .watch, message: "WatchConnectivityManager: snapshot queued via transferUserInfo")
         } catch {
             LogManager.shared.log(category: .watch, message: "WatchConnectivityManager: failed to encode snapshot — \(error)")
