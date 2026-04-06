@@ -45,6 +45,11 @@ final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
         for complication: CLKComplication,
         withHandler handler: @escaping (CLKComplicationTimelineEntry?) -> Void
     ) {
+        // Whenever ClockKit calls us it hands us the CLKComplication object.
+        // Cache it so WatchSessionReceiver can call reloadTimeline() even when
+        // activeComplications is nil (common during background execution on watchOS 9+).
+        WatchSessionReceiver.shared.cacheComplication(complication)
+
         // Prefer the file store (persists across launches); fall back to the in-memory
         // cache in case the file write hasn't completed or the store is unavailable.
         guard let snapshot = GlucoseSnapshotStore.shared.load()
@@ -78,6 +83,7 @@ final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
         for complication: CLKComplication,
         withHandler handler: @escaping (Date?) -> Void
     ) {
+        WatchSessionReceiver.shared.cacheComplication(complication)
         // Expire timeline 15 minutes after last reading
         // so Watch does not display indefinitely stale data
         if let snapshot = GlucoseSnapshotStore.shared.load() {
