@@ -77,6 +77,7 @@ extension MainViewController {
 
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
+        let previousIOBText = Observable.shared.iobText.value
         infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
@@ -238,6 +239,18 @@ extension MainViewController {
 
         // Mark device status as loaded for initial loading state
         markDataLoaded("deviceStatus")
+
+        if Storage.shared.contactEnabled.value, Storage.shared.contactIOB.value != .off,
+           Observable.shared.iobText.value != previousIOBText
+        {
+            contactImageUpdater.updateContactImage(
+                bgValue: Observable.shared.bgText.value,
+                trend: Observable.shared.directionText.value,
+                delta: Observable.shared.deltaText.value,
+                iob: Observable.shared.iobText.value,
+                stale: Observable.shared.bgStale.value
+            )
+        }
 
         LogManager.shared.log(category: .deviceStatus, message: "Update Device Status done", isDebug: true)
     }
