@@ -72,7 +72,7 @@ extension MainViewController {
                     while i <= toLoad {
                         if i < prediction.count {
                             let sgvValue = Int(round(prediction[i]))
-                            let clampedValue = min(max(sgvValue, 39), 400)
+                            let clampedValue = min(max(sgvValue, globalVariables.minDisplayGlucose), globalVariables.maxDisplayGlucose)
                             let prediction = ShareGlucoseData(sgv: clampedValue, date: predictionTime, direction: "flat")
                             predictionData.append(prediction)
                             predictionTime += 300
