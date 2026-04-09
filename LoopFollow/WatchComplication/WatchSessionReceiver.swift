@@ -1,12 +1,11 @@
+// LoopFollow
 // WatchSessionReceiver.swift
-// Philippe Achkar
-// 2026-03-10
 
-import Foundation
-import WatchConnectivity
 import ClockKit
-import WatchKit
+import Foundation
 import os.log
+import WatchConnectivity
+import WatchKit
 
 private let watchLog = OSLog(
     subsystem: Bundle.main.bundleIdentifier ?? "com.loopfollow.watch",
@@ -14,7 +13,6 @@ private let watchLog = OSLog(
 )
 
 final class WatchSessionReceiver: NSObject {
-
     // MARK: - Shared Instance
 
     static let shared = WatchSessionReceiver()
@@ -45,7 +43,7 @@ final class WatchSessionReceiver: NSObject {
 
     // MARK: - Init
 
-    private override init() {
+    override private init() {
         super.init()
     }
 
@@ -72,7 +70,6 @@ final class WatchSessionReceiver: NSObject {
 // MARK: - WCSessionDelegate
 
 extension WatchSessionReceiver: WCSessionDelegate {
-
     func session(
         _ session: WCSession,
         activationDidCompleteWith activationState: WCSessionActivationState,
@@ -112,7 +109,7 @@ extension WatchSessionReceiver: WCSessionDelegate {
 
     /// Handles immediate delivery when Watch app is in foreground (sendMessage path).
     func session(
-        _ session: WCSession,
+        _: WCSession,
         didReceiveMessage message: [String: Any]
     ) {
         process(payload: message, source: "sendMessage")
@@ -120,16 +117,16 @@ extension WatchSessionReceiver: WCSessionDelegate {
 
     /// Handles queued background delivery (transferUserInfo path).
     func session(
-        _ session: WCSession,
+        _: WCSession,
         didReceiveUserInfo userInfo: [String: Any]
     ) {
         process(payload: userInfo, source: "userInfo")
     }
 
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+    func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         process(payload: applicationContext, source: "applicationContext")
     }
-    
+
     // MARK: - Private
 
     private func process(payload: [String: Any], source: String) {
@@ -207,7 +204,9 @@ extension WatchSessionReceiver: WCSessionDelegate {
             return
         }
 
-        for complication in complications { server.reloadTimeline(for: complication) }
+        for complication in complications {
+            server.reloadTimeline(for: complication)
+        }
         os_log("WatchSessionReceiver: reloadTimeline called for %d complication(s)", log: watchLog, type: .info, complications.count)
     }
 

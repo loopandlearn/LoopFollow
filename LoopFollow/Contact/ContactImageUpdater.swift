@@ -119,15 +119,18 @@ class ContactImageUpdater {
     private func getIncludedFields(for contactType: ContactType) -> [ContactType] {
         var included: [ContactType] = []
         if Storage.shared.contactTrend.value == .include,
-           Storage.shared.contactTrendTarget.value == contactType {
+           Storage.shared.contactTrendTarget.value == contactType
+        {
             included.append(.Trend)
         }
         if Storage.shared.contactDelta.value == .include,
-           Storage.shared.contactDeltaTarget.value == contactType {
+           Storage.shared.contactDeltaTarget.value == contactType
+        {
             included.append(.Delta)
         }
         if Storage.shared.contactIOB.value == .include,
-           Storage.shared.contactIOBTarget.value == contactType {
+           Storage.shared.contactIOBTarget.value == contactType
+        {
             included.append(.IOB)
         }
         return included

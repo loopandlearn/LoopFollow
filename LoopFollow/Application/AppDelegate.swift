@@ -40,7 +40,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ = BLEManager.shared
         // Ensure VolumeButtonHandler is initialized so it can receive alarm notifications
         _ = VolumeButtonHandler.shared
-        
+
         WatchConnectivityManager.shared.activate()
 
         // Register for remote notifications

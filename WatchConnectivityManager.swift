@@ -1,9 +1,5 @@
-//  WatchConnectivityManager.swift
-//  LoopFollow
-//
-//  Copyright © 2026 Jon Fawcett. All rights reserved.
-//
-
+// LoopFollow
+// WatchConnectivityManager.swift
 
 // WatchConnectivityManager.swift
 // Philippe Achkar
@@ -13,7 +9,6 @@ import Foundation
 import WatchConnectivity
 
 final class WatchConnectivityManager: NSObject {
-
     // MARK: - Shared Instance
 
     static let shared = WatchConnectivityManager()
@@ -23,7 +18,7 @@ final class WatchConnectivityManager: NSObject {
     /// Timestamp of the last snapshot the Watch ACK'd via sendAck().
     private var lastWatchAckTimestamp: TimeInterval = 0
 
-    private override init() {
+    override private init() {
         super.init()
     }
 
@@ -83,7 +78,7 @@ final class WatchConnectivityManager: NSObject {
 
             // transferUserInfo: guaranteed queued delivery for background wakes.
             session.transferUserInfo(payload)
-            
+
             // applicationContext: latest-state mirror for next launch / scheduled refresh.
             do {
                 try session.updateApplicationContext(payload)
@@ -93,7 +88,7 @@ final class WatchConnectivityManager: NSObject {
                     message: "WatchConnectivityManager: failed to update applicationContext — \(error)"
                 )
             }
-            
+
             LogManager.shared.log(category: .watch, message: "WatchConnectivityManager: snapshot queued via transferUserInfo")
         } catch {
             LogManager.shared.log(category: .watch, message: "WatchConnectivityManager: failed to encode snapshot — \(error)")
@@ -104,9 +99,8 @@ final class WatchConnectivityManager: NSObject {
 // MARK: - WCSessionDelegate
 
 extension WatchConnectivityManager: WCSessionDelegate {
-
     func session(
-        _ session: WCSession,
+        _: WCSession,
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: Error?
     ) {
@@ -120,14 +114,14 @@ extension WatchConnectivityManager: WCSessionDelegate {
     /// When the Watch app comes to the foreground, send the latest snapshot immediately
     /// so the Watch app has fresh data without waiting for the next BG poll.
     /// Receives ACKs from the Watch (sent after each snapshot is saved).
-    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+    func session(_: WCSession, didReceiveMessage message: [String: Any]) {
         if let ackTimestamp = message["watchAck"] as? TimeInterval {
             lastWatchAckTimestamp = ackTimestamp
             LogManager.shared.log(category: .watch, message: "WatchConnectivityManager: Watch ACK received for snapshot at \(ackTimestamp)")
         }
     }
 
-    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+    func session(_: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
         if let ackTimestamp = userInfo["watchAck"] as? TimeInterval {
             lastWatchAckTimestamp = ackTimestamp
             LogManager.shared.log(category: .watch, message: "WatchConnectivityManager: Watch ACK (userInfo) received for snapshot at \(ackTimestamp)")
@@ -142,11 +136,11 @@ extension WatchConnectivityManager: WCSessionDelegate {
         }
     }
 
-    func sessionDidBecomeInactive(_ session: WCSession) {
+    func sessionDidBecomeInactive(_: WCSession) {
         LogManager.shared.log(category: .watch, message: "WatchConnectivityManager: session became inactive")
     }
 
-    func sessionDidDeactivate(_ session: WCSession) {
+    func sessionDidDeactivate(_: WCSession) {
         LogManager.shared.log(category: .watch, message: "WatchConnectivityManager: session deactivated — reactivating")
         WCSession.default.activate()
     }
