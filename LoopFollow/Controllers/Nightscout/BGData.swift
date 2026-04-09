@@ -236,14 +236,19 @@ extension MainViewController {
             let latestBG = entries[latestEntryIndex].sgv
             let priorBG = entries[latestEntryIndex - 1].sgv
             let deltaBG = latestBG - priorBG
-            let lastBGTime = entries[latestEntryIndex].date
 
             self.updateServerText(with: sourceName)
 
             // Set BGText with the latest BG value
-            self.setBGTextColor()
+            self.updateBGTextAppearance()
 
-            Observable.shared.bgText.value = Localizer.toDisplayUnits(String(latestBG))
+            if latestBG <= globalVariables.minDisplayGlucose {
+                Observable.shared.bgText.value = "LOW"
+            } else if latestBG >= globalVariables.maxDisplayGlucose {
+                Observable.shared.bgText.value = "HIGH"
+            } else {
+                Observable.shared.bgText.value = Localizer.toDisplayUnits(String(latestBG))
+            }
             Observable.shared.bg.value = latestBG
 
             // Direction handling
