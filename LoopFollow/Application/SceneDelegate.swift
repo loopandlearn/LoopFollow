@@ -34,6 +34,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
     }
 
+    func scene(_: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard URLContexts.contains(where: { $0.url.scheme == AppGroupID.urlScheme && $0.url.host == "la-tap" }) else { return }
+        // scene(_:openURLContexts:) fires after sceneDidBecomeActive when the app
+        // foregrounds from background. Post on the next run loop so the view
+        // hierarchy (including any presented modals) is fully settled.
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
+        }
+    }
+
     func sceneWillResignActive(_: UIScene) {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
@@ -53,7 +63,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
 
-    // Handle the UIApplicationShortcutItem when the user taps on the Home Screen Quick Action. This function toggles the "Speak BG" setting in UserDefaultsRepository, speaks the current state (on/off) using AVSpeechSynthesizer, and updates the Quick Action appearance.
+    /// Handle the UIApplicationShortcutItem when the user taps on the Home Screen Quick Action. This function toggles the "Speak BG" setting in UserDefaultsRepository, speaks the current state (on/off) using AVSpeechSynthesizer, and updates the Quick Action appearance.
     func handleShortcutItem(_ shortcutItem: UIApplicationShortcutItem) {
         if let bundleIdentifier = Bundle.main.bundleIdentifier {
             let expectedType = bundleIdentifier + ".toggleSpeakBG"
@@ -66,7 +76,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
 
-    // The following method is called when the user taps on the Home Screen Quick Action
+    /// The following method is called when the user taps on the Home Screen Quick Action
     func windowScene(_: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler _: @escaping (Bool) -> Void) {
         handleShortcutItem(shortcutItem)
     }

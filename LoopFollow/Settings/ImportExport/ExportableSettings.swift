@@ -148,8 +148,8 @@ struct RemoteSettingsExport: Codable {
     let remoteType: RemoteType
     let user: String
     let sharedSecret: String
-    let apnsKey: String
-    let keyId: String
+    let remoteApnsKey: String
+    let remoteKeyId: String
     let teamId: String?
     let maxBolus: Double
     let maxCarbs: Double
@@ -168,8 +168,8 @@ struct RemoteSettingsExport: Codable {
             remoteType: storage.remoteType.value,
             user: storage.user.value,
             sharedSecret: storage.sharedSecret.value,
-            apnsKey: storage.apnsKey.value,
-            keyId: storage.keyId.value,
+            remoteApnsKey: storage.remoteApnsKey.value,
+            remoteKeyId: storage.remoteKeyId.value,
             teamId: storage.teamId.value,
             maxBolus: storage.maxBolus.value.doubleValue(for: .internationalUnit()),
             maxCarbs: storage.maxCarbs.value.doubleValue(for: .gram()),
@@ -189,8 +189,8 @@ struct RemoteSettingsExport: Codable {
         storage.remoteType.value = remoteType
         storage.user.value = user
         storage.sharedSecret.value = sharedSecret
-        storage.apnsKey.value = apnsKey
-        storage.keyId.value = keyId
+        storage.remoteApnsKey.value = remoteApnsKey
+        storage.remoteKeyId.value = remoteKeyId
         storage.teamId.value = teamId
         storage.maxBolus.value = HKQuantity(unit: .internationalUnit(), doubleValue: maxBolus)
         storage.maxCarbs.value = HKQuantity(unit: .gram(), doubleValue: maxCarbs)
@@ -237,9 +237,9 @@ struct RemoteSettingsExport: Codable {
         case .nightscout:
             return !user.isEmpty
         case .trc:
-            return !user.isEmpty && !sharedSecret.isEmpty && !apnsKey.isEmpty && !keyId.isEmpty
+            return !user.isEmpty && !sharedSecret.isEmpty && !remoteApnsKey.isEmpty && !remoteKeyId.isEmpty
         case .loopAPNS:
-            return !keyId.isEmpty && !apnsKey.isEmpty && teamId != nil && !loopAPNSQrCodeURL.isEmpty
+            return !remoteKeyId.isEmpty && !remoteApnsKey.isEmpty && teamId != nil && !loopAPNSQrCodeURL.isEmpty
         }
     }
 
@@ -266,14 +266,14 @@ struct RemoteSettingsExport: Codable {
 
         // For TRC and LoopAPNS, check if key details are changing
         if remoteType == .trc || remoteType == .loopAPNS {
-            let currentKeyId = storage.keyId.value
-            let currentApnsKey = storage.apnsKey.value
+            let currentKeyId = storage.remoteKeyId.value
+            let currentApnsKey = storage.remoteApnsKey.value
 
-            if !currentKeyId.isEmpty, currentKeyId != keyId {
+            if !currentKeyId.isEmpty, currentKeyId != remoteKeyId {
                 message += "APNS Key ID is changing. This may affect your remote commands.\n"
             }
 
-            if !currentApnsKey.isEmpty, currentApnsKey != apnsKey {
+            if !currentApnsKey.isEmpty, currentApnsKey != remoteApnsKey {
                 message += "APNS Key is changing. This may affect your remote commands.\n"
             }
         }

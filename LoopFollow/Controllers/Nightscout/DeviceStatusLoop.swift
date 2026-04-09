@@ -30,12 +30,14 @@ extension MainViewController {
             let profileISF = profileManager.currentISF()
             if let profileISF = profileISF {
                 infoManager.updateInfoData(type: .isf, value: profileISF)
+                Storage.shared.lastIsfMgdlPerU.value = profileISF.doubleValue(for: .milligramsPerDeciliter)
             }
 
             // Carb Ratio (CR)
             let profileCR = profileManager.currentCarbRatio()
             if let profileCR = profileCR {
                 infoManager.updateInfoData(type: .carbRatio, value: profileCR)
+                Storage.shared.lastCarbRatio.value = profileCR
             }
 
             // Target
@@ -47,6 +49,8 @@ extension MainViewController {
             } else if let profileTargetLow = profileTargetLow {
                 infoManager.updateInfoData(type: .target, value: profileTargetLow)
             }
+            Storage.shared.lastTargetLowMgdl.value = profileTargetLow?.doubleValue(for: .milligramsPerDeciliter)
+            Storage.shared.lastTargetHighMgdl.value = profileTargetHigh?.doubleValue(for: .milligramsPerDeciliter)
 
             // IOB
             if let insulinMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
@@ -63,7 +67,7 @@ extension MainViewController {
 
             if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject] {
                 let prediction = predictdata["values"] as! [Double]
-                PredictionLabel.text = Localizer.toDisplayUnits(String(Int(prediction.last!)))
+                PredictionLabel.text = Localizer.toDisplayUnits(String(Int(round(prediction.last!))))
                 PredictionLabel.textColor = UIColor.systemPurple
                 if Storage.shared.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
                     predictionData.removeAll()
@@ -88,6 +92,8 @@ extension MainViewController {
                         let formattedMax = Localizer.toDisplayUnits(String(predMax))
                         let value = "\(formattedMin)/\(formattedMax)"
                         infoManager.updateInfoData(type: .minMax, value: value)
+                        Storage.shared.lastMinBgMgdl.value = predMin
+                        Storage.shared.lastMaxBgMgdl.value = predMax
                     }
 
                     updatePredictionGraph()
@@ -119,6 +125,17 @@ extension MainViewController {
             } else {
                 LoopStatusLabel.text = "↻"
                 latestLoopStatusString = "↻"
+            }
+
+            // Live Activity storage
+            Storage.shared.lastIOB.value = latestIOB?.value
+            Storage.shared.lastCOB.value = latestCOB?.value
+            if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject],
+               let values = predictdata["values"] as? [Double]
+            {
+                Storage.shared.projectedBgMgdl.value = values.last
+            } else {
+                Storage.shared.projectedBgMgdl.value = nil
             }
         }
     }

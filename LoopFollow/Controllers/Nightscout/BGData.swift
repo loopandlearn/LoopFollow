@@ -260,8 +260,18 @@ extension MainViewController {
                 Observable.shared.deltaText.value = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
 
+            // Live Activity storage
+            Storage.shared.lastBgReadingTimeSeconds.value = lastBGTime
+            Storage.shared.lastDeltaMgdl.value = Double(deltaBG)
+            Storage.shared.lastTrendCode.value = entries[latestEntryIndex].direction
+
             // Mark BG data as loaded for initial loading state
             self.markDataLoaded("bg")
+
+            // Live Activity update
+            #if !targetEnvironment(macCatalyst)
+                LiveActivityManager.shared.refreshFromCurrentState(reason: "bg")
+            #endif
 
             // Update contact
             if Storage.shared.contactEnabled.value {
