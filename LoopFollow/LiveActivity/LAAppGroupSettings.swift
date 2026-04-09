@@ -241,7 +241,6 @@ enum LAAppGroupSettings {
         return raw.compactMap { LiveActivitySlotOption(rawValue: $0) }
     }
 
-
     // MARK: - Display Name
 
     static func setDisplayName(_ name: String, show: Bool) {

@@ -143,7 +143,7 @@ final class LiveActivityManager {
         Storage.shared.laRenewBy.value = 0
         Storage.shared.laRenewalFailed.value = false
         cancelRenewalFailedNotification()
-        
+
         guard let activity = current else {
             LogManager.shared.log(
                 category: .general,
