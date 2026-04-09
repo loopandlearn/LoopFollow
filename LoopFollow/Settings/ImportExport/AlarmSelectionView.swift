@@ -213,6 +213,8 @@ struct AlarmSelectionRow: View {
             return "Not Looping Alert"
         case .missedBolus:
             return "Missed Bolus Alert"
+        case .futureCarbs:
+            return "Future Carbs Alert"
         case .sensorChange:
             return "Sensor Change Alert"
         case .pumpChange:

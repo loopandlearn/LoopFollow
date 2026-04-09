@@ -195,7 +195,7 @@ struct AggregatedStatsViewWrapper: View {
     var body: some View {
         Group {
             if let mainVC = mainViewController {
-                AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
+                AggregatedStatsContentView(mainViewController: mainVC)
             } else {
                 Text("Loading stats...")
                     .onAppear {

@@ -145,22 +145,25 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Capture before migrations run: true for existing users, false for fresh installs.
         let isExistingUser = Storage.shared.migrationStep.exists
 
+        // Step 1: Released in v3.0.0 (2025-07-07). Can be removed after 2026-07-07.
         if Storage.shared.migrationStep.value < 1 {
             Storage.shared.migrateStep1()
             Storage.shared.migrationStep.value = 1
         }
 
+        // Step 2: Released in v3.1.0 (2025-07-21). Can be removed after 2026-07-21.
         if Storage.shared.migrationStep.value < 2 {
             Storage.shared.migrateStep2()
             Storage.shared.migrationStep.value = 2
         }
 
+        // Step 3: Released in v4.5.0 (2026-02-01). Can be removed after 2027-02-01.
         if Storage.shared.migrationStep.value < 3 {
             Storage.shared.migrateStep3()
             Storage.shared.migrationStep.value = 3
         }
 
-        // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
+        // Step 4: Released in v5.0.0 (2026-03-20). Can be removed after 2027-03-20.
         if Storage.shared.migrationStep.value < 4 {
             // Existing users need to see the fat/protein order change banner.
             // New users never saw the old order, so mark it as already seen.
@@ -168,6 +171,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             Storage.shared.migrationStep.value = 4
         }
 
+        // Step 5: Released in v5.0.0 (2026-03-20). Can be removed after 2027-03-20.
         if Storage.shared.migrationStep.value < 5 {
             Storage.shared.migrateStep5()
             Storage.shared.migrationStep.value = 5
@@ -195,6 +199,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // setup show/hide small graph and stats
         updateGraphVisibility()
         statsView.isHidden = !Storage.shared.showStats.value
+
+        // Tap on stats view to open full statistics screen
+        let statsTap = UITapGestureRecognizer(target: self, action: #selector(statsViewTapped))
+        statsView.addGestureRecognizer(statsTap)
 
         BGChart.delegate = self
         BGChartFull.delegate = self
@@ -667,7 +675,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: nil)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: nil))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController
@@ -722,6 +730,22 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return nil
     }
 
+    @objc private func statsViewTapped() {
+        #if !targetEnvironment(macCatalyst)
+            let position = Storage.shared.position(for: .stats).normalized
+            if position != .menu, let tabIndex = position.tabIndex, let tbc = tabBarController {
+                tbc.selectedIndex = tabIndex
+                return
+            }
+        #endif
+
+        let statsModalView = AggregatedStatsModalView(mainViewController: self)
+        let hostingController = UIHostingController(rootView: statsModalView)
+        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.modalPresentationStyle = .fullScreen
+        present(hostingController, animated: true)
+    }
+
     private func createViewController(for item: TabItem, position: TabPosition, storyboard: UIStoryboard) -> UIViewController? {
         let tag = position.tabIndex ?? 0
 
@@ -756,7 +780,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: self)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: self))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController

@@ -81,6 +81,7 @@ struct GeneralSettingsView: View {
                     if speakBG.value {
                         Picker("Language", selection: $speakLanguage.value) {
                             Text("English").tag("en")
+                            Text("French").tag("fr")
                             Text("Italian").tag("it")
                             Text("Slovak").tag("sk")
                             Text("Swedish").tag("sv")

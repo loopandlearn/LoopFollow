@@ -43,9 +43,14 @@ class Storage {
 
     var contactTrend = StorageValue<ContactIncludeOption>(key: "contactTrend", defaultValue: .off)
     var contactDelta = StorageValue<ContactIncludeOption>(key: "contactDelta", defaultValue: .off)
+    var contactIOB = StorageValue<ContactIncludeOption>(key: "contactIOB", defaultValue: .off)
+    var contactTrendTarget = StorageValue<ContactType>(key: "contactTrendTarget", defaultValue: .BG)
+    var contactDeltaTarget = StorageValue<ContactType>(key: "contactDeltaTarget", defaultValue: .BG)
+    var contactIOBTarget = StorageValue<ContactType>(key: "contactIOBTarget", defaultValue: .BG)
     var contactEnabled = StorageValue<Bool>(key: "contactEnabled", defaultValue: false)
     var contactBackgroundColor = StorageValue<String>(key: "contactBackgroundColor", defaultValue: ContactColorOption.black.rawValue)
     var contactTextColor = StorageValue<String>(key: "contactTextColor", defaultValue: ContactColorOption.white.rawValue)
+    var contactColorMode = StorageValue<ContactColorMode>(key: "contactColorMode", defaultValue: .staticColor)
 
     var sensorScheduleOffset = StorageValue<Double?>(key: "sensorScheduleOffset", defaultValue: nil)
 
@@ -59,6 +64,7 @@ class Storage {
     var lastRecBolusNotified = StorageValue<Double?>(key: "lastRecBolusNotified", defaultValue: nil)
     var lastCOBNotified = StorageValue<Double?>(key: "lastCOBNotified", defaultValue: nil)
     var lastMissedBolusNotified = StorageValue<Date?>(key: "lastMissedBolusNotified", defaultValue: nil)
+    var pendingFutureCarbs = StorageValue<[PendingFutureCarb]>(key: "pendingFutureCarbs", defaultValue: [])
 
     // General Settings [BEGIN]
     var appBadge = StorageValue<Bool>(key: "appBadge", defaultValue: true)
