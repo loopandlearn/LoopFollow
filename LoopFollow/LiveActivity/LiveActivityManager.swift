@@ -150,7 +150,7 @@ final class LiveActivityManager {
                 message: "[LA] foreground restart: current=nil (old activity not bound locally), ending all existing LAs before restart"
             )
             current = nil
-        
+
             Task {
                 for activity in Activity<GlucoseLiveActivityAttributes>.activities {
                     await activity.end(nil, dismissalPolicy: .immediate)
@@ -178,7 +178,7 @@ final class LiveActivityManager {
             }
         }
     }
-    
+
     @objc private func handleBackgroundAudioFailed() {
         guard Storage.shared.laEnabled.value, current != nil else { return }
         // The background audio session has permanently failed — the app will lose its
@@ -188,7 +188,7 @@ final class LiveActivityManager {
         Storage.shared.laRenewBy.value = Date().timeIntervalSince1970
         refreshFromCurrentState(reason: "audio-session-failed")
     }
-    
+
     private func shouldRestartBecauseExtensionLooksStuck() -> Bool {
         guard Storage.shared.laEnabled.value else { return false }
         guard !dismissedByUser else { return false }
@@ -554,7 +554,7 @@ final class LiveActivityManager {
             highMgdl: Storage.shared.highLine.value,
         )
         GlucoseSnapshotStore.shared.save(snapshot)
-        //WatchConnectivityManager.shared.send(snapshot: snapshot)
+        // WatchConnectivityManager.shared.send(snapshot: snapshot)
 
         // LA update: gated on LA being active, snapshot having changed, and activities enabled.
         guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
