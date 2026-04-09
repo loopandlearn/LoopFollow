@@ -1106,7 +1106,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
             BGText.textColor = color
 
-            if latestBG <= 39 || latestBG >= 400 {
+            if latestBG <= globalVariables.minDisplayGlucose || latestBG >= globalVariables.maxDisplayGlucose {
                 BGText.font = UIFont.systemFont(ofSize: 65, weight: .black)
             } else {
                 BGText.font = UIFont.systemFont(ofSize: 85, weight: .black)
