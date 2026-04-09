@@ -97,6 +97,15 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
         }
     }
 
+    /// True when the value is a glucose measurement and should be followed by
+    /// the user's preferred unit label (mg/dL or mmol/L) in compact displays.
+    var isGlucoseUnit: Bool {
+        switch self {
+        case .projectedBG, .delta, .minMax, .target, .isf: return true
+        default: return false
+        }
+    }
+
     /// True when the underlying value may be nil (e.g. Dexcom-only users who have
     /// no Loop data). The widget renders "—" in those cases.
     var isOptional: Bool {
@@ -118,6 +127,8 @@ enum LiveActivitySlotDefaults {
     static let slot3: LiveActivitySlotOption = .projectedBG
     /// Bottom-right slot — intentionally empty until the user configures it
     static let slot4: LiveActivitySlotOption = .none
+    /// Small widget (CarPlay / Watch Smart Stack) right slot
+    static let smallWidgetSlot: LiveActivitySlotOption = .projectedBG
 
     static var all: [LiveActivitySlotOption] {
         [slot1, slot2, slot3, slot4]
@@ -135,8 +146,11 @@ enum LAAppGroupSettings {
         static let lowLineMgdl = "la.lowLine.mgdl"
         static let highLineMgdl = "la.highLine.mgdl"
         static let slots = "la.slots"
+        static let smallWidgetSlot = "la.smallWidgetSlot"
         static let displayName = "la.displayName"
         static let showDisplayName = "la.showDisplayName"
+        static let watchSlots = "watch.slots"
+        static let watchSelectedSlots = "watch.selectedSlots"
     }
 
     private static var defaults: UserDefaults? {
@@ -178,6 +192,55 @@ enum LAAppGroupSettings {
         }
         return raw.map { LiveActivitySlotOption(rawValue: $0) ?? .none }
     }
+
+    // MARK: - Small widget slot (Write)
+
+    static func setSmallWidgetSlot(_ slot: LiveActivitySlotOption) {
+        defaults?.set(slot.rawValue, forKey: Keys.smallWidgetSlot)
+    }
+
+    // MARK: - Small widget slot (Read)
+
+    static func smallWidgetSlot() -> LiveActivitySlotOption {
+        guard let raw = defaults?.string(forKey: Keys.smallWidgetSlot) else {
+            return LiveActivitySlotDefaults.smallWidgetSlot
+        }
+        return LiveActivitySlotOption(rawValue: raw) ?? LiveActivitySlotDefaults.smallWidgetSlot
+    }
+
+    // MARK: - Watch slots (Write)
+
+    /// Persists the 4-position Watch data card slot configuration.
+    static func setWatchSlots(_ slots: [LiveActivitySlotOption]) {
+        let raw = slots.prefix(4).map(\.rawValue)
+        defaults?.set(raw, forKey: Keys.watchSlots)
+    }
+
+    // MARK: - Watch slots (Read)
+
+    static func watchSlots() -> [LiveActivitySlotOption] {
+        guard let raw = defaults?.stringArray(forKey: Keys.watchSlots), raw.count == 4 else {
+            return [.iob, .cob, .projectedBG, .battery]
+        }
+        return raw.map { LiveActivitySlotOption(rawValue: $0) ?? .none }
+    }
+
+    // MARK: - Watch selected slots (ordered, variable-length)
+
+    /// Persists the user's ordered list of selected Watch data slots.
+    static func setWatchSelectedSlots(_ slots: [LiveActivitySlotOption]) {
+        defaults?.set(slots.map(\.rawValue), forKey: Keys.watchSelectedSlots)
+    }
+
+    /// Returns the ordered list of selected Watch data slots.
+    /// Falls back to a sensible default if nothing is saved.
+    static func watchSelectedSlots() -> [LiveActivitySlotOption] {
+        guard let raw = defaults?.stringArray(forKey: Keys.watchSelectedSlots) else {
+            return [.iob, .cob, .projectedBG, .battery]
+        }
+        return raw.compactMap { LiveActivitySlotOption(rawValue: $0) }
+    }
+
 
     // MARK: - Display Name
 

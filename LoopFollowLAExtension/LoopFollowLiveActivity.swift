@@ -54,6 +54,12 @@ struct LoopFollowLiveActivityWidget: Widget {
             return ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
                 LockScreenFamilyAdaptiveView(state: context.state)
                     .id(context.state.seq)
+                    .background(
+                        LALivenessMarker(
+                            seq: context.state.seq,
+                            producedAt: context.state.producedAt
+                        )
+                    )
                     .activitySystemActionForegroundColor(.white)
                     .applyActivityContentMarginsFixIfAvailable()
                     .widgetURL(URL(string: "\(AppGroupID.urlScheme)://la-tap")!)
@@ -65,6 +71,12 @@ struct LoopFollowLiveActivityWidget: Widget {
             return ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
                 LockScreenLiveActivityView(state: context.state)
                     .id(context.state.seq)
+                    .background(
+                        LALivenessMarker(
+                            seq: context.state.seq,
+                            producedAt: context.state.producedAt
+                        )
+                    )
                     .activitySystemActionForegroundColor(.white)
                     .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
                     .applyActivityContentMarginsFixIfAvailable()
@@ -117,14 +129,17 @@ private struct LockScreenFamilyAdaptiveView: View {
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
 
-    private var unitLabel: String {
-        switch snapshot.unit {
-        case .mgdl: return "mg/dL"
-        case .mmol: return "mmol/L"
-        }
+    /// Unit label for the right slot — ISF appends "/U", other glucose slots
+    /// use the plain glucose unit, non-glucose slots return nil.
+    private func rightSlotUnitLabel(for slot: LiveActivitySlotOption) -> String? {
+        guard slot.isGlucoseUnit else { return nil }
+        if slot == .isf { return snapshot.unit.displayName + "/U" }
+        return snapshot.unit.displayName
     }
 
     var body: some View {
+        let rightSlot = LAAppGroupSettings.smallWidgetSlot()
+
         HStack(alignment: .center, spacing: 0) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
@@ -138,23 +153,60 @@ private struct SmallFamilyView: View {
                         .foregroundStyle(LAColors.keyline(for: snapshot))
                 }
 
-                Text("\(LAFormat.delta(snapshot)) \(unitLabel)")
+                Text("\(LAFormat.delta(snapshot)) \(snapshot.unit.displayName)")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.85))
             }
+            .layoutPriority(1)
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(LAFormat.projected(snapshot))
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white)
-
-                Text(unitLabel)
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.65))
+            if rightSlot != .none {
+                if let unitLabel = rightSlotUnitLabel(for: rightSlot) {
+                    // Use ViewThatFits so the unit label appears on surfaces with
+                    // enough vertical space (CarPlay) and is omitted where it doesn't
+                    // fit (Watch Smart Stack).
+                    ViewThatFits(in: .vertical) {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(rightSlot.gridLabel)
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.65))
+                            Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .monospacedDigit()
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                            Text(unitLabel)
+                                .font(.system(size: 11, weight: .regular, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.55))
+                        }
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(rightSlot.gridLabel)
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.65))
+                            Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .monospacedDigit()
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                    }
+                } else {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(rightSlot.gridLabel)
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.65))
+                        Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -303,6 +355,33 @@ private struct MetricBlock: View {
     }
 }
 
+private func slotFormattedValue(option: LiveActivitySlotOption, snapshot: GlucoseSnapshot) -> String {
+    switch option {
+    case .none: ""
+    case .delta: LAFormat.delta(snapshot)
+    case .projectedBG: LAFormat.projected(snapshot)
+    case .minMax: LAFormat.minMax(snapshot)
+    case .iob: LAFormat.iob(snapshot)
+    case .cob: LAFormat.cob(snapshot)
+    case .recBolus: LAFormat.recBolus(snapshot)
+    case .autosens: LAFormat.autosens(snapshot)
+    case .tdd: LAFormat.tdd(snapshot)
+    case .basal: LAFormat.basal(snapshot)
+    case .pump: LAFormat.pump(snapshot)
+    case .pumpBattery: LAFormat.pumpBattery(snapshot)
+    case .battery: LAFormat.battery(snapshot)
+    case .target: LAFormat.target(snapshot)
+    case .isf: LAFormat.isf(snapshot)
+    case .carbRatio: LAFormat.carbRatio(snapshot)
+    case .sage: LAFormat.age(insertTime: snapshot.sageInsertTime)
+    case .cage: LAFormat.age(insertTime: snapshot.cageInsertTime)
+    case .iage: LAFormat.age(insertTime: snapshot.iageInsertTime)
+    case .carbsToday: LAFormat.carbsToday(snapshot)
+    case .override: LAFormat.override(snapshot)
+    case .profile: LAFormat.profileName(snapshot)
+    }
+}
+
 private struct SlotView: View {
     let option: LiveActivitySlotOption
     let snapshot: GlucoseSnapshot
@@ -312,34 +391,7 @@ private struct SlotView: View {
             Color.clear
                 .frame(width: 60, height: 36)
         } else {
-            MetricBlock(label: option.gridLabel, value: value(for: option))
-        }
-    }
-
-    private func value(for option: LiveActivitySlotOption) -> String {
-        switch option {
-        case .none: ""
-        case .delta: LAFormat.delta(snapshot)
-        case .projectedBG: LAFormat.projected(snapshot)
-        case .minMax: LAFormat.minMax(snapshot)
-        case .iob: LAFormat.iob(snapshot)
-        case .cob: LAFormat.cob(snapshot)
-        case .recBolus: LAFormat.recBolus(snapshot)
-        case .autosens: LAFormat.autosens(snapshot)
-        case .tdd: LAFormat.tdd(snapshot)
-        case .basal: LAFormat.basal(snapshot)
-        case .pump: LAFormat.pump(snapshot)
-        case .pumpBattery: LAFormat.pumpBattery(snapshot)
-        case .battery: LAFormat.battery(snapshot)
-        case .target: LAFormat.target(snapshot)
-        case .isf: LAFormat.isf(snapshot)
-        case .carbRatio: LAFormat.carbRatio(snapshot)
-        case .sage: LAFormat.age(insertTime: snapshot.sageInsertTime)
-        case .cage: LAFormat.age(insertTime: snapshot.cageInsertTime)
-        case .iage: LAFormat.age(insertTime: snapshot.iageInsertTime)
-        case .carbsToday: LAFormat.carbsToday(snapshot)
-        case .override: LAFormat.override(snapshot)
-        case .profile: LAFormat.profileName(snapshot)
+            MetricBlock(label: option.gridLabel, value: slotFormattedValue(option: option, snapshot: snapshot))
         }
     }
 }
@@ -359,26 +411,19 @@ private struct DynamicIslandLeadingView: View {
                 .minimumScaleFactor(0.7)
         } else {
             VStack(alignment: .leading, spacing: 2) {
-                Text(LAFormat.glucose(snapshot))
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white)
-
-                HStack(spacing: 5) {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(LAFormat.glucose(snapshot))
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(LAColors.keyline(for: snapshot))
                     Text(LAFormat.trendArrow(snapshot))
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.9))
-
-                    Text(LAFormat.delta(snapshot))
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.9))
-
-                    Text("Proj: \(LAFormat.projected(snapshot))")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.9))
+                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .foregroundStyle(LAColors.keyline(for: snapshot))
                 }
+                Text("\(LAFormat.delta(snapshot)) \(snapshot.unit.displayName)")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.85))
             }
         }
     }
@@ -391,18 +436,21 @@ private struct DynamicIslandTrailingView: View {
         if snapshot.isNotLooping {
             EmptyView()
         } else {
-            VStack(alignment: .trailing, spacing: 3) {
-                Text("IOB \(LAFormat.iob(snapshot))")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white.opacity(0.95))
-
-                Text("COB \(LAFormat.cob(snapshot))")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(.white.opacity(0.95))
+            let slot = LAAppGroupSettings.smallWidgetSlot()
+            if slot != .none {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(slot.gridLabel)
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.65))
+                    Text(slotFormattedValue(option: slot, snapshot: snapshot))
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .padding(.trailing, 6)
             }
-            .padding(.trailing, 6)
         }
     }
 }

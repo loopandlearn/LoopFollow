@@ -15,6 +15,14 @@ func IsNightscoutEnabled() -> Bool {
     return !Storage.shared.url.value.isEmpty
 }
 
+private struct APNSCredentialSnapshot: Equatable {
+    let remoteApnsKey: String
+    let teamId: String?
+    let remoteKeyId: String
+    let lfApnsKey: String
+    let lfKeyId: String
+}
+
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
     var isPresentedAsModal: Bool = false
 
@@ -145,11 +153,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Migrations run in foreground only — see runMigrationsIfNeeded() for details.
         runMigrationsIfNeeded()
 
-        if Storage.shared.migrationStep.value < 7 {
-            Storage.shared.migrateStep7()
-            Storage.shared.migrationStep.value = 7
-        }
-
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
 
@@ -172,6 +175,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // setup show/hide small graph and stats
         updateGraphVisibility()
         statsView.isHidden = !Storage.shared.showStats.value
+
+        // Tap on stats view to open full statistics screen
+        let statsTap = UITapGestureRecognizer(target: self, action: #selector(statsViewTapped))
+        statsView.addGestureRecognizer(statsTap)
 
         BGChart.delegate = self
         BGChartFull.delegate = self
@@ -372,14 +379,25 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
-        Publishers.MergeMany(
-            Storage.shared.remoteApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.teamId.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.remoteKeyId.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.lfApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.lfKeyId.$value.map { _ in () }.eraseToAnyPublisher()
+        Publishers.CombineLatest4(
+            Storage.shared.remoteApnsKey.$value,
+            Storage.shared.teamId.$value,
+            Storage.shared.remoteKeyId.$value,
+            Storage.shared.lfApnsKey.$value
         )
-        .receive(on: DispatchQueue.main)
+        .combineLatest(Storage.shared.lfKeyId.$value)
+        .map { values, lfKeyId in
+            APNSCredentialSnapshot(
+                remoteApnsKey: values.0,
+                teamId: values.1,
+                remoteKeyId: values.2,
+                lfApnsKey: values.3,
+                lfKeyId: lfKeyId
+            )
+        }
+        .removeDuplicates()
+        .dropFirst()
+        .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
         .sink { _ in JWTManager.shared.invalidateCache() }
         .store(in: &cancellables)
 
@@ -636,7 +654,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: nil)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: nil))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController
@@ -686,8 +704,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if Observable.shared.currentAlarm.value != nil,
            let snoozerIndex = getSnoozerTabIndex(), snoozerIndex < vcs.count
         {
+            LogManager.shared.log(category: .general, message: "[LA] tap nav: alarm active → snoozer at index \(snoozerIndex)", isDebug: true)
             targetIndex = snoozerIndex
         } else {
+            LogManager.shared.log(category: .general, message: "[LA] tap nav: no alarm (or snoozer not found) → home", isDebug: true)
             targetIndex = 0
         }
 
@@ -704,13 +724,40 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         guard let tabBarController = tabBarController,
               let viewControllers = tabBarController.viewControllers else { return nil }
 
+        // First: search for SnoozerViewController directly in the tab bar.
         for (index, vc) in viewControllers.enumerated() {
             if let _ = vc as? SnoozerViewController {
                 return index
             }
         }
 
+        // Fallback: derive the expected index from the stored snoozer position.
+        // When snoozer is in the menu (.menu), tabIndex == 4 — the Menu tab.
+        // This is better than falling back to Home (0) because the user can at
+        // least reach the snoozer from the menu tab in one tap.
+        let position = Storage.shared.snoozerPosition.value.normalized
+        if let tabIndex = position.tabIndex, tabIndex < viewControllers.count {
+            LogManager.shared.log(category: .general, message: "[LA] tap nav: snoozer not a direct tab — using stored position tabIndex=\(tabIndex)", isDebug: true)
+            return tabIndex
+        }
+
         return nil
+    }
+
+    @objc private func statsViewTapped() {
+        #if !targetEnvironment(macCatalyst)
+            let position = Storage.shared.position(for: .stats).normalized
+            if position != .menu, let tabIndex = position.tabIndex, let tbc = tabBarController {
+                tbc.selectedIndex = tabIndex
+                return
+            }
+        #endif
+
+        let statsModalView = AggregatedStatsModalView(mainViewController: self)
+        let hostingController = UIHostingController(rootView: statsModalView)
+        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.modalPresentationStyle = .fullScreen
+        present(hostingController, animated: true)
     }
 
     private func createViewController(for item: TabItem, position: TabPosition, storyboard: UIStoryboard) -> UIViewController? {
@@ -747,7 +794,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: self)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: self))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController
@@ -962,32 +1009,46 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Capture before migrations run: true for existing users, false for fresh installs.
         let isExistingUser = Storage.shared.migrationStep.exists
 
+        // Step 1: Released in v3.0.0 (2025-07-07). Can be removed after 2026-07-07.
         if Storage.shared.migrationStep.value < 1 {
             Storage.shared.migrateStep1()
             Storage.shared.migrationStep.value = 1
         }
+
+        // Step 2: Released in v3.1.0 (2025-07-21). Can be removed after 2026-07-21.
         if Storage.shared.migrationStep.value < 2 {
             Storage.shared.migrateStep2()
             Storage.shared.migrationStep.value = 2
         }
+
+        // Step 3: Released in v4.5.0 (2026-02-01). Can be removed after 2027-02-01.
         if Storage.shared.migrationStep.value < 3 {
             Storage.shared.migrateStep3()
             Storage.shared.migrationStep.value = 3
         }
-        // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
+
+        // Step 4: Released in v5.0.0 (2026-03-20). Can be removed after 2027-03-20.
         if Storage.shared.migrationStep.value < 4 {
             // Existing users need to see the fat/protein order change banner.
             // New users never saw the old order, so mark it as already seen.
             Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
             Storage.shared.migrationStep.value = 4
         }
+
+        // Step 5: Released in v5.0.0 (2026-03-20). Can be removed after 2027-03-20.
         if Storage.shared.migrationStep.value < 5 {
             Storage.shared.migrateStep5()
             Storage.shared.migrationStep.value = 5
         }
+
         if Storage.shared.migrationStep.value < 6 {
             Storage.shared.migrateStep6()
             Storage.shared.migrationStep.value = 6
+        }
+
+        if Storage.shared.migrationStep.value < 7 {
+            Storage.shared.migrateStep7()
+            Storage.shared.migrationStep.value = 7
         }
     }
 

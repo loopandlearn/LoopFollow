@@ -7,6 +7,7 @@ struct LiveActivitySettingsView: View {
     @State private var laEnabled: Bool = Storage.shared.laEnabled.value
     @State private var restartConfirmed = false
     @State private var slots: [LiveActivitySlotOption] = LAAppGroupSettings.slots()
+    @State private var smallWidgetSlot: LiveActivitySlotOption = LAAppGroupSettings.smallWidgetSlot()
 
     private let slotLabels = ["Top left", "Top right", "Bottom left", "Bottom right"]
 
@@ -29,7 +30,7 @@ struct LiveActivitySettingsView: View {
                 }
             }
 
-            Section(header: Text("Grid slots")) {
+            Section(header: Text("Grid Slots - Live Activity")) {
                 ForEach(0 ..< 4, id: \.self) { index in
                     Picker(slotLabels[index], selection: Binding(
                         get: { slots[index] },
@@ -38,6 +39,21 @@ struct LiveActivitySettingsView: View {
                         ForEach(LiveActivitySlotOption.allCases, id: \.self) { option in
                             Text(option.displayName).tag(option)
                         }
+                    }
+                }
+            }
+
+            Section(header: Text("Grid Slot - CarPlay / Watch")) {
+                Picker("Right slot", selection: Binding(
+                    get: { smallWidgetSlot },
+                    set: { newValue in
+                        smallWidgetSlot = newValue
+                        LAAppGroupSettings.setSmallWidgetSlot(newValue)
+                        LiveActivityManager.shared.refreshFromCurrentState(reason: "small widget slot changed")
+                    }
+                )) {
+                    ForEach(LiveActivitySlotOption.allCases, id: \.self) { option in
+                        Text(option.displayName).tag(option)
                     }
                 }
             }

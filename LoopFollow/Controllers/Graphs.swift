@@ -321,13 +321,8 @@ extension MainViewController {
         lineBolus.drawCirclesEnabled = true
         lineBolus.drawFilledEnabled = false
 
-        if Storage.shared.showValues.value {
-            lineBolus.drawValuesEnabled = true
-            lineBolus.highlightEnabled = false
-        } else {
-            lineBolus.drawValuesEnabled = false
-            lineBolus.highlightEnabled = true
-        }
+        lineBolus.drawValuesEnabled = Storage.shared.showValues.value
+        lineBolus.highlightEnabled = true
 
         // Carbs
         let chartEntryCarbs = [ChartDataEntry]()
@@ -347,13 +342,8 @@ extension MainViewController {
         lineCarbs.drawCirclesEnabled = true
         lineCarbs.drawFilledEnabled = false
 
-        if Storage.shared.showValues.value {
-            lineCarbs.drawValuesEnabled = true
-            lineCarbs.highlightEnabled = false
-        } else {
-            lineCarbs.drawValuesEnabled = false
-            lineCarbs.highlightEnabled = true
-        }
+        lineCarbs.drawValuesEnabled = Storage.shared.showValues.value
+        lineCarbs.highlightEnabled = true
 
         // create Scheduled Basal graph data
         let chartBasalScheduledEntry = [ChartDataEntry]()
@@ -569,13 +559,8 @@ extension MainViewController {
         lineSmb.drawCirclesEnabled = false
         lineSmb.drawFilledEnabled = false
 
-        if Storage.shared.showValues.value {
-            lineSmb.drawValuesEnabled = true
-            lineSmb.highlightEnabled = false
-        } else {
-            lineSmb.drawValuesEnabled = false
-            lineSmb.highlightEnabled = true
-        }
+        lineSmb.drawValuesEnabled = Storage.shared.showValues.value
+        lineSmb.highlightEnabled = true
 
         // TempTarget graph data
         let chartTempTargetEntry = [ChartDataEntry]()
@@ -1021,7 +1006,8 @@ extension MainViewController {
             let graphHours = 24 * Storage.shared.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: formatter.string(from: NSNumber(value: bolusData[i].value)))
+            let valueString = formatter.string(from: NSNumber(value: bolusData[i].value)) ?? ""
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(bolusData[i].sgv), data: valueString + "\r\r" + formatPillText(line1: valueString + " U", time: bolusData[i].date))
             mainChart.addEntry(dot)
             if Storage.shared.smallGraphTreatments.value {
                 smallChart.addEntry(dot)
@@ -1093,7 +1079,8 @@ extension MainViewController {
             let graphHours = 24 * Storage.shared.downloadDays.value
             if dateTimeStamp < dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours) { continue }
 
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: formatter.string(from: NSNumber(value: smbData[i].value)))
+            let valueString = formatter.string(from: NSNumber(value: smbData[i].value)) ?? ""
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(smbData[i].sgv), data: valueString + "\r\r" + formatPillText(line1: valueString + " U", time: smbData[i].date))
             mainChart.addEntry(dot)
             if Storage.shared.smallGraphTreatments.value {
                 smallChart.addEntry(dot)
@@ -1146,7 +1133,7 @@ extension MainViewController {
                 dateTimeStamp = dateTimeStamp - 250
             }
 
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString)
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString + "\r\r" + formatPillText(line1: valueString + " g", time: carbData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
             if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(dot)

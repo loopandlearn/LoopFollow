@@ -59,6 +59,7 @@ class Storage {
     var lastRecBolusNotified = StorageValue<Double?>(key: "lastRecBolusNotified", defaultValue: nil)
     var lastCOBNotified = StorageValue<Double?>(key: "lastCOBNotified", defaultValue: nil)
     var lastMissedBolusNotified = StorageValue<Date?>(key: "lastMissedBolusNotified", defaultValue: nil)
+    var pendingFutureCarbs = StorageValue<[PendingFutureCarb]>(key: "pendingFutureCarbs", defaultValue: [])
 
     // General Settings [BEGIN]
     var appBadge = StorageValue<Bool>(key: "appBadge", defaultValue: true)
@@ -87,6 +88,7 @@ class Storage {
     var lastBgReadingTimeSeconds = StorageValue<TimeInterval?>(key: "lastBgReadingTimeSeconds", defaultValue: nil)
     var lastDeltaMgdl = StorageValue<Double?>(key: "lastDeltaMgdl", defaultValue: nil)
     var lastTrendCode = StorageValue<String?>(key: "lastTrendCode", defaultValue: nil)
+    var lastBgMgdl = StorageValue<Double?>(key: "lastBgMgdl", defaultValue: nil)
     var lastIOB = StorageValue<Double?>(key: "lastIOB", defaultValue: nil)
     var lastCOB = StorageValue<Double?>(key: "lastCOB", defaultValue: nil)
     var projectedBgMgdl = StorageValue<Double?>(key: "projectedBgMgdl", defaultValue: nil)
@@ -194,6 +196,7 @@ class Storage {
 
     var lastLoopingChecked = StorageValue<Date?>(key: "lastLoopingChecked", defaultValue: nil)
     var lastBGChecked = StorageValue<Date?>(key: "lastBGChecked", defaultValue: nil)
+    var lastLoopTime = StorageValue<TimeInterval>(key: "lastLoopTime", defaultValue: 0)
 
     // Tab positions - which position each item is in (positions 1-4 are customizable, 5 is always Menu)
     var homePosition = StorageValue<TabPosition>(key: "homePosition", defaultValue: .position1)
@@ -385,6 +388,7 @@ class Storage {
 
         lastLoopingChecked.reload()
         lastBGChecked.reload()
+        lastLoopTime.reload()
 
         homePosition.reload()
         alarmsPosition.reload()

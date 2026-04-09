@@ -262,6 +262,7 @@ extension MainViewController {
 
             // Live Activity storage
             Storage.shared.lastBgReadingTimeSeconds.value = lastBGTime
+            Storage.shared.lastBgMgdl.value = Double(latestBG)
             Storage.shared.lastDeltaMgdl.value = Double(deltaBG)
             Storage.shared.lastTrendCode.value = entries[latestEntryIndex].direction
 
