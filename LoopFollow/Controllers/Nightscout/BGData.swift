@@ -236,6 +236,7 @@ extension MainViewController {
             let latestBG = entries[latestEntryIndex].sgv
             let priorBG = entries[latestEntryIndex - 1].sgv
             let deltaBG = latestBG - priorBG
+            let lastBGTime = entries[latestEntryIndex].date
 
             self.updateServerText(with: sourceName)
 
