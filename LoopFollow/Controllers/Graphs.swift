@@ -1111,12 +1111,15 @@ extension MainViewController {
             formatter.maximumFractionDigits = 2
             formatter.minimumIntegerDigits = 1
 
-            var valueString: String = formatter.string(from: NSNumber(value: carbData[i].value))!
+            let carbAmountString = formatter.string(from: NSNumber(value: carbData[i].value))!
+            var valueString = carbAmountString
+            var markerLine1 = carbAmountString + "g"
 
             var hours = 3
             if carbData[i].absorptionTime > 0, Storage.shared.showAbsorption.value {
                 hours = carbData[i].absorptionTime / 60
                 valueString += " " + String(hours) + "h"
+                markerLine1 += " " + String(hours) + "h"
             }
 
             // Check overlapping carbs to shift left if needed
@@ -1133,7 +1136,7 @@ extension MainViewController {
                 dateTimeStamp = dateTimeStamp - 250
             }
 
-            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString + "\r\r" + formatPillText(line1: valueString + " g", time: carbData[i].date))
+            let dot = ChartDataEntry(x: Double(dateTimeStamp), y: Double(carbData[i].sgv), data: valueString + "\r\r" + formatPillText(line1: markerLine1, time: carbData[i].date))
             BGChart.data?.dataSets[dataIndex].addEntry(dot)
             if Storage.shared.smallGraphTreatments.value {
                 BGChartFull.data?.dataSets[dataIndex].addEntry(dot)
