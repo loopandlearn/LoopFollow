@@ -54,6 +54,12 @@ struct LoopFollowLiveActivityWidget: Widget {
             return ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
                 LockScreenFamilyAdaptiveView(state: context.state)
                     .id(context.state.seq)
+                    .background(
+                        LALivenessMarker(
+                            seq: context.state.seq,
+                            producedAt: context.state.producedAt
+                        )
+                    )
                     .activitySystemActionForegroundColor(.white)
                     .applyActivityContentMarginsFixIfAvailable()
                     .widgetURL(URL(string: "\(AppGroupID.urlScheme)://la-tap")!)
@@ -65,6 +71,12 @@ struct LoopFollowLiveActivityWidget: Widget {
             return ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
                 LockScreenLiveActivityView(state: context.state)
                     .id(context.state.seq)
+                    .background(
+                        LALivenessMarker(
+                            seq: context.state.seq,
+                            producedAt: context.state.producedAt
+                        )
+                    )
                     .activitySystemActionForegroundColor(.white)
                     .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
                     .applyActivityContentMarginsFixIfAvailable()

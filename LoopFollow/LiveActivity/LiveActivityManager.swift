@@ -106,38 +106,31 @@ final class LiveActivityManager {
         let now = Date().timeIntervalSince1970
         let overlayIsShowing = renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
 
-        LogManager.shared.log(category: .general, message: "[LA] foreground: renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing), current=\(current?.id ?? "nil"), dismissedByUser=\(dismissedByUser), renewBy=\(renewBy), now=\(now)")
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] foreground: renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing), current=\(current?.id ?? "nil"), dismissedByUser=\(dismissedByUser), renewBy=\(renewBy), now=\(now)"
+        )
+
         guard renewalFailed || overlayIsShowing else {
             LogManager.shared.log(category: .general, message: "[LA] foreground: no action needed (not in renewal window)")
             return
         }
 
-        // Overlay is showing or renewal previously failed — end the stale LA and start a fresh one.
-        // We cannot call startIfNeeded() here: it finds the existing activity in
-        // Activity.activities and reuses it rather than replacing it.
-        LogManager.shared.log(category: .general, message: "[LA] ending stale LA and restarting (renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing))")
-        // Suppress the handleDidBecomeActive() call that always fires after willEnterForeground.
-        // Without this, the two methods race: didBecomeActive binds to the old (dying) activity
-        // and observes its push token, while handleForeground's async end+restart creates a new
-        // activity — leaving pushToken nil when the new activity tries to start.
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] ending stale LA and restarting (renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing))"
+        )
+
         skipNextDidBecomeActive = true
-        // Clear state synchronously so any snapshot built between now and when the
-        // new LA is started computes showRenewalOverlay = false.
-        Storage.shared.laRenewBy.value = 0
-        Storage.shared.laRenewalFailed.value = false
-        cancelRenewalFailedNotification()
 
-        guard let activity = current else {
-            // LA was already gone (ended by iOS or user). If the user explicitly swiped,
-            // laRenewBy was cleared to 0 at that point, so overlayIsShowing would be false
-            // and we would never reach here. Reaching here means iOS ended it while the
-            // renewal window was open — restart is correct.
-            LogManager.shared.log(category: .general, message: "[LA] foreground restart: current=nil (iOS-ended during renewal window), dismissedByUser=\(dismissedByUser), restarting")
-            startFromCurrentState()
-            return
-        }
+        // Mark restart intent BEFORE clearing storage flags, so any late .dismissed
+        // from the old activity is never misclassified as a user swipe.
+        endingForRestart = true
+        dismissedByUser = false
 
-        current = nil
+        // Stop any observers/tasks tied to the previous activity instance. In the
+        // current=nil branch below, the old observer can otherwise deliver a late
+        // .dismissed and poison dismissedByUser.
         updateTask?.cancel()
         updateTask = nil
         tokenObservationTask?.cancel()
@@ -146,28 +139,46 @@ final class LiveActivityManager {
         stateObserverTask = nil
         pushToken = nil
 
-        // Signal the state observer that the upcoming .dismissed event is our own
-        // end() call, not a user swipe. This must be set synchronously before end()
-        // is awaited so the observer sees it regardless of MainActor scheduling order.
-        endingForRestart = true
+        // Clear renewal state so the new snapshot does not show the renewal overlay.
+        Storage.shared.laRenewBy.value = 0
+        Storage.shared.laRenewalFailed.value = false
+        cancelRenewalFailedNotification()
+
+        guard let activity = current else {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] foreground restart: current=nil (old activity not bound locally), ending all existing LAs before restart"
+            )
+            current = nil
+        
+            Task {
+                for activity in Activity<GlucoseLiveActivityAttributes>.activities {
+                    await activity.end(nil, dismissalPolicy: .immediate)
+                }
+                await MainActor.run {
+                    self.dismissedByUser = false
+                    self.startFromCurrentState(cleanupOrphans: false)
+                    LogManager.shared.log(
+                        category: .general,
+                        message: "[LA] foreground restart: fresh LA started after ending unbound existing activity"
+                    )
+                }
+            }
+            return
+        }
+
+        current = nil
 
         Task {
-            // Await end so the activity is removed from Activity.activities before
-            // startIfNeeded() runs — otherwise it hits the reuse path and skips
-            // writing a new laRenewBy deadline.
             await activity.end(nil, dismissalPolicy: .immediate)
             await MainActor.run {
-                self.endingForRestart = false
                 self.dismissedByUser = false
-                // startFromCurrentState rebuilds the snapshot (showRenewalOverlay = false
-                // since laRenewBy is 0), saves it to the store, then calls startIfNeeded()
-                // which finds no existing activity and requests a fresh LA with a new deadline.
-                self.startFromCurrentState()
+                self.startFromCurrentState(cleanupOrphans: false)
                 LogManager.shared.log(category: .general, message: "[LA] Live Activity restarted after foreground retry")
             }
         }
     }
-
+    
     @objc private func handleBackgroundAudioFailed() {
         guard Storage.shared.laEnabled.value, current != nil else { return }
         // The background audio session has permanently failed — the app will lose its
@@ -177,9 +188,48 @@ final class LiveActivityManager {
         Storage.shared.laRenewBy.value = Date().timeIntervalSince1970
         refreshFromCurrentState(reason: "audio-session-failed")
     }
+    
+    private func shouldRestartBecauseExtensionLooksStuck() -> Bool {
+        guard Storage.shared.laEnabled.value else { return false }
+        guard !dismissedByUser else { return false }
+
+        guard let activity = current ?? Activity<GlucoseLiveActivityAttributes>.activities.first else {
+            return false
+        }
+
+        let now = Date().timeIntervalSince1970
+        let staleDatePassed = activity.content.staleDate.map { $0 <= Date() } ?? false
+        if staleDatePassed {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] liveness check: staleDate already passed"
+            )
+            return true
+        }
+
+        let expectedSeq = activity.content.state.seq
+        let seenSeq = LALivenessStore.lastExtensionSeq
+        let lastSeenAt = LALivenessStore.lastExtensionSeenAt
+        let lastProducedAt = LALivenessStore.lastExtensionProducedAt
+
+        let extensionHasNeverCheckedIn = lastSeenAt <= 0
+        let extensionLooksBehind = seenSeq < expectedSeq
+        let noRecentExtensionTouch = extensionHasNeverCheckedIn || (now - lastSeenAt > LiveActivityManager.extensionLivenessGrace)
+
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] liveness check: expectedSeq=\(expectedSeq), seenSeq=\(seenSeq), lastSeenAt=\(lastSeenAt), lastProducedAt=\(lastProducedAt), behind=\(extensionLooksBehind), noRecentTouch=\(noRecentExtensionTouch)",
+            isDebug: true
+        )
+
+        // Conservative rule:
+        // only suspect "stuck" if the extension is both behind AND has not checked in recently.
+        return extensionLooksBehind && noRecentExtensionTouch
+    }
 
     static let renewalThreshold: TimeInterval = 7.5 * 3600
     static let renewalWarning: TimeInterval = 30 * 60
+    static let extensionLivenessGrace: TimeInterval = 15 * 60
 
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
@@ -223,10 +273,18 @@ final class LiveActivityManager {
             let needsRestart = Storage.shared.laRenewalFailed.value || inRenewalWindow || staleDatePassed
 
             if needsRestart {
-                LogManager.shared.log(category: .general, message: "[LA] existing activity is stale on startIfNeeded — ending and restarting (staleDatePassed=\(staleDatePassed), inRenewalWindow=\(inRenewalWindow))")
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] existing activity is stale on startIfNeeded — ending and restarting (staleDatePassed=\(staleDatePassed), inRenewalWindow=\(inRenewalWindow))"
+                )
+
+                endingForRestart = true
+                dismissedByUser = false
+
                 Storage.shared.laRenewBy.value = 0
                 Storage.shared.laRenewalFailed.value = false
                 cancelRenewalFailedNotification()
+
                 Task {
                     await existing.end(nil, dismissalPolicy: .immediate)
                     await MainActor.run { self.startIfNeeded() }
@@ -269,6 +327,7 @@ final class LiveActivityManager {
 
             let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
             let content = ActivityContent(state: initialState, staleDate: renewDeadline)
+            LALivenessStore.clear()
             let activity = try Activity.request(attributes: attributes, content: content, pushType: .token)
 
             bind(to: activity, logReason: "start-new")
@@ -287,6 +346,7 @@ final class LiveActivityManager {
         guard let activity = current else { return }
         current = nil
         Storage.shared.laRenewBy.value = 0
+        LALivenessStore.clear()
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
             await activity.end(nil, dismissalPolicy: .immediate)
@@ -328,6 +388,7 @@ final class LiveActivityManager {
             if current?.id == activity.id {
                 current = nil
                 Storage.shared.laRenewBy.value = 0
+                LALivenessStore.clear()
             }
         }
     }
@@ -341,6 +402,7 @@ final class LiveActivityManager {
         dismissedByUser = false
         Storage.shared.laRenewBy.value = 0
         Storage.shared.laRenewalFailed.value = false
+        LALivenessStore.clear()
         cancelRenewalFailedNotification()
         current = nil
         updateTask?.cancel(); updateTask = nil
@@ -352,15 +414,19 @@ final class LiveActivityManager {
                 await activity.end(nil, dismissalPolicy: .immediate)
             }
             await MainActor.run {
-                self.startFromCurrentState()
+                self.startFromCurrentState(cleanupOrphans: false)
                 LogManager.shared.log(category: .general, message: "[LA] forceRestart: Live Activity restarted")
             }
         }
     }
 
-    func startFromCurrentState() {
+    func startFromCurrentState(cleanupOrphans: Bool = false) {
         guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
-        endOrphanedActivities()
+
+        if cleanupOrphans {
+            endOrphanedActivities()
+        }
+
         let provider = StorageCurrentGlucoseStateProvider()
         if let snapshot = GlucoseSnapshotBuilder.build(from: provider) {
             LAAppGroupSettings.setThresholds(
@@ -377,7 +443,8 @@ final class LiveActivityManager {
     }
 
     func refreshFromCurrentState(reason: String) {
-        guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
+        // No LA guard here — Watch and store must update regardless of LA state.
+        // LA-specific gating (laEnabled, dismissedByUser) is applied inside performRefresh.
         refreshWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             self?.performRefresh(reason: reason)
@@ -478,14 +545,20 @@ final class LiveActivityManager {
         let now = Date()
         let timeSinceLastUpdate = now.timeIntervalSince(lastUpdateTime ?? .distantPast)
         let forceRefreshNeeded = timeSinceLastUpdate >= 5 * 60
-        if let previous = GlucoseSnapshotStore.shared.load(), previous == snapshot, !forceRefreshNeeded {
-            return
-        }
+        // Capture dedup result BEFORE saving so the store comparison is valid.
+        let snapshotUnchanged = GlucoseSnapshotStore.shared.load() == snapshot
+
+        // Store + Watch: always update, independent of LA state.
         LAAppGroupSettings.setThresholds(
             lowMgdl: Storage.shared.lowLine.value,
             highMgdl: Storage.shared.highLine.value,
         )
         GlucoseSnapshotStore.shared.save(snapshot)
+        //WatchConnectivityManager.shared.send(snapshot: snapshot)
+
+        // LA update: gated on LA being active, snapshot having changed, and activities enabled.
+        guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
+        guard !snapshotUnchanged || forceRefreshNeeded else { return }
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             return
         }
@@ -595,6 +668,8 @@ final class LiveActivityManager {
     private func bind(to activity: Activity<GlucoseLiveActivityAttributes>, logReason: String) {
         if current?.id == activity.id { return }
         current = activity
+        dismissedByUser = false
+        endingForRestart = false
         attachStateObserver(to: activity)
         LogManager.shared.log(category: .general, message: "Live Activity bound id=\(activity.id) (\(logReason))", isDebug: true)
         observePushToken(for: activity)
