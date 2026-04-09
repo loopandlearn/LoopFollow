@@ -10,13 +10,15 @@ enum ComplicationID {
     static let gaugeCorner = "LoopFollowGaugeCorner"
     /// graphicCorner stacked text only (Complication 2).
     static let stackCorner = "LoopFollowStackCorner"
-    // DEBUG COMPLICATION — enabled for pipeline diagnostics.
-    // Shows two timestamps to isolate pipeline failures:
-    //   outer (top):  HH:mm of snapshot.updatedAt — when CGM data last reached the Watch
-    //   inner (↺):    HH:mm when ClockKit last called getCurrentTimelineEntry
-    // If outer changes but inner is stale → reloadTimeline() not firing or ClockKit ignoring it.
-    // If inner changes but outer is stale → data delivery broken, complication rebuilding with old data.
-    static let debugCorner = "LoopFollowDebugCorner"
+    #if DEBUG
+        // DEBUG COMPLICATION — pipeline diagnostics only, never shipped in release builds.
+        // Shows two timestamps to isolate pipeline failures:
+        //   outer (top):  HH:mm of snapshot.updatedAt — when CGM data last reached the Watch
+        //   inner (↺):    HH:mm when ClockKit last called getCurrentTimelineEntry
+        // If outer changes but inner is stale → reloadTimeline() not firing or ClockKit ignoring it.
+        // If inner changes but outer is stale → data delivery broken, complication rebuilding with old data.
+        static let debugCorner = "LoopFollowDebugCorner"
+    #endif
 }
 
 // MARK: - Entry builder
@@ -35,7 +37,9 @@ enum ComplicationEntryBuilder {
         case .graphicCorner:
             switch identifier {
             case ComplicationID.stackCorner: return graphicCornerStackTemplate(snapshot: snapshot)
-            case ComplicationID.debugCorner: return graphicCornerDebugTemplate(snapshot: snapshot)
+            #if DEBUG
+                case ComplicationID.debugCorner: return graphicCornerDebugTemplate(snapshot: snapshot)
+            #endif
             default: return graphicCornerGaugeTemplate(snapshot: snapshot)
             }
         default:
@@ -59,11 +63,13 @@ enum ComplicationEntryBuilder {
                     innerTextProvider: CLKSimpleTextProvider(text: ""),
                     outerTextProvider: CLKSimpleTextProvider(text: "--")
                 )
-            case ComplicationID.debugCorner:
-                return CLKComplicationTemplateGraphicCornerStackText(
-                    innerTextProvider: CLKSimpleTextProvider(text: "STALE"),
-                    outerTextProvider: CLKSimpleTextProvider(text: "--:--")
-                )
+            #if DEBUG
+                case ComplicationID.debugCorner:
+                    return CLKComplicationTemplateGraphicCornerStackText(
+                        innerTextProvider: CLKSimpleTextProvider(text: "STALE"),
+                        outerTextProvider: CLKSimpleTextProvider(text: "--:--")
+                    )
+            #endif
             default:
                 return staleGaugeTemplate()
             }
@@ -90,11 +96,13 @@ enum ComplicationEntryBuilder {
                     innerTextProvider: CLKSimpleTextProvider(text: "→ --"),
                     outerTextProvider: outer
                 )
-            case ComplicationID.debugCorner:
-                return CLKComplicationTemplateGraphicCornerStackText(
-                    innerTextProvider: CLKSimpleTextProvider(text: "DEBUG"),
-                    outerTextProvider: CLKSimpleTextProvider(text: "--:--")
-                )
+            #if DEBUG
+                case ComplicationID.debugCorner:
+                    return CLKComplicationTemplateGraphicCornerStackText(
+                        innerTextProvider: CLKSimpleTextProvider(text: "DEBUG"),
+                        outerTextProvider: CLKSimpleTextProvider(text: "--:--")
+                    )
+            #endif
             default:
                 let outer = CLKSimpleTextProvider(text: "---")
                 outer.tintColor = .green
@@ -184,7 +192,7 @@ enum ComplicationEntryBuilder {
         bgText.tintColor = thresholdColor(for: snapshot)
 
         let bottomLabel: String
-        if let _ = snapshot.projected {
+        if snapshot.projected != nil {
             // ⇢ = dashed arrow (U+21E2); swap for ▸ (U+25B8) if it renders poorly on-device
             bottomLabel = "\(WatchFormat.delta(snapshot)) | ⇢\(WatchFormat.projected(snapshot))"
         } else {
@@ -197,7 +205,7 @@ enum ComplicationEntryBuilder {
         )
     }
 
-    // MARK: - Graphic Corner — Debug (Complication 3)
+    // MARK: - Graphic Corner — Debug (Complication 3, DEBUG builds only)
 
     // Outer (top): HH:mm of the snapshot's updatedAt — when the CGM reading arrived.
     // Inner (bottom): "↺ HH:mm" — when ClockKit last called getCurrentTimelineEntry.
@@ -207,15 +215,17 @@ enum ComplicationEntryBuilder {
     //   inner changes  → ClockKit is refreshing the complication face
     //   inner stale    → reloadTimeline is not being called or ClockKit is ignoring it
 
-    private static func graphicCornerDebugTemplate(snapshot: GlucoseSnapshot) -> CLKComplicationTemplate {
-        let dataTime = WatchFormat.updateTime(snapshot)
-        let buildTime = WatchFormat.currentTime()
+    #if DEBUG
+        private static func graphicCornerDebugTemplate(snapshot: GlucoseSnapshot) -> CLKComplicationTemplate {
+            let dataTime = WatchFormat.updateTime(snapshot)
+            let buildTime = WatchFormat.currentTime()
 
-        return CLKComplicationTemplateGraphicCornerStackText(
-            innerTextProvider: CLKSimpleTextProvider(text: "↺ \(buildTime)"),
-            outerTextProvider: CLKSimpleTextProvider(text: dataTime)
-        )
-    }
+            return CLKComplicationTemplateGraphicCornerStackText(
+                innerTextProvider: CLKSimpleTextProvider(text: "↺ \(buildTime)"),
+                outerTextProvider: CLKSimpleTextProvider(text: dataTime)
+            )
+        }
+    #endif
 
     // MARK: - Threshold color
 

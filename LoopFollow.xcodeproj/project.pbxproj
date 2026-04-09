@@ -981,6 +981,7 @@
 				374A77A12F5BE17000E96858 /* GlucoseSnapshot.swift */,
 				374A77A32F5BE17000E96858 /* LAAppGroupSettings.swift */,
 				374A77982F5BD8AB00E96858 /* APNSClient.swift */,
+				37989DD32F60A11E0004BD8B /* WatchConnectivityManager.swift */,
 			);
 			path = LiveActivity;
 			sourceTree = "<group>";
@@ -1680,7 +1681,6 @@
 			isa = PBXGroup;
 			children = (
 				379BECA92F6588300069DC62 /* RestartLiveActivityIntent.swift */,
-				37989DD32F60A11E0004BD8B /* WatchConnectivityManager.swift */,
 				374DAACA2F5B924B00BB663B /* LoopFollowLAExtensionExtension.entitlements */,
 				DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */,
 				DDB0AF542BB1B24A00AFA48B /* BuildDetails.plist */,

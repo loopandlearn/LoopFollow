@@ -81,8 +81,9 @@ final class WatchAppDelegate: NSObject, WKApplicationDelegate {
         }
 
         do {
+            // GlucoseSnapshot has a custom decoder that reads `updatedAt` as a
+            // Double, so no JSONDecoder date strategy is required.
             let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
             return try decoder.decode(GlucoseSnapshot.self, from: data)
         } catch {
             logger.error("WatchAppDelegate: failed to decode applicationContext snapshot — \(error.localizedDescription, privacy: .public)")

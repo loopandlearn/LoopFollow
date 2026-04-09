@@ -24,8 +24,9 @@ final class GlucoseSnapshotStore {
         queue.async {
             do {
                 let url = try self.fileURL()
+                // GlucoseSnapshot writes `updatedAt` as a Double via its custom
+                // encoder, so no JSONEncoder date strategy is required.
                 let encoder = JSONEncoder()
-                encoder.dateEncodingStrategy = .iso8601
                 let data = try encoder.encode(snapshot)
                 try data.write(to: url, options: [.atomic])
                 os_log("GlucoseSnapshotStore: saved snapshot g=%d to %{public}@", log: storeLog, type: .debug, Int(snapshot.glucose), url.lastPathComponent)
@@ -45,8 +46,9 @@ final class GlucoseSnapshotStore {
             }
 
             let data = try Data(contentsOf: url)
+            // GlucoseSnapshot reads `updatedAt` as a Double via its custom decoder,
+            // so no JSONDecoder date strategy is required.
             let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
             let snapshot = try decoder.decode(GlucoseSnapshot.self, from: data)
             return snapshot
         } catch {
