@@ -169,7 +169,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         "deviceStatus": false,
     ]
     private var loadingTimeoutTimer: Timer?
-    private var remoteCommandPollingTimer: Timer?
     private var remoteCommandPollingStartedAt: Date?
     private var remoteCommandPollingBaseline: RemoteCommandDataSignature?
     private let remoteCommandPollingInterval: TimeInterval = 3
@@ -869,7 +868,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     deinit {
-        remoteCommandPollingTimer?.invalidate()
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("refresh"), object: nil)
     }
 
@@ -915,26 +913,20 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         remoteCommandPollingBaseline = currentRemoteCommandDataSignature()
         remoteCommandPollingStartedAt = Date()
-        remoteCommandPollingTimer?.invalidate()
 
-        performRemoteCommandPollingTick()
-
-        let timer = Timer.scheduledTimer(withTimeInterval: remoteCommandPollingInterval, repeats: true) { [weak self] _ in
+        TaskScheduler.shared.scheduleTask(id: .remoteCommandPoll, nextRun: Date()) { [weak self] in
             self?.performRemoteCommandPollingTick()
         }
-        timer.tolerance = 0.5
-        remoteCommandPollingTimer = timer
 
         LogManager.shared.log(category: .general, message: "Started aggressive polling after remote command result notification")
     }
 
     private func stopRemoteCommandPolling(reason: String) {
-        guard remoteCommandPollingTimer != nil || remoteCommandPollingStartedAt != nil else { return }
+        guard remoteCommandPollingStartedAt != nil else { return }
 
-        remoteCommandPollingTimer?.invalidate()
-        remoteCommandPollingTimer = nil
         remoteCommandPollingStartedAt = nil
         remoteCommandPollingBaseline = nil
+        TaskScheduler.shared.rescheduleTask(id: .remoteCommandPoll, to: .distantFuture)
 
         LogManager.shared.log(category: .general, message: "Stopped aggressive polling: \(reason)")
     }
@@ -947,9 +939,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return
         }
 
-        bgTaskAction()
-        deviceStatusAction()
-        treatmentsTaskAction()
+        let now = Date()
+        TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: now)
+        TaskScheduler.shared.rescheduleTask(id: .treatments, to: now)
+
+        TaskScheduler.shared.rescheduleTask(
+            id: .remoteCommandPoll,
+            to: Date().addingTimeInterval(remoteCommandPollingInterval)
+        )
     }
 
     private func currentRemoteCommandDataSignature() -> RemoteCommandDataSignature {
