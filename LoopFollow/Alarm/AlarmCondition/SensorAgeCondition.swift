@@ -3,8 +3,8 @@
 
 import Foundation
 
-/// Fires once when we are **≤ threshold hours** away from the
-/// sensor's configured lifetime.  No repeats once triggered.
+/// Fires when we are **≤ threshold hours** away from the
+/// sensor's configured lifetime.
 struct SensorAgeCondition: AlarmCondition {
     static let type: AlarmType = .sensorChange
     init() {}
