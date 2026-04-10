@@ -1,10 +1,6 @@
 // LoopFollow
 // WatchConnectivityManager.swift
 
-// WatchConnectivityManager.swift
-// Philippe Achkar
-// 2026-03-10
-
 import Foundation
 import WatchConnectivity
 
@@ -15,8 +11,21 @@ final class WatchConnectivityManager: NSObject {
 
     // MARK: - Init
 
-    /// Timestamp of the last snapshot the Watch ACK'd via sendAck().
-    private var lastWatchAckTimestamp: TimeInterval = 0
+    /// Serial queue protecting mutable state (the last-ack timestamp) from
+    /// concurrent access: `send(snapshot:)` may be called from any thread, and
+    /// WCSession delegate callbacks arrive on an arbitrary background queue.
+    private let stateQueue = DispatchQueue(label: "com.loopfollow.WatchConnectivityManager.state")
+
+    /// Backing storage for `lastWatchAckTimestamp`. Always access via the
+    /// thread-safe accessor below.
+    private var _lastWatchAckTimestamp: TimeInterval = 0
+
+    /// Timestamp of the last snapshot the Watch ACK'd. Read/write is serialized
+    /// through `stateQueue`.
+    private var lastWatchAckTimestamp: TimeInterval {
+        get { stateQueue.sync { _lastWatchAckTimestamp } }
+        set { stateQueue.sync { _lastWatchAckTimestamp = newValue } }
+    }
 
     override private init() {
         super.init()
@@ -56,8 +65,9 @@ final class WatchConnectivityManager: NSObject {
         }
 
         do {
+            // GlucoseSnapshot has a custom encoder that writes updatedAt as a
+            // Double (timeIntervalSince1970), so no date strategy needs to be set.
             let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
             let data = try encoder.encode(snapshot)
             let payload: [String: Any] = ["snapshot": data]
 

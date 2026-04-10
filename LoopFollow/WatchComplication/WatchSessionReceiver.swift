@@ -35,7 +35,6 @@ final class WatchSessionReceiver: NSObject {
     private var cachedComplications: [String: CLKComplication] = [:]
 
     /// Called by WatchComplicationProvider whenever ClockKit passes a CLKComplication to us.
-    /// Must be called on the main thread (ClockKit callbacks are main-thread).
     func cacheComplication(_ complication: CLKComplication) {
         let key = "\(complication.identifier)-\(complication.family.rawValue)"
         cachedComplications[key] = complication
@@ -88,8 +87,9 @@ extension WatchSessionReceiver: WCSessionDelegate {
     private func bootstrapFromApplicationContext(_ session: WCSession) {
         guard let data = session.receivedApplicationContext["snapshot"] as? Data else { return }
         do {
+            // GlucoseSnapshot has a custom decoder that reads `updatedAt` as a
+            // Double, so no JSONDecoder date strategy is required.
             let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
             let snapshot = try decoder.decode(GlucoseSnapshot.self, from: data)
             GlucoseSnapshotStore.shared.save(snapshot) { [weak self] in
                 os_log("WatchSessionReceiver: bootstrapped snapshot from applicationContext", log: watchLog, type: .debug)
@@ -135,8 +135,9 @@ extension WatchSessionReceiver: WCSessionDelegate {
             return
         }
         do {
+            // GlucoseSnapshot has a custom decoder that reads `updatedAt` as a
+            // Double, so no JSONDecoder date strategy is required.
             let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
             let snapshot = try decoder.decode(GlucoseSnapshot.self, from: data)
             // Cache in memory immediately — complication provider can use this as a
             // fallback if the App Group file store hasn't flushed yet.

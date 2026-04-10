@@ -14,7 +14,7 @@ final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
     // MARK: - Complication Descriptors
 
     func getComplicationDescriptors(handler: @escaping ([CLKComplicationDescriptor]) -> Void) {
-        let descriptors = [
+        var descriptors: [CLKComplicationDescriptor] = [
             // Complication 1: BG + gauge arc (graphicCircular + graphicCorner)
             CLKComplicationDescriptor(
                 identifier: ComplicationID.gaugeCorner,
@@ -27,13 +27,17 @@ final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
                 displayName: "LoopFollow Text",
                 supportedFamilies: [.graphicCorner]
             ),
-            // DEBUG COMPLICATION — enabled for pipeline diagnostics.
-            CLKComplicationDescriptor(
-                identifier: ComplicationID.debugCorner,
-                displayName: "LoopFollow Debug",
-                supportedFamilies: [.graphicCorner]
-            ),
         ]
+        #if DEBUG
+            // DEBUG COMPLICATION — pipeline diagnostics only, not shipped in release builds.
+            descriptors.append(
+                CLKComplicationDescriptor(
+                    identifier: ComplicationID.debugCorner,
+                    displayName: "LoopFollow Debug",
+                    supportedFamilies: [.graphicCorner]
+                )
+            )
+        #endif
         handler(descriptors)
     }
 

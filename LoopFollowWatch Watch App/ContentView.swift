@@ -204,6 +204,8 @@ struct SlotSelectionView: View {
 
     var body: some View {
         List {
+            // `.delta` and `.projectedBG` are always shown on the glucose page,
+            // so they're excluded from the grid slot picker to avoid duplication.
             ForEach(LiveActivitySlotOption.allCases.filter { $0 != .none && $0 != .delta && $0 != .projectedBG }, id: \.self) { option in
                 Button(action: { model.toggleSlot(option) }) {
                     HStack {

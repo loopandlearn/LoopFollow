@@ -149,7 +149,6 @@ enum LAAppGroupSettings {
         static let smallWidgetSlot = "la.smallWidgetSlot"
         static let displayName = "la.displayName"
         static let showDisplayName = "la.showDisplayName"
-        static let watchSlots = "watch.slots"
         static let watchSelectedSlots = "watch.selectedSlots"
     }
 
@@ -206,23 +205,6 @@ enum LAAppGroupSettings {
             return LiveActivitySlotDefaults.smallWidgetSlot
         }
         return LiveActivitySlotOption(rawValue: raw) ?? LiveActivitySlotDefaults.smallWidgetSlot
-    }
-
-    // MARK: - Watch slots (Write)
-
-    /// Persists the 4-position Watch data card slot configuration.
-    static func setWatchSlots(_ slots: [LiveActivitySlotOption]) {
-        let raw = slots.prefix(4).map(\.rawValue)
-        defaults?.set(raw, forKey: Keys.watchSlots)
-    }
-
-    // MARK: - Watch slots (Read)
-
-    static func watchSlots() -> [LiveActivitySlotOption] {
-        guard let raw = defaults?.stringArray(forKey: Keys.watchSlots), raw.count == 4 else {
-            return [.iob, .cob, .projectedBG, .battery]
-        }
-        return raw.map { LiveActivitySlotOption(rawValue: $0) ?? .none }
     }
 
     // MARK: - Watch selected slots (ordered, variable-length)
