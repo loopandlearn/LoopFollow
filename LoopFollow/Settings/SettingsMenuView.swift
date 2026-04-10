@@ -71,6 +71,18 @@ struct SettingsMenuView: View {
                         settingsPath.value.append(Sheet.importExport)
                     }
 
+                    NavigationRow(title: "APN",
+                                  icon: "bell.and.waves.left.and.right")
+                    {
+                        settingsPath.value.append(Sheet.apn)
+                    }
+
+                    NavigationRow(title: "Live Activity",
+                                  icon: "dot.radiowaves.left.and.right")
+                    {
+                        settingsPath.value.append(Sheet.liveActivity)
+                    }
+
                     if !nightscoutURL.value.isEmpty {
                         NavigationRow(title: "Remote",
                                       icon: "antenna.radiowaves.left.and.right")
@@ -155,6 +167,8 @@ private enum Sheet: Hashable, Identifiable {
     case tabSettings
     case infoDisplay
     case alarmSettings
+    case apn
+    case liveActivity
     case remote
     case importExport
     case calendar, contact
@@ -175,6 +189,8 @@ private enum Sheet: Hashable, Identifiable {
         case .tabSettings: TabCustomizationModal()
         case .infoDisplay: InfoDisplaySettingsView(viewModel: .init())
         case .alarmSettings: AlarmSettingsView()
+        case .apn: APNSettingsView()
+        case .liveActivity: LiveActivitySettingsView()
         case .remote: RemoteSettingsView(viewModel: .init())
         case .importExport: ImportExportSettingsView()
         case .calendar: CalendarSettingsView()
@@ -193,7 +209,7 @@ struct AggregatedStatsViewWrapper: View {
     var body: some View {
         Group {
             if let mainVC = mainViewController {
-                AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
+                AggregatedStatsContentView(mainViewController: mainVC)
             } else {
                 Text("Loading stats...")
                     .onAppear {

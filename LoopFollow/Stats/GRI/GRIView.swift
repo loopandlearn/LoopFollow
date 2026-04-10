@@ -7,6 +7,7 @@ struct GRIView: View {
     @ObservedObject var viewModel: GRIViewModel
 
     private let legendColumns = [GridItem(.adaptive(minimum: 90), spacing: 12, alignment: .leading)]
+    private let yAxisLabelInset: CGFloat = 24
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -34,22 +35,35 @@ struct GRIView: View {
             }
 
             if let hypo = viewModel.griHypoComponent, let hyper = viewModel.griHyperComponent {
-                GRIRiskGridView(
-                    hypoComponent: hypo,
-                    hyperComponent: hyper,
-                    gri: viewModel.gri ?? 0
-                )
-                .frame(height: 250)
-                .allowsHitTesting(false)
-                .clipped()
-                HStack {
-                    Text("Hypoglycemia Component (%)")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("Hyperglycemia Component (%)")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    ZStack(alignment: .leading) {
+                        GRIRiskGridView(
+                            hypoComponent: hypo,
+                            hyperComponent: hyper,
+                            gri: viewModel.gri ?? 0
+                        )
+                        .frame(height: 250)
+                        .padding(.leading, yAxisLabelInset)
+                        .allowsHitTesting(false)
+                        .clipped()
+
+                        Text("Hyperglycemia Component (%)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .rotationEffect(.degrees(-90))
+                            .fixedSize()
+                            .frame(width: yAxisLabelInset)
+                    }
+
+                    HStack(spacing: 0) {
+                        Spacer()
+                            .frame(width: yAxisLabelInset)
+
+                        Text("Hypoglycemia Component (%)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
                 }
 
                 LazyVGrid(columns: legendColumns, alignment: .leading, spacing: 8) {

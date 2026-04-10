@@ -2,20 +2,90 @@
 // Storage+Migrate.swift
 
 import Foundation
+import UserNotifications
 
 extension Storage {
     func migrateStep5() {
-        let isLegacyDefaultTabBarOrder = homePosition.value.normalized == .position1
-            && alarmsPosition.value.normalized == .position2
-            && remotePosition.value.normalized == .position3
-            && nightscoutPosition.value.normalized == .position4
-            && snoozerPosition.value.normalized == .menu
+        // Users upgrading from main had snoozer hardcoded at position 3, but that
+        // key never existed in UserDefaults. On dev the default for snoozerPosition
+        // is .menu, so an unstored value silently becomes .menu and snoozer
+        // disappears from the tab bar.
+        //
+        // Detect this by checking .exists: if snoozerPosition was never stored,
+        // the user expects snoozer at position 3 (where it always was on main).
+        guard !snoozerPosition.exists else { return }
 
-        guard isLegacyDefaultTabBarOrder else { return }
+        LogManager.shared.log(category: .general, message: "migrateStep5: snoozerPosition not stored, restoring snoozer to position 3")
 
-        LogManager.shared.log(category: .general, message: "migrateStep5: Reordering default tabs to Home, Alarms, Nightscout, Remote")
-        nightscoutPosition.value = .position3
-        remotePosition.value = .position4
+        // If position 3 is occupied by another item whose position also wasn't
+        // stored (e.g. nightscout landing there from a changed default), move
+        // that item out first.
+        for item in TabItem.allCases where item != .snoozer {
+            if position(for: item).normalized == .position3,
+               !migratePositionExists(for: item)
+            {
+                setPosition(.menu, for: item)
+            }
+        }
+
+        if tabItem(at: .position3) == nil {
+            snoozerPosition.value = .position3
+        }
+    }
+
+    func migrateStep7() {
+        // Cancel notifications scheduled with old hardcoded identifiers.
+        // Replaced with bundle-ID-scoped identifiers for multi-instance support.
+        LogManager.shared.log(category: .general, message: "Running migrateStep7 — cancel legacy notification identifiers")
+
+        let legacyNotificationIDs = [
+            "loopfollow.background.alert.6min",
+            "loopfollow.background.alert.12min",
+            "loopfollow.background.alert.18min",
+            "loopfollow.la.renewal.failed",
+        ]
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: legacyNotificationIDs)
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: legacyNotificationIDs)
+    }
+
+    func migrateStep6() {
+        // APNs credential separation
+        LogManager.shared.log(category: .general, message: "Running migrateStep6 — APNs credential separation")
+
+        let legacyReturnApnsKey = StorageValue<String>(key: "returnApnsKey", defaultValue: "")
+        let legacyReturnKeyId = StorageValue<String>(key: "returnKeyId", defaultValue: "")
+        let legacyApnsKey = StorageValue<String>(key: "apnsKey", defaultValue: "")
+        let legacyKeyId = StorageValue<String>(key: "keyId", defaultValue: "")
+
+        // 1. If returnApnsKey had a value, that was LoopFollow's own key (different team scenario)
+        if legacyReturnApnsKey.exists, !legacyReturnApnsKey.value.isEmpty {
+            lfApnsKey.value = legacyReturnApnsKey.value
+            lfKeyId.value = legacyReturnKeyId.value
+        }
+
+        // 2. If lfApnsKey is still empty and the old primary key exists,
+        //    check if same team — if so, the primary key was used for everything
+        if lfApnsKey.value.isEmpty, legacyApnsKey.exists, !legacyApnsKey.value.isEmpty {
+            let lfTeamId = BuildDetails.default.teamID ?? ""
+            let remoteTeamId = teamId.value ?? ""
+            let sameTeam = !lfTeamId.isEmpty && (remoteTeamId.isEmpty || lfTeamId == remoteTeamId)
+            if sameTeam {
+                lfApnsKey.value = legacyApnsKey.value
+                lfKeyId.value = legacyKeyId.value
+            }
+        }
+
+        // 3. Move old primary credentials to remoteApnsKey/remoteKeyId
+        if legacyApnsKey.exists, !legacyApnsKey.value.isEmpty {
+            remoteApnsKey.value = legacyApnsKey.value
+            remoteKeyId.value = legacyKeyId.value
+        }
+
+        // 4. Clean up old keys
+        legacyReturnApnsKey.remove()
+        legacyReturnKeyId.remove()
+        legacyApnsKey.remove()
+        legacyKeyId.remove()
     }
 
     func migrateStep3() {
@@ -32,7 +102,19 @@ extension Storage {
         }
 
         if !TabPosition.customizablePositions.contains(snoozerPosition.value.normalized) {
-            snoozerPosition.value = .position3
+            // Move any unstored occupant at position 3 to menu before placing snoozer,
+            // to avoid a collision when dev defaults differ from main.
+            for item in TabItem.allCases where item != .snoozer {
+                if position(for: item).normalized == .position3,
+                   !migratePositionExists(for: item)
+                {
+                    setPosition(.menu, for: item)
+                }
+            }
+
+            if tabItem(at: .position3) == nil {
+                snoozerPosition.value = .position3
+            }
         }
 
         if alarmsPosition.value == .more {
@@ -59,10 +141,21 @@ extension Storage {
     }
 
     func migrateStep1() {
-        Storage.shared.url.value = ObservableUserDefaults.shared.old_url.value
-        Storage.shared.device.value = ObservableUserDefaults.shared.old_device.value
-        Storage.shared.nsWriteAuth.value = ObservableUserDefaults.shared.old_nsWriteAuth.value
-        Storage.shared.nsAdminAuth.value = ObservableUserDefaults.shared.old_nsAdminAuth.value
+        // Guard each field with .exists so that if the App Group suite is unreadable
+        // (e.g. Before-First-Unlock state after a reboot), we skip the write rather
+        // than overwriting the already-migrated Standard value with an empty default.
+        if ObservableUserDefaults.shared.old_url.exists {
+            Storage.shared.url.value = ObservableUserDefaults.shared.old_url.value
+        }
+        if ObservableUserDefaults.shared.old_device.exists {
+            Storage.shared.device.value = ObservableUserDefaults.shared.old_device.value
+        }
+        if ObservableUserDefaults.shared.old_nsWriteAuth.exists {
+            Storage.shared.nsWriteAuth.value = ObservableUserDefaults.shared.old_nsWriteAuth.value
+        }
+        if ObservableUserDefaults.shared.old_nsAdminAuth.exists {
+            Storage.shared.nsAdminAuth.value = ObservableUserDefaults.shared.old_nsAdminAuth.value
+        }
 
         // Helper: 1-to-1 type -----------------------------------------------------------------
         func move<T: AnyConvertible & Equatable>(
@@ -1718,5 +1811,21 @@ extension Storage {
         alarm.activeOption = .always
 
         Storage.shared.alarms.value.append(alarm)
+    }
+
+    // MARK: - Migration helpers (can be removed when step 5 is removed)
+
+    /// Check whether a tab item's position was explicitly stored in UserDefaults
+    /// (as opposed to using the StorageValue default).
+    private func migratePositionExists(for item: TabItem) -> Bool {
+        switch item {
+        case .home: return homePosition.exists
+        case .alarms: return alarmsPosition.exists
+        case .remote: return remotePosition.exists
+        case .nightscout: return nightscoutPosition.exists
+        case .snoozer: return snoozerPosition.exists
+        case .stats: return statisticsPosition.exists
+        case .treatments: return treatmentsPosition.exists
+        }
     }
 }

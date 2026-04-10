@@ -314,9 +314,8 @@ class MoreMenuViewController: UIViewController {
             return
         }
 
-        let statsVC = UIHostingController(
-            rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: mainVC))
-        )
+        let statsView = AggregatedStatsContentView(mainViewController: mainVC)
+        let statsVC = UIHostingController(rootView: statsView)
         statsVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
         navigationController?.pushViewController(statsVC, animated: true)
     }

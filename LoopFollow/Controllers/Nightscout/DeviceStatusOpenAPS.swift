@@ -37,8 +37,10 @@ extension MainViewController {
             }
             if let profileISF = profileISF, let enactedISF = enactedISF, profileISF != enactedISF {
                 infoManager.updateInfoData(type: .isf, firstValue: profileISF, secondValue: enactedISF, separator: .arrow)
+                Storage.shared.lastIsfMgdlPerU.value = enactedISF.doubleValue(for: .milligramsPerDeciliter)
             } else if let profileISF = profileISF {
                 infoManager.updateInfoData(type: .isf, value: profileISF)
+                Storage.shared.lastIsfMgdlPerU.value = profileISF.doubleValue(for: .milligramsPerDeciliter)
             }
 
             // Carb Ratio (CR)
@@ -57,14 +59,17 @@ extension MainViewController {
 
             if let profileCR = profileCR, let enactedCR = enactedCR, profileCR != enactedCR {
                 infoManager.updateInfoData(type: .carbRatio, value: profileCR, enactedValue: enactedCR, separator: .arrow)
+                Storage.shared.lastCarbRatio.value = enactedCR
             } else if let profileCR = profileCR {
                 infoManager.updateInfoData(type: .carbRatio, value: profileCR)
+                Storage.shared.lastCarbRatio.value = profileCR
             }
 
             // IOB
             if let iobMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
                 infoManager.updateInfoData(type: .iob, value: iobMetric)
                 latestIOB = iobMetric
+                Observable.shared.iobText.value = iobMetric.formattedValue()
             }
 
             // COB
@@ -98,6 +103,7 @@ extension MainViewController {
             if let sens = enactedOrSuggested["sensitivityRatio"] as? Double {
                 let formattedSens = String(format: "%.0f", sens * 100.0) + "%"
                 infoManager.updateInfoData(type: .autosens, value: formattedSens)
+                Storage.shared.lastAutosens.value = sens
             }
 
             // Recommended Bolus
@@ -112,6 +118,9 @@ extension MainViewController {
             if let eventualBGValue = enactedOrSuggested["eventualBG"] as? Double {
                 let eventualBGQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: eventualBGValue)
                 PredictionLabel.text = Localizer.formatQuantity(eventualBGQuantity)
+                Storage.shared.projectedBgMgdl.value = eventualBGValue
+            } else {
+                Storage.shared.projectedBgMgdl.value = nil
             }
 
             // Target
@@ -136,11 +145,19 @@ extension MainViewController {
                 } else {
                     infoManager.updateInfoData(type: .target, value: profileTargetHigh)
                 }
+                let effectiveMgdl = enactedTarget.doubleValue(for: .milligramsPerDeciliter)
+                Storage.shared.lastTargetLowMgdl.value = effectiveMgdl
+                Storage.shared.lastTargetHighMgdl.value = effectiveMgdl
+            } else if let profileTargetHigh = profileTargetHigh {
+                let profileMgdl = profileTargetHigh.doubleValue(for: .milligramsPerDeciliter)
+                Storage.shared.lastTargetLowMgdl.value = profileMgdl
+                Storage.shared.lastTargetHighMgdl.value = profileMgdl
             }
 
             // TDD
             if let tddMetric = InsulinMetric(from: enactedOrSuggested, key: "TDD") {
                 infoManager.updateInfoData(type: .tdd, value: tddMetric)
+                Storage.shared.lastTdd.value = tddMetric.value
             }
 
             let predBGsData: [String: AnyObject]? = {
@@ -182,7 +199,8 @@ extension MainViewController {
                                 minPredBG = min(minPredBG, predictionValue)
                                 maxPredBG = max(maxPredBG, predictionValue)
 
-                                let prediction = ShareGlucoseData(sgv: Int(round(predictionValue)), date: predictionTime, direction: "flat")
+                                let clampedValue = min(max(Int(round(predictionValue)), globalVariables.minDisplayGlucose), globalVariables.maxDisplayGlucose)
+                                let prediction = ShareGlucoseData(sgv: clampedValue, date: predictionTime, direction: "flat")
                                 predictionData.append(prediction)
                                 predictionTime += 300
                             }
@@ -201,6 +219,8 @@ extension MainViewController {
                 if minPredBG != Double.infinity, maxPredBG != -Double.infinity {
                     let value = "\(Localizer.toDisplayUnits(String(minPredBG)))/\(Localizer.toDisplayUnits(String(maxPredBG)))"
                     infoManager.updateInfoData(type: .minMax, value: value)
+                    Storage.shared.lastMinBgMgdl.value = minPredBG
+                    Storage.shared.lastMaxBgMgdl.value = maxPredBG
                 } else {
                     infoManager.updateInfoData(type: .minMax, value: "N/A")
                 }
@@ -224,6 +244,10 @@ extension MainViewController {
                 LoopStatusLabel.text = "↻"
                 latestLoopStatusString = "↻"
             }
+
+            // Live Activity storage
+            Storage.shared.lastIOB.value = latestIOB?.value
+            Storage.shared.lastCOB.value = latestCOB?.value
         }
     }
 }

@@ -45,6 +45,7 @@ extension MainViewController {
                                    .withColonSeparatorInTime]
 
         if let iageTime = formatter.date(from: (lastIageString as! String))?.timeIntervalSince1970 {
+            Storage.shared.iageInsertTime.value = iageTime
             let now = dateTimeUtils.getNowTimeIntervalUTC()
             let secondsAgo = now - iageTime
 

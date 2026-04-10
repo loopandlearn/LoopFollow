@@ -107,6 +107,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         case missedBolusPrebolusWindow, missedBolusIgnoreSmallBolusUnits
         case missedBolusIgnoreUnderGrams, missedBolusIgnoreUnderBG
         case bolusCountThreshold, bolusWindowMinutes
+        case sensorLifetimeDays
     }
 
     init(from decoder: Decoder) throws {
@@ -137,6 +138,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         missedBolusIgnoreUnderBG = try container.decodeIfPresent(Double.self, forKey: .missedBolusIgnoreUnderBG)
         bolusCountThreshold = try container.decodeIfPresent(Int.self, forKey: .bolusCountThreshold)
         bolusWindowMinutes = try container.decodeIfPresent(Int.self, forKey: .bolusWindowMinutes)
+        sensorLifetimeDays = try container.decodeIfPresent(Int.self, forKey: .sensorLifetimeDays)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -165,6 +167,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(missedBolusIgnoreUnderBG, forKey: .missedBolusIgnoreUnderBG)
         try container.encodeIfPresent(bolusCountThreshold, forKey: .bolusCountThreshold)
         try container.encodeIfPresent(bolusWindowMinutes, forKey: .bolusWindowMinutes)
+        try container.encodeIfPresent(sensorLifetimeDays, forKey: .sensorLifetimeDays)
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -190,6 +193,12 @@ struct Alarm: Identifiable, Codable, Equatable {
     var bolusCountThreshold: Int?
     /// ...within this many minutes
     var bolusWindowMinutes: Int?
+
+    // ─────────────────────────────────────────────────────────────
+    // Sensor‑Change fields ─
+    // ─────────────────────────────────────────────────────────────
+    /// CGM sensor lifetime in days (e.g. 10 for Dexcom G6, 15 for G7 15-day)
+    var sensorLifetimeDays: Int?
 
     /// Function for when the alarm is triggered.
     /// If this alarm, all alarms is disabled or snoozed, then should not be called. This or all alarmd could be muted, then this function will just generate a notification.
@@ -309,9 +318,16 @@ struct Alarm: Identifiable, Codable, Equatable {
             predictiveMinutes = 15
             delta = 0.1
             threshold = 4
+        case .futureCarbs:
+            soundFile = .alertToneRingtone1
+            threshold = 45 // max lookahead minutes
+            delta = 5 // min grams
+            snoozeDuration = 0
+            repeatSoundOption = .never
         case .sensorChange:
             soundFile = .wakeUpWillYou
             threshold = 12
+            sensorLifetimeDays = 10
         case .pumpChange:
             soundFile = .wakeUpWillYou
             threshold = 12
@@ -364,7 +380,7 @@ extension AlarmType {
         switch self {
         case .low, .high, .fastDrop, .fastRise, .missedReading, .temporary:
             return .glucose
-        case .iob, .cob, .missedBolus, .recBolus:
+        case .iob, .cob, .missedBolus, .futureCarbs, .recBolus:
             return .insulin
         case .battery, .batteryDrop, .pump, .pumpBattery, .pumpChange,
              .sensorChange, .notLooping, .buildExpire:
@@ -384,6 +400,7 @@ extension AlarmType {
         case .iob: return "syringe"
         case .cob: return "fork.knife"
         case .missedBolus: return "exclamationmark.arrow.triangle.2.circlepath"
+        case .futureCarbs: return "clock.arrow.circlepath"
         case .recBolus: return "bolt.horizontal"
         case .battery: return "battery.25"
         case .batteryDrop: return "battery.100.bolt"
@@ -411,6 +428,7 @@ extension AlarmType {
         case .iob: return "High insulin-on-board."
         case .cob: return "High carbs-on-board."
         case .missedBolus: return "Carbs without bolus."
+        case .futureCarbs: return "Reminder when future carbs are due."
         case .recBolus: return "Recommended bolus issued."
         case .battery: return "Phone battery low."
         case .batteryDrop: return "Battery drops quickly."
