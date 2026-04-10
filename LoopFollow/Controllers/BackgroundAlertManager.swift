@@ -11,11 +11,24 @@ enum BackgroundAlertDuration: TimeInterval, CaseIterable {
     case eighteenMinutes = 1080 // 18 minutes in seconds
 }
 
-/// Enum representing unique identifiers for each background alert.
-enum BackgroundAlertIdentifier: String, CaseIterable {
-    case sixMin = "loopfollow.background.alert.6min"
-    case twelveMin = "loopfollow.background.alert.12min"
-    case eighteenMin = "loopfollow.background.alert.18min"
+/// Unique identifiers for each background alert, scoped to the current bundle
+/// so multiple LoopFollow instances don't interfere with each other's notifications.
+enum BackgroundAlertIdentifier: CaseIterable {
+    case sixMin
+    case twelveMin
+    case eighteenMin
+
+    private static let prefix = Bundle.main.bundleIdentifier ?? "loopfollow"
+
+    var rawValue: String {
+        switch self {
+        case .sixMin: "\(Self.prefix).background.alert.6min"
+        case .twelveMin: "\(Self.prefix).background.alert.12min"
+        case .eighteenMin: "\(Self.prefix).background.alert.18min"
+        }
+    }
+
+    static let categoryIdentifier = "\(prefix).background.alert"
 }
 
 class BackgroundAlertManager {
@@ -118,7 +131,7 @@ class BackgroundAlertManager {
         content.title = title
         content.body = body
         content.sound = .defaultCritical
-        content.categoryIdentifier = "loopfollow.background.alert"
+        content.categoryIdentifier = BackgroundAlertIdentifier.categoryIdentifier
         return content
     }
 

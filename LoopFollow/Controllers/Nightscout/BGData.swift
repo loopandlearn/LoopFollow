@@ -241,9 +241,15 @@ extension MainViewController {
             self.updateServerText(with: sourceName)
 
             // Set BGText with the latest BG value
-            self.setBGTextColor()
+            self.updateBGTextAppearance()
 
-            Observable.shared.bgText.value = Localizer.toDisplayUnits(String(latestBG))
+            if latestBG <= globalVariables.minDisplayGlucose {
+                Observable.shared.bgText.value = "LOW"
+            } else if latestBG >= globalVariables.maxDisplayGlucose {
+                Observable.shared.bgText.value = "HIGH"
+            } else {
+                Observable.shared.bgText.value = Localizer.toDisplayUnits(String(latestBG))
+            }
             Observable.shared.bg.value = latestBG
 
             // Direction handling
@@ -260,8 +266,18 @@ extension MainViewController {
                 Observable.shared.deltaText.value = "+" + Localizer.toDisplayUnits(String(deltaBG))
             }
 
+            // Live Activity storage
+            Storage.shared.lastBgReadingTimeSeconds.value = lastBGTime
+            Storage.shared.lastDeltaMgdl.value = Double(deltaBG)
+            Storage.shared.lastTrendCode.value = entries[latestEntryIndex].direction
+
             // Mark BG data as loaded for initial loading state
             self.markDataLoaded("bg")
+
+            // Live Activity update
+            #if !targetEnvironment(macCatalyst)
+                LiveActivityManager.shared.refreshFromCurrentState(reason: "bg")
+            #endif
 
             // Update contact
             if Storage.shared.contactEnabled.value {
@@ -270,6 +286,7 @@ extension MainViewController {
                         bgValue: Observable.shared.bgText.value,
                         trend: Observable.shared.directionText.value,
                         delta: Observable.shared.deltaText.value,
+                        iob: Observable.shared.iobText.value,
                         stale: Observable.shared.bgStale.value
                     )
             }

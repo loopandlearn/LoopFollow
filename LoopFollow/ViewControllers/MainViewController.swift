@@ -15,6 +15,14 @@ func IsNightscoutEnabled() -> Bool {
     return !Storage.shared.url.value.isEmpty
 }
 
+private struct APNSCredentialSnapshot: Equatable {
+    let remoteApnsKey: String
+    let teamId: String?
+    let remoteKeyId: String
+    let lfApnsKey: String
+    let lfKeyId: String
+}
+
 class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
     private struct RemoteCommandDataSignature {
         let carbTimestamp: TimeInterval?
@@ -179,36 +187,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         loadDebugData()
 
-        // Capture before migrations run: true for existing users, false for fresh installs.
-        let isExistingUser = Storage.shared.migrationStep.exists
-
-        if Storage.shared.migrationStep.value < 1 {
-            Storage.shared.migrateStep1()
-            Storage.shared.migrationStep.value = 1
-        }
-
-        if Storage.shared.migrationStep.value < 2 {
-            Storage.shared.migrateStep2()
-            Storage.shared.migrationStep.value = 2
-        }
-
-        if Storage.shared.migrationStep.value < 3 {
-            Storage.shared.migrateStep3()
-            Storage.shared.migrationStep.value = 3
-        }
-
-        // TODO: This migration step can be deleted in March 2027. Check the commit for other places to cleanup.
-        if Storage.shared.migrationStep.value < 4 {
-            // Existing users need to see the fat/protein order change banner.
-            // New users never saw the old order, so mark it as already seen.
-            Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
-            Storage.shared.migrationStep.value = 4
-        }
-
-        if Storage.shared.migrationStep.value < 5 {
-            Storage.shared.migrateStep5()
-            Storage.shared.migrationStep.value = 5
-        }
+        // Migrations run in foreground only — see runMigrationsIfNeeded() for details.
+        runMigrationsIfNeeded()
 
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
@@ -233,6 +213,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         updateGraphVisibility()
         statsView.isHidden = !Storage.shared.showStats.value
 
+        // Tap on stats view to open full statistics screen
+        let statsTap = UITapGestureRecognizer(target: self, action: #selector(statsViewTapped))
+        statsView.addGestureRecognizer(statsTap)
+
         BGChart.delegate = self
         BGChartFull.delegate = self
 
@@ -243,6 +227,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        // didBecomeActive is used (not willEnterForeground) to ensure applicationState == .active
+        // when runMigrationsIfNeeded() is called. This catches migrations deferred by a
+        // background BGAppRefreshTask launch in Before-First-Unlock state.
+        notificationCenter.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
 
         // Setup the Graph
         if firstGraphLoad {
@@ -321,7 +310,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         Storage.shared.colorBGText.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.setBGTextColor()
+                self?.updateBGTextAppearance()
             }
             .store(in: &cancellables)
 
@@ -434,29 +423,27 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
-        Storage.shared.apnsKey.$value
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { _ in
-                JWTManager.shared.invalidateCache()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.teamId.$value
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { _ in
-                JWTManager.shared.invalidateCache()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.keyId.$value
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { _ in
-                JWTManager.shared.invalidateCache()
-            }
-            .store(in: &cancellables)
+        Publishers.CombineLatest4(
+            Storage.shared.remoteApnsKey.$value,
+            Storage.shared.teamId.$value,
+            Storage.shared.remoteKeyId.$value,
+            Storage.shared.lfApnsKey.$value
+        )
+        .combineLatest(Storage.shared.lfKeyId.$value)
+        .map { values, lfKeyId in
+            APNSCredentialSnapshot(
+                remoteApnsKey: values.0,
+                teamId: values.1,
+                remoteKeyId: values.2,
+                lfApnsKey: values.3,
+                lfKeyId: lfKeyId
+            )
+        }
+        .removeDuplicates()
+        .dropFirst()
+        .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+        .sink { _ in JWTManager.shared.invalidateCache() }
+        .store(in: &cancellables)
 
         Storage.shared.device.$value
             .receive(on: DispatchQueue.main)
@@ -711,7 +698,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: nil)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: nil))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController
@@ -753,6 +740,28 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         updateNightscoutTabState()
     }
 
+    @objc private func navigateOnLAForeground() {
+        guard let tabBarController = tabBarController,
+              let vcs = tabBarController.viewControllers, !vcs.isEmpty else { return }
+
+        let targetIndex: Int
+        if Observable.shared.currentAlarm.value != nil,
+           let snoozerIndex = getSnoozerTabIndex(), snoozerIndex < vcs.count
+        {
+            targetIndex = snoozerIndex
+        } else {
+            targetIndex = 0
+        }
+
+        if let presented = tabBarController.presentedViewController {
+            presented.dismiss(animated: false) {
+                tabBarController.selectedIndex = targetIndex
+            }
+        } else {
+            tabBarController.selectedIndex = targetIndex
+        }
+    }
+
     private func getSnoozerTabIndex() -> Int? {
         guard let tabBarController = tabBarController,
               let viewControllers = tabBarController.viewControllers else { return nil }
@@ -764,6 +773,22 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
         return nil
+    }
+
+    @objc private func statsViewTapped() {
+        #if !targetEnvironment(macCatalyst)
+            let position = Storage.shared.position(for: .stats).normalized
+            if position != .menu, let tabIndex = position.tabIndex, let tbc = tabBarController {
+                tbc.selectedIndex = tabIndex
+                return
+            }
+        #endif
+
+        let statsModalView = AggregatedStatsModalView(mainViewController: self)
+        let hostingController = UIHostingController(rootView: statsModalView)
+        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.modalPresentationStyle = .fullScreen
+        present(hostingController, animated: true)
     }
 
     private func createViewController(for item: TabItem, position: TabPosition, storyboard: UIStoryboard) -> UIViewController? {
@@ -800,7 +825,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             return treatmentsVC
 
         case .stats:
-            let statsVC = UIHostingController(rootView: AggregatedStatsView(viewModel: AggregatedStatsViewModel(mainViewController: self)))
+            let statsVC = UIHostingController(rootView: AggregatedStatsContentView(mainViewController: self))
             let navController = UINavigationController(rootViewController: statsVC)
             navController.tabBarItem = UITabBarItem(title: item.displayName, image: UIImage(systemName: item.icon), tag: tag)
             return navController
@@ -1064,6 +1089,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
         if Storage.shared.backgroundRefreshType.value == .silentTune {
             backgroundTask.startBackgroundTask()
+            BackgroundRefreshManager.shared.scheduleRefresh()
         }
 
         if Storage.shared.backgroundRefreshType.value != .none {
@@ -1071,7 +1097,93 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
+    // Migrations must only run when UserDefaults is accessible (i.e. after first unlock).
+    // When the app is launched in the background by BGAppRefreshTask immediately after a
+    // reboot, the device may be in Before-First-Unlock (BFU) state: UserDefaults files are
+    // still encrypted, so every read returns the default value (0 / ""). Running migrations
+    // in that state would overwrite real settings with empty strings.
+    //
+    // Strategy: skip migrations if applicationState == .background; call this method again
+    // from appCameToForeground() so they run on the first foreground after a BFU launch.
+    func runMigrationsIfNeeded() {
+        guard UIApplication.shared.applicationState != .background else { return }
+
+        // Capture before migrations run: true for existing users, false for fresh installs.
+        let isExistingUser = Storage.shared.migrationStep.exists
+
+        // Step 1: Released in v3.0.0 (2025-07-07). Can be removed after 2026-07-07.
+        if Storage.shared.migrationStep.value < 1 {
+            Storage.shared.migrateStep1()
+            Storage.shared.migrationStep.value = 1
+        }
+
+        // Step 2: Released in v3.1.0 (2025-07-21). Can be removed after 2026-07-21.
+        if Storage.shared.migrationStep.value < 2 {
+            Storage.shared.migrateStep2()
+            Storage.shared.migrationStep.value = 2
+        }
+
+        // Step 3: Released in v4.5.0 (2026-02-01). Can be removed after 2027-02-01.
+        if Storage.shared.migrationStep.value < 3 {
+            Storage.shared.migrateStep3()
+            Storage.shared.migrationStep.value = 3
+        }
+
+        // Step 4: Released in v5.0.0 (2026-03-20). Can be removed after 2027-03-20.
+        if Storage.shared.migrationStep.value < 4 {
+            // Existing users need to see the fat/protein order change banner.
+            // New users never saw the old order, so mark it as already seen.
+            Storage.shared.hasSeenFatProteinOrderChange.value = !isExistingUser
+            Storage.shared.migrationStep.value = 4
+        }
+
+        // Step 5: Released in v5.0.0 (2026-03-20). Can be removed after 2027-03-20.
+        if Storage.shared.migrationStep.value < 5 {
+            Storage.shared.migrateStep5()
+            Storage.shared.migrationStep.value = 5
+        }
+
+        if Storage.shared.migrationStep.value < 6 {
+            Storage.shared.migrateStep6()
+            Storage.shared.migrationStep.value = 6
+        }
+
+        if Storage.shared.migrationStep.value < 7 {
+            Storage.shared.migrateStep7()
+            Storage.shared.migrationStep.value = 7
+        }
+    }
+
+    @objc func appDidBecomeActive() {
+        // applicationState == .active is guaranteed here, so the BFU guard in
+        // runMigrationsIfNeeded() will always pass. Catches the case where viewDidLoad
+        // ran during a BGAppRefreshTask background launch and deferred migrations.
+        runMigrationsIfNeeded()
+    }
+
     @objc func appCameToForeground() {
+        // If the app was cold-launched in Before-First-Unlock state (e.g. by BGAppRefreshTask
+        // after a reboot), all StorageValues were cached from encrypted UserDefaults and hold
+        // their defaults. Reload everything from disk now that the device is unlocked, firing
+        // Combine observers only for values that actually changed.
+        LogManager.shared.log(category: .general, message: "appCameToForeground: needsBFUReload=\(Storage.shared.needsBFUReload), url='\(Storage.shared.url.value)'")
+        if Storage.shared.needsBFUReload {
+            Storage.shared.needsBFUReload = false
+            LogManager.shared.log(category: .general, message: "BFU reload triggered — reloading all StorageValues")
+            Storage.shared.reloadAll()
+            LogManager.shared.log(category: .general, message: "BFU reload complete: url='\(Storage.shared.url.value)'")
+            // Show the loading overlay so the user sees feedback during the 2-5s
+            // while tasks re-run with the now-correct credentials.
+            loadingStates = ["bg": false, "profile": false, "deviceStatus": false]
+            isInitialLoad = true
+            setupLoadingState()
+            showLoadingOverlay()
+            // Tasks were scheduled during BFU viewDidLoad with url="" — they fired, found no
+            // data source, and rescheduled themselves 60s out. Reset them now so they run
+            // within their normal 2-5s initial delay using the now-correct credentials.
+            scheduleAllTasks()
+        }
+
         // reset screenlock state if needed
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
 
@@ -1144,6 +1256,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     @objc override func viewDidAppear(_: Bool) {
         showHideNSDetails()
+        #if !targetEnvironment(macCatalyst)
+            LiveActivityManager.shared.startFromCurrentState()
+        #endif
     }
 
     func stringFromTimeInterval(interval: TimeInterval) -> String {
@@ -1200,7 +1315,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
-    func setBGTextColor() {
+    func updateBGTextAppearance() {
         if bgData.count > 0 {
             let latestBG = bgData[bgData.count - 1].sgv
             var color = NSUIColor.label
@@ -1220,6 +1335,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
 
             BGText.textColor = color
+
+            if latestBG <= globalVariables.minDisplayGlucose || latestBG >= globalVariables.maxDisplayGlucose {
+                BGText.font = UIFont.systemFont(ofSize: 65, weight: .black)
+            } else {
+                BGText.font = UIFont.systemFont(ofSize: 85, weight: .black)
+            }
         }
     }
 

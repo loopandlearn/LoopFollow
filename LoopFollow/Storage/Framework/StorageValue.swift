@@ -40,4 +40,16 @@ class StorageValue<T: Codable & Equatable>: ObservableObject {
     func remove() {
         StorageValue.defaults.removeObject(forKey: key)
     }
+
+    /// Re-reads the value from UserDefaults, updating the @Published cache.
+    /// Call this when the app foregrounds after a Before-First-Unlock background launch,
+    /// where StorageValue was initialized while UserDefaults was locked (returning defaults).
+    func reload() {
+        if let data = StorageValue.defaults.data(forKey: key),
+           let decodedValue = try? JSONDecoder().decode(T.self, from: data),
+           decodedValue != value
+        {
+            value = decodedValue
+        }
+    }
 }

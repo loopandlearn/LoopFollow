@@ -7,6 +7,7 @@ import UIKit
 struct AggregatedStatsView: View {
     @ObservedObject var viewModel: AggregatedStatsViewModel
     @Environment(\.dismiss) var dismiss
+    var onDismiss: (() -> Void)?
     @State private var showGMI: Bool
     @State private var showStdDev: Bool
     @State private var startDate: Date
@@ -17,8 +18,9 @@ struct AggregatedStatsView: View {
     @State private var loadingTimer: Timer?
     @State private var timeoutTimer: Timer?
 
-    init(viewModel: AggregatedStatsViewModel) {
+    init(viewModel: AggregatedStatsViewModel, onDismiss: (() -> Void)? = nil) {
         self.viewModel = viewModel
+        self.onDismiss = onDismiss
         _showGMI = State(initialValue: Storage.shared.showGMI.value)
         _showStdDev = State(initialValue: Storage.shared.showStdDev.value)
 
@@ -105,6 +107,11 @@ struct AggregatedStatsView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            if let onDismiss {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Done", action: onDismiss)
+                }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Refresh") {
                     loadingError = false
@@ -160,6 +167,38 @@ struct AggregatedStatsView: View {
         .onChange(of: showStdDev) { newValue in
             Storage.shared.showStdDev.value = newValue
         }
+    }
+}
+
+struct AggregatedStatsContentView: View {
+    @StateObject private var viewModel: AggregatedStatsViewModel
+    private let onDismiss: (() -> Void)?
+
+    init(mainViewController: MainViewController?, onDismiss: (() -> Void)? = nil) {
+        _viewModel = StateObject(wrappedValue: AggregatedStatsViewModel(mainViewController: mainViewController))
+        self.onDismiss = onDismiss
+    }
+
+    var body: some View {
+        AggregatedStatsView(viewModel: viewModel, onDismiss: onDismiss)
+            .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
+    }
+}
+
+struct AggregatedStatsModalView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let mainViewController: MainViewController?
+
+    var body: some View {
+        NavigationView {
+            AggregatedStatsContentView(
+                mainViewController: mainViewController,
+                onDismiss: { dismiss() }
+            )
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 }
 
