@@ -26,8 +26,9 @@ class StatsData {
         a1C = 0.0
         coefficientOfVariation = 0.0
 
-        let lowThreshold = 70.0
-        let highThreshold = UnitSettingsStore.shared.timeInRangeMode == .titr ? 140.0 : 180.0
+        let thresholds = UnitSettingsStore.shared.effectiveThresholds()
+        let lowThreshold = thresholds.low
+        let highThreshold = thresholds.high
 
         for i in 0 ..< bgData.count {
             // Set low/range/high counts for pie chart and %'s

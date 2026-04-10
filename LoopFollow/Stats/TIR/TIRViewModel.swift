@@ -6,27 +6,29 @@ import Foundation
 
 class TIRViewModel: ObservableObject {
     @Published var tirData: [TIRDataPoint] = []
-    @Published var showTITR: Bool {
-        didSet {
-            UnitSettingsStore.shared.timeInRangeMode = showTITR ? .titr : .tir
-        }
-    }
 
     private let dataService: StatsDataService
 
     init(dataService: StatsDataService) {
         self.dataService = dataService
-        showTITR = UnitSettingsStore.shared.timeInRangeMode == .titr
         calculateTIR()
     }
 
     func calculateTIR() {
         let bgData = dataService.getBGData()
-        tirData = TIRCalculator.calculate(bgData: bgData, useTightRange: showTITR)
+        tirData = TIRCalculator.calculate(bgData: bgData)
     }
 
     func toggleTIRMode() {
-        showTITR.toggle()
+        let mode = UnitSettingsStore.shared.timeInRangeMode
+        switch mode {
+        case .tir:
+            UnitSettingsStore.shared.timeInRangeMode = .titr
+        case .titr:
+            UnitSettingsStore.shared.timeInRangeMode = .custom
+        case .custom:
+            UnitSettingsStore.shared.timeInRangeMode = .tir
+        }
         calculateTIR()
     }
 

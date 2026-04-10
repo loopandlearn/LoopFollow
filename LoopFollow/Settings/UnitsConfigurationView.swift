@@ -6,6 +6,8 @@ import SwiftUI
 /// Reusable view for configuring units and metrics.
 /// Can be embedded in Forms or used standalone during onboarding.
 struct UnitsConfigurationView: View {
+    @State private var rangeMode = UnitSettingsStore.shared.timeInRangeMode
+
     var body: some View {
         Group {
             Section("Glucose") {
@@ -20,14 +22,41 @@ struct UnitsConfigurationView: View {
             }
 
             Section("Range") {
-                Picker("Range Mode", selection: Binding(
-                    get: { UnitSettingsStore.shared.timeInRangeMode },
-                    set: { UnitSettingsStore.shared.timeInRangeMode = $0 }
-                )) {
-                    Text("Time In Range").tag(TimeInRangeDisplayMode.tir)
-                    Text("Time In Tighter Range").tag(TimeInRangeDisplayMode.titr)
+                Picker("Range Mode", selection: $rangeMode) {
+                    Text("TIR").tag(TimeInRangeDisplayMode.tir)
+                    Text("TITR").tag(TimeInRangeDisplayMode.titr)
+                    Text("Custom").tag(TimeInRangeDisplayMode.custom)
                 }
                 .pickerStyle(.segmented)
+                .onChange(of: rangeMode) { newValue in
+                    UnitSettingsStore.shared.timeInRangeMode = newValue
+                    Observable.shared.chartSettingsChanged.value = true
+                }
+
+                if rangeMode == .custom {
+                    BGPicker(
+                        title: "Low",
+                        range: 40 ... 120,
+                        value: Binding(
+                            get: { Storage.shared.lowLine.value },
+                            set: {
+                                Storage.shared.lowLine.value = $0
+                                Observable.shared.chartSettingsChanged.value = true
+                            }
+                        )
+                    )
+                    BGPicker(
+                        title: "High",
+                        range: 120 ... 400,
+                        value: Binding(
+                            get: { Storage.shared.highLine.value },
+                            set: {
+                                Storage.shared.highLine.value = $0
+                                Observable.shared.chartSettingsChanged.value = true
+                            }
+                        )
+                    )
+                }
             }
 
             Section("Glycemic Metrics") {

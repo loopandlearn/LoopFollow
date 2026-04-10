@@ -21,6 +21,7 @@ enum GlucoseDisplayUnit: String, Codable, CaseIterable {
 enum TimeInRangeDisplayMode: String, Codable, CaseIterable {
     case tir = "TIR"
     case titr = "TITR"
+    case custom = "Custom"
 }
 
 enum GlycemicMetricMode: String, Codable, CaseIterable {
@@ -54,10 +55,22 @@ final class UnitSettingsStore {
 
     var timeInRangeMode: TimeInRangeDisplayMode {
         get {
-            Storage.shared.showTITR.value ? .titr : .tir
+            TimeInRangeDisplayMode(rawValue: Storage.shared.timeInRangeModeRaw.value) ?? .tir
         }
         set {
-            Storage.shared.showTITR.value = (newValue == .titr)
+            Storage.shared.timeInRangeModeRaw.value = newValue.rawValue
+        }
+    }
+
+    /// Returns the effective low/high thresholds (in mg/dL) for the current range mode.
+    func effectiveThresholds() -> (low: Double, high: Double) {
+        switch timeInRangeMode {
+        case .tir:
+            return (70.0, 180.0)
+        case .titr:
+            return (70.0, 140.0)
+        case .custom:
+            return (Storage.shared.lowLine.value, Storage.shared.highLine.value)
         }
     }
 

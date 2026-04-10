@@ -299,7 +299,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
         .store(in: &cancellables)
 
-        Storage.shared.showTITR.$value
+        Storage.shared.timeInRangeModeRaw.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateBGGraphSettings()
@@ -1052,6 +1052,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             Storage.shared.migrateStep7()
             Storage.shared.migrationStep.value = 7
         }
+
+        if Storage.shared.migrationStep.value < 8 {
+            Storage.shared.migrateStep8()
+            Storage.shared.migrationStep.value = 8
+        }
     }
 
     @objc func appDidBecomeActive() {
@@ -1220,10 +1225,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             let latestBG = bgData[bgData.count - 1].sgv
             var color = NSUIColor.label
             if Storage.shared.colorBGText.value {
-                if Double(latestBG) >= Storage.shared.highLine.value {
+                let thresholds = UnitSettingsStore.shared.effectiveThresholds()
+                if Double(latestBG) >= thresholds.high {
                     color = NSUIColor.systemYellow
                     Observable.shared.bgTextColor.value = .yellow
-                } else if Double(latestBG) <= Storage.shared.lowLine.value {
+                } else if Double(latestBG) <= thresholds.low {
                     color = NSUIColor.systemRed
                     Observable.shared.bgTextColor.value = .red
                 } else {

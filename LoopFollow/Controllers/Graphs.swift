@@ -202,9 +202,7 @@ class TempTargetRenderer: LineChartRenderer {
 let ScaleXMax: Double = 150.0
 extension MainViewController {
     private func graphRangeThresholds() -> (low: Double, high: Double) {
-        let low = 70.0
-        let high = UnitSettingsStore.shared.timeInRangeMode == .titr ? 140.0 : 180.0
-        return (low, high)
+        UnitSettingsStore.shared.effectiveThresholds()
     }
 
     func updateChartRenderers() {
@@ -614,13 +612,13 @@ extension MainViewController {
 
         let thresholds = graphRangeThresholds()
 
-        // Add lower red line based on low alert value
+        // Add lower red line
         let ll = ChartLimitLine()
         ll.limit = thresholds.low
         ll.lineColor = NSUIColor.systemRed.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ll)
 
-        // Add upper yellow line based on low alert value
+        // Add upper yellow line
         let ul = ChartLimitLine()
         ul.limit = thresholds.high
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
@@ -775,13 +773,13 @@ extension MainViewController {
 
         let thresholds = graphRangeThresholds()
 
-        // Add lower red line based on low alert value
+        // Add lower red line
         let ll = ChartLimitLine()
         ll.limit = thresholds.low
         ll.lineColor = NSUIColor.systemRed.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ll)
 
-        // Add upper yellow line based on low alert value
+        // Add upper yellow line
         let ul = ChartLimitLine()
         ul.limit = thresholds.high
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)

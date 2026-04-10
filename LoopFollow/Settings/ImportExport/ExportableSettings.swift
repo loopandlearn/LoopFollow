@@ -14,6 +14,8 @@ struct NightscoutSettingsExport: Codable {
     let glycemicMetricMode: String
     let glycemicOutputUnit: String
     let timeInRangeMode: String
+    let lowLine: Double?
+    let highLine: Double?
     let variabilityMetricMode: String
 
     enum CodingKeys: String, CodingKey {
@@ -24,6 +26,8 @@ struct NightscoutSettingsExport: Codable {
         case glycemicMetricMode
         case glycemicOutputUnit
         case timeInRangeMode
+        case lowLine
+        case highLine
         case variabilityMetricMode
     }
 
@@ -35,6 +39,8 @@ struct NightscoutSettingsExport: Codable {
         glycemicMetricMode: String,
         glycemicOutputUnit: String,
         timeInRangeMode: String,
+        lowLine: Double?,
+        highLine: Double?,
         variabilityMetricMode: String
     ) {
         self.version = version
@@ -44,6 +50,8 @@ struct NightscoutSettingsExport: Codable {
         self.glycemicMetricMode = glycemicMetricMode
         self.glycemicOutputUnit = glycemicOutputUnit
         self.timeInRangeMode = timeInRangeMode
+        self.lowLine = lowLine
+        self.highLine = highLine
         self.variabilityMetricMode = variabilityMetricMode
     }
 
@@ -56,6 +64,8 @@ struct NightscoutSettingsExport: Codable {
         glycemicMetricMode = try container.decodeIfPresent(String.self, forKey: .glycemicMetricMode) ?? GlycemicMetricMode.gmi.rawValue
         glycemicOutputUnit = try container.decodeIfPresent(String.self, forKey: .glycemicOutputUnit) ?? GlycemicOutputUnit.percent.rawValue
         timeInRangeMode = try container.decodeIfPresent(String.self, forKey: .timeInRangeMode) ?? TimeInRangeDisplayMode.tir.rawValue
+        lowLine = try container.decodeIfPresent(Double.self, forKey: .lowLine)
+        highLine = try container.decodeIfPresent(Double.self, forKey: .highLine)
         variabilityMetricMode = try container.decodeIfPresent(String.self, forKey: .variabilityMetricMode) ?? VariabilityMetricMode.stdDeviation.rawValue
     }
 
@@ -70,6 +80,8 @@ struct NightscoutSettingsExport: Codable {
             glycemicMetricMode: unitSettings.glycemicMetricMode.rawValue,
             glycemicOutputUnit: unitSettings.glycemicOutputUnit.rawValue,
             timeInRangeMode: unitSettings.timeInRangeMode.rawValue,
+            lowLine: storage.lowLine.value,
+            highLine: storage.highLine.value,
             variabilityMetricMode: unitSettings.variabilityMetricMode.rawValue
         )
     }
@@ -88,6 +100,12 @@ struct NightscoutSettingsExport: Codable {
         }
         if let timeInRangeMode = TimeInRangeDisplayMode(rawValue: timeInRangeMode) {
             UnitSettingsStore.shared.timeInRangeMode = timeInRangeMode
+        }
+        if let lowLine = lowLine {
+            storage.lowLine.value = lowLine
+        }
+        if let highLine = highLine {
+            storage.highLine.value = highLine
         }
         if let variabilityMetricMode = VariabilityMetricMode(rawValue: variabilityMetricMode) {
             UnitSettingsStore.shared.variabilityMetricMode = variabilityMetricMode

@@ -179,11 +179,8 @@ struct AggregatedStatsView: View {
         .onReceive(Storage.shared.useIFCC.$value) { _ in
             refreshVisibleStats()
         }
-        .onReceive(Storage.shared.showTITR.$value) { newValue in
-            if viewModel.tirStats.showTITR != newValue {
-                viewModel.tirStats.showTITR = newValue
-                viewModel.tirStats.calculateTIR()
-            }
+        .onReceive(Storage.shared.timeInRangeModeRaw.$value) { _ in
+            viewModel.tirStats.calculateTIR()
         }
     }
 
