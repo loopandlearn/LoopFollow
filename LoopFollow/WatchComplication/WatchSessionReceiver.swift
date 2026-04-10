@@ -32,15 +32,10 @@ final class WatchSessionReceiver: NSObject {
     /// Populated when ClockKit calls getCurrentTimelineEntry (complication is on an active face)
     /// or when activeComplications is non-nil. Used as a fallback when activeComplications
     /// returns nil/empty during background execution — a known watchOS 9+ limitation.
-    ///
-    /// Access must be serialized on the main thread. ClockKit callbacks are main-thread,
-    /// and reloadComplicationsOnMainThread() is only called from main.
     private var cachedComplications: [String: CLKComplication] = [:]
 
     /// Called by WatchComplicationProvider whenever ClockKit passes a CLKComplication to us.
-    /// Must be called on the main thread (ClockKit callbacks are main-thread).
     func cacheComplication(_ complication: CLKComplication) {
-        dispatchPrecondition(condition: .onQueue(.main))
         let key = "\(complication.identifier)-\(complication.family.rawValue)"
         cachedComplications[key] = complication
     }
