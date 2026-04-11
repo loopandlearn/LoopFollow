@@ -13,6 +13,7 @@ struct LoopAPNSBolusView: View {
     @State private var alertMessage = ""
     @State private var alertType: AlertType = .success
 
+    @ObservedObject private var commonBoluses = CommonBolusesManager.shared
     @FocusState private var insulinFieldIsFocused: Bool
 
     // Add state for recommended bolus and warning
@@ -68,6 +69,30 @@ struct LoopAPNSBolusView: View {
                                     .padding(.vertical, 8)
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                    }
+
+                    if !commonBoluses.commonBoluses.isEmpty {
+                        Section(header: Text("Common Boluses")) {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    ForEach(commonBoluses.commonBoluses) { bolus in
+                                        Button {
+                                            insulinAmount = HKQuantity(unit: .internationalUnit(), doubleValue: bolus.units)
+                                        } label: {
+                                            Text("\(InsulinFormatter.shared.string(bolus.units))U")
+                                                .font(.subheadline.weight(.medium))
+                                                .padding(.horizontal, 14)
+                                                .padding(.vertical, 8)
+                                                .background(Color.accentColor.opacity(0.15))
+                                                .foregroundColor(.accentColor)
+                                                .cornerRadius(8)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.vertical, 4)
                             }
                         }
                     }
@@ -180,6 +205,10 @@ struct LoopAPNSBolusView: View {
                     alertType = .error
                     showAlert = true
                 }
+
+                let step = Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit())
+                let maxBolus = Storage.shared.maxBolus.value.doubleValue(for: .internationalUnit())
+                commonBoluses.refresh(stepIncrement: max(0.001, step), maxBolus: maxBolus)
 
                 loadRecommendedBolus()
                 // Reset timer state so it shows '-' until first tick
@@ -369,6 +398,10 @@ struct LoopAPNSBolusView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
+                    let sentUnits = insulinAmount.doubleValue(for: .internationalUnit())
+                    if sentUnits > 0 {
+                        CommonBolusesManager.shared.recordBolus(units: sentUnits)
+                    }
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
                     self.alertMessage = "Insulin sent successfully!"

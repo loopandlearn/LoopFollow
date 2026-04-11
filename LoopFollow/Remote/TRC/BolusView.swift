@@ -14,6 +14,7 @@ struct BolusView: View {
 
     @ObservedObject private var deviceRecBolus = Observable.shared.deviceRecBolus
     @ObservedObject private var enactedOrSuggested = Observable.shared.enactedOrSuggested
+    @ObservedObject private var commonBoluses = CommonBolusesManager.shared
 
     @FocusState private var bolusFieldIsFocused: Bool
     @State private var showAlert = false
@@ -67,6 +68,30 @@ struct BolusView: View {
                 Form {
                     recommendedBlocks(now: context.date)
 
+                    if !commonBoluses.commonBoluses.isEmpty {
+                        Section(header: Text("Common Boluses")) {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    ForEach(commonBoluses.commonBoluses) { bolus in
+                                        Button {
+                                            applyCommonBolus(bolus.units)
+                                        } label: {
+                                            Text("\(InsulinFormatter.shared.string(bolus.units))U")
+                                                .font(.subheadline.weight(.medium))
+                                                .padding(.horizontal, 14)
+                                                .padding(.vertical, 8)
+                                                .background(Color.accentColor.opacity(0.15))
+                                                .foregroundColor(.accentColor)
+                                                .cornerRadius(8)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                    }
+
                     Section {
                         HKQuantityInputView(
                             label: "Bolus Amount",
@@ -104,6 +129,12 @@ struct BolusView: View {
                 }
                 .navigationTitle("Bolus")
                 .navigationBarTitleDisplayMode(.inline)
+            }
+            .onAppear {
+                commonBoluses.refresh(
+                    stepIncrement: stepU,
+                    maxBolus: maxBolus.value.doubleValue(for: .internationalUnit())
+                )
             }
             .alert(isPresented: $showAlert) {
                 switch alertType {
@@ -245,6 +276,13 @@ struct BolusView: View {
         }
     }
 
+    private func applyCommonBolus(_ units: Double) {
+        let maxU = maxBolus.value.doubleValue(for: .internationalUnit())
+        let clamped = min(units, maxU)
+        let stepped = roundedToStep(clamped)
+        bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: stepped)
+    }
+
     private func applyRecommendedBolus(_ rec: Double) {
         let maxU = maxBolus.value.doubleValue(for: .internationalUnit())
         let clamped = min(rec, maxU)
@@ -267,6 +305,10 @@ struct BolusView: View {
             DispatchQueue.main.async {
                 isLoading = false
                 if success {
+                    let sentUnits = bolusAmount.doubleValue(for: .internationalUnit())
+                    if sentUnits > 0 {
+                        CommonBolusesManager.shared.recordBolus(units: sentUnits)
+                    }
                     statusMessage = "Bolus command sent successfully."
                     LogManager.shared.log(
                         category: .apns,

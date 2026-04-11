@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B500000000000000000000A2 /* RemoteBolusHistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500000000000000000000A1 /* RemoteBolusHistoryEntry.swift */; };
+		B500000000000000000000A4 /* CommonBolusesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500000000000000000000A3 /* CommonBolusesManager.swift */; };
+		B500000000000000000000B2 /* RemoteMealHistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500000000000000000000B1 /* RemoteMealHistoryEntry.swift */; };
+		B500000000000000000000B4 /* CommonMealsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500000000000000000000B3 /* CommonMealsManager.swift */; };
 		2D8068C66833EEAED7B4BEB8 /* FutureCarbsCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EBAB9EECE7095238A558060 /* FutureCarbsCondition.swift */; };
 		374A77992F5BD8B200E96858 /* APNSClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77982F5BD8AB00E96858 /* APNSClient.swift */; };
 		374A77A52F5BE17000E96858 /* AppGroupID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A779F2F5BE17000E96858 /* AppGroupID.swift */; };
@@ -195,8 +199,8 @@
 		DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0C92D355256000D2A63 /* LogView.swift */; };
 		DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0CB2D35526E000D2A63 /* SearchBar.swift */; };
 		DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0CD2D355879000D2A63 /* LogEntry.swift */; };
-		DDA9ACA82D6A66E200E6F1A9 /* ContactColorOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */; };
 		DDA9ACA62D6A66D000E6F1A9 /* ContactColorMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA52D6A66C800E6F1A9 /* ContactColorMode.swift */; };
+		DDA9ACA82D6A66E200E6F1A9 /* ContactColorOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */; };
 		DDA9ACAA2D6A6B8300E6F1A9 /* ContactIncludeOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA92D6A6B8200E6F1A9 /* ContactIncludeOption.swift */; };
 		DDA9ACAC2D6B317100E6F1A9 /* ContactType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACAB2D6B316F00E6F1A9 /* ContactType.swift */; };
 		DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */; };
@@ -459,6 +463,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B500000000000000000000A1 /* RemoteBolusHistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteBolusHistoryEntry.swift; sourceTree = "<group>"; };
+		B500000000000000000000A3 /* CommonBolusesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonBolusesManager.swift; sourceTree = "<group>"; };
+		B500000000000000000000B1 /* RemoteMealHistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteMealHistoryEntry.swift; sourceTree = "<group>"; };
+		B500000000000000000000B3 /* CommonMealsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonMealsManager.swift; sourceTree = "<group>"; };
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
 		2B9BEC26E4E48EF9B811A372 /* PendingFutureCarb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingFutureCarb.swift; sourceTree = "<group>"; };
 		2EBAB9EECE7095238A558060 /* FutureCarbsCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureCarbsCondition.swift; sourceTree = "<group>"; };
@@ -643,8 +651,8 @@
 		DD9ED0C92D355256000D2A63 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		DD9ED0CB2D35526E000D2A63 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		DD9ED0CD2D355879000D2A63 /* LogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntry.swift; sourceTree = "<group>"; };
-		DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactColorOption.swift; sourceTree = "<group>"; };
 		DDA9ACA52D6A66C800E6F1A9 /* ContactColorMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactColorMode.swift; sourceTree = "<group>"; };
+		DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactColorOption.swift; sourceTree = "<group>"; };
 		DDA9ACA92D6A6B8200E6F1A9 /* ContactIncludeOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactIncludeOption.swift; sourceTree = "<group>"; };
 		DDA9ACAB2D6B316F00E6F1A9 /* ContactType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactType.swift; sourceTree = "<group>"; };
 		DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RileyLinkHeartbeatBluetoothDevice.swift; sourceTree = "<group>"; };
@@ -1034,9 +1042,29 @@
 			path = Metric;
 			sourceTree = "<group>";
 		};
+		B500000000000000000000B5 /* CommonMeals */ = {
+			isa = PBXGroup;
+			children = (
+				B500000000000000000000B1 /* RemoteMealHistoryEntry.swift */,
+				B500000000000000000000B3 /* CommonMealsManager.swift */,
+			);
+			path = CommonMeals;
+			sourceTree = "<group>";
+		};
+		B500000000000000000000A5 /* CommonBoluses */ = {
+			isa = PBXGroup;
+			children = (
+				B500000000000000000000A1 /* RemoteBolusHistoryEntry.swift */,
+				B500000000000000000000A3 /* CommonBolusesManager.swift */,
+			);
+			path = CommonBoluses;
+			sourceTree = "<group>";
+		};
 		DD0C0C6E2C4AFFB800DBADDF /* Remote */ = {
 			isa = PBXGroup;
 			children = (
+				B500000000000000000000A5 /* CommonBoluses */,
+				B500000000000000000000B5 /* CommonMeals */,
 				DDDF6F4A2D479B6A00884336 /* Nightscout */,
 				DDDF6F482D479AEF00884336 /* NoRemoteView.swift */,
 				DDEF503E2D479B8A00884336 /* LoopAPNS */,
@@ -2186,6 +2214,10 @@
 				6584B1012E4A263900135D4D /* TOTPService.swift in Sources */,
 				DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */,
 				DDEF503A2D31615000999A5D /* LogManager.swift in Sources */,
+				B500000000000000000000A2 /* RemoteBolusHistoryEntry.swift in Sources */,
+				B500000000000000000000A4 /* CommonBolusesManager.swift in Sources */,
+				B500000000000000000000B2 /* RemoteMealHistoryEntry.swift in Sources */,
+				B500000000000000000000B4 /* CommonMealsManager.swift in Sources */,
 				DD4878172C7B75350048F05C /* BolusView.swift in Sources */,
 				DD026E592EA2C8A200A39CB5 /* InsulinPrecisionManager.swift in Sources */,
 				374A77992F5BD8B200E96858 /* APNSClient.swift in Sources */,
