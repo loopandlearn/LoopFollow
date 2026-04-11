@@ -48,7 +48,7 @@ struct MealView: View {
             VStack {
                 Form {
                     if !commonMeals.commonMeals.isEmpty {
-                        Section(header: Text("Common Meals")) {
+                        Section(header: CommonSectionHeader(title: "Common Meals", infoText: CommonSectionHeader.mealInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
                                     ForEach(commonMeals.commonMeals) { meal in

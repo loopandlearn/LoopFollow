@@ -69,7 +69,7 @@ struct BolusView: View {
                     recommendedBlocks(now: context.date)
 
                     if !commonBoluses.commonBoluses.isEmpty {
-                        Section(header: Text("Common Boluses")) {
+                        Section(header: CommonSectionHeader(title: "Common Boluses", infoText: CommonSectionHeader.bolusInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
                                     ForEach(commonBoluses.commonBoluses) { bolus in
