@@ -13,7 +13,7 @@ struct LoopAPNSBolusView: View {
     @State private var alertMessage = ""
     @State private var alertType: AlertType = .success
 
-    @ObservedObject private var commonBoluses = CommonBolusesManager.shared
+    @ObservedObject private var quickPickBoluses = QuickPickBolusesManager.shared
     @FocusState private var insulinFieldIsFocused: Bool
 
     // Add state for recommended bolus and warning
@@ -73,11 +73,11 @@ struct LoopAPNSBolusView: View {
                         }
                     }
 
-                    if !commonBoluses.commonBoluses.isEmpty {
-                        Section(header: CommonSectionHeader(title: "Common Boluses", infoText: CommonSectionHeader.bolusInfoText)) {
+                    if !quickPickBoluses.quickPickBoluses.isEmpty {
+                        Section(header: QuickPickSectionHeader(title: "Quick-Pick Boluses", infoText: QuickPickSectionHeader.bolusInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
-                                    ForEach(commonBoluses.commonBoluses) { bolus in
+                                    ForEach(quickPickBoluses.quickPickBoluses) { bolus in
                                         Button {
                                             insulinAmount = HKQuantity(unit: .internationalUnit(), doubleValue: bolus.units)
                                         } label: {
@@ -208,7 +208,7 @@ struct LoopAPNSBolusView: View {
 
                 let step = Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit())
                 let maxBolus = Storage.shared.maxBolus.value.doubleValue(for: .internationalUnit())
-                commonBoluses.refresh(stepIncrement: max(0.001, step), maxBolus: maxBolus)
+                quickPickBoluses.refresh(stepIncrement: max(0.001, step), maxBolus: maxBolus)
 
                 loadRecommendedBolus()
                 // Reset timer state so it shows '-' until first tick
@@ -400,7 +400,7 @@ struct LoopAPNSBolusView: View {
                 if success {
                     let sentUnits = insulinAmount.doubleValue(for: .internationalUnit())
                     if sentUnits > 0 {
-                        CommonBolusesManager.shared.recordBolus(units: sentUnits)
+                        QuickPickBolusesManager.shared.recordBolus(units: sentUnits)
                     }
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)

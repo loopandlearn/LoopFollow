@@ -8,7 +8,7 @@ struct LoopAPNSCarbsView: View {
     private typealias AbsorptionPreset = (hours: Int, minutes: Int)
 
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject private var commonMeals = CommonMealsManager.shared
+    @ObservedObject private var quickPickMeals = QuickPickMealsManager.shared
     @State private var carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var absorptionHours = 3
     @State private var absorptionMinutes = 0
@@ -103,11 +103,11 @@ struct LoopAPNSCarbsView: View {
         NavigationView {
             VStack {
                 Form {
-                    if !commonMeals.commonMeals.isEmpty {
-                        Section(header: CommonSectionHeader(title: "Common Meals", infoText: CommonSectionHeader.mealInfoText)) {
+                    if !quickPickMeals.quickPickMeals.isEmpty {
+                        Section(header: QuickPickSectionHeader(title: "Quick-Pick Meals", infoText: QuickPickSectionHeader.mealInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
-                                    ForEach(commonMeals.commonMeals) { meal in
+                                    ForEach(quickPickMeals.quickPickMeals) { meal in
                                         Button {
                                             carbsAmount = HKQuantity(unit: .gram(), doubleValue: meal.carbs)
                                         } label: {
@@ -405,7 +405,7 @@ struct LoopAPNSCarbsView: View {
                     showAlert = true
                 }
 
-                commonMeals.refresh(
+                quickPickMeals.refresh(
                     maxCarbs: Storage.shared.maxCarbs.value.doubleValue(for: .gram()),
                     includeFatProtein: false
                 )
@@ -562,7 +562,7 @@ struct LoopAPNSCarbsView: View {
                 if success {
                     let sentCarbs = carbsAmount.doubleValue(for: .gram())
                     if sentCarbs > 0 {
-                        CommonMealsManager.shared.recordMeal(carbs: sentCarbs)
+                        QuickPickMealsManager.shared.recordMeal(carbs: sentCarbs)
                     }
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)

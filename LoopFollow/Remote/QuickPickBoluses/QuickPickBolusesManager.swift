@@ -1,21 +1,21 @@
 // LoopFollow
-// CommonBolusesManager.swift
+// QuickPickBolusesManager.swift
 
 import Foundation
 
-struct CommonBolus: Identifiable, Equatable {
+struct QuickPickBolus: Identifiable, Equatable {
     let id = UUID()
     let units: Double
 
-    static func == (lhs: CommonBolus, rhs: CommonBolus) -> Bool {
+    static func == (lhs: QuickPickBolus, rhs: QuickPickBolus) -> Bool {
         lhs.id == rhs.id
     }
 }
 
-final class CommonBolusesManager: ObservableObject {
-    static let shared = CommonBolusesManager()
+final class QuickPickBolusesManager: ObservableObject {
+    static let shared = QuickPickBolusesManager()
 
-    @Published private(set) var commonBoluses: [CommonBolus] = []
+    @Published private(set) var quickPickBoluses: [QuickPickBolus] = []
 
     private static let maxEntries = 500
     private static let maxAgeDays = 90.0
@@ -38,7 +38,7 @@ final class CommonBolusesManager: ObservableObject {
 
     func refresh(now: Date = Date(), stepIncrement: Double, maxBolus: Double) {
         let history = Storage.shared.remoteBolusHistory.value
-        commonBoluses = Self.computeCommonBoluses(
+        quickPickBoluses = Self.computeQuickPickBoluses(
             from: history,
             now: now,
             stepIncrement: stepIncrement,
@@ -48,12 +48,12 @@ final class CommonBolusesManager: ObservableObject {
 
     // MARK: - Scoring (static for testability)
 
-    static func computeCommonBoluses(
+    static func computeQuickPickBoluses(
         from history: [RemoteBolusHistoryEntry],
         now: Date,
         stepIncrement: Double,
         maxBolus: Double
-    ) -> [CommonBolus] {
+    ) -> [QuickPickBolus] {
         guard stepIncrement > 0 else { return [] }
 
         let nowMinute = {
@@ -81,7 +81,7 @@ final class CommonBolusesManager: ObservableObject {
             .filter { $0.value >= minScore }
             .sorted { $0.value > $1.value }
             .prefix(maxResults)
-            .map { CommonBolus(units: $0.key) }
+            .map { QuickPickBolus(units: $0.key) }
     }
 
     static func timeOfDayScore(entryMinute: Int, nowMinute: Int) -> Double {

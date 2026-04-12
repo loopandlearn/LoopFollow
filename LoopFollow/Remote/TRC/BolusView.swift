@@ -14,7 +14,7 @@ struct BolusView: View {
 
     @ObservedObject private var deviceRecBolus = Observable.shared.deviceRecBolus
     @ObservedObject private var enactedOrSuggested = Observable.shared.enactedOrSuggested
-    @ObservedObject private var commonBoluses = CommonBolusesManager.shared
+    @ObservedObject private var quickPickBoluses = QuickPickBolusesManager.shared
 
     @FocusState private var bolusFieldIsFocused: Bool
     @State private var showAlert = false
@@ -68,13 +68,13 @@ struct BolusView: View {
                 Form {
                     recommendedBlocks(now: context.date)
 
-                    if !commonBoluses.commonBoluses.isEmpty {
-                        Section(header: CommonSectionHeader(title: "Common Boluses", infoText: CommonSectionHeader.bolusInfoText)) {
+                    if !quickPickBoluses.quickPickBoluses.isEmpty {
+                        Section(header: QuickPickSectionHeader(title: "Quick-Pick Boluses", infoText: QuickPickSectionHeader.bolusInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
-                                    ForEach(commonBoluses.commonBoluses) { bolus in
+                                    ForEach(quickPickBoluses.quickPickBoluses) { bolus in
                                         Button {
-                                            applyCommonBolus(bolus.units)
+                                            applyQuickPickBolus(bolus.units)
                                         } label: {
                                             Text("\(InsulinFormatter.shared.string(bolus.units))U")
                                                 .font(.subheadline.weight(.medium))
@@ -131,7 +131,7 @@ struct BolusView: View {
                 .navigationBarTitleDisplayMode(.inline)
             }
             .onAppear {
-                commonBoluses.refresh(
+                quickPickBoluses.refresh(
                     stepIncrement: stepU,
                     maxBolus: maxBolus.value.doubleValue(for: .internationalUnit())
                 )
@@ -276,7 +276,7 @@ struct BolusView: View {
         }
     }
 
-    private func applyCommonBolus(_ units: Double) {
+    private func applyQuickPickBolus(_ units: Double) {
         let maxU = maxBolus.value.doubleValue(for: .internationalUnit())
         let clamped = min(units, maxU)
         let stepped = roundedToStep(clamped)
@@ -307,7 +307,7 @@ struct BolusView: View {
                 if success {
                     let sentUnits = bolusAmount.doubleValue(for: .internationalUnit())
                     if sentUnits > 0 {
-                        CommonBolusesManager.shared.recordBolus(units: sentUnits)
+                        QuickPickBolusesManager.shared.recordBolus(units: sentUnits)
                     }
                     statusMessage = "Bolus command sent successfully."
                     LogManager.shared.log(

@@ -20,7 +20,7 @@ struct MealView: View {
     @ObservedObject private var mealWithBolus = Storage.shared.mealWithBolus
     @ObservedObject private var mealWithFatProtein = Storage.shared.mealWithFatProtein
     @ObservedObject private var maxBolus = Storage.shared.maxBolus
-    @ObservedObject private var commonMeals = CommonMealsManager.shared
+    @ObservedObject private var quickPickMeals = QuickPickMealsManager.shared
 
     @FocusState private var carbsFieldIsFocused: Bool
     @FocusState private var proteinFieldIsFocused: Bool
@@ -47,13 +47,13 @@ struct MealView: View {
         NavigationView {
             VStack {
                 Form {
-                    if !commonMeals.commonMeals.isEmpty {
-                        Section(header: CommonSectionHeader(title: "Common Meals", infoText: CommonSectionHeader.mealInfoText)) {
+                    if !quickPickMeals.quickPickMeals.isEmpty {
+                        Section(header: QuickPickSectionHeader(title: "Quick-Pick Meals", infoText: QuickPickSectionHeader.mealInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
-                                    ForEach(commonMeals.commonMeals) { meal in
+                                    ForEach(quickPickMeals.quickPickMeals) { meal in
                                         Button {
-                                            applyCommonMeal(meal)
+                                            applyQuickPickMeal(meal)
                                         } label: {
                                             VStack(spacing: 2) {
                                                 Text("\(Int(meal.carbs))g")
@@ -208,7 +208,7 @@ struct MealView: View {
                 selectedTime = nil
                 isScheduling = false
 
-                commonMeals.refresh(
+                quickPickMeals.refresh(
                     maxCarbs: maxCarbs.value.doubleValue(for: .gram()),
                     includeFatProtein: mealWithFatProtein.value
                 )
@@ -342,7 +342,7 @@ struct MealView: View {
                 if success {
                     let sentCarbs = carbs.doubleValue(for: .gram())
                     if sentCarbs > 0 {
-                        CommonMealsManager.shared.recordMeal(
+                        QuickPickMealsManager.shared.recordMeal(
                             carbs: sentCarbs,
                             fat: fat.doubleValue(for: .gram()),
                             protein: protein.doubleValue(for: .gram()),
@@ -381,7 +381,7 @@ struct MealView: View {
         return formatter.string(from: date)
     }
 
-    private func applyCommonMeal(_ meal: CommonMeal) {
+    private func applyQuickPickMeal(_ meal: QuickPickMeal) {
         let maxC = maxCarbs.value.doubleValue(for: .gram())
         carbs = HKQuantity(unit: .gram(), doubleValue: min(meal.carbs, maxC))
         if mealWithFatProtein.value {

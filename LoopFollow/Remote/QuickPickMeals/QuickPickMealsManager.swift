@@ -1,24 +1,24 @@
 // LoopFollow
-// CommonMealsManager.swift
+// QuickPickMealsManager.swift
 
 import Foundation
 
-struct CommonMeal: Identifiable, Equatable {
+struct QuickPickMeal: Identifiable, Equatable {
     let id = UUID()
     let carbs: Double
     let fat: Double
     let protein: Double
     let bolus: Double
 
-    static func == (lhs: CommonMeal, rhs: CommonMeal) -> Bool {
+    static func == (lhs: QuickPickMeal, rhs: QuickPickMeal) -> Bool {
         lhs.id == rhs.id
     }
 }
 
-final class CommonMealsManager: ObservableObject {
-    static let shared = CommonMealsManager()
+final class QuickPickMealsManager: ObservableObject {
+    static let shared = QuickPickMealsManager()
 
-    @Published private(set) var commonMeals: [CommonMeal] = []
+    @Published private(set) var quickPickMeals: [QuickPickMeal] = []
 
     private static let maxEntries = 500
     private static let maxAgeDays = 90.0
@@ -41,7 +41,7 @@ final class CommonMealsManager: ObservableObject {
 
     func refresh(now: Date = Date(), carbStep: Double = 1.0, maxCarbs: Double, includeFatProtein: Bool) {
         let history = Storage.shared.remoteMealHistory.value
-        commonMeals = Self.computeCommonMeals(
+        quickPickMeals = Self.computeQuickPickMeals(
             from: history,
             now: now,
             carbStep: carbStep,
@@ -52,13 +52,13 @@ final class CommonMealsManager: ObservableObject {
 
     // MARK: - Scoring (static for testability)
 
-    static func computeCommonMeals(
+    static func computeQuickPickMeals(
         from history: [RemoteMealHistoryEntry],
         now: Date,
         carbStep: Double,
         maxCarbs: Double,
         includeFatProtein: Bool
-    ) -> [CommonMeal] {
+    ) -> [QuickPickMeal] {
         guard carbStep > 0 else { return [] }
 
         let nowMinute = {
@@ -98,7 +98,7 @@ final class CommonMealsManager: ObservableObject {
             .prefix(maxResults)
             .map { item in
                 let best = groupBestEntry[item.key]?.entry
-                return CommonMeal(
+                return QuickPickMeal(
                     carbs: item.key,
                     fat: includeFatProtein ? (best?.fat ?? 0) : 0,
                     protein: includeFatProtein ? (best?.protein ?? 0) : 0,
