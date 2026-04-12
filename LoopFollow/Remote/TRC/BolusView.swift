@@ -82,7 +82,6 @@ struct BolusView: View {
                         )
                     }
                 }
-                .scrollDismissesKeyboard(.interactively)
                 .safeAreaInset(edge: .bottom) {
                     Button {
                         bolusFieldIsFocused = false

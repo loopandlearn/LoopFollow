@@ -141,7 +141,6 @@ struct MealView: View {
                         }
                     }
                 }
-                .scrollDismissesKeyboard(.interactively)
                 .safeAreaInset(edge: .bottom) {
                     Button {
                         carbsFieldIsFocused = false

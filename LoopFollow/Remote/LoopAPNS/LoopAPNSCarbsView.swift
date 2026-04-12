@@ -276,7 +276,6 @@ struct LoopAPNSCarbsView: View {
                         }
                     }
                 }
-                .scrollDismissesKeyboard(.interactively)
                 .safeAreaInset(edge: .bottom) {
                     Button(action: sendCarbs) {
                         if isLoading {

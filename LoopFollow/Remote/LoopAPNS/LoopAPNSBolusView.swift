@@ -152,7 +152,6 @@ struct LoopAPNSBolusView: View {
                         }
                     }
                 }
-                .scrollDismissesKeyboard(.interactively)
                 .safeAreaInset(edge: .bottom) {
                     Button(action: sendInsulin) {
                         if isLoading {
