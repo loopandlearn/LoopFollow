@@ -176,45 +176,25 @@ extension MainViewController {
             let predictioncolor = UIColor.systemGray
             PredictionLabel.textColor = predictioncolor
             topPredictionBG = Storage.shared.minBGScale.value
-            if let predbgdata = predBGsData {
-                let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
-                    ("ZT", "ZT", 12),
-                    ("IOB", "Insulin", 13),
-                    ("COB", "LoopYellow", 14),
-                    ("UAM", "UAM", 15),
-                ]
 
+            if let predbgdata = predBGsData {
+                let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
+                var rawPredBGs = [String: [Double]]()
                 var minPredBG = Double.infinity
                 var maxPredBG = -Double.infinity
 
-                for (type, colorName, dataIndex) in predictionTypes {
-                    var predictionData = [ShareGlucoseData]()
-                    if let graphdata = predbgdata[type] as? [Double] {
-                        var predictionTime = updatedTime ?? Date().timeIntervalSince1970
-                        let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
-
-                        for i in 0 ... toLoad {
-                            if i < graphdata.count {
-                                let predictionValue = graphdata[i]
-                                minPredBG = min(minPredBG, predictionValue)
-                                maxPredBG = max(maxPredBG, predictionValue)
-
-                                let clampedValue = min(max(Int(round(predictionValue)), globalVariables.minDisplayGlucose), globalVariables.maxDisplayGlucose)
-                                let prediction = ShareGlucoseData(sgv: clampedValue, date: predictionTime, direction: "flat")
-                                predictionData.append(prediction)
-                                predictionTime += 300
-                            }
+                for type in ["ZT", "IOB", "COB", "UAM"] {
+                    if let arr = predbgdata[type] as? [Double], !arr.isEmpty {
+                        rawPredBGs[type] = arr
+                        for i in 0 ... min(toLoad, arr.count - 1) {
+                            minPredBG = min(minPredBG, arr[i])
+                            maxPredBG = max(maxPredBG, arr[i])
                         }
                     }
-
-                    let color = UIColor(named: colorName) ?? UIColor.systemPurple
-                    updatePredictionGraphGeneric(
-                        dataIndex: dataIndex,
-                        predictionData: predictionData,
-                        chartLabel: type,
-                        color: color
-                    )
                 }
+
+                openAPSPredBGs = rawPredBGs.isEmpty ? nil : rawPredBGs
+                openAPSPredUpdatedTime = updatedTime
 
                 if minPredBG != Double.infinity, maxPredBG != -Double.infinity {
                     let value = "\(Localizer.toDisplayUnits(String(minPredBG)))/\(Localizer.toDisplayUnits(String(maxPredBG)))"
@@ -224,6 +204,11 @@ extension MainViewController {
                 } else {
                     infoManager.updateInfoData(type: .minMax, value: "N/A")
                 }
+
+                updateOpenAPSPredictionDisplay()
+            } else {
+                openAPSPredBGs = nil
+                openAPSPredUpdatedTime = nil
             }
 
             if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {

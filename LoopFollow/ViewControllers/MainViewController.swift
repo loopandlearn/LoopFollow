@@ -91,6 +91,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var overrideGraphData: [DataStructs.overrideStruct] = []
     var tempTargetGraphData: [DataStructs.tempTargetStruct] = []
     var predictionData: [ShareGlucoseData] = []
+    var openAPSPredBGs: [String: [Double]]?
+    var openAPSPredUpdatedTime: TimeInterval?
     var bgCheckData: [ShareGlucoseData] = []
     var suspendGraphData: [DataStructs.timestampOnlyStruct] = []
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
@@ -419,6 +421,20 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
                 if shouldReset {
                     Storage.shared.remoteType.value = .none
                 }
+            }
+            .store(in: &cancellables)
+
+        Storage.shared.device.$value
+            .receive(on: DispatchQueue.main)
+            .map { device -> Bool? in
+                device.isEmpty ? nil : (device == "Loop")
+            }
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] isLoop in
+                guard let isLoop = isLoop else { return }
+                Storage.shared.predictionDisplayType.value = isLoop ? .lines : .cone
+                self?.updateOpenAPSPredictionDisplay()
             }
             .store(in: &cancellables)
 

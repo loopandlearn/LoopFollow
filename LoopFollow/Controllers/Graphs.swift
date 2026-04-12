@@ -26,6 +26,7 @@ enum GraphDataIndex: Int {
     case uamPrediction = 15
     case smb = 16
     case tempTarget = 17
+    case predictionCone = 18
 }
 
 extension GraphDataIndex {
@@ -49,6 +50,7 @@ extension GraphDataIndex {
         case .uamPrediction: return "UAM Prediction"
         case .smb: return "SMB"
         case .tempTarget: return "Temp Target"
+        case .predictionCone: return "Prediction Cone"
         }
     }
 }
@@ -56,8 +58,9 @@ extension GraphDataIndex {
 class CompositeRenderer: LineChartRenderer {
     let tempTargetRenderer: TempTargetRenderer
     let triangleRenderer: TriangleRenderer
+    let coneRenderer: ConeOfUncertaintyRenderer
 
-    init(dataProvider: LineChartDataProvider?, animator: Animator?, viewPortHandler: ViewPortHandler?, tempTargetDataSetIndex: Int, smbDataSetIndex: Int) {
+    init(dataProvider: LineChartDataProvider?, animator: Animator?, viewPortHandler: ViewPortHandler?, tempTargetDataSetIndex: Int, smbDataSetIndex: Int, coneDataSetIndex: Int) {
         tempTargetRenderer = TempTargetRenderer(
             dataProvider: dataProvider,
             animator: animator,
@@ -70,11 +73,18 @@ class CompositeRenderer: LineChartRenderer {
             viewPortHandler: viewPortHandler,
             smbDataSetIndex: smbDataSetIndex
         )
+        coneRenderer = ConeOfUncertaintyRenderer(
+            dataProvider: dataProvider,
+            animator: animator,
+            viewPortHandler: viewPortHandler,
+            coneDataSetIndex: coneDataSetIndex
+        )
         super.init(dataProvider: dataProvider!, animator: animator!, viewPortHandler: viewPortHandler!)
     }
 
     override func drawExtras(context: CGContext) {
         super.drawExtras(context: context)
+        coneRenderer.drawExtras(context: context)
         tempTargetRenderer.drawExtras(context: context)
         triangleRenderer.drawExtras(context: context)
     }
@@ -204,13 +214,15 @@ extension MainViewController {
     func updateChartRenderers() {
         let tempTargetDataIndex = GraphDataIndex.tempTarget.rawValue
         let smbDataIndex = GraphDataIndex.smb.rawValue
+        let coneDataIndex = GraphDataIndex.predictionCone.rawValue
 
         let compositeRenderer = CompositeRenderer(
             dataProvider: BGChart,
             animator: BGChart.chartAnimator,
             viewPortHandler: BGChart.viewPortHandler,
             tempTargetDataSetIndex: tempTargetDataIndex,
-            smbDataSetIndex: smbDataIndex
+            smbDataSetIndex: smbDataIndex,
+            coneDataSetIndex: coneDataIndex
         )
         BGChart.renderer = compositeRenderer
 
@@ -595,7 +607,16 @@ extension MainViewController {
         data.append(COBlinePrediction) // Dataset 14
         data.append(UAMlinePrediction) // Dataset 15
         data.append(lineSmb) // Dataset 16
-        data.append(lineTempTarget)
+        data.append(lineTempTarget) // Dataset 17
+
+        // Dataset 18: Prediction Cone (rendered via ConeOfUncertaintyRenderer)
+        let lineCone = LineChartDataSet(entries: [ChartDataEntry](), label: "")
+        lineCone.lineWidth = 0
+        lineCone.drawCirclesEnabled = false
+        lineCone.drawValuesEnabled = false
+        lineCone.highlightEnabled = false
+        lineCone.axisDependency = YAxis.AxisDependency.right
+        data.append(lineCone)
 
         data.setValueFont(UIFont.systemFont(ofSize: 12))
 
@@ -783,6 +804,9 @@ extension MainViewController {
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
+
+        // Re-render prediction display in case display type changed
+        updateOpenAPSPredictionDisplay()
     }
 
     func updateBGGraph() {
@@ -1601,7 +1625,16 @@ extension MainViewController {
         data.append(COBlinePrediction) // Dataset 14
         data.append(UAMlinePrediction) // Dataset 15
         data.append(lineSmb) // Dataset 16
-        data.append(lineTempTarget)
+        data.append(lineTempTarget) // Dataset 17
+
+        // Dataset 18: Prediction Cone placeholder (not rendered on small chart)
+        let lineConeSmall = LineChartDataSet(entries: [ChartDataEntry](), label: "")
+        lineConeSmall.lineWidth = 0
+        lineConeSmall.drawCirclesEnabled = false
+        lineConeSmall.drawValuesEnabled = false
+        lineConeSmall.highlightEnabled = false
+        lineConeSmall.axisDependency = YAxis.AxisDependency.right
+        data.append(lineConeSmall)
 
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false
@@ -1895,6 +1928,104 @@ extension MainViewController {
             return wrappedLine1 + "\r\n" + line2 + "\r\n" + formattedDate
         } else {
             return wrappedLine1 + "\r\n" + formattedDate
+        }
+    }
+
+    func updateConeGraph(coneData: [ConeChartDataEntry]) {
+        let dataIndex = GraphDataIndex.predictionCone.rawValue
+        let mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+        mainChart.clear()
+        for entry in coneData {
+            mainChart.addEntry(entry)
+        }
+        BGChart.rightAxis.axisMaximum = Double(calculateMaxBgGraphValue())
+        updateChartRenderers()
+    }
+
+    func clearConeGraph() {
+        let dataIndex = GraphDataIndex.predictionCone.rawValue
+        guard let lineData = BGChart.lineData, lineData.dataSets.count > dataIndex else { return }
+        lineData.dataSets[dataIndex].clear()
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
+    }
+
+    func updateOpenAPSPredictionDisplay() {
+        guard let predBGs = openAPSPredBGs else { return }
+
+        // Cone is only for OpenAPS-based systems; Loop always uses lines
+        let displayType: PredictionDisplayType = Storage.shared.device.value == "Loop" ? .lines : Storage.shared.predictionDisplayType.value
+        let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
+        let predictionStart = openAPSPredUpdatedTime ?? Date().timeIntervalSince1970
+
+        let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
+            ("ZT", "ZT", GraphDataIndex.ztPrediction.rawValue),
+            ("IOB", "Insulin", GraphDataIndex.iobPrediction.rawValue),
+            ("COB", "LoopYellow", GraphDataIndex.cobPrediction.rawValue),
+            ("UAM", "UAM", GraphDataIndex.uamPrediction.rawValue),
+        ]
+
+        topPredictionBG = Storage.shared.minBGScale.value
+
+        if displayType == .cone {
+            var allArrays = [[Double]]()
+            for (type, _, _) in predictionTypes {
+                if let arr = predBGs[type], !arr.isEmpty {
+                    allArrays.append(arr)
+                }
+            }
+
+            var coneData = [ConeChartDataEntry]()
+            if !allArrays.isEmpty {
+                let maxLength = min(allArrays.map { $0.count }.max()!, toLoad + 1)
+                var t = predictionStart
+                for i in 0 ..< maxLength {
+                    var valuesAtIndex = [Double]()
+                    for arr in allArrays where i < arr.count {
+                        valuesAtIndex.append(arr[i])
+                    }
+                    if !valuesAtIndex.isEmpty {
+                        var yMin = max(valuesAtIndex.min()!, Double(globalVariables.minDisplayGlucose))
+                        var yMax = min(valuesAtIndex.max()!, Double(globalVariables.maxDisplayGlucose))
+                        // Ensure minimum ±1 mg/dL range so the cone is visible when predictions agree
+                        if yMin == yMax {
+                            yMin -= 1
+                            yMax += 1
+                        }
+                        coneData.append(ConeChartDataEntry(x: t, yMin: yMin, yMax: yMax))
+                        if yMax > topPredictionBG - 20 { topPredictionBG = yMax + 20 }
+                    }
+                    t += 300
+                }
+            }
+
+            updateConeGraph(coneData: coneData)
+
+            // Clear individual prediction lines
+            for (_, _, dataIndex) in predictionTypes {
+                updatePredictionGraphGeneric(dataIndex: dataIndex, predictionData: [], chartLabel: "", color: .clear)
+            }
+
+        } else {
+            clearConeGraph()
+
+            for (type, colorName, dataIndex) in predictionTypes {
+                var predictionData = [ShareGlucoseData]()
+                if let graphdata = predBGs[type] {
+                    var t = predictionStart
+                    for i in 0 ... toLoad {
+                        if i < graphdata.count {
+                            let v = graphdata[i]
+                            let clamped = min(max(Int(round(v)), globalVariables.minDisplayGlucose), globalVariables.maxDisplayGlucose)
+                            predictionData.append(ShareGlucoseData(sgv: clamped, date: t, direction: "flat"))
+                            t += 300
+                        }
+                    }
+                }
+                let color = UIColor(named: colorName) ?? UIColor.systemPurple
+                updatePredictionGraphGeneric(dataIndex: dataIndex, predictionData: predictionData, chartLabel: type, color: color)
+            }
         }
     }
 

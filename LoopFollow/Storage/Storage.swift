@@ -130,6 +130,7 @@ class Storage {
 
     var smallGraphHeight = StorageValue<Int>(key: "smallGraphHeight", defaultValue: 40)
     var predictionToLoad = StorageValue<Double>(key: "predictionToLoad", defaultValue: 1.0)
+    var predictionDisplayType = StorageValue<PredictionDisplayType>(key: "predictionDisplayType", defaultValue: .cone)
     var minBasalScale = StorageValue<Double>(key: "minBasalScale", defaultValue: 5.0)
     var minBGScale = StorageValue<Double>(key: "minBGScale", defaultValue: 250.0)
     var lowLine = StorageValue<Double>(key: "lowLine", defaultValue: 70.0)
@@ -336,6 +337,7 @@ class Storage {
         smallGraphTreatments.reload()
         smallGraphHeight.reload()
         predictionToLoad.reload()
+        predictionDisplayType.reload()
         minBasalScale.reload()
         minBGScale.reload()
         lowLine.reload()
