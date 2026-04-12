@@ -3,6 +3,7 @@
 
 import Combine
 import Foundation
+import SwiftUI
 
 protocol NightscoutSettingsViewModelDelegate: AnyObject {
     func nightscoutSettingsDidFinish()
@@ -33,6 +34,16 @@ class NightscoutSettingsViewModel: ObservableObject {
     }
 
     @Published var nightscoutStatus: String = "Checking..."
+    @Published var webSocketStatus: String = "Disconnected"
+
+    var webSocketStatusColor: Color {
+        switch NightscoutSocketManager.shared.connectionState {
+        case .authenticated: return .green
+        case .connecting, .connected: return .orange
+        case .disconnected: return .secondary
+        case .error: return .red
+        }
+    }
 
     private var cancellables = Set<AnyCancellable>()
     private var checkStatusSubject = PassthroughSubject<Void, Never>()
@@ -44,6 +55,7 @@ class NightscoutSettingsViewModel: ObservableObject {
 
         setupDebounce()
         checkNightscoutStatus()
+        observeWebSocketState()
     }
 
     private func setupDebounce() {
@@ -141,5 +153,25 @@ class NightscoutSettingsViewModel: ObservableObject {
 
     func dismiss() {
         delegate?.nightscoutSettingsDidFinish()
+    }
+
+    private func observeWebSocketState() {
+        updateWebSocketStatus()
+        NotificationCenter.default.publisher(for: .nightscoutSocketStateChanged)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateWebSocketStatus()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func updateWebSocketStatus() {
+        switch NightscoutSocketManager.shared.connectionState {
+        case .disconnected: webSocketStatus = "Disconnected"
+        case .connecting: webSocketStatus = "Connecting..."
+        case .connected: webSocketStatus = "Connected"
+        case .authenticated: webSocketStatus = "Connected"
+        case .error: webSocketStatus = "Error"
+        }
     }
 }

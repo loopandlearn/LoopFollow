@@ -425,6 +425,9 @@
 		FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCFEEC9D2486E68E00402A7F /* WebKit.framework */; };
 		FCFEECA02488157B00402A7F /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEEC9F2488157B00402A7F /* Chart.swift */; };
 		FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEECA1248857A600402A7F /* SettingsViewController.swift */; };
+		DD50C10A2F60A00000000001 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DD50C10A2F60A00000000003 /* SocketIO */; };
+		DD50C10A2F60B00000000002 /* NightscoutSocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C10A2F60B00000000001 /* NightscoutSocketManager.swift */; };
+		DD50C10A2F60B00000000004 /* NightscoutSocketDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C10A2F60B00000000003 /* NightscoutSocketDataHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -574,6 +577,8 @@
 		DD493AE42ACF2383009A6922 /* Treatments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Treatments.swift; sourceTree = "<group>"; };
 		DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatus.swift; sourceTree = "<group>"; };
 		DD493AE82ACF2445009A6922 /* BGData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGData.swift; sourceTree = "<group>"; };
+		DD50C10A2F60B00000000001 /* NightscoutSocketManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSocketManager.swift; sourceTree = "<group>"; };
+		DD50C10A2F60B00000000003 /* NightscoutSocketDataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSocketDataHandler.swift; sourceTree = "<group>"; };
 		DD4A407D2E6AFEE6007B318B /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeOfDay.swift; sourceTree = "<group>"; };
 		DD4AFB3C2DB55D2900BB593F /* AlarmConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmConfiguration.swift; sourceTree = "<group>"; };
@@ -911,6 +916,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD50C10A2F60A00000000001 /* SocketIO in Frameworks */,
 				FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */,
 				3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */,
 			);
@@ -1155,6 +1161,8 @@
 				DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */,
 				DD0C0C612C4175FD00DBADDF /* NSProfile.swift */,
 				DD5334222C60ED3600062F9D /* IAge.swift */,
+				DD50C10A2F60B00000000001 /* NightscoutSocketManager.swift */,
+				DD50C10A2F60B00000000003 /* NightscoutSocketDataHandler.swift */,
 			);
 			path = Nightscout;
 			sourceTree = "<group>";
@@ -1783,6 +1791,7 @@
 			);
 			name = LoopFollow;
 			packageProductDependencies = (
+				DD50C10A2F60A00000000003 /* SocketIO */,
 			);
 			productName = LoopFollow;
 			productReference = FC9788142485969B00A7906C /* Loop Follow.app */;
@@ -1820,6 +1829,7 @@
 			);
 			mainGroup = FC97880B2485969B00A7906C;
 			packageReferences = (
+				DD50C10A2F60A00000000002 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */,
 			);
 			productRefGroup = FC9788152485969B00A7906C /* Products */;
 			projectDirPath = "";
@@ -2190,6 +2200,8 @@
 				DD026E592EA2C8A200A39CB5 /* InsulinPrecisionManager.swift in Sources */,
 				374A77992F5BD8B200E96858 /* APNSClient.swift in Sources */,
 				DD493AE72ACF23CF009A6922 /* DeviceStatus.swift in Sources */,
+				DD50C10A2F60B00000000002 /* NightscoutSocketManager.swift in Sources */,
+				DD50C10A2F60B00000000004 /* NightscoutSocketDataHandler.swift in Sources */,
 				DDC7E5162DBCFA7F00EB1127 /* SnoozerView.swift in Sources */,
 				FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */,
 				DD7F4C232DD7A62200D449E9 /* AlarmType+SortDirection.swift in Sources */,
@@ -2802,6 +2814,25 @@
 			versionGroupType = wrapper.xcdatamodel;
 		};
 /* End XCVersionGroup section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DD50C10A2F60A00000000002 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 16.1.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DD50C10A2F60A00000000003 /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DD50C10A2F60A00000000002 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */;
+			productName = SocketIO;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FC97880C2485969B00A7906C /* Project object */;
 }

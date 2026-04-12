@@ -12,6 +12,7 @@ struct NightscoutSettingsView: View {
                 urlSection
                 tokenSection
                 statusSection
+                webSocketSection
                 importSection
             }
             .onDisappear {
@@ -53,6 +54,17 @@ struct NightscoutSettingsView: View {
     private var statusSection: some View {
         Section(header: Text("Status")) {
             Text(viewModel.nightscoutStatus)
+        }
+    }
+
+    private var webSocketSection: some View {
+        Section(header: Text("Real-time Updates")) {
+            HStack {
+                Text("WebSocket")
+                Spacer()
+                Text(viewModel.webSocketStatus)
+                    .foregroundColor(viewModel.webSocketStatusColor)
+            }
         }
     }
 
