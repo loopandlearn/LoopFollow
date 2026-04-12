@@ -7,18 +7,21 @@ import SwiftUI
 /// Can be embedded in Forms or used standalone during onboarding.
 struct UnitsConfigurationView: View {
     @State private var rangeMode = UnitSettingsStore.shared.timeInRangeMode
+    @State private var glucoseUnit = UnitSettingsStore.shared.glucoseUnit
+    @State private var lowValue = Storage.shared.lowLine.value
+    @State private var highValue = Storage.shared.highLine.value
 
     var body: some View {
         Group {
             Section("Glucose") {
-                Picker("Glucose Unit", selection: Binding(
-                    get: { UnitSettingsStore.shared.glucoseUnit },
-                    set: { UnitSettingsStore.shared.glucoseUnit = $0 }
-                )) {
+                Picker("Glucose Unit", selection: $glucoseUnit) {
                     Text("mg/dL").tag(GlucoseDisplayUnit.mgdL)
                     Text("mmol/L").tag(GlucoseDisplayUnit.mmolL)
                 }
                 .pickerStyle(.segmented)
+                .onChange(of: glucoseUnit) { newValue in
+                    UnitSettingsStore.shared.glucoseUnit = newValue
+                }
             }
 
             Section("Range") {
@@ -37,25 +40,23 @@ struct UnitsConfigurationView: View {
                     BGPicker(
                         title: "Low",
                         range: 40 ... 120,
-                        value: Binding(
-                            get: { Storage.shared.lowLine.value },
-                            set: {
-                                Storage.shared.lowLine.value = $0
-                                Observable.shared.chartSettingsChanged.value = true
-                            }
-                        )
+                        value: $lowValue
                     )
+                    .id(glucoseUnit)
+                    .onChange(of: lowValue) { newValue in
+                        Storage.shared.lowLine.value = newValue
+                        Observable.shared.chartSettingsChanged.value = true
+                    }
                     BGPicker(
                         title: "High",
                         range: 120 ... 400,
-                        value: Binding(
-                            get: { Storage.shared.highLine.value },
-                            set: {
-                                Storage.shared.highLine.value = $0
-                                Observable.shared.chartSettingsChanged.value = true
-                            }
-                        )
+                        value: $highValue
                     )
+                    .id(glucoseUnit)
+                    .onChange(of: highValue) { newValue in
+                        Storage.shared.highLine.value = newValue
+                        Observable.shared.chartSettingsChanged.value = true
+                    }
                 }
             }
 
