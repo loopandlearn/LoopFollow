@@ -34,6 +34,19 @@ class NightscoutSettingsViewModel: ObservableObject {
     }
 
     @Published var nightscoutStatus: String = "Checking..."
+
+    @Published var webSocketEnabled: Bool = Storage.shared.webSocketEnabled.value {
+        didSet {
+            Storage.shared.webSocketEnabled.value = webSocketEnabled
+            if webSocketEnabled {
+                NightscoutSocketManager.shared.connectIfNeeded()
+            } else {
+                NightscoutSocketManager.shared.disconnect()
+                triggerRefresh()
+            }
+        }
+    }
+
     @Published var webSocketStatus: String = "Disconnected"
 
     var webSocketStatusColor: Color {
@@ -153,6 +166,10 @@ class NightscoutSettingsViewModel: ObservableObject {
 
     func dismiss() {
         delegate?.nightscoutSettingsDidFinish()
+    }
+
+    private func triggerRefresh() {
+        NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
     }
 
     private func observeWebSocketState() {

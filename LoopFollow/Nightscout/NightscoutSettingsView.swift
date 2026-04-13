@@ -57,14 +57,56 @@ struct NightscoutSettingsView: View {
         }
     }
 
+    @State private var showWebSocketInfo = false
+
     private var webSocketSection: some View {
-        Section(header: Text("Real-time Updates")) {
-            HStack {
-                Text("WebSocket")
-                Spacer()
-                Text(viewModel.webSocketStatus)
-                    .foregroundColor(viewModel.webSocketStatusColor)
+        Section(header: webSocketSectionHeader) {
+            Toggle("Enable WebSocket", isOn: $viewModel.webSocketEnabled)
+            if viewModel.webSocketEnabled {
+                HStack {
+                    Text("Status")
+                    Spacer()
+                    Text(viewModel.webSocketStatus)
+                        .foregroundColor(viewModel.webSocketStatusColor)
+                }
             }
+        }
+        .sheet(isPresented: $showWebSocketInfo) {
+            NavigationStack {
+                ScrollView {
+                    Text("""
+                    When enabled, LoopFollow maintains a live connection to your Nightscout server using WebSocket. This allows data updates (new glucose readings, treatments, device status) to arrive within seconds instead of waiting for the next polling cycle.
+
+                    Polling continues at reduced frequency as a safety net. If the WebSocket connection drops, normal polling resumes immediately.
+
+                    This feature may affect battery usage. On WiFi, impact is minimal. On cellular, the persistent connection may prevent the radio from entering idle mode.
+                    """)
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .navigationTitle("Real-time Updates")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { showWebSocketInfo = false }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    private var webSocketSectionHeader: some View {
+        HStack(spacing: 4) {
+            Text("Real-time Updates")
+            Button {
+                showWebSocketInfo = true
+            } label: {
+                Image(systemName: "info.circle")
+                    .foregroundStyle(Color.accentColor)
+            }
+            .buttonStyle(.plain)
         }
     }
 

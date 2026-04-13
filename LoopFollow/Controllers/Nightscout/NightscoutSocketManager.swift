@@ -38,6 +38,11 @@ class NightscoutSocketManager {
     // MARK: - Public API
 
     func connectIfNeeded() {
+        guard Storage.shared.webSocketEnabled.value else {
+            disconnect()
+            return
+        }
+
         let url = Storage.shared.url.value
         let token = Storage.shared.token.value
 
@@ -61,7 +66,7 @@ class NightscoutSocketManager {
     }
 
     func reconnectIfNeeded() {
-        guard !currentURL.isEmpty else { return }
+        guard Storage.shared.webSocketEnabled.value, !currentURL.isEmpty else { return }
 
         if connectionState == .disconnected || connectionState == .error {
             connect()
@@ -133,8 +138,8 @@ class NightscoutSocketManager {
             self.connectionState = .disconnected
             self.stalenessTimer?.invalidate()
             self.stalenessTimer = nil
-            // Immediately restore normal polling
-            TaskScheduler.shared.checkTasksNow()
+            // Immediately restore normal polling intervals
+            NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
         }
 
         socket.on(clientEvent: .reconnect) { _, _ in
