@@ -23,11 +23,8 @@ class NightscoutSocketManager {
         }
     }
 
-    private(set) var lastDataReceived: Date?
-
     private var manager: SocketManager?
     private var socket: SocketIOClient?
-    private var stalenessTimer: Timer?
     private var currentURL: String = ""
     private var currentToken: String = ""
 
@@ -74,10 +71,8 @@ class NightscoutSocketManager {
     }
 
     func disconnect() {
-        stalenessTimer?.invalidate()
-        stalenessTimer = nil
-        socket?.disconnect()
         socket?.removeAllHandlers()
+        socket?.disconnect()
         manager?.disconnect()
         manager = nil
         socket = nil
@@ -136,8 +131,6 @@ class NightscoutSocketManager {
             let reason = (data.first as? String) ?? "unknown"
             LogManager.shared.log(category: .websocket, message: "Socket disconnected: \(reason)")
             self.connectionState = .disconnected
-            self.stalenessTimer?.invalidate()
-            self.stalenessTimer = nil
             // Immediately restore normal polling intervals
             NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
         }
@@ -156,7 +149,6 @@ class NightscoutSocketManager {
             guard let self = self else { return }
             LogManager.shared.log(category: .websocket, message: "Authorized and receiving data")
             self.connectionState = .authenticated
-            self.startStalenessTimer()
         }
 
         socket.on("dataUpdate") { [weak self] data, _ in
@@ -164,7 +156,6 @@ class NightscoutSocketManager {
                   let payload = data.first as? [String: Any]
             else { return }
 
-            self.lastDataReceived = Date()
             LogManager.shared.log(category: .websocket, message: "Received dataUpdate (delta: \(payload["delta"] as? Bool ?? false))", isDebug: true)
 
             DispatchQueue.main.async {
@@ -188,19 +179,6 @@ class NightscoutSocketManager {
         }
 
         socket?.emit("authorize", authPayload)
-    }
-
-    private func startStalenessTimer() {
-        stalenessTimer?.invalidate()
-        stalenessTimer = Timer.scheduledTimer(withTimeInterval: 600, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            if let lastData = self.lastDataReceived,
-               Date().timeIntervalSince(lastData) > 600
-            {
-                LogManager.shared.log(category: .websocket, message: "No data received in 10 minutes, triggering poll fallback")
-                TaskScheduler.shared.checkTasksNow()
-            }
-        }
     }
 }
 

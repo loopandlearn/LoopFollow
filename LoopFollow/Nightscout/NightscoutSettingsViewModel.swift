@@ -148,6 +148,7 @@ class NightscoutSettingsViewModel: ObservableObject {
             case .emptyAddress:
                 nightscoutStatus = "Address Empty"
             }
+            NightscoutSocketManager.shared.disconnect()
         } else {
             let authStatus: String
             if Storage.shared.nsAdminAuth.value {
