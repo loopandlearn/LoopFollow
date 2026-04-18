@@ -5,6 +5,12 @@ import SwiftUI
 
 struct NightscoutSettingsView: View {
     @ObservedObject var viewModel: NightscoutSettingsViewModel
+    @State private var activeInfoSheet: InfoSheet?
+
+    private enum InfoSheet: Identifiable {
+        case url, token
+        var id: Self { self }
+    }
 
     var body: some View {
         NavigationView {
@@ -14,6 +20,12 @@ struct NightscoutSettingsView: View {
                 statusSection
                 importSection
             }
+            .sheet(item: $activeInfoSheet) { sheet in
+                switch sheet {
+                case .url: urlInfoSheet
+                case .token: tokenInfoSheet
+                }
+            }
             .onDisappear {
                 viewModel.dismiss()
             }
@@ -22,10 +34,10 @@ struct NightscoutSettingsView: View {
         .navigationBarTitle("Nightscout Settings", displayMode: .inline)
     }
 
-    // MARK: - Subviews / Computed Properties
+    // MARK: - Sections
 
     private var urlSection: some View {
-        Section(header: Text("URL")) {
+        Section(header: sectionHeader("URL", sheet: .url)) {
             TextField("Enter URL", text: $viewModel.nightscoutURL)
                 .textContentType(.username)
                 .autocapitalization(.none)
@@ -37,7 +49,7 @@ struct NightscoutSettingsView: View {
     }
 
     private var tokenSection: some View {
-        Section(header: Text("Token")) {
+        Section(header: sectionHeader("Token", sheet: .token)) {
             HStack {
                 Text("Access Token")
                 TogglableSecureInput(
@@ -66,5 +78,90 @@ struct NightscoutSettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Section Header
+
+    private func sectionHeader(_ title: String, sheet: InfoSheet) -> some View {
+        HStack(spacing: 4) {
+            Text(title)
+            Button {
+                activeInfoSheet = sheet
+            } label: {
+                Image(systemName: "info.circle")
+                    .foregroundStyle(Color.accentColor)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: - Info Sheets
+
+    private var urlInfoSheet: some View {
+        NavigationStack {
+            ScrollView {
+                Text(verbatim: """
+                Enter your Nightscout site URL, for example:
+                https://yoursite.yourprovider.com
+
+                You can copy your full URL (including the token) from Nightscout Admin Tools. When pasted here, LoopFollow automatically extracts both the URL and the token.
+
+                To find your URL, open your Nightscout site in a browser and copy the address from the address bar. Remove any trailing slashes or path components — just the base URL is needed.
+                """)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationTitle("Nightscout URL")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { activeInfoSheet = nil }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var tokenInfoSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("""
+                    A token controls what LoopFollow can access on your Nightscout site. Tokens are not the same as API keys — they are created within Nightscout itself.
+                    """)
+
+                    Text("Creating a Token")
+                        .font(.headline)
+                    Text("""
+                    1. Open your Nightscout site in a browser
+                    2. Go to the hamburger menu (☰) and select Admin Tools
+                    3. Under "Subjects", tap "Add new Subject"
+                    4. Enter a name (e.g. "LoopFollow") and select a role
+                    5. Save, then copy the token (it looks like: loopfollow-1234567890abcdef)
+                    """)
+
+                    Text("Which Role Do I Need?")
+                        .font(.headline)
+                    Text("""
+                    • Read — sufficient for most setups, including Loop and Trio remote control via APNS
+                    • Read & Write (Careportal) — required only for Nightscout Remote Control (Trio 0.2.x or older)
+
+                    If your Nightscout site is publicly readable, you can leave the token empty. The status will show "OK (Read)".
+                    """)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationTitle("Access Token")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { activeInfoSheet = nil }
+                }
+            }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 }

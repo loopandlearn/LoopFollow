@@ -7,6 +7,7 @@ struct BackgroundRefreshSettingsView: View {
     @ObservedObject var viewModel: BackgroundRefreshSettingsViewModel
     @State private var forceRefresh = false
     @State private var timer: Timer?
+    @State private var showInfo = false
 
     @ObservedObject var bleManager = BLEManager.shared
 
@@ -19,6 +20,9 @@ struct BackgroundRefreshSettingsView: View {
                     selectedDeviceSection
                     availableDevicesSection
                 }
+            }
+            .sheet(isPresented: $showInfo) {
+                backgroundRefreshInfoSheet
             }
             .onAppear {
                 startTimer()
@@ -34,7 +38,7 @@ struct BackgroundRefreshSettingsView: View {
     // MARK: - Subviews / Computed Properties
 
     private var refreshTypeSection: some View {
-        Section {
+        Section(header: refreshTypeSectionHeader) {
             Picker("Background Refresh Type", selection: $viewModel.backgroundRefreshType) {
                 ForEach(BackgroundRefreshType.allCases, id: \.self) { type in
                     Text(type.rawValue).tag(type)
@@ -174,6 +178,64 @@ struct BackgroundRefreshSettingsView: View {
             return Text("Reconnecting...")
                 .foregroundColor(.orange)
         }
+    }
+
+    // MARK: - Section Header & Info Sheet
+
+    private var refreshTypeSectionHeader: some View {
+        HStack(spacing: 4) {
+            Text("Background Refresh")
+            Button {
+                showInfo = true
+            } label: {
+                Image(systemName: "info.circle")
+                    .foregroundStyle(Color.accentColor)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var backgroundRefreshInfoSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("LoopFollow needs to stay active in the background to check for alarms and update glucose values. There are several methods available:")
+
+                    Text("Silent Tune")
+                        .font(.headline)
+                    Text("Plays a silent audio track to keep the app active. This has several drawbacks including battery drain and limited reliability — it may be interrupted by other apps.")
+
+                    Text("Bluetooth Heartbeat")
+                        .font(.headline)
+                    Text("Uses an external Bluetooth device to keep LoopFollow awake. This can save significantly on battery and provides more reliable background operation.")
+
+                    Text("Supported Bluetooth Devices")
+                        .font(.headline)
+                    Text(verbatim: """
+                    • Radiolink: RileyLink, OrangeLink, Emalink — heartbeat every minute
+                    • Dexcom G5/G6/ONE/Anubis transmitter — heartbeat every ~5 minutes
+                    • Dexcom G7/ONE+ sensor — heartbeat every ~5 minutes
+
+                    Dexcom device batteries continue to provide Bluetooth power for months after they are no longer in service with a sensor.
+                    """)
+
+                    Text("If the person using LoopFollow is also wearing a Dexcom or radiolink, they should choose their own device.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationTitle("Background Refresh")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showInfo = false }
+                }
+            }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 
     private func startTimer() {
