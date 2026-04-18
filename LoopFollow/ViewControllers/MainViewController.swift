@@ -35,13 +35,7 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     var infoTableContainer: UIView!
     var PredictionLabel: UILabel!
     var LoopStatusLabel: UILabel!
-    var statsPieChart: PieChartView!
-    var statsLowPercent: UILabel!
-    var statsInRangePercent: UILabel!
-    var statsHighPercent: UILabel!
-    var statsAvgBG: UILabel!
-    var statsEstA1C: UILabel!
-    var statsStdDev: UILabel!
+    var statsDisplayModel = StatsDisplayModel()
     var serverText: UILabel!
     var statsView: UIView!
     var smallGraphHeightConstraint: NSLayoutConstraint!
@@ -226,75 +220,12 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         smallGraphHeightConstraint = BGChartFull.heightAnchor.constraint(equalToConstant: 40)
         smallGraphHeightConstraint.isActive = true
 
-        // Stats view
+        // Stats view (SwiftUI hosted)
         statsView = UIView()
-        statsView.backgroundColor = .secondarySystemBackground
         statsView.setContentCompressionResistancePriority(.required, for: .vertical)
         let statsHeightConstraint = statsView.heightAnchor.constraint(equalToConstant: 100)
         statsHeightConstraint.isActive = true
-
-        statsPieChart = PieChartView()
-        statsPieChart.backgroundColor = .clear
-        statsPieChart.isUserInteractionEnabled = false
-        statsPieChart.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            statsPieChart.widthAnchor.constraint(equalToConstant: 100),
-            statsPieChart.heightAnchor.constraint(equalToConstant: 100),
-        ])
-
-        // Stats labels
-        func makeStatColumn(title: String, valueLabel: inout UILabel!) -> UIStackView {
-            let titleLabel = UILabel()
-            titleLabel.font = .systemFont(ofSize: 15)
-            titleLabel.text = title
-
-            valueLabel = UILabel()
-            valueLabel!.font = .systemFont(ofSize: 15)
-            valueLabel!.text = ""
-
-            let stack = UIStackView(arrangedSubviews: [titleLabel, valueLabel!])
-            stack.axis = .vertical
-            stack.alignment = .center
-            return stack
-        }
-
-        let lowColumn = makeStatColumn(title: "Low:", valueLabel: &statsLowPercent)
-        let inRangeColumn = makeStatColumn(title: "In Range:", valueLabel: &statsInRangePercent)
-        let highColumn = makeStatColumn(title: "High:", valueLabel: &statsHighPercent)
-
-        let statsRow1 = UIStackView(arrangedSubviews: [lowColumn, inRangeColumn, highColumn])
-        statsRow1.axis = .horizontal
-        statsRow1.distribution = .fillEqually
-        statsRow1.alignment = .top
-        statsRow1.spacing = 10
-
-        let avgBGColumn = makeStatColumn(title: "Avg BG:", valueLabel: &statsAvgBG)
-        let estA1CColumn = makeStatColumn(title: "Est A1C:", valueLabel: &statsEstA1C)
-        let stdDevColumn = makeStatColumn(title: "Std Dev:", valueLabel: &statsStdDev)
-
-        let statsRow2 = UIStackView(arrangedSubviews: [avgBGColumn, estA1CColumn, stdDevColumn])
-        statsRow2.axis = .horizontal
-        statsRow2.distribution = .fillEqually
-        statsRow2.alignment = .top
-        statsRow2.spacing = 10
-
-        let statsLabelsStack = UIStackView(arrangedSubviews: [statsRow1, statsRow2])
-        statsLabelsStack.axis = .vertical
-        statsLabelsStack.distribution = .fillEqually
-        statsLabelsStack.spacing = 10
-
-        let statsContentStack = UIStackView(arrangedSubviews: [statsPieChart, statsLabelsStack])
-        statsContentStack.axis = .horizontal
-        statsContentStack.alignment = .center
-        statsContentStack.translatesAutoresizingMaskIntoConstraints = false
-
-        statsView.addSubview(statsContentStack)
-        NSLayoutConstraint.activate([
-            statsContentStack.leadingAnchor.constraint(equalTo: statsView.leadingAnchor),
-            statsContentStack.trailingAnchor.constraint(equalTo: statsView.trailingAnchor),
-            statsContentStack.topAnchor.constraint(equalTo: statsView.topAnchor),
-            statsContentStack.bottomAnchor.constraint(equalTo: statsView.bottomAnchor),
-        ])
+        setupStatsView()
 
         let bottomStack = UIStackView(arrangedSubviews: [BGChart, BGChartFull, statsView])
         bottomStack.axis = .vertical
@@ -348,10 +279,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         // setup show/hide small graph and stats
         updateGraphVisibility()
         statsView.isHidden = !Storage.shared.showStats.value
-
-        // Tap on stats view to open full statistics screen
-        let statsTap = UITapGestureRecognizer(target: self, action: #selector(statsViewTapped))
-        statsView.addGestureRecognizer(statsTap)
 
         BGChart.delegate = self
         BGChartFull.delegate = self
@@ -839,6 +766,25 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
     private func updateInfoTableTimeZone() {
         infoTableHostingController?.rootView.timeZoneOverride = timeZoneOverrideInfoValue
+    }
+
+    private func setupStatsView() {
+        let statsDisplayView = StatsDisplayView(model: statsDisplayModel) { [weak self] in
+            self?.statsViewTapped()
+        }
+        let hosting = UIHostingController(rootView: statsDisplayView)
+        hosting.view.translatesAutoresizingMaskIntoConstraints = false
+        hosting.view.backgroundColor = .clear
+
+        addChild(hosting)
+        statsView.addSubview(hosting.view)
+        NSLayoutConstraint.activate([
+            hosting.view.topAnchor.constraint(equalTo: statsView.topAnchor),
+            hosting.view.bottomAnchor.constraint(equalTo: statsView.bottomAnchor),
+            hosting.view.leadingAnchor.constraint(equalTo: statsView.leadingAnchor),
+            hosting.view.trailingAnchor.constraint(equalTo: statsView.trailingAnchor),
+        ])
+        hosting.didMove(toParent: self)
     }
 
     @objc func appMovedToBackground() {

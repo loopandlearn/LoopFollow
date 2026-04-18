@@ -286,6 +286,8 @@
 		FC16A98124996C07003D6245 /* DateTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A98024996C07003D6245 /* DateTime.swift */; };
 		FC1BDD2B24A22650001B652C /* Stats.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2A24A22650001B652C /* Stats.swift */; };
 		FC1BDD2D24A23204001B652C /* MainViewController+updateStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2C24A23204001B652C /* MainViewController+updateStats.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F3 /* StatsDisplayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* StatsDisplayModel.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F5 /* StatsDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F4 /* StatsDisplayView.swift */; };
 		FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2E24A232A3001B652C /* DataStructs.swift */; };
 		FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC3AE7B3249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld */; };
 		FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTaskAudio.swift */; };
@@ -736,6 +738,8 @@
 		FC16A98024996C07003D6245 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
 		FC1BDD2A24A22650001B652C /* Stats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stats.swift; sourceTree = "<group>"; };
 		FC1BDD2C24A23204001B652C /* MainViewController+updateStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MainViewController+updateStats.swift"; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* StatsDisplayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsDisplayModel.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F4 /* StatsDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsDisplayView.swift; sourceTree = "<group>"; };
 		FC1BDD2E24A232A3001B652C /* DataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStructs.swift; sourceTree = "<group>"; };
 		FC3AE7B4249E8E0E00AAE1E0 /* LoopFollow.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LoopFollow.xcdatamodel; sourceTree = "<group>"; };
 		FC5A5C3C2497B229009C550E /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -1443,6 +1447,8 @@
 				FC16A97E249969E2003D6245 /* Graphs.swift */,
 				FC1BDD2A24A22650001B652C /* Stats.swift */,
 				FC1BDD2C24A23204001B652C /* MainViewController+updateStats.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* StatsDisplayModel.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F4 /* StatsDisplayView.swift */,
 				FCA2DDE52501095000254A8C /* Timers.swift */,
 				DD608A0B2C27415C00F91132 /* BackgroundAlertManager.swift */,
 				65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */,
@@ -2330,6 +2336,8 @@
 				DDA9ACAC2D6B317100E6F1A9 /* ContactType.swift in Sources */,
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,
 				FC1BDD2D24A23204001B652C /* MainViewController+updateStats.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F3 /* StatsDisplayModel.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F5 /* StatsDisplayView.swift in Sources */,
 				DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */,
 				DD7F4C152DD51FEB00D449E9 /* TempTargetEndAlarmEditor.swift in Sources */,
 				FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */,
