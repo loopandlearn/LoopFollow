@@ -24,6 +24,10 @@ private struct APNSCredentialSnapshot: Equatable {
 }
 
 class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificationCenterDelegate {
+    /// Singleton reference set during viewDidLoad. Used by code that needs
+    /// to reach MainViewController without walking the view hierarchy.
+    private(set) weak static var shared: MainViewController?
+
     var isPresentedAsModal: Bool = false
 
     var BGChart: LineChartView!
@@ -167,6 +171,7 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        MainViewController.shared = self
 
         setupUI()
 
