@@ -101,6 +101,8 @@
 		DD1D52B92E1EB5DC00432050 /* TabPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52B82E1EB5DC00432050 /* TabPosition.swift */; };
 		CC3D4E5F6A7B8C9D0E2F2A3B /* MoreMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3D4E5F6A7B8C9D0E1F2A3B /* MoreMenuView.swift */; };
 		DD7A3B5D2F1E8D9A00B4C6E1 /* BGDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7A3B5C2F1E8D9A00B4C6E1 /* BGDisplayView.swift */; };
+		DD7A3B5F2F1E8DA000B4C6E1 /* LineChartWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7A3B5E2F1E8DA000B4C6E1 /* LineChartWrapper.swift */; };
+		DD7A3B612F1E8DA600B4C6E1 /* MainHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7A3B602F1E8DA600B4C6E1 /* MainHomeView.swift */; };
 		EE5F6A7B8C9D0E2F2A3B4C5D /* NightscoutContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5F6A7B8C9D0E1F2A3B4C5D /* NightscoutContentView.swift */; };
 		DD1D52C02E4C100000000001 /* AppearanceMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52BF2E4C100000000001 /* AppearanceMode.swift */; };
 		DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */; };
@@ -552,6 +554,8 @@
 		DD1D52B82E1EB5DC00432050 /* TabPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPosition.swift; sourceTree = "<group>"; };
 		CC3D4E5F6A7B8C9D0E1F2A3B /* MoreMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreMenuView.swift; sourceTree = "<group>"; };
 		DD7A3B5C2F1E8D9A00B4C6E1 /* BGDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BGDisplayView.swift; sourceTree = "<group>"; };
+		DD7A3B5E2F1E8DA000B4C6E1 /* LineChartWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineChartWrapper.swift; sourceTree = "<group>"; };
+		DD7A3B602F1E8DA600B4C6E1 /* MainHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainHomeView.swift; sourceTree = "<group>"; };
 		EE5F6A7B8C9D0E1F2A3B4C5D /* NightscoutContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutContentView.swift; sourceTree = "<group>"; };
 		DD1D52BF2E4C100000000001 /* AppearanceMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceMode.swift; sourceTree = "<group>"; };
 		DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsView.swift; sourceTree = "<group>"; };
@@ -1709,6 +1713,8 @@
 			isa = PBXGroup;
 			children = (
 				DD7A3B5C2F1E8D9A00B4C6E1 /* BGDisplayView.swift */,
+				DD7A3B5E2F1E8DA000B4C6E1 /* LineChartWrapper.swift */,
+				DD7A3B602F1E8DA600B4C6E1 /* MainHomeView.swift */,
 				CC3D4E5F6A7B8C9D0E1F2A3B /* MoreMenuView.swift */,
 				EE5F6A7B8C9D0E1F2A3B4C5D /* NightscoutContentView.swift */,
 				FC97881B2485969B00A7906C /* MainViewController.swift */,
@@ -2228,6 +2234,8 @@
 				DDF6999E2C5AAA640058A8D9 /* ErrorMessageView.swift in Sources */,
 				CC3D4E5F6A7B8C9D0E2F2A3B /* MoreMenuView.swift in Sources */,
 				DD7A3B5D2F1E8D9A00B4C6E1 /* BGDisplayView.swift in Sources */,
+				DD7A3B5F2F1E8DA000B4C6E1 /* LineChartWrapper.swift in Sources */,
+				DD7A3B612F1E8DA600B4C6E1 /* MainHomeView.swift in Sources */,
 				EE5F6A7B8C9D0E2F2A3B4C5D /* NightscoutContentView.swift in Sources */,
 				654132E72E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift in Sources */,
 				DD4878152C7B75230048F05C /* MealView.swift in Sources */,

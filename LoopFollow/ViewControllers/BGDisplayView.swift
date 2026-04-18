@@ -8,7 +8,6 @@ struct BGDisplayView: View {
     @ObservedObject var bgText = Observable.shared.bgText
     @ObservedObject var bgTextColor = Observable.shared.bgTextColor
     @ObservedObject var bgStale = Observable.shared.bgStale
-    @ObservedObject var bg = Observable.shared.bg
     @ObservedObject var directionText = Observable.shared.directionText
     @ObservedObject var deltaText = Observable.shared.deltaText
     @ObservedObject var minAgoText = Observable.shared.minAgoText
@@ -20,14 +19,6 @@ struct BGDisplayView: View {
 
     var onRefresh: (() -> Void)?
 
-    private var bgFontSize: CGFloat {
-        guard let bgValue = bg.value else { return 85 }
-        if bgValue <= globalVariables.minDisplayGlucose || bgValue >= globalVariables.maxDisplayGlucose {
-            return 65
-        }
-        return 85
-    }
-
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -35,7 +26,7 @@ struct BGDisplayView: View {
                     .font(.system(size: 13))
 
                 Text(bgText.value)
-                    .font(.system(size: bgFontSize, weight: .black))
+                    .font(.system(size: 85, weight: .black))
                     .foregroundColor(bgTextColor.value)
                     .strikethrough(
                         bgStale.value,
@@ -43,6 +34,7 @@ struct BGDisplayView: View {
                         color: bgStale.value ? .red : .clear
                     )
                     .frame(maxWidth: .infinity)
+                    .lineLimit(1)
                     .minimumScaleFactor(0.5)
 
                 HStack {
@@ -51,6 +43,8 @@ struct BGDisplayView: View {
                     Text(deltaText.value)
                         .font(.system(size: 32))
                 }
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
 
                 Text(minAgoText.value)
                     .font(.system(size: 17))

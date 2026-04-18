@@ -28,11 +28,10 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
     var BGChart: LineChartView!
     var BGChartFull: LineChartView!
-    var infoTableContainer: UIView!
-    var bgDisplayContainer: UIView!
     var statsDisplayModel = StatsDisplayModel()
-    var statsView: UIView!
-    var smallGraphHeightConstraint: NSLayoutConstraint!
+
+    /// The hosting controller's view — hidden during loading / first-time setup.
+    private var mainContentView: UIView!
 
     // Setup buttons for first-time configuration
     private var setupNightscoutButton: UIButton!
@@ -133,68 +132,37 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     private func setupUI() {
         view.backgroundColor = .systemBackground
 
-        // --- Top section: BG display + info table (horizontal stack) ---
-
-        bgDisplayContainer = UIView()
-        bgDisplayContainer.translatesAutoresizingMaskIntoConstraints = false
-
-        infoTableContainer = UIView()
-        infoTableContainer.translatesAutoresizingMaskIntoConstraints = false
-        let tableWidthConstraint = infoTableContainer.widthAnchor.constraint(equalToConstant: 250)
-        tableWidthConstraint.priority = .defaultHigh
-        tableWidthConstraint.isActive = true
-
-        let topStack = UIStackView(arrangedSubviews: [bgDisplayContainer, infoTableContainer])
-        topStack.axis = .horizontal
-        topStack.spacing = 10
-        topStack.translatesAutoresizingMaskIntoConstraints = false
-        topStack.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
-
-        // --- Bottom section: charts + stats (vertical stack) ---
-
         BGChart = LineChartView()
         BGChart.backgroundColor = .systemBackground
-        BGChart.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-        BGChart.setContentHuggingPriority(.defaultHigh, for: .vertical)
-        BGChart.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
 
         BGChartFull = LineChartView()
         BGChartFull.backgroundColor = .systemBackground
-        BGChartFull.autoresizesSubviews = false
-        BGChartFull.setContentCompressionResistancePriority(.required, for: .vertical)
-        smallGraphHeightConstraint = BGChartFull.heightAnchor.constraint(equalToConstant: 40)
-        smallGraphHeightConstraint.isActive = true
 
-        // Stats view (SwiftUI hosted)
-        statsView = UIView()
-        statsView.setContentCompressionResistancePriority(.required, for: .vertical)
-        let statsHeightConstraint = statsView.heightAnchor.constraint(equalToConstant: 100)
-        statsHeightConstraint.isActive = true
-        setupStatsView()
+        infoManager = InfoManager()
 
-        let bottomStack = UIStackView(arrangedSubviews: [BGChart, BGChartFull, statsView])
-        bottomStack.axis = .vertical
-        bottomStack.spacing = 8
-        bottomStack.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-        bottomStack.setContentHuggingPriority(.required, for: .vertical)
-        bottomStack.translatesAutoresizingMaskIntoConstraints = false
+        let mainView = MainHomeView(
+            bgChart: BGChart,
+            bgChartFull: BGChartFull,
+            infoManager: infoManager,
+            statsModel: statsDisplayModel,
+            onRefresh: { [weak self] in self?.refresh() },
+            onStatsTap: { [weak self] in self?.statsViewTapped() }
+        )
+        let hosting = UIHostingController(rootView: mainView)
+        hosting.view.translatesAutoresizingMaskIntoConstraints = false
+        hosting.view.backgroundColor = .clear
 
-        // --- Add to view and constrain ---
-
-        view.addSubview(topStack)
-        view.addSubview(bottomStack)
-
+        addChild(hosting)
+        view.addSubview(hosting.view)
         let safeArea = view.safeAreaLayoutGuide
         NSLayoutConstraint.activate([
-            topStack.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 8),
-            topStack.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 8),
-            topStack.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -8),
-
-            bottomStack.topAnchor.constraint(equalTo: topStack.bottomAnchor, constant: 8),
-            bottomStack.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 8),
-            bottomStack.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -8),
-            bottomStack.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: -8),
+            hosting.view.topAnchor.constraint(equalTo: safeArea.topAnchor),
+            hosting.view.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor),
+            hosting.view.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
+            hosting.view.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
         ])
+        hosting.didMove(toParent: self)
+        mainContentView = hosting.view
     }
 
     override func viewDidLoad() {
@@ -210,20 +178,13 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
 
-        infoManager = InfoManager()
-        setupInfoTableView()
-
-        smallGraphHeightConstraint.constant = CGFloat(Storage.shared.smallGraphHeight.value)
-        view.layoutIfNeeded()
-
         let shareUserName = Storage.shared.shareUserName.value
         let sharePassword = Storage.shared.sharePassword.value
         let shareServer = Storage.shared.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
         dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer)
 
-        // setup show/hide small graph and stats
+        // setup show/hide graphs (first-time setup check)
         updateGraphVisibility()
-        statsView.isHidden = !Storage.shared.showStats.value
 
         BGChart.delegate = self
         BGChartFull.delegate = self
@@ -252,7 +213,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
         scheduleAllTasks()
 
-        setupBGDisplayView()
         NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
 
         /// When an alarm is triggered, go to the snoozer tab
@@ -282,24 +242,10 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
             }
             .store(in: &cancellables)
 
-        Storage.shared.showStats.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.statsView.isHidden = !Storage.shared.showStats.value
-            }
-            .store(in: &cancellables)
-
         Storage.shared.useIFCC.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateStats()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.showSmallGraph.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.updateGraphVisibility()
             }
             .store(in: &cancellables)
 
@@ -314,20 +260,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateServerText()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.graphTimeZoneEnabled.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.updateInfoTableTimeZone()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.graphTimeZoneIdentifier.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.updateInfoTableTimeZone()
             }
             .store(in: &cancellables)
 
@@ -613,89 +545,8 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
         if Observable.shared.chartSettingsChanged.value {
             updateBGGraphSettings()
-
-            smallGraphHeightConstraint.constant = CGFloat(Storage.shared.smallGraphHeight.value)
-            view.layoutIfNeeded()
-
             Observable.shared.chartSettingsChanged.value = false
         }
-    }
-
-    private func setupBGDisplayView() {
-        let bgDisplayView = BGDisplayView(onRefresh: { [weak self] in
-            self?.refresh()
-        })
-        let hosting = UIHostingController(rootView: bgDisplayView)
-        hosting.view.translatesAutoresizingMaskIntoConstraints = false
-        hosting.view.backgroundColor = .clear
-
-        addChild(hosting)
-        bgDisplayContainer.addSubview(hosting.view)
-        NSLayoutConstraint.activate([
-            hosting.view.topAnchor.constraint(equalTo: bgDisplayContainer.topAnchor),
-            hosting.view.bottomAnchor.constraint(equalTo: bgDisplayContainer.bottomAnchor),
-            hosting.view.leadingAnchor.constraint(equalTo: bgDisplayContainer.leadingAnchor),
-            hosting.view.trailingAnchor.constraint(equalTo: bgDisplayContainer.trailingAnchor),
-        ])
-        hosting.didMove(toParent: self)
-    }
-
-    private var infoTableHostingController: UIHostingController<InfoTableView>?
-
-    private var timeZoneOverrideInfoValue: String? {
-        guard Storage.shared.graphTimeZoneEnabled.value,
-              let overrideTimeZone = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
-        else {
-            return nil
-        }
-
-        return overrideTimeZone.identifier
-    }
-
-    private func setupInfoTableView() {
-        let infoTableView = InfoTableView(
-            infoManager: infoManager,
-            timeZoneOverride: timeZoneOverrideInfoValue
-        )
-        let hosting = UIHostingController(rootView: infoTableView)
-        hosting.view.translatesAutoresizingMaskIntoConstraints = false
-        hosting.view.backgroundColor = .clear
-        infoTableHostingController = hosting
-
-        addChild(hosting)
-        infoTableContainer.addSubview(hosting.view)
-        NSLayoutConstraint.activate([
-            hosting.view.topAnchor.constraint(equalTo: infoTableContainer.topAnchor),
-            hosting.view.bottomAnchor.constraint(equalTo: infoTableContainer.bottomAnchor),
-            hosting.view.leadingAnchor.constraint(equalTo: infoTableContainer.leadingAnchor),
-            hosting.view.trailingAnchor.constraint(equalTo: infoTableContainer.trailingAnchor),
-        ])
-        hosting.didMove(toParent: self)
-
-        infoTableContainer.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
-    }
-
-    private func updateInfoTableTimeZone() {
-        infoTableHostingController?.rootView.timeZoneOverride = timeZoneOverrideInfoValue
-    }
-
-    private func setupStatsView() {
-        let statsDisplayView = StatsDisplayView(model: statsDisplayModel) { [weak self] in
-            self?.statsViewTapped()
-        }
-        let hosting = UIHostingController(rootView: statsDisplayView)
-        hosting.view.translatesAutoresizingMaskIntoConstraints = false
-        hosting.view.backgroundColor = .clear
-
-        addChild(hosting)
-        statsView.addSubview(hosting.view)
-        NSLayoutConstraint.activate([
-            hosting.view.topAnchor.constraint(equalTo: statsView.topAnchor),
-            hosting.view.bottomAnchor.constraint(equalTo: statsView.bottomAnchor),
-            hosting.view.leadingAnchor.constraint(equalTo: statsView.leadingAnchor),
-            hosting.view.trailingAnchor.constraint(equalTo: statsView.trailingAnchor),
-        ])
-        hosting.didMove(toParent: self)
     }
 
     @objc func appMovedToBackground() {
@@ -908,10 +759,7 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
             return
         }
 
-        let isHidden = !IsNightscoutEnabled()
-
-        infoTableContainer.isHidden = isHidden || Storage.shared.hideInfoTable.value
-
+        // Info table visibility is handled reactively by MainHomeView.
         updateNightscoutTabState()
     }
 
@@ -1290,15 +1138,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         present(navController, animated: true)
     }
 
-    private func hideGraphs() {
-        BGChart.isHidden = true
-        BGChartFull.isHidden = true
-    }
-
-    private func showGraphs() {
-        updateGraphVisibility()
-    }
-
     private func makeCloseBarButtonItem() -> UIBarButtonItem {
         let button = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(dismissModal))
         button.tintColor = .systemBlue
@@ -1306,38 +1145,18 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     }
 
     private func hideAllDataUI() {
-        // Hide graphs
-        BGChart.isHidden = true
-        BGChartFull.isHidden = true
-
-        // Hide BG display and info table
-        bgDisplayContainer.isHidden = true
-        infoTableContainer.isHidden = true
-        statsView.isHidden = true
+        mainContentView?.isHidden = true
     }
 
     private func showAllDataUI() {
-        bgDisplayContainer.isHidden = false
-
-        // Show graphs based on settings
-        updateGraphVisibility()
-
-        // Show/hide info table based on user settings
-        let isNightscoutEnabled = IsNightscoutEnabled()
-        infoTableContainer.isHidden = !isNightscoutEnabled || Storage.shared.hideInfoTable.value
-
-        statsView.isHidden = !Storage.shared.showStats.value
+        mainContentView?.isHidden = false
     }
 
     private func updateGraphVisibility() {
-        let isFirstTimeSetup = !isDataSourceConfigured()
-
-        if isFirstTimeSetup {
-            BGChart.isHidden = true
-            BGChartFull.isHidden = true
-        } else {
-            BGChart.isHidden = false
-            BGChartFull.isHidden = !Storage.shared.showSmallGraph.value
+        // Graph and component visibility is handled reactively by MainHomeView.
+        // This method now only manages the overall content visibility for first-time setup.
+        if !isDataSourceConfigured() {
+            mainContentView?.isHidden = true
         }
     }
 
