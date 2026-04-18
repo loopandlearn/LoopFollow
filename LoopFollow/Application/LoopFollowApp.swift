@@ -1,14 +1,11 @@
 // LoopFollow
 // LoopFollowApp.swift
 
-import AVFoundation
 import SwiftUI
 
 @main
 struct LoopFollowApp: App {
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
-
-    private let synthesizer = AVSpeechSynthesizer()
 
     var body: some Scene {
         WindowGroup {

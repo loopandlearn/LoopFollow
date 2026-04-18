@@ -37,14 +37,6 @@ class NightscoutViewController: UIViewController {
             }
             .store(in: &cancellables)
 
-        // Listen for system appearance changes (when in System mode)
-        NotificationCenter.default.publisher(for: .appearanceDidChange)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
-            }
-            .store(in: &cancellables)
-
         var url = Storage.shared.url.value
         let token = Storage.shared.token.value
 
@@ -71,16 +63,6 @@ class NightscoutViewController: UIViewController {
         clearWebCache()
         webView.reload()
         sender.endRefreshing()
-    }
-
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-
-        if Storage.shared.appearanceMode.value == .system,
-           previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle
-        {
-            overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
-        }
     }
 
     func clearWebCache() {

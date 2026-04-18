@@ -1,10 +1,9 @@
 // LoopFollow
 // DeviceStatus.swift
 
-import Charts
 import Foundation
 import HealthKit
-import UIKit
+import SwiftUI
 
 extension MainViewController {
     func webLoadNSDeviceStatus() {

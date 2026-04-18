@@ -2,7 +2,6 @@
 // MinAgoTask.swift
 
 import Foundation
-import UIKit
 
 extension MainViewController {
     func scheduleMinAgoTask(initialDelay: TimeInterval = 1.0) {

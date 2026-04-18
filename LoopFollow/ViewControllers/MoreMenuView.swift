@@ -118,9 +118,6 @@ struct MoreMenuView: View {
         }
         .navigationDestination(isPresented: $showSettingsView) {
             SettingsMenuView()
-                .onDisappear {
-                    MainViewController.rebuildTabsIfNeeded()
-                }
         }
         .navigationDestination(isPresented: $showAlarmsView) {
             AlarmsContainerView()

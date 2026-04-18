@@ -455,12 +455,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         }
     }
 
-    /// Static method kept for backward compatibility — with SwiftUI TabView,
-    /// tab rebuilding is handled reactively by MainTabView.
-    static func rebuildTabsIfNeeded() {
-        // No-op: SwiftUI TabView observes Storage position changes directly
-    }
-
     @objc private func navigateOnLAForeground() {
         let orderedItems = Storage.shared.orderedTabBarItems()
         if Observable.shared.currentAlarm.value != nil,
@@ -540,7 +534,8 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         currentIage = nil
     }
 
-    override func viewWillAppear(_: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
 
         if Observable.shared.chartSettingsChanged.value {
@@ -554,11 +549,7 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         UIApplication.shared.isIdleTimerDisabled = false
 
         // We want to always come back to the home screen
-        if let tabBarController = tabBarController,
-           let vcs = tabBarController.viewControllers, !vcs.isEmpty
-        {
-            tabBarController.selectedIndex = 0
-        }
+        Observable.shared.selectedTabIndex.value = 0
 
         if Storage.shared.backgroundRefreshType.value == .silentTune {
             backgroundTask.startBackgroundTask()
@@ -727,7 +718,8 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         }
     }
 
-    @objc override func viewDidAppear(_: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         showHideNSDetails()
         #if !targetEnvironment(macCatalyst)
             LiveActivityManager.shared.startFromCurrentState()
@@ -741,26 +733,8 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         return String(format: "%02d:%02d", hours, minutes)
     }
 
-    private func updateNightscoutTabState() {
-        guard let tabBarController = tabBarController,
-              let viewControllers = tabBarController.viewControllers else { return }
-
-        let isNightscoutEnabled = !Storage.shared.url.value.isEmpty
-
-        for (index, vc) in viewControllers.enumerated() {
-            if vc is NightscoutViewController {
-                tabBarController.tabBar.items?[index].isEnabled = isNightscoutEnabled
-            }
-        }
-    }
-
     func showHideNSDetails() {
-        if isInitialLoad || !isDataSourceConfigured() {
-            return
-        }
-
         // Info table visibility is handled reactively by MainHomeView.
-        updateNightscoutTabState()
     }
 
     func updateBadge(val: Int) {
@@ -807,23 +781,8 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         // Update this view controller
         overrideUserInterfaceStyle = style
 
-        // Update the tab bar controller (affects all tabs)
-        tabBarController?.overrideUserInterfaceStyle = style
-
         // Update the window (affects the entire app including modals)
         window.overrideUserInterfaceStyle = style
-    }
-
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-
-        // When system appearance changes and we're in "System" mode, notify all observers
-        if Storage.shared.appearanceMode.value == .system,
-           previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle
-        {
-            // Post notification so other view controllers can update if needed
-            NotificationCenter.default.post(name: .appearanceDidChange, object: nil)
-        }
     }
 
     func bgDirectionGraphic(_ value: String) -> String {

@@ -10,6 +10,7 @@ import UserNotifications
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     let notificationCenter = UNUserNotificationCenter.current()
+    private let speechSynthesizer = AVSpeechSynthesizer()
 
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         LogManager.shared.log(category: .general, message: "App started")
@@ -128,7 +129,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Storage.shared.speakBG.value.toggle()
             let message = Storage.shared.speakBG.value ? "BG Speak is now on" : "BG Speak is now off"
             let utterance = AVSpeechUtterance(string: message)
-            AVSpeechSynthesizer().speak(utterance)
+            speechSynthesizer.speak(utterance)
             completionHandler(true)
         } else {
             completionHandler(false)

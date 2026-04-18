@@ -1,7 +1,6 @@
 // LoopFollow
 // MainTabView.swift
 
-import Combine
 import SwiftUI
 
 struct MainTabView: View {
