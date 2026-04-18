@@ -46,5 +46,8 @@ class Observable {
 
     var isNotLooping = ObservableValue<Bool>(default: false)
 
+    /// Selected tab index used by SwiftUI TabView — set from MainViewController to switch tabs
+    var selectedTabIndex = ObservableValue<Int>(default: 0)
+
     private init() {}
 }

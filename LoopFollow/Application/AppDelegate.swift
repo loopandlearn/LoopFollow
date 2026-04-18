@@ -1,12 +1,12 @@
 // LoopFollow
 // AppDelegate.swift
 
+import AVFoundation
 import CoreData
 import EventKit
 import UIKit
 import UserNotifications
 
-@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     let notificationCenter = UNUserNotificationCenter.current()
@@ -111,32 +111,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         completionHandler(.newData)
     }
 
-    // MARK: - URL handling
-
-    // Note: with scene-based lifecycle (iOS 13+), URLs are delivered to
-    // SceneDelegate.scene(_:openURLContexts:) — not here. The scene delegate
-    // handles <urlScheme>://la-tap for Live Activity tap navigation.
-
-    // MARK: UISceneSession Lifecycle
-
     func application(_: UIApplication, willFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // set the "prevent screen lock" option when the app is started
-        // This method doesn't seem to be working anymore. Added to view controllers as solution offered on SO
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
-
         return true
     }
 
-    func application(_: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options _: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
+    // MARK: - Quick Actions
 
-    func application(_: UIApplication, didDiscardSceneSessions _: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    func application(_: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
+            completionHandler(false)
+            return
+        }
+        let expectedType = bundleIdentifier + ".toggleSpeakBG"
+        if shortcutItem.type == expectedType {
+            Storage.shared.speakBG.value.toggle()
+            let message = Storage.shared.speakBG.value ? "BG Speak is now on" : "BG Speak is now off"
+            let utterance = AVSpeechUtterance(string: message)
+            AVSpeechSynthesizer().speak(utterance)
+            completionHandler(true)
+        } else {
+            completionHandler(false)
+        }
     }
 
     // MARK: - Core Data stack
@@ -186,10 +182,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         if response.actionIdentifier == "OPEN_APP_ACTION" {
-            if let window {
-                window.rootViewController?.dismiss(animated: true, completion: nil)
-                window.rootViewController?.present(MainViewController(), animated: true, completion: nil)
-            }
+            // Switch to Home tab
+            Observable.shared.selectedTabIndex.value = 0
         }
 
         if response.actionIdentifier == "snooze" {

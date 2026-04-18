@@ -6,12 +6,28 @@ import UIKit
 import WebKit
 
 class NightscoutViewController: UIViewController {
-    @IBOutlet var webView: WKWebView!
+    var webView: WKWebView!
     private var cancellables = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBackground
         overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+
+        // Create WKWebView programmatically
+        let webConfiguration = WKWebViewConfiguration()
+        webConfiguration.mediaTypesRequiringUserActionForPlayback = []
+        webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(webView)
+
+        let safeArea = view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: safeArea.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor),
+        ])
 
         // Listen for appearance setting changes
         Storage.shared.appearanceMode.$value
