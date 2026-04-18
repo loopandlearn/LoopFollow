@@ -212,9 +212,9 @@ extension MainViewController {
 
     func updateServerText(with serverText: String? = nil) {
         if Storage.shared.showDisplayName.value, let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
-            self.serverText.text = displayName
+            Observable.shared.serverText.value = displayName
         } else if let serverText = serverText {
-            self.serverText.text = serverText
+            Observable.shared.serverText.value = serverText
         }
     }
 

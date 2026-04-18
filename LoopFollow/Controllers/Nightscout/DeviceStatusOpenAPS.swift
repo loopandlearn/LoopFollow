@@ -9,11 +9,11 @@ extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
         Storage.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
         if lastLoopRecord["failureReason"] != nil {
-            LoopStatusLabel.text = "X"
+            Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
         } else {
             guard let enactedOrSuggested = lastLoopRecord["suggested"] as? [String: AnyObject] ?? lastLoopRecord["enacted"] as? [String: AnyObject] else {
-                LoopStatusLabel.text = "↻"
+                Observable.shared.loopStatusText.value = "↻"
                 latestLoopStatusString = "↻"
                 return
             }
@@ -117,7 +117,7 @@ extension MainViewController {
             // Eventual BG
             if let eventualBGValue = enactedOrSuggested["eventualBG"] as? Double {
                 let eventualBGQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: eventualBGValue)
-                PredictionLabel.text = Localizer.formatQuantity(eventualBGQuantity)
+                Observable.shared.predictionText.value = Localizer.formatQuantity(eventualBGQuantity)
                 Storage.shared.projectedBgMgdl.value = eventualBGValue
             } else {
                 Storage.shared.projectedBgMgdl.value = nil
@@ -173,8 +173,7 @@ extension MainViewController {
                 return nil
             }()
 
-            let predictioncolor = UIColor.systemGray
-            PredictionLabel.textColor = predictioncolor
+            Observable.shared.predictionColor.value = .gray
             topPredictionBG = Storage.shared.minBGScale.value
             if let predbgdata = predBGsData {
                 let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
@@ -233,15 +232,15 @@ extension MainViewController {
                         lastBGTime = bgData[bgData.count - 1].date
                     }
                     if tempBasalTime > lastBGTime {
-                        LoopStatusLabel.text = "⏀"
+                        Observable.shared.loopStatusText.value = "⏀"
                         latestLoopStatusString = "⏀"
                     } else {
-                        LoopStatusLabel.text = "↻"
+                        Observable.shared.loopStatusText.value = "↻"
                         latestLoopStatusString = "↻"
                     }
                 }
             } else {
-                LoopStatusLabel.text = "↻"
+                Observable.shared.loopStatusText.value = "↻"
                 latestLoopStatusString = "↻"
             }
 

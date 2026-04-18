@@ -23,24 +23,16 @@ private struct APNSCredentialSnapshot: Equatable {
     let lfKeyId: String
 }
 
-class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
+class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificationCenterDelegate {
     var isPresentedAsModal: Bool = false
 
-    var BGText: UILabel!
-    var DeltaText: UILabel!
-    var DirectionText: UILabel!
     var BGChart: LineChartView!
     var BGChartFull: LineChartView!
-    var MinAgoText: UILabel!
     var infoTableContainer: UIView!
-    var PredictionLabel: UILabel!
-    var LoopStatusLabel: UILabel!
+    var bgDisplayContainer: UIView!
     var statsDisplayModel = StatsDisplayModel()
-    var serverText: UILabel!
     var statsView: UIView!
     var smallGraphHeightConstraint: NSLayoutConstraint!
-    var refreshScrollView: UIScrollView!
-    var refreshControl: UIRefreshControl!
 
     // Setup buttons for first-time configuration
     private var setupNightscoutButton: UIButton!
@@ -143,55 +135,8 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
         // --- Top section: BG display + info table (horizontal stack) ---
 
-        serverText = UILabel()
-        serverText.font = .systemFont(ofSize: 13)
-        serverText.textAlignment = .center
-        serverText.text = "Server"
-
-        BGText = UILabel()
-        BGText.font = .systemFont(ofSize: 85, weight: .black)
-        BGText.textAlignment = .center
-        BGText.text = "BG"
-        BGText.setContentCompressionResistancePriority(.required, for: .horizontal)
-
-        DirectionText = UILabel()
-        DirectionText.font = .systemFont(ofSize: 60, weight: .black)
-        DirectionText.textAlignment = .right
-        DirectionText.text = "--"
-        DirectionText.setContentCompressionResistancePriority(.required, for: .horizontal)
-
-        DeltaText = UILabel()
-        DeltaText.font = .systemFont(ofSize: 32)
-        DeltaText.textAlignment = .left
-        DeltaText.text = "Delta"
-        DeltaText.setContentCompressionResistancePriority(.required, for: .horizontal)
-
-        let directionDeltaStack = UIStackView(arrangedSubviews: [DirectionText, DeltaText])
-        directionDeltaStack.axis = .horizontal
-        directionDeltaStack.distribution = .fillEqually
-
-        MinAgoText = UILabel()
-        MinAgoText.font = .systemFont(ofSize: 17)
-        MinAgoText.textAlignment = .center
-        MinAgoText.text = "MinAgo"
-
-        LoopStatusLabel = UILabel()
-        LoopStatusLabel.font = .systemFont(ofSize: 17)
-        LoopStatusLabel.textAlignment = .right
-        LoopStatusLabel.text = ""
-
-        PredictionLabel = UILabel()
-        PredictionLabel.font = .systemFont(ofSize: 17)
-        PredictionLabel.textAlignment = .left
-        PredictionLabel.text = ""
-
-        let loopPredictionStack = UIStackView(arrangedSubviews: [LoopStatusLabel, PredictionLabel])
-        loopPredictionStack.axis = .horizontal
-        loopPredictionStack.distribution = .fillEqually
-        loopPredictionStack.spacing = UIStackView.spacingUseSystem
-
-        let bgViewStack = UIStackView(arrangedSubviews: [serverText, BGText, directionDeltaStack, MinAgoText, loopPredictionStack])
-        bgViewStack.axis = .vertical
+        bgDisplayContainer = UIView()
+        bgDisplayContainer.translatesAutoresizingMaskIntoConstraints = false
 
         infoTableContainer = UIView()
         infoTableContainer.translatesAutoresizingMaskIntoConstraints = false
@@ -199,7 +144,7 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         tableWidthConstraint.priority = .defaultHigh
         tableWidthConstraint.isActive = true
 
-        let topStack = UIStackView(arrangedSubviews: [bgViewStack, infoTableContainer])
+        let topStack = UIStackView(arrangedSubviews: [bgDisplayContainer, infoTableContainer])
         topStack.axis = .horizontal
         topStack.spacing = 10
         topStack.translatesAutoresizingMaskIntoConstraints = false
@@ -307,47 +252,8 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
         scheduleAllTasks()
 
-        // Set up refreshScrollView for BGText
-        refreshScrollView = UIScrollView()
-        refreshScrollView.translatesAutoresizingMaskIntoConstraints = false
-        refreshScrollView.alwaysBounceVertical = true
-        view.addSubview(refreshScrollView)
-
-        NSLayoutConstraint.activate([
-            refreshScrollView.leadingAnchor.constraint(equalTo: BGText.leadingAnchor),
-            refreshScrollView.trailingAnchor.constraint(equalTo: BGText.trailingAnchor),
-            refreshScrollView.topAnchor.constraint(equalTo: BGText.topAnchor),
-            refreshScrollView.bottomAnchor.constraint(equalTo: BGText.bottomAnchor),
-        ])
-
-        refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
-        refreshScrollView.addSubview(refreshControl)
-        refreshScrollView.alwaysBounceVertical = true
-
-        refreshScrollView.delegate = self
+        setupBGDisplayView()
         NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
-
-        Observable.shared.bgText.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newValue in
-                self?.BGText.text = newValue
-            }
-            .store(in: &cancellables)
-
-        Observable.shared.directionText.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newValue in
-                self?.DirectionText.text = newValue
-            }
-            .store(in: &cancellables)
-
-        Observable.shared.deltaText.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newValue in
-                self?.DeltaText.text = newValue
-            }
-            .store(in: &cancellables)
 
         /// When an alarm is triggered, go to the snoozer tab
         Observable.shared.currentAlarm.$value
@@ -694,26 +600,12 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
             }
         }
 
-        MinAgoText.text = "Refreshing"
         Observable.shared.minAgoText.value = "Refreshing"
         scheduleAllTasks()
 
         currentCage = nil
         currentSage = nil
         currentIage = nil
-        refreshControl.endRefreshing()
-    }
-
-    // Scroll down BGText when refreshing
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView == refreshScrollView {
-            let yOffset = scrollView.contentOffset.y
-            if yOffset < 0 {
-                BGText.transform = CGAffineTransform(translationX: 0, y: -yOffset)
-            } else {
-                BGText.transform = CGAffineTransform.identity
-            }
-        }
     }
 
     override func viewWillAppear(_: Bool) {
@@ -727,6 +619,25 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
             Observable.shared.chartSettingsChanged.value = false
         }
+    }
+
+    private func setupBGDisplayView() {
+        let bgDisplayView = BGDisplayView(onRefresh: { [weak self] in
+            self?.refresh()
+        })
+        let hosting = UIHostingController(rootView: bgDisplayView)
+        hosting.view.translatesAutoresizingMaskIntoConstraints = false
+        hosting.view.backgroundColor = .clear
+
+        addChild(hosting)
+        bgDisplayContainer.addSubview(hosting.view)
+        NSLayoutConstraint.activate([
+            hosting.view.topAnchor.constraint(equalTo: bgDisplayContainer.topAnchor),
+            hosting.view.bottomAnchor.constraint(equalTo: bgDisplayContainer.bottomAnchor),
+            hosting.view.leadingAnchor.constraint(equalTo: bgDisplayContainer.leadingAnchor),
+            hosting.view.trailingAnchor.constraint(equalTo: bgDisplayContainer.trailingAnchor),
+        ])
+        hosting.didMove(toParent: self)
     }
 
     private var infoTableHostingController: UIHostingController<InfoTableView>?
@@ -997,22 +908,9 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
             return
         }
 
-        var isHidden = false
-        if !IsNightscoutEnabled() {
-            isHidden = true
-        }
+        let isHidden = !IsNightscoutEnabled()
 
-        LoopStatusLabel.isHidden = isHidden
-        if IsNotLooping {
-            PredictionLabel.isHidden = true
-        } else {
-            PredictionLabel.isHidden = isHidden
-        }
-        infoTableContainer.isHidden = isHidden
-
-        if Storage.shared.hideInfoTable.value {
-            infoTableContainer.isHidden = true
-        }
+        infoTableContainer.isHidden = isHidden || Storage.shared.hideInfoTable.value
 
         updateNightscoutTabState()
     }
@@ -1029,28 +927,16 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     func updateBGTextAppearance() {
         if bgData.count > 0 {
             let latestBG = bgData[bgData.count - 1].sgv
-            var color = NSUIColor.label
             if Storage.shared.colorBGText.value {
                 if Double(latestBG) >= Storage.shared.highLine.value {
-                    color = NSUIColor.systemYellow
                     Observable.shared.bgTextColor.value = .yellow
                 } else if Double(latestBG) <= Storage.shared.lowLine.value {
-                    color = NSUIColor.systemRed
                     Observable.shared.bgTextColor.value = .red
                 } else {
-                    color = NSUIColor.systemGreen
                     Observable.shared.bgTextColor.value = .green
                 }
             } else {
                 Observable.shared.bgTextColor.value = .primary
-            }
-
-            BGText.textColor = color
-
-            if latestBG <= globalVariables.minDisplayGlucose || latestBG >= globalVariables.maxDisplayGlucose {
-                BGText.font = UIFont.systemFont(ofSize: 65, weight: .black)
-            } else {
-                BGText.font = UIFont.systemFont(ofSize: 85, weight: .black)
             }
         }
     }
@@ -1424,44 +1310,21 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         BGChart.isHidden = true
         BGChartFull.isHidden = true
 
-        // Hide BG display elements
-        BGText.isHidden = true
-        DeltaText.isHidden = true
-        DirectionText.isHidden = true
-        MinAgoText.isHidden = true
-        serverText.isHidden = true
-
-        // Hide info table and stats
+        // Hide BG display and info table
+        bgDisplayContainer.isHidden = true
         infoTableContainer.isHidden = true
         statsView.isHidden = true
-
-        // Hide loop status and prediction
-        LoopStatusLabel.isHidden = true
-        PredictionLabel.isHidden = true
     }
 
     private func showAllDataUI() {
-        // Show BG display elements
-        BGText.isHidden = false
-        DeltaText.isHidden = false
-        DirectionText.isHidden = false
-        MinAgoText.isHidden = false
-        serverText.isHidden = false
+        bgDisplayContainer.isHidden = false
 
         // Show graphs based on settings
         updateGraphVisibility()
 
-        // Show/hide info table and stats based on user settings
+        // Show/hide info table based on user settings
         let isNightscoutEnabled = IsNightscoutEnabled()
-        if isNightscoutEnabled {
-            infoTableContainer.isHidden = Storage.shared.hideInfoTable.value
-            LoopStatusLabel.isHidden = false
-            PredictionLabel.isHidden = IsNotLooping
-        } else {
-            infoTableContainer.isHidden = true
-            LoopStatusLabel.isHidden = true
-            PredictionLabel.isHidden = true
-        }
+        infoTableContainer.isHidden = !isNightscoutEnabled || Storage.shared.hideInfoTable.value
 
         statsView.isHidden = !Storage.shared.showStats.value
     }

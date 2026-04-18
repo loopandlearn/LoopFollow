@@ -36,7 +36,6 @@ extension MainViewController {
     }
 
     func evaluateNotLooping() {
-        guard let statusStackView = LoopStatusLabel.superview as? UIStackView else { return }
         guard let lastLoopTime = Observable.shared.alertLastLoopTime.value, lastLoopTime > 0 else {
             return
         }
@@ -47,15 +46,9 @@ extension MainViewController {
         if IsNightscoutEnabled(), (now - lastLoopTime) >= nonLoopingTimeThreshold, lastLoopTime > 0 {
             IsNotLooping = true
             Observable.shared.isNotLooping.value = true
-            statusStackView.distribution = .fill
 
-            PredictionLabel.isHidden = true
-            LoopStatusLabel.frame = CGRect(x: 0, y: 0, width: statusStackView.frame.width, height: statusStackView.frame.height)
-
-            LoopStatusLabel.textAlignment = .center
-            LoopStatusLabel.text = "⚠️ Not Looping!"
-            LoopStatusLabel.textColor = UIColor.systemYellow
-            LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
+            Observable.shared.loopStatusText.value = "⚠️ Not Looping!"
+            Observable.shared.loopStatusColor.value = .yellow
             #if !targetEnvironment(macCatalyst)
                 LiveActivityManager.shared.refreshFromCurrentState(reason: "notLooping")
             #endif
@@ -63,20 +56,8 @@ extension MainViewController {
         } else {
             IsNotLooping = false
             Observable.shared.isNotLooping.value = false
-            statusStackView.distribution = .fillEqually
-            PredictionLabel.isHidden = false
 
-            LoopStatusLabel.textAlignment = .right
-            LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
-
-            switch Storage.shared.appearanceMode.value {
-            case .dark:
-                LoopStatusLabel.textColor = UIColor.white
-            case .light:
-                LoopStatusLabel.textColor = UIColor.black
-            case .system:
-                LoopStatusLabel.textColor = UIColor.label
-            }
+            Observable.shared.loopStatusColor.value = .primary
             #if !targetEnvironment(macCatalyst)
                 LiveActivityManager.shared.refreshFromCurrentState(reason: "loopingResumed")
             #endif

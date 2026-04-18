@@ -15,9 +15,7 @@ extension MainViewController {
 
     func minAgoTaskAction() {
         guard bgData.count > 0, let lastBG = bgData.last else {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.MinAgoText.text = ""
+            DispatchQueue.main.async {
                 Observable.shared.minAgoText.value = ""
                 Observable.shared.bgText.value = ""
             }
@@ -46,9 +44,7 @@ extension MainViewController {
 
         // Update UI only if the display text has changed
         if minAgoDisplayText != Observable.shared.minAgoText.value {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.MinAgoText.text = minAgoDisplayText
+            DispatchQueue.main.async {
                 Observable.shared.minAgoText.value = minAgoDisplayText
             }
         }
@@ -56,19 +52,12 @@ extension MainViewController {
         let deltaTime = secondsAgo / 60
         Observable.shared.bgStale.value = deltaTime >= 12
 
-        // Apply strikethrough to BGText based on the staleness of the data
-        // Also clear badge if bgvalue is stale
-        let bgTextStr = BGText.text ?? ""
-        let attributeString = NSMutableAttributedString(string: bgTextStr)
-        attributeString.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: attributeString.length))
-        if Observable.shared.bgStale.value { // Data is stale
-            attributeString.addAttribute(.strikethroughColor, value: UIColor.systemRed, range: NSRange(location: 0, length: attributeString.length))
+        // Update badge based on staleness
+        if Observable.shared.bgStale.value {
             updateBadge(val: 0)
-        } else { // Data is fresh
-            attributeString.addAttribute(.strikethroughColor, value: UIColor.clear, range: NSRange(location: 0, length: attributeString.length))
+        } else {
             updateBadge(val: Observable.shared.bg.value ?? 0)
         }
-        BGText.attributedText = attributeString
 
         // Determine the next run interval based on the current state
         let nextUpdateInterval: TimeInterval

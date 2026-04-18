@@ -18,7 +18,7 @@ extension MainViewController {
         let lastLoopTime = Observable.shared.alertLastLoopTime.value ?? 0
 
         if lastLoopRecord["failureReason"] != nil {
-            LoopStatusLabel.text = "X"
+            Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
         } else {
             var wasEnacted = false
@@ -67,8 +67,8 @@ extension MainViewController {
 
             if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject] {
                 let prediction = predictdata["values"] as! [Double]
-                PredictionLabel.text = Localizer.toDisplayUnits(String(Int(round(prediction.last!))))
-                PredictionLabel.textColor = UIColor.systemPurple
+                Observable.shared.predictionText.value = Localizer.toDisplayUnits(String(Int(round(prediction.last!))))
+                Observable.shared.predictionColor.value = .purple
                 if Storage.shared.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
                     predictionData.removeAll()
                     var predictionTime = lastLoopTime
@@ -113,15 +113,15 @@ extension MainViewController {
                         lastBGTime = bgData[bgData.count - 1].date
                     }
                     if tempBasalTime > lastBGTime, !wasEnacted {
-                        LoopStatusLabel.text = "⏀"
+                        Observable.shared.loopStatusText.value = "⏀"
                         latestLoopStatusString = "⏀"
                     } else {
-                        LoopStatusLabel.text = "↻"
+                        Observable.shared.loopStatusText.value = "↻"
                         latestLoopStatusString = "↻"
                     }
                 }
             } else {
-                LoopStatusLabel.text = "↻"
+                Observable.shared.loopStatusText.value = "↻"
                 latestLoopStatusString = "↻"
             }
 

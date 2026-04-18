@@ -24,6 +24,12 @@ class Observable {
     var deltaText = ObservableValue<String>(default: "+0")
     var iobText = ObservableValue<String>(default: "--")
 
+    var serverText = ObservableValue<String>(default: "Server")
+    var loopStatusText = ObservableValue<String>(default: "")
+    var loopStatusColor = ObservableValue<Color>(default: .primary)
+    var predictionText = ObservableValue<String>(default: "")
+    var predictionColor = ObservableValue<Color>(default: .purple)
+
     var currentAlarm = ObservableValue<UUID?>(default: nil)
     var alarmSoundPlaying = ObservableValue<Bool>(default: false)
 
