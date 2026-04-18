@@ -23,7 +23,7 @@ private struct APNSCredentialSnapshot: Equatable {
     let lfKeyId: String
 }
 
-class MainViewController: UIViewController, UITableViewDataSource, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
+class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificationCenterDelegate, UIScrollViewDelegate {
     var isPresentedAsModal: Bool = false
 
     var BGText: UILabel!
@@ -32,7 +32,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var BGChart: LineChartView!
     var BGChartFull: LineChartView!
     var MinAgoText: UILabel!
-    var infoTable: UITableView!
+    var infoTableContainer: UIView!
     var PredictionLabel: UILabel!
     var LoopStatusLabel: UILabel!
     var statsPieChart: PieChartView!
@@ -199,14 +199,13 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         let bgViewStack = UIStackView(arrangedSubviews: [serverText, BGText, directionDeltaStack, MinAgoText, loopPredictionStack])
         bgViewStack.axis = .vertical
 
-        infoTable = UITableView(frame: .zero, style: .plain)
-        infoTable.backgroundColor = .systemBackground
-        infoTable.translatesAutoresizingMaskIntoConstraints = false
-        let tableWidthConstraint = infoTable.widthAnchor.constraint(equalToConstant: 250)
+        infoTableContainer = UIView()
+        infoTableContainer.translatesAutoresizingMaskIntoConstraints = false
+        let tableWidthConstraint = infoTableContainer.widthAnchor.constraint(equalToConstant: 250)
         tableWidthConstraint.priority = .defaultHigh
         tableWidthConstraint.isActive = true
 
-        let topStack = UIStackView(arrangedSubviews: [bgViewStack, infoTable])
+        let topStack = UIStackView(arrangedSubviews: [bgViewStack, infoTableContainer])
         topStack.axis = .horizontal
         topStack.spacing = 10
         topStack.translatesAutoresizingMaskIntoConstraints = false
@@ -335,13 +334,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
 
-        infoTable.rowHeight = 21
-        infoTable.dataSource = self
-        infoTable.tableFooterView = UIView(frame: .zero)
-        infoTable.bounces = false
-        infoTable.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
-
-        infoManager = InfoManager(tableView: infoTable)
+        infoManager = InfoManager()
+        setupInfoTableView()
 
         smallGraphHeightConstraint.constant = CGFloat(Storage.shared.smallGraphHeight.value)
         view.layoutIfNeeded()
@@ -493,14 +487,14 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         Storage.shared.graphTimeZoneEnabled.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.infoTable.reloadData()
+                self?.updateInfoTableTimeZone()
             }
             .store(in: &cancellables)
 
         Storage.shared.graphTimeZoneIdentifier.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.infoTable.reloadData()
+                self?.updateInfoTableTimeZone()
             }
             .store(in: &cancellables)
 
@@ -797,7 +791,6 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
     override func viewWillAppear(_: Bool) {
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
-        infoTable.reloadData()
 
         if Observable.shared.chartSettingsChanged.value {
             updateBGGraphSettings()
@@ -809,6 +802,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
     }
 
+    private var infoTableHostingController: UIHostingController<InfoTableView>?
+
     private var timeZoneOverrideInfoValue: String? {
         guard Storage.shared.graphTimeZoneEnabled.value,
               let overrideTimeZone = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
@@ -819,42 +814,31 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         return overrideTimeZone.identifier
     }
 
-    // Info Table Functions
-    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        guard let infoManager = infoManager else {
-            return 0
-        }
-        let overrideRowCount = timeZoneOverrideInfoValue == nil ? 0 : 1
-        return infoManager.numberOfRows() + overrideRowCount
+    private func setupInfoTableView() {
+        let infoTableView = InfoTableView(
+            infoManager: infoManager,
+            timeZoneOverride: timeZoneOverrideInfoValue
+        )
+        let hosting = UIHostingController(rootView: infoTableView)
+        hosting.view.translatesAutoresizingMaskIntoConstraints = false
+        hosting.view.backgroundColor = .clear
+        infoTableHostingController = hosting
+
+        addChild(hosting)
+        infoTableContainer.addSubview(hosting.view)
+        NSLayoutConstraint.activate([
+            hosting.view.topAnchor.constraint(equalTo: infoTableContainer.topAnchor),
+            hosting.view.bottomAnchor.constraint(equalTo: infoTableContainer.bottomAnchor),
+            hosting.view.leadingAnchor.constraint(equalTo: infoTableContainer.leadingAnchor),
+            hosting.view.trailingAnchor.constraint(equalTo: infoTableContainer.trailingAnchor),
+        ])
+        hosting.didMove(toParent: self)
+
+        infoTableContainer.addBorder(toSide: .Left, withColor: UIColor.darkGray.cgColor, andThickness: 2)
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "LabelCell")
-            ?? UITableViewCell(style: .value1, reuseIdentifier: "LabelCell")
-        cell.detailTextLabel?.textColor = .label
-
-        if indexPath.row == 0, let timeZoneOverrideInfoValue {
-            cell.textLabel?.text = "Time Zone"
-            cell.detailTextLabel?.text = timeZoneOverrideInfoValue
-            return cell
-        }
-
-        let adjustedIndexPath: IndexPath
-        if timeZoneOverrideInfoValue != nil {
-            adjustedIndexPath = IndexPath(row: indexPath.row - 1, section: indexPath.section)
-        } else {
-            adjustedIndexPath = indexPath
-        }
-
-        if let values = infoManager.dataForIndexPath(adjustedIndexPath) {
-            cell.textLabel?.text = values.name
-            cell.detailTextLabel?.text = values.value
-        } else {
-            cell.textLabel?.text = ""
-            cell.detailTextLabel?.text = ""
-        }
-
-        return cell
+    private func updateInfoTableTimeZone() {
+        infoTableHostingController?.rootView.timeZoneOverride = timeZoneOverrideInfoValue
     }
 
     @objc func appMovedToBackground() {
@@ -1078,10 +1062,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         } else {
             PredictionLabel.isHidden = isHidden
         }
-        infoTable.isHidden = isHidden
+        infoTableContainer.isHidden = isHidden
 
         if Storage.shared.hideInfoTable.value {
-            infoTable.isHidden = true
+            infoTableContainer.isHidden = true
         }
 
         updateNightscoutTabState()
@@ -1502,7 +1486,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         serverText.isHidden = true
 
         // Hide info table and stats
-        infoTable.isHidden = true
+        infoTableContainer.isHidden = true
         statsView.isHidden = true
 
         // Hide loop status and prediction
@@ -1524,11 +1508,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // Show/hide info table and stats based on user settings
         let isNightscoutEnabled = IsNightscoutEnabled()
         if isNightscoutEnabled {
-            infoTable.isHidden = Storage.shared.hideInfoTable.value
+            infoTableContainer.isHidden = Storage.shared.hideInfoTable.value
             LoopStatusLabel.isHidden = false
             PredictionLabel.isHidden = IsNotLooping
         } else {
-            infoTable.isHidden = true
+            infoTableContainer.isHidden = true
             LoopStatusLabel.isHidden = true
             PredictionLabel.isHidden = true
         }
