@@ -135,7 +135,7 @@ struct MoreMenuView: View {
             TreatmentsView()
         }
         .navigationDestination(isPresented: $showStatsView) {
-            AggregatedStatsContentView(mainViewController: nil)
+            AggregatedStatsContentView(mainViewController: MainViewController.shared)
         }
         .navigationDestination(isPresented: $showHomeView) {
             HomeContentView(isModal: true)

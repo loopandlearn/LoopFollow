@@ -55,7 +55,7 @@ struct MainTabView: View {
             TreatmentsView()
         case .stats:
             NavigationStack {
-                AggregatedStatsContentView(mainViewController: nil)
+                AggregatedStatsContentView(mainViewController: MainViewController.shared)
             }
         }
     }
