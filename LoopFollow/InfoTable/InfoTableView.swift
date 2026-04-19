@@ -27,7 +27,7 @@ struct InfoTableView: View {
             Text(value)
                 .foregroundStyle(.primary)
         }
-        .font(.subheadline)
+        .font(.system(size: 17))
         .frame(height: 21)
         .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
     }
