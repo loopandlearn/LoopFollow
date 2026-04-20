@@ -87,9 +87,13 @@ final class LiveActivityManager {
 
     @objc private func handleDidBecomeActive() {
         guard Storage.shared.laEnabled.value else { return }
-        if skipNextDidBecomeActive {
-            LogManager.shared.log(category: .general, message: "[LA] didBecomeActive: skipped (handleForeground owns restart)", isDebug: true)
-            skipNextDidBecomeActive = false
+        if pendingForegroundRestart {
+            pendingForegroundRestart = false
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] didBecomeActive: running deferred foreground restart"
+            )
+            performForegroundRestart()
             return
         }
         LogManager.shared.log(category: .general, message: "[LA] didBecomeActive: calling startFromCurrentState, dismissedByUser=\(dismissedByUser)", isDebug: true)
@@ -116,13 +120,17 @@ final class LiveActivityManager {
             return
         }
 
+        // willEnterForegroundNotification fires before the scene reaches
+        // foregroundActive — Activity.request() returns `visibility` during
+        // this window. Defer the actual restart to didBecomeActive.
+        pendingForegroundRestart = true
         LogManager.shared.log(
             category: .general,
-            message: "[LA] ending stale LA and restarting (renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing))"
+            message: "[LA] foreground: scheduling restart on next didBecomeActive (renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing))"
         )
+    }
 
-        skipNextDidBecomeActive = true
-
+    private func performForegroundRestart() {
         // Mark restart intent BEFORE clearing storage flags, so any late .dismissed
         // from the old activity is never misclassified as a user swipe.
         endingForRestart = true
@@ -249,9 +257,10 @@ final class LiveActivityManager {
     /// a .dismissed delivery triggered by our own end() call is never misclassified as a
     /// user swipe — regardless of the order in which the MainActor executes the two writes.
     private var endingForRestart = false
-    /// Set by handleForeground() when it takes ownership of the restart sequence.
-    /// Prevents handleDidBecomeActive() from racing with an in-flight end+restart.
-    private var skipNextDidBecomeActive = false
+    /// Set by handleForeground() when the renewal window has been detected.
+    /// The actual end+restart is run from handleDidBecomeActive() because
+    /// Activity.request() returns `visibility` during willEnterForeground.
+    private var pendingForegroundRestart = false
 
     // MARK: - Public API
 
@@ -344,6 +353,10 @@ final class LiveActivityManager {
     /// Does not clear laEnabled — the user's preference is preserved for relaunch.
     func endOnTerminate() {
         guard let activity = current else { return }
+        // Flag the end as system-initiated so the state observer does not
+        // classify the resulting `.dismissed` as a user swipe (laRenewBy is
+        // cleared below, which would otherwise make pastDeadline=false).
+        endingForRestart = true
         current = nil
         Storage.shared.laRenewBy.value = 0
         LALivenessStore.clear()
@@ -399,6 +412,10 @@ final class LiveActivityManager {
     func forceRestart() {
         guard Storage.shared.laEnabled.value else { return }
         LogManager.shared.log(category: .general, message: "[LA] forceRestart called")
+        // Mark as system-initiated so any residual `.dismissed` delivered from
+        // the cancelled state observer stream cannot flip dismissedByUser=true
+        // and spoil the freshly started LA.
+        endingForRestart = true
         dismissedByUser = false
         Storage.shared.laRenewBy.value = 0
         Storage.shared.laRenewalFailed.value = false
@@ -687,6 +704,10 @@ final class LiveActivityManager {
     }
 
     func handleExpiredToken() {
+        // Mark as system-initiated so the `.dismissed` delivered by end()
+        // is not classified as a user swipe — that would set dismissedByUser=true
+        // and block the auto-restart promised by the comment below.
+        endingForRestart = true
         end()
         // Activity will restart on next BG refresh via refreshFromCurrentState()
     }
