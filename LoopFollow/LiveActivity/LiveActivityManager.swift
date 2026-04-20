@@ -87,16 +87,18 @@ final class LiveActivityManager {
 
     @objc private func handleDidBecomeActive() {
         guard Storage.shared.laEnabled.value else { return }
+        let appState = UIApplication.shared.applicationState.rawValue
+        let existing = Activity<GlucoseLiveActivityAttributes>.activities.count
         if pendingForegroundRestart {
             pendingForegroundRestart = false
             LogManager.shared.log(
                 category: .general,
-                message: "[LA] didBecomeActive: running deferred foreground restart"
+                message: "[LA] didBecomeActive: running deferred foreground restart (appState=\(appState), activities=\(existing))"
             )
             performForegroundRestart()
             return
         }
-        LogManager.shared.log(category: .general, message: "[LA] didBecomeActive: calling startFromCurrentState, dismissedByUser=\(dismissedByUser)", isDebug: true)
+        LogManager.shared.log(category: .general, message: "[LA] didBecomeActive: startFromCurrentState (appState=\(appState), activities=\(existing), current=\(current?.id ?? "nil"), dismissedByUser=\(dismissedByUser))", isDebug: true)
         Task { @MainActor in
             self.startFromCurrentState()
         }
@@ -109,10 +111,12 @@ final class LiveActivityManager {
         let renewBy = Storage.shared.laRenewBy.value
         let now = Date().timeIntervalSince1970
         let overlayIsShowing = renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
+        let appState = UIApplication.shared.applicationState.rawValue
+        let existing = Activity<GlucoseLiveActivityAttributes>.activities.count
 
         LogManager.shared.log(
             category: .general,
-            message: "[LA] foreground: renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing), current=\(current?.id ?? "nil"), dismissedByUser=\(dismissedByUser), renewBy=\(renewBy), now=\(now)"
+            message: "[LA] foreground: appState=\(appState), activities=\(existing), renewalFailed=\(renewalFailed), overlayShowing=\(overlayIsShowing), current=\(current?.id ?? "nil"), dismissedByUser=\(dismissedByUser), renewBy=\(renewBy), now=\(now)"
         )
 
         guard renewalFailed || overlayIsShowing else {
@@ -265,7 +269,14 @@ final class LiveActivityManager {
     // MARK: - Public API
 
     func startIfNeeded() {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+        let authorized = ActivityAuthorizationInfo().areActivitiesEnabled
+        let existingCount = Activity<GlucoseLiveActivityAttributes>.activities.count
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] startIfNeeded: authorized=\(authorized), activities=\(existingCount), current=\(current?.id ?? "nil"), dismissedByUser=\(dismissedByUser), laEnabled=\(Storage.shared.laEnabled.value)",
+            isDebug: true
+        )
+        guard authorized else {
             LogManager.shared.log(category: .general, message: "Live Activity not authorized")
             return
         }
@@ -344,7 +355,12 @@ final class LiveActivityManager {
             Storage.shared.laRenewalFailed.value = false
             LogManager.shared.log(category: .general, message: "Live Activity started id=\(activity.id)")
         } catch {
-            LogManager.shared.log(category: .general, message: "Live Activity failed to start: \(error)")
+            let ns = error as NSError
+            let scene = isAppVisibleForLiveActivityStart()
+            LogManager.shared.log(
+                category: .general,
+                message: "Live Activity failed to start: \(error) domain=\(ns.domain) code=\(ns.code) — authorized=\(ActivityAuthorizationInfo().areActivitiesEnabled), sceneActive=\(scene), activities=\(Activity<GlucoseLiveActivityAttributes>.activities.count)"
+            )
         }
     }
 
@@ -532,7 +548,11 @@ final class LiveActivityManager {
             // Renewal failed — deadline was never written, so no rollback needed.
             let isFirstFailure = !Storage.shared.laRenewalFailed.value
             Storage.shared.laRenewalFailed.value = true
-            LogManager.shared.log(category: .general, message: "[LA] renewal failed, keeping existing LA: \(error)")
+            let ns = error as NSError
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] renewal failed, keeping existing LA: \(error) domain=\(ns.domain) code=\(ns.code) — authorized=\(ActivityAuthorizationInfo().areActivitiesEnabled), activities=\(Activity<GlucoseLiveActivityAttributes>.activities.count)"
+            )
             if isFirstFailure {
                 scheduleRenewalFailedNotification()
             }
@@ -574,9 +594,17 @@ final class LiveActivityManager {
         // WatchConnectivityManager.shared.send(snapshot: snapshot)
 
         // LA update: gated on LA being active, snapshot having changed, and activities enabled.
-        guard Storage.shared.laEnabled.value, !dismissedByUser else { return }
+        if !Storage.shared.laEnabled.value {
+            LogManager.shared.log(category: .general, message: "[LA] refresh: LA update skipped — laEnabled=false reason=\(reason)", isDebug: true)
+            return
+        }
+        if dismissedByUser {
+            LogManager.shared.log(category: .general, message: "[LA] refresh: LA update skipped — dismissedByUser=true reason=\(reason)")
+            return
+        }
         guard !snapshotUnchanged || forceRefreshNeeded else { return }
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            LogManager.shared.log(category: .general, message: "[LA] refresh: LA update skipped — areActivitiesEnabled=false reason=\(reason)")
             return
         }
         if current == nil, let existing = Activity<GlucoseLiveActivityAttributes>.activities.first {
@@ -649,6 +677,12 @@ final class LiveActivityManager {
 
             if isForeground {
                 await activity.update(content)
+            } else {
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] update seq=\(nextSeq) — app backgrounded, direct ActivityKit update skipped, relying on APNs",
+                    isDebug: true
+                )
             }
 
             if Task.isCancelled { return }
@@ -663,6 +697,11 @@ final class LiveActivityManager {
 
             if let token = pushToken {
                 await APNSClient.shared.sendLiveActivityUpdate(pushToken: token, state: state)
+            } else {
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] update seq=\(nextSeq) reason=\(reason) — no push token yet, APNs skipped"
+                )
             }
         }
     }
@@ -685,25 +724,41 @@ final class LiveActivityManager {
     private func bind(to activity: Activity<GlucoseLiveActivityAttributes>, logReason: String) {
         if current?.id == activity.id { return }
         current = activity
+        let wasEndingForRestart = endingForRestart
         dismissedByUser = false
         endingForRestart = false
         attachStateObserver(to: activity)
-        LogManager.shared.log(category: .general, message: "Live Activity bound id=\(activity.id) (\(logReason))", isDebug: true)
+        LogManager.shared.log(
+            category: .general,
+            message: "Live Activity bound id=\(activity.id) state=\(activity.activityState) (\(logReason)) — endingForRestart cleared (was \(wasEndingForRestart))",
+            isDebug: true
+        )
         observePushToken(for: activity)
     }
 
     private func observePushToken(for activity: Activity<GlucoseLiveActivityAttributes>) {
         tokenObservationTask?.cancel()
+        let activityID = activity.id
         tokenObservationTask = Task {
             for await tokenData in activity.pushTokenUpdates {
                 let token = tokenData.map { String(format: "%02x", $0) }.joined()
+                let previousTail = self.pushToken.map { String($0.suffix(8)) } ?? "nil"
+                let tail = String(token.suffix(8))
                 self.pushToken = token
-                LogManager.shared.log(category: .general, message: "Live Activity push token received", isDebug: true)
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] push token received id=\(activityID) token=…\(tail) (prev=…\(previousTail))"
+                )
             }
         }
     }
 
     func handleExpiredToken() {
+        let existing = Activity<GlucoseLiveActivityAttributes>.activities.count
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] handleExpiredToken: current=\(current?.id ?? "nil"), activities=\(existing), dismissedByUser=\(dismissedByUser) — marking endingForRestart and ending"
+        )
         // Mark as system-initiated so the `.dismissed` delivered by end()
         // is not classified as a user swipe — that would set dismissedByUser=true
         // and block the auto-restart promised by the comment below.
