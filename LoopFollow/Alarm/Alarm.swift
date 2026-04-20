@@ -262,7 +262,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         AlarmManager.shared.sendNotification(title: type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
 
         if playSound {
-            AlarmSound.setSoundFile(str: soundFile.rawValue)
+            AlarmSound.setSoundFile(soundFile)
             // Only use delay if repeating is enabled, otherwise delay doesn't make sense
             let delay = shouldRepeat ? soundDelay : 0
             AlarmSound.play(repeating: shouldRepeat, delay: delay)

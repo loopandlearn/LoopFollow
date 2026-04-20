@@ -58,7 +58,30 @@ class AlarmSound {
     }
 
     static func setSoundFile(str: String) {
-        soundURL = Bundle.main.url(forResource: str, withExtension: "caf")!
+        setSoundFile(.builtin(str))
+    }
+
+    static func setSoundFile(_ file: SoundFile) {
+        if let resolved = resolveURL(for: file) {
+            soundURL = resolved
+            return
+        }
+        LogManager.shared.log(
+            category: .alarm,
+            message: "AlarmSound - missing sound for \(file.id); falling back to \(SoundFile.fallback.id)"
+        )
+        if let fallback = resolveURL(for: .fallback) {
+            soundURL = fallback
+        }
+    }
+
+    private static func resolveURL(for file: SoundFile) -> URL? {
+        switch file {
+        case let .builtin(name):
+            return Bundle.main.url(forResource: name, withExtension: "caf")
+        case let .custom(uuid):
+            return CustomSoundStore.shared.url(for: uuid)
+        }
     }
 
     /*

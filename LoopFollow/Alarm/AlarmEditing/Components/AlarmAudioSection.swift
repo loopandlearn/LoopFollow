@@ -2,6 +2,7 @@
 // AlarmAudioSection.swift
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct AlarmAudioSection: View {
     @Binding var alarm: Alarm
@@ -111,27 +112,37 @@ private struct TonePickerSheet: View {
     @Binding var selected: SoundFile
     @Environment(\.dismiss) private var dismiss
 
+    @State private var customSounds: [CustomSound] = []
+    @State private var showingImporter = false
+    @State private var importError: String?
+
     var body: some View {
         NavigationView {
             ScrollViewReader { proxy in
                 List {
-                    ForEach(SoundFile.allCases) { tone in
-                        Button {
-                            selected = tone
-                            AlarmSound.setSoundFile(str: tone.rawValue)
-                            AlarmSound.stop()
-                            AlarmSound.playTest()
-                        } label: {
-                            HStack {
-                                Text(tone.displayName)
-                                if tone == selected {
-                                    Spacer()
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.accentColor)
-                                }
-                            }
+                    Section {
+                        ForEach(customSounds) { sound in
+                            toneRow(tone: .custom(sound.id), label: sound.displayName)
+                                .id(SoundFile.custom(sound.id))
                         }
-                        .id(tone)
+                        .onDelete(perform: deleteCustomSounds)
+
+                        Button {
+                            showingImporter = true
+                        } label: {
+                            Label("Import Sound…", systemImage: "plus.circle")
+                        }
+                    } header: {
+                        Text("Custom")
+                    } footer: {
+                        Text("Custom sounds stay on this device and aren't included in settings export.")
+                    }
+
+                    Section(header: Text("Built-in")) {
+                        ForEach(SoundFile.allBuiltins) { tone in
+                            toneRow(tone: tone, label: tone.displayName)
+                                .id(tone)
+                        }
                     }
                 }
                 .navigationTitle("Choose Tone")
@@ -144,9 +155,76 @@ private struct TonePickerSheet: View {
                     }
                 }
                 .onAppear {
+                    reloadCustomSounds()
                     proxy.scrollTo(selected, anchor: .center)
                 }
+                .fileImporter(
+                    isPresented: $showingImporter,
+                    allowedContentTypes: [.audio],
+                    allowsMultipleSelection: false
+                ) { result in
+                    handleImport(result)
+                }
+                .alert(
+                    "Import Failed",
+                    isPresented: Binding(
+                        get: { importError != nil },
+                        set: { if !$0 { importError = nil } }
+                    ),
+                    actions: { Button("OK", role: .cancel) { importError = nil } },
+                    message: { Text(importError ?? "") }
+                )
             }
+        }
+    }
+
+    @ViewBuilder
+    private func toneRow(tone: SoundFile, label: String) -> some View {
+        Button {
+            selected = tone
+            AlarmSound.setSoundFile(tone)
+            AlarmSound.stop()
+            AlarmSound.playTest()
+        } label: {
+            HStack {
+                Text(label)
+                if tone == selected {
+                    Spacer()
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.accentColor)
+                }
+            }
+        }
+    }
+
+    private func reloadCustomSounds() {
+        customSounds = CustomSoundStore.shared.list()
+    }
+
+    private func deleteCustomSounds(at offsets: IndexSet) {
+        for index in offsets {
+            let sound = customSounds[index]
+            CustomSoundStore.shared.delete(sound.id)
+        }
+        reloadCustomSounds()
+    }
+
+    private func handleImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case let .success(urls):
+            guard let url = urls.first else { return }
+            do {
+                let imported = try CustomSoundStore.shared.importFile(at: url)
+                reloadCustomSounds()
+                selected = .custom(imported.id)
+                AlarmSound.setSoundFile(.custom(imported.id))
+                AlarmSound.stop()
+                AlarmSound.playTest()
+            } catch {
+                importError = error.localizedDescription
+            }
+        case let .failure(error):
+            importError = error.localizedDescription
         }
     }
 }
