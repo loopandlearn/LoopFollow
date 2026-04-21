@@ -2,12 +2,11 @@
 // MoreMenuView.swift
 
 import SwiftUI
+import UIKit
 
 struct MoreMenuView: View {
     @State private var latestVersion: String?
     @State private var versionTint: Color = .secondary
-    @State private var showShareSheet = false
-    @State private var shareFiles: [URL] = []
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var showAlert = false
@@ -108,9 +107,6 @@ struct MoreMenuView: View {
         .task {
             await fetchVersionInfo()
         }
-        .sheet(isPresented: $showShareSheet) {
-            ActivityView(activityItems: shareFiles)
-        }
         .alert(alertTitle, isPresented: $showAlert) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -184,8 +180,8 @@ struct MoreMenuView: View {
             showAlert = true
             return
         }
-        shareFiles = files
-        showShareSheet = true
+        let avc = UIActivityViewController(activityItems: files, applicationActivities: nil)
+        UIApplication.shared.topMost?.present(avc, animated: true)
     }
 
     private func fetchVersionInfo() async {
@@ -199,16 +195,4 @@ struct MoreMenuView: View {
             : latest == current ? .green
             : .secondary
     }
-}
-
-// MARK: - UIActivityViewController wrapper
-
-struct ActivityView: UIViewControllerRepresentable {
-    let activityItems: [Any]
-
-    func makeUIViewController(context _: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-    }
-
-    func updateUIViewController(_: UIActivityViewController, context _: Context) {}
 }
