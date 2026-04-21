@@ -39,6 +39,76 @@ final class LiveActivityManager {
             name: .backgroundAudioFailed,
             object: nil,
         )
+        startPushToStartTokenObservation()
+        startActivityUpdatesObservation()
+    }
+
+    /// Observes the type-level push-to-start token (iOS 17.2+) and persists it.
+    /// The token survives app relaunches but is reissued by iOS periodically or when
+    /// the user toggles LA permissions — each new delivery overwrites the stored value.
+    private func startPushToStartTokenObservation() {
+        if #available(iOS 17.2, *) {
+            pushToStartObservationTask?.cancel()
+            pushToStartObservationTask = Task {
+                for await tokenData in Activity<GlucoseLiveActivityAttributes>.pushToStartTokenUpdates {
+                    let token = tokenData.map { String(format: "%02x", $0) }.joined()
+                    let previousTail = Storage.shared.laPushToStartToken.value.isEmpty
+                        ? "nil"
+                        : String(Storage.shared.laPushToStartToken.value.suffix(8))
+                    let tail = String(token.suffix(8))
+                    Storage.shared.laPushToStartToken.value = token
+                    LogManager.shared.log(
+                        category: .general,
+                        message: "[LA] push-to-start token received token=…\(tail) (prev=…\(previousTail))"
+                    )
+                }
+            }
+        }
+    }
+
+    /// Observes new Activity creations (iOS 16.2+). When an activity is started
+    /// by push-to-start (iOS 17.2+), the app discovers it through this stream and
+    /// adopts it via the same bind/update path as an app-initiated start.
+    private func startActivityUpdatesObservation() {
+        if #available(iOS 16.2, *) {
+            activityUpdatesObservationTask?.cancel()
+            activityUpdatesObservationTask = Task { [weak self] in
+                for await activity in Activity<GlucoseLiveActivityAttributes>.activityUpdates {
+                    await MainActor.run {
+                        self?.adoptPushToStartActivity(activity)
+                    }
+                }
+            }
+        }
+    }
+
+    @MainActor
+    private func adoptPushToStartActivity(_ activity: Activity<GlucoseLiveActivityAttributes>) {
+        // Skip if it's the activity we already track (app-initiated path binds it directly).
+        if current?.id == activity.id { return }
+        // If we already have a current activity and this is a different one, it's likely
+        // the new push-to-start LA replacing an old one. End the old, then bind the new.
+        if let old = current, old.id != activity.id {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] activityUpdates: replacing old=\(old.id) with new=\(activity.id)"
+            )
+            let oldActivity = old
+            Task {
+                await oldActivity.end(nil, dismissalPolicy: .immediate)
+            }
+        } else {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] activityUpdates: adopting new activity id=\(activity.id)"
+            )
+        }
+        // Fresh deadline — push-to-start-initiated LAs reset the 8-hour clock.
+        Storage.shared.laRenewBy.value = Date().timeIntervalSince1970 + LiveActivityManager.renewalThreshold
+        Storage.shared.laRenewalFailed.value = false
+        cancelRenewalFailedNotification()
+        dismissedByUser = false
+        bind(to: activity, logReason: "push-to-start-adopt")
     }
 
     /// Fires before the app loses focus (lock screen, home button, etc.).
@@ -265,6 +335,16 @@ final class LiveActivityManager {
     /// The actual end+restart is run from handleDidBecomeActive() because
     /// Activity.request() returns `visibility` during willEnterForeground.
     private var pendingForegroundRestart = false
+    /// Observes `pushToStartTokenUpdates` (iOS 17.2+) and persists the token.
+    /// Long-lived — started once at init and never cancelled.
+    private var pushToStartObservationTask: Task<Void, Never>?
+    /// Observes `Activity<>.activityUpdates` (iOS 16.2+) so activities started
+    /// out-of-band (push-to-start) are adopted automatically.
+    private var activityUpdatesObservationTask: Task<Void, Never>?
+    /// Base backoff after a 429 for push-to-start; doubled on each subsequent 429,
+    /// capped at `pushToStartMaxBackoff`. Reset to zero after a successful send.
+    private static let pushToStartBaseBackoff: TimeInterval = 300 // 5 min
+    private static let pushToStartMaxBackoff: TimeInterval = 3600 // 60 min
 
     // MARK: - Public API
 
@@ -500,6 +580,20 @@ final class LiveActivityManager {
         guard renewBy > 0, Date().timeIntervalSince1970 >= renewBy else { return false }
 
         let overdueBy = Date().timeIntervalSince1970 - renewBy
+
+        // Activity.request() requires a foregroundActive scene — from the background
+        // it always fails with `visibility`. Try push-to-start instead (iOS 17.2+);
+        // fall back to marking renewal failed and waiting for the user to foreground
+        // the app if push-to-start isn't available or doesn't succeed.
+        guard isAppVisibleForLiveActivityStart() else {
+            if attemptPushToStartIfEligible(snapshot: snapshot, overdueBy: overdueBy, oldActivity: oldActivity) {
+                // Fired — the async result handler updates state based on success/failure.
+                return false
+            }
+            markRenewalFailedFromBackground(overdueBy: overdueBy)
+            return false
+        }
+
         LogManager.shared.log(category: .general, message: "[LA] renewal deadline passed by \(Int(overdueBy))s, requesting new LA")
 
         let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
@@ -557,6 +651,139 @@ final class LiveActivityManager {
                 scheduleRenewalFailedNotification()
             }
             return false
+        }
+    }
+
+    /// Attempts to kick off a fresh LA via APNs push-to-start (iOS 17.2+) when the
+    /// app is not foregroundActive and the renewal deadline has passed.
+    ///
+    /// Returns true if an APNs request was actually dispatched. When true, the
+    /// async result handler updates backoff/renewal state. When false, the caller
+    /// falls back to `markRenewalFailedFromBackground`.
+    ///
+    /// Rate-limited: the stored backoff gates subsequent attempts. On iOS <17.2
+    /// no token is ever stored, so this path simply returns false.
+    private func attemptPushToStartIfEligible(
+        snapshot: GlucoseSnapshot,
+        overdueBy: TimeInterval,
+        oldActivity _: Activity<GlucoseLiveActivityAttributes>
+    ) -> Bool {
+        let token = Storage.shared.laPushToStartToken.value
+        guard !token.isEmpty else {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] push-to-start unavailable (no token — iOS <17.2 or not yet issued)"
+            )
+            return false
+        }
+
+        let now = Date().timeIntervalSince1970
+        let lastAt = Storage.shared.laLastPushToStartAt.value
+        let backoff = Storage.shared.laPushToStartBackoff.value
+        if lastAt > 0, now < lastAt + backoff {
+            let wait = Int(lastAt + backoff - now)
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] push-to-start rate-limited: next allowed in \(wait)s (backoff=\(Int(backoff))s)"
+            )
+            return false
+        }
+
+        // Record attempt time up-front so two refresh ticks can't double-fire.
+        Storage.shared.laLastPushToStartAt.value = now
+
+        seq += 1
+        let nextSeq = seq
+        let freshSnapshot = snapshot.withRenewalOverlay(false)
+        let state = GlucoseLiveActivityAttributes.ContentState(
+            snapshot: freshSnapshot,
+            seq: nextSeq,
+            reason: "push-to-start",
+            producedAt: Date(),
+        )
+        let staleDate = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
+
+        let tail = String(token.suffix(8))
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] push-to-start firing overdueBy=\(Int(overdueBy))s token=…\(tail) seq=\(nextSeq)"
+        )
+
+        Task { [weak self] in
+            let result = await APNSClient.shared.sendLiveActivityStart(
+                pushToStartToken: token,
+                attributesTitle: "LoopFollow",
+                state: state,
+                staleDate: staleDate,
+            )
+            await MainActor.run {
+                self?.handlePushToStartResult(result, overdueBy: overdueBy)
+            }
+        }
+        return true
+    }
+
+    @MainActor
+    private func handlePushToStartResult(
+        _ result: APNSClient.PushToStartResult,
+        overdueBy: TimeInterval
+    ) {
+        switch result {
+        case .success:
+            // Adoption of the new LA runs via `activityUpdates` observation, which
+            // ends the old activity, resets the renewal deadline and clears
+            // `laRenewalFailed`. Apply base backoff so refresh ticks between now
+            // and adoption don't re-fire push-to-start.
+            Storage.shared.laPushToStartBackoff.value = LiveActivityManager.pushToStartBaseBackoff
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] push-to-start succeeded — awaiting activityUpdates to adopt new LA"
+            )
+        case .rateLimited:
+            let currentBackoff = Storage.shared.laPushToStartBackoff.value
+            let next = min(
+                LiveActivityManager.pushToStartMaxBackoff,
+                max(LiveActivityManager.pushToStartBaseBackoff, currentBackoff * 2)
+            )
+            Storage.shared.laPushToStartBackoff.value = next
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] push-to-start 429 — backoff raised to \(Int(next))s"
+            )
+            markRenewalFailedFromBackground(overdueBy: overdueBy)
+        case .tokenInvalid:
+            // Clear the stored token so the next `pushToStartTokenUpdates`
+            // delivery can overwrite it. Reset backoff — no point holding off
+            // while we wait for iOS to reissue.
+            Storage.shared.laPushToStartToken.value = ""
+            Storage.shared.laPushToStartBackoff.value = 0
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] push-to-start token invalid — cleared, awaiting new token"
+            )
+            markRenewalFailedFromBackground(overdueBy: overdueBy)
+        case .failed:
+            let currentBackoff = Storage.shared.laPushToStartBackoff.value
+            if currentBackoff < LiveActivityManager.pushToStartBaseBackoff {
+                Storage.shared.laPushToStartBackoff.value = LiveActivityManager.pushToStartBaseBackoff
+            }
+            markRenewalFailedFromBackground(overdueBy: overdueBy)
+        }
+    }
+
+    /// Background renewal couldn't restart the LA (not visible, and push-to-start
+    /// unavailable or rate-limited). Mark the state so the renewal overlay shows
+    /// on the lock screen, and post a local notification on the first failure so
+    /// the user knows to foreground the app.
+    private func markRenewalFailedFromBackground(overdueBy: TimeInterval) {
+        let isFirstFailure = !Storage.shared.laRenewalFailed.value
+        Storage.shared.laRenewalFailed.value = true
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] renewal deadline passed by \(Int(overdueBy))s — app not visible, push-to-start unavailable, renewal marked failed"
+        )
+        if isFirstFailure {
+            scheduleRenewalFailedNotification()
         }
     }
 

@@ -101,9 +101,115 @@ class APNSClient {
         }
     }
 
+    // MARK: - Send Live Activity Start (push-to-start, iOS 17.2+)
+
+    enum PushToStartResult {
+        case success
+        case rateLimited
+        case tokenInvalid
+        case failed
+    }
+
+    func sendLiveActivityStart(
+        pushToStartToken: String,
+        attributesTitle: String,
+        state: GlucoseLiveActivityAttributes.ContentState,
+        staleDate: Date,
+    ) async -> PushToStartResult {
+        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: lfKeyId, teamId: lfTeamId, apnsKey: lfApnsKey) else {
+            LogManager.shared.log(category: .apns, message: "APNs failed to generate JWT for Live Activity push-to-start")
+            return .failed
+        }
+
+        let payload = buildStartPayload(attributesTitle: attributesTitle, state: state, staleDate: staleDate)
+
+        guard let url = URL(string: "\(apnsHost)/3/device/\(pushToStartToken)") else {
+            LogManager.shared.log(category: .apns, message: "APNs invalid URL (push-to-start)", isDebug: true)
+            return .failed
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("bearer \(jwt)", forHTTPHeaderField: "authorization")
+        request.setValue("application/json", forHTTPHeaderField: "content-type")
+        request.setValue("\(bundleID).push-type.liveactivity", forHTTPHeaderField: "apns-topic")
+        request.setValue("liveactivity", forHTTPHeaderField: "apns-push-type")
+        request.setValue("10", forHTTPHeaderField: "apns-priority")
+        request.httpBody = payload
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                LogManager.shared.log(category: .apns, message: "APNs push-to-start: no HTTP response")
+                return .failed
+            }
+            switch httpResponse.statusCode {
+            case 200:
+                LogManager.shared.log(category: .apns, message: "APNs push-to-start sent successfully")
+                return .success
+            case 403:
+                JWTManager.shared.invalidateCache()
+                LogManager.shared.log(category: .apns, message: "APNs push-to-start JWT rejected (403) — token cache cleared")
+                return .failed
+            case 404, 410:
+                // Push-to-start token rotated or invalid — caller should clear stored token
+                // so the next pushToStartTokenUpdates delivery overwrites it.
+                let reason = httpResponse.statusCode == 410 ? "expired (410)" : "not found (404)"
+                LogManager.shared.log(category: .apns, message: "APNs push-to-start token \(reason) — clearing stored token")
+                return .tokenInvalid
+            case 429:
+                LogManager.shared.log(category: .apns, message: "APNs push-to-start rate limited (429)")
+                return .rateLimited
+            default:
+                let responseBody = String(data: data, encoding: .utf8) ?? "empty"
+                LogManager.shared.log(category: .apns, message: "APNs push-to-start failed status=\(httpResponse.statusCode) body=\(responseBody)")
+                return .failed
+            }
+        } catch {
+            LogManager.shared.log(category: .apns, message: "APNs push-to-start error: \(error.localizedDescription)")
+            return .failed
+        }
+    }
+
+    private func buildStartPayload(
+        attributesTitle: String,
+        state: GlucoseLiveActivityAttributes.ContentState,
+        staleDate: Date,
+    ) -> Data? {
+        guard let contentStateDict = contentStateDictionary(state: state) else { return nil }
+
+        let payload: [String: Any] = [
+            "aps": [
+                "timestamp": Int(Date().timeIntervalSince1970),
+                "event": "start",
+                "stale-date": Int(staleDate.timeIntervalSince1970),
+                "attributes-type": "GlucoseLiveActivityAttributes",
+                "attributes": ["title": attributesTitle],
+                "content-state": contentStateDict,
+                "alert": [
+                    "title": "LoopFollow",
+                    "body": "Live Activity restarted",
+                ],
+            ],
+        ]
+        return try? JSONSerialization.data(withJSONObject: payload)
+    }
+
     // MARK: - Payload Builder
 
     private func buildPayload(state: GlucoseLiveActivityAttributes.ContentState) -> Data? {
+        guard let contentState = contentStateDictionary(state: state) else { return nil }
+        let payload: [String: Any] = [
+            "aps": [
+                "timestamp": Int(Date().timeIntervalSince1970),
+                "event": "update",
+                "content-state": contentState,
+            ],
+        ]
+        return try? JSONSerialization.data(withJSONObject: payload)
+    }
+
+    private func contentStateDictionary(state: GlucoseLiveActivityAttributes.ContentState) -> [String: Any]? {
         let snapshot = state.snapshot
 
         var snapshotDict: [String: Any] = [
@@ -139,22 +245,12 @@ class APNSClient {
         if let minBgMgdl = snapshot.minBgMgdl { snapshotDict["minBgMgdl"] = minBgMgdl }
         if let maxBgMgdl = snapshot.maxBgMgdl { snapshotDict["maxBgMgdl"] = maxBgMgdl }
 
-        let contentState: [String: Any] = [
+        return [
             "snapshot": snapshotDict,
             "seq": state.seq,
             "reason": state.reason,
             "producedAt": state.producedAt.timeIntervalSince1970,
         ]
-
-        let payload: [String: Any] = [
-            "aps": [
-                "timestamp": Int(Date().timeIntervalSince1970),
-                "event": "update",
-                "content-state": contentState,
-            ],
-        ]
-
-        return try? JSONSerialization.data(withJSONObject: payload)
     }
 }
 

@@ -116,6 +116,12 @@ class Storage {
     var laEnabled = StorageValue<Bool>(key: "laEnabled", defaultValue: false)
     var laRenewBy = StorageValue<TimeInterval>(key: "laRenewBy", defaultValue: 0)
     var laRenewalFailed = StorageValue<Bool>(key: "laRenewalFailed", defaultValue: false)
+    // Push-to-start (iOS 17.2+). Token persists across launches; empty when unavailable.
+    var laPushToStartToken = StorageValue<String>(key: "laPushToStartToken", defaultValue: "")
+    // Unix timestamp of last push-to-start attempt; used to rate-limit and back off on 429.
+    var laLastPushToStartAt = StorageValue<TimeInterval>(key: "laLastPushToStartAt", defaultValue: 0)
+    // Current backoff in seconds before the next push-to-start attempt is allowed (set by 429).
+    var laPushToStartBackoff = StorageValue<TimeInterval>(key: "laPushToStartBackoff", defaultValue: 0)
 
     // Graph Settings [BEGIN]
     var showDots = StorageValue<Bool>(key: "showDots", defaultValue: true)
@@ -324,6 +330,9 @@ class Storage {
         laEnabled.reload()
         laRenewBy.reload()
         laRenewalFailed.reload()
+        laPushToStartToken.reload()
+        laLastPushToStartAt.reload()
+        laPushToStartBackoff.reload()
 
         showDots.reload()
         showLines.reload()
