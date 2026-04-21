@@ -107,6 +107,9 @@ final class LiveActivityManager {
         Storage.shared.laRenewBy.value = Date().timeIntervalSince1970 + LiveActivityManager.renewalThreshold
         Storage.shared.laRenewalFailed.value = false
         cancelRenewalFailedNotification()
+        // Clear extension-liveness tracking: the old LA's last-seen seq must not
+        // leave the new LA looking stuck on the first few refresh ticks.
+        LALivenessStore.clear()
         dismissedByUser = false
         bind(to: activity, logReason: "push-to-start-adopt")
     }
@@ -570,9 +573,7 @@ final class LiveActivityManager {
 
     /// Requests a fresh Live Activity to replace the current one when the renewal
     /// deadline has passed, working around Apple's 8-hour maximum LA lifetime.
-    /// The new LA is requested FIRST — the old one is only ended if that succeeds,
-    /// so the user keeps live data if Activity.request() throws.
-    /// Returns true if renewal was performed (caller should return early).
+    /// Returns true if a foreground restart was performed (caller returns early).
     private func renewIfNeeded(snapshot: GlucoseSnapshot) -> Bool {
         guard let oldActivity = current else { return false }
 
@@ -580,41 +581,98 @@ final class LiveActivityManager {
         guard renewBy > 0, Date().timeIntervalSince1970 >= renewBy else { return false }
 
         let overdueBy = Date().timeIntervalSince1970 - renewBy
+        return attemptLARestart(
+            snapshot: snapshot,
+            oldActivity: oldActivity,
+            logReason: "renew",
+            ageSeconds: overdueBy
+        )
+    }
 
+    /// Restarts the LA when the widget extension stops rendering new seqs —
+    /// iOS sometimes freezes the widget process while the renewal deadline is
+    /// still in the future, leaving the lock screen showing stale glucose.
+    /// The `LALivenessStore` marker written by `LALivenessMarker` in the
+    /// widget body is the authoritative signal; `shouldRestartBecauseExtensionLooksStuck`
+    /// gates on a 15-minute grace period plus a seq-behind check.
+    /// Rate-limiting on push-to-start (`laLastPushToStartAt` + `laPushToStartBackoff`)
+    /// plus `laRenewalFailed`'s `isFirstFailure` gate make this safe to call every tick.
+    private func restartIfExtensionLooksStuck(snapshot: GlucoseSnapshot) -> Bool {
+        guard let oldActivity = current else { return false }
+        guard shouldRestartBecauseExtensionLooksStuck() else { return false }
+
+        let lastSeenAt = LALivenessStore.lastExtensionSeenAt
+        let silenceSeconds = lastSeenAt > 0
+            ? Date().timeIntervalSince1970 - lastSeenAt
+            : 0
+
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] extension looks stuck — triggering restart (silenceSeconds=\(Int(silenceSeconds)))"
+        )
+        return attemptLARestart(
+            snapshot: snapshot,
+            oldActivity: oldActivity,
+            logReason: "stuck",
+            ageSeconds: silenceSeconds
+        )
+    }
+
+    /// Unified restart path. Shared by deadline-based renewal and
+    /// extension-stuck detection so both take the same foreground /
+    /// background / push-to-start / mark-failed decisions.
+    ///
+    /// The new LA is requested FIRST — the old one is only ended if that
+    /// succeeds, so the user keeps live data if `Activity.request()` throws.
+    /// Returns true if a foreground restart was performed (caller returns
+    /// early). Background paths return false even on successful push-to-start
+    /// dispatch — their async handlers update state as results come in.
+    private func attemptLARestart(
+        snapshot: GlucoseSnapshot,
+        oldActivity: Activity<GlucoseLiveActivityAttributes>,
+        logReason: String,
+        ageSeconds: TimeInterval
+    ) -> Bool {
         // Activity.request() requires a foregroundActive scene — from the background
         // it always fails with `visibility`. Try push-to-start instead (iOS 17.2+);
         // fall back to marking renewal failed and waiting for the user to foreground
         // the app if push-to-start isn't available or doesn't succeed.
         guard isAppVisibleForLiveActivityStart() else {
-            if attemptPushToStartIfEligible(snapshot: snapshot, overdueBy: overdueBy, oldActivity: oldActivity) {
-                // Fired — the async result handler updates state based on success/failure.
+            if attemptPushToStartIfEligible(snapshot: snapshot, overdueBy: ageSeconds, oldActivity: oldActivity) {
                 return false
             }
-            markRenewalFailedFromBackground(overdueBy: overdueBy)
+            markRenewalFailedFromBackground(overdueBy: ageSeconds)
             return false
         }
 
-        LogManager.shared.log(category: .general, message: "[LA] renewal deadline passed by \(Int(overdueBy))s, requesting new LA")
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] restart (\(logReason)) age=\(Int(ageSeconds))s, requesting new LA"
+        )
 
         let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
         let attributes = GlucoseLiveActivityAttributes(title: "LoopFollow")
 
-        // Build the fresh snapshot with showRenewalOverlay: false — the new LA has a
-        // fresh deadline so no overlay is needed from the first frame. We pass the
-        // deadline as staleDate to ActivityContent below, not to Storage yet; Storage
-        // is only updated after Activity.request succeeds so a crash between the two
-        // can't leave the deadline permanently stuck in the future.
+        // showRenewalOverlay: false — the new LA has a fresh deadline so no overlay
+        // is needed from the first frame. The deadline is passed as staleDate below,
+        // not written to Storage yet; Storage is only updated after Activity.request
+        // succeeds so a crash between the two can't leave a stuck future deadline.
         let freshSnapshot = snapshot.withRenewalOverlay(false)
 
         let state = GlucoseLiveActivityAttributes.ContentState(
             snapshot: freshSnapshot,
             seq: seq,
-            reason: "renew",
+            reason: logReason,
             producedAt: Date(),
         )
         let content = ActivityContent(state: state, staleDate: renewDeadline)
 
         do {
+            // Clear before Activity.request so the new LA starts with a clean
+            // liveness slate. A stale lastSeenAt from the old LA could otherwise
+            // satisfy `seenSeq < expectedSeq` for the new one and trip the stuck
+            // check again.
+            LALivenessStore.clear()
             let newActivity = try Activity.request(attributes: attributes, content: content, pushType: .token)
 
             Task {
@@ -629,23 +687,23 @@ final class LiveActivityManager {
             stateObserverTask = nil
             pushToken = nil
 
-            // Write deadline only on success — avoids a stuck future deadline if we crash
-            // between the write and the Activity.request call.
             Storage.shared.laRenewBy.value = renewDeadline.timeIntervalSince1970
-            bind(to: newActivity, logReason: "renew")
+            bind(to: newActivity, logReason: logReason)
             Storage.shared.laRenewalFailed.value = false
             cancelRenewalFailedNotification()
             GlucoseSnapshotStore.shared.save(freshSnapshot)
-            LogManager.shared.log(category: .general, message: "[LA] Live Activity renewed successfully id=\(newActivity.id)")
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] Live Activity restarted (\(logReason)) id=\(newActivity.id)"
+            )
             return true
         } catch {
-            // Renewal failed — deadline was never written, so no rollback needed.
             let isFirstFailure = !Storage.shared.laRenewalFailed.value
             Storage.shared.laRenewalFailed.value = true
             let ns = error as NSError
             LogManager.shared.log(
                 category: .general,
-                message: "[LA] renewal failed, keeping existing LA: \(error) domain=\(ns.domain) code=\(ns.code) — authorized=\(ActivityAuthorizationInfo().areActivitiesEnabled), activities=\(Activity<GlucoseLiveActivityAttributes>.activities.count)"
+                message: "[LA] restart (\(logReason)) failed, keeping existing LA: \(error) domain=\(ns.domain) code=\(ns.code) — authorized=\(ActivityAuthorizationInfo().areActivitiesEnabled), activities=\(Activity<GlucoseLiveActivityAttributes>.activities.count)"
             )
             if isFirstFailure {
                 scheduleRenewalFailedNotification()
@@ -801,6 +859,13 @@ final class LiveActivityManager {
 
         // Check if the Live Activity is approaching Apple's 8-hour limit and renew if so.
         if renewIfNeeded(snapshot: snapshot) { return }
+
+        // Catch a frozen widget extension — iOS occasionally stops invoking the
+        // extension before the 8h deadline. `shouldRestartBecauseExtensionLooksStuck`
+        // consults the LALivenessMarker's shared-defaults timestamp written from the
+        // widget's SwiftUI body. Safe to run every tick: the underlying push-to-start
+        // rate-limit and `laRenewalFailed`'s first-failure gate dedupe repeat firings.
+        if restartIfExtensionLooksStuck(snapshot: snapshot) { return }
 
         if snapshot.showRenewalOverlay {
             LogManager.shared.log(category: .general, message: "[LA] sending update with renewal overlay visible")
