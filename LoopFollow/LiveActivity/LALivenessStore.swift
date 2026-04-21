@@ -4,7 +4,7 @@
 import Foundation
 
 enum LALivenessStore {
-    private static let defaults = UserDefaults(suiteName: AppGroupID.baseBundleID)
+    private static let defaults = UserDefaults(suiteName: AppGroupID.current())
 
     private enum Key {
         static let lastExtensionSeenAt = "la.liveness.lastExtensionSeenAt"

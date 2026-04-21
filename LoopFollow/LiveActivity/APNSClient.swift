@@ -186,10 +186,6 @@ class APNSClient {
                 "attributes-type": "GlucoseLiveActivityAttributes",
                 "attributes": ["title": attributesTitle],
                 "content-state": contentStateDict,
-                "alert": [
-                    "title": "LoopFollow",
-                    "body": "Live Activity restarted",
-                ],
             ],
         ]
         return try? JSONSerialization.data(withJSONObject: payload)
