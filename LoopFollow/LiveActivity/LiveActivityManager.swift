@@ -107,9 +107,6 @@ final class LiveActivityManager {
         Storage.shared.laRenewBy.value = Date().timeIntervalSince1970 + LiveActivityManager.renewalThreshold
         Storage.shared.laRenewalFailed.value = false
         cancelRenewalFailedNotification()
-        // Clear extension-liveness tracking: the old LA's last-seen seq must not
-        // leave the new LA looking stuck on the first few refresh ticks.
-        LALivenessStore.clear()
         dismissedByUser = false
         bind(to: activity, logReason: "push-to-start-adopt")
     }
@@ -274,47 +271,8 @@ final class LiveActivityManager {
         refreshFromCurrentState(reason: "audio-session-failed")
     }
 
-    private func shouldRestartBecauseExtensionLooksStuck() -> Bool {
-        guard Storage.shared.laEnabled.value else { return false }
-        guard !dismissedByUser else { return false }
-
-        guard let activity = current ?? Activity<GlucoseLiveActivityAttributes>.activities.first else {
-            return false
-        }
-
-        let now = Date().timeIntervalSince1970
-        let staleDatePassed = activity.content.staleDate.map { $0 <= Date() } ?? false
-        if staleDatePassed {
-            LogManager.shared.log(
-                category: .general,
-                message: "[LA] liveness check: staleDate already passed"
-            )
-            return true
-        }
-
-        let expectedSeq = activity.content.state.seq
-        let seenSeq = LALivenessStore.lastExtensionSeq
-        let lastSeenAt = LALivenessStore.lastExtensionSeenAt
-        let lastProducedAt = LALivenessStore.lastExtensionProducedAt
-
-        let extensionHasNeverCheckedIn = lastSeenAt <= 0
-        let extensionLooksBehind = seenSeq < expectedSeq
-        let noRecentExtensionTouch = extensionHasNeverCheckedIn || (now - lastSeenAt > LiveActivityManager.extensionLivenessGrace)
-
-        LogManager.shared.log(
-            category: .general,
-            message: "[LA] liveness check: expectedSeq=\(expectedSeq), seenSeq=\(seenSeq), lastSeenAt=\(lastSeenAt), lastProducedAt=\(lastProducedAt), behind=\(extensionLooksBehind), noRecentTouch=\(noRecentExtensionTouch)",
-            isDebug: true
-        )
-
-        // Conservative rule:
-        // only suspect "stuck" if the extension is both behind AND has not checked in recently.
-        return extensionLooksBehind && noRecentExtensionTouch
-    }
-
     static let renewalThreshold: TimeInterval = 7.5 * 3600
     static let renewalWarning: TimeInterval = 30 * 60
-    static let extensionLivenessGrace: TimeInterval = 15 * 60
 
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
@@ -430,7 +388,6 @@ final class LiveActivityManager {
 
             let renewDeadline = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
             let content = ActivityContent(state: initialState, staleDate: renewDeadline)
-            LALivenessStore.clear()
             let activity = try Activity.request(attributes: attributes, content: content, pushType: .token)
 
             bind(to: activity, logReason: "start-new")
@@ -458,7 +415,6 @@ final class LiveActivityManager {
         endingForRestart = true
         current = nil
         Storage.shared.laRenewBy.value = 0
-        LALivenessStore.clear()
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
             await activity.end(nil, dismissalPolicy: .immediate)
@@ -500,7 +456,6 @@ final class LiveActivityManager {
             if current?.id == activity.id {
                 current = nil
                 Storage.shared.laRenewBy.value = 0
-                LALivenessStore.clear()
             }
         }
     }
@@ -518,7 +473,6 @@ final class LiveActivityManager {
         dismissedByUser = false
         Storage.shared.laRenewBy.value = 0
         Storage.shared.laRenewalFailed.value = false
-        LALivenessStore.clear()
         cancelRenewalFailedNotification()
         current = nil
         updateTask?.cancel(); updateTask = nil
@@ -589,38 +543,8 @@ final class LiveActivityManager {
         )
     }
 
-    /// Restarts the LA when the widget extension stops rendering new seqs —
-    /// iOS sometimes freezes the widget process while the renewal deadline is
-    /// still in the future, leaving the lock screen showing stale glucose.
-    /// The `LALivenessStore` marker written by `LALivenessMarker` in the
-    /// widget body is the authoritative signal; `shouldRestartBecauseExtensionLooksStuck`
-    /// gates on a 15-minute grace period plus a seq-behind check.
-    /// Rate-limiting on push-to-start (`laLastPushToStartAt` + `laPushToStartBackoff`)
-    /// plus `laRenewalFailed`'s `isFirstFailure` gate make this safe to call every tick.
-    private func restartIfExtensionLooksStuck(snapshot: GlucoseSnapshot) -> Bool {
-        guard let oldActivity = current else { return false }
-        guard shouldRestartBecauseExtensionLooksStuck() else { return false }
-
-        let lastSeenAt = LALivenessStore.lastExtensionSeenAt
-        let silenceSeconds = lastSeenAt > 0
-            ? Date().timeIntervalSince1970 - lastSeenAt
-            : 0
-
-        LogManager.shared.log(
-            category: .general,
-            message: "[LA] extension looks stuck — triggering restart (silenceSeconds=\(Int(silenceSeconds)))"
-        )
-        return attemptLARestart(
-            snapshot: snapshot,
-            oldActivity: oldActivity,
-            logReason: "stuck",
-            ageSeconds: silenceSeconds
-        )
-    }
-
-    /// Unified restart path. Shared by deadline-based renewal and
-    /// extension-stuck detection so both take the same foreground /
-    /// background / push-to-start / mark-failed decisions.
+    /// Unified restart path. Shared by deadline-based renewal so it takes the
+    /// same foreground / background / push-to-start / mark-failed decisions.
     ///
     /// The new LA is requested FIRST — the old one is only ended if that
     /// succeeds, so the user keeps live data if `Activity.request()` throws.
@@ -668,11 +592,6 @@ final class LiveActivityManager {
         let content = ActivityContent(state: state, staleDate: renewDeadline)
 
         do {
-            // Clear before Activity.request so the new LA starts with a clean
-            // liveness slate. A stale lastSeenAt from the old LA could otherwise
-            // satisfy `seenSeq < expectedSeq` for the new one and trip the stuck
-            // check again.
-            LALivenessStore.clear()
             let newActivity = try Activity.request(attributes: attributes, content: content, pushType: .token)
 
             Task {
@@ -859,13 +778,6 @@ final class LiveActivityManager {
 
         // Check if the Live Activity is approaching Apple's 8-hour limit and renew if so.
         if renewIfNeeded(snapshot: snapshot) { return }
-
-        // Catch a frozen widget extension — iOS occasionally stops invoking the
-        // extension before the 8h deadline. `shouldRestartBecauseExtensionLooksStuck`
-        // consults the LALivenessMarker's shared-defaults timestamp written from the
-        // widget's SwiftUI body. Safe to run every tick: the underlying push-to-start
-        // rate-limit and `laRenewalFailed`'s first-failure gate dedupe repeat firings.
-        if restartIfExtensionLooksStuck(snapshot: snapshot) { return }
 
         if snapshot.showRenewalOverlay {
             LogManager.shared.log(category: .general, message: "[LA] sending update with renewal overlay visible")
