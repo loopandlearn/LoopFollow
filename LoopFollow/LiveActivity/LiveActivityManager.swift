@@ -49,20 +49,36 @@ final class LiveActivityManager {
     private func startPushToStartTokenObservation() {
         if #available(iOS 17.2, *) {
             pushToStartObservationTask?.cancel()
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] pushToStartTokenUpdates observation starting (iOS 17.2+)"
+            )
             pushToStartObservationTask = Task {
+                var deliveries = 0
                 for await tokenData in Activity<GlucoseLiveActivityAttributes>.pushToStartTokenUpdates {
+                    deliveries += 1
                     let token = tokenData.map { String(format: "%02x", $0) }.joined()
                     let previousTail = Storage.shared.laPushToStartToken.value.isEmpty
                         ? "nil"
                         : String(Storage.shared.laPushToStartToken.value.suffix(8))
                     let tail = String(token.suffix(8))
+                    let changed = tail != previousTail
                     Storage.shared.laPushToStartToken.value = token
                     LogManager.shared.log(
                         category: .general,
-                        message: "[LA] push-to-start token received token=…\(tail) (prev=…\(previousTail))"
+                        message: "[LA] push-to-start token received #\(deliveries) token=…\(tail) (prev=…\(previousTail))\(changed ? " CHANGED" : " same")"
                     )
                 }
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] pushToStartTokenUpdates stream ended after \(deliveries) deliveries — no further tokens will arrive"
+                )
             }
+        } else {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] pushToStartTokenUpdates unavailable (iOS <17.2) — push-to-start will never fire"
+            )
         }
     }
 
@@ -72,20 +88,59 @@ final class LiveActivityManager {
     private func startActivityUpdatesObservation() {
         if #available(iOS 16.2, *) {
             activityUpdatesObservationTask?.cancel()
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] activityUpdates observation starting (iOS 16.2+)"
+            )
             activityUpdatesObservationTask = Task { [weak self] in
+                var deliveries = 0
                 for await activity in Activity<GlucoseLiveActivityAttributes>.activityUpdates {
+                    deliveries += 1
+                    let incomingID = activity.id
+                    LogManager.shared.log(
+                        category: .general,
+                        message: "[LA] activityUpdates delivery #\(deliveries) id=\(incomingID) — dispatching to MainActor"
+                    )
                     await MainActor.run {
                         self?.adoptPushToStartActivity(activity)
                     }
                 }
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] activityUpdates stream ended after \(deliveries) deliveries — push-to-start adoption will no longer work until app relaunch"
+                )
             }
+        } else {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] activityUpdates unavailable (iOS <16.2) — push-to-start adoption cannot work"
+            )
         }
     }
 
     @MainActor
     private func adoptPushToStartActivity(_ activity: Activity<GlucoseLiveActivityAttributes>) {
         // Skip if it's the activity we already track (app-initiated path binds it directly).
-        if current?.id == activity.id { return }
+        if current?.id == activity.id {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] activityUpdates: ignoring own activity id=\(activity.id) (already current)"
+            )
+            return
+        }
+
+        let adoptDelay = lastPushToStartSuccessAt.map { Int(Date().timeIntervalSince($0)) }
+        let delayDescription = adoptDelay.map { "\($0)s after last push-to-start success" } ?? "no prior push-to-start this session"
+        let totalActivities = Activity<GlucoseLiveActivityAttributes>.activities.count
+        let staleDate = activity.content.staleDate
+        let staleDesc = staleDate.map { String(format: "%.0f", $0.timeIntervalSinceNow) + "s" } ?? "nil"
+        let incomingSeq = activity.content.state.seq
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] adopt: id=\(activity.id) seq=\(incomingSeq) staleIn=\(staleDesc) totalActivities=\(totalActivities) (\(delayDescription))"
+        )
+        lastPushToStartSuccessAt = nil
+
         // If we already have a current activity and this is a different one, it's likely
         // the new push-to-start LA replacing an old one. End the old, then bind the new.
         if let old = current, old.id != activity.id {
@@ -100,7 +155,7 @@ final class LiveActivityManager {
         } else {
             LogManager.shared.log(
                 category: .general,
-                message: "[LA] activityUpdates: adopting new activity id=\(activity.id)"
+                message: "[LA] activityUpdates: adopting new activity id=\(activity.id) (no prior current)"
             )
         }
         // Fresh deadline — push-to-start-initiated LAs reset the 8-hour clock.
@@ -302,6 +357,10 @@ final class LiveActivityManager {
     /// Observes `Activity<>.activityUpdates` (iOS 16.2+) so activities started
     /// out-of-band (push-to-start) are adopted automatically.
     private var activityUpdatesObservationTask: Task<Void, Never>?
+    /// Timestamp of the last successful push-to-start APNs dispatch. Used to log
+    /// the delay until iOS delivers the new activity via `activityUpdates`. If
+    /// adoption never happens, a growing gap here is the fingerprint.
+    private var lastPushToStartSuccessAt: Date?
     /// Base backoff after a 429 for push-to-start; doubled on each subsequent 429,
     /// capped at `pushToStartMaxBackoff`. Reset to zero after a successful send.
     private static let pushToStartBaseBackoff: TimeInterval = 300 // 5 min
@@ -535,6 +594,16 @@ final class LiveActivityManager {
         guard renewBy > 0, Date().timeIntervalSince1970 >= renewBy else { return false }
 
         let overdueBy = Date().timeIntervalSince1970 - renewBy
+        // Negative timeToCeiling means the LA is already past Apple's 8h limit
+        // (the renewal deadline is 7.5h and the ceiling is 8h, so 30 minutes after
+        // `renewBy`). A foreground Activity.request should still work but a
+        // background adoption may race against system end-of-life.
+        let timeToCeiling = 30 * 60 - overdueBy
+        let laAgeHours = String(format: "%.2f", (LiveActivityManager.renewalThreshold + overdueBy) / 3600.0)
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] renewIfNeeded: firing — laAge=\(laAgeHours)h overdueBy=\(Int(overdueBy))s timeToCeiling=\(Int(timeToCeiling))s (positive = before 8h, negative = past 8h)"
+        )
         return attemptLARestart(
             snapshot: snapshot,
             oldActivity: oldActivity,
@@ -681,17 +750,25 @@ final class LiveActivityManager {
         let staleDate = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
 
         let tail = String(token.suffix(8))
+        let existingActivities = Activity<GlucoseLiveActivityAttributes>.activities.count
+        let staleInSeconds = Int(staleDate.timeIntervalSinceNow)
         LogManager.shared.log(
             category: .general,
-            message: "[LA] push-to-start firing overdueBy=\(Int(overdueBy))s token=…\(tail) seq=\(nextSeq)"
+            message: "[LA] push-to-start firing overdueBy=\(Int(overdueBy))s token=…\(tail) seq=\(nextSeq) staleIn=\(staleInSeconds)s existingActivities=\(existingActivities) current=\(current?.id ?? "nil")"
         )
 
+        let sendStart = Date()
         Task { [weak self] in
             let result = await APNSClient.shared.sendLiveActivityStart(
                 pushToStartToken: token,
                 attributesTitle: "LoopFollow",
                 state: state,
                 staleDate: staleDate,
+            )
+            let elapsedMs = Int(Date().timeIntervalSince(sendStart) * 1000)
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] push-to-start APNs round-trip result=\(result) elapsed=\(elapsedMs)ms"
             )
             await MainActor.run {
                 self?.handlePushToStartResult(result, overdueBy: overdueBy)
@@ -712,9 +789,10 @@ final class LiveActivityManager {
             // `laRenewalFailed`. Apply base backoff so refresh ticks between now
             // and adoption don't re-fire push-to-start.
             Storage.shared.laPushToStartBackoff.value = LiveActivityManager.pushToStartBaseBackoff
+            lastPushToStartSuccessAt = Date()
             LogManager.shared.log(
                 category: .general,
-                message: "[LA] push-to-start succeeded — awaiting activityUpdates to adopt new LA"
+                message: "[LA] push-to-start succeeded — awaiting activityUpdates to adopt new LA (backoff=\(Int(LiveActivityManager.pushToStartBaseBackoff))s)"
             )
         case .rateLimited:
             let currentBackoff = Storage.shared.laPushToStartBackoff.value
@@ -932,10 +1010,13 @@ final class LiveActivityManager {
         dismissedByUser = false
         endingForRestart = false
         attachStateObserver(to: activity)
+        let renewBy = Storage.shared.laRenewBy.value
+        let now = Date().timeIntervalSince1970
+        let renewIn = renewBy > 0 ? Int(renewBy - now) : 0
+        let ceilingIn = renewBy > 0 ? Int(renewBy + 30 * 60 - now) : 0
         LogManager.shared.log(
             category: .general,
-            message: "Live Activity bound id=\(activity.id) state=\(activity.activityState) (\(logReason)) — endingForRestart cleared (was \(wasEndingForRestart))",
-            isDebug: true
+            message: "[LA] bind id=\(activity.id) state=\(activity.activityState) (\(logReason)) — renewIn=\(renewIn)s ceilingIn=\(ceilingIn)s endingForRestart cleared (was \(wasEndingForRestart))"
         )
         observePushToken(for: activity)
     }
