@@ -56,7 +56,7 @@ platform :ios do
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
       app_identifier: [
         "com.#{TEAMID}.LoopFollow",
-	"com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"
+        "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"
       ]
     )
 
@@ -139,10 +139,13 @@ platform :ios do
     end
 
     configure_bundle_id("LoopFollow", "com.#{TEAMID}.LoopFollow", [
+      Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS,
       Spaceship::ConnectAPI::BundleIdCapability::Type::PUSH_NOTIFICATIONS
     ])
     
-    configure_bundle_id("LoopFollow Live Activity Extension", "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension", [])
+    configure_bundle_id("LoopFollow Live Activity Extension", "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension", [
+      Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS
+    ])
 
   end
 
