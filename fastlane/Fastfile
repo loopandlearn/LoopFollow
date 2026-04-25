@@ -183,12 +183,6 @@ platform :ios do
       key_content: "#{FASTLANE_KEY}"
     )
 
-    def find_bundle_id(identifier)
-      bundle_id = Spaceship::ConnectAPI::BundleId.find(identifier)
-    end
-
-    find_bundle_id("com.#{TEAMID}.loopkit.LoopFollow")
-
     match(
       type: "appstore",
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
