@@ -9,8 +9,8 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var remoteType: RemoteType
     @Published var user: String
     @Published var sharedSecret: String
-    @Published var apnsKey: String
-    @Published var keyId: String
+    @Published var remoteApnsKey: String
+    @Published var remoteKeyId: String
 
     @Published var maxBolus: HKQuantity
     @Published var maxCarbs: HKQuantity
@@ -20,11 +20,6 @@ class RemoteSettingsViewModel: ObservableObject {
     @Published var mealWithFatProtein: Bool
     @Published var isTrioDevice: Bool = (Storage.shared.device.value == "Trio")
     @Published var isLoopDevice: Bool = (Storage.shared.device.value == "Loop")
-
-    // MARK: - Return Notification Properties
-
-    @Published var returnApnsKey: String
-    @Published var returnKeyId: String
 
     // MARK: - Loop APNS Setup Properties
 
@@ -56,16 +51,13 @@ class RemoteSettingsViewModel: ObservableObject {
 
         // Determine if a comparison is needed and perform it.
         switch remoteType {
-        case .trc:
-            // If the target ID is empty, there's nothing to compare.
+        case .trc, .loopAPNS:
             guard !targetTeamId.isEmpty else {
                 return false
             }
-            // Return true if the IDs are different.
             return loopFollowTeamID != targetTeamId
 
-        case .loopAPNS, .none, .nightscout:
-            // For other remote types, this check is not applicable.
+        case .none, .nightscout:
             return false
         }
     }
@@ -73,8 +65,13 @@ class RemoteSettingsViewModel: ObservableObject {
     // MARK: - Computed property for Loop APNS Setup validation
 
     var loopAPNSSetup: Bool {
-        !keyId.isEmpty &&
-            !apnsKey.isEmpty &&
+        let hasCredentials: Bool
+        if areTeamIdsDifferent {
+            hasCredentials = !remoteKeyId.isEmpty && !remoteApnsKey.isEmpty
+        } else {
+            hasCredentials = !Storage.shared.lfKeyId.value.isEmpty && !Storage.shared.lfApnsKey.value.isEmpty
+        }
+        return hasCredentials &&
             !loopDeveloperTeamId.isEmpty &&
             !loopAPNSQrCodeURL.isEmpty &&
             !Storage.shared.deviceToken.value.isEmpty &&
@@ -89,8 +86,8 @@ class RemoteSettingsViewModel: ObservableObject {
         remoteType = storage.remoteType.value
         user = storage.user.value
         sharedSecret = storage.sharedSecret.value
-        apnsKey = storage.apnsKey.value
-        keyId = storage.keyId.value
+        remoteApnsKey = storage.remoteApnsKey.value
+        remoteKeyId = storage.remoteKeyId.value
         maxBolus = storage.maxBolus.value
         maxCarbs = storage.maxCarbs.value
         maxProtein = storage.maxProtein.value
@@ -101,9 +98,6 @@ class RemoteSettingsViewModel: ObservableObject {
         loopDeveloperTeamId = storage.teamId.value ?? ""
         loopAPNSQrCodeURL = storage.loopAPNSQrCodeURL.value
         productionEnvironment = storage.productionEnvironment.value
-
-        returnApnsKey = storage.returnApnsKey.value
-        returnKeyId = storage.returnKeyId.value
 
         setupBindings()
     }
@@ -125,19 +119,18 @@ class RemoteSettingsViewModel: ObservableObject {
             .sink { [weak self] in self?.storage.sharedSecret.value = $0 }
             .store(in: &cancellables)
 
-        $apnsKey
+        $remoteApnsKey
             .dropFirst()
             .sink { [weak self] newValue in
-                // Validate and fix the APNS key format using the service
                 let apnsService = LoopAPNSService()
                 let fixedKey = apnsService.validateAndFixAPNSKey(newValue)
-                self?.storage.apnsKey.value = fixedKey
+                self?.storage.remoteApnsKey.value = fixedKey
             }
             .store(in: &cancellables)
 
-        $keyId
+        $remoteKeyId
             .dropFirst()
-            .sink { [weak self] in self?.storage.keyId.value = $0 }
+            .sink { [weak self] in self?.storage.remoteKeyId.value = $0 }
             .store(in: &cancellables)
 
         $maxBolus
@@ -194,17 +187,6 @@ class RemoteSettingsViewModel: ObservableObject {
             .dropFirst()
             .sink { [weak self] in self?.storage.productionEnvironment.value = $0 }
             .store(in: &cancellables)
-
-        // Return notification bindings
-        $returnApnsKey
-            .dropFirst()
-            .sink { [weak self] in self?.storage.returnApnsKey.value = $0 }
-            .store(in: &cancellables)
-
-        $returnKeyId
-            .dropFirst()
-            .sink { [weak self] in self?.storage.returnKeyId.value = $0 }
-            .store(in: &cancellables)
     }
 
     func handleLoopAPNSQRCodeScanResult(_ result: Result<String, Error>) {
@@ -235,8 +217,8 @@ class RemoteSettingsViewModel: ObservableObject {
         remoteType = storage.remoteType.value
         user = storage.user.value
         sharedSecret = storage.sharedSecret.value
-        apnsKey = storage.apnsKey.value
-        keyId = storage.keyId.value
+        remoteApnsKey = storage.remoteApnsKey.value
+        remoteKeyId = storage.remoteKeyId.value
         maxBolus = storage.maxBolus.value
         maxCarbs = storage.maxCarbs.value
         maxProtein = storage.maxProtein.value

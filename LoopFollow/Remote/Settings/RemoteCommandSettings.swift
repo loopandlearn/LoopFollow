@@ -8,8 +8,8 @@ struct RemoteCommandSettings: Codable {
     let remoteType: RemoteType
     let user: String
     let sharedSecret: String
-    let apnsKey: String
-    let keyId: String
+    let remoteApnsKey: String
+    let remoteKeyId: String
     let teamId: String?
     let maxBolus: Double
     let maxCarbs: Double
@@ -27,8 +27,8 @@ struct RemoteCommandSettings: Codable {
         remoteType: RemoteType,
         user: String,
         sharedSecret: String,
-        apnsKey: String,
-        keyId: String,
+        remoteApnsKey: String,
+        remoteKeyId: String,
         teamId: String?,
         maxBolus: Double,
         maxCarbs: Double,
@@ -44,8 +44,8 @@ struct RemoteCommandSettings: Codable {
         self.remoteType = remoteType
         self.user = user
         self.sharedSecret = sharedSecret
-        self.apnsKey = apnsKey
-        self.keyId = keyId
+        self.remoteApnsKey = remoteApnsKey
+        self.remoteKeyId = remoteKeyId
         self.teamId = teamId
         self.maxBolus = maxBolus
         self.maxCarbs = maxCarbs
@@ -68,8 +68,8 @@ struct RemoteCommandSettings: Codable {
             remoteType: storage.remoteType.value,
             user: storage.user.value,
             sharedSecret: storage.sharedSecret.value,
-            apnsKey: storage.apnsKey.value,
-            keyId: storage.keyId.value,
+            remoteApnsKey: storage.remoteApnsKey.value,
+            remoteKeyId: storage.remoteKeyId.value,
             teamId: storage.teamId.value,
             maxBolus: storage.maxBolus.value.doubleValue(for: .internationalUnit()),
             maxCarbs: storage.maxCarbs.value.doubleValue(for: .gram()),
@@ -91,8 +91,8 @@ struct RemoteCommandSettings: Codable {
         storage.remoteType.value = remoteType
         storage.user.value = user
         storage.sharedSecret.value = sharedSecret
-        storage.apnsKey.value = apnsKey
-        storage.keyId.value = keyId
+        storage.remoteApnsKey.value = remoteApnsKey
+        storage.remoteKeyId.value = remoteKeyId
         storage.teamId.value = teamId
         storage.maxBolus.value = HKQuantity(unit: .internationalUnit(), doubleValue: maxBolus)
         storage.maxCarbs.value = HKQuantity(unit: .gram(), doubleValue: maxCarbs)
@@ -152,9 +152,9 @@ struct RemoteCommandSettings: Codable {
         case .nightscout:
             return !user.isEmpty
         case .trc:
-            return !user.isEmpty && !sharedSecret.isEmpty && !apnsKey.isEmpty && !keyId.isEmpty
+            return !user.isEmpty && !sharedSecret.isEmpty && !remoteApnsKey.isEmpty && !remoteKeyId.isEmpty
         case .loopAPNS:
-            return !keyId.isEmpty && !apnsKey.isEmpty && teamId != nil && !loopAPNSQrCodeURL.isEmpty
+            return !remoteKeyId.isEmpty && !remoteApnsKey.isEmpty && teamId != nil && !loopAPNSQrCodeURL.isEmpty
         }
     }
 

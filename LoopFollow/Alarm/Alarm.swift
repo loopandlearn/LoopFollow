@@ -107,6 +107,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         case missedBolusPrebolusWindow, missedBolusIgnoreSmallBolusUnits
         case missedBolusIgnoreUnderGrams, missedBolusIgnoreUnderBG
         case bolusCountThreshold, bolusWindowMinutes
+        case sensorLifetimeDays
     }
 
     init(from decoder: Decoder) throws {
@@ -137,6 +138,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         missedBolusIgnoreUnderBG = try container.decodeIfPresent(Double.self, forKey: .missedBolusIgnoreUnderBG)
         bolusCountThreshold = try container.decodeIfPresent(Int.self, forKey: .bolusCountThreshold)
         bolusWindowMinutes = try container.decodeIfPresent(Int.self, forKey: .bolusWindowMinutes)
+        sensorLifetimeDays = try container.decodeIfPresent(Int.self, forKey: .sensorLifetimeDays)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -165,6 +167,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(missedBolusIgnoreUnderBG, forKey: .missedBolusIgnoreUnderBG)
         try container.encodeIfPresent(bolusCountThreshold, forKey: .bolusCountThreshold)
         try container.encodeIfPresent(bolusWindowMinutes, forKey: .bolusWindowMinutes)
+        try container.encodeIfPresent(sensorLifetimeDays, forKey: .sensorLifetimeDays)
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -190,6 +193,12 @@ struct Alarm: Identifiable, Codable, Equatable {
     var bolusCountThreshold: Int?
     /// ...within this many minutes
     var bolusWindowMinutes: Int?
+
+    // ─────────────────────────────────────────────────────────────
+    // Sensor‑Change fields ─
+    // ─────────────────────────────────────────────────────────────
+    /// CGM sensor lifetime in days (e.g. 10 for Dexcom G6, 15 for G7 15-day)
+    var sensorLifetimeDays: Int?
 
     /// Function for when the alarm is triggered.
     /// If this alarm, all alarms is disabled or snoozed, then should not be called. This or all alarmd could be muted, then this function will just generate a notification.
@@ -318,6 +327,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         case .sensorChange:
             soundFile = .wakeUpWillYou
             threshold = 12
+            sensorLifetimeDays = 10
         case .pumpChange:
             soundFile = .wakeUpWillYou
             threshold = 12

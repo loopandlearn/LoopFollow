@@ -7,6 +7,15 @@ target 'LoopFollow' do
 end
 
 post_install do |installer|
+  # Set minimum deployment target for all pods to match the app (suppresses deprecation warnings)
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 16.6
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.6'
+      end
+    end
+  end
+
   # Patch Charts Transformer to avoid "CGAffineTransformInvert: singular matrix"
   # warnings when chart views have zero dimensions (before layout).
   transformer = 'Pods/Charts/Source/Charts/Utils/Transformer.swift'

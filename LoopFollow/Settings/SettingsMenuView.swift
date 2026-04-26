@@ -65,6 +65,20 @@ struct SettingsMenuView: View {
                         settingsPath.value.append(Sheet.importExport)
                     }
 
+                    NavigationRow(title: "APN",
+                                  icon: "bell.and.waves.left.and.right")
+                    {
+                        settingsPath.value.append(Sheet.apn)
+                    }
+
+                    #if !targetEnvironment(macCatalyst)
+                        NavigationRow(title: "Live Activity",
+                                      icon: "dot.radiowaves.left.and.right")
+                        {
+                            settingsPath.value.append(Sheet.liveActivity)
+                        }
+                    #endif
+
                     if !nightscoutURL.value.isEmpty {
                         NavigationRow(title: "Remote",
                                       icon: "antenna.radiowaves.left.and.right")
@@ -158,6 +172,10 @@ private enum Sheet: Hashable, Identifiable {
     case tabSettings
     case infoDisplay
     case alarmSettings
+    case apn
+    #if !targetEnvironment(macCatalyst)
+        case liveActivity
+    #endif
     case remote
     case importExport
     case calendar, contact
@@ -177,6 +195,10 @@ private enum Sheet: Hashable, Identifiable {
         case .tabSettings: TabCustomizationModal()
         case .infoDisplay: InfoDisplaySettingsView(viewModel: .init())
         case .alarmSettings: AlarmSettingsView()
+        case .apn: APNSettingsView()
+        #if !targetEnvironment(macCatalyst)
+            case .liveActivity: LiveActivitySettingsView()
+        #endif
         case .remote: RemoteSettingsView(viewModel: .init())
         case .importExport: ImportExportSettingsView()
         case .calendar: CalendarSettingsView()

@@ -81,26 +81,39 @@ struct BolusView: View {
                             }
                         )
                     }
+                }
+                .safeAreaInset(edge: .bottom) {
+                    Button {
+                        bolusFieldIsFocused = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            let rawValue = self.bolusAmount.doubleValue(for: .internationalUnit())
+                            let steppedAmount = roundedToStep(rawValue)
 
-                    LoadingButtonView(
-                        buttonText: "Send Bolus",
-                        progressText: "Sending Bolus...",
-                        isLoading: isLoading,
-                        action: {
-                            bolusFieldIsFocused = false
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                let rawValue = self.bolusAmount.doubleValue(for: .internationalUnit())
-                                let steppedAmount = roundedToStep(rawValue)
-
-                                if steppedAmount > 0 {
-                                    bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: steppedAmount)
-                                    alertType = .confirmBolus
-                                    showAlert = true
-                                }
+                            if steppedAmount > 0 {
+                                bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: steppedAmount)
+                                alertType = .confirmBolus
+                                showAlert = true
                             }
-                        },
-                        isDisabled: isLoading
-                    )
+                        }
+                    } label: {
+                        if isLoading {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Sending Bolus...")
+                            }
+                            .frame(maxWidth: .infinity)
+                        } else {
+                            Text("Send Bolus")
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .disabled(isLoading)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(.bar)
                 }
                 .navigationTitle("Bolus")
                 .navigationBarTitleDisplayMode(.inline)
