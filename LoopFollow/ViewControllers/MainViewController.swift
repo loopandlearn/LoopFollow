@@ -194,7 +194,10 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // when runMigrationsIfNeeded() is called. This catches migrations deferred by a
         // background BGAppRefreshTask launch in Before-First-Unlock state.
         notificationCenter.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
+
+        #if !targetEnvironment(macCatalyst)
+            notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
+        #endif
 
         // Setup the Graph
         if firstGraphLoad {

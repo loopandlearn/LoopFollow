@@ -39,9 +39,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // scene(_:openURLContexts:) fires after sceneDidBecomeActive when the app
         // foregrounds from background. Post on the next run loop so the view
         // hierarchy (including any presented modals) is fully settled.
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
-        }
+        #if !targetEnvironment(macCatalyst)
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
+            }
+        #endif
     }
 
     func sceneWillResignActive(_: UIScene) {
