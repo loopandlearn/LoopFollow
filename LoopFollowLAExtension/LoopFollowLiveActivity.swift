@@ -249,7 +249,7 @@ private struct LockScreenLiveActivityView: View {
                         .foregroundStyle(.white.opacity(0.80))
                         .lineLimit(1)
                 }
-                .frame(minWidth: 168, maxWidth: 190, alignment: .leading)
+                .frame(minWidth: 160, maxWidth: 184, alignment: .leading)
                 .layoutPriority(2)
 
                 Rectangle()
@@ -343,15 +343,19 @@ private struct MetricBlock: View {
             Text(label)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.78))
+                .lineLimit(1)
+                .minimumScaleFactor(0.80)
 
             Text(value)
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(.white)
                 .lineLimit(1)
-                .minimumScaleFactor(0.85)
+                .minimumScaleFactor(0.65)
+                .allowsTightening(true)
+                .layoutPriority(1)
         }
-        .frame(width: 60, alignment: .leading)
+        .frame(width: 72, alignment: .leading)
     }
 }
 
@@ -389,7 +393,7 @@ private struct SlotView: View {
     var body: some View {
         if option == .none {
             Color.clear
-                .frame(width: 60, height: 36)
+                .frame(width: 72, height: 36)
         } else {
             MetricBlock(label: option.gridLabel, value: slotFormattedValue(option: option, snapshot: snapshot))
         }
