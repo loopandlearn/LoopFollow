@@ -32,9 +32,11 @@ class StatsDataService {
     func updateDateRange(start: Date, end: Date) {
         startDate = start
         endDate = end
-        // Also update daysToAnalyze for compatibility with existing code
-        let daysBetween = dateTimeUtils.displayCalendar().dateComponents([.day], from: start, to: end).day ?? 14
-        daysToAnalyze = max(daysBetween, 1)
+        let calendar = dateTimeUtils.displayCalendar()
+        let startDay = calendar.startOfDay(for: start)
+        let endDay = calendar.startOfDay(for: end)
+        let daysBetween = calendar.dateComponents([.day], from: startDay, to: endDay).day ?? 13
+        daysToAnalyze = daysBetween + 1
     }
 
     func ensureDataAvailable(onProgress: @escaping () -> Void, completion: @escaping () -> Void) {
