@@ -22,7 +22,7 @@ struct PumpChangeCondition: AlarmCondition {
     func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         // 0. sanity guards
         guard let warnAheadHrs = alarm.threshold, warnAheadHrs > 0 else { return false }
-        guard let insertTS = data.pumpInsertTime else { return false }
+        guard let insertTS = data.pumpInsertTime, insertTS > 0 else { return false }
 
         // convert UNIX timestamp → Date
         let insertedAt = Date(timeIntervalSince1970: insertTS)
