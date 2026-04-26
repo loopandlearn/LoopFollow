@@ -856,10 +856,10 @@ final class LiveActivityManager {
     }
 }
 
-#endif
-
 extension Notification.Name {
     /// Posted when the user taps the Live Activity or Dynamic Island.
     /// Observers navigate to the Home or Snoozer tab as appropriate.
     static let liveActivityDidForeground = Notification.Name("liveActivityDidForeground")
 }
+
+#endif

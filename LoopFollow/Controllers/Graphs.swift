@@ -801,10 +801,14 @@ extension MainViewController {
 
         topBG = Storage.shared.minBGScale.value
         for i in 0 ..< entries.count {
-            if Double(entries[i].sgv) > topBG - maxBGOffset {
-                topBG = Double(entries[i].sgv) + maxBGOffset
+            // Clamp the plotted y-value to the same bounds the header text uses
+            // (HIGH/LOW), so the graph stays consistent with the main display.
+            // The pill tooltip still shows the raw reading.
+            let plottedSgv = Double(min(max(entries[i].sgv, globalVariables.minDisplayGlucose), globalVariables.maxDisplayGlucose))
+            if plottedSgv > topBG - maxBGOffset {
+                topBG = plottedSgv + maxBGOffset
             }
-            let value = ChartDataEntry(x: Double(entries[i].date), y: Double(entries[i].sgv), data: formatPillText(line1: Localizer.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
+            let value = ChartDataEntry(x: Double(entries[i].date), y: plottedSgv, data: formatPillText(line1: Localizer.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
             mainChart.append(value)
             smallChart.append(value)
 

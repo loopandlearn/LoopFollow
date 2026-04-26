@@ -1,0 +1,37 @@
+name: Lint
+run-name: Lint (${{ github.head_ref || github.ref_name }})
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  swiftformat:
+    name: SwiftFormat
+    runs-on: ubuntu-latest
+    container: swift:6.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Cache SwiftFormat build
+        uses: actions/cache@v4
+        with:
+          path: BuildTools/.build
+          key: ${{ runner.os }}-swiftformat-${{ hashFiles('BuildTools/Package.resolved', 'BuildTools/Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftformat-
+
+      - name: SwiftFormat --lint
+        run: |
+          swift run -c release --package-path BuildTools swiftformat . \
+            --lint \
+            --header "LoopFollow\n{file}" \
+            --exclude Pods,Generated,R.generated.swift,fastlane/swift,Dependencies,dexcom-share-client-swift
