@@ -29,15 +29,22 @@ struct GeneralSettingsView: View {
     @ObservedObject var speakHighBG = Storage.shared.speakHighBG
     @ObservedObject var speakHighBGLimit = Storage.shared.speakHighBGLimit
 
+    @State private var activeInfoSheet: InfoSheet?
+
+    private enum InfoSheet: Identifiable {
+        case appSettings, display, speakBG
+        var id: Self { self }
+    }
+
     var body: some View {
         NavigationView {
             Form {
-                Section("App Settings") {
+                Section(header: sectionHeader("App Settings", sheet: .appSettings)) {
                     Toggle("Display App Badge", isOn: $appBadge.value)
                     Toggle("Persistent Notification", isOn: $persistentNotification.value)
                 }
 
-                Section("Display") {
+                Section(header: sectionHeader("Display", sheet: .display)) {
                     Picker("Appearance", selection: $appearanceMode.value) {
                         ForEach(AppearanceMode.allCases, id: \.self) { mode in
                             Text(mode.displayName).tag(mode)
@@ -75,7 +82,7 @@ struct GeneralSettingsView: View {
                     }
                 }
 
-                Section("Speak BG") {
+                Section(header: sectionHeader("Speak BG", sheet: .speakBG)) {
                     Toggle("Speak BG", isOn: $speakBG.value.animation())
 
                     if speakBG.value {
@@ -133,10 +140,143 @@ struct GeneralSettingsView: View {
                     }
                 }
             }
+            .sheet(item: $activeInfoSheet) { sheet in
+                switch sheet {
+                case .appSettings: appSettingsInfoSheet
+                case .display: displayInfoSheet
+                case .speakBG: speakBGInfoSheet
+                }
+            }
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("General Settings", displayMode: .inline)
     }
+
+    // MARK: - Section Header
+
+    private func sectionHeader(_ title: String, sheet: InfoSheet) -> some View {
+        HStack(spacing: 4) {
+            Text(title)
+            Button {
+                activeInfoSheet = sheet
+            } label: {
+                Image(systemName: "info.circle")
+                    .foregroundStyle(Color.accentColor)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: - Info Sheets
+
+    private var appSettingsInfoSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Display App Badge")
+                        .font(.headline)
+                    Text("Shows the current glucose value on the app icon. For the badge to stay current, you need to enable a Background Refresh option — otherwise it will go stale when the app is in the background.")
+
+                    Text("Persistent Notification")
+                        .font(.headline)
+                    Text("When enabled, glucose is reported as a notification with every update. This is typically left disabled.")
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationTitle("App Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { activeInfoSheet = nil }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var displayInfoSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Display Stats")
+                        .font(.headline)
+                    Text("Shows 24-hour statistics (time in range, average BG, estimated A1C, standard deviation) on the Home screen.")
+
+                    Text("Use IFCC A1C")
+                        .font(.headline)
+                    Text("Displays estimated A1C in mmol/mol (IFCC) instead of the default % (NGSP/DCCT). Common in many countries outside the US.")
+
+                    Text("Display Small Graph")
+                        .font(.headline)
+                    Text("Shows a full history graph below the main plot. The history length is determined by the \"Days Back\" setting in Graph settings.")
+
+                    Text("Color BG Text")
+                        .font(.headline)
+                    Text("Uses colors to highlight glucose values — red for low, green for in range, and yellow for high — across the app.")
+
+                    Text("Keep Screen Active")
+                        .font(.headline)
+                    Text("Overrides your phone's auto-lock setting to keep the screen on. This works whether plugged in or not, so remember to lock the screen manually to conserve battery.")
+
+                    Text("Show Display Name")
+                        .font(.headline)
+                    Text("Shows the app name on the Home screen. Useful when following more than one person, to tell multiple LoopFollow instances apart.")
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationTitle("Display Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { activeInfoSheet = nil }
+                }
+            }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var speakBGInfoSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("When enabled, LoopFollow speaks glucose values aloud. You can choose to have it speak every reading, or only when glucose is outside a range you define.")
+
+                    Text("Always vs. Conditional")
+                        .font(.headline)
+                    Text("\"Always\" speaks every glucose reading. When off, you can selectively enable speaking for low and/or high values only.")
+
+                    Text("Low vs. Proactive Low")
+                        .font(.headline)
+                    Text(verbatim: """
+                    These are mutually exclusive:
+                    • Low — speaks when glucose is at or below the Low BG Limit
+                    • Proactive Low — speaks when glucose is below the limit OR dropping fast (exceeding the Fast Drop Delta), even if still above the limit
+                    """)
+
+                    Text("Fast Drop Delta")
+                        .font(.headline)
+                    Text("Only available with Proactive Low. Sets the rate of change threshold (in mg/dL or mmol/L per reading) that triggers a spoken alert even when glucose is still above the Low BG Limit.")
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationTitle("Speak BG")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { activeInfoSheet = nil }
+                }
+            }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+
+    // MARK: - Helpers
 
     private func markChartSettingsDirty() {
         Observable.shared.chartSettingsChanged.value = true
