@@ -15,7 +15,7 @@ enum globalVariables {
     // Glucose display range (mg/dL)
     // Values at or below the min are shown as "LOW" on the main display;
     // values at or above the max are shown as "HIGH". Also used to clamp
-    // prediction values on the graph.
+    // BG readings and prediction values on the graph.
     static let minDisplayGlucose: Int = 39
     static let maxDisplayGlucose: Int = 400
 }
