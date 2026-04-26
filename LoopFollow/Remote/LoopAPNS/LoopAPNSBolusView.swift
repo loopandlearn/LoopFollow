@@ -109,22 +109,6 @@ struct LoopAPNSBolusView: View {
                         }
                     }
 
-                    Section {
-                        Button(action: sendInsulin) {
-                            if isLoading {
-                                HStack {
-                                    ProgressView()
-                                        .scaleEffect(0.8)
-                                    Text("Sending...")
-                                }
-                            } else {
-                                Text("Send Insulin")
-                            }
-                        }
-                        .disabled(insulinAmount.doubleValue(for: .internationalUnit()) <= 0 || isLoading || isTOTPBlocked)
-                        .frame(maxWidth: .infinity)
-                    }
-
                     // TOTP Blocking Warning Section
                     if isTOTPBlocked && showTOTPWarning {
                         Section {
@@ -167,6 +151,27 @@ struct LoopAPNSBolusView: View {
                             }
                         }
                     }
+                }
+                .safeAreaInset(edge: .bottom) {
+                    Button(action: sendInsulin) {
+                        if isLoading {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Sending...")
+                            }
+                            .frame(maxWidth: .infinity)
+                        } else {
+                            Text("Send Insulin")
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .disabled(insulinAmount.doubleValue(for: .internationalUnit()) <= 0 || isLoading || isTOTPBlocked)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(.bar)
                 }
                 .navigationTitle("Insulin")
                 .navigationBarTitleDisplayMode(.inline)

@@ -99,6 +99,7 @@
 		DD1D52B92E1EB5DC00432050 /* TabPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52B82E1EB5DC00432050 /* TabPosition.swift */; };
 		DD1D52BB2E1EB60B00432050 /* MoreMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52BA2E1EB60B00432050 /* MoreMenuViewController.swift */; };
 		DD1D52C02E4C100000000001 /* AppearanceMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52BF2E4C100000000001 /* AppearanceMode.swift */; };
+		DD1D52C22E4C100000000002 /* PredictionDisplayType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D52C12E4C100000000002 /* PredictionDisplayType.swift */; };
 		DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */; };
 		DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */; };
 		DD485F142E454B2600CE8CBF /* SecureMessenger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD485F132E454B2600CE8CBF /* SecureMessenger.swift */; };
@@ -195,8 +196,8 @@
 		DD9ED0CA2D355257000D2A63 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0C92D355256000D2A63 /* LogView.swift */; };
 		DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0CB2D35526E000D2A63 /* SearchBar.swift */; };
 		DD9ED0CE2D35587A000D2A63 /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9ED0CD2D355879000D2A63 /* LogEntry.swift */; };
-		DDA9ACA82D6A66E200E6F1A9 /* ContactColorOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */; };
 		DDA9ACA62D6A66D000E6F1A9 /* ContactColorMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA52D6A66C800E6F1A9 /* ContactColorMode.swift */; };
+		DDA9ACA82D6A66E200E6F1A9 /* ContactColorOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */; };
 		DDA9ACAA2D6A6B8300E6F1A9 /* ContactIncludeOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACA92D6A6B8200E6F1A9 /* ContactIncludeOption.swift */; };
 		DDA9ACAC2D6B317100E6F1A9 /* ContactType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9ACAB2D6B316F00E6F1A9 /* ContactType.swift */; };
 		DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */; };
@@ -548,6 +549,7 @@
 		DD1D52B82E1EB5DC00432050 /* TabPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPosition.swift; sourceTree = "<group>"; };
 		DD1D52BA2E1EB60B00432050 /* MoreMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreMenuViewController.swift; sourceTree = "<group>"; };
 		DD1D52BF2E4C100000000001 /* AppearanceMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceMode.swift; sourceTree = "<group>"; };
+		DD1D52C12E4C100000000002 /* PredictionDisplayType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictionDisplayType.swift; sourceTree = "<group>"; };
 		DD2C2E4E2D3B8AEC006413A5 /* NightscoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsView.swift; sourceTree = "<group>"; };
 		DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsViewModel.swift; sourceTree = "<group>"; };
 		DD485F132E454B2600CE8CBF /* SecureMessenger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureMessenger.swift; sourceTree = "<group>"; };
@@ -643,8 +645,8 @@
 		DD9ED0C92D355256000D2A63 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		DD9ED0CB2D35526E000D2A63 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		DD9ED0CD2D355879000D2A63 /* LogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntry.swift; sourceTree = "<group>"; };
-		DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactColorOption.swift; sourceTree = "<group>"; };
 		DDA9ACA52D6A66C800E6F1A9 /* ContactColorMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactColorMode.swift; sourceTree = "<group>"; };
+		DDA9ACA72D6A66DD00E6F1A9 /* ContactColorOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactColorOption.swift; sourceTree = "<group>"; };
 		DDA9ACA92D6A6B8200E6F1A9 /* ContactIncludeOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactIncludeOption.swift; sourceTree = "<group>"; };
 		DDA9ACAB2D6B316F00E6F1A9 /* ContactType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactType.swift; sourceTree = "<group>"; };
 		DDAD162E2D2EF97C0084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RileyLinkHeartbeatBluetoothDevice.swift; sourceTree = "<group>"; };
@@ -1667,6 +1669,7 @@
 				656F8C112E49F3780008DC1D /* QRCodeGenerator.swift */,
 				DD4A407D2E6AFEE6007B318B /* AuthService.swift */,
 				DD1D52BF2E4C100000000001 /* AppearanceMode.swift */,
+				DD1D52C12E4C100000000002 /* PredictionDisplayType.swift */,
 				DD1D52B82E1EB5DC00432050 /* TabPosition.swift */,
 				DD83164B2DE4DB3A004467AA /* BinaryFloatingPoint+localized.swift */,
 				DD4AFB3A2DB55CB600BB593F /* TimeOfDay.swift */,
@@ -2345,6 +2348,7 @@
 				DD7F4C112DD51ED900D449E9 /* TempTargetStartAlarmEditor.swift in Sources */,
 				DD1D52B92E1EB5DC00432050 /* TabPosition.swift in Sources */,
 				DD1D52C02E4C100000000001 /* AppearanceMode.swift in Sources */,
+				DD1D52C22E4C100000000002 /* PredictionDisplayType.swift in Sources */,
 				DD50C7552D0862770057AE6F /* ContactImageUpdater.swift in Sources */,
 				654132EA2E19F24800BDBE08 /* TOTPGenerator.swift in Sources */,
 				6541341C2E1DC28000BDBE08 /* DateExtensions.swift in Sources */,
