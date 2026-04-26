@@ -141,3 +141,76 @@ class PillMarker: MarkerImage {
         return "\(formattedString)"
     }
 }
+
+// MARK: - Cone of Uncertainty
+
+class ConeChartDataEntry: ChartDataEntry {
+    var yMin: Double = 0.0
+    var yMax: Double = 0.0
+
+    required init() {
+        super.init()
+    }
+
+    init(x: Double, yMin: Double, yMax: Double) {
+        self.yMin = yMin
+        self.yMax = yMax
+        super.init(x: x, y: yMax)
+    }
+
+    override func copy(with _: NSZone? = nil) -> Any {
+        let copy = ConeChartDataEntry(x: x, yMin: yMin, yMax: yMax)
+        copy.data = data
+        return copy
+    }
+}
+
+class ConeOfUncertaintyRenderer: LineChartRenderer {
+    let coneDataSetIndex: Int
+
+    init(dataProvider: LineChartDataProvider?, animator: Animator?, viewPortHandler: ViewPortHandler?, coneDataSetIndex: Int) {
+        self.coneDataSetIndex = coneDataSetIndex
+        super.init(dataProvider: dataProvider!, animator: animator!, viewPortHandler: viewPortHandler!)
+    }
+
+    override func drawExtras(context: CGContext) {
+        super.drawExtras(context: context)
+
+        guard let dataProvider = dataProvider,
+              dataProvider.lineData?.dataSets.count ?? 0 > coneDataSetIndex,
+              let lineDataSet = dataProvider.lineData?.dataSets[coneDataSetIndex] as? LineChartDataSet,
+              lineDataSet.entryCount > 1 else { return }
+
+        let trans = dataProvider.getTransformer(forAxis: lineDataSet.axisDependency)
+        let phaseY = animator.phaseY
+
+        var upperPoints = [CGPoint]()
+        var lowerPoints = [CGPoint]()
+
+        for i in 0 ..< lineDataSet.entryCount {
+            guard let entry = lineDataSet.entryForIndex(i) as? ConeChartDataEntry else { continue }
+            upperPoints.append(trans.pixelForValues(x: entry.x, y: entry.yMax * phaseY))
+            lowerPoints.append(trans.pixelForValues(x: entry.x, y: entry.yMin * phaseY))
+        }
+
+        guard upperPoints.count > 1 else { return }
+
+        context.saveGState()
+
+        let path = CGMutablePath()
+        path.move(to: upperPoints[0])
+        for i in 1 ..< upperPoints.count {
+            path.addLine(to: upperPoints[i])
+        }
+        for i in stride(from: lowerPoints.count - 1, through: 0, by: -1) {
+            path.addLine(to: lowerPoints[i])
+        }
+        path.closeSubpath()
+
+        context.addPath(path)
+        context.setFillColor(UIColor.systemBlue.withAlphaComponent(0.4).cgColor)
+        context.fillPath()
+
+        context.restoreGState()
+    }
+}

@@ -131,8 +131,12 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
     // MARK: - Renewal
 
     var showRenewalOverlay: Bool {
-        let renewBy = Storage.shared.laRenewBy.value
-        let now = Date().timeIntervalSince1970
-        return renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
+        #if targetEnvironment(macCatalyst)
+            return false
+        #else
+            let renewBy = Storage.shared.laRenewBy.value
+            let now = Date().timeIntervalSince1970
+            return renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
+        #endif
     }
 }
