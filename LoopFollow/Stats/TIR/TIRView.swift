@@ -13,7 +13,7 @@ struct TIRView: View {
             ZStack(alignment: .topTrailing) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text(viewModel.showTITR ? "Time in Tight Range" : "Time in Range")
+                        Text(tirTitle)
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()
@@ -32,7 +32,7 @@ struct TIRView: View {
 
                         VStack(alignment: .leading, spacing: 8) {
                             if let average = viewModel.tirData.first(where: { $0.period == .average }) {
-                                Text("Cutoffs in \(Storage.shared.units.value)")
+                                Text("Cutoffs in \(UnitSettingsStore.shared.glucoseUnit.rawValue)")
                                     .foregroundColor(.secondary)
 
                                 TIRLegendItem(
@@ -84,19 +84,41 @@ struct TIRView: View {
         .buttonStyle(PlainButtonStyle())
     }
 
-    private func formatRange(_: Double) -> String {
-        let lowThreshold: Double
-        let highThreshold: Double
-
-        if Storage.shared.units.value == "mg/dL" {
-            lowThreshold = 70.0
-            highThreshold = viewModel.showTITR ? 140.0 : 180.0
-        } else {
-            lowThreshold = 3.9
-            highThreshold = viewModel.showTITR ? 7.8 : 10.0
+    private var tirTitle: String {
+        switch UnitSettingsStore.shared.timeInRangeMode {
+        case .tir:
+            return "Time in Range"
+        case .titr:
+            return "Time in Tight Range"
+        case .custom:
+            return "Custom Range"
         }
+    }
 
-        return String(format: "%.1f – %.1f %@", lowThreshold, highThreshold, Storage.shared.units.value)
+    private func formatRange(_: Double) -> String {
+        let thresholds = UnitSettingsStore.shared.effectiveThresholds()
+        let glucoseUnit = UnitSettingsStore.shared.glucoseUnit
+        let low = UnitSettingsStore.shared.convertMgdlToDisplay(thresholds.low)
+        let high = UnitSettingsStore.shared.convertMgdlToDisplay(thresholds.high)
+        let digits = glucoseUnit.fractionDigits
+        let fmt = "%.\(digits)f – %.\(digits)f %@"
+        return String(format: fmt, low, high, glucoseUnit.rawValue)
+    }
+
+    private var lowThreshold: Double {
+        UnitSettingsStore.shared.convertMgdlToDisplay(UnitSettingsStore.shared.effectiveThresholds().low)
+    }
+
+    private var highThreshold: Double {
+        UnitSettingsStore.shared.convertMgdlToDisplay(UnitSettingsStore.shared.effectiveThresholds().high)
+    }
+
+    private var veryLowThreshold: Double {
+        UnitSettingsStore.shared.convertMgdlToDisplay(54.0)
+    }
+
+    private var veryHighThreshold: Double {
+        UnitSettingsStore.shared.convertMgdlToDisplay(250.0)
     }
 
     private var veryLowCutoffText: String {
@@ -119,30 +141,9 @@ struct TIRView: View {
         "> \(formatThreshold(veryHighThreshold))"
     }
 
-    private var lowThreshold: Double {
-        Storage.shared.units.value == "mg/dL" ? 70.0 : 3.9
-    }
-
-    private var highThreshold: Double {
-        if Storage.shared.units.value == "mg/dL" {
-            return viewModel.showTITR ? 140.0 : 180.0
-        }
-        return viewModel.showTITR ? 7.8 : 10.0
-    }
-
-    private var veryLowThreshold: Double {
-        Storage.shared.units.value == "mg/dL" ? 54.0 : 3.0
-    }
-
-    private var veryHighThreshold: Double {
-        Storage.shared.units.value == "mg/dL" ? 250.0 : 13.9
-    }
-
     private func formatThreshold(_ value: Double) -> String {
-        if Storage.shared.units.value == "mg/dL" {
-            return String(format: "%.0f", value)
-        }
-        return String(format: "%.1f", value)
+        let digits = UnitSettingsStore.shared.glucoseUnit.fractionDigits
+        return String(format: "%.\(digits)f", value)
     }
 }
 

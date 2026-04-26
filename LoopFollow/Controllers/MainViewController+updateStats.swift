@@ -26,12 +26,25 @@ extension MainViewController {
             statsInRangePercent.text = String(format: "%.1f%%", stats.percentRange)
             statsHighPercent.text = String(format: "%.1f%%", stats.percentHigh)
             statsAvgBG.text = Localizer.toDisplayUnits(String(format: "%.0f", stats.avgBG))
-            if Storage.shared.useIFCC.value {
+            statsEstA1CTitle.text = UnitSettingsStore.shared.glycemicMetricMode == .gmi ? "GMI:" : "Est. A1C:"
+
+            if UnitSettingsStore.shared.glycemicOutputUnit == .mmolMol {
                 statsEstA1C.text = String(format: "%.0f", stats.a1C)
             } else {
                 statsEstA1C.text = String(format: "%.1f", stats.a1C)
             }
-            statsStdDev.text = String(format: "%.2f", stats.stdDev)
+
+            if UnitSettingsStore.shared.variabilityMetricMode == .stdDeviation {
+                statsStdDevTitle.text = "Std Dev:"
+                if UnitSettingsStore.shared.glucoseUnit == .mgdL {
+                    statsStdDev.text = String(format: "%.0f", stats.stdDev)
+                } else {
+                    statsStdDev.text = String(format: "%.1f", stats.stdDev)
+                }
+            } else {
+                statsStdDevTitle.text = "CV:"
+                statsStdDev.text = String(format: "%.1f%%", stats.coefficientOfVariation)
+            }
 
             createStatsPie(pieData: stats.pie)
         }

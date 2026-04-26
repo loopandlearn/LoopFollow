@@ -42,7 +42,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     @IBOutlet var statsInRangePercent: UILabel!
     @IBOutlet var statsHighPercent: UILabel!
     @IBOutlet var statsAvgBG: UILabel!
+    @IBOutlet var statsEstA1CTitle: UILabel!
     @IBOutlet var statsEstA1C: UILabel!
+    @IBOutlet var statsStdDevTitle: UILabel!
     @IBOutlet var statsStdDev: UILabel!
     @IBOutlet var serverText: UILabel!
     @IBOutlet var statsView: UIView!
@@ -288,10 +290,23 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
             .store(in: &cancellables)
 
-        Storage.shared.useIFCC.$value
+        Publishers.MergeMany(
+            Storage.shared.units.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.useIFCC.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.showGMI.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.showStdDev.$value.map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] _ in
+            self?.updateStats()
+        }
+        .store(in: &cancellables)
+
+        Storage.shared.timeInRangeModeRaw.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.updateStats()
+                self?.updateBGGraphSettings()
+                self?.updateBGGraph()
             }
             .store(in: &cancellables)
 
@@ -1040,6 +1055,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             Storage.shared.migrateStep7()
             Storage.shared.migrationStep.value = 7
         }
+
+        if Storage.shared.migrationStep.value < 8 {
+            Storage.shared.migrateStep8()
+            Storage.shared.migrationStep.value = 8
+        }
     }
 
     @objc func appDidBecomeActive() {
@@ -1208,10 +1228,11 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             let latestBG = bgData[bgData.count - 1].sgv
             var color = NSUIColor.label
             if Storage.shared.colorBGText.value {
-                if Double(latestBG) >= Storage.shared.highLine.value {
+                let thresholds = UnitSettingsStore.shared.effectiveThresholds()
+                if Double(latestBG) >= thresholds.high {
                     color = NSUIColor.systemYellow
                     Observable.shared.bgTextColor.value = .yellow
-                } else if Double(latestBG) <= Storage.shared.lowLine.value {
+                } else if Double(latestBG) <= thresholds.low {
                     color = NSUIColor.systemRed
                     Observable.shared.bgTextColor.value = .red
                 } else {
@@ -1550,15 +1571,30 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     @objc private func setupNightscoutTapped() {
-        let nightscoutSettingsView = NightscoutSettingsView(viewModel: .init())
+        let navController = UINavigationController()
+        let nightscoutSettingsView = NightscoutSettingsView(viewModel: .init(), usesModalCloseButton: true, onContinueToUnits: { [weak navController] in
+            let unitsView = UnitsOnboardingView {
+                navController?.dismiss(animated: true)
+            }
+            let unitsController = UIHostingController(rootView: unitsView)
+            let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+            unitsController.overrideUserInterfaceStyle = style
+            navController?.pushViewController(unitsController, animated: true)
+        }, onImportSettings: { [weak navController] in
+            let importSettingsView = ImportExportSettingsView()
+            let importSettingsController = UIHostingController(rootView: importSettingsView)
+            let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+            importSettingsController.overrideUserInterfaceStyle = style
+            navController?.pushViewController(importSettingsController, animated: true)
+        })
         let hostingController = UIHostingController(rootView: nightscoutSettingsView)
-        let navController = UINavigationController(rootViewController: hostingController)
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         hostingController.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
 
+        navController.setViewControllers([hostingController], animated: false)
         hostingController.navigationItem.rightBarButtonItem = makeCloseBarButtonItem()
 
         navController.modalPresentationStyle = .pageSheet
@@ -1566,15 +1602,24 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     }
 
     @objc private func setupDexcomTapped() {
-        let dexcomSettingsView = DexcomSettingsView(viewModel: .init())
+        let navController = UINavigationController()
+        let dexcomSettingsView = DexcomSettingsView(viewModel: .init(), usesModalCloseButton: true, onContinueToUnits: { [weak navController] in
+            let unitsView = UnitsOnboardingView {
+                navController?.dismiss(animated: true)
+            }
+            let unitsController = UIHostingController(rootView: unitsView)
+            let style = Storage.shared.appearanceMode.value.userInterfaceStyle
+            unitsController.overrideUserInterfaceStyle = style
+            navController?.pushViewController(unitsController, animated: true)
+        })
         let hostingController = UIHostingController(rootView: dexcomSettingsView)
-        let navController = UINavigationController(rootViewController: hostingController)
 
         // Apply appearance mode
         let style = Storage.shared.appearanceMode.value.userInterfaceStyle
         hostingController.overrideUserInterfaceStyle = style
         navController.overrideUserInterfaceStyle = style
 
+        navController.setViewControllers([hostingController], animated: false)
         hostingController.navigationItem.rightBarButtonItem = makeCloseBarButtonItem()
 
         navController.modalPresentationStyle = .pageSheet

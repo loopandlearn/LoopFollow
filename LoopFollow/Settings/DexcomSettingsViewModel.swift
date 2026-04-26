@@ -5,6 +5,9 @@ import Combine
 import Foundation
 
 class DexcomSettingsViewModel: ObservableObject {
+    /// Whether this is a fresh setup (credentials were empty when view appeared)
+    private(set) var isFreshSetup: Bool = false
+
     @Published var userName: String = Storage.shared.shareUserName.value {
         willSet {
             if newValue != userName {
@@ -29,5 +32,12 @@ class DexcomSettingsViewModel: ObservableObject {
         }
     }
 
-    init() {}
+    /// Whether credentials are filled in
+    var hasCredentials: Bool {
+        !userName.isEmpty && !password.isEmpty
+    }
+
+    init() {
+        isFreshSetup = Storage.shared.shareUserName.value.isEmpty
+    }
 }
