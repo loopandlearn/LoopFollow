@@ -12,6 +12,7 @@ enum TaskID: CaseIterable {
     case minAgoUpdate
     case calendarWrite
     case alarmCheck
+    case remoteCommandPoll
 }
 
 struct ScheduledTask {
