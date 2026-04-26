@@ -10,11 +10,11 @@ extension MainViewController {
         if !Storage.shared.downloadTreatments.value { return }
 
         let startTimeString = dateTimeUtils.getDateTimeString(addingDays: -1 * Storage.shared.downloadDays.value)
-        let currentTimeString = dateTimeUtils.getDateTimeString()
+        let endTimeString = dateTimeUtils.getDateTimeString(addingHours: 6)
         let estimatedCount = max(Storage.shared.downloadDays.value * 100, 5000)
         let parameters: [String: String] = [
             "find[created_at][$gte]": startTimeString,
-            "find[created_at][$lte]": currentTimeString,
+            "find[created_at][$lte]": endTimeString,
             "count": "\(estimatedCount)",
         ]
         NightscoutUtils.executeDynamicRequest(eventType: .treatments, parameters: parameters) { (result: Result<Any, Error>) in

@@ -1,13 +1,25 @@
 // LoopFollow
 // LoopAPNSService.swift
 
-import CryptoKit
 import Foundation
 import HealthKit
-import SwiftJWT
 
 class LoopAPNSService {
     private let storage = Storage.shared
+
+    /// Returns the effective APNs credentials for sending commands to the remote app.
+    /// Same team → use LoopFollow's own key. Different team → use remote-specific key.
+    private func effectiveCredentials() -> (apnsKey: String, keyId: String, teamId: String) {
+        let lfTeamId = BuildDetails.default.teamID ?? ""
+        let remoteTeamId = storage.teamId.value ?? ""
+        let sameTeam = !lfTeamId.isEmpty && !remoteTeamId.isEmpty && lfTeamId == remoteTeamId
+
+        if sameTeam || remoteTeamId.isEmpty {
+            return (storage.lfApnsKey.value, storage.lfKeyId.value, lfTeamId)
+        } else {
+            return (storage.remoteApnsKey.value, storage.remoteKeyId.value, remoteTeamId)
+        }
+    }
 
     enum LoopAPNSError: Error, LocalizedError {
         case invalidConfiguration
@@ -57,26 +69,11 @@ class LoopAPNSService {
             return nil
         }
 
-        // Get the target Loop app's Team ID from storage.
-        let targetTeamId = storage.teamId.value ?? ""
-        let teamIdsAreDifferent = loopFollowTeamID != targetTeamId
+        let lfKeyId = storage.lfKeyId.value
+        let lfApnsKey = storage.lfApnsKey.value
 
-        let keyIdForReturn: String
-        let apnsKeyForReturn: String
-
-        if teamIdsAreDifferent {
-            // Team IDs differ, use the separate return credentials.
-            keyIdForReturn = storage.returnKeyId.value
-            apnsKeyForReturn = storage.returnApnsKey.value
-        } else {
-            // Team IDs are the same, use the primary credentials.
-            keyIdForReturn = storage.keyId.value
-            apnsKeyForReturn = storage.apnsKey.value
-        }
-
-        // Ensure we have the necessary credentials.
-        guard !keyIdForReturn.isEmpty, !apnsKeyForReturn.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "Missing required return APNS credentials. Check Remote Settings.")
+        guard !lfKeyId.isEmpty, !lfApnsKey.isEmpty else {
+            LogManager.shared.log(category: .apns, message: "Missing LoopFollow APNS credentials. Configure them in App Settings → APN.")
             return nil
         }
 
@@ -85,8 +82,8 @@ class LoopAPNSService {
             deviceToken: loopFollowDeviceToken,
             bundleId: Bundle.main.bundleIdentifier ?? "",
             teamId: loopFollowTeamID,
-            keyId: keyIdForReturn,
-            apnsKey: apnsKeyForReturn
+            keyId: lfKeyId,
+            apnsKey: lfApnsKey
         )
     }
 
@@ -108,8 +105,9 @@ class LoopAPNSService {
     /// Validates the Loop APNS setup by checking all required fields
     /// - Returns: True if setup is valid, false otherwise
     func validateSetup() -> Bool {
-        let hasKeyId = !storage.keyId.value.isEmpty
-        let hasAPNSKey = !storage.apnsKey.value.isEmpty
+        let creds = effectiveCredentials()
+        let hasKeyId = !creds.keyId.isEmpty
+        let hasAPNSKey = !creds.apnsKey.isEmpty
         let hasQrCode = !storage.loopAPNSQrCodeURL.value.isEmpty
         let hasDeviceToken = !Storage.shared.deviceToken.value.isEmpty
         let hasBundleIdentifier = !Storage.shared.bundleId.value.isEmpty
@@ -138,8 +136,7 @@ class LoopAPNSService {
 
         let deviceToken = Storage.shared.deviceToken.value
         let bundleIdentifier = Storage.shared.bundleId.value
-        let keyId = storage.keyId.value
-        let apnsKey = storage.apnsKey.value
+        let creds = effectiveCredentials()
 
         // Create APNS notification payload (matching Loop's expected format)
         let now = Date()
@@ -186,8 +183,9 @@ class LoopAPNSService {
         sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
-            keyId: keyId,
-            apnsKey: apnsKey,
+            keyId: creds.keyId,
+            apnsKey: creds.apnsKey,
+            teamId: creds.teamId,
             payload: finalPayload,
             completion: completion
         )
@@ -207,8 +205,7 @@ class LoopAPNSService {
 
         let deviceToken = Storage.shared.deviceToken.value
         let bundleIdentifier = Storage.shared.bundleId.value
-        let keyId = storage.keyId.value
-        let apnsKey = storage.apnsKey.value
+        let creds = effectiveCredentials()
 
         // Create APNS notification payload (matching Loop's expected format)
         let now = Date()
@@ -250,8 +247,9 @@ class LoopAPNSService {
         sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
-            keyId: keyId,
-            apnsKey: apnsKey,
+            keyId: creds.keyId,
+            apnsKey: creds.apnsKey,
+            teamId: creds.teamId,
             payload: finalPayload,
             completion: completion
         )
@@ -262,9 +260,10 @@ class LoopAPNSService {
     private func validateCredentials() -> [String]? {
         var errors = [String]()
 
-        let keyId = storage.keyId.value
-        let teamId = Storage.shared.teamId.value ?? ""
-        let apnsKey = storage.apnsKey.value
+        let creds = effectiveCredentials()
+        let keyId = creds.keyId
+        let teamId = creds.teamId
+        let apnsKey = creds.apnsKey
 
         // Validate keyId (should be 10 alphanumeric characters)
         let keyIdPattern = "^[A-Z0-9]{10}$"
@@ -328,6 +327,7 @@ class LoopAPNSService {
         bundleIdentifier: String,
         keyId: String,
         apnsKey: String,
+        teamId: String,
         payload: [String: Any],
         completion: @escaping (Bool, String?) -> Void
     ) {
@@ -340,7 +340,7 @@ class LoopAPNSService {
         }
 
         // Create JWT token for APNS authentication
-        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: Storage.shared.teamId.value ?? "", apnsKey: apnsKey) else {
+        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: teamId, apnsKey: apnsKey) else {
             let errorMessage = "Failed to generate JWT, please check that the APNS Key ID, APNS Key and Team ID are correct."
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
@@ -429,6 +429,7 @@ class LoopAPNSService {
                         LogManager.shared.log(category: .apns, message: "APNS error 400: \(responseBodyMessage) - Check device token and environment settings")
                         completion(false, errorMessage)
                     case 403:
+                        JWTManager.shared.invalidateCache()
                         let errorMessage = "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)"
                         LogManager.shared.log(category: .apns, message: "APNS error 403: \(responseBodyMessage) - Check APNS key permissions for bundle ID")
                         completion(false, errorMessage)
@@ -699,11 +700,13 @@ class LoopAPNSService {
         }
 
         // Send the notification using the existing APNS infrastructure
+        let creds = effectiveCredentials()
         sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
-            keyId: storage.keyId.value,
-            apnsKey: storage.apnsKey.value,
+            keyId: creds.keyId,
+            apnsKey: creds.apnsKey,
+            teamId: creds.teamId,
             payload: payload,
             completion: completion
         )
@@ -753,11 +756,13 @@ class LoopAPNSService {
         }
 
         // Send the notification using the existing APNS infrastructure
+        let creds = effectiveCredentials()
         sendAPNSNotification(
             deviceToken: deviceToken,
             bundleIdentifier: bundleIdentifier,
-            keyId: storage.keyId.value,
-            apnsKey: storage.apnsKey.value,
+            keyId: creds.keyId,
+            apnsKey: creds.apnsKey,
+            teamId: creds.teamId,
             payload: payload,
             completion: completion
         )

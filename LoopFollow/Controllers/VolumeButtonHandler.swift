@@ -106,7 +106,7 @@ class VolumeButtonHandler: NSObject {
     }
 
     private func alarmStopped() {
-        LogManager.shared.log(category: .volumeButtonSnooze, message: "Alarm stop detected")
+        guard isMonitoring else { return }
 
         alarmStartTime = nil
         stopMonitoring()
