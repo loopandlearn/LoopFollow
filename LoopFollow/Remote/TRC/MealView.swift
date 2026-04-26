@@ -140,31 +140,44 @@ struct MealView: View {
                             }
                         }
                     }
+                }
+                .safeAreaInset(edge: .bottom) {
+                    Button {
+                        carbsFieldIsFocused = false
+                        proteinFieldIsFocused = false
+                        fatFieldIsFocused = false
 
-                    LoadingButtonView(
-                        buttonText: "Send Meal",
-                        progressText: "Sending Meal Data...",
-                        isLoading: isLoading,
-                        action: {
-                            carbsFieldIsFocused = false
-                            proteinFieldIsFocused = false
-                            fatFieldIsFocused = false
-
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                guard carbs.doubleValue(for: .gram()) != 0 ||
-                                    protein.doubleValue(for: .gram()) != 0 ||
-                                    fat.doubleValue(for: .gram()) != 0
-                                else {
-                                    return
-                                }
-                                if !showAlert {
-                                    alertType = .confirmMeal
-                                    showAlert = true
-                                }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            guard carbs.doubleValue(for: .gram()) != 0 ||
+                                protein.doubleValue(for: .gram()) != 0 ||
+                                fat.doubleValue(for: .gram()) != 0
+                            else {
+                                return
                             }
-                        },
-                        isDisabled: isButtonDisabled
-                    )
+                            if !showAlert {
+                                alertType = .confirmMeal
+                                showAlert = true
+                            }
+                        }
+                    } label: {
+                        if isLoading {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Sending Meal Data...")
+                            }
+                            .frame(maxWidth: .infinity)
+                        } else {
+                            Text("Send Meal")
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .disabled(isButtonDisabled)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(.bar)
                 }
                 .navigationTitle("Meal")
                 .navigationBarTitleDisplayMode(.inline)

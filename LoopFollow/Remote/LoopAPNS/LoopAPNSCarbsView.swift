@@ -232,22 +232,6 @@ struct LoopAPNSCarbsView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    Section {
-                        Button(action: sendCarbs) {
-                            if isLoading {
-                                HStack {
-                                    ProgressView()
-                                        .scaleEffect(0.8)
-                                    Text("Sending...")
-                                }
-                            } else {
-                                Text("Send Carbs")
-                            }
-                        }
-                        .disabled(carbsAmount.doubleValue(for: .gram()) <= 0 || isLoading || isTOTPBlocked)
-                        .frame(maxWidth: .infinity)
-                    }
-
                     // TOTP Blocking Warning Section
                     if isTOTPBlocked && showTOTPWarning {
                         Section {
@@ -291,6 +275,27 @@ struct LoopAPNSCarbsView: View {
                             }
                         }
                     }
+                }
+                .safeAreaInset(edge: .bottom) {
+                    Button(action: sendCarbs) {
+                        if isLoading {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Sending...")
+                            }
+                            .frame(maxWidth: .infinity)
+                        } else {
+                            Text("Send Carbs")
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .disabled(carbsAmount.doubleValue(for: .gram()) <= 0 || isLoading || isTOTPBlocked)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(.bar)
                 }
                 .navigationTitle("Carbs")
                 .navigationBarTitleDisplayMode(.inline)
