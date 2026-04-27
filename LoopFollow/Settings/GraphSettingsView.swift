@@ -23,6 +23,13 @@ struct GraphSettingsView: View {
     @ObservedObject private var highLine = Storage.shared.highLine
     @ObservedObject private var downloadDays = Storage.shared.downloadDays
 
+    @State private var activeInfoSheet: InfoSheet?
+
+    private enum InfoSheet: Identifiable {
+        case scale, history
+        var id: Self { self }
+    }
+
     private var nightscoutEnabled: Bool { IsNightscoutEnabled() }
 
     var body: some View {
@@ -97,7 +104,7 @@ struct GraphSettingsView: View {
 
                 // ── Basal / BG scale ─────────────────────────────────────────
                 if nightscoutEnabled {
-                    Section("Basal / BG Scale") {
+                    Section(header: sectionHeader("Basal / BG Scale", sheet: .scale)) {
                         SettingsStepperRow(
                             title: "Min Basal",
                             range: 0.5 ... 20,
@@ -130,7 +137,7 @@ struct GraphSettingsView: View {
 
                 // ── History window ───────────────────────────────────────────
                 if nightscoutEnabled {
-                    Section("History") {
+                    Section(header: sectionHeader("History", sheet: .history)) {
                         SettingsStepperRow(
                             title: "Show Days Back",
                             range: 1 ... 4,
@@ -141,9 +148,78 @@ struct GraphSettingsView: View {
                     }
                 }
             }
+            .sheet(item: $activeInfoSheet) { sheet in
+                switch sheet {
+                case .scale: scaleInfoSheet
+                case .history: historyInfoSheet
+                }
+            }
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Graph Settings", displayMode: .inline)
+    }
+
+    // MARK: - Section Header
+
+    private func sectionHeader(_ title: String, sheet: InfoSheet) -> some View {
+        HStack(spacing: 4) {
+            Text(title)
+            Button {
+                activeInfoSheet = sheet
+            } label: {
+                Image(systemName: "info.circle")
+                    .foregroundStyle(Color.accentColor)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: - Info Sheets
+
+    private var scaleInfoSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Min Basal")
+                        .font(.headline)
+                    Text("Sets the minimum displayed range for the basal rate plot. The graph will always show at least this range, even if actual basal rates are lower.")
+
+                    Text("Min BG Scale")
+                        .font(.headline)
+                    Text("Sets the minimum displayed range for the glucose scale. The graph will always show at least up to this value, preventing the scale from compressing too tightly when glucose values are in a narrow range.")
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationTitle("Basal / BG Scale")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { activeInfoSheet = nil }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var historyInfoSheet: some View {
+        NavigationStack {
+            ScrollView {
+                Text("Controls how many days of history are shown in the small graph and how much data is fetched from your Nightscout site. Higher values show more history but increase data usage.")
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationTitle("History")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { activeInfoSheet = nil }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
     }
 
     /// Marks the chart as needing a redraw
