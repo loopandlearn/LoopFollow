@@ -21,6 +21,10 @@ extension MainViewController {
 
         webLoadNSProfile()
 
-        TaskScheduler.shared.rescheduleTask(id: .profile, to: Date().addingTimeInterval(10 * 60))
+        var interval: TimeInterval = 10 * 60
+        if NightscoutSocketManager.shared.connectionState == .authenticated {
+            interval = 30 * 60
+        }
+        TaskScheduler.shared.rescheduleTask(id: .profile, to: Date().addingTimeInterval(interval))
     }
 }
