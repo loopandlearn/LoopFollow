@@ -120,7 +120,7 @@ extension NightscoutViewController: WKNavigationDelegate, WKUIDelegate {
             return false
         }
 
-        NSLog("Should start: \(url.absoluteString)")
+        LogManager.shared.log(category: .nightscout, message: "Web shouldStart: \(LogRedactor.url(url.absoluteString))", isDebug: true)
         return true
     }
 

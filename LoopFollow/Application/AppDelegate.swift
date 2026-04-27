@@ -72,7 +72,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Observable.shared.loopFollowDeviceToken.value = tokenString
 
-        LogManager.shared.log(category: .apns, message: "Successfully registered for remote notifications with token: \(tokenString)")
+        LogManager.shared.log(category: .apns, message: "Successfully registered for remote notifications with token: \(LogRedactor.tail(tokenString))")
     }
 
     /// Called when failed to register for remote notifications
@@ -82,7 +82,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     /// Called when a remote notification is received
     func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        LogManager.shared.log(category: .apns, message: "Received remote notification: \(userInfo)")
+        let userInfoKeys = userInfo.keys.compactMap { $0 as? String }.sorted()
+        LogManager.shared.log(category: .apns, message: "Received remote notification: keys=\(userInfoKeys)")
 
         // Check if this is a response notification from Loop or Trio
         if let aps = userInfo["aps"] as? [String: Any] {
@@ -217,7 +218,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     {
         // Log the notification
         let userInfo = notification.request.content.userInfo
-        LogManager.shared.log(category: .general, message: "Will present notification: \(userInfo)")
+        let userInfoKeys = userInfo.keys.compactMap { $0 as? String }.sorted()
+        LogManager.shared.log(category: .general, message: "Will present notification: keys=\(userInfoKeys)")
 
         // Show the notification even when app is in foreground
         completionHandler([.banner, .sound, .badge])

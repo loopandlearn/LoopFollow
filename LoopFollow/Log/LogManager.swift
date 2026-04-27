@@ -55,7 +55,8 @@ class LogManager {
     ///   - limitIdentifier: Optional key to rate-limit similar log messages.
     ///   - limitInterval: Time interval (in seconds) to wait before logging the same type again.
     func log(category: Category, message: String, isDebug: Bool = false, limitIdentifier: String? = nil, limitInterval: TimeInterval = 300) {
-        let logMessage = formattedLogMessage(for: category, message: message)
+        let safeMessage = LogRedactor.sweep(message)
+        let logMessage = formattedLogMessage(for: category, message: safeMessage)
 
         consoleQueue.async {
             print(logMessage)
