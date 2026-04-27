@@ -53,18 +53,7 @@ class RemoteViewController: UIViewController {
             existingHostingController.removeFromParent()
         }
 
-        if remoteType == .nightscout {
-            var remoteView: AnyView
-
-            switch Storage.shared.device.value {
-            case "Trio":
-                remoteView = AnyView(TrioNightscoutRemoteView())
-            default:
-                remoteView = AnyView(NoRemoteView())
-            }
-
-            hostingController = UIHostingController(rootView: remoteView)
-        } else if remoteType == .trc {
+        if remoteType == .trc {
             if Storage.shared.device.value != "Trio" {
                 hostingController = UIHostingController(
                     rootView: AnyView(
@@ -95,15 +84,6 @@ class RemoteViewController: UIViewController {
             ])
 
             hostingController.didMove(toParent: self)
-        }
-
-        if remoteType == .nightscout, !Storage.shared.nsWriteAuth.value {
-            NightscoutUtils.verifyURLAndToken { _, _, nsWriteAuth, nsAdminAuth in
-                DispatchQueue.main.async {
-                    Storage.shared.nsWriteAuth.value = nsWriteAuth
-                    Storage.shared.nsAdminAuth.value = nsAdminAuth
-                }
-            }
         }
     }
 
