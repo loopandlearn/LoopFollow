@@ -985,6 +985,8 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         if Storage.shared.backgroundRefreshType.value != .none {
             BackgroundAlertManager.shared.startBackgroundAlert()
         }
+
+        NightscoutSocketManager.shared.disconnect()
     }
 
     // Migrations must only run when UserDefaults is accessible (i.e. after first unlock).
@@ -1086,7 +1088,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         }
 
         TaskScheduler.shared.checkTasksNow()
-        NightscoutSocketManager.shared.reconnectIfNeeded()
+        NightscoutSocketManager.shared.connectIfNeeded()
 
         checkAndNotifyVersionStatus()
         checkAppExpirationStatus()

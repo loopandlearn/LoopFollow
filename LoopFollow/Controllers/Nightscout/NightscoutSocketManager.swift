@@ -62,14 +62,6 @@ class NightscoutSocketManager {
         connect()
     }
 
-    func reconnectIfNeeded() {
-        guard Storage.shared.webSocketEnabled.value, !currentURL.isEmpty else { return }
-
-        if connectionState == .disconnected || connectionState == .error {
-            connect()
-        }
-    }
-
     func disconnect() {
         socket?.removeAllHandlers()
         socket?.disconnect()
