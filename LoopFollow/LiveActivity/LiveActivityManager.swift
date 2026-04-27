@@ -12,17 +12,17 @@ import UserNotifications
 
 // Live Activity manager for LoopFollow.
 //
-// iOS 17.2+: every LA creation (initial start, renewal, forced restart)
-//            goes through APNs push-to-start. Updates ride the same APNs
-//            transport used today. One transport, one credential failure
-//            mode that surfaces in settings.
+// iOS 17.2+:        every LA creation (initial start, renewal, forced
+//                   restart) goes through APNs push-to-start. Updates
+//                   ride the same APNs transport. One transport, one
+//                   credential failure mode that surfaces in settings.
 //
-// iOS 16.x:  legacy Activity.request() for everything; renewal-failed
-//            notification when backgrounded. Identical to current dev
-//            behavior — the entry-point #available(iOS 17.2) checks
-//            isolate every iOS 17 code path, so the legacy helpers can
-//            be deleted in one commit when the deployment target reaches
-//            17.2.
+// iOS 16.6 – 17.1:  legacy Activity.request() for everything;
+//                   renewal-failed notification when backgrounded.
+//                   The entry-point `if #available(iOS 17.2, *)` checks
+//                   isolate every iOS 17.2 code path, so the legacy
+//                   helpers can be deleted in one commit when the
+//                   deployment target reaches 17.2.
 
 final class LiveActivityManager {
     static let shared = LiveActivityManager()
@@ -96,38 +96,31 @@ final class LiveActivityManager {
         }
     }
 
-    /// Observes new Activity creations (iOS 16.2+). When an activity is started
-    /// by push-to-start (iOS 17.2+), the app discovers it through this stream and
+    /// Observes new Activity creations. When an activity is started by
+    /// push-to-start (iOS 17.2+), the app discovers it through this stream and
     /// adopts it via the same bind/update path as an app-initiated start.
     private func startActivityUpdatesObservation() {
-        if #available(iOS 16.2, *) {
-            activityUpdatesObservationTask?.cancel()
-            LogManager.shared.log(
-                category: .general,
-                message: "[LA] activityUpdates observation starting (iOS 16.2+)"
-            )
-            activityUpdatesObservationTask = Task { [weak self] in
-                var deliveries = 0
-                for await activity in Activity<GlucoseLiveActivityAttributes>.activityUpdates {
-                    deliveries += 1
-                    let incomingID = activity.id
-                    LogManager.shared.log(
-                        category: .general,
-                        message: "[LA] activityUpdates delivery #\(deliveries) id=\(incomingID) — dispatching to MainActor"
-                    )
-                    await MainActor.run {
-                        self?.adoptPushToStartActivity(activity)
-                    }
-                }
+        activityUpdatesObservationTask?.cancel()
+        LogManager.shared.log(
+            category: .general,
+            message: "[LA] activityUpdates observation starting"
+        )
+        activityUpdatesObservationTask = Task { [weak self] in
+            var deliveries = 0
+            for await activity in Activity<GlucoseLiveActivityAttributes>.activityUpdates {
+                deliveries += 1
+                let incomingID = activity.id
                 LogManager.shared.log(
                     category: .general,
-                    message: "[LA] activityUpdates stream ended after \(deliveries) deliveries — push-to-start adoption will no longer work until app relaunch"
+                    message: "[LA] activityUpdates delivery #\(deliveries) id=\(incomingID) — dispatching to MainActor"
                 )
+                await MainActor.run {
+                    self?.adoptPushToStartActivity(activity)
+                }
             }
-        } else {
             LogManager.shared.log(
                 category: .general,
-                message: "[LA] activityUpdates unavailable (iOS <16.2) — push-to-start adoption cannot work"
+                message: "[LA] activityUpdates stream ended after \(deliveries) deliveries — push-to-start adoption will no longer work until app relaunch"
             )
         }
     }
@@ -437,8 +430,8 @@ final class LiveActivityManager {
     /// Observes `pushToStartTokenUpdates` (iOS 17.2+) and persists the token.
     /// Long-lived — started once at init and never cancelled.
     private var pushToStartObservationTask: Task<Void, Never>?
-    /// Observes `Activity<>.activityUpdates` (iOS 16.2+) so activities started
-    /// out-of-band (push-to-start) are adopted automatically.
+    /// Observes `Activity<>.activityUpdates` so activities started out-of-band
+    /// (push-to-start) are adopted automatically.
     private var activityUpdatesObservationTask: Task<Void, Never>?
     /// Timestamp of the last successful push-to-start APNs dispatch. Used to log
     /// the delay until iOS delivers the new activity via `activityUpdates`. If
@@ -498,8 +491,9 @@ final class LiveActivityManager {
         }
     }
 
-    /// iOS 16.x path. Identical to dev's `startIfNeeded` — Activity.request()
-    /// for everything. Removable when the deployment target reaches 17.2.
+    /// Pre-17.2 path (iOS 16.6 – 17.1). Identical to dev's `startIfNeeded` —
+    /// Activity.request() for everything. Removable when the deployment target
+    /// reaches 17.2.
     @MainActor
     private func startIfNeededLegacy() {
         if let existing = Activity<GlucoseLiveActivityAttributes>.activities.first {
@@ -738,8 +732,9 @@ final class LiveActivityManager {
         }
     }
 
-    /// iOS 16.x renewal: foreground Activity.request, mark renewal-failed if it
-    /// throws. Removable when the deployment target reaches 17.2.
+    /// Pre-17.2 renewal (iOS 16.6 – 17.1): foreground Activity.request, mark
+    /// renewal-failed if it throws. Removable when the deployment target
+    /// reaches 17.2.
     private func attemptLegacyRenewal(
         snapshot: GlucoseSnapshot,
         oldActivity: Activity<GlucoseLiveActivityAttributes>
