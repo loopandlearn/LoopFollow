@@ -86,25 +86,22 @@ class NightscoutUtils {
                     completion(.success(decodedObject))
                 }
             } catch let decodingError as DecodingError {
-                print("[ERROR] Failed to decode \(T.self):")
+                let typeName = String(describing: T.self)
                 switch decodingError {
                 case let .typeMismatch(type, context):
-                    print("Type mismatch for type \(type), context: \(context.debugDescription)")
-                    print("Coding path:", context.codingPath)
+                    LogManager.shared.log(category: .nightscout, message: "Decode \(typeName) typeMismatch: \(type) at \(context.codingPath.map { $0.stringValue }.joined(separator: "."))", isDebug: true)
                 case let .valueNotFound(type, context):
-                    print("Value not found for type \(type), context: \(context.debugDescription)")
-                    print("Coding path:", context.codingPath)
+                    LogManager.shared.log(category: .nightscout, message: "Decode \(typeName) valueNotFound: \(type) at \(context.codingPath.map { $0.stringValue }.joined(separator: "."))", isDebug: true)
                 case let .keyNotFound(key, context):
-                    print("Key '\(key.stringValue)' not found, context: \(context.debugDescription)")
-                    print("Coding path:", context.codingPath)
-                case let .dataCorrupted(context):
-                    print("Data corrupted, context: \(context.debugDescription)")
+                    LogManager.shared.log(category: .nightscout, message: "Decode \(typeName) keyNotFound: '\(key.stringValue)' at \(context.codingPath.map { $0.stringValue }.joined(separator: "."))", isDebug: true)
+                case .dataCorrupted:
+                    LogManager.shared.log(category: .nightscout, message: "Decode \(typeName) dataCorrupted", isDebug: true)
                 @unknown default:
-                    print("Unknown decoding error")
+                    LogManager.shared.log(category: .nightscout, message: "Decode \(typeName) unknown error", isDebug: true)
                 }
                 completion(.failure(decodingError))
             } catch {
-                print("[ERROR] General error:", error)
+                LogManager.shared.log(category: .nightscout, message: "Decode \(T.self) general error: \(String(describing: type(of: error)))", isDebug: true)
                 completion(.failure(error))
             }
         }
