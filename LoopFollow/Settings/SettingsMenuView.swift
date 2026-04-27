@@ -228,37 +228,7 @@ struct AggregatedStatsViewWrapper: View {
     }
 
     private func getMainViewController() -> MainViewController? {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootVC = window.rootViewController
-        else {
-            return nil
-        }
-
-        if let mainVC = rootVC as? MainViewController {
-            return mainVC
-        }
-
-        if let navVC = rootVC as? UINavigationController,
-           let mainVC = navVC.viewControllers.first as? MainViewController
-        {
-            return mainVC
-        }
-
-        if let tabVC = rootVC as? UITabBarController {
-            for vc in tabVC.viewControllers ?? [] {
-                if let mainVC = vc as? MainViewController {
-                    return mainVC
-                }
-                if let navVC = vc as? UINavigationController,
-                   let mainVC = navVC.viewControllers.first as? MainViewController
-                {
-                    return mainVC
-                }
-            }
-        }
-
-        return nil
+        MainViewController.shared
     }
 }
 

@@ -826,25 +826,7 @@ class TreatmentDetailViewModel: ObservableObject {
     }
 
     private func getMainViewController() -> MainViewController? {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let tabBarController = window.rootViewController as? UITabBarController
-        else {
-            return nil
-        }
-
-        for vc in tabBarController.viewControllers ?? [] {
-            if let mainVC = vc as? MainViewController {
-                return mainVC
-            }
-            if let navVC = vc as? UINavigationController,
-               let mainVC = navVC.viewControllers.first as? MainViewController
-            {
-                return mainVC
-            }
-        }
-
-        return nil
+        MainViewController.shared
     }
 }
 
@@ -1417,26 +1399,7 @@ class TreatmentsViewModel: ObservableObject {
     }
 
     private func getMainViewController() -> MainViewController? {
-        // Try to find MainViewController in the app's window hierarchy
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let tabBarController = window.rootViewController as? UITabBarController
-        else {
-            return nil
-        }
-
-        for vc in tabBarController.viewControllers ?? [] {
-            if let mainVC = vc as? MainViewController {
-                return mainVC
-            }
-            if let navVC = vc as? UINavigationController,
-               let mainVC = navVC.viewControllers.first as? MainViewController
-            {
-                return mainVC
-            }
-        }
-
-        return nil
+        MainViewController.shared
     }
 }
 
