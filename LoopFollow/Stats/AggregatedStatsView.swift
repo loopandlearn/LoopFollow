@@ -21,8 +21,8 @@ struct AggregatedStatsView: View {
     init(viewModel: AggregatedStatsViewModel, onDismiss: (() -> Void)? = nil) {
         self.viewModel = viewModel
         self.onDismiss = onDismiss
-        _showGMI = State(initialValue: Storage.shared.showGMI.value)
-        _showStdDev = State(initialValue: Storage.shared.showStdDev.value)
+        _showGMI = State(initialValue: UnitSettingsStore.shared.glycemicMetricMode == .gmi)
+        _showStdDev = State(initialValue: UnitSettingsStore.shared.variabilityMetricMode == .stdDeviation)
 
         let calendar = dateTimeUtils.displayCalendar()
         let startOfToday = calendar.startOfDay(for: Date())
@@ -162,11 +162,31 @@ struct AggregatedStatsView: View {
             timeoutTimer = nil
         }
         .onChange(of: showGMI) { newValue in
-            Storage.shared.showGMI.value = newValue
+            UnitSettingsStore.shared.glycemicMetricMode = newValue ? .gmi : .ehba1c
         }
         .onChange(of: showStdDev) { newValue in
-            Storage.shared.showStdDev.value = newValue
+            UnitSettingsStore.shared.variabilityMetricMode = newValue ? .stdDeviation : .cv
         }
+        .onReceive(Storage.shared.showGMI.$value) { newValue in
+            showGMI = newValue
+        }
+        .onReceive(Storage.shared.showStdDev.$value) { newValue in
+            showStdDev = newValue
+        }
+        .onReceive(Storage.shared.units.$value) { _ in
+            refreshVisibleStats()
+        }
+        .onReceive(Storage.shared.useIFCC.$value) { _ in
+            refreshVisibleStats()
+        }
+        .onReceive(Storage.shared.timeInRangeModeRaw.$value) { _ in
+            viewModel.tirStats.calculateTIR()
+        }
+    }
+
+    private func refreshVisibleStats() {
+        guard !isLoadingData else { return }
+        viewModel.calculateStats()
     }
 }
 
@@ -319,9 +339,9 @@ struct StatsGridView: View {
                     showGMI.toggle()
                 }) {
                     StatCard(
-                        title: showGMI ? "GMI" : "eHbA1c",
-                        value: showGMI ? formatGMI(simpleStats.gmi) : formatEhbA1c(simpleStats.avgGlucose),
-                        unit: showGMI ? "%" : (Storage.shared.units.value == "mg/dL" ? "%" : "mmol/mol"),
+                        title: showGMI ? "GMI" : "Est. A1C",
+                        value: showGMI ? formatGMI(simpleStats.avgGlucose) : formatEhbA1c(simpleStats.avgGlucose),
+                        unit: UnitSettingsStore.shared.glycemicOutputUnit.rawValue,
                         color: .blue,
                         isInteractive: true
                     )
@@ -331,7 +351,7 @@ struct StatsGridView: View {
                 StatCard(
                     title: "Avg Glucose",
                     value: formatGlucose(simpleStats.avgGlucose),
-                    unit: Storage.shared.units.value,
+                    unit: UnitSettingsStore.shared.glucoseUnit.rawValue,
                     color: Color(red: 0.20, green: 0.99, blue: 0.70)
                 )
 
@@ -341,7 +361,7 @@ struct StatsGridView: View {
                     StatCard(
                         title: showStdDev ? "Std Deviation" : "CV",
                         value: showStdDev ? formatStdDev(simpleStats.stdDeviation) : formatCV(simpleStats.coefficientOfVariation),
-                        unit: showStdDev ? Storage.shared.units.value : "%",
+                        unit: showStdDev ? UnitSettingsStore.shared.glucoseUnit.rawValue : "%",
                         color: .orange,
                         isInteractive: true
                     )
@@ -403,34 +423,25 @@ struct StatsGridView: View {
         }
     }
 
-    private func formatGMI(_ value: Double?) -> String {
-        guard let value = value else { return "---" }
+    private func formatGMI(_ avgGlucose: Double?) -> String {
+        guard let value = GlycemicMetricCalculator.calculateGMI(avgGlucoseInDisplayUnits: avgGlucose) else { return "---" }
+        if UnitSettingsStore.shared.glycemicOutputUnit == .mmolMol {
+            return String(format: "%.0f", value)
+        }
         return String(format: "%.1f", value)
     }
 
     private func formatEhbA1c(_ avgGlucose: Double?) -> String {
-        guard let avgGlucose = avgGlucose else { return "---" }
-
-        let avgGlucoseMgdL: Double
-        if Storage.shared.units.value == "mg/dL" {
-            avgGlucoseMgdL = avgGlucose
-        } else {
-            avgGlucoseMgdL = avgGlucose * 18.0182
+        guard let value = GlycemicMetricCalculator.calculateEhba1c(avgGlucoseInDisplayUnits: avgGlucose) else { return "---" }
+        if UnitSettingsStore.shared.glycemicOutputUnit == .mmolMol {
+            return String(format: "%.0f", value)
         }
-
-        let ehba1cPercent = (avgGlucoseMgdL + 46.7) / 28.7
-
-        if Storage.shared.units.value == "mg/dL" {
-            return String(format: "%.1f", ehba1cPercent)
-        } else {
-            let ehba1cMmolMol = (ehba1cPercent - 2.15) * 10.929
-            return String(format: "%.0f", ehba1cMmolMol)
-        }
+        return String(format: "%.1f", value)
     }
 
     private func formatGlucose(_ value: Double?) -> String {
         guard let value = value else { return "---" }
-        if Storage.shared.units.value == "mg/dL" {
+        if UnitSettingsStore.shared.glucoseUnit == .mgdL {
             return String(format: "%.0f", value)
         } else {
             return String(format: "%.1f", value)
@@ -439,7 +450,7 @@ struct StatsGridView: View {
 
     private func formatStdDev(_ value: Double?) -> String {
         guard let value = value else { return "---" }
-        if Storage.shared.units.value == "mg/dL" {
+        if UnitSettingsStore.shared.glucoseUnit == .mgdL {
             return String(format: "%.0f", value)
         } else {
             return String(format: "%.1f", value)

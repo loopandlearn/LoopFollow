@@ -8,7 +8,6 @@ struct GeneralSettingsView: View {
     @ObservedObject var appBadge = Storage.shared.appBadge
     @ObservedObject var appearanceMode = Storage.shared.appearanceMode
     @ObservedObject var showStats = Storage.shared.showStats
-    @ObservedObject var useIFCC = Storage.shared.useIFCC
     @ObservedObject var showSmallGraph = Storage.shared.showSmallGraph
     @ObservedObject var screenlockSwitchState = Storage.shared.screenlockSwitchState
     @ObservedObject var showDisplayName = Storage.shared.showDisplayName
@@ -51,7 +50,6 @@ struct GeneralSettingsView: View {
                         }
                     }
                     Toggle("Display Stats", isOn: $showStats.value)
-                    Toggle("Use IFCC A1C", isOn: $useIFCC.value)
                     Toggle("Display Small Graph", isOn: $showSmallGraph.value)
                     Toggle("Color BG Text", isOn: $colorBGText.value)
                     Toggle("Keep Screen Active", isOn: $screenlockSwitchState.value)

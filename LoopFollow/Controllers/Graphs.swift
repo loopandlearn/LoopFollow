@@ -211,6 +211,10 @@ class TempTargetRenderer: LineChartRenderer {
 
 let ScaleXMax: Double = 150.0
 extension MainViewController {
+    private func graphRangeThresholds() -> (low: Double, high: Double) {
+        UnitSettingsStore.shared.effectiveThresholds()
+    }
+
     func updateChartRenderers() {
         let tempTargetDataIndex = GraphDataIndex.tempTarget.rawValue
         let smbDataIndex = GraphDataIndex.smb.rawValue
@@ -627,15 +631,17 @@ extension MainViewController {
         // Clear limit lines so they don't add multiples when changing the settings
         BGChart.rightAxis.removeAllLimitLines()
 
-        // Add lower red line based on low alert value
+        let thresholds = graphRangeThresholds()
+
+        // Add lower red line
         let ll = ChartLimitLine()
-        ll.limit = Storage.shared.lowLine.value
+        ll.limit = thresholds.low
         ll.lineColor = NSUIColor.systemRed.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ll)
 
-        // Add upper yellow line based on low alert value
+        // Add upper yellow line
         let ul = ChartLimitLine()
-        ul.limit = Storage.shared.highLine.value
+        ul.limit = thresholds.high
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
 
@@ -786,15 +792,17 @@ extension MainViewController {
         // Clear limit lines so they don't add multiples when changing the settings
         BGChart.rightAxis.removeAllLimitLines()
 
-        // Add lower red line based on low alert value
+        let thresholds = graphRangeThresholds()
+
+        // Add lower red line
         let ll = ChartLimitLine()
-        ll.limit = Storage.shared.lowLine.value
+        ll.limit = thresholds.low
         ll.lineColor = NSUIColor.systemRed.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ll)
 
-        // Add upper yellow line based on low alert value
+        // Add upper yellow line
         let ul = ChartLimitLine()
-        ul.limit = Storage.shared.highLine.value
+        ul.limit = thresholds.high
         ul.lineColor = NSUIColor.systemYellow.withAlphaComponent(0.5)
         BGChart.rightAxis.addLimitLine(ul)
 
@@ -824,6 +832,7 @@ extension MainViewController {
         var colors = [NSUIColor]()
 
         topBG = Storage.shared.minBGScale.value
+        let thresholds = graphRangeThresholds()
         for i in 0 ..< entries.count {
             // Clamp the plotted y-value to the same bounds the header text uses
             // (HIGH/LOW), so the graph stays consistent with the main display.
@@ -836,9 +845,9 @@ extension MainViewController {
             mainChart.append(value)
             smallChart.append(value)
 
-            if Double(entries[i].sgv) >= Storage.shared.highLine.value {
+            if Double(entries[i].sgv) >= thresholds.high {
                 colors.append(NSUIColor.systemYellow)
-            } else if Double(entries[i].sgv) <= Storage.shared.lowLine.value {
+            } else if Double(entries[i].sgv) <= thresholds.low {
                 colors.append(NSUIColor.systemRed)
             } else {
                 colors.append(NSUIColor.systemGreen)

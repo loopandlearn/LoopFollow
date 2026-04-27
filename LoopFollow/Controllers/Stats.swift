@@ -14,6 +14,7 @@ class StatsData {
     var avgBG: Float
     var a1C: Float
     var stdDev: Float
+    var coefficientOfVariation: Float
     var bgDataCount: Int
     var pie: [DataStructs.pieData]
 
@@ -23,12 +24,17 @@ class StatsData {
         countHigh = 0
         totalGlucose = 0
         a1C = 0.0
+        coefficientOfVariation = 0.0
+
+        let thresholds = UnitSettingsStore.shared.effectiveThresholds()
+        let lowThreshold = thresholds.low
+        let highThreshold = thresholds.high
 
         for i in 0 ..< bgData.count {
             // Set low/range/high counts for pie chart and %'s
-            if Double(bgData[i].sgv) <= Storage.shared.lowLine.value {
+            if Double(bgData[i].sgv) < lowThreshold {
                 countLow += 1
-            } else if Double(bgData[i].sgv) >= Storage.shared.highLine.value {
+            } else if Double(bgData[i].sgv) > highThreshold {
                 countHigh += 1
             } else {
                 countRange += 1
@@ -60,15 +66,19 @@ class StatsData {
             partialSum += (Float(bgData[i].sgv) - avgBG) * (Float(bgData[i].sgv) - avgBG)
         }
 
-        stdDev = sqrt(partialSum / Float(bgData.count))
-        if Storage.shared.units.value != "mg/dL" {
-            stdDev = stdDev * Float(GlucoseConversion.mgDlToMmolL)
+        let stdDevMgdL = sqrt(partialSum / Float(bgData.count))
+        if avgBG > 0 {
+            coefficientOfVariation = (stdDevMgdL / avgBG) * 100.0
         }
+        stdDev = Float(UnitSettingsStore.shared.convertMgdlToDisplay(Double(stdDevMgdL)))
 
-        if Storage.shared.useIFCC.value {
-            a1C = (((46.7 + Float(avgBG)) / 28.7) - 2.152) / 0.09148
+        let avgBGDisplay = UnitSettingsStore.shared.convertMgdlToDisplay(Double(avgBG))
+        let metricValue: Double?
+        if UnitSettingsStore.shared.glycemicMetricMode == .gmi {
+            metricValue = GlycemicMetricCalculator.calculateGMI(avgGlucoseInDisplayUnits: avgBGDisplay)
         } else {
-            a1C = (46.7 + Float(avgBG)) / 28.7
+            metricValue = GlycemicMetricCalculator.calculateEhba1c(avgGlucoseInDisplayUnits: avgBGDisplay)
         }
+        a1C = Float(metricValue ?? 0.0)
     }
 }

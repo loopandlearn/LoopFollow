@@ -25,8 +25,8 @@ struct StatsDisplayView: View {
                 }
                 HStack {
                     statColumn(title: "Avg BG:", value: model.avgBG)
-                    statColumn(title: "Est A1C:", value: model.estA1C)
-                    statColumn(title: "Std Dev:", value: model.stdDev)
+                    statColumn(title: model.estA1CTitle, value: model.estA1C)
+                    statColumn(title: model.stdDevTitle, value: model.stdDev)
                 }
             }
             .frame(maxWidth: .infinity)

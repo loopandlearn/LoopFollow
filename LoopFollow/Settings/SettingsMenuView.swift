@@ -31,6 +31,7 @@ struct SettingsMenuView: View {
                     {
                         settingsPath.value.append(Sheet.general)
                     }
+
                     NavigationRow(title: "Graph",
                                   icon: "chart.xyaxis.line")
                     {
@@ -43,6 +44,11 @@ struct SettingsMenuView: View {
                         {
                             settingsPath.value.append(Sheet.infoDisplay)
                         }
+                    }
+                    NavigationRow(title: "Units and Metrics",
+                                  icon: "scalemass")
+                    {
+                        settingsPath.value.append(Sheet.units)
                     }
 
                     NavigationRow(title: "Tabs",
@@ -138,16 +144,6 @@ struct SettingsMenuView: View {
     @ViewBuilder
     private var dataSection: some View {
         Section("Data Settings") {
-            Picker("Units",
-                   selection: Binding(
-                       get: { Storage.shared.units.value },
-                       set: { Storage.shared.units.value = $0 }
-                   )) {
-                Text("mg/dL").tag("mg/dL")
-                Text("mmol/L").tag("mmol/L")
-            }
-            .pickerStyle(.segmented)
-
             NavigationRow(title: "Nightscout",
                           icon: "network")
             {
@@ -166,6 +162,7 @@ struct SettingsMenuView: View {
 // MARK: – Sheet routing
 
 private enum Sheet: Hashable, Identifiable {
+    case units
     case nightscout, dexcom
     case backgroundRefresh
     case general, graph
@@ -187,6 +184,7 @@ private enum Sheet: Hashable, Identifiable {
     @ViewBuilder
     var destination: some View {
         switch self {
+        case .units: UnitsSettingsView()
         case .nightscout: NightscoutSettingsView(viewModel: .init())
         case .dexcom: DexcomSettingsView(viewModel: .init())
         case .backgroundRefresh: BackgroundRefreshSettingsView(viewModel: .init())
