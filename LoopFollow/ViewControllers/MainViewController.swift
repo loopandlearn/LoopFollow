@@ -222,6 +222,7 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         showHideNSDetails()
 
         scheduleAllTasks()
+        setupNightscoutSocket()
 
         NotificationCenter.default.addObserver(self, selector: #selector(refresh), name: NSNotification.Name("refresh"), object: nil)
 
@@ -551,6 +552,7 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
         Observable.shared.minAgoText.value = "Refreshing"
         scheduleAllTasks()
+        NightscoutSocketManager.shared.connectIfNeeded()
 
         currentCage = nil
         currentSage = nil
@@ -582,6 +584,8 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         if Storage.shared.backgroundRefreshType.value != .none {
             BackgroundAlertManager.shared.startBackgroundAlert()
         }
+
+        NightscoutSocketManager.shared.disconnect()
     }
 
     // Migrations must only run when UserDefaults is accessible (i.e. after first unlock).
@@ -683,6 +687,7 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         }
 
         TaskScheduler.shared.checkTasksNow()
+        NightscoutSocketManager.shared.connectIfNeeded()
 
         checkAndNotifyVersionStatus()
         checkAppExpirationStatus()
