@@ -1052,7 +1052,7 @@ final class LiveActivityManager {
             highMgdl: Storage.shared.highLine.value,
         )
         GlucoseSnapshotStore.shared.save(snapshot)
-        // WatchConnectivityManager.shared.send(snapshot: snapshot)
+        WatchConnectivityManager.shared.send(snapshot: snapshot)
 
         // LA update: gated on LA being active, snapshot having changed, and activities enabled.
         if !Storage.shared.laEnabled.value {

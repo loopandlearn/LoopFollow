@@ -497,8 +497,10 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         if Observable.shared.currentAlarm.value != nil,
            let snoozerIndex = orderedItems.firstIndex(of: .snoozer)
         {
+            LogManager.shared.log(category: .general, message: "[LA] tap nav: alarm active → snoozer at index \(snoozerIndex)", isDebug: true)
             Observable.shared.selectedTabIndex.value = snoozerIndex
         } else {
+            LogManager.shared.log(category: .general, message: "[LA] tap nav: no alarm (or snoozer not found) → home", isDebug: true)
             Observable.shared.selectedTabIndex.value = 0
         }
     }
