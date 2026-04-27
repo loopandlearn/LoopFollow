@@ -45,7 +45,7 @@ class JWTManager {
             let signedJWT = "\(signingInput).\(signatureBase64)"
 
             cache[cacheKey] = CachedToken(jwt: signedJWT, expiresAt: Date().addingTimeInterval(ttl))
-            LogManager.shared.log(category: .apns, message: "JWT generated for key \(keyId) (TTL 55 min)")
+            LogManager.shared.log(category: .apns, message: "JWT generated for key \(LogRedactor.keyId(keyId)) (TTL 55 min)")
             return signedJWT
         } catch {
             LogManager.shared.log(category: .apns, message: "Failed to sign JWT: \(error.localizedDescription)")

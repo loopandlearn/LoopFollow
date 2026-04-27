@@ -37,8 +37,6 @@ class ObservableUserDefaultsValue<T: AnyConvertible & Equatable>: ObservableObje
 
                 // Notify UserDefaultsValueGroups that value has changed
                 UserDefaultsValueGroups.valueChanged(self)
-
-                print("Value for \(self.key) changed to \(self.value)") // Logging
             }
         }
     }

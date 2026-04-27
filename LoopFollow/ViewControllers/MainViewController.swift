@@ -1070,12 +1070,12 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
         // after a reboot), all StorageValues were cached from encrypted UserDefaults and hold
         // their defaults. Reload everything from disk now that the device is unlocked, firing
         // Combine observers only for values that actually changed.
-        LogManager.shared.log(category: .general, message: "appCameToForeground: needsBFUReload=\(Storage.shared.needsBFUReload), url='\(Storage.shared.url.value)'")
+        LogManager.shared.log(category: .general, message: "appCameToForeground: needsBFUReload=\(Storage.shared.needsBFUReload), url='\(LogRedactor.url(Storage.shared.url.value))'")
         if Storage.shared.needsBFUReload {
             Storage.shared.needsBFUReload = false
             LogManager.shared.log(category: .general, message: "BFU reload triggered — reloading all StorageValues")
             Storage.shared.reloadAll()
-            LogManager.shared.log(category: .general, message: "BFU reload complete: url='\(Storage.shared.url.value)'")
+            LogManager.shared.log(category: .general, message: "BFU reload complete: url='\(LogRedactor.url(Storage.shared.url.value))'")
             // Show the loading overlay so the user sees feedback during the 2-5s
             // while tasks re-run with the now-correct credentials.
             loadingStates = ["bg": false, "profile": false, "deviceStatus": false]
