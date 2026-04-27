@@ -28,7 +28,7 @@ struct AggregatedStatsView: View {
         let startOfToday = calendar.startOfDay(for: Date())
         let end = calendar.date(byAdding: .second, value: -1, to: startOfToday) ?? Date()
         let endDay = calendar.startOfDay(for: end)
-        let startDay = calendar.date(byAdding: .day, value: -7, to: endDay) ?? endDay
+        let startDay = calendar.date(byAdding: .day, value: -(7 - 1), to: endDay) ?? endDay
         let start = calendar.startOfDay(for: startDay)
         _startDate = State(initialValue: start)
         _endDate = State(initialValue: end)

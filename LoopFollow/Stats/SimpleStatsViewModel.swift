@@ -66,7 +66,7 @@ class SimpleStatsViewModel: ObservableObject {
         let smbTotal = smbInPeriod.reduce(0.0) { $0 + $1.value }
         let totalBolusInPeriod = bolusTotal + smbTotal
 
-        let cutoffTime = Date().timeIntervalSince1970 - (Double(dataService.daysToAnalyze) * 24 * 60 * 60)
+        let cutoffTime = dataService.startDate.timeIntervalSince1970
         let allBolusDates = (bolusesInPeriod + smbInPeriod).map { $0.date }.filter { $0 >= cutoffTime }
         let actualDays = calculateActualDaysCovered(dates: allBolusDates, requestedDays: dataService.daysToAnalyze)
 
@@ -93,7 +93,7 @@ class SimpleStatsViewModel: ObservableObject {
 
         let totalCarbsInPeriod = dailyCarbs.values.reduce(0.0, +)
 
-        let daysWithData = max(dailyCarbs.count, 1)
+        let daysWithData = dataService.daysToAnalyze
 
         if daysWithData > 0 {
             avgCarbs = totalCarbsInPeriod / Double(daysWithData)
@@ -295,7 +295,7 @@ class SimpleStatsViewModel: ObservableObject {
         guard !dates.isEmpty else { return requestedDays }
 
         let calendar = dateTimeUtils.displayCalendar()
-        let cutoffTime = Date().timeIntervalSince1970 - (Double(requestedDays) * 24 * 60 * 60)
+        let cutoffTime = dataService.startDate.timeIntervalSince1970
         let filteredDates = dates.filter { $0 >= cutoffTime }
 
         var uniqueDays = Set<Date>()
