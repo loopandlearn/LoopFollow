@@ -87,7 +87,6 @@
 		DD0C0C6B2C48562000DBADDF /* InsulinMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6A2C48562000DBADDF /* InsulinMetric.swift */; };
 		DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */; };
 		DD0C0C702C4AFFE800DBADDF /* RemoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */; };
-		DD0C0C722C4B000800DBADDF /* TrioNightscoutRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C712C4B000800DBADDF /* TrioNightscoutRemoteView.swift */; };
 		DD12D4852E1705D9004E0112 /* AlarmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD12D4842E1705D9004E0112 /* AlarmViewController.swift */; };
 		DD12D4872E1705E6004E0112 /* AlarmsContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD12D4862E1705E6004E0112 /* AlarmsContainerView.swift */; };
 		DD13BC752C3FD6210062313B /* InfoType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC742C3FD6200062313B /* InfoType.swift */; };
@@ -112,7 +111,6 @@
 		DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878122C7B750D0048F05C /* TempTargetView.swift */; };
 		DD4878152C7B75230048F05C /* MealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878142C7B75230048F05C /* MealView.swift */; };
 		DD4878172C7B75350048F05C /* BolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878162C7B75350048F05C /* BolusView.swift */; };
-		DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift */; };
 		DD48781E2C7DAF2F0048F05C /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */; };
 		DD4878202C7DAF890048F05C /* PushMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48781F2C7DAF890048F05C /* PushMessage.swift */; };
 		DD493AD52ACF2109009A6922 /* ResumePump.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD493AD42ACF2109009A6922 /* ResumePump.swift */; };
@@ -251,7 +249,6 @@
 		A1A1A10002000000A0CFEED1 /* LogRedactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10002000000A0CFEED2 /* LogRedactor.swift */; };
 		DDDC31CC2E13A7DF009EA0F3 /* AddAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */; };
 		DDDC31CE2E13A811009EA0F3 /* AlarmTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */; };
-		DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F482D479AEF00884336 /* NoRemoteView.swift */; };
 		DDE69ED22C7256260013EAEC /* RemoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE69ED12C7256260013EAEC /* RemoteType.swift */; };
 		DDE75D232DE5E505007C1FC1 /* Glyph.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D222DE5E505007C1FC1 /* Glyph.swift */; };
 		DDE75D272DE5E539007C1FC1 /* ActionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE75D262DE5E539007C1FC1 /* ActionRow.swift */; };
@@ -539,7 +536,6 @@
 		DD0C0C6A2C48562000DBADDF /* InsulinMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinMetric.swift; sourceTree = "<group>"; };
 		DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbMetric.swift; sourceTree = "<group>"; };
 		DD0C0C6F2C4AFFE800DBADDF /* RemoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteViewController.swift; sourceTree = "<group>"; };
-		DD0C0C712C4B000800DBADDF /* TrioNightscoutRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioNightscoutRemoteView.swift; sourceTree = "<group>"; };
 		DD12D4842E1705D9004E0112 /* AlarmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmViewController.swift; sourceTree = "<group>"; };
 		DD12D4862E1705E6004E0112 /* AlarmsContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmsContainerView.swift; sourceTree = "<group>"; };
 		DD13BC742C3FD6200062313B /* InfoType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoType.swift; sourceTree = "<group>"; };
@@ -564,7 +560,6 @@
 		DD4878122C7B750D0048F05C /* TempTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetView.swift; sourceTree = "<group>"; };
 		DD4878142C7B75230048F05C /* MealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealView.swift; sourceTree = "<group>"; };
 		DD4878162C7B75350048F05C /* BolusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusView.swift; sourceTree = "<group>"; };
-		DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioNightscoutRemoteController.swift; sourceTree = "<group>"; };
 		DD48781D2C7DAF2F0048F05C /* PushNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
 		DD48781F2C7DAF890048F05C /* PushMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessage.swift; sourceTree = "<group>"; };
 		DD493AD42ACF2109009A6922 /* ResumePump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumePump.swift; sourceTree = "<group>"; };
@@ -705,7 +700,6 @@
 		A1A1A10002000000A0CFEED2 /* LogRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogRedactor.swift; sourceTree = "<group>"; };
 		DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmSheet.swift; sourceTree = "<group>"; };
 		DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmTile.swift; sourceTree = "<group>"; };
-		DDDF6F482D479AEF00884336 /* NoRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoRemoteView.swift; sourceTree = "<group>"; };
 		DDE69ED12C7256260013EAEC /* RemoteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteType.swift; sourceTree = "<group>"; };
 		DDE75D222DE5E505007C1FC1 /* Glyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glyph.swift; sourceTree = "<group>"; };
 		DDE75D262DE5E539007C1FC1 /* ActionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionRow.swift; sourceTree = "<group>"; };
@@ -1043,8 +1037,6 @@
 		DD0C0C6E2C4AFFB800DBADDF /* Remote */ = {
 			isa = PBXGroup;
 			children = (
-				DDDF6F4A2D479B6A00884336 /* Nightscout */,
-				DDDF6F482D479AEF00884336 /* NoRemoteView.swift */,
 				DDEF503E2D479B8A00884336 /* LoopAPNS */,
 				DD4878112C7B74F90048F05C /* TRC */,
 				DD4878062C7B2E9E0048F05C /* Settings */,
@@ -1098,7 +1090,6 @@
 				DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */,
 				DD4878162C7B75350048F05C /* BolusView.swift */,
 				DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */,
-				DD4878182C7C56D60048F05C /* TrioNightscoutRemoteController.swift */,
 				DDFD5C522CB167DA00D3FD68 /* TRCCommandType.swift */,
 				DDBE3ABC2CB5A961006B37DC /* OverrideView.swift */,
 			);
@@ -1337,14 +1328,6 @@
 				DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */,
 			);
 			path = AddAlarm;
-			sourceTree = "<group>";
-		};
-		DDDF6F4A2D479B6A00884336 /* Nightscout */ = {
-			isa = PBXGroup;
-			children = (
-				DD0C0C712C4B000800DBADDF /* TrioNightscoutRemoteView.swift */,
-			);
-			path = Nightscout;
 			sourceTree = "<group>";
 		};
 		DDEF503D2D32753A00999A5D /* Task */ = {
@@ -2142,7 +2125,6 @@
 				DD7F4C072DD5042F00D449E9 /* OverrideStartAlarmEditor.swift in Sources */,
 				DDCC3A4B2DDBB5E4006F1C10 /* BatteryCondition.swift in Sources */,
 				DDCC3A502DDED000006F1C10 /* PumpBatteryCondition.swift in Sources */,
-				DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */,
 				656F8C142E49F3D20008DC1D /* RemoteCommandSettings.swift in Sources */,
 				DD12D4872E1705E6004E0112 /* AlarmsContainerView.swift in Sources */,
 				DD83164A2DE4C504004467AA /* SettingsStepperRow.swift in Sources */,
@@ -2259,7 +2241,6 @@
 				DDC6CA3F2DD7C6340060EE25 /* TemporaryAlarmEditor.swift in Sources */,
 				DDF699992C5AA3060058A8D9 /* TempTargetPresetManager.swift in Sources */,
 				DDC6CA452DD8D8E60060EE25 /* PumpChangeCondition.swift in Sources */,
-				DD0C0C722C4B000800DBADDF /* TrioNightscoutRemoteView.swift in Sources */,
 				DD493ADB2ACF21A3009A6922 /* Bolus.swift in Sources */,
 				DDF9676E2AD08C6E00C5EB95 /* SiteChange.swift in Sources */,
 				DDCC3A542DDC5D62006F1C10 /* BatteryDropAlarmEditor.swift in Sources */,
@@ -2339,7 +2320,6 @@
 				DD026E5B2EA2C9C300A39CB5 /* InsulinFormatter.swift in Sources */,
 				DD5334B02D1447C500CDD6EA /* BLEManager.swift in Sources */,
 				DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */,
-				DD4878192C7C56D60048F05C /* TrioNightscoutRemoteController.swift in Sources */,
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
 				DDA9ACAC2D6B317100E6F1A9 /* ContactType.swift in Sources */,
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,

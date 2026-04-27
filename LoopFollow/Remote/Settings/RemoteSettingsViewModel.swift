@@ -57,7 +57,7 @@ class RemoteSettingsViewModel: ObservableObject {
             }
             return loopFollowTeamID != targetTeamId
 
-        case .none, .nightscout:
+        case .none:
             return false
         }
     }
