@@ -211,10 +211,6 @@ struct RemoteSettingsExport: Codable {
                 storage.device.value = "Loop"
             case .trc:
                 storage.device.value = "Trio"
-            case .nightscout:
-                // For Nightscout, we don't automatically set device type
-                // as it should be determined by the actual connection
-                break
             case .none:
                 break
             }
@@ -234,8 +230,6 @@ struct RemoteSettingsExport: Codable {
         switch remoteType {
         case .none:
             return true
-        case .nightscout:
-            return !user.isEmpty
         case .trc:
             return !user.isEmpty && !sharedSecret.isEmpty && !remoteApnsKey.isEmpty && !remoteKeyId.isEmpty
         case .loopAPNS:

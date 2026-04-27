@@ -418,8 +418,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
 
                 // Check if current remote type is invalid for the device
                 let shouldReset = (currentRemoteType == .loopAPNS && !isLoopDevice) ||
-                    (currentRemoteType == .trc && !isTrioDevice) ||
-                    (currentRemoteType == .nightscout && !isTrioDevice)
+                    (currentRemoteType == .trc && !isTrioDevice)
 
                 if shouldReset {
                     Storage.shared.remoteType.value = .none
