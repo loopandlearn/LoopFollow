@@ -148,6 +148,9 @@ final class LiveActivityManager {
         )
         lastPushToStartSuccessAt = nil
         pushToStartSendsWithoutAdoption = 0
+        // The new LA is confirmed — clear any post-send backoff so a legitimate
+        // near-term renewal isn't silently blocked by the 5-minute base interval.
+        Storage.shared.laPushToStartBackoff.value = 0
 
         // If we already have a current activity and this is a different one, it's likely
         // the new push-to-start LA replacing an old one. End the old, then bind the new.
@@ -386,12 +389,17 @@ final class LiveActivityManager {
     /// When a successful APNs push-to-start does not result in an `activityUpdates`
     /// adoption, count those orphaned sends. After this threshold, the next
     /// foreground entry forces a local restart to nudge iOS to issue a new
-    /// pushToStartToken — Apple FB21158660 workaround.
-    private static let pushToStartForceRestartThreshold: Int = 2
+    /// pushToStartToken — Apple FB21158660 workaround. Set to 4 (not 2) to avoid
+    /// false positives on slow connections where the activityUpdates delivery lags.
+    private static let pushToStartForceRestartThreshold: Int = 4
     /// Polling timeout for the push-to-start token to arrive after a fresh install.
     /// `pushToStartTokenUpdates` typically delivers within a couple of seconds.
     private static let pushToStartTokenWaitTimeout: TimeInterval = 5
     private static let pushToStartTokenPollInterval: TimeInterval = 0.5
+    /// Delay before the single automatic retry when the push-to-start token is not
+    /// yet available after the initial wait. The token is almost always en route
+    /// and arrives within a few seconds of the first request.
+    private static let pushToStartTokenRetryDelay: TimeInterval = 10
 
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
@@ -767,10 +775,11 @@ final class LiveActivityManager {
     // MARK: - Push-to-start (iOS 17.2+)
 
     /// Single creation path for iOS 17.2+. Handles initial start, renewal, and
-    /// forced restart. Verifies token + APNs credentials, applies backoff, ends
-    /// the old activity (if any) before sending so the new push-to-start LA
-    /// cleanly replaces it. Adoption is delivered via the `activityUpdates`
-    /// observer — `handlePushToStartResult` only updates backoff/state.
+    /// forced restart. Verifies token + APNs credentials, applies backoff, then
+    /// dispatches the APNs push-to-start call. The old activity is only ended
+    /// after a confirmed successful send, preserving it if the send fails.
+    /// Adoption is delivered via the `activityUpdates` observer —
+    /// `handlePushToStartResult` only updates backoff/state.
     @available(iOS 17.2, *)
     @MainActor
     private func attemptPushToStartCreate(
@@ -836,7 +845,8 @@ final class LiveActivityManager {
     private func dispatchPushToStart(
         reason: String,
         oldActivity: Activity<GlucoseLiveActivityAttributes>?,
-        snapshot: GlucoseSnapshot
+        snapshot: GlucoseSnapshot,
+        isRetry: Bool = false
     ) async {
         // Wait briefly for the push-to-start token to arrive — covers the
         // fresh-install case where the user toggles LA on before iOS has
@@ -858,11 +868,23 @@ final class LiveActivityManager {
             }
         }
         guard !token.isEmpty else {
-            LogManager.shared.log(
-                category: .general,
-                message: "[LA] push-to-start (\(reason)) aborted — no token after \(LiveActivityManager.pushToStartTokenWaitTimeout)s wait (iOS hasn't issued one yet)"
-            )
-            await MainActor.run { self.schedulePushToStartTokenMissingNotification() }
+            if isRetry {
+                // Token still absent after retry — give up and notify the user.
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] push-to-start (\(reason)) aborted — no token after retry (iOS hasn't issued one yet)"
+                )
+                await MainActor.run { self.schedulePushToStartTokenMissingNotification() }
+            } else {
+                // Token likely en route — wait briefly and make a single automatic
+                // retry before surfacing an error to the user.
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] push-to-start (\(reason)) no token after \(Int(LiveActivityManager.pushToStartTokenWaitTimeout))s — retrying in \(Int(LiveActivityManager.pushToStartTokenRetryDelay))s"
+                )
+                try? await Task.sleep(nanoseconds: UInt64(LiveActivityManager.pushToStartTokenRetryDelay * 1_000_000_000))
+                await dispatchPushToStart(reason: reason, oldActivity: oldActivity, snapshot: snapshot, isRetry: true)
+            }
             return
         }
 
@@ -890,15 +912,6 @@ final class LiveActivityManager {
             message: "[LA] push-to-start (\(reason)) firing token=…\(tail) seq=\(nextSeq) staleIn=\(Int(staleDate.timeIntervalSinceNow))s"
         )
 
-        // End the old activity inline so the push-to-start cleanly replaces it.
-        if let oldActivity {
-            LogManager.shared.log(
-                category: .general,
-                message: "[LA] push-to-start (\(reason)) ending oldActivity=\(oldActivity.id) before send"
-            )
-            await oldActivity.end(nil, dismissalPolicy: .immediate)
-        }
-
         let sendStart = Date()
         let result = await APNSClient.shared.sendLiveActivityStart(
             pushToStartToken: token,
@@ -911,6 +924,18 @@ final class LiveActivityManager {
             category: .general,
             message: "[LA] push-to-start (\(reason)) APNs round-trip result=\(result) elapsed=\(elapsedMs)ms"
         )
+
+        // End the old activity only after a confirmed successful send — if the
+        // send fails the user keeps their existing LA rather than losing data
+        // with nothing to replace it.
+        if result == .success, let oldActivity {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] push-to-start (\(reason)) send succeeded — ending oldActivity=\(oldActivity.id)"
+            )
+            await oldActivity.end(nil, dismissalPolicy: .immediate)
+        }
+
         await MainActor.run {
             self.handlePushToStartResult(result, reason: reason)
         }
