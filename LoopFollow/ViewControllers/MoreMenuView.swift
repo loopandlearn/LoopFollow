@@ -10,7 +10,6 @@ struct MoreMenuView: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var showAlert = false
-    @State private var showSettingsView = false
     @State private var showAlarmsView = false
     @State private var showRemoteView = false
     @State private var showNightscoutView = false
@@ -24,7 +23,7 @@ struct MoreMenuView: View {
         List {
             // Settings
             Section {
-                Button { showSettingsView = true } label: {
+                NavigationLink(value: SettingsRoute.settings) {
                     Label("Settings", systemImage: "gearshape")
                         .foregroundStyle(.primary)
                 }
@@ -112,9 +111,7 @@ struct MoreMenuView: View {
         } message: {
             Text(alertMessage)
         }
-        .navigationDestination(isPresented: $showSettingsView) {
-            SettingsMenuView()
-        }
+        .navigationDestination(for: SettingsRoute.self) { $0.destination }
         .navigationDestination(isPresented: $showAlarmsView) {
             AlarmsContainerView()
         }
