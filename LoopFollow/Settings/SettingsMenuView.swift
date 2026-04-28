@@ -8,7 +8,6 @@ struct SettingsMenuView: View {
     // MARK: - Observed Objects
 
     @ObservedObject private var nightscoutURL = Storage.shared.url
-    @ObservedObject private var settingsPath = Observable.shared.settingsPath
 
     // MARK: – Local state
 
@@ -21,112 +20,83 @@ struct SettingsMenuView: View {
     // MARK: – Body
 
     var body: some View {
-        NavigationStack(path: $settingsPath.value) {
-            List {
-                dataSection
+        List {
+            dataSection
 
-                Section("Display Settings") {
-                    NavigationRow(title: "General",
-                                  icon: "gearshape")
-                    {
-                        settingsPath.value.append(Sheet.general)
-                    }
-                    NavigationRow(title: "Graph",
-                                  icon: "chart.xyaxis.line")
-                    {
-                        settingsPath.value.append(Sheet.graph)
-                    }
+            Section("Display Settings") {
+                NavigationRow(title: "General",
+                              icon: "gearshape",
+                              value: SettingsRoute.general)
+                NavigationRow(title: "Graph",
+                              icon: "chart.xyaxis.line",
+                              value: SettingsRoute.graph)
 
-                    if !nightscoutURL.value.isEmpty {
-                        NavigationRow(title: "Information Display",
-                                      icon: "info.circle")
-                        {
-                            settingsPath.value.append(Sheet.infoDisplay)
-                        }
-                    }
-
-                    NavigationRow(title: "Tabs",
-                                  icon: "rectangle.3.group")
-                    {
-                        settingsPath.value.append(Sheet.tabSettings)
-                    }
+                if !nightscoutURL.value.isEmpty {
+                    NavigationRow(title: "Information Display",
+                                  icon: "info.circle",
+                                  value: SettingsRoute.infoDisplay)
                 }
 
-                Section("App Settings") {
-                    NavigationRow(title: "Background Refresh",
-                                  icon: "arrow.clockwise")
-                    {
-                        settingsPath.value.append(Sheet.backgroundRefresh)
-                    }
+                NavigationRow(title: "Tabs",
+                              icon: "rectangle.3.group",
+                              value: SettingsRoute.tabSettings)
+            }
 
-                    NavigationRow(title: "Import/Export",
-                                  icon: "square.and.arrow.down")
-                    {
-                        settingsPath.value.append(Sheet.importExport)
-                    }
+            Section("App Settings") {
+                NavigationRow(title: "Background Refresh",
+                              icon: "arrow.clockwise",
+                              value: SettingsRoute.backgroundRefresh)
 
-                    NavigationRow(title: "APN",
-                                  icon: "bell.and.waves.left.and.right")
-                    {
-                        settingsPath.value.append(Sheet.apn)
-                    }
+                NavigationRow(title: "Import/Export",
+                              icon: "square.and.arrow.down",
+                              value: SettingsRoute.importExport)
 
-                    #if !targetEnvironment(macCatalyst)
-                        NavigationRow(title: "Live Activity",
-                                      icon: "dot.radiowaves.left.and.right")
-                        {
-                            settingsPath.value.append(Sheet.liveActivity)
-                        }
-                    #endif
+                NavigationRow(title: "APN",
+                              icon: "bell.and.waves.left.and.right",
+                              value: SettingsRoute.apn)
 
-                    if !nightscoutURL.value.isEmpty {
-                        NavigationRow(title: "Remote",
-                                      icon: "antenna.radiowaves.left.and.right")
-                        {
-                            settingsPath.value.append(Sheet.remote)
-                        }
-                    }
-                }
+                #if !targetEnvironment(macCatalyst)
+                    NavigationRow(title: "Live Activity",
+                                  icon: "dot.radiowaves.left.and.right",
+                                  value: SettingsRoute.liveActivity)
+                #endif
 
-                Section("Alarms") {
-                    NavigationRow(title: "Alarms",
-                                  icon: "bell.badge")
-                    {
-                        settingsPath.value.append(Sheet.alarmSettings)
-                    }
-                }
-
-                Section("Integrations") {
-                    NavigationRow(title: "Calendar",
-                                  icon: "calendar")
-                    {
-                        settingsPath.value.append(Sheet.calendar)
-                    }
-
-                    NavigationRow(title: "Contact",
-                                  icon: "person.circle")
-                    {
-                        settingsPath.value.append(Sheet.contact)
-                    }
-                }
-
-                Section("Advanced Settings") {
-                    NavigationRow(title: "Advanced",
-                                  icon: "exclamationmark.shield")
-                    {
-                        settingsPath.value.append(Sheet.advanced)
-                    }
+                if !nightscoutURL.value.isEmpty {
+                    NavigationRow(title: "Remote",
+                                  icon: "antenna.radiowaves.left.and.right",
+                                  value: SettingsRoute.remote)
                 }
             }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.large)
-            .navigationDestination(for: Sheet.self) { $0.destination }
-            .toolbar {
-                if let onBack {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: onBack) {
-                            Image(systemName: "chevron.left")
-                        }
+
+            Section("Alarms") {
+                NavigationRow(title: "Alarms",
+                              icon: "bell.badge",
+                              value: SettingsRoute.alarmSettings)
+            }
+
+            Section("Integrations") {
+                NavigationRow(title: "Calendar",
+                              icon: "calendar",
+                              value: SettingsRoute.calendar)
+
+                NavigationRow(title: "Contact",
+                              icon: "person.circle",
+                              value: SettingsRoute.contact)
+            }
+
+            Section("Advanced Settings") {
+                NavigationRow(title: "Advanced",
+                              icon: "exclamationmark.shield",
+                              value: SettingsRoute.advanced)
+            }
+        }
+        .navigationTitle("Settings")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            if let onBack {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: onBack) {
+                        Image(systemName: "chevron.left")
                     }
                 }
             }
@@ -149,23 +119,20 @@ struct SettingsMenuView: View {
             .pickerStyle(.segmented)
 
             NavigationRow(title: "Nightscout",
-                          icon: "network")
-            {
-                settingsPath.value.append(Sheet.nightscout)
-            }
+                          icon: "network",
+                          value: SettingsRoute.nightscout)
 
             NavigationRow(title: "Dexcom",
-                          icon: "sensor.tag.radiowaves.forward")
-            {
-                settingsPath.value.append(Sheet.dexcom)
-            }
+                          icon: "sensor.tag.radiowaves.forward",
+                          value: SettingsRoute.dexcom)
         }
     }
 }
 
 // MARK: – Sheet routing
 
-private enum Sheet: Hashable, Identifiable {
+enum SettingsRoute: Hashable, Identifiable {
+    case settings
     case nightscout, dexcom
     case backgroundRefresh
     case general, graph
@@ -187,6 +154,7 @@ private enum Sheet: Hashable, Identifiable {
     @ViewBuilder
     var destination: some View {
         switch self {
+        case .settings: SettingsMenuView()
         case .nightscout: NightscoutSettingsView(viewModel: .init())
         case .dexcom: DexcomSettingsView(viewModel: .init())
         case .backgroundRefresh: BackgroundRefreshSettingsView(viewModel: .init())
@@ -228,37 +196,7 @@ struct AggregatedStatsViewWrapper: View {
     }
 
     private func getMainViewController() -> MainViewController? {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootVC = window.rootViewController
-        else {
-            return nil
-        }
-
-        if let mainVC = rootVC as? MainViewController {
-            return mainVC
-        }
-
-        if let navVC = rootVC as? UINavigationController,
-           let mainVC = navVC.viewControllers.first as? MainViewController
-        {
-            return mainVC
-        }
-
-        if let tabVC = rootVC as? UITabBarController {
-            for vc in tabVC.viewControllers ?? [] {
-                if let mainVC = vc as? MainViewController {
-                    return mainVC
-                }
-                if let navVC = vc as? UINavigationController,
-                   let mainVC = navVC.viewControllers.first as? MainViewController
-                {
-                    return mainVC
-                }
-            }
-        }
-
-        return nil
+        MainViewController.shared
     }
 }
 
