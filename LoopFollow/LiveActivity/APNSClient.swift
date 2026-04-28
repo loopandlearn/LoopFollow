@@ -142,7 +142,14 @@ class APNSClient {
         request.setValue("\(bundleID).push-type.liveactivity", forHTTPHeaderField: "apns-topic")
         request.setValue("liveactivity", forHTTPHeaderField: "apns-push-type")
         request.setValue("10", forHTTPHeaderField: "apns-priority")
-        request.setValue("0", forHTTPHeaderField: "apns-expiration")
+        // 10-minute expiry — long enough to survive a brief connectivity gap
+        // while the glucose reading in the payload is still clinically meaningful.
+        // The stale date (8 h) is too generous: delivering a start with hours-old
+        // glucose data is worse than not starting at all.
+        request.setValue("\(Int(Date().timeIntervalSince1970) + 10 * 60)", forHTTPHeaderField: "apns-expiration")
+        // Collapse key prevents duplicate LA creation if two sends race (e.g., a
+        // refresh tick and a user-initiated restart overlap).
+        request.setValue("\(bundleID).la.start", forHTTPHeaderField: "apns-collapse-id")
         request.httpBody = payload
 
         do {
