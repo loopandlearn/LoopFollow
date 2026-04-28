@@ -44,8 +44,6 @@ class Observable {
     var pumpBatteryLevel = ObservableValue<Double?>(default: nil)
     var enactedOrSuggested = ObservableValue<TimeInterval?>(default: nil)
 
-    var settingsPath = ObservableValue<NavigationPath>(default: NavigationPath())
-
     var lastSentTOTP = ObservableValue<String?>(default: nil)
 
     var loopFollowDeviceToken = ObservableValue<String>(default: "")
