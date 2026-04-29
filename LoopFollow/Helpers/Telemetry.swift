@@ -14,6 +14,7 @@ final class TelemetryClient {
     private static let endpoint = URL(string: "https://lf.bjorkert.se/api/telemetry/checkin")!
     private static let salt = "lf-telemetry"
     private static let weeklyInterval: TimeInterval = 7 * 24 * 60 * 60
+    private static let dailyInterval: TimeInterval = 24 * 60 * 60
 
     /// Lazily generates and persists the install's permanent clientId on
     /// first construction. `Storage.telemetryClientId` is nil until this
@@ -47,49 +48,62 @@ final class TelemetryClient {
     /// any abuse to harmless duplicate-row inserts.
     private static let writeToken = "RsEDJ8RoOs7HHZ_XGOdI1sY3Yuv6iPnRRk7tg-NlCAg"
 
-    /// Re-entrancy lock so concurrent call sites (e.g. AppDelegate cold-launch
-    /// hook + SceneDelegate foreground hook firing in the same activation)
-    /// can't both POST. The first one through atomically flips this true; the
-    /// second sees it and bails. Reset in a `defer` so any path through `send`
-    /// — success, failure, throw — clears it.
-    private let sendingLock = NSLock()
-    private var isSending = false
-
-    /// Returns true if the configured trigger conditions are met (weekly elapsed
-    /// or build SHA changed since the last successful send).
-    func shouldSendNow(now: Date = Date()) -> Bool {
-        let storage = Storage.shared
-        let weekElapsed = storage.telemetryLastSentAt.value
-            .map { now.timeIntervalSince($0) > Self.weeklyInterval } ?? true
+    /// True when the running build's commit SHA differs from the SHA recorded
+    /// at the last successful send. Used at startup to fire one immediate
+    /// ping after an app update — the regular 24h scheduler can't tell that
+    /// the build changed and would otherwise wait out the previous interval.
+    func buildShaChangedSinceLastSend() -> Bool {
         let currentSha = BuildDetails.default.commitSha ?? ""
-        let buildChanged = storage.telemetryLastSentSha.value != currentSha
-        return weekElapsed || buildChanged
+        return Storage.shared.telemetryLastSentSha.value != currentSha
     }
 
-    /// Single entry point used by all triggers (cold launch, foreground, etc).
-    /// Skips silently if telemetry is disabled, consent isn't yet recorded, or
-    /// trigger conditions aren't met. Safe to call from any thread; concurrent
-    /// calls collapse into one network request via `sendingLock`.
+    /// Wires telemetry into TaskScheduler. Called once on app start (from
+    /// AppDelegate.didFinishLaunchingWithOptions) and again after each tick.
+    /// First run is computed from `telemetryLastSentAt`: a relaunch 6h after
+    /// the previous send waits 18h; a relaunch after 25h fires on the next
+    /// timer tick (TaskScheduler treats a past nextRun as "fire soon"). Each
+    /// fired tick reschedules itself for +24h, giving the steady-state
+    /// cadence while the app keeps running.
+    ///
+    /// Bails out without scheduling if the user hasn't decided on consent
+    /// yet or has opted out — there's nothing for the timer to do, and
+    /// scheduling for "now" with `lastSentAt` still nil would tight-loop
+    /// (fire → maybeSend bails → reschedule → fire …).
+    func scheduleRecurring() {
+        let storage = Storage.shared
+        guard storage.telemetryConsentDecisionMade.value,
+              storage.telemetryEnabled.value
+        else {
+            return
+        }
+
+        let nextRun: Date
+        if let last = storage.telemetryLastSentAt.value {
+            nextRun = last.addingTimeInterval(Self.dailyInterval)
+        } else {
+            // Consent given but we've never landed a successful send
+            // (network down at first launch, server hiccup, etc). Retry in
+            // a minute — bounded so a persistently failing send doesn't
+            // turn into a busy loop.
+            nextRun = Date().addingTimeInterval(60)
+        }
+
+        TaskScheduler.shared.scheduleTask(id: .telemetry, nextRun: nextRun) {
+            Task.detached {
+                await TelemetryClient.shared.maybeSend()
+                TelemetryClient.shared.scheduleRecurring()
+            }
+        }
+    }
+
+    /// Single entry point used by all callers (scheduler tick, consent-yes,
+    /// startup SHA-change). Gated only by consent + opt-in toggle; *when* to
+    /// send is the caller's decision (the scheduler handles the 24h cadence
+    /// by setting `nextRun`; startup handles the SHA-change shortcut).
     func maybeSend() async {
         let storage = Storage.shared
         guard storage.telemetryConsentDecisionMade.value else { return }
         guard storage.telemetryEnabled.value else { return }
-        guard shouldSendNow() else { return }
-
-        sendingLock.lock()
-        if isSending {
-            sendingLock.unlock()
-            return
-        }
-        isSending = true
-        sendingLock.unlock()
-
-        defer {
-            sendingLock.lock()
-            isSending = false
-            sendingLock.unlock()
-        }
-
         await send()
     }
 
@@ -128,26 +142,24 @@ final class TelemetryClient {
         payload["instance"] = AppConstants.appInstanceId
 
         if let idfv = UIDevice.current.identifierForVendor?.uuidString {
-            payload["hashedIDFV"] = Self.hashed(idfv)
+            payload["idfv"] = idfv
         }
 
         payload["device"] = Self.hardwareIdentifier()
         payload["platform"] = Self.detectPlatform()
         payload["osVersion"] = UIDevice.current.systemVersion
-        payload["timeZone"] = TimeZone.current.identifier
-
-        // hashedDexcomAccount / hashedNightscoutHost are sent ONLY when those
-        // backends are configured. Their presence-or-absence is itself the
-        // "do you use Dexcom / Nightscout?" signal — no separate booleans.
 
         let dexcomUser = storage.shareUserName.value.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !dexcomUser.isEmpty {
-            payload["hashedDexcomAccount"] = Self.hashed(dexcomUser)
-        }
+        payload["usesDexcom"] = !dexcomUser.isEmpty
 
         let nsURLRaw = storage.url.value.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !nsURLRaw.isEmpty, let host = URL(string: nsURLRaw)?.host, !host.isEmpty {
-            payload["hashedNightscoutHost"] = Self.hashed(host)
+        payload["usesNightscout"] = !nsURLRaw.isEmpty
+
+        // Which closed-loop app is being followed (Loop / Trio / …). Field
+        // omitted when device hasn't been detected yet; absence is the signal.
+        let device = storage.device.value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !device.isEmpty {
+            payload["followingApp"] = device
         }
 
         payload["backgroundRefreshMethod"] = storage.backgroundRefreshType.value.rawValue
@@ -301,25 +313,25 @@ struct TelemetryPrivacyView: View {
                 Group {
                     Text("Endpoint")
                         .font(.headline)
-                    Text("Once a week (or after a new build), the app sends a small JSON object to https://lf.bjorkert.se. The endpoint is self-hosted by the maintainer; no third-party analytics service is involved.")
+                    Text("Once a day (or after a new build), the app sends a small JSON object to https://lf.bjorkert.se. The endpoint is self-hosted by the maintainer; no third-party analytics service is involved.")
                 }
 
                 Group {
                     Text("What is sent")
                         .font(.headline)
-                    Text("App version, build SHA and date, whether this is a TestFlight build, the Apple development team that signed this build (anonymized), the install instance number, a per-device anonymized identifier, the hardware identifier (e.g. iPhone15,2), iOS version, and time zone. An anonymized identifier for your Nightscout site and your Dexcom username is also sent — but only when those are configured. The full JSON is visible under Diagnostics → What's sent.")
+                    Text("App version, build SHA and date, whether this is a TestFlight build, the Apple development team that signed this build (anonymized), the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), and iOS version. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent.")
                 }
 
                 Group {
                     Text("What stays on your device")
                         .font(.headline)
-                    Text("All glucose, insulin, and carb data. Your Nightscout URL and API token. Your Dexcom credentials. Remote-command secrets and APNS keys. Location data. Logs — these are never sent automatically; the Settings → Logs sharing flow is unchanged and only triggered by you.")
+                    Text("All glucose, insulin, and carb data. Your Nightscout URL and API token. Your Dexcom credentials. Remote-command secrets and APNS keys. Time zone. Location data. Logs — these are never sent automatically; the Settings → Logs sharing flow is unchanged and only triggered by you.")
                 }
 
                 Group {
                     Text("Frequency")
                         .font(.headline)
-                    Text("Once every 7 days, plus once after each new build. The check runs on every app launch (including silent-push wake-ups and background app refresh) and on every foreground. Whichever launch is first eligible will send.")
+                    Text("Once every 24 hours, plus once after installing a new build. The check runs in the background while the app is active or refreshing in the background.")
                 }
 
                 Group {
@@ -352,7 +364,7 @@ struct TelemetryConsentView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("You can choose to share anonymous information with the developers to help improve LoopFollow—such as app and iOS version, device type, time zone, and a few settings. Your health data, credentials, and logs remain on your device.")
+                    Text("You can choose to share anonymous information with the developers to help improve LoopFollow—such as app and iOS version, device type, which app you're following, and a few settings. Your health data, credentials, time zone, and logs remain on your device.")
 
                     Text("You can change this any time in Settings → Diagnostics.")
                         .font(.subheadline)
@@ -374,9 +386,12 @@ struct TelemetryConsentView: View {
                     Button {
                         Storage.shared.telemetryEnabled.value = true
                         Storage.shared.telemetryConsentDecisionMade.value = true
-                        // Fire one ping right away so the chosen-yes state isn't
-                        // delayed until the next foreground / cold launch.
-                        Task.detached { await TelemetryClient.shared.maybeSend() }
+                        // Fire the inaugural ping immediately, then start the
+                        // 24h scheduled cadence ticking from that send.
+                        Task.detached {
+                            await TelemetryClient.shared.maybeSend()
+                            TelemetryClient.shared.scheduleRecurring()
+                        }
                         dismiss()
                     } label: {
                         Text("Yes, send anonymous stats")
