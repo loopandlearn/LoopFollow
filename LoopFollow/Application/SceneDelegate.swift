@@ -10,10 +10,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     let synthesizer = AVSpeechSynthesizer()
 
     /// One-shot guard so the consent prompt is only attempted once per
-    /// process lifetime even if the scene activates repeatedly. The send
-    /// check itself is idempotent — `TelemetryClient.maybeSend()` rate-limits
-    /// via telemetryLastSentAt and a re-entrancy lock — so it can fire from
-    /// every activation without harm.
+    /// process lifetime even if the scene activates repeatedly.
     private var consentPromptShownThisProcess = false
 
     func scene(_ scene: UIScene, willConnectTo _: UISceneSession, options _: UIScene.ConnectionOptions) {
@@ -43,22 +40,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         runTelemetryFirstForegroundHook()
     }
 
-    /// Telemetry trigger. See Helpers/Telemetry.swift.
-    /// On every foreground, runs `maybeSend()` (which is idempotent and
-    /// internally rate-limited). If consent has not yet been recorded,
-    /// presents the one-time consent sheet exactly once per process.
+    /// Presents the one-time consent sheet on first foreground. Sending is
+    /// handled by AppDelegate at launch and by TaskScheduler thereafter —
+    /// firing maybeSend here would duplicate the launch-time send.
     private func runTelemetryFirstForegroundHook() {
-        let storage = Storage.shared
-
-        if !storage.telemetryConsentDecisionMade.value {
-            if !consentPromptShownThisProcess {
-                consentPromptShownThisProcess = true
-                presentTelemetryConsentSheet()
-            }
-            return
+        if !Storage.shared.telemetryConsentDecisionMade.value,
+           !consentPromptShownThisProcess
+        {
+            consentPromptShownThisProcess = true
+            presentTelemetryConsentSheet()
         }
-
-        Task.detached { await TelemetryClient.shared.maybeSend() }
     }
 
     private func presentTelemetryConsentSheet() {
