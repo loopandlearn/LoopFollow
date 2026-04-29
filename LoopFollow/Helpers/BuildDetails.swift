@@ -31,9 +31,13 @@ class BuildDetails {
         return dict["com-LoopFollow-branch"] as? String
     }
 
+    var commitSha: String? {
+        return dict["com-LoopFollow-commit-sha"] as? String
+    }
+
     var branchAndSha: String {
         let branch = branch ?? "Unknown"
-        let sha = dict["com-LoopFollow-commit-sha"] as? String ?? "Unknown"
+        let sha = commitSha ?? "Unknown"
         return "\(branch) \(sha)"
     }
 

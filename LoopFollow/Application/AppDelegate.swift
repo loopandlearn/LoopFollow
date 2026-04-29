@@ -48,6 +48,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         BackgroundRefreshManager.shared.register()
 
+        // Telemetry: every cold launch (foreground or background) is a chance
+        // to send a check-in. Internally gated by consent, the toggle, and the
+        // 7-day / build-SHA trigger. Hooking didFinishLaunchingWithOptions in
+        // addition to SceneDelegate.sceneDidBecomeActive ensures background
+        // launches (silent push wake, BG app refresh) keep the cadence honest
+        // for users who rarely foreground the app — important for a follower
+        // app whose users mostly read state via widgets / live activities.
+        // See Helpers/Telemetry.swift.
+        TelemetryClient.shared.recordColdLaunch()
+        Task.detached { await TelemetryClient.shared.maybeSend() }
+
         // Detect Before-First-Unlock launch. If protected data is unavailable here,
         // StorageValues were cached from encrypted UserDefaults and need a reload
         // on the first foreground after the user unlocks.
