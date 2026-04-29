@@ -149,6 +149,7 @@ enum LAAppGroupSettings {
         static let smallWidgetSlot = "la.smallWidgetSlot"
         static let displayName = "la.displayName"
         static let showDisplayName = "la.showDisplayName"
+        static let watchSelectedSlots = "watch.selectedSlots"
     }
 
     private static var defaults: UserDefaults? {
@@ -204,6 +205,22 @@ enum LAAppGroupSettings {
             return LiveActivitySlotDefaults.smallWidgetSlot
         }
         return LiveActivitySlotOption(rawValue: raw) ?? LiveActivitySlotDefaults.smallWidgetSlot
+    }
+
+    // MARK: - Watch selected slots (ordered, variable-length)
+
+    /// Persists the user's ordered list of selected Watch data slots.
+    static func setWatchSelectedSlots(_ slots: [LiveActivitySlotOption]) {
+        defaults?.set(slots.map(\.rawValue), forKey: Keys.watchSelectedSlots)
+    }
+
+    /// Returns the ordered list of selected Watch data slots.
+    /// Falls back to a sensible default if nothing is saved.
+    static func watchSelectedSlots() -> [LiveActivitySlotOption] {
+        guard let raw = defaults?.stringArray(forKey: Keys.watchSelectedSlots) else {
+            return [.iob, .cob, .projectedBG, .battery]
+        }
+        return raw.compactMap { LiveActivitySlotOption(rawValue: $0) }
     }
 
     // MARK: - Display Name

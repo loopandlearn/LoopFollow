@@ -58,6 +58,7 @@ enum AppGroupID {
             ".WidgetExtension",
             ".Widgets",
             ".WidgetsExtension",
+            ".watchkitapp",
             ".Watch",
             ".WatchExtension",
             ".CarPlay",
