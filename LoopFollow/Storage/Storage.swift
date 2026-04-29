@@ -188,7 +188,6 @@ class Storage {
 
     var telemetryEnabled = StorageValue<Bool>(key: "telemetryEnabled", defaultValue: true)
     var telemetryConsentDecisionMade = StorageValue<Bool>(key: "telemetryConsentDecisionMade", defaultValue: false)
-    var telemetryClientId = StorageValue<String?>(key: "telemetryClientId", defaultValue: nil)
     var telemetryLastSentAt = StorageValue<Date?>(key: "telemetryLastSentAt", defaultValue: nil)
     var telemetryLastSentSha = StorageValue<String>(key: "telemetryLastSentSha", defaultValue: "")
 

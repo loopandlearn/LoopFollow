@@ -16,16 +16,7 @@ final class TelemetryClient {
     private static let weeklyInterval: TimeInterval = 7 * 24 * 60 * 60
     private static let dailyInterval: TimeInterval = 24 * 60 * 60
 
-    /// Lazily generates and persists the install's permanent clientId on
-    /// first construction. `Storage.telemetryClientId` is nil until this
-    /// runs; assigning to .value goes through StorageValue's didSet, which
-    /// is what actually writes to UserDefaults.
-    private init() {
-        let storage = Storage.shared
-        if storage.telemetryClientId.value == nil {
-            storage.telemetryClientId.value = UUID().uuidString
-        }
-    }
+    private init() {}
 
     /// Records a cold launch in a sliding 7-day window of timestamps. Called
     /// from AppDelegate.didFinishLaunchingWithOptions on every process start
@@ -115,12 +106,6 @@ final class TelemetryClient {
         let bd = BuildDetails.default
 
         var payload: [String: Any] = [:]
-
-        // Guaranteed non-nil after TelemetryClient.shared has been constructed
-        // — see private init(). Empty fallback is defensive; the server's
-        // UUID regex would reject an empty string with 400, surfacing the
-        // invariant break via the reject-rate Telegram alert.
-        payload["clientId"] = storage.telemetryClientId.value ?? ""
 
         if let v = info["CFBundleShortVersionString"] as? String { payload["appVersion"] = v }
         if let v = info["CFBundleVersion"] as? String { payload["buildNumber"] = v }
