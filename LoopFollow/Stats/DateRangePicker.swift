@@ -37,9 +37,7 @@ struct DateRangePicker: View {
     }
 
     private var lastFullDay: Date {
-        let calendar = dateTimeUtils.displayCalendar()
-        let startOfToday = calendar.startOfDay(for: Date())
-        return calendar.date(byAdding: .second, value: -1, to: startOfToday) ?? Date()
+        StatsDateRange.lastComplete(days: 1).end
     }
 
     var body: some View {
@@ -240,11 +238,9 @@ struct DateRangePicker: View {
     }
 
     private func setDateRange(days: Int) {
-        let calendar = dateTimeUtils.displayCalendar()
-        endDate = lastFullDay
-        let endDayStart = calendar.startOfDay(for: endDate)
-        let startDayStart = calendar.date(byAdding: .day, value: -(days - 1), to: endDayStart) ?? endDayStart
-        startDate = calendar.startOfDay(for: startDayStart)
+        let range = StatsDateRange.lastComplete(days: days)
+        startDate = range.start
+        endDate = range.end
         showStartDatePicker = false
         showEndDatePicker = false
         onDateChange()
