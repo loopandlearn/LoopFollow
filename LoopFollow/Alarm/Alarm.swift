@@ -3,7 +3,6 @@
 
 import Foundation
 import HealthKit
-import UIKit
 import UserNotifications
 
 protocol DayNightDisplayable {
@@ -260,19 +259,7 @@ struct Alarm: Identifiable, Codable, Equatable {
             }
         }()
 
-        // When backgrounded without Silent Tune holding a session alive, the in-app
-        // AVAudioSession activation can fail (cannotInterruptOthers, 560557684). Pass
-        // the alarm's soundFile to the notification so the system delivers the user's
-        // configured sound as a fallback. In foreground or with Silent Tune, the in-app
-        // player is reliable and we keep .default to avoid an echo with the looping player.
-        let inBackgroundWithoutSilentTune = UIApplication.shared.applicationState != .active
-            && Storage.shared.backgroundRefreshType.value != .silentTune
-        let notificationSound: SoundFile? = (playSound && inBackgroundWithoutSilentTune) ? soundFile : nil
-        AlarmManager.shared.sendNotification(
-            title: type.rawValue,
-            actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze",
-            soundFile: notificationSound
-        )
+        AlarmManager.shared.sendNotification(title: type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
 
         if playSound {
             AlarmSound.setSoundFile(str: soundFile.rawValue)

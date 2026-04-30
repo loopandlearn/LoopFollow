@@ -88,8 +88,7 @@ class AlarmSound {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer!.delegate = audioPlayerDelegate
 
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: sessionCategoryOptions())
-            try AVAudioSession.sharedInstance().setActive(true)
+            activateAudioSessionWithFallback()
 
             audioPlayer?.numberOfLoops = 0
 
@@ -116,8 +115,6 @@ class AlarmSound {
             return
         }
 
-        enableAudio()
-
         // If repeating with delay, we'll handle it manually via the delegate
         // Only set repeatDelay if both repeating and delay > 0
         repeatDelay = (repeating && delay > 0) ? TimeInterval(delay) : 0
@@ -126,8 +123,7 @@ class AlarmSound {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer!.delegate = audioPlayerDelegate
 
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: sessionCategoryOptions())
-            try AVAudioSession.sharedInstance().setActive(true)
+            activateAudioSessionWithFallback()
 
             // Only use numberOfLoops if we're not using delay-based repeating
             // When repeatDelay > 0, we play once and then use the delegate to schedule the next play with delay
@@ -145,8 +141,7 @@ class AlarmSound {
             // First sound plays immediately - delay only applies between repeated sounds
             if audioPlayer!.play() {
                 if !isPlaying {
-                    LogManager.shared.log(category: .alarm, message: "AlarmSound - not playing after calling play")
-                    LogManager.shared.log(category: .alarm, message: "AlarmSound - rate value: \(audioPlayer!.rate)")
+                    LogManager.shared.log(category: .alarm, message: "AlarmSound - not playing after calling play (rate \(audioPlayer!.rate))")
                 } else {
                     Observable.shared.alarmSoundPlaying.value = true
                     if repeatDelay > 0 {
@@ -184,8 +179,7 @@ class AlarmSound {
                 audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
                 audioPlayer!.delegate = audioPlayerDelegate
 
-                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: sessionCategoryOptions())
-                try AVAudioSession.sharedInstance().setActive(true)
+                activateAudioSessionWithFallback()
 
                 audioPlayer!.numberOfLoops = 0
 
@@ -213,8 +207,7 @@ class AlarmSound {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer!.delegate = audioPlayerDelegate
 
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: sessionCategoryOptions())
-            try AVAudioSession.sharedInstance().setActive(true)
+            activateAudioSessionWithFallback()
 
             // Play endless loops
             audioPlayer!.numberOfLoops = 2
@@ -260,26 +253,35 @@ class AlarmSound {
         systemOutputVolumeBeforeOverride = nil
     }
 
-    fileprivate static func enableAudio() {
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: sessionCategoryOptions())
-            try AVAudioSession.sharedInstance().setActive(true)
-            LogManager.shared.log(category: .alarm, message: "Audio session configured for alarm playback")
-        } catch {
-            LogManager.shared.log(category: .alarm, message: "Enable audio error: \(error)")
-        }
-    }
-
     // Background activation of a non-mixable .playback session is denied by iOS
     // (cannotInterruptOthers, 560557684) unless the app is already actively playing
     // audio. In foreground, or with Silent Tune holding a mixable session alive,
-    // the legacy options: [] succeeds and lets the alarm dominate other audio.
-    // For Bluetooth-heartbeat users with no Silent Tune, fall back to .duckOthers
-    // (mixable + ducks others) so activation is permitted from background.
-    fileprivate static func sessionCategoryOptions() -> AVAudioSession.CategoryOptions {
-        let inBackgroundWithoutSilentTune = UIApplication.shared.applicationState != .active
+    // options: [] succeeds and lets the alarm dominate other audio. For
+    // Bluetooth-heartbeat users with no Silent Tune we skip [] (it would always
+    // be denied) and ladder through mixable options so activation is still
+    // permitted from background. Each attempt is logged so we can see in the
+    // field which fallback (if any) the user landed on.
+    fileprivate static func activateAudioSessionWithFallback() {
+        let isBackgroundWithoutSilentTune = UIApplication.shared.applicationState == .background
             && Storage.shared.backgroundRefreshType.value != .silentTune
-        return inBackgroundWithoutSilentTune ? .duckOthers : []
+
+        let dominate: (label: String, options: AVAudioSession.CategoryOptions) = ("[]", [])
+        let duck: (label: String, options: AVAudioSession.CategoryOptions) = (".duckOthers", .duckOthers)
+        let mix: (label: String, options: AVAudioSession.CategoryOptions) = (".mixWithOthers", .mixWithOthers)
+
+        let candidates = isBackgroundWithoutSilentTune ? [duck, mix] : [dominate, duck, mix]
+        for candidate in candidates {
+            do {
+                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: candidate.options)
+                try AVAudioSession.sharedInstance().setActive(true)
+                LogManager.shared.log(category: .alarm, message: "AlarmSound - audio session active (options: \(candidate.label))")
+                return
+            } catch {
+                let nsError = error as NSError
+                LogManager.shared.log(category: .alarm, message: "AlarmSound - audio session activation failed (options: \(candidate.label)) [code \(nsError.code)]: \(error.localizedDescription)")
+            }
+        }
+        LogManager.shared.log(category: .alarm, message: "AlarmSound - all audio session option fallbacks exhausted")
     }
 }
 
