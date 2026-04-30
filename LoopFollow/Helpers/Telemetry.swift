@@ -120,10 +120,6 @@ final class TelemetryClient {
         // build (browser-build), which is just "isTestFlight == false".
         payload["isTestFlight"] = bd.isTestFlightBuild()
 
-        if let team = bd.teamID, !team.isEmpty {
-            payload["hashedTeamId"] = Self.hashed(team)
-        }
-
         payload["instance"] = AppConstants.appInstanceId
 
         if let idfv = UIDevice.current.identifierForVendor?.uuidString {
@@ -304,7 +300,7 @@ struct TelemetryPrivacyView: View {
                 Group {
                     Text("What is sent")
                         .font(.headline)
-                    Text("App version, build SHA and date, whether this is a TestFlight build, the Apple development team that signed this build (anonymized), the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), and iOS version. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent.")
+                    Text("App version, build SHA and date, whether this is a TestFlight build, the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), and iOS version. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent.")
                 }
 
                 Group {
