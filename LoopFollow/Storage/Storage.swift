@@ -33,7 +33,7 @@ class Storage {
     var mealWithFatProtein = StorageValue<Bool>(key: "mealWithFatProtein", defaultValue: false)
 
     // TODO: This flag can be deleted in March 2027. Check the commit for other places to cleanup.
-    var hasSeenFatProteinOrderChange = StorageValue<Bool>(key: "hasSeenFatProteinOrderChange", defaultValue: false)
+    var hasSeenFatProteinOrderChange = StorageValue<Bool>(key: "hasSeenFatProteinOrderChange", defaultValue: true)
 
     var backgroundRefreshType = StorageValue<BackgroundRefreshType>(key: "backgroundRefreshType", defaultValue: .silentTune)
 
@@ -194,7 +194,10 @@ class Storage {
     var nsWriteAuth = StorageValue<Bool>(key: "nsWriteAuth", defaultValue: false)
     var nsAdminAuth = StorageValue<Bool>(key: "nsAdminAuth", defaultValue: false)
 
-    var migrationStep = StorageValue<Int>(key: "migrationStep", defaultValue: 0)
+    // When adding a new migration step in `runMigrationsIfNeeded()`, bump this default
+    // to the new latest step number so fresh installs skip all migrations. Other defaults
+    // in this file must reflect the post-migration final state for a fresh install.
+    var migrationStep = StorageValue<Int>(key: "migrationStep", defaultValue: 7)
 
     var persistentNotification = StorageValue<Bool>(key: "persistentNotification", defaultValue: false)
     var persistentNotificationLastBGTime = StorageValue<Date>(key: "persistentNotificationLastBGTime", defaultValue: .distantPast)
@@ -206,9 +209,9 @@ class Storage {
     // Tab positions - which position each item is in (positions 1-4 are customizable, 5 is always Menu)
     var homePosition = StorageValue<TabPosition>(key: "homePosition", defaultValue: .position1)
     var alarmsPosition = StorageValue<TabPosition>(key: "alarmsPosition", defaultValue: .position2)
-    var snoozerPosition = StorageValue<TabPosition>(key: "snoozerPosition", defaultValue: .menu)
-    var nightscoutPosition = StorageValue<TabPosition>(key: "nightscoutPosition", defaultValue: .position3)
-    var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .position4)
+    var snoozerPosition = StorageValue<TabPosition>(key: "snoozerPosition", defaultValue: .position3)
+    var nightscoutPosition = StorageValue<TabPosition>(key: "nightscoutPosition", defaultValue: .position4)
+    var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .menu)
     var statisticsPosition = StorageValue<TabPosition>(key: "statisticsPosition", defaultValue: .menu)
     var treatmentsPosition = StorageValue<TabPosition>(key: "treatmentsPosition", defaultValue: .menu)
 
@@ -233,8 +236,8 @@ class Storage {
     /// launch, where Storage was initialized while UserDefaults was encrypted and all values were
     /// cached as their defaults.
     ///
-    /// `migrationStep` is intentionally excluded: viewDidLoad writes it to 6 during the BFU
-    /// launch; if we reloaded it and the flush had somehow not landed yet, migrations would re-run.
+    /// `migrationStep` is intentionally excluded: viewDidLoad writes it to the latest step during
+    /// the BFU launch; if we reloaded it and the flush had somehow not landed yet, migrations would re-run.
     ///
     /// SecureStorageValue properties (maxBolus, maxCarbs, maxProtein, maxFat, bolusIncrement) are
     /// not covered here — SecureStorageValue does not implement reload() and Keychain has the same
