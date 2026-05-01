@@ -108,11 +108,12 @@ final class TelemetryClient {
         var payload: [String: Any] = [:]
 
         if let v = info["CFBundleShortVersionString"] as? String { payload["appVersion"] = v }
-        if let v = info["CFBundleVersion"] as? String { payload["buildNumber"] = v }
 
-        if let branch = bd.branch { payload["buildBranch"] = branch }
-        if let sha = bd.commitSha { payload["buildSha"] = sha }
-        if let date = bd.buildDateString { payload["buildDate"] = date }
+        // Date-only (YYYY-MM-DD) prefix of the ISO8601 build date. Time is
+        // dropped to keep the payload to a low-resolution build identifier.
+        if let date = bd.buildDateString, date.count >= 10 {
+            payload["buildDate"] = String(date.prefix(10))
+        }
 
         // Only signal we can actually verify: receipt-based TestFlight check.
         // macCatalyst is covered by `platform`; simulator is covered by the
@@ -183,7 +184,7 @@ final class TelemetryClient {
             }
             if (200 ..< 300).contains(http.statusCode) {
                 let now = Date()
-                let sha = (payload["buildSha"] as? String) ?? ""
+                let sha = BuildDetails.default.commitSha ?? ""
                 storage.telemetryLastSentAt.value = now
                 storage.telemetryLastSentSha.value = sha
                 LogManager.shared.log(category: .telemetry, message: "send ok status=\(http.statusCode)", isDebug: true)
@@ -300,7 +301,7 @@ struct TelemetryPrivacyView: View {
                 Group {
                     Text("What is sent")
                         .font(.headline)
-                    Text("App version, build SHA and date, whether this is a TestFlight build, the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), and iOS version. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent.")
+                    Text("App version, build date, whether this is a TestFlight build, the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), and iOS version. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent.")
                 }
 
                 Group {
