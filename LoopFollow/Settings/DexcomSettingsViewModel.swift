@@ -12,6 +12,7 @@ class DexcomSettingsViewModel: ObservableObject {
         willSet {
             if newValue != userName {
                 Storage.shared.shareUserName.value = newValue
+                PhoneSessionManager.shared.sendConfig()
             }
         }
     }
@@ -20,6 +21,7 @@ class DexcomSettingsViewModel: ObservableObject {
         willSet {
             if newValue != password {
                 Storage.shared.sharePassword.value = newValue
+                PhoneSessionManager.shared.sendConfig()
             }
         }
     }
@@ -28,6 +30,7 @@ class DexcomSettingsViewModel: ObservableObject {
         willSet {
             if newValue != server {
                 Storage.shared.shareServer.value = newValue
+                PhoneSessionManager.shared.sendConfig()
             }
         }
     }

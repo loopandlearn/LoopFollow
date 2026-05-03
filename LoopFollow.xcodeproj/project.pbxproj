@@ -431,6 +431,8 @@
 		FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCFEEC9D2486E68E00402A7F /* WebKit.framework */; };
 		FCFEECA02488157B00402A7F /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEEC9F2488157B00402A7F /* Chart.swift */; };
 		FCFEECA2248857A600402A7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFEECA1248857A600402A7F /* SettingsViewController.swift */; };
+		BB0100000000000B000000AA /* LoopFollowWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = BB01000000000001000000AA /* LoopFollowWatch.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		BB0100000000000F000000AA /* PhoneSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0100000000000E000000AA /* PhoneSessionManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -440,6 +442,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 37A4BDD82F5B6B4A00EEB289;
 			remoteInfo = LoopFollowLAExtensionExtension;
+		};
+		BB0100000000000D000000AA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FC97880C2485969B00A7906C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BB01000000000003000000AA;
+			remoteInfo = LoopFollowWatch;
 		};
 		DDCC3ADA2DDE1790006F1C10 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -460,6 +469,17 @@
 				37A4BDE82F5B6B4C00EEB289 /* LoopFollowLAExtensionExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB0100000000000A000000AA /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				BB0100000000000B000000AA /* LoopFollowWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -893,12 +913,25 @@
 		FCFEEC9D2486E68E00402A7F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		FCFEEC9F2488157B00402A7F /* Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
 		FCFEECA1248857A600402A7F /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		BB01000000000001000000AA /* LoopFollowWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LoopFollowWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB0100000000000E000000AA /* PhoneSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSessionManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BB01000000000011000000AA /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BB01000000000003000000AA /* LoopFollowWatch */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		37A4BDDE2F5B6B4A00EEB289 /* LoopFollowLAExtension */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = LoopFollowLAExtension; sourceTree = "<group>"; };
 		65AC25F52ECFD5E800421360 /* Stats */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Stats; sourceTree = "<group>"; };
 		65AC26702ED245DF00421360 /* Treatments */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Treatments; sourceTree = "<group>"; };
+		BB01000000000002000000AA /* LoopFollowWatch */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (BB01000000000011000000AA /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = LoopFollowWatch; sourceTree = "<group>"; };
 		DDCC3AD72DDE1790006F1C10 /* Tests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Tests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -925,6 +958,13 @@
 			files = (
 				FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */,
 				3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB01000000000006000000AA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1005,6 +1045,14 @@
 				059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		BB01000000000010000000AA /* Watch */ = {
+			isa = PBXGroup;
+			children = (
+				BB0100000000000E000000AA /* PhoneSessionManager.swift */,
+			);
+			path = Watch;
 			sourceTree = "<group>";
 		};
 		DD02475A2DB2E8CE00FCADF6 /* AlarmCondition */ = {
@@ -1625,6 +1673,7 @@
 				DDC7E5142DBCE1B900EB1127 /* Snoozer */,
 				DDC7E5CD2DC6637800EB1127 /* Storage */,
 				DDEF503D2D32753A00999A5D /* Task */,
+				BB01000000000010000000AA /* Watch */,
 				FCC68871248A736700A0279D /* ViewControllers */,
 			);
 			path = LoopFollow;
@@ -1643,6 +1692,7 @@
 				FC5A5C3C2497B229009C550E /* Config.xcconfig */,
 				FC8DEEE32485D1680075863F /* LoopFollow */,
 				DDCC3AD72DDE1790006F1C10 /* Tests */,
+				BB01000000000002000000AA /* LoopFollowWatch */,
 				37A4BDDE2F5B6B4A00EEB289 /* LoopFollowLAExtension */,
 				FC9788152485969B00A7906C /* Products */,
 				8E32230C453C93FDCE59C2B9 /* Pods */,
@@ -1656,6 +1706,7 @@
 				FC9788142485969B00A7906C /* Loop Follow.app */,
 				DDCC3AD62DDE1790006F1C10 /* Tests.xctest */,
 				37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */,
+				BB01000000000001000000AA /* LoopFollowWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1789,11 +1840,13 @@
 				04DA71CCA0280FA5FA2DF7A6 /* [CP] Embed Pods Frameworks */,
 				DDB0AF532BB1AA0900AFA48B /* Capture Build Details */,
 				37A4BDED2F5B6B4C00EEB289 /* Embed Foundation Extensions */,
+				BB0100000000000A000000AA /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				37A4BDE72F5B6B4C00EEB289 /* PBXTargetDependency */,
+				BB0100000000000C000000AA /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				65AC25F52ECFD5E800421360 /* Stats */,
@@ -1804,6 +1857,28 @@
 			);
 			productName = LoopFollow;
 			productReference = FC9788142485969B00A7906C /* Loop Follow.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BB01000000000003000000AA /* LoopFollowWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB01000000000009000000AA /* Build configuration list for PBXNativeTarget "LoopFollowWatch" */;
+			buildPhases = (
+				BB01000000000004000000AA /* Sources */,
+				BB01000000000006000000AA /* Frameworks */,
+				BB01000000000005000000AA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				BB01000000000002000000AA /* LoopFollowWatch */,
+			);
+			name = LoopFollowWatch;
+			packageProductDependencies = (
+			);
+			productName = LoopFollowWatch;
+			productReference = BB01000000000001000000AA /* LoopFollowWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1846,6 +1921,7 @@
 				FC9788132485969B00A7906C /* LoopFollow */,
 				DDCC3AD52DDE1790006F1C10 /* Tests */,
 				37A4BDD82F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension */,
+				BB01000000000003000000AA /* LoopFollowWatch */,
 			);
 		};
 /* End PBXProject section */
@@ -1992,6 +2068,13 @@
 				FC7CE581248ABE37001F83B8 /* Siri_Urgent_Low_Glucose.caf in Resources */,
 				FC7CE553248ABE37001F83B8 /* Sci-Fi_Eerie_Alarm.caf in Resources */,
 				FC7CE56A248ABE37001F83B8 /* Cartoon_Siren.caf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB01000000000005000000AA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2395,6 +2478,14 @@
 				DDEF50422D479BAA00884336 /* LoopAPNSCarbsView.swift in Sources */,
 				DDEF50432D479BBA00884336 /* LoopAPNSBolusView.swift in Sources */,
 				DDEF50452D479BDA00884336 /* LoopAPNSRemoteView.swift in Sources */,
+				BB0100000000000F000000AA /* PhoneSessionManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB01000000000004000000AA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2406,6 +2497,12 @@
 			platformFilter = ios;
 			target = 37A4BDD82F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension */;
 			targetProxy = 37A4BDE62F5B6B4C00EEB289 /* PBXContainerItemProxy */;
+		};
+		BB0100000000000C000000AA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = BB01000000000003000000AA /* LoopFollowWatch */;
+			targetProxy = BB0100000000000D000000AA /* PBXContainerItemProxy */;
 		};
 		DDCC3ADB2DDE1790006F1C10 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2772,6 +2869,53 @@
 			};
 			name = Release;
 		};
+		BB01000000000007000000AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FC5A5C3C2497B229009C550E /* Config.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LoopFollowWatch/Info.plist;
+				MARKETING_VERSION = "$(LOOP_FOLLOW_MARKETING_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow$(app_suffix).watchkitapp";
+				PRODUCT_NAME = LoopFollowWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		BB01000000000008000000AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FC5A5C3C2497B229009C550E /* Config.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LoopFollowWatch/Info.plist;
+				MARKETING_VERSION = "$(LOOP_FOLLOW_MARKETING_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow$(app_suffix).watchkitapp";
+				PRODUCT_NAME = LoopFollowWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2807,6 +2951,15 @@
 			buildConfigurations = (
 				FC97882E2485969C00A7906C /* Debug */,
 				FC97882F2485969C00A7906C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BB01000000000009000000AA /* Build configuration list for PBXNativeTarget "LoopFollowWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB01000000000007000000AA /* Debug */,
+				BB01000000000008000000AA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
