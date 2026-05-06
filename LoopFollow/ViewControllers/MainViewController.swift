@@ -762,6 +762,15 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             }
         }
 
+        // Fallback: derive the expected index from the stored snoozer position.
+        // When snoozer is in the menu (.menu), tabIndex == 4 — the Menu tab.
+        // This is better than falling back to Home (0) because the user can at
+        // least reach the snoozer from the menu tab in one tap.
+        let position = Storage.shared.snoozerPosition.value.normalized
+        if let tabIndex = position.tabIndex, tabIndex < viewControllers.count {
+            return tabIndex
+        }
+
         return nil
     }
 

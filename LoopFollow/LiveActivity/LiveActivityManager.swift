@@ -349,6 +349,11 @@ final class LiveActivityManager {
 
     @objc private func handleBackgroundAudioFailed() {
         guard Storage.shared.laEnabled.value, current != nil else { return }
+        if #available(iOS 17.2, *) {
+            // Push-to-start handles LA renewal on iOS 17.2+ without requiring the
+            // user to foreground the app, so no renewal overlay is needed.
+            return
+        }
         // The background audio session has permanently failed — the app will lose its
         // background keep-alive. Immediately push the renewal overlay so the user sees
         // "Tap to update" on the lock screen and knows to foreground the app.
