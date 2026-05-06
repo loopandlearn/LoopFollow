@@ -92,6 +92,9 @@ protocol CurrentGlucoseStateProviding {
     /// True when LoopFollow detects the loop has not reported in 15+ minutes.
     var isNotLooping: Bool { get }
 
+    /// Unix epoch seconds of the last successful Loop run (nil if never received).
+    var loopLastRunAt: TimeInterval? { get }
+
     // MARK: - Renewal
 
     /// True when the Live Activity is within renewalWarning seconds of its deadline.
@@ -161,6 +164,7 @@ enum GlucoseSnapshotBuilder {
             maxBgMgdl: provider.maxBgMgdl,
             unit: preferredUnit,
             isNotLooping: provider.isNotLooping,
+            loopLastRunAt: provider.loopLastRunAt,
             showRenewalOverlay: provider.showRenewalOverlay,
         )
     }

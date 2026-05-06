@@ -135,6 +135,16 @@ enum LiveActivitySlotDefaults {
     }
 }
 
+// MARK: - Watch remote preset
+
+/// Lightweight override preset transferred via App Group for Watch remote commands.
+struct WatchOverridePreset: Codable, Identifiable {
+    var id: String { name }
+    var name: String
+    var symbol: String?
+    var durationSeconds: TimeInterval  // 0 = indefinite
+}
+
 // MARK: - App Group settings
 
 /// Minimal App Group settings needed by the Live Activity UI.
@@ -149,6 +159,12 @@ enum LAAppGroupSettings {
         static let smallWidgetSlot = "la.smallWidgetSlot"
         static let displayName = "la.displayName"
         static let showDisplayName = "la.showDisplayName"
+        static let watchSlots = "watch.slots"
+        static let watchSelectedSlots = "watch.selectedSlots"
+        static let watchOverridePresets = "watch.overridePresets"
+        static let watchRemoteEnabled = "watch.remoteEnabled"
+        static let watchMaxBolus = "watch.maxBolus"
+        static let watchMaxCarbs = "watch.maxCarbs"
     }
 
     private static var defaults: UserDefaults? {
@@ -206,6 +222,40 @@ enum LAAppGroupSettings {
         return LiveActivitySlotOption(rawValue: raw) ?? LiveActivitySlotDefaults.smallWidgetSlot
     }
 
+    // MARK: - Watch slots (Write)
+
+    /// Persists the 4-position Watch data card slot configuration.
+    static func setWatchSlots(_ slots: [LiveActivitySlotOption]) {
+        let raw = slots.prefix(4).map(\.rawValue)
+        defaults?.set(raw, forKey: Keys.watchSlots)
+    }
+
+    // MARK: - Watch slots (Read)
+
+    static func watchSlots() -> [LiveActivitySlotOption] {
+        guard let raw = defaults?.stringArray(forKey: Keys.watchSlots), raw.count == 4 else {
+            return [.iob, .cob, .projectedBG, .battery]
+        }
+        return raw.map { LiveActivitySlotOption(rawValue: $0) ?? .none }
+    }
+
+    // MARK: - Watch selected slots (ordered, variable-length)
+
+    /// Persists the user's ordered list of selected Watch data slots.
+    static func setWatchSelectedSlots(_ slots: [LiveActivitySlotOption]) {
+        defaults?.set(slots.map(\.rawValue), forKey: Keys.watchSelectedSlots)
+    }
+
+    /// Returns the ordered list of selected Watch data slots.
+    /// Falls back to a sensible default if nothing is saved.
+    static func watchSelectedSlots() -> [LiveActivitySlotOption] {
+        guard let raw = defaults?.stringArray(forKey: Keys.watchSelectedSlots) else {
+            return [.iob, .cob, .projectedBG, .battery]
+        }
+        return raw.compactMap { LiveActivitySlotOption(rawValue: $0) }
+    }
+
+
     // MARK: - Display Name
 
     static func setDisplayName(_ name: String, show: Bool) {
@@ -219,5 +269,43 @@ enum LAAppGroupSettings {
 
     static func showDisplayName() -> Bool {
         defaults?.bool(forKey: Keys.showDisplayName) ?? false
+    }
+
+    // MARK: - Watch Remote Commands
+
+    static func setWatchOverridePresets(_ presets: [WatchOverridePreset]) {
+        guard let data = try? JSONEncoder().encode(presets) else { return }
+        defaults?.set(data, forKey: Keys.watchOverridePresets)
+    }
+
+    static func watchOverridePresets() -> [WatchOverridePreset] {
+        guard let data = defaults?.data(forKey: Keys.watchOverridePresets),
+              let presets = try? JSONDecoder().decode([WatchOverridePreset].self, from: data)
+        else { return [] }
+        return presets
+    }
+
+    static func setWatchRemoteEnabled(_ enabled: Bool) {
+        defaults?.set(enabled, forKey: Keys.watchRemoteEnabled)
+    }
+
+    static func isWatchRemoteEnabled() -> Bool {
+        defaults?.bool(forKey: Keys.watchRemoteEnabled) ?? false
+    }
+
+    static func setWatchMaxBolus(_ maxBolus: Double) {
+        defaults?.set(maxBolus, forKey: Keys.watchMaxBolus)
+    }
+
+    static func watchMaxBolus() -> Double {
+        defaults?.object(forKey: Keys.watchMaxBolus) as? Double ?? 10.0
+    }
+
+    static func setWatchMaxCarbs(_ maxCarbs: Double) {
+        defaults?.set(maxCarbs, forKey: Keys.watchMaxCarbs)
+    }
+
+    static func watchMaxCarbs() -> Double {
+        defaults?.object(forKey: Keys.watchMaxCarbs) as? Double ?? 150.0
     }
 }

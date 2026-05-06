@@ -10,8 +10,8 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
     // MARK: - Core Glucose
 
     var glucoseMgdl: Double? {
-        guard let bg = Observable.shared.bg.value, bg > 0 else { return nil }
-        return Double(bg)
+        guard let bg = Storage.shared.lastBgMgdl.value, bg > 0 else { return nil }
+        return bg
     }
 
     var deltaMgdl: Double? {
@@ -126,6 +126,11 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
         let lastLoopTime = Storage.shared.lastLoopTime.value
         guard lastLoopTime > 0, !Storage.shared.url.value.isEmpty else { return false }
         return Date().timeIntervalSince1970 - lastLoopTime >= 15 * 60
+    }
+
+    var loopLastRunAt: TimeInterval? {
+        let t = Storage.shared.lastLoopTime.value
+        return t > 0 ? t : nil
     }
 
     // MARK: - Renewal

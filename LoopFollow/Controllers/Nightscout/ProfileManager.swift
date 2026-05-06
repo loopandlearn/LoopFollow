@@ -94,8 +94,8 @@ final class ProfileManager {
             loopOverrides = []
         }
 
-        if let trioOverrides = profileData.trioOverrides {
-            self.trioOverrides = trioOverrides.map { entry in
+        if let trioPresets = profileData.trioOverrides {
+            self.trioOverrides = trioPresets.map { entry in
                 let targetQuantity = entry.target != nil ? HKQuantity(unit: .milligramsPerDeciliter, doubleValue: entry.target!) : nil
                 return TrioOverride(
                     name: entry.name,
@@ -107,6 +107,28 @@ final class ProfileManager {
         } else {
             trioOverrides = []
         }
+
+        // Write presets to the shared App Group for the Watch remote commands view.
+        // Prefer Loop override presets; fall back to Trio presets for Trio users.
+        let watchPresets: [WatchOverridePreset]
+        if !loopOverrides.isEmpty {
+            watchPresets = loopOverrides.map {
+                WatchOverridePreset(
+                    name: $0.name,
+                    symbol: $0.symbol.isEmpty ? nil : $0.symbol,
+                    durationSeconds: TimeInterval($0.duration ?? 0)
+                )
+            }
+        } else {
+            watchPresets = trioOverrides.map {
+                WatchOverridePreset(
+                    name: $0.name,
+                    symbol: nil,
+                    durationSeconds: $0.duration.map { TimeInterval($0) } ?? 0
+                )
+            }
+        }
+        LAAppGroupSettings.setWatchOverridePresets(watchPresets)
 
         Storage.shared.deviceToken.value = profileData.deviceToken ?? profileData.loopSettings?.deviceToken ?? ""
 

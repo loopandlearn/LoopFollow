@@ -40,6 +40,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ = BLEManager.shared
         // Ensure VolumeButtonHandler is initialized so it can receive alarm notifications
         _ = VolumeButtonHandler.shared
+        
+        WatchConnectivityManager.shared.activate()
 
         // Register for remote notifications
         DispatchQueue.main.async {
@@ -122,6 +124,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
+
+        // Forward Loop command return notifications to the Watch
+        WatchConnectivityManager.shared.forwardCommandReturnToWatch(userInfo: userInfo)
 
         // Call completion handler
         completionHandler(.newData)

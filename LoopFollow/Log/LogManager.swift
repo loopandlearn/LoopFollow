@@ -30,6 +30,7 @@ class LogManager {
         case calendar = "Calendar"
         case deviceStatus = "Device Status"
         case remote = "Remote"
+        case watch = "Watch"
         case telemetry = "Telemetry"
     }
 
