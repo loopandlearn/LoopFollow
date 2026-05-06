@@ -96,6 +96,10 @@ struct AggregatedStatsView: View {
                 GRIView(viewModel: viewModel.griStats)
                     .padding(.horizontal)
                     .opacity(isLoadingData ? 0.4 : 1.0)
+
+                BasalVariabilityView(viewModel: viewModel.basalVariabilityStats)
+                    .padding(.horizontal)
+                    .opacity(isLoadingData ? 0.4 : 1.0)
             }
             .padding(.bottom)
             .frame(maxWidth: .infinity)

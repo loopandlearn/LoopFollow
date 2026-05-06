@@ -9,6 +9,7 @@ class AggregatedStatsViewModel: ObservableObject {
     var agpStats: AGPViewModel
     var griStats: GRIViewModel
     var tirStats: TIRViewModel
+    var basalVariabilityStats: BasalVariabilityViewModel
 
     let dataService: StatsDataService
 
@@ -20,6 +21,7 @@ class AggregatedStatsViewModel: ObservableObject {
         agpStats = AGPViewModel(dataService: dataService)
         griStats = GRIViewModel(dataService: dataService)
         tirStats = TIRViewModel(dataService: dataService)
+        basalVariabilityStats = BasalVariabilityViewModel(dataService: dataService)
     }
 
     func calculateStats() {
@@ -27,6 +29,7 @@ class AggregatedStatsViewModel: ObservableObject {
         agpStats.calculateAGP()
         griStats.calculateGRI()
         tirStats.calculateTIR()
+        basalVariabilityStats.calculate()
         dataAvailability = dataService.getDataAvailability()
     }
 
@@ -35,6 +38,7 @@ class AggregatedStatsViewModel: ObservableObject {
         agpStats.clearStats()
         griStats.clearStats()
         tirStats.clearStats()
+        basalVariabilityStats.clearStats()
         dataAvailability = nil
     }
 

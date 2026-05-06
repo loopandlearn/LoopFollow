@@ -191,5 +191,9 @@ extension MainViewController {
             }
         }
         processCage(entries: pumpSiteChange)
+
+        if Storage.shared.device.value == "Loop" {
+            updateLoopTDD()
+        }
     }
 }
