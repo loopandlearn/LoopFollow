@@ -7,7 +7,6 @@ import WatchKit
 import WidgetKit
 
 class ExtensionDelegate: NSObject, WKApplicationDelegate, UNUserNotificationCenterDelegate {
-
     func applicationDidFinishLaunching() {
         WatchSessionManager.shared.startSession()
         let center = UNUserNotificationCenter.current()
@@ -32,7 +31,8 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate, UNUserNotificationCent
                 // regardless of whether the app was cold-launched by the
                 // system or brought to the foreground by the user.
                 if let config = WatchSessionManager.shared.config,
-                   config.hasAnySource {
+                   config.hasAnySource
+                {
                     BGFetcher.shared.fetch(config: config)
                     // Give the network requests a few seconds to land, then complete.
                     DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
@@ -80,8 +80,8 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate, UNUserNotificationCent
 
     // Show notifications even when the app is in the foreground
     func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification,
+        _: UNUserNotificationCenter,
+        willPresent _: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         completionHandler([.banner, .sound])

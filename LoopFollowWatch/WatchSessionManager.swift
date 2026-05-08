@@ -9,7 +9,7 @@ class WatchSessionManager: NSObject, ObservableObject, WCSessionDelegate {
 
     @Published var config: WatchConfig?
 
-    private override init() {
+    override private init() {
         super.init()
         // Load cached config on startup
         config = WatchConfig.loadFromDefaults()
@@ -41,7 +41,7 @@ class WatchSessionManager: NSObject, ObservableObject, WCSessionDelegate {
 
     // MARK: - WCSessionDelegate
 
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+    func session(_ session: WCSession, activationDidCompleteWith _: WCSessionActivationState, error: Error?) {
         if let error = error {
             print("WCSession activation failed: \(error.localizedDescription)")
             return
@@ -59,15 +59,15 @@ class WatchSessionManager: NSObject, ObservableObject, WCSessionDelegate {
         }
     }
 
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+    func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         handleReceivedConfig(applicationContext)
     }
 
-    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+    func session(_: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
         handleReceivedConfig(userInfo)
     }
 
-    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+    func session(_: WCSession, didReceiveMessage message: [String: Any]) {
         handleReceivedConfig(message)
     }
 

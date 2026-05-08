@@ -1,9 +1,5 @@
 // LoopFollow
 // BGDynamicColor.swift
-//
-// Maps a BG value (mg/dL) to a hue-based color.
-// Red (hue 0°) at ≤55, Green (hue 120°) at 100, Purple (hue 270°) at ≥220.
-// Interpolates linearly through the hue spectrum between those anchors.
 
 import SwiftUI
 

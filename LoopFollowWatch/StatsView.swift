@@ -1,18 +1,5 @@
 // LoopFollow
 // StatsView.swift
-//
-// Third watch page (swipe right from Remote). Mirrors the iPhone
-// LoopFollow stats block: pie chart for Low / In Range / High
-// distribution, plus Avg BG, Est A1C, and Std Dev. Computed over the
-// last 24 hours of the bgHistory cache that BGFetcher already holds
-// for the chart (~300 readings ≈ 25h from Nightscout or Dexcom Share).
-//
-// Formulas match LoopFollow/Controllers/Stats.swift exactly:
-//   - Low/High thresholds are inclusive (<= lowLine, >= highLine)
-//   - Population standard deviation (divide by N, not N-1)
-//   - NGSP A1C: (avgBG + 46.7) / 28.7
-// IFCC A1C and per-user alt formulas live on the iPhone via
-// Storage.useIFCC; we default to NGSP here to keep WatchConfig small.
 
 import Charts
 import SwiftUI
@@ -231,9 +218,9 @@ struct StatsResult {
     let percentLow: Double
     let percentRange: Double
     let percentHigh: Double
-    let avgBG: Double   // always mg/dL; convert at display time
-    let stdDev: Double  // always mg/dL; convert at display time
-    let a1c: Double     // percent (NGSP)
+    let avgBG: Double // always mg/dL; convert at display time
+    let stdDev: Double // always mg/dL; convert at display time
+    let a1c: Double // percent (NGSP)
 }
 
 enum StatsCompute {

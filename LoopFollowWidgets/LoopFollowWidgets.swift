@@ -1,8 +1,8 @@
 // LoopFollow
 // LoopFollowWidgets.swift
 
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 struct BGComplicationEntryView: View {
     let entry: BGEntry
@@ -44,7 +44,7 @@ struct LoopFollowWidgetBundle: WidgetBundle {
         OverrideShortcutWidget()
         TempTargetShortcutWidget()
         #if os(iOS)
-        BGLiveActivityWidget()
+            BGLiveActivityWidget()
         #endif
     }
 }

@@ -1,5 +1,6 @@
 // LoopFollow
 // CircularComplicationView.swift
+
 //
 // Round complication for modular watch faces (accessoryCircular).
 // Layout: staleness on top, BG center, delta + trend below.

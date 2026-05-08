@@ -1,8 +1,5 @@
 // LoopFollow
 // NavigationRouter.swift
-//
-// Handles deep link URL parsing and drives programmatic navigation
-// from complication shortcuts into the watch app's screens.
 
 import SwiftUI
 
@@ -27,9 +24,9 @@ class NavigationRouter: ObservableObject {
         activeDestination = nil
 
         switch url.host {
-        case "bolus":      navigateTo(.bolus)
-        case "meal":       navigateTo(.meal)
-        case "override":   navigateTo(.override)
+        case "bolus": navigateTo(.bolus)
+        case "meal": navigateTo(.meal)
+        case "override": navigateTo(.override)
         case "temptarget": navigateTo(.tempTarget)
         default:
             // "open" or unknown — stay on main graph (tab 0)

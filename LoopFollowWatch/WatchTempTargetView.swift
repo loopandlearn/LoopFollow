@@ -212,10 +212,10 @@ private struct CustomTempTargetView: View {
     }
 
     private var crownRange: ClosedRange<Double> {
-        guard !showConfirm else { return 0...1 }
+        guard !showConfirm else { return 0 ... 1 }
         switch editingField {
-        case .target: return 60...300
-        case .duration: return 5...480
+        case .target: return 60 ... 300
+        case .duration: return 5 ... 480
         }
     }
 

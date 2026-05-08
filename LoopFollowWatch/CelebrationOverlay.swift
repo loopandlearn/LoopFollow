@@ -63,7 +63,7 @@ struct CelebrationOverlay: View {
 
     /// Returns true roughly every 5–15 sends (≈10% chance per send).
     static func shouldCelebrate() -> Bool {
-        return Int.random(in: 1...10) == 1
+        return Int.random(in: 1 ... 10) == 1
     }
 
     /// How long to show the celebration before dismissing (longer than normal 3s).
@@ -89,26 +89,26 @@ struct CelebrationOverlay: View {
         switch animationType {
         case .confetti:
             // Two waves of confetti covering the full screen
-            let wave1: [Particle] = (0..<40).map { _ in
+            let wave1: [Particle] = (0 ..< 40).map { _ in
                 Particle(
                     x: 0, y: -20,
-                    targetX: Double.random(in: -120...120),
-                    targetY: Double.random(in: 60...220),
-                    size: Double.random(in: 5...10),
-                    rotation: Double.random(in: 360...1080),
-                    delay: Double.random(in: 0...0.5),
+                    targetX: Double.random(in: -120 ... 120),
+                    targetY: Double.random(in: 60 ... 220),
+                    size: Double.random(in: 5 ... 10),
+                    rotation: Double.random(in: 360 ... 1080),
+                    delay: Double.random(in: 0 ... 0.5),
                     color: [.red, .blue, .green, .yellow, .orange, .pink, .purple, .mint, .cyan].randomElement()!,
                     emoji: "", wave: 1
                 )
             }
-            let wave2: [Particle] = (0..<25).map { _ in
+            let wave2: [Particle] = (0 ..< 25).map { _ in
                 Particle(
-                    x: Double.random(in: -60...60), y: -40,
-                    targetX: Double.random(in: -120...120),
-                    targetY: Double.random(in: 40...200),
-                    size: Double.random(in: 6...12),
-                    rotation: Double.random(in: 360...1080),
-                    delay: Double.random(in: 0...0.4),
+                    x: Double.random(in: -60 ... 60), y: -40,
+                    targetX: Double.random(in: -120 ... 120),
+                    targetY: Double.random(in: 40 ... 200),
+                    size: Double.random(in: 6 ... 12),
+                    rotation: Double.random(in: 360 ... 1080),
+                    delay: Double.random(in: 0 ... 0.4),
                     color: [.red, .blue, .green, .yellow, .orange, .pink, .purple, .mint, .cyan].randomElement()!,
                     emoji: "", wave: 2
                 )
@@ -120,19 +120,19 @@ struct CelebrationOverlay: View {
             var all: [Particle] = []
             let bursts: [(Double, Double, Double)] = [
                 (0, -30, 0), (-40, -50, 0.3), (35, -20, 0.7),
-                (-20, 10, 1.5), (30, -45, 1.8), (0, 0, 2.2)
+                (-20, 10, 1.5), (30, -45, 1.8), (0, 0, 2.2),
             ]
             for (bx, by, baseDelay) in bursts {
-                for _ in 0..<12 {
-                    let angle = Double.random(in: 0...(2 * .pi))
-                    let dist = Double.random(in: 30...90)
+                for _ in 0 ..< 12 {
+                    let angle = Double.random(in: 0 ... (2 * .pi))
+                    let dist = Double.random(in: 30 ... 90)
                     all.append(Particle(
                         x: bx, y: by,
                         targetX: bx + cos(angle) * dist,
                         targetY: by + sin(angle) * dist,
-                        size: Double.random(in: 4...8),
+                        size: Double.random(in: 4 ... 8),
                         rotation: 0,
-                        delay: baseDelay + Double.random(in: 0...0.15),
+                        delay: baseDelay + Double.random(in: 0 ... 0.15),
                         color: [.red, .orange, .yellow, .cyan, .white, .pink, .green].randomElement()!,
                         emoji: "", wave: baseDelay < 1.0 ? 1 : 2
                     ))
@@ -142,16 +142,16 @@ struct CelebrationOverlay: View {
 
         case .sparkleRain:
             // Dense sparkles falling across the full width, two waves
-            particles = (0..<30).map { i in
+            particles = (0 ..< 30).map { i in
                 let wave = i < 18 ? 1 : 2
                 return Particle(
-                    x: Double.random(in: -100...100),
+                    x: Double.random(in: -100 ... 100),
                     y: -120,
-                    targetX: Double.random(in: -100...100),
+                    targetX: Double.random(in: -100 ... 100),
                     targetY: 160,
-                    size: Double.random(in: 12...22),
-                    rotation: Double.random(in: -360...360),
-                    delay: Double.random(in: 0...(wave == 1 ? 1.5 : 0.8)),
+                    size: Double.random(in: 12 ... 22),
+                    rotation: Double.random(in: -360 ... 360),
+                    delay: Double.random(in: 0 ... (wave == 1 ? 1.5 : 0.8)),
                     color: [.yellow, .white, .orange, .cyan, .mint].randomElement()!,
                     emoji: "", wave: wave
                 )
@@ -183,45 +183,45 @@ struct CelebrationOverlay: View {
         case .partyEmoji:
             // Huge emoji bouncing in from all edges, two waves
             let emojis = ["🎉", "🥳", "🎊", "🪩", "✨", "💫", "⭐️", "🌟", "🎆", "🎇", "🍾", "🥂"]
-            let wave1: [Particle] = (0..<6).map { _ in
-                let edge = Int.random(in: 0...3)
+            let wave1: [Particle] = (0 ..< 6).map { _ in
+                let edge = Int.random(in: 0 ... 3)
                 let startX: Double
                 let startY: Double
                 switch edge {
-                case 0: startX = Double.random(in: -100...100); startY = -140
-                case 1: startX = Double.random(in: -100...100); startY = 140
-                case 2: startX = -140; startY = Double.random(in: -80...80)
-                default: startX = 140; startY = Double.random(in: -80...80)
+                case 0: startX = Double.random(in: -100 ... 100); startY = -140
+                case 1: startX = Double.random(in: -100 ... 100); startY = 140
+                case 2: startX = -140; startY = Double.random(in: -80 ... 80)
+                default: startX = 140; startY = Double.random(in: -80 ... 80)
                 }
                 return Particle(
                     x: startX, y: startY,
-                    targetX: Double.random(in: -50...50),
-                    targetY: Double.random(in: -50...50),
-                    size: Double.random(in: 40...56),
-                    rotation: Double.random(in: -30...30),
-                    delay: Double.random(in: 0...0.6),
+                    targetX: Double.random(in: -50 ... 50),
+                    targetY: Double.random(in: -50 ... 50),
+                    size: Double.random(in: 40 ... 56),
+                    rotation: Double.random(in: -30 ... 30),
+                    delay: Double.random(in: 0 ... 0.6),
                     color: .white,
                     emoji: emojis.randomElement()!,
                     wave: 1
                 )
             }
-            let wave2: [Particle] = (0..<5).map { _ in
-                let edge = Int.random(in: 0...3)
+            let wave2: [Particle] = (0 ..< 5).map { _ in
+                let edge = Int.random(in: 0 ... 3)
                 let startX: Double
                 let startY: Double
                 switch edge {
-                case 0: startX = Double.random(in: -100...100); startY = -140
-                case 1: startX = Double.random(in: -100...100); startY = 140
-                case 2: startX = -140; startY = Double.random(in: -80...80)
-                default: startX = 140; startY = Double.random(in: -80...80)
+                case 0: startX = Double.random(in: -100 ... 100); startY = -140
+                case 1: startX = Double.random(in: -100 ... 100); startY = 140
+                case 2: startX = -140; startY = Double.random(in: -80 ... 80)
+                default: startX = 140; startY = Double.random(in: -80 ... 80)
                 }
                 return Particle(
                     x: startX, y: startY,
-                    targetX: Double.random(in: -50...50),
-                    targetY: Double.random(in: -50...50),
-                    size: Double.random(in: 44...60),
-                    rotation: Double.random(in: -30...30),
-                    delay: Double.random(in: 0...0.5),
+                    targetX: Double.random(in: -50 ... 50),
+                    targetY: Double.random(in: -50 ... 50),
+                    size: Double.random(in: 44 ... 60),
+                    rotation: Double.random(in: -30 ... 30),
+                    delay: Double.random(in: 0 ... 0.5),
                     color: .white,
                     emoji: emojis.randomElement()!,
                     wave: 2

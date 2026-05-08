@@ -7,7 +7,6 @@ import UserNotifications
 import WatchKit
 
 class WatchRemoteService {
-
     // MARK: - Local Notification Helper
 
     static func postLocalNotification(title: String, body: String) {
@@ -299,7 +298,7 @@ class WatchRemoteService {
         request.setValue(payload.commandType, forHTTPHeaderField: "apns-collapse-id")
         request.httpBody = try? JSONEncoder().encode(message)
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { _, response, error in
             DispatchQueue.main.async {
                 if let error = error {
                     completion(false, error.localizedDescription)

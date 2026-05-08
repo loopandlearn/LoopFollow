@@ -8,7 +8,7 @@ import WatchConnectivity
 class PhoneSessionManager: NSObject, WCSessionDelegate {
     static let shared = PhoneSessionManager()
 
-    private override init() {
+    override private init() {
         super.init()
     }
 
@@ -71,15 +71,15 @@ class PhoneSessionManager: NSObject, WCSessionDelegate {
 
     // MARK: - WCSessionDelegate
 
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+    func session(_: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error _: Error?) {
         if activationState == .activated {
             sendConfig()
         }
     }
 
-    func sessionDidBecomeInactive(_ session: WCSession) {}
+    func sessionDidBecomeInactive(_: WCSession) {}
 
-    func sessionDidDeactivate(_ session: WCSession) {
+    func sessionDidDeactivate(_: WCSession) {
         WCSession.default.activate()
     }
 
@@ -91,14 +91,14 @@ class PhoneSessionManager: NSObject, WCSessionDelegate {
     }
 
     // Handle Watch requesting config via applicationContext
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+    func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         if applicationContext["requestConfig"] != nil {
             sendConfig()
         }
     }
 
     // Handle Watch requesting config via sendMessage (with reply)
-    func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+    func session(_: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         if message["requestConfig"] != nil {
             let config = buildConfig()
             replyHandler(config)
@@ -109,14 +109,14 @@ class PhoneSessionManager: NSObject, WCSessionDelegate {
         }
     }
 
-    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+    func session(_: WCSession, didReceiveMessage message: [String: Any]) {
         if message["requestConfig"] != nil {
             sendConfig()
         }
     }
 
     // Handle Watch requesting config via transferUserInfo
-    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+    func session(_: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
         if userInfo["requestConfig"] != nil {
             sendConfig()
         }

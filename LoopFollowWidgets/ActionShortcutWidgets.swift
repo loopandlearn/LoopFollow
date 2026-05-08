@@ -1,9 +1,5 @@
 // LoopFollow
 // ActionShortcutWidgets.swift
-//
-// Four static circular complications for quick actions:
-// Bolus (drop), Meal (fork & knife), Override (lightning bolt), Temp Target (target).
-// Each deep links to the corresponding screen in the watch app.
 
 import SwiftUI
 import WidgetKit
@@ -15,15 +11,15 @@ struct ActionEntry: TimelineEntry {
 }
 
 struct ActionTimelineProvider: TimelineProvider {
-    func placeholder(in context: Context) -> ActionEntry {
+    func placeholder(in _: Context) -> ActionEntry {
         ActionEntry(date: .now)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (ActionEntry) -> Void) {
+    func getSnapshot(in _: Context, completion: @escaping (ActionEntry) -> Void) {
         completion(ActionEntry(date: .now))
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<ActionEntry>) -> Void) {
+    func getTimeline(in _: Context, completion: @escaping (Timeline<ActionEntry>) -> Void) {
         completion(Timeline(entries: [ActionEntry(date: .now)], policy: .never))
     }
 }

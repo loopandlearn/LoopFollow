@@ -1,11 +1,5 @@
 // LoopFollow
 // FollowStatusView.swift
-//
-// Full-screen sheet shown when the user taps the loop-status icon. Two tabs:
-// "Device Status" mirrors the iPhone "Follow Status" view (LOOP / OVERRIDE /
-// REASON / PUMP / SITE / TODAY / UPDATED), and "Profile" lists the active
-// profile schedules. All data is sourced from BGFetcher state already
-// downloaded for the main view — no new fetches.
 
 import SwiftUI
 
@@ -163,7 +157,8 @@ private struct DeviceStatusTab: View {
     private var overrideSection: some View {
         let s = bgFetcher.loopStatus
         if (s?.overrideActive == true && s?.overrideText != nil)
-            || (s?.tempTargetActive == true && s?.tempTargetText != nil) {
+            || (s?.tempTargetActive == true && s?.tempTargetText != nil)
+        {
             VStack(alignment: .leading, spacing: 4) {
                 SectionHeader("Override")
                 if let oText = s?.overrideText, s?.overrideActive == true {

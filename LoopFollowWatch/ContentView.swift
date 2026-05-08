@@ -10,7 +10,7 @@ struct ContentView: View {
     @ObservedObject var bgFetcher: BGFetcher
 
     @State private var now = Date()
-    @State private var timeOffset: Double = 7.2  // zoomHours(2) * 3.6 — aligns marker with "now"
+    @State private var timeOffset: Double = 7.2 // zoomHours(2) * 3.6 — aligns marker with "now"
     @State private var zoomHours: Double = 2
     @State private var showReloadCheck = false
     @State private var showLoopDetail = false
@@ -100,6 +100,7 @@ struct ContentView: View {
     private var visibleStart: Date {
         Date().addingTimeInterval(-zoomHours * 3600 + timeOffset.rounded() * 300)
     }
+
     private var visibleEnd: Date {
         Date().addingTimeInterval(timeOffset.rounded() * 300)
     }
@@ -112,7 +113,8 @@ struct ContentView: View {
         guard visible.count >= 2,
               let first = visible.first?.timestamp,
               let last = visible.last?.timestamp,
-              last > first else {
+              last > first
+        else {
             // Fall back to single color from current reading
             if let reading = visible.first ?? bgHistory.last {
                 return LinearGradient(colors: [bgDynamicColor(Double(reading.bgValue)).opacity(0.4)], startPoint: .leading, endPoint: .trailing)
@@ -233,7 +235,7 @@ struct ContentView: View {
                                     .init(color: .clear, location: 0),
                                     .init(color: .white, location: 0.06),
                                     .init(color: .white, location: 0.94),
-                                    .init(color: .clear, location: 1.0)
+                                    .init(color: .clear, location: 1.0),
                                 ],
                                 startPoint: .leading,
                                 endPoint: .trailing
@@ -245,7 +247,7 @@ struct ContentView: View {
                                     .init(color: .white.opacity(0.3), location: 0),
                                     .init(color: .white, location: 0.45),
                                     .init(color: .white, location: 0.55),
-                                    .init(color: .white.opacity(0.3), location: 1.0)
+                                    .init(color: .white.opacity(0.3), location: 1.0),
                                 ],
                                 startPoint: .top,
                                 endPoint: .bottom
@@ -362,7 +364,8 @@ struct ContentView: View {
     private func freshnessText(reading: BGReading) -> String {
         // When not showing the latest reading, display the clock time
         if let latest = bgFetcher.currentBG,
-           reading.timestamp != latest.timestamp {
+           reading.timestamp != latest.timestamp
+        {
             let formatter = DateFormatter()
             formatter.dateFormat = "h:mm a"
             return formatter.string(from: reading.timestamp)

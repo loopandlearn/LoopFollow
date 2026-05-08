@@ -1,9 +1,5 @@
 // LoopFollow
 // RectangularComplicationView.swift
-//
-// Reusable BG display view for both accessoryRectangular complication and
-// future Live Activity usage. Text overlays left side, sparkline fades in
-// from left to right with progressive line thickness. No background color.
 
 import SwiftUI
 import WidgetKit
@@ -29,7 +25,7 @@ struct BGComplicationContent: View {
                     stops: [
                         .init(color: .clear, location: 0),
                         .init(color: .clear, location: 0.39),
-                        .init(color: .white, location: 0.80)
+                        .init(color: .white, location: 0.80),
                     ],
                     startPoint: .leading,
                     endPoint: .trailing
@@ -120,8 +116,8 @@ private struct SparklineView: View {
         GeometryReader { geo in
             let w = geo.size.width
             let h = geo.size.height
-            let topInset: CGFloat = 6     // room for top y-axis label
-            let bottomInset: CGFloat = 4  // room for bottom y-axis label
+            let topInset: CGFloat = 6 // room for top y-axis label
+            let bottomInset: CGFloat = 4 // room for bottom y-axis label
             let chartH = h - topInset - bottomInset
             // Keep sparkline clear of y-axis labels. Labels sit at
             // x = w - 16 in a 28pt trailing-aligned frame, so a
@@ -170,30 +166,30 @@ private struct SparklineView: View {
                 if screenPoints.count >= 2 {
                     Group {
                         // Per-segment fill + stroke — each colored by midpoint BG value
-                        ForEach(0..<(screenPoints.count - 1), id: \.self) { i in
-                        let t = Double(i) / Double(max(screenPoints.count - 2, 1))
-                        let lineWidth = 0.3 + t * 1.7
-                        let opacity = min(t * 1.4, 1.0)
-                        let midBG = Double(sorted[i].value + sorted[i + 1].value) / 2.0
-                        let segColor = bgDynamicColor(midBG)
+                        ForEach(0 ..< (screenPoints.count - 1), id: \.self) { i in
+                            let t = Double(i) / Double(max(screenPoints.count - 2, 1))
+                            let lineWidth = 0.3 + t * 1.7
+                            let opacity = min(t * 1.4, 1.0)
+                            let midBG = Double(sorted[i].value + sorted[i + 1].value) / 2.0
+                            let segColor = bgDynamicColor(midBG)
 
-                        // Fill slice under this segment
-                        buildSegmentFill(points: screenPoints, index: i, height: topInset + chartH)
-                            .fill(
-                                LinearGradient(
-                                    colors: [segColor.opacity(0.60), segColor.opacity(0.05)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
+                            // Fill slice under this segment
+                            buildSegmentFill(points: screenPoints, index: i, height: topInset + chartH)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [segColor.opacity(0.60), segColor.opacity(0.05)],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
                                 )
-                            )
 
-                        // Stroke with progressive width + opacity
-                        buildSingleSegment(points: screenPoints, index: i)
-                            .stroke(
-                                segColor.opacity(opacity),
-                                style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt, lineJoin: .round)
-                            )
-                    }
+                            // Stroke with progressive width + opacity
+                            buildSingleSegment(points: screenPoints, index: i)
+                                .stroke(
+                                    segColor.opacity(opacity),
+                                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt, lineJoin: .round)
+                                )
+                        }
                     }
                     .widgetAccentable()
                 }
@@ -261,7 +257,7 @@ private struct SparklineView: View {
             if points.count == 2 {
                 path.addLine(to: last)
             } else {
-                for i in 0..<(points.count - 1) {
+                for i in 0 ..< (points.count - 1) {
                     let p0 = points[max(i - 1, 0)]
                     let p1 = points[i]
                     let p2 = points[min(i + 1, points.count - 1)]

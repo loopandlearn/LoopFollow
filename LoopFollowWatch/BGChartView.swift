@@ -25,6 +25,7 @@ struct BGChartView: View {
         default: return 6
         }
     }
+
     private var treatmentSymbolSize: CGFloat { CGFloat(30.0 * min(1.6, max(0.7, 2.0 / zoomHours))) }
     private var showTreatmentLabels: Bool { treatmentLevel >= 2 }
     @FocusState private var chartFocused: Bool
@@ -317,7 +318,7 @@ struct BGChartView: View {
                 let pts = screenPoints.map(\.point)
                 guard pts.count >= 2 else { return }
 
-                for i in 0..<(pts.count - 1) {
+                for i in 0 ..< (pts.count - 1) {
                     let midBG = Double(screenPoints[i].bgValue + screenPoints[i + 1].bgValue) / 2.0
                     let segColor = bgDynamicColor(midBG)
 

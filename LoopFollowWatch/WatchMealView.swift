@@ -54,12 +54,12 @@ struct WatchMealView: View {
     }
 
     private var crownRange: ClosedRange<Double> {
-        guard let field = editingField else { return 0...1 }
+        guard let field = editingField else { return 0 ... 1 }
         switch field {
-        case .carbs: return 0...config.maxCarbs
-        case .protein: return 0...config.maxProtein
-        case .fat: return 0...config.maxFat
-        case .time: return -240...240
+        case .carbs: return 0 ... config.maxCarbs
+        case .protein: return 0 ... config.maxProtein
+        case .fat: return 0 ... config.maxFat
+        case .time: return -240 ... 240
         }
     }
 

@@ -1,21 +1,14 @@
 // LoopFollow
 // WidgetNightscoutFetcher.swift
-//
-// Lightweight Nightscout BG fetcher for the widget extension. Fetches only the
-// 3 most recent entries (count=3) and merges any new readings into the cached
-// WidgetData. This runs inside getTimeline(), which the system calls every ~5
-// minutes for an active complication — giving us a reliable update path that
-// doesn't depend on the watch app's background task budget.
 
 import Foundation
 
 enum WidgetNightscoutFetcher {
-
     /// Result of a widget-side fetch attempt.
     enum FetchResult {
-        case updated(WidgetData)   // new reading(s) merged into cache
+        case updated(WidgetData) // new reading(s) merged into cache
         case unchanged(WidgetData) // cache was already current
-        case failed(WidgetData?)   // network/parse error; returns cache if available
+        case failed(WidgetData?) // network/parse error; returns cache if available
     }
 
     /// Fetch the latest 3 entries from Nightscout, merge into cached WidgetData,
@@ -72,7 +65,7 @@ enum WidgetNightscoutFetcher {
         var sgv: Double?
         var mbg: Double?
         var glucose: Double?
-        var date: TimeInterval    // epoch millis
+        var date: TimeInterval // epoch millis
         var direction: String?
 
         var bgValue: Int? {
@@ -91,7 +84,7 @@ enum WidgetNightscoutFetcher {
         "DoubleUp": "↑↑", "SingleUp": "↑", "FortyFiveUp": "↗",
         "Flat": "→", "FortyFiveDown": "↘", "SingleDown": "↓",
         "DoubleDown": "↓↓", "NOT COMPUTABLE": "-", "RATE OUT OF RANGE": "-",
-        "NONE": "-", "": "-"
+        "NONE": "-", "": "-",
     ]
 
     private static func mergeResponse(data: Data) -> FetchResult {
@@ -99,7 +92,8 @@ enum WidgetNightscoutFetcher {
 
         guard let entries = try? JSONDecoder().decode([NSEntry].self, from: data),
               let latest = entries.first,
-              let latestBG = latest.bgValue else {
+              let latestBG = latest.bgValue
+        else {
             return .failed(cache)
         }
 

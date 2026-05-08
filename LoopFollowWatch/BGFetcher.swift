@@ -8,7 +8,7 @@ import WidgetKit
 // MARK: - Widget Data (shared with LoopFollowWidgets target via UserDefaults)
 
 struct WidgetBGPoint: Codable, Hashable {
-    let value: Int      // mg/dL
+    let value: Int // mg/dL
     let timestamp: Date
 }
 
@@ -40,7 +40,7 @@ struct WidgetData: Codable {
     }
 
     static func load() -> WidgetData? {
-        guard let data = sharedDefaults.data(forKey: Self.storageKey),
+        guard let data = sharedDefaults.data(forKey: storageKey),
               let decoded = try? JSONDecoder().decode(WidgetData.self, from: data)
         else { return nil }
         return decoded
@@ -128,6 +128,7 @@ class BGFetcher: ObservableObject {
     private let dexcomApplicationId = "d89443d2-327c-4a6f-89e5-496bbb0317db"
 
     // MARK: - Adaptive fetch cadence
+
     //
     // CGM readings arrive every ~5 min. Rather than fetching on a fixed 5-min
     // repeating timer (which ends up phase-locked to whenever start() was
@@ -422,7 +423,8 @@ class BGFetcher: ObservableObject {
         // Pump / uploader info live as siblings of `loop` on the devicestatus entry.
         let battery: Int? = {
             if let uploader = entry["uploader"] as? [String: Any],
-               let b = uploader["battery"] as? Double {
+               let b = uploader["battery"] as? Double
+            {
                 return Int(b)
             }
             return nil
@@ -445,25 +447,29 @@ class BGFetcher: ObservableObject {
 
         // IOB
         if let iobData = loopRecord["iob"] as? [String: Any],
-           let iobValue = iobData["iob"] as? Double {
+           let iobValue = iobData["iob"] as? Double
+        {
             iob = iobValue
         }
 
         // COB
         if let cobData = loopRecord["cob"] as? [String: Any],
-           let cobValue = cobData["cob"] as? Double {
+           let cobValue = cobData["cob"] as? Double
+        {
             cob = cobValue
         }
 
         // Basal
         if let enacted = loopRecord["enacted"] as? [String: Any],
-           let rate = enacted["rate"] as? Double {
+           let rate = enacted["rate"] as? Double
+        {
             basalRate = rate
         }
 
         // Predictions
         if let predictData = loopRecord["predicted"] as? [String: Any],
-           let values = predictData["values"] as? [Double] {
+           let values = predictData["values"] as? [Double]
+        {
             predictions = values
             predictionStart = timestamp
         }
@@ -475,7 +481,8 @@ class BGFetcher: ObservableObject {
 
         // Override (top-level in devicestatus for Loop)
         if let overrideData = entry["override"] as? [String: Any],
-           let isActive = overrideData["active"] as? Bool, isActive {
+           let isActive = overrideData["active"] as? Bool, isActive
+        {
             overrideActive = true
             var oText = ""
             if let multiplier = overrideData["multiplier"] as? Double {
@@ -485,7 +492,8 @@ class BGFetcher: ObservableObject {
             }
             if let correction = overrideData["currentCorrectionRange"] as? [String: Any],
                let minVal = correction["minValue"] as? Double,
-               let maxVal = correction["maxValue"] as? Double {
+               let maxVal = correction["maxValue"] as? Double
+            {
                 oText += " (\(Int(minVal))-\(Int(maxVal)))"
             }
             overrideText = oText
@@ -533,7 +541,8 @@ class BGFetcher: ObservableObject {
         // Pump / uploader info live as siblings of `openaps` on the devicestatus entry.
         let battery: Int? = {
             if let uploader = entry["uploader"] as? [String: Any],
-               let b = uploader["battery"] as? Double {
+               let b = uploader["battery"] as? Double
+            {
                 return Int(b)
             }
             return nil
@@ -561,7 +570,8 @@ class BGFetcher: ObservableObject {
 
         // IOB
         if let iobData = openapsRecord["iob"] as? [String: Any],
-           let iobValue = iobData["iob"] as? Double {
+           let iobValue = iobData["iob"] as? Double
+        {
             iob = iobValue
         }
 
@@ -571,7 +581,8 @@ class BGFetcher: ObservableObject {
         } else if let reason = enactedOrSuggested?["reason"] as? String {
             let pattern = "COB: (\\d+(?:\\.\\d+)?)"
             if let regex = try? NSRegularExpression(pattern: pattern),
-               let match = regex.firstMatch(in: reason, range: NSRange(location: 0, length: reason.utf16.count)) {
+               let match = regex.firstMatch(in: reason, range: NSRange(location: 0, length: reason.utf16.count))
+            {
                 let valueString = (reason as NSString).substring(with: match.range(at: 1))
                 cob = Double(valueString)
             }
@@ -583,7 +594,8 @@ class BGFetcher: ObservableObject {
         if let reason = enactedOrSuggested?["reason"] as? String {
             let crPattern = "CR: (\\d+(?:\\.\\d+)?)"
             if let regex = try? NSRegularExpression(pattern: crPattern),
-               let match = regex.firstMatch(in: reason, range: NSRange(location: 0, length: reason.utf16.count)) {
+               let match = regex.firstMatch(in: reason, range: NSRange(location: 0, length: reason.utf16.count))
+            {
                 let valueString = (reason as NSString).substring(with: match.range(at: 1))
                 carbRatio = Double(valueString)
             }
@@ -591,17 +603,20 @@ class BGFetcher: ObservableObject {
 
         // Basal from enacted
         if let enacted = openapsRecord["enacted"] as? [String: Any],
-           let rate = enacted["rate"] as? Double {
+           let rate = enacted["rate"] as? Double
+        {
             basalRate = rate
         }
 
         // Predictions - all four types
         let predBGsData: [String: Any]? = {
             if let suggested = openapsRecord["suggested"] as? [String: Any],
-               let predBGs = suggested["predBGs"] as? [String: Any] {
+               let predBGs = suggested["predBGs"] as? [String: Any]
+            {
                 return predBGs
             } else if let enacted = openapsRecord["enacted"] as? [String: Any],
-                      let predBGs = enacted["predBGs"] as? [String: Any] {
+                      let predBGs = enacted["predBGs"] as? [String: Any]
+            {
                 return predBGs
             }
             return nil
@@ -631,7 +646,8 @@ class BGFetcher: ObservableObject {
         if tdd == nil, let reason = reasonText {
             let pattern = "TDD:\\s*(\\d+(?:\\.\\d+)?)"
             if let regex = try? NSRegularExpression(pattern: pattern),
-               let match = regex.firstMatch(in: reason, range: NSRange(location: 0, length: reason.utf16.count)) {
+               let match = regex.firstMatch(in: reason, range: NSRange(location: 0, length: reason.utf16.count))
+            {
                 let valueString = (reason as NSString).substring(with: match.range(at: 1))
                 tdd = Double(valueString)
             }
@@ -644,7 +660,8 @@ class BGFetcher: ObservableObject {
         if let enacted = openapsRecord["enacted"] as? [String: Any],
            let targetBG = enacted["target_bg"] as? Double,
            let currentTarget = enactedOrSuggested?["current_target"] as? Double,
-           targetBG != currentTarget {
+           targetBG != currentTarget
+        {
             tempTargetActive = true
             tempTargetText = "\(Int(targetBG)) mg/dL"
         }
@@ -915,7 +932,8 @@ class BGFetcher: ObservableObject {
 
         // Extract timezone
         if let tz = defaultStore?["timezone"] as? String,
-           let timezone = TimeZone(identifier: tz) {
+           let timezone = TimeZone(identifier: tz)
+        {
             newTimezone = timezone
         }
 
@@ -944,7 +962,8 @@ class BGFetcher: ObservableObject {
 
         // Loop overrides from loopSettings
         if let loopSettings = profile["loopSettings"] as? [String: Any],
-           let overridePresetsArray = loopSettings["overridePresets"] as? [[String: Any]] {
+           let overridePresetsArray = loopSettings["overridePresets"] as? [[String: Any]]
+        {
             for preset in overridePresetsArray {
                 guard let name = preset["name"] as? String else { continue }
                 let duration = preset["duration"] as? Double
@@ -957,7 +976,8 @@ class BGFetcher: ObservableObject {
         // Also check loopSettings inside default store
         if presets.isEmpty,
            let storeLoopSettings = defaultStore?["loopSettings"] as? [String: Any],
-           let overridePresetsArray = storeLoopSettings["overridePresets"] as? [[String: Any]] {
+           let overridePresetsArray = storeLoopSettings["overridePresets"] as? [[String: Any]]
+        {
             for preset in overridePresetsArray {
                 guard let name = preset["name"] as? String else { continue }
                 let duration = preset["duration"] as? Double
@@ -1053,7 +1073,8 @@ class BGFetcher: ObservableObject {
             switch eventType {
             case "Pump Site Change", "Site Change":
                 if let dateStr = entry["timestamp"] as? String ?? entry["created_at"] as? String,
-                   let ts = parseNSDate(dateStr) {
+                   let ts = parseNSDate(dateStr)
+                {
                     if newCannulaChangeDate == nil || ts > newCannulaChangeDate! {
                         newCannulaChangeDate = ts
                     }
@@ -1061,7 +1082,8 @@ class BGFetcher: ObservableObject {
 
             case "Sensor Start", "Sensor Change":
                 if let dateStr = entry["timestamp"] as? String ?? entry["created_at"] as? String,
-                   let ts = parseNSDate(dateStr) {
+                   let ts = parseNSDate(dateStr)
+                {
                     if newSensorChangeDate == nil || ts > newSensorChangeDate! {
                         newSensorChangeDate = ts
                     }
@@ -1069,7 +1091,8 @@ class BGFetcher: ObservableObject {
 
             case "Insulin Change", "Insulin Cartridge Change":
                 if let dateStr = entry["timestamp"] as? String ?? entry["created_at"] as? String,
-                   let ts = parseNSDate(dateStr) {
+                   let ts = parseNSDate(dateStr)
+                {
                     if newInsulinChangeDate == nil || ts > newInsulinChangeDate! {
                         newInsulinChangeDate = ts
                     }
@@ -1077,7 +1100,8 @@ class BGFetcher: ObservableObject {
 
             case "Correction Bolus", "Bolus", "External Insulin":
                 if let dateStr = entry["timestamp"] as? String ?? entry["created_at"] as? String,
-                   let ts = parseNSDate(dateStr) {
+                   let ts = parseNSDate(dateStr)
+                {
                     if let automatic = entry["automatic"] as? Bool, automatic {
                         if let insulin = entry["insulin"] as? Double, insulin > 0 {
                             newTreatments.append(Treatment(timestamp: ts, type: .smb, value: insulin))
@@ -1092,13 +1116,15 @@ class BGFetcher: ObservableObject {
             case "SMB":
                 if let dateStr = entry["timestamp"] as? String ?? entry["created_at"] as? String,
                    let ts = parseNSDate(dateStr),
-                   let insulin = entry["insulin"] as? Double, insulin > 0 {
+                   let insulin = entry["insulin"] as? Double, insulin > 0
+                {
                     newTreatments.append(Treatment(timestamp: ts, type: .smb, value: insulin))
                 }
 
             case "Meal Bolus":
                 if let dateStr = entry["timestamp"] as? String ?? entry["created_at"] as? String,
-                   let ts = parseNSDate(dateStr) {
+                   let ts = parseNSDate(dateStr)
+                {
                     if let insulin = entry["insulin"] as? Double, insulin > 0 {
                         newTreatments.append(Treatment(timestamp: ts, type: .bolus, value: insulin))
                     }
@@ -1110,7 +1136,8 @@ class BGFetcher: ObservableObject {
             case "Carb Correction":
                 if let dateStr = entry["timestamp"] as? String ?? entry["created_at"] as? String,
                    let ts = parseNSDate(dateStr),
-                   let carbs = entry["carbs"] as? Double, carbs > 0 {
+                   let carbs = entry["carbs"] as? Double, carbs > 0
+                {
                     newTreatments.append(Treatment(timestamp: ts, type: .carbs, value: carbs))
                 }
 
@@ -1126,7 +1153,8 @@ class BGFetcher: ObservableObject {
             default:
                 // Generic bolus/carb fallback
                 if let dateStr = entry["timestamp"] as? String ?? entry["created_at"] as? String,
-                   let ts = parseNSDate(dateStr) {
+                   let ts = parseNSDate(dateStr)
+                {
                     if let insulin = entry["insulin"] as? Double, insulin > 0 {
                         newTreatments.append(Treatment(timestamp: ts, type: .bolus, value: insulin))
                     }
@@ -1208,7 +1236,8 @@ class BGFetcher: ObservableObject {
             // Cap at next override start to prevent overlap
             if i + 1 < sortedOverrides.count,
                let nextDateStr = sortedOverrides[i + 1]["timestamp"] as? String ?? sortedOverrides[i + 1]["created_at"] as? String,
-               let nextStart = parseNSDate(nextDateStr) {
+               let nextStart = parseNSDate(nextDateStr)
+            {
                 if endDate > nextStart.addingTimeInterval(-60) {
                     endDate = nextStart.addingTimeInterval(-60)
                 }
@@ -1415,7 +1444,7 @@ class BGFetcher: ObservableObject {
         }
 
         guard !readings.isEmpty else {
-            self.fallbackToNightscout(config: config, dexError: "No Dexcom readings")
+            fallbackToNightscout(config: config, dexError: "No Dexcom readings")
             return
         }
 
