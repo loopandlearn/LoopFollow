@@ -32,8 +32,6 @@ extension MainViewController {
         let formatter = DateComponentsFormatter()
         formatter.unitsStyle = .positional
         formatter.zeroFormattingBehavior = .dropLeading
-
-        let shouldDisplaySeconds = secondsAgo >= 270 && secondsAgo < 720 // 4.5 to 12 minutes
         formatter.allowedUnits = [.minute, .second]
 
         let formattedDuration = formatter.string(from: secondsAgo) ?? ""
