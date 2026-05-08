@@ -3,191 +3,150 @@
 
 import SwiftUI
 
+private let tempColor = Color(red: 0.2, green: 0.9, blue: 0.1)
+
 struct WatchTempTargetView: View {
     let config: WatchConfig
-    @State private var mode: ViewMode = .menu
-    @State private var customTarget: Double = 120
-    @State private var customDuration: Double = 60
-    @State private var editingField: EditField = .target
+    @ObservedObject var bgFetcher: BGFetcher
+    @Environment(\.dismiss) private var dismiss
     @State private var showConfirm = false
     @State private var pendingTarget: Int = 0
     @State private var pendingDuration: Int = 0
     @State private var resultMessage: String?
     @State private var isError = false
-
-    enum ViewMode {
-        case menu, custom
-    }
-
-    enum EditField {
-        case target, duration
-    }
-
-    /// The value bound to the crown depending on which field is being edited
-    private var crownBinding: Binding<Double> {
-        switch editingField {
-        case .target:
-            return $customTarget
-        case .duration:
-            return $customDuration
-        }
-    }
-
-    private var crownRange: ClosedRange<Double> {
-        switch editingField {
-        case .target:
-            return 60...300
-        case .duration:
-            return 5...480
-        }
-    }
-
-    private var crownStep: Double {
-        switch editingField {
-        case .target: return 5
-        case .duration: return 5
-        }
-    }
+    @State private var showCelebration = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 8) {
-                if let result = resultMessage {
-                    Text(result)
-                        .font(.system(size: 14))
-                        .foregroundColor(isError ? .red : .green)
-                        .multilineTextAlignment(.center)
-                } else if showConfirm {
-                    Text("\(pendingTarget) \(config.units == "mmol/L" ? "mmol/L" : "mg/dL") for \(pendingDuration)m")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.pink)
-
-                    CrownConfirmView(label: "to set target") {
-                        sendTempTarget()
+        Group {
+            if let result = resultMessage {
+                ZStack {
+                    VStack {
+                        Spacer()
+                        Text(result)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(isError ? .red : .green)
+                            .multilineTextAlignment(.center)
+                        Spacer()
                     }
-                } else if mode == .custom {
-                    Text("🎯 Custom Target")
-                        .font(.system(size: 14, weight: .semibold))
+                    CelebrationOverlay(isActive: $showCelebration)
+                }
+            } else {
+                ScrollView {
+                    VStack(spacing: 8) {
+                        if showConfirm {
+                            Text("\(pendingTarget) \(config.units == "mmol/L" ? "mmol/L" : "mg/dL") for \(pendingDuration)m")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(tempColor)
 
-                    // Target row — tappable to select for crown editing
-                    Button {
-                        editingField = .target
-                    } label: {
-                        HStack {
-                            Text("Target:")
-                                .font(.system(size: 12))
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Text(config.units == "mmol/L"
-                                ? String(format: "%.1f", customTarget * 0.0555)
-                                : "\(Int(customTarget))")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(editingField == .target ? .pink : .primary)
+                            CrownConfirmView(label: "to set target") {
+                                sendTempTarget()
+                            }
+                        } else {
+                            // Active temp target section (check both devicestatus and treatments)
+                            if let activeTT = activeTempTargetEntry {
+                                Text("Active Temp Target")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.gray)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                                Text("\(Int(activeTT.targetBottom))-\(Int(activeTT.targetTop)) mg/dL" + (activeTT.reason.isEmpty ? "" : " (\(activeTT.reason))"))
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 10)
+                                    .background(Color.green.opacity(0.3))
+                                    .cornerRadius(8)
+
+                                Button {
+                                    cancelTarget()
+                                } label: {
+                                    Text("Cancel Temp Target")
+                                        .font(.system(size: 15, weight: .medium))
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 14)
+                                        .background(Color.red.opacity(0.3))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(.plain)
+
+                                Divider()
+                            }
+
+                            Text("Temp Targets")
+                                .font(.system(size: 14, weight: .semibold))
+
+                            Button {
+                                pendingTarget = 160
+                                pendingDuration = 180
+                                showConfirm = true
+                            } label: {
+                                Text("Exercise: 160 / 3h")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(tempColor.opacity(0.55))
+                                    .cornerRadius(8)
+                            }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                pendingTarget = 80
+                                pendingDuration = 120
+                                showConfirm = true
+                            } label: {
+                                Text("Mealtime: 80 / 2h")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(tempColor.opacity(0.55))
+                                    .cornerRadius(8)
+                            }
+                            .buttonStyle(.plain)
+
+                            Divider()
+
+                            NavigationLink {
+                                CustomTempTargetView(config: config, bgFetcher: bgFetcher)
+                            } label: {
+                                Text("Custom...")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(tempColor)
+                                    .cornerRadius(8)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(editingField == .target ? Color.pink.opacity(0.15) : Color.clear)
-                        .cornerRadius(8)
                     }
-                    .buttonStyle(.plain)
-
-                    // Duration row — tappable to select for crown editing
-                    Button {
-                        editingField = .duration
-                    } label: {
-                        HStack {
-                            Text("Duration:")
-                                .font(.system(size: 12))
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Text("\(Int(customDuration))m")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(editingField == .duration ? .pink : .primary)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(editingField == .duration ? Color.pink.opacity(0.15) : Color.clear)
-                        .cornerRadius(8)
-                    }
-                    .buttonStyle(.plain)
-
-                    Text("Tap a field, then scroll crown")
-                        .font(.system(size: 9))
-                        .foregroundColor(.secondary)
-
-                    HStack(spacing: 8) {
-                        Button("Back") {
-                            mode = .menu
-                        }
-                        .font(.system(size: 12))
-
-                        Button("Set") {
-                            pendingTarget = Int(customTarget)
-                            pendingDuration = Int(customDuration)
-                            showConfirm = true
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.pink)
-                        .font(.system(size: 12))
-                    }
-                } else {
-                    // Menu mode
-                    Text("🎯 Temp Target")
-                        .font(.system(size: 14, weight: .semibold))
-
-                    // Presets
-                    Button("Exercise: 150 / 60m") {
-                        pendingTarget = 150
-                        pendingDuration = 60
-                        showConfirm = true
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.pink.opacity(0.6))
-
-                    Button("Eating Soon: 80 / 60m") {
-                        pendingTarget = 80
-                        pendingDuration = 60
-                        showConfirm = true
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.pink.opacity(0.6))
-
-                    // Custom
-                    Divider()
-
-                    Button("Custom...") {
-                        mode = .custom
-                        editingField = .target
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.pink)
-
-                    Divider()
-
-                    // Cancel
-                    Button("Cancel Active") {
-                        cancelTarget()
-                    }
-                    .foregroundColor(.red)
                 }
             }
         }
-        .focusable(mode == .custom && !showConfirm)
-        .digitalCrownRotation(
-            crownBinding,
-            from: crownRange.lowerBound,
-            through: crownRange.upperBound,
-            by: crownStep,
-            sensitivity: .medium,
-            isContinuous: false,
-            isHapticFeedbackEnabled: true
-        )
+    }
+
+    /// Returns the currently active temp target from treatments, or nil if none active.
+    private var activeTempTargetEntry: TempTargetEntry? {
+        let now = Date()
+        return bgFetcher.tempTargetEntries.first { $0.startDate <= now && $0.endDate > now }
+    }
+
+    private func autoDismiss() {
+        let delay = showCelebration ? CelebrationOverlay.displayDuration : 3.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            dismiss()
+        }
     }
 
     private func sendTempTarget() {
         WatchRemoteService.sendTempTarget(target: pendingTarget, duration: pendingDuration, config: config) { success, error in
             if success {
                 resultMessage = "Target set!"
+                showCelebration = CelebrationOverlay.shouldCelebrate()
+                WatchRemoteService.postLocalNotification(
+                    title: "Temp Target Set",
+                    body: "\(pendingTarget) mg/dL for \(pendingDuration)m"
+                )
+                autoDismiss()
             } else {
                 resultMessage = error ?? "Failed"
                 isError = true
@@ -199,6 +158,192 @@ struct WatchTempTargetView: View {
         WatchRemoteService.cancelTempTarget(config: config) { success, error in
             if success {
                 resultMessage = "Target cancelled"
+                showCelebration = CelebrationOverlay.shouldCelebrate()
+                WatchRemoteService.postLocalNotification(
+                    title: "Temp Target Cancelled",
+                    body: "Temp target cancel command sent"
+                )
+                autoDismiss()
+            } else {
+                resultMessage = error ?? "Failed"
+                isError = true
+            }
+        }
+    }
+}
+
+// MARK: - Custom Target (pushed via NavigationLink)
+
+private struct CustomTempTargetView: View {
+    let config: WatchConfig
+    @ObservedObject var bgFetcher: BGFetcher
+    @Environment(\.dismiss) private var dismiss
+    @State private var customTarget: Double = 120
+    @State private var customDuration: Double = 60
+    @State private var editingField: EditField = .target
+    @State private var showConfirm = false
+    @State private var pendingTarget: Int = 0
+    @State private var pendingDuration: Int = 0
+    @State private var resultMessage: String?
+    @State private var isError = false
+    @State private var showCelebration = false
+
+    enum EditField {
+        case target, duration
+    }
+
+    private var crownBinding: Binding<Double> {
+        Binding(
+            get: {
+                guard !showConfirm else { return 0 }
+                switch editingField {
+                case .target: return customTarget
+                case .duration: return customDuration
+                }
+            },
+            set: { newValue in
+                guard !showConfirm else { return }
+                switch editingField {
+                case .target: customTarget = newValue
+                case .duration: customDuration = newValue
+                }
+            }
+        )
+    }
+
+    private var crownRange: ClosedRange<Double> {
+        guard !showConfirm else { return 0...1 }
+        switch editingField {
+        case .target: return 60...300
+        case .duration: return 5...480
+        }
+    }
+
+    private var crownStep: Double {
+        switch editingField {
+        case .target: return 5
+        case .duration: return 5
+        }
+    }
+
+    var body: some View {
+        Group {
+            if let result = resultMessage {
+                ZStack {
+                    VStack {
+                        Spacer()
+                        Text(result)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(isError ? .red : .green)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                    }
+                    CelebrationOverlay(isActive: $showCelebration)
+                }
+            } else {
+                ScrollView {
+                    VStack(spacing: 8) {
+                        if showConfirm {
+                            Text("\(pendingTarget) \(config.units == "mmol/L" ? "mmol/L" : "mg/dL") for \(pendingDuration)m")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(tempColor)
+
+                            CrownConfirmView(label: "to set target") {
+                                sendTempTarget()
+                            }
+                        } else {
+                            Text("Custom Target")
+                                .font(.system(size: 14, weight: .semibold))
+
+                            Button {
+                                editingField = .target
+                            } label: {
+                                HStack {
+                                    Text("Target:")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    Text(config.units == "mmol/L"
+                                        ? String(format: "%.1f", customTarget * 0.0555)
+                                        : "\(Int(customTarget))")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(editingField == .target ? tempColor : .primary)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(editingField == .target ? tempColor.opacity(0.15) : Color.clear)
+                                .cornerRadius(6)
+                            }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                editingField = .duration
+                            } label: {
+                                HStack {
+                                    Text("Duration:")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    Text("\(Int(customDuration))m")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(editingField == .duration ? tempColor : .primary)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(editingField == .duration ? tempColor.opacity(0.15) : Color.clear)
+                                .cornerRadius(6)
+                            }
+                            .buttonStyle(.plain)
+
+                            Text("Tap a field, then scroll crown")
+                                .font(.system(size: 9))
+                                .foregroundColor(.secondary)
+
+                            Button {
+                                pendingTarget = Int(customTarget)
+                                pendingDuration = Int(customDuration)
+                                showConfirm = true
+                            } label: {
+                                Text("Set")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(tempColor)
+                                    .cornerRadius(8)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
+        .modifier(CrownRotationModifier(
+            isActive: !showConfirm && resultMessage == nil,
+            value: crownBinding,
+            from: crownRange.lowerBound,
+            through: crownRange.upperBound,
+            by: crownStep,
+            sensitivity: .medium
+        ))
+    }
+
+    private func autoDismiss() {
+        let delay = showCelebration ? CelebrationOverlay.displayDuration : 3.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            dismiss()
+        }
+    }
+
+    private func sendTempTarget() {
+        WatchRemoteService.sendTempTarget(target: pendingTarget, duration: pendingDuration, config: config) { success, error in
+            if success {
+                resultMessage = "Target set!"
+                showCelebration = CelebrationOverlay.shouldCelebrate()
+                WatchRemoteService.postLocalNotification(
+                    title: "Temp Target Set",
+                    body: "\(pendingTarget) mg/dL for \(pendingDuration)m"
+                )
+                autoDismiss()
             } else {
                 resultMessage = error ?? "Failed"
                 isError = true

@@ -31,6 +31,11 @@ struct WatchConfig: Equatable {
     // Nightscout write auth
     var nsWriteAuth: Bool
 
+    // Meal settings (synced from iPhone)
+    var mealWithFatProtein: Bool
+    var maxProtein: Double
+    var maxFat: Double
+
     var hasDexcomCredentials: Bool {
         !dexUsername.isEmpty && !dexPassword.isEmpty
     }
@@ -75,6 +80,9 @@ struct WatchConfig: Equatable {
             "trcProductionEnv": trcProductionEnv,
             "trcUser": trcUser,
             "nsWriteAuth": nsWriteAuth,
+            "mealWithFatProtein": mealWithFatProtein,
+            "maxProtein": maxProtein,
+            "maxFat": maxFat,
         ]
     }
 
@@ -99,11 +107,21 @@ struct WatchConfig: Equatable {
         trcProductionEnv = dict["trcProductionEnv"] as? Bool ?? false
         trcUser = dict["trcUser"] as? String ?? ""
         nsWriteAuth = dict["nsWriteAuth"] as? Bool ?? false
+        mealWithFatProtein = dict["mealWithFatProtein"] as? Bool ?? false
+        maxProtein = dict["maxProtein"] as? Double ?? 30.0
+        maxFat = dict["maxFat"] as? Double ?? 30.0
     }
 
     func saveToDefaults() {
         let defaults = UserDefaults.standard
         defaults.set(toDictionary(), forKey: "watchConfig")
+
+        // Also mirror NS credentials to the App Group so the widget extension
+        // (a separate process) can fetch BG directly from Nightscout.
+        if let shared = UserDefaults(suiteName: WidgetData.appGroupID) {
+            shared.set(nsURL, forKey: "nsURL")
+            shared.set(nsToken, forKey: "nsToken")
+        }
     }
 
     static func loadFromDefaults() -> WatchConfig? {

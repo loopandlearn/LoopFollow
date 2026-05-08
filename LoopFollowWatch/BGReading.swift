@@ -43,12 +43,11 @@ struct BGReading {
     }
 
     var minAgoText: String {
-        let seconds = Int(Date().timeIntervalSince(timestamp))
-        let minutes = seconds / 60
-        if minutes < 1 {
-            return "just now"
-        }
-        return "\(minutes) min ago"
+        let totalSeconds = Int(Date().timeIntervalSince(timestamp))
+        if totalSeconds < 5 { return "now" }
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        return "\(minutes)m \(seconds)s"
     }
 
     static func directionArrow(_ direction: String) -> String {

@@ -5,7 +5,7 @@ import SwiftUI
 import WatchKit
 
 /// Reusable crown-rotation confirmation component.
-/// User must TAP the wheel icon first, then scroll the Digital Crown through a full rotation to confirm.
+/// User must TAP the wheel icon once, then scroll the Digital Crown to confirm.
 struct CrownConfirmView: View {
     let label: String
     let onConfirm: () -> Void
@@ -42,48 +42,49 @@ struct CrownConfirmView: View {
                     Image(systemName: "checkmark")
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.green)
-                        .transition(.scale)
                 } else {
                     VStack(spacing: 2) {
                         Image(systemName: "digitalcrown.arrow.clockwise")
                             .font(.system(size: tapped ? 20 : 24))
                             .foregroundColor(tapped ? .blue : .gray.opacity(0.5))
                             .rotationEffect(.degrees(tapped ? progress / fullRotation * 360 : 0))
-                        if tapped {
-                            Text("Scroll")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
-                        }
+                        Text(tapped ? "Scroll" : "Tap")
+                            .font(.system(size: 10))
+                            .foregroundColor(tapped ? .blue : .gray.opacity(0.5))
                     }
                 }
             }
-            .frame(width: 70, height: 70)
-            .contentShape(Circle())
+            .frame(width: 80, height: 80)
+            .padding(.horizontal, 8)
             .onTapGesture {
                 if !tapped && !confirmed {
-                    withAnimation { tapped = true }
+                    withAnimation(.none) { tapped = true }
                     WKInterfaceDevice.current().play(.click)
                 }
             }
 
-            // Instruction text
-            if confirmed {
-                Text("Sent!")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.green)
-            } else if tapped {
-                Text("Scroll crown \(label)")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.center)
-            } else {
-                Text("Tap wheel, then scroll \(label)")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+            // Instruction text — fixed height to prevent layout shifts
+            Group {
+                if confirmed {
+                    Text("Sent!")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.green)
+                } else if tapped {
+                    Text("Scroll crown \(label)")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.primary)
+                } else {
+                    Text("Tap wheel \(label)")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
             }
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .frame(height: 16)
+            .multilineTextAlignment(.center)
         }
-        .focusable(tapped && !confirmed)
+        .focusable()
         .digitalCrownRotation(
             $progress,
             from: 0,
@@ -95,7 +96,6 @@ struct CrownConfirmView: View {
         )
         .onChange(of: progress) { newValue in
             guard tapped else {
-                // Reset if somehow triggered before tap
                 progress = 0
                 return
             }

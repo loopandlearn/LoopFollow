@@ -3,8 +3,22 @@
 
 import CryptoKit
 import Foundation
+import UserNotifications
+import WatchKit
 
 class WatchRemoteService {
+
+    // MARK: - Local Notification Helper
+
+    static func postLocalNotification(title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
+        WKInterfaceDevice.current().play(.notification)
+    }
 
     // MARK: - Public API
 
@@ -31,23 +45,31 @@ class WatchRemoteService {
         }
     }
 
-    static func sendMeal(carbs: Int, config: WatchConfig, completion: @escaping (Bool, String?) -> Void) {
+    static func sendMeal(carbs: Int, protein: Int? = nil, fat: Int? = nil, entryTime: Date? = nil, config: WatchConfig, completion: @escaping (Bool, String?) -> Void) {
+        let timestamp = entryTime ?? Date()
         switch config.remoteType {
         case "Trio Remote Control":
-            let payload = TRCPayload(
+            var payload = TRCPayload(
                 user: config.trcUser,
                 commandType: "meal",
                 timestamp: Date().timeIntervalSince1970,
                 carbs: carbs
             )
+            payload.protein = protein
+            payload.fat = fat
+            if let entryTime = entryTime {
+                payload.scheduledTime = entryTime.timeIntervalSince1970
+            }
             sendTRCCommand(payload: payload, config: config, completion: completion)
         case "Nightscout":
-            let body: [String: Any] = [
+            var body: [String: Any] = [
                 "enteredBy": "LoopFollow Watch",
                 "eventType": "Meal Bolus",
                 "carbs": carbs,
-                "created_at": ISO8601DateFormatter().string(from: Date()),
+                "created_at": ISO8601DateFormatter().string(from: timestamp),
             ]
+            if let protein = protein { body["protein"] = protein }
+            if let fat = fat { body["fat"] = fat }
             postNightscoutTreatment(body: body, config: config, completion: completion)
         default:
             completion(false, "Remote type not supported")
@@ -144,14 +166,18 @@ class WatchRemoteService {
         var target: Int?
         var duration: Int?
         var carbs: Int?
+        var protein: Int?
+        var fat: Int?
         var overrideName: String?
+        var scheduledTime: TimeInterval?
 
         enum CodingKeys: String, CodingKey {
             case user
             case commandType = "command_type"
             case timestamp
             case bolusAmount = "bolus_amount"
-            case target, duration, carbs, overrideName
+            case target, duration, carbs, protein, fat, overrideName
+            case scheduledTime = "scheduled_time"
         }
     }
 

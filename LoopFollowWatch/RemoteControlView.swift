@@ -3,9 +3,12 @@
 
 import SwiftUI
 
+private let tempColor = Color(red: 0.2, green: 0.9, blue: 0.1)
+
 struct RemoteControlView: View {
     let config: WatchConfig
     @ObservedObject var bgFetcher: BGFetcher
+    @ObservedObject var router: NavigationRouter
 
     private let columns = [
         GridItem(.flexible(), spacing: 8),
@@ -15,36 +18,56 @@ struct RemoteControlView: View {
     var body: some View {
         NavigationStack {
             LazyVGrid(columns: columns, spacing: 8) {
-                NavigationLink {
-                    WatchBolusView(config: config)
+                Button {
+                    router.activeDestination = .bolus
                 } label: {
-                    RemoteTile(icon: "💧", label: "Bolus", color: .blue)
+                    RemoteTile(icon: "drop.fill", label: "Bolus", color: .blue)
                 }
                 .buttonStyle(.plain)
 
-                NavigationLink {
-                    WatchMealView(config: config)
+                Button {
+                    router.activeDestination = .meal
                 } label: {
-                    RemoteTile(icon: "🍽️", label: "Meal", color: .yellow)
+                    RemoteTile(icon: "fork.knife", label: "Meal", color: .yellow)
                 }
                 .buttonStyle(.plain)
 
-                NavigationLink {
-                    WatchOverrideView(config: config, bgFetcher: bgFetcher)
+                Button {
+                    router.activeDestination = .override
                 } label: {
-                    RemoteTile(icon: "⚡", label: "Override", color: .purple)
+                    RemoteTile(icon: "bolt.fill", label: "Override", color: .purple)
                 }
                 .buttonStyle(.plain)
 
-                NavigationLink {
-                    WatchTempTargetView(config: config)
+                Button {
+                    router.activeDestination = .tempTarget
                 } label: {
-                    RemoteTile(icon: "🎯", label: "Temp", color: .pink)
+                    RemoteTile(icon: "target", label: "Temp", color: tempColor)
                 }
                 .buttonStyle(.plain)
             }
             .padding(.horizontal, 4)
             .padding(.top, 2)
+            .navigationDestination(item: $router.activeDestination) { destination in
+                switch destination {
+                case .bolus:
+                    WatchBolusView(
+                        config: config,
+                        bgFetcher: bgFetcher,
+                        popToRoot: { router.activeDestination = nil }
+                    )
+                case .meal:
+                    WatchMealView(
+                        config: config,
+                        bgFetcher: bgFetcher,
+                        popToRoot: { router.activeDestination = nil }
+                    )
+                case .override:
+                    WatchOverrideView(config: config, bgFetcher: bgFetcher)
+                case .tempTarget:
+                    WatchTempTargetView(config: config, bgFetcher: bgFetcher)
+                }
+            }
         }
     }
 }
@@ -56,15 +79,35 @@ private struct RemoteTile: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            Text(icon)
-                .font(.system(size: 30))
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(.white)
             Text(label)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.white)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 72)
-        .background(color.opacity(0.3))
-        .cornerRadius(12)
+        .background(
+            ZStack {
+                // Base gradient — lighter top, darker bottom for 3D depth
+                LinearGradient(
+                    colors: [color, color.opacity(0.85)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                // Top highlight for raised look
+                VStack {
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.08), Color.white.opacity(0)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 14)
+                    Spacer()
+                }
+            }
+        )
+        .cornerRadius(6)
     }
 }
