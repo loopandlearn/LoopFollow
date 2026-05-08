@@ -26,6 +26,7 @@ struct WatchBolusView: View {
     @State private var isError = false
     @State private var showCalcDetail = false
     @State private var showCelebration = false
+    @State private var isRefreshing = true
 
     /// The displayed amount, snapped to 0.05U increments
     private var amount: Double {
@@ -35,148 +36,158 @@ struct WatchBolusView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            if let result = resultMessage {
-                ZStack {
-                    VStack {
-                        Spacer()
-                        Text(result)
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(isError ? .red : .green)
-                            .multilineTextAlignment(.center)
-                        Spacer()
-                    }
-                    CelebrationOverlay(isActive: $showCelebration)
-                }
-            } else if showConfirm {
-                confirmSummary
-                    .padding(.bottom, 12)
-
-                CrownConfirmView(label: confirmedAmount > 0 ? "to deliver" : "to send meal") {
-                    sendBolusAndMeal()
-                }
-
-            } else {
-                HStack {
-                    Button {
-                        rawCrown = max(rawCrown - 1.0, 0)
-                        WKInterfaceDevice.current().play(.click)
-                    } label: {
-                        Text("−")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.blue)
-                            .frame(width: 32, height: 32)
-                            .background(Color.blue.opacity(0.3))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    // Extra padding so the tap target doesn't bleed
-                    // into the system back button zone on small watches.
-                    .padding(.leading, 8)
-
-                    Spacer()
-
-                    Text("Bolus")
-                        .font(.system(size: 16, weight: .semibold))
-
-                    Spacer()
-
-                    Button {
-                        rawCrown = min(rawCrown + 1.0, config.maxBolus / 0.25)
-                        WKInterfaceDevice.current().play(.click)
-                    } label: {
-                        Text("+")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.blue)
-                            .frame(width: 32, height: 32)
-                            .background(Color.blue.opacity(0.3))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-
-                Text(String(format: "%.2f U", amount))
-                    .font(.system(size: 60, weight: .bold, design: .rounded))
-                    .foregroundColor(.blue)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-
-                HStack(spacing: 6) {
-                    Text("Calculated: \(String(format: "%.2f", bgFetcher.recommendedBolus))U")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.blue)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .onTapGesture {
-                            rawCrown = min(bgFetcher.recommendedBolus, config.maxBolus) / 0.25
+        ZStack {
+            VStack(spacing: 0) {
+                if let result = resultMessage {
+                    ZStack {
+                        VStack {
+                            Spacer()
+                            Text(result)
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(isError ? .red : .green)
+                                .multilineTextAlignment(.center)
+                            Spacer()
                         }
-                    if bgFetcher.bolusCalc != nil {
+                        CelebrationOverlay(isActive: $showCelebration)
+                    }
+                } else if showConfirm {
+                    confirmSummary
+                        .padding(.bottom, 12)
+
+                    CrownConfirmView(label: confirmedAmount > 0 ? "to deliver" : "to send meal") {
+                        sendBolusAndMeal()
+                    }
+
+                } else {
+                    HStack {
                         Button {
-                            showCalcDetail = true
+                            rawCrown = max(rawCrown - 1.0, 0)
+                            WKInterfaceDevice.current().play(.click)
                         } label: {
-                            Image(systemName: "info.circle")
-                                .font(.system(size: 20))
-                                .foregroundColor(.blue.opacity(0.8))
-                                .frame(width: 36, height: 36)
+                            Text("−")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.blue)
+                                .frame(width: 32, height: 32)
+                                .background(Color.blue.opacity(0.3))
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.leading, 8)
+
+                        Spacer()
+
+                        Text("Bolus")
+                            .font(.system(size: 16, weight: .semibold))
+
+                        Spacer()
+
+                        Button {
+                            rawCrown = min(rawCrown + 1.0, config.maxBolus / 0.25)
+                            WKInterfaceDevice.current().play(.click)
+                        } label: {
+                            Text("+")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.blue)
+                                .frame(width: 32, height: 32)
+                                .background(Color.blue.opacity(0.3))
+                                .clipShape(Circle())
                         }
                         .buttonStyle(.plain)
                     }
-                }
-                .padding(.leading, 8)
-                .padding(.top, -8)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
 
-                Button(amount > 0 ? "Confirm" : (pendingMeal != nil ? "Skip" : "Confirm")) {
-                    confirmedAmount = amount
-                    showConfirm = true
+                    Text(String(format: "%.2f U", amount))
+                        .font(.system(size: 60, weight: .bold, design: .rounded))
+                        .foregroundColor(.blue)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    HStack(spacing: 6) {
+                        Text("Calculated: \(String(format: "%.2f", bgFetcher.recommendedBolus))U")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.blue)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .onTapGesture {
+                                rawCrown = min(bgFetcher.recommendedBolus, config.maxBolus) / 0.25
+                            }
+                        if bgFetcher.bolusCalc != nil {
+                            Button {
+                                showCalcDetail = true
+                            } label: {
+                                Image(systemName: "info.circle")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.blue.opacity(0.8))
+                                    .frame(width: 36, height: 36)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.leading, 8)
+                    .padding(.top, -8)
+
+                    Button(amount > 0 ? "Confirm" : (pendingMeal != nil ? "Skip" : "Confirm")) {
+                        confirmedAmount = amount
+                        showConfirm = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+                    .disabled(amount <= 0 && pendingMeal == nil)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.blue)
-                .disabled(amount <= 0 && pendingMeal == nil)
             }
-        }
-        .modifier(CrownRotationModifier(
-            isActive: !showConfirm && resultMessage == nil,
-            value: $rawCrown,
-            from: 0,
-            through: config.maxBolus / 0.25,
-            by: 0.01,
-            sensitivity: .low
-        ))
-        .onChange(of: rawCrown) { _ in
-            let current = amount
-            if current != lastHapticAmount {
-                lastHapticAmount = current
-                WKInterfaceDevice.current().play(.click)
+            .modifier(CrownRotationModifier(
+                isActive: !showConfirm && resultMessage == nil,
+                value: $rawCrown,
+                from: 0,
+                through: config.maxBolus / 0.25,
+                by: 0.01,
+                sensitivity: .low
+            ))
+            .onChange(of: rawCrown) { _ in
+                let current = amount
+                if current != lastHapticAmount {
+                    lastHapticAmount = current
+                    WKInterfaceDevice.current().play(.click)
+                }
             }
-        }
-        .sheet(isPresented: $showCalcDetail) {
-            if let calc = bgFetcher.bolusCalc {
-                BolusCalcDetailView(calc: calc, recommended: bgFetcher.recommendedBolus)
+            .sheet(isPresented: $showCalcDetail) {
+                if let calc = bgFetcher.bolusCalc {
+                    BolusCalcDetailView(calc: calc, recommended: bgFetcher.recommendedBolus)
+                }
             }
-        }
-        .navigationBarBackButtonHidden(showConfirm)
-        .toolbar {
-            if showConfirm {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        showConfirm = false
-                    } label: {
-                        Image(systemName: "chevron.left")
+            .navigationBarBackButtonHidden(showConfirm)
+            .toolbar {
+                if showConfirm {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button {
+                            showConfirm = false
+                        } label: {
+                            Image(systemName: "chevron.left")
+                        }
                     }
                 }
             }
-        }
-        .onAppear {
-            // If launched directly (not from meal entry), clear any stale pending carbs
-            if pendingMeal == nil {
+            .onAppear {
+                if pendingMeal == nil {
+                    bgFetcher.pendingCarbs = 0
+                }
+                isRefreshing = true
+                bgFetcher.fetchDeviceStatus(config: config) {
+                    bgFetcher.updateRecommendedBolus()
+                    isRefreshing = false
+                }
+            }
+            .onDisappear {
                 bgFetcher.pendingCarbs = 0
             }
-            bgFetcher.updateRecommendedBolus()
-        }
-        .onDisappear {
-            bgFetcher.pendingCarbs = 0
+
+            if isRefreshing {
+                Color.black.opacity(0.6)
+                    .ignoresSafeArea()
+                ProgressView()
+                    .tint(.blue)
+            }
         }
     }
 

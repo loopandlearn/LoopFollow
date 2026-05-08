@@ -324,7 +324,7 @@ class BGFetcher: ObservableObject {
 
     // MARK: - Nightscout Device Status
 
-    func fetchDeviceStatus(config: WatchConfig) {
+    func fetchDeviceStatus(config: WatchConfig, completion: (() -> Void)? = nil) {
         var components = URLComponents(string: config.nsURL)
         components?.path = "/api/v1/devicestatus.json"
 
@@ -335,15 +335,20 @@ class BGFetcher: ObservableObject {
         queryItems.append(URLQueryItem(name: "count", value: "1"))
         components?.queryItems = queryItems
 
-        guard let url = components?.url else { return }
+        guard let url = components?.url else {
+            completion?()
+            return
+        }
 
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
-        request.timeoutInterval = 15
+        request.timeoutInterval = 10
 
         URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
-            guard let self = self, error == nil, let data = data else { return }
-            self.parseDeviceStatus(data: data)
+            if let self = self, error == nil, let data = data {
+                self.parseDeviceStatus(data: data)
+            }
+            DispatchQueue.main.async { completion?() }
         }.resume()
     }
 
