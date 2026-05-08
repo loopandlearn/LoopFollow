@@ -123,7 +123,7 @@ struct SnoozerView: View {
             }
 
             Text(bgText.value)
-                .font(.system(size: 300, weight: .black))
+                .font(.system(size: 300, weight: .black).monospacedDigit())
                 .minimumScaleFactor(0.5)
                 .foregroundColor(bgTextColor.value)
                 .strikethrough(
@@ -138,7 +138,7 @@ struct SnoozerView: View {
                     Text(directionText.value)
                         .font(.system(size: 90, weight: .black))
                     Text(deltaText.value)
-                        .font(.system(size: 70))
+                        .font(.system(size: 70).monospacedDigit())
                 }
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white)
@@ -151,14 +151,14 @@ struct SnoozerView: View {
                     .frame(maxWidth: .infinity, maxHeight: dirMaxH)
 
                 Text(deltaText.value)
-                    .font(.system(size: 160))
+                    .font(.system(size: 160).monospacedDigit())
                     .minimumScaleFactor(0.5)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, maxHeight: deltaMaxH)
             }
 
             Text(minAgoText.value)
-                .font(.system(size: 160))
+                .font(.system(size: 160).monospacedDigit())
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: ageMaxH)
