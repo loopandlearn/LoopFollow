@@ -55,6 +55,9 @@ class PhoneSessionManager: NSObject, WCSessionDelegate {
             "lfTeamId": lfTeamId,
             "lfBundleId": lfBundleId,
             "lfProductionEnv": lfProductionEnv,
+            "mealWithFatProtein": Storage.shared.mealWithFatProtein.value,
+            "maxProtein": Storage.shared.maxProtein.value.doubleValue(for: .gram()),
+            "maxFat": Storage.shared.maxFat.value.doubleValue(for: .gram()),
         ]
     }
 

@@ -160,7 +160,10 @@ class RemoteSettingsViewModel: ObservableObject {
 
         $mealWithFatProtein
             .dropFirst()
-            .sink { [weak self] in self?.storage.mealWithFatProtein.value = $0 }
+            .sink { [weak self] in
+                self?.storage.mealWithFatProtein.value = $0
+                PhoneSessionManager.shared.sendConfig()
+            }
             .store(in: &cancellables)
 
         // Device type monitoring
