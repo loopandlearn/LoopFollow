@@ -134,9 +134,6 @@ struct WatchMealView: View {
                 bgFetcher.updateRecommendedBolus()
             }
         }
-        .onDisappear {
-            bgFetcher.pendingCarbs = 0
-        }
     }
 
     private let gridColumns = [
