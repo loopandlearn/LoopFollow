@@ -765,21 +765,21 @@ extension MainViewController {
                 midnightTimeInterval = midnightTimeInterval.advanced(by: -24 * 60 * 60)
             }
         }
-        
+
         // Draw "same time" lines on prior days (orange dotted lines)
         createSameTimeLines()
     }
-    
+
     func createSameTimeLines() {
         // Draw orange dotted lines at the current time of day on each prior day
         // This helps visualize what was happening at this same time yesterday, etc.
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         let graphHours = 24 * Storage.shared.downloadDays.value
         let graphStart = dateTimeUtils.getTimeIntervalNHoursAgo(N: graphHours)
-        
+
         // Start from 24 hours ago (yesterday at this time) and go back
         var priorDayTime = now - (24 * 60 * 60)
-        
+
         while priorDayTime > graphStart {
             // Large chart - orange dotted line (same style as teal midnight lines)
             let ul = ChartLimitLine()
@@ -788,7 +788,7 @@ extension MainViewController {
             ul.lineDashLengths = [CGFloat(2), CGFloat(5)]
             ul.lineWidth = 1
             BGChart.xAxis.addLimitLine(ul)
-            
+
             // Small chart - orange dotted line
             let sl = ChartLimitLine()
             sl.limit = Double(priorDayTime)
@@ -796,7 +796,7 @@ extension MainViewController {
             sl.lineDashLengths = [CGFloat(2), CGFloat(2)]
             sl.lineWidth = 1
             BGChartFull.xAxis.addLimitLine(sl)
-            
+
             // Move back another 24 hours
             priorDayTime = priorDayTime - (24 * 60 * 60)
         }
