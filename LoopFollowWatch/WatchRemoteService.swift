@@ -29,7 +29,8 @@ class WatchRemoteService {
                 user: config.trcUser,
                 commandType: "bolus",
                 timestamp: Date().timeIntervalSince1970,
-                bolusAmount: amount
+                bolusAmount: amount,
+                returnNotification: makeReturnNotificationInfo(config: config)
             )
             sendTRCCommand(payload: payload, config: config, completion: completion)
         case "Nightscout":
@@ -53,7 +54,8 @@ class WatchRemoteService {
                 user: config.trcUser,
                 commandType: "meal",
                 timestamp: Date().timeIntervalSince1970,
-                carbs: carbs
+                carbs: carbs,
+                returnNotification: makeReturnNotificationInfo(config: config)
             )
             payload.protein = protein
             payload.fat = fat
@@ -84,7 +86,8 @@ class WatchRemoteService {
                 commandType: "temp_target",
                 timestamp: Date().timeIntervalSince1970,
                 target: target,
-                duration: duration
+                duration: duration,
+                returnNotification: makeReturnNotificationInfo(config: config)
             )
             sendTRCCommand(payload: payload, config: config, completion: completion)
         case "Nightscout":
@@ -109,7 +112,8 @@ class WatchRemoteService {
             let payload = TRCPayload(
                 user: config.trcUser,
                 commandType: "cancel_temp_target",
-                timestamp: Date().timeIntervalSince1970
+                timestamp: Date().timeIntervalSince1970,
+                returnNotification: makeReturnNotificationInfo(config: config)
             )
             sendTRCCommand(payload: payload, config: config, completion: completion)
         case "Nightscout":
@@ -133,7 +137,8 @@ class WatchRemoteService {
                 user: config.trcUser,
                 commandType: "start_override",
                 timestamp: Date().timeIntervalSince1970,
-                overrideName: name
+                overrideName: name,
+                returnNotification: makeReturnNotificationInfo(config: config)
             )
             sendTRCCommand(payload: payload, config: config, completion: completion)
         default:
@@ -147,7 +152,8 @@ class WatchRemoteService {
             let payload = TRCPayload(
                 user: config.trcUser,
                 commandType: "cancel_override",
-                timestamp: Date().timeIntervalSince1970
+                timestamp: Date().timeIntervalSince1970,
+                returnNotification: makeReturnNotificationInfo(config: config)
             )
             sendTRCCommand(payload: payload, config: config, completion: completion)
         default:
@@ -170,6 +176,25 @@ class WatchRemoteService {
         var fat: Int?
         var overrideName: String?
         var scheduledTime: TimeInterval?
+        var returnNotification: ReturnNotificationInfo?
+
+        struct ReturnNotificationInfo: Encodable {
+            let productionEnvironment: Bool
+            let deviceToken: String
+            let bundleId: String
+            let teamId: String
+            let keyId: String
+            let apnsKey: String
+
+            enum CodingKeys: String, CodingKey {
+                case productionEnvironment = "production_environment"
+                case deviceToken = "device_token"
+                case bundleId = "bundle_id"
+                case teamId = "team_id"
+                case keyId = "key_id"
+                case apnsKey = "apns_key"
+            }
+        }
 
         enum CodingKeys: String, CodingKey {
             case user
@@ -178,7 +203,31 @@ class WatchRemoteService {
             case bolusAmount = "bolus_amount"
             case target, duration, carbs, protein, fat, overrideName
             case scheduledTime = "scheduled_time"
+            case returnNotification = "return_notification"
         }
+    }
+
+    /// Build the return-notification block from LF credentials in
+    /// WatchConfig. Returns nil if any required field is missing —
+    /// matches PushNotificationManager.createReturnNotificationInfo()
+    /// behavior so Trio falls back to its default ack channel.
+    private static func makeReturnNotificationInfo(config: WatchConfig) -> TRCPayload.ReturnNotificationInfo? {
+        guard !config.lfDeviceToken.isEmpty,
+              !config.lfApnsKey.isEmpty,
+              !config.lfKeyId.isEmpty,
+              !config.lfTeamId.isEmpty,
+              !config.lfBundleId.isEmpty
+        else {
+            return nil
+        }
+        return TRCPayload.ReturnNotificationInfo(
+            productionEnvironment: config.lfProductionEnv,
+            deviceToken: config.lfDeviceToken,
+            bundleId: config.lfBundleId,
+            teamId: config.lfTeamId,
+            keyId: config.lfKeyId,
+            apnsKey: config.lfApnsKey
+        )
     }
 
     private struct APSPayload: Encodable {
@@ -221,8 +270,8 @@ class WatchRemoteService {
             return
         }
 
-        // Sign JWT
-        guard let jwt = signJWT(keyId: config.trcKeyId, teamId: config.trcTeamId, apnsKey: config.trcApnsKey) else {
+        // Sign JWT (cached for 55 min — see jwtCache above)
+        guard let jwt = cachedJWT(keyId: config.trcKeyId, teamId: config.trcTeamId, apnsKey: config.trcApnsKey) else {
             completion(false, "JWT signing failed")
             return
         }
@@ -260,6 +309,11 @@ class WatchRemoteService {
                     completion(true, nil)
                 } else {
                     let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+                    if code == 403 {
+                        // Stale or invalid JWT — drop the cache so the
+                        // next send re-signs.
+                        invalidateJWTCache()
+                    }
                     completion(false, "APNS error: \(code)")
                 }
             }
@@ -283,6 +337,35 @@ class WatchRemoteService {
     }
 
     // MARK: - CryptoKit P256 JWT Signing
+
+    /// 55-minute JWT cache. APNS rejects JWTs older than 1 hour, so we
+    /// regenerate a few minutes before the boundary. Keyed by
+    /// "keyId:teamId" so distinct credentials (e.g. LF vs remote) don't
+    /// collide. Mirrors JWTManager.shared on the phone.
+    private static let jwtTTL: TimeInterval = 55 * 60
+    private static var jwtCache: [String: (token: String, expiresAt: Date)] = [:]
+    private static let jwtCacheQueue = DispatchQueue(label: "com.loopfollow.watch.jwtCache")
+
+    private static func cachedJWT(keyId: String, teamId: String, apnsKey: String) -> String? {
+        let cacheKey = "\(keyId):\(teamId)"
+        if let entry = jwtCacheQueue.sync(execute: { jwtCache[cacheKey] }),
+           entry.expiresAt > Date()
+        {
+            return entry.token
+        }
+        guard let fresh = signJWT(keyId: keyId, teamId: teamId, apnsKey: apnsKey) else {
+            return nil
+        }
+        let expiresAt = Date().addingTimeInterval(jwtTTL)
+        jwtCacheQueue.sync { jwtCache[cacheKey] = (fresh, expiresAt) }
+        return fresh
+    }
+
+    /// Drop cached JWTs. Call when APNS returns 403 so the next send
+    /// signs fresh credentials.
+    private static func invalidateJWTCache() {
+        jwtCacheQueue.sync { jwtCache.removeAll() }
+    }
 
     private static func signJWT(keyId: String, teamId: String, apnsKey: String) -> String? {
         // Extract raw key data from PEM
@@ -380,12 +463,17 @@ class WatchRemoteService {
         }
 
         URLSession.shared.dataTask(with: url) { data, _, error in
+            // Nightscout's /api/v1/status.json wraps the JWT inside an
+            // `authorized` object: { "authorized": { "token": "..." } }.
+            // The previous code looked for a top-level `token` and never
+            // found it, silently falling back to the raw API secret —
+            // which doesn't authorize as Bearer JWT on the POST.
             guard error == nil, let data = data,
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let jwt = json["token"] as? String
+                  let authorized = json["authorized"] as? [String: Any],
+                  let jwt = authorized["token"] as? String
             else {
-                // Fallback: use token directly as API secret hash
-                completion(config.nsToken)
+                completion(nil)
                 return
             }
             completion(jwt)

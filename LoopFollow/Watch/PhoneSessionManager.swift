@@ -19,7 +19,16 @@ class PhoneSessionManager: NSObject, WCSessionDelegate {
     }
 
     private func buildConfig() -> [String: Any] {
-        [
+        // LF (LoopFollow's own) APNS credentials — used by the watch to
+        // populate `return_notification` so Trio acks land here on the
+        // iPhone (which can then forward to the watch via WCSession).
+        // Mirrors PushNotificationManager.createReturnNotificationInfo().
+        let lfDeviceToken = Observable.shared.loopFollowDeviceToken.value
+        let lfTeamId = BuildDetails.default.teamID ?? ""
+        let lfBundleId = Bundle.main.bundleIdentifier ?? ""
+        let lfProductionEnv = BuildDetails.default.isTestFlightBuild()
+
+        return [
             "nsURL": Storage.shared.url.value,
             "nsToken": Storage.shared.token.value,
             "dexUsername": Storage.shared.shareUserName.value,
@@ -40,6 +49,12 @@ class PhoneSessionManager: NSObject, WCSessionDelegate {
             "trcProductionEnv": Storage.shared.productionEnvironment.value,
             "trcUser": Storage.shared.user.value,
             "nsWriteAuth": Storage.shared.nsWriteAuth.value,
+            "lfDeviceToken": lfDeviceToken,
+            "lfApnsKey": Storage.shared.lfApnsKey.value,
+            "lfKeyId": Storage.shared.lfKeyId.value,
+            "lfTeamId": lfTeamId,
+            "lfBundleId": lfBundleId,
+            "lfProductionEnv": lfProductionEnv,
         ]
     }
 

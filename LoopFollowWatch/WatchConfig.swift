@@ -28,6 +28,16 @@ struct WatchConfig: Equatable {
     var trcProductionEnv: Bool
     var trcUser: String
 
+    // LoopFollow's own APNS credentials — used to populate
+    // `return_notification` so Trio's ack lands on the iPhone, which
+    // can forward it to the watch over WCSession.
+    var lfDeviceToken: String
+    var lfApnsKey: String
+    var lfKeyId: String
+    var lfTeamId: String
+    var lfBundleId: String
+    var lfProductionEnv: Bool
+
     // Nightscout write auth
     var nsWriteAuth: Bool
 
@@ -79,6 +89,12 @@ struct WatchConfig: Equatable {
             "trcBundleId": trcBundleId,
             "trcProductionEnv": trcProductionEnv,
             "trcUser": trcUser,
+            "lfDeviceToken": lfDeviceToken,
+            "lfApnsKey": lfApnsKey,
+            "lfKeyId": lfKeyId,
+            "lfTeamId": lfTeamId,
+            "lfBundleId": lfBundleId,
+            "lfProductionEnv": lfProductionEnv,
             "nsWriteAuth": nsWriteAuth,
             "mealWithFatProtein": mealWithFatProtein,
             "maxProtein": maxProtein,
@@ -106,6 +122,12 @@ struct WatchConfig: Equatable {
         trcBundleId = dict["trcBundleId"] as? String ?? ""
         trcProductionEnv = dict["trcProductionEnv"] as? Bool ?? false
         trcUser = dict["trcUser"] as? String ?? ""
+        lfDeviceToken = dict["lfDeviceToken"] as? String ?? ""
+        lfApnsKey = dict["lfApnsKey"] as? String ?? ""
+        lfKeyId = dict["lfKeyId"] as? String ?? ""
+        lfTeamId = dict["lfTeamId"] as? String ?? ""
+        lfBundleId = dict["lfBundleId"] as? String ?? ""
+        lfProductionEnv = dict["lfProductionEnv"] as? Bool ?? false
         nsWriteAuth = dict["nsWriteAuth"] as? Bool ?? false
         mealWithFatProtein = dict["mealWithFatProtein"] as? Bool ?? false
         maxProtein = dict["maxProtein"] as? Double ?? 30.0
