@@ -86,7 +86,14 @@ extension MainViewController {
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
         let previousIOBText = Observable.shared.iobText.value
-        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
+        // Capture the enactedOrSuggested timestamp BEFORE we process the new record,
+        // so we can detect if the new record was "sparse" (no parseable timestamp /
+        // bg / TDD inside enactedOrSuggested). Trio occasionally writes a thin
+        // devicestatus record (e.g. SMB-only notifications) that doesn't have those
+        // fields; landing on one of those records leaves Updated / TDD / Smoothed BG
+        // blank — we want to keep polling until a full record arrives.
+        let previousEnactedTime = Observable.shared.enactedOrSuggested.value
+        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd, .smoothedBg])
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
         if Storage.shared.device.value == "Loop" {
@@ -212,14 +219,19 @@ extension MainViewController {
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         let secondsAgo = now - (Observable.shared.alertLastLoopTime.value ?? 0)
 
-        // If the smoothed-BG feature is on and the most recent BG dot doesn't yet
-        // have a matching smoothed point, poll devicestatus aggressively until it
-        // does — Trio's loop runs and writes the smoothed BG within seconds of each
-        // new CGM reading, but occasionally takes longer. Backoff the cadence:
-        // 3s while the BG is still fresh (<60s), 15s after that up to 5 minutes,
-        // then give up. Only run when we've seen at least one smoothed point
-        // (Trio is in use) so Loop accounts don't burn polls.
+        // Two reasons we may want to poll devicestatus aggressively (instead of the
+        // normal ~5-minute cadence):
+        //   1) Smoothed-BG feature is on and the latest CGM dot has no matching
+        //      smoothed point yet (Trio's loop runs shortly after each new BG).
+        //   2) The latest devicestatus record we just processed was "sparse" — i.e.
+        //      its enactedOrSuggested block had no parseable timestamp, so Updated
+        //      / TDD / Smoothed BG didn't repopulate. Trio occasionally writes
+        //      thin records (SMB-only notifications, partial loop runs); landing on
+        //      one shouldn't leave the info table blank for 5 minutes.
+        // Either reason: backoff cadence 3s for the first 60s after the BG, then
+        // 15s out to 5 minutes, then give up.
         let latestBgAge: TimeInterval = bgData.last.map { Date().timeIntervalSince1970 - $0.date } ?? .infinity
+        let recordIsSparse = (Observable.shared.enactedOrSuggested.value == previousEnactedTime)
         let needsSmoothedBgRetry: Bool = {
             guard Storage.shared.displaySmoothedBG.value,
                   !smoothedBgData.isEmpty,
@@ -228,13 +240,15 @@ extension MainViewController {
             else { return false }
             return smoothedBg(near: latestBg.date) == nil
         }()
-        let smoothedBgRetryDelay: TimeInterval = latestBgAge < 60 ? 3 : 15
+        let needsSparseRecordRetry: Bool = recordIsSparse && latestBgAge < 300
+        let needsRetry = needsSmoothedBgRetry || needsSparseRecordRetry
+        let retryDelay: TimeInterval = latestBgAge < 60 ? 3 : 15
 
         DispatchQueue.main.async {
-            if needsSmoothedBgRetry {
+            if needsRetry {
                 TaskScheduler.shared.rescheduleTask(
                     id: .deviceStatus,
-                    to: Date().addingTimeInterval(smoothedBgRetryDelay)
+                    to: Date().addingTimeInterval(retryDelay)
                 )
             } else if secondsAgo >= (20 * 60) {
                 TaskScheduler.shared.rescheduleTask(
