@@ -230,7 +230,12 @@ extension MainViewController {
         //      one shouldn't leave the info table blank for 5 minutes.
         // Either reason: backoff cadence 3s for the first 60s after the BG, then
         // 15s out to 5 minutes, then give up.
-        let latestBgAge: TimeInterval = bgData.last.map { Date().timeIntervalSince1970 - $0.date } ?? .infinity
+        // When bgData is still empty (cold app launch — BG fetch may not have
+        // completed yet by the time the first devicestatus parse runs), treat age
+        // as 0 instead of infinity so we still allow fast-poll. Otherwise the very
+        // first cold-launch parse would silently skip retry and leave the rows
+        // blank for the full 5-minute normal cadence.
+        let latestBgAge: TimeInterval = bgData.last.map { Date().timeIntervalSince1970 - $0.date } ?? 0
         let recordIsSparse = (Observable.shared.enactedOrSuggested.value == previousEnactedTime)
         let needsSmoothedBgRetry: Bool = {
             guard Storage.shared.displaySmoothedBG.value,
