@@ -114,6 +114,17 @@ extension MainViewController {
                 Observable.shared.deviceRecBolus.value = nil
             }
 
+            // Smoothed BG (Trio applies CGM smoothing and reports the smoothed value here).
+            // Append to in-memory history so each loop run's smoothed value can be matched to its glucose dot.
+            // Skip entirely when the feature toggle is off so we don't pay the parse / append cost.
+            if Storage.shared.displaySmoothedBG.value,
+               let smoothedBgValue = enactedOrSuggested["bg"] as? Double,
+               let updatedTime = updatedTime
+            {
+                appendSmoothedBgPoint(time: updatedTime, bgMgdl: smoothedBgValue)
+                infoManager.updateInfoData(type: .smoothedBg, value: Localizer.toDisplayUnits(String(smoothedBgValue)))
+            }
+
             // Eventual BG
             if let eventualBGValue = enactedOrSuggested["eventualBG"] as? Double {
                 let eventualBGQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: eventualBGValue)

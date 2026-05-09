@@ -95,6 +95,9 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var predictionData: [ShareGlucoseData] = []
     var openAPSPredBGs: [String: [Double]]?
     var openAPSPredUpdatedTime: TimeInterval?
+    var smoothedBgData: [SmoothedBgPoint] = []
+    var hasFetchedSmoothedBgHistory: Bool = false
+    var lastSmoothedBgBulkRefreshAt: Date?
     var bgCheckData: [ShareGlucoseData] = []
     var suspendGraphData: [DataStructs.timestampOnlyStruct] = []
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
@@ -274,6 +277,41 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateBGTextAppearance()
+            }
+            .store(in: &cancellables)
+
+        // Refetch the smoothed-BG history when the graph day-range setting changes,
+        // so the popup history covers the newly visible window. The fetch itself
+        // bails when the feature toggle is off, so this is cheap when unused.
+        Storage.shared.downloadDays.$value
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                guard Storage.shared.displaySmoothedBG.value else { return }
+                self.smoothedBgData = []
+                self.hasFetchedSmoothedBgHistory = false
+                self.webLoadNSSmoothedBgHistory()
+            }
+            .store(in: &cancellables)
+
+        // React to the smoothed-BG toggle: fetch on ON, drop the cached history on OFF
+        // and refresh the chart so popups stop showing smoothed values immediately.
+        Storage.shared.displaySmoothedBG.$value
+            .dropFirst()
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] enabled in
+                guard let self = self else { return }
+                if enabled {
+                    self.hasFetchedSmoothedBgHistory = false
+                    self.webLoadNSSmoothedBgHistory()
+                } else {
+                    self.smoothedBgData = []
+                    self.hasFetchedSmoothedBgHistory = false
+                    self.infoManager.clearInfoData(type: .smoothedBg)
+                    self.updateBGGraph()
+                }
             }
             .store(in: &cancellables)
 

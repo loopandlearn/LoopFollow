@@ -212,8 +212,31 @@ extension MainViewController {
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         let secondsAgo = now - (Observable.shared.alertLastLoopTime.value ?? 0)
 
+        // If the smoothed-BG feature is on and the most recent BG dot doesn't yet
+        // have a matching smoothed point, poll devicestatus aggressively until it
+        // does — Trio's loop runs and writes the smoothed BG within seconds of each
+        // new CGM reading, but occasionally takes longer. Backoff the cadence:
+        // 3s while the BG is still fresh (<60s), 15s after that up to 5 minutes,
+        // then give up. Only run when we've seen at least one smoothed point
+        // (Trio is in use) so Loop accounts don't burn polls.
+        let latestBgAge: TimeInterval = bgData.last.map { Date().timeIntervalSince1970 - $0.date } ?? .infinity
+        let needsSmoothedBgRetry: Bool = {
+            guard Storage.shared.displaySmoothedBG.value,
+                  !smoothedBgData.isEmpty,
+                  let latestBg = bgData.last,
+                  latestBgAge < 300
+            else { return false }
+            return smoothedBg(near: latestBg.date) == nil
+        }()
+        let smoothedBgRetryDelay: TimeInterval = latestBgAge < 60 ? 3 : 15
+
         DispatchQueue.main.async {
-            if secondsAgo >= (20 * 60) {
+            if needsSmoothedBgRetry {
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(smoothedBgRetryDelay)
+                )
+            } else if secondsAgo >= (20 * 60) {
                 TaskScheduler.shared.rescheduleTask(
                     id: .deviceStatus,
                     to: Date().addingTimeInterval(5 * 60)
@@ -250,6 +273,14 @@ extension MainViewController {
 
         // Mark device status as loaded for initial loading state
         markDataLoaded("deviceStatus")
+
+        // First successful loop run of the session: backfill the smoothed-BG history
+        // so the popup can show ✨ values for older glucose dots, not just the latest.
+        // Gated on the feature toggle and a session flag — DeviceStatusOpenAPS may
+        // have already appended the current point above, so we can't use isEmpty here.
+        if Storage.shared.displaySmoothedBG.value, !hasFetchedSmoothedBgHistory {
+            webLoadNSSmoothedBgHistory()
+        }
 
         if Storage.shared.contactEnabled.value, Storage.shared.contactIOB.value != .off,
            Observable.shared.iobText.value != previousIOBText

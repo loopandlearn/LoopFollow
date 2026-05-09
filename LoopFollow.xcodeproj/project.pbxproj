@@ -64,6 +64,9 @@
 		65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */; };
 		65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */; };
 		66E3D12E66AA4534A144A54B /* BackgroundRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */; };
+		9C7FB98C98BE4FF98F4815EE /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFBE69CEF18416D84959974 /* Telemetry.swift */; };
+		A1A1A10001000000A0CFEED1 /* APNsCredentialValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */; };
+		A1A1A10002000000A0CFEED1 /* LogRedactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10002000000A0CFEED2 /* LogRedactor.swift */; };
 		ACE7F6DE0D065BEB52CDC0DB /* FutureCarbsAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D2A4EFD18B7B7748B6669E /* FutureCarbsAlarmEditor.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
@@ -250,7 +253,6 @@
 		DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */; };
 		DDDB86F12DF7223C00AADDAC /* DeleteAlarmSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */; };
 		DDDC01DD2E244B3100D9975C /* JWTManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC01DC2E244B3100D9975C /* JWTManager.swift */; };
-		A1A1A10002000000A0CFEED1 /* LogRedactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10002000000A0CFEED2 /* LogRedactor.swift */; };
 		DDDC31CC2E13A7DF009EA0F3 /* AddAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */; };
 		DDDC31CE2E13A811009EA0F3 /* AlarmTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */; };
 		DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F482D479AEF00884336 /* NoRemoteView.swift */; };
@@ -267,6 +269,7 @@
 		DDEF50422D479BAA00884336 /* LoopAPNSCarbsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */; };
 		DDEF50432D479BBA00884336 /* LoopAPNSBolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50422D479BBA00884336 /* LoopAPNSBolusView.swift */; };
 		DDEF50452D479BDA00884336 /* LoopAPNSRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEF50442D479BDA00884336 /* LoopAPNSRemoteView.swift */; };
+		DDF1A0010000000000000002 /* SmoothedBgHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1A0010000000000000001 /* SmoothedBgHistory.swift */; };
 		DDF2C0102BEFA991007A20E6 /* GitHubService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */; };
 		DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */; };
 		DDF2C0142BEFD468007A20E6 /* blacklisted-versions.json in Resources */ = {isa = PBXBuildFile; fileRef = DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */; };
@@ -291,7 +294,6 @@
 		FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2E24A232A3001B652C /* DataStructs.swift */; };
 		FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC3AE7B3249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld */; };
 		FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTaskAudio.swift */; };
-		A1A1A10001000000A0CFEED1 /* APNsCredentialValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */; };
 		FC5A5C3D2497B229009C550E /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FC5A5C3C2497B229009C550E /* Config.xcconfig */; };
 		FC7CE518248ABE37001F83B8 /* Siri_Alert_Calibration_Needed.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4A9248ABE2B001F83B8 /* Siri_Alert_Calibration_Needed.caf */; };
 		FC7CE519248ABE37001F83B8 /* Rise_And_Shine.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4AA248ABE2B001F83B8 /* Rise_And_Shine.caf */; };
@@ -424,7 +426,6 @@
 		FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886A24898FD800A0279D /* ObservationToken.swift */; };
 		FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886C2489909D00A0279D /* AnyConvertible.swift */; };
 		FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886E2489A53800A0279D /* AppConstants.swift */; };
-		9C7FB98C98BE4FF98F4815EE /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFBE69CEF18416D84959974 /* Telemetry.swift */; };
 		FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD2A27C24C9D044009F7B7B /* Globals.swift */; };
 		FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */; };
 		FCEF87AC24A141A700AE6FA0 /* Localizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCEF87AA24A1417900AE6FA0 /* Localizer.swift */; };
@@ -517,9 +518,12 @@
 		65A100022F5AA00000AA1002 /* UnitsConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitsConfigurationView.swift; sourceTree = "<group>"; };
 		65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTokenValidationView.swift; sourceTree = "<group>"; };
 		65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonHandler.swift; sourceTree = "<group>"; };
+		A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNsCredentialValidator.swift; sourceTree = "<group>"; };
+		A1A1A10002000000A0CFEED2 /* LogRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogRedactor.swift; sourceTree = "<group>"; };
 		A7D55B42A22051DAD69E89D0 /* Pods_LoopFollow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LoopFollow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshManager.swift; sourceTree = "<group>"; };
 		B7D2A4EFD18B7B7748B6669E /* FutureCarbsAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureCarbsAlarmEditor.swift; sourceTree = "<group>"; };
+		BDFBE69CEF18416D84959974 /* Telemetry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Telemetry.swift; sourceTree = "<group>"; };
 		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
 		DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireCondition.swift; sourceTree = "<group>"; };
 		DD026E582EA2C8A200A39CB5 /* InsulinPrecisionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinPrecisionManager.swift; sourceTree = "<group>"; };
@@ -707,7 +711,6 @@
 		DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTarget.swift; sourceTree = "<group>"; };
 		DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAlarmSection.swift; sourceTree = "<group>"; };
 		DDDC01DC2E244B3100D9975C /* JWTManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JWTManager.swift; sourceTree = "<group>"; };
-		A1A1A10002000000A0CFEED2 /* LogRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogRedactor.swift; sourceTree = "<group>"; };
 		DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmSheet.swift; sourceTree = "<group>"; };
 		DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmTile.swift; sourceTree = "<group>"; };
 		DDDF6F482D479AEF00884336 /* NoRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoRemoteView.swift; sourceTree = "<group>"; };
@@ -724,6 +727,7 @@
 		DDEF50412D479BAA00884336 /* LoopAPNSCarbsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSCarbsView.swift; sourceTree = "<group>"; };
 		DDEF50422D479BBA00884336 /* LoopAPNSBolusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSBolusView.swift; sourceTree = "<group>"; };
 		DDEF50442D479BDA00884336 /* LoopAPNSRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAPNSRemoteView.swift; sourceTree = "<group>"; };
+		DDF1A0010000000000000001 /* SmoothedBgHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothedBgHistory.swift; sourceTree = "<group>"; };
 		DDF2C00F2BEFA991007A20E6 /* GitHubService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubService.swift; sourceTree = "<group>"; };
 		DDF2C0112BEFB733007A20E6 /* AppVersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionManager.swift; sourceTree = "<group>"; };
 		DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "blacklisted-versions.json"; sourceTree = "<group>"; };
@@ -876,7 +880,6 @@
 		FCA2DDE52501095000254A8C /* Timers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timers.swift; sourceTree = "<group>"; };
 		FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryKeyPath.swift; sourceTree = "<group>"; };
 		FCC688592489554800A0279D /* BackgroundTaskAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskAudio.swift; sourceTree = "<group>"; };
-		A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNsCredentialValidator.swift; sourceTree = "<group>"; };
 		FCC6885B2489559400A0279D /* blank.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blank.wav; sourceTree = "<group>"; };
 		FCC6885D24896A6C00A0279D /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
 		FCC6886624898F8000A0279D /* UserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValue.swift; sourceTree = "<group>"; };
@@ -884,7 +887,6 @@
 		FCC6886A24898FD800A0279D /* ObservationToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationToken.swift; sourceTree = "<group>"; };
 		FCC6886C2489909D00A0279D /* AnyConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyConvertible.swift; sourceTree = "<group>"; };
 		FCC6886E2489A53800A0279D /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
-		BDFBE69CEF18416D84959974 /* Telemetry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Telemetry.swift; sourceTree = "<group>"; };
 		FCC688702489A57C00A0279D /* Loop Follow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Follow.entitlements"; sourceTree = "<group>"; };
 		FCD2A27C24C9D044009F7B7B /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = carbBolusArrays.swift; sourceTree = "<group>"; };
@@ -1165,6 +1167,7 @@
 				DD493AE62ACF23CF009A6922 /* DeviceStatus.swift */,
 				DD493AE82ACF2445009A6922 /* BGData.swift */,
 				DD6A935D2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift */,
+				DDF1A0010000000000000001 /* SmoothedBgHistory.swift */,
 				DD608A072C1F584900F91132 /* DeviceStatusLoop.swift */,
 				DD0C0C5F2C415B9D00DBADDF /* ProfileManager.swift */,
 				DD0C0C612C4175FD00DBADDF /* NSProfile.swift */,
@@ -2292,6 +2295,7 @@
 				DDAD162F2D2EF9830084BE10 /* RileyLinkHeartbeatBluetoothDevice.swift in Sources */,
 				FC97881C2485969B00A7906C /* MainViewController.swift in Sources */,
 				DD6A935E2BFA6FA2003FFB8E /* DeviceStatusOpenAPS.swift in Sources */,
+				DDF1A0010000000000000002 /* SmoothedBgHistory.swift in Sources */,
 				DD493AD52ACF2109009A6922 /* ResumePump.swift in Sources */,
 				DD85E9952D739CFE001C8BB7 /* OmnipodDashHeartbeatBluetoothTransmitter.swift in Sources */,
 				DD8316442DE47CA9004467AA /* BGPicker.swift in Sources */,
@@ -2445,7 +2449,7 @@
 				CODE_SIGN_ENTITLEMENTS = LoopFollowLAExtensionExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -2497,7 +2501,7 @@
 				CODE_SIGN_ENTITLEMENTS = LoopFollowLAExtensionExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -2546,7 +2550,7 @@
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2579,7 +2583,7 @@
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2731,7 +2735,7 @@
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2756,7 +2760,7 @@
 				CODE_SIGN_ENTITLEMENTS = "LoopFollow/Loop Follow.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LoopFollow/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -20,6 +20,8 @@ struct AdvancedSettingsView: View {
                     Stepper(value: $viewModel.bgUpdateDelay, in: 1 ... 30, step: 1) {
                         Text("BG Update Delay (Sec): \(viewModel.bgUpdateDelay)")
                     }
+
+                    Toggle("Display Smoothed BG", isOn: $viewModel.displaySmoothedBG)
                 }
 
                 Section(header: Text("Logging Options")) {
