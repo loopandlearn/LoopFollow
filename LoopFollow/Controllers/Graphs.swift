@@ -696,6 +696,14 @@ extension MainViewController {
         BGChart.drawGridBackgroundEnabled = true
         BGChart.gridBackgroundColor = NSUIColor.secondarySystemBackground
 
+        // Bumped from the library default of 100 to 150 so the bolus / carb / SMB
+        // value labels still render at the 3h zoom level after the smoothing-line
+        // dataset added ~280 entries to the chart's total entry count. DGCharts
+        // hides values when total-entries × scaleX exceeds maxVisibleCount × scaleX;
+        // 150 absorbs the new dataset while keeping ≥6h zooms hiding values, as
+        // before.
+        BGChart.maxVisibleCount = 150
+
         BGChart.highlightValue(nil, callDelegate: false)
 
         BGChart.data = data
