@@ -38,8 +38,8 @@ struct EndoReportView: View {
     @AppStorage("endoReport.customAidSystem") private var customAidSystem = ""
 
     // Date range
-    @State private var startDate: Date = Calendar.current.date(byAdding: .day, value: -14, to: Date()) ?? Date()
-    @State private var endDate: Date = .init()
+    @State private var startDate: Date = StatsDateRange.lastComplete(days: 14).start
+    @State private var endDate: Date = StatsDateRange.lastComplete(days: 14).end
 
     // UI state
     @StateObject private var profileFetcher = NightscoutProfileFetcher()
@@ -58,7 +58,7 @@ struct EndoReportView: View {
     var body: some View {
         NavigationView {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 18) {
+                VStack(spacing: 12) {
                     sectionCard("Report Period", icon: "calendar", color: .blue) {
                         VStack(spacing: 16) {
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -369,7 +369,7 @@ struct EndoReportView: View {
                         .stroke(Color.secondary.opacity(0.16), lineWidth: 1)
                 )
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
     }
 
     @ViewBuilder
@@ -413,7 +413,7 @@ struct EndoReportView: View {
                     .frame(minHeight: 100)
             }
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 3)
     }
 
     @ViewBuilder
@@ -564,7 +564,7 @@ struct EndoReportView: View {
 
     @ViewBuilder
     private func settingCard<Content: View>(_ title: String, icon: String, color: Color, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 ZStack {
                     Circle()
@@ -582,8 +582,9 @@ struct EndoReportView: View {
             }
             content()
         }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Color(UIColor.systemBackground)))
+        .padding(12)
+        .background(Color(UIColor.systemBackground).overlay(color.opacity(0.1)))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .stroke(Color.secondary.opacity(0.12), lineWidth: 1)
@@ -591,12 +592,13 @@ struct EndoReportView: View {
     }
 
     private func sectionCard<Content: View>(_ title: String, icon: String, color: Color, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 12) {
             sectionLabel(title, icon: icon, color: color)
             content()
         }
-        .padding(18)
-        .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Color(UIColor.systemBackground)))
+        .padding(14)
+        .background(Color(UIColor.systemBackground).overlay(color.opacity(0.1)))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.08), radius: 24, x: 0, y: 10)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
@@ -620,7 +622,7 @@ struct EndoReportView: View {
             }
             .toggleStyle(SwitchToggleStyle(tint: .teal))
         }
-        .padding(14)
+        .padding(10)
         .background(RoundedRectangle(cornerRadius: 18).fill(Color(UIColor.systemGray6)))
     }
 
@@ -651,20 +653,19 @@ struct EndoReportView: View {
                 .foregroundColor(.primary)
             Spacer()
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
     }
 
     // MARK: - Presets
 
     private struct Preset { let label: String; let start: Date; let end: Date }
     private var presets: [Preset] {
-        let now = Date(); let cal = Calendar.current
         return [
-            Preset(label: "3d", start: cal.date(byAdding: .day, value: -3, to: now)!, end: now),
-            Preset(label: "7d", start: cal.date(byAdding: .day, value: -7, to: now)!, end: now),
-            Preset(label: "14d", start: cal.date(byAdding: .day, value: -14, to: now)!, end: now),
-            Preset(label: "30d", start: cal.date(byAdding: .day, value: -30, to: now)!, end: now),
-            Preset(label: "90d", start: cal.date(byAdding: .day, value: -90, to: now)!, end: now),
+            Preset(label: "3d", start: StatsDateRange.lastComplete(days: 3).start, end: StatsDateRange.lastComplete(days: 3).end),
+            Preset(label: "7d", start: StatsDateRange.lastComplete(days: 7).start, end: StatsDateRange.lastComplete(days: 7).end),
+            Preset(label: "14d", start: StatsDateRange.lastComplete(days: 14).start, end: StatsDateRange.lastComplete(days: 14).end),
+            Preset(label: "30d", start: StatsDateRange.lastComplete(days: 30).start, end: StatsDateRange.lastComplete(days: 30).end),
+            Preset(label: "90d", start: StatsDateRange.lastComplete(days: 90).start, end: StatsDateRange.lastComplete(days: 90).end),
         ]
     }
 

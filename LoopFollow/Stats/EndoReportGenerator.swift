@@ -272,39 +272,31 @@ enum EndoReportGenerator {
             y = nutritionSection(carbs: carbs, stats: stats, cfg: cfg, y: y + 1, m: m, w: r.width, ctx: ctx)
         }
 
-        let hasDevice = !cfg.pumpDevice.isEmpty || !cfg.cgmDevice.isEmpty || !cfg.insulinType.isEmpty
-        if cfg.includeDevices, hasDevice {
-            y = sectionHdr("DEVICES & INSULIN", y: y + 2, m: m, w: r.width, cfg: cfg, ctx: ctx)
-            var rows: [(String, String)] = []
-            if !cfg.pumpDevice.isEmpty { rows.append(("Pump", cfg.pumpDevice)) }
-            if !cfg.cgmDevice.isEmpty { rows.append(("CGM", cfg.cgmDevice)) }
-            if !cfg.insulinType.isEmpty { rows.append(("Insulin", cfg.insulinType)) }
-            y = metricTable(rows, y: y + 1, m: m, w: r.width, cfg: cfg, ctx: ctx)
-        }
+        let hasDevice = cfg.includeDevices && (!cfg.pumpDevice.isEmpty || !cfg.cgmDevice.isEmpty || !cfg.insulinType.isEmpty)
+        let hasSettings = cfg.includeTherapySettings && (!cfg.carbRatio.isEmpty || !cfg.isf.isEmpty || !cfg.basalRate.isEmpty || !cfg.targetGlucose.isEmpty)
 
-        let hasSettings = !cfg.carbRatio.isEmpty || !cfg.isf.isEmpty || !cfg.basalRate.isEmpty || !cfg.targetGlucose.isEmpty
-        if cfg.includeTherapySettings, hasSettings {
-            y = sectionHdr("CURRENT THERAPY SETTINGS", y: y + 2, m: m, w: r.width, cfg: cfg, ctx: ctx)
-            var rows: [(String, String)] = []
-            if !cfg.carbRatio.isEmpty { rows.append(("Carb Ratio (CR)", cfg.carbRatio)) }
-            if !cfg.isf.isEmpty { rows.append(("Insulin Sensitivity (ISF)", cfg.isf)) }
-
-            var basalVal = ""
-            if !cfg.basalRate.isEmpty { basalVal = formatBasalRateForDisplay(cfg.basalRate) }
-            if !cfg.targetGlucose.isEmpty {
-                if !basalVal.isEmpty { basalVal += "\n" }
-                basalVal += "Target: \(cfg.targetGlucose)"
+        if hasDevice || hasSettings {
+            y = sectionHdr("SYSTEM & THERAPY SETTINGS", y: y + 2, m: m, w: r.width, cfg: cfg, ctx: ctx)
+            var gridItems: [(String, String)] = []
+            if hasDevice {
+                if !cfg.pumpDevice.isEmpty { gridItems.append(("Pump", cfg.pumpDevice)) }
+                if !cfg.cgmDevice.isEmpty { gridItems.append(("CGM", cfg.cgmDevice)) }
+                if !cfg.insulinType.isEmpty { gridItems.append(("Insulin", cfg.insulinType)) }
             }
-            if !basalVal.isEmpty { rows.append((cfg.basalRate.isEmpty ? "Target Glucose" : "Basal & Target", basalVal)) }
-
-            y = settingsTable(rows, y: y + 1, m: m, w: r.width, cfg: cfg, ctx: ctx)
+            if hasSettings {
+                if !cfg.carbRatio.isEmpty { gridItems.append(("CR", cfg.carbRatio)) }
+                if !cfg.isf.isEmpty { gridItems.append(("ISF", cfg.isf)) }
+                if !cfg.basalRate.isEmpty { gridItems.append(("Basal", formatBasalRateForDisplay(cfg.basalRate))) }
+                if !cfg.targetGlucose.isEmpty { gridItems.append(("Target", cfg.targetGlucose)) }
+            }
+            y = drawSettingsGrid(gridItems, x: m, y: y + 1, width: r.width - m * 2, cfg: cfg, ctx: ctx)
         }
 
         if cfg.includeAGP, !agpData.isEmpty {
-            let agpAvail = r.height - y - 50
-            if agpAvail >= 100 {
+            let agpAvail = r.height - y - 40
+            if agpAvail >= 80 {
                 y = sectionHdr("AMBULATORY GLUCOSE PROFILE", y: y + 6, m: m, w: r.width, cfg: cfg, ctx: ctx)
-                let agpH = Swift.min(agpAvail - 24, 118)
+                let agpH = Swift.min(agpAvail - 20, 130)
                 drawAGP(agpData: agpData, x: m, y: y + 4, w: r.width - m * 2, h: agpH, cfg: cfg, ctx: ctx)
             }
         }
@@ -508,7 +500,7 @@ enum EndoReportGenerator {
             ("Programmed Basal", simpleVM.programmedBasal != nil ? String(format: "%.2f U/day", simpleVM.programmedBasal!) : "—"),
             ("Actual Basal", simpleVM.actualBasal != nil ? String(format: "%.2f U/day", simpleVM.actualBasal!) : "—"),
         ]
-        return metricTable(rows, y: ty, m: m, w: w, cfg: cfg, ctx: ctx)
+        return metricTable(rows, x: m, y: ty, width: w - m * 2, cfg: cfg, ctx: ctx)
     }
 
     // MARK: - Nutrition section
@@ -541,25 +533,25 @@ enum EndoReportGenerator {
     // MARK: - Tables
 
     @discardableResult
-    private static func metricTable(_ rows: [(String, String)], y: CGFloat, m: CGFloat,
-                                    w: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat
+    private static func metricTable(_ rows: [(String, String)], x: CGFloat, y: CGFloat,
+                                    width: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat
     {
-        let tw = w - m * 2; let hh: CGFloat = 12; let rh: CGFloat = 11; var cy = y
+        let tw = width; let hh: CGFloat = 12; let rh: CGFloat = 11; var cy = y
         ctx.setFillColor(accent(cfg).withAlphaComponent(0.10).cgColor)
-        ctx.fill(CGRect(x: m, y: cy, width: tw, height: hh))
+        ctx.fill(CGRect(x: x, y: cy, width: tw, height: hh))
         let ha: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 7), .foregroundColor: accent(cfg), .kern: 0.4]
-        "METRIC".draw(at: CGPoint(x: m + 6, y: cy + 1), withAttributes: ha)
-        "VALUE".draw(at: CGPoint(x: m + tw * 0.62 + 6, y: cy + 1), withAttributes: ha)
+        "METRIC".draw(at: CGPoint(x: x + 6, y: cy + 1), withAttributes: ha)
+        "VALUE".draw(at: CGPoint(x: x + tw * 0.58 + 6, y: cy + 1), withAttributes: ha)
         cy += hh
         for (i, row) in rows.enumerated() {
             ctx.setFillColor((i % 2 == 0 ? C_WHITE : C_CLOUD).cgColor)
-            ctx.fill(CGRect(x: m, y: cy, width: tw, height: rh))
+            ctx.fill(CGRect(x: x, y: cy, width: tw, height: rh))
             let ka: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 7), .foregroundColor: C_INK]
             let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 7), .foregroundColor: accent(cfg)]
-            (row.0 as NSString).draw(at: CGPoint(x: m + 6, y: cy + 1), withAttributes: ka)
-            (row.1 as NSString).draw(at: CGPoint(x: m + tw * 0.62 + 6, y: cy + 1), withAttributes: va)
+            (row.0 as NSString).draw(at: CGPoint(x: x + 6, y: cy + 1), withAttributes: ka)
+            (row.1 as NSString).draw(at: CGPoint(x: x + tw * 0.58 + 6, y: cy + 1), withAttributes: va)
             ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.3)
-            ctx.move(to: CGPoint(x: m, y: cy + rh)); ctx.addLine(to: CGPoint(x: m + tw, y: cy + rh)); ctx.strokePath()
+            ctx.move(to: CGPoint(x: x, y: cy + rh)); ctx.addLine(to: CGPoint(x: x + tw, y: cy + rh)); ctx.strokePath()
             cy += rh
         }
         return cy + 1
@@ -567,18 +559,18 @@ enum EndoReportGenerator {
 
     // Dynamic settings table to handle multi-line text input neatly
     @discardableResult
-    private static func settingsTable(_ rows: [(String, String)], y: CGFloat, m: CGFloat,
-                                      w: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat
+    private static func settingsTable(_ rows: [(String, String)], x: CGFloat, y: CGFloat,
+                                      width: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat
     {
-        let tw = w - m * 2
+        let tw = width
         let headerH: CGFloat = 12
         var cy = y
 
         ctx.setFillColor(accent(cfg).withAlphaComponent(0.10).cgColor)
-        ctx.fill(CGRect(x: m, y: cy, width: tw, height: headerH))
+        ctx.fill(CGRect(x: x, y: cy, width: tw, height: headerH))
 
         let ha: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 7), .foregroundColor: accent(cfg), .kern: 0.4]
-        "THERAPY SETTING & VALUES".draw(at: CGPoint(x: m + 6, y: cy + 3), withAttributes: ha)
+        "THERAPY SETTING & VALUES".draw(at: CGPoint(x: x + 6, y: cy + 3), withAttributes: ha)
         cy += headerH
 
         for (i, row) in rows.enumerated() {
@@ -586,23 +578,23 @@ enum EndoReportGenerator {
             let rh = 11.0 + CGFloat(lines.count) * 10.5 + 4.0
 
             ctx.setFillColor((i % 2 == 0 ? C_WHITE : C_CLOUD).cgColor)
-            ctx.fill(CGRect(x: m, y: cy, width: tw, height: rh))
+            ctx.fill(CGRect(x: x, y: cy, width: tw, height: rh))
 
             let ka: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 7.5), .foregroundColor: C_SLATE]
             let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: accent(cfg)]
 
-            (row.0 as NSString).draw(at: CGPoint(x: m + 6, y: cy + 3.5), withAttributes: ka)
+            (row.0 as NSString).draw(at: CGPoint(x: x + 6, y: cy + 3.5), withAttributes: ka)
 
             var ly = cy + 12.5
             for line in lines {
-                (line as NSString).draw(at: CGPoint(x: m + 6, y: ly), withAttributes: va)
+                (line as NSString).draw(at: CGPoint(x: x + 6, y: ly), withAttributes: va)
                 ly += 10.5
             }
 
             ctx.setStrokeColor(C_BORDER.cgColor)
             ctx.setLineWidth(0.3)
-            ctx.move(to: CGPoint(x: m, y: cy + rh))
-            ctx.addLine(to: CGPoint(x: m + tw, y: cy + rh))
+            ctx.move(to: CGPoint(x: x, y: cy + rh))
+            ctx.addLine(to: CGPoint(x: x + tw, y: cy + rh))
             ctx.strokePath()
 
             cy += rh
@@ -616,7 +608,7 @@ enum EndoReportGenerator {
                                 w: CGFloat, h: CGFloat, cfg: EndoReportConfig, ctx: CGContext)
     {
         guard !agpData.isEmpty else { return }
-        let lPad: CGFloat = 26; let bPad: CGFloat = 16
+        let lPad: CGFloat = 26; let bPad: CGFloat = 24
         let cw = w - lPad; let ch = h - bPad
         let cx = x + lPad; let cy = y
 
@@ -695,12 +687,43 @@ enum EndoReportGenerator {
         for item in lgItems.reversed() {
             let lsz = (item.0 as NSString).size(withAttributes: lgA)
             lgX -= lsz.width
-            (item.0 as NSString).draw(at: CGPoint(x: lgX, y: cy + ch + 3), withAttributes: lgA)
+            (item.0 as NSString).draw(at: CGPoint(x: lgX, y: cy + ch + 11), withAttributes: lgA)
             lgX -= 15
-            item.2 ? { ctx.setFillColor(item.1.cgColor); ctx.fill(CGRect(x: lgX, y: cy + ch + 4, width: 12, height: 8)) }()
-                : { ctx.setFillColor(item.1.cgColor); ctx.fill(CGRect(x: lgX, y: cy + ch + 7, width: 12, height: 2)) }()
+            item.2 ? { ctx.setFillColor(item.1.cgColor); ctx.fill(CGRect(x: lgX, y: cy + ch + 12, width: 12, height: 8)) }()
+                : { ctx.setFillColor(item.1.cgColor); ctx.fill(CGRect(x: lgX, y: cy + ch + 15, width: 12, height: 2)) }()
             lgX -= 5
         }
+    }
+
+    @discardableResult
+    private static func drawSettingsGrid(_ items: [(String, String)], x: CGFloat, y: CGFloat, width: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat {
+        let count = CGFloat(items.count)
+        guard count > 0 else { return y }
+        let spacing: CGFloat = 4
+        let cw = (width - (count - 1) * spacing) / count
+        var maxH: CGFloat = 0
+
+        for (i, item) in items.enumerated() {
+            let cx = x + CGFloat(i) * (cw + spacing)
+            let lines = item.1.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+            let h = 12.0 + CGFloat(lines.count) * 9.5 + 4.0
+            maxH = max(maxH, h)
+
+            ctx.setFillColor(C_CLOUD.cgColor)
+            ctx.fill(CGRect(x: cx, y: y, width: cw, height: h))
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.4); ctx.stroke(CGRect(x: cx, y: y, width: cw, height: h))
+
+            let la: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.8), .foregroundColor: C_SLATE]
+            let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 7), .foregroundColor: accent(cfg)]
+
+            (item.0 as NSString).draw(at: CGPoint(x: cx + 4, y: y + 2.5), withAttributes: la)
+            var ly = y + 10.5
+            for line in lines {
+                (line as NSString).draw(at: CGPoint(x: cx + 4, y: ly), withAttributes: va)
+                ly += 9.5
+            }
+        }
+        return y + maxH + 4
     }
 
     // MARK: - Format helpers
