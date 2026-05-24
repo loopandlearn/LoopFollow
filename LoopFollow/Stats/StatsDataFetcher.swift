@@ -91,9 +91,11 @@ class StatsDataFetcher {
         NightscoutUtils.executeRequest(eventType: .profile, parameters: [:]) { (result: Result<NSProfile, Error>) in
             switch result {
             case let .success(profileData):
-                let profileStore = profileData.store["default"] ??
+                let profileStore = profileData.store.values.first(where: { $0.basal.count > 0 }) ??
+                    profileData.store[profileData.defaultProfile] ??
+                    profileData.store["default"] ??
                     profileData.store["Default"] ??
-                    profileData.store[profileData.defaultProfile]
+                    profileData.store.values.first
 
                 DispatchQueue.main.async {
                     if let profileStore {
@@ -351,9 +353,9 @@ class StatsDataFetcher {
             let dateTimeStamp = dateParsed.timeIntervalSince1970
             if dateTimeStamp < cutoffTime { continue }
 
-            guard let basalRate = currentEntry["absolute"] as? Double else {
-                continue
-            }
+            let basalRate = (currentEntry["absolute"] as? Double) ??
+                (currentEntry["rate"] as? Double) ??
+                Double(currentEntry["absolute"] as? String ?? "") ?? 0.0
 
             var duration = currentEntry["duration"] as? Double ?? 0.0
 
