@@ -66,6 +66,7 @@ enum EndoReportGenerator {
         let smbs = dataService.getSMBData()
         let carbs = dataService.getCarbData()
         let basals = dataService.getBasalData()
+        let basalProfile = dataService.getBasalProfile() // Get basal profile here
         let simpleVM = SimpleStatsViewModel(dataService: dataService)
         simpleVM.calculateStats()
 
@@ -107,8 +108,7 @@ enum EndoReportGenerator {
                     for (day, dayData) in slice {
                         drawDayRow(ctx: ctx.cgContext, x: 28, y: y,
                                    w: pageRect.width - 56, h: rowH,
-                                   day: day, dayData: dayData, cfg: config,
-                                   simpleVM: simpleVM)
+                                   day: day, dayData: dayData, cfg: config, basalProfile: basalProfile)
                         y += rowH + rowGap
                     }
                     drawFooter(ctx: ctx.cgContext, r: pageRect, cfg: config,
@@ -739,11 +739,33 @@ enum EndoReportGenerator {
         return input
     }
 
+    // MARK: - Basal Profile Helpers
+
+    static func calculateDailyProgrammedBasal(basalProfile: [MainViewController.basalProfileStruct]) -> Double {
+        guard !basalProfile.isEmpty else { return 0.0 }
+
+        let sortedProfile = basalProfile.sorted { $0.timeAsSeconds < $1.timeAsSeconds }
+
+        var totalBasal = 0.0
+        let secondsInDay = 24 * 60 * 60
+
+        for i in 0 ..< sortedProfile.count {
+            let current = sortedProfile[i]
+            let currentTime = Double(current.timeAsSeconds)
+
+            let nextTime: Double = (i < sortedProfile.count - 1) ? Double(sortedProfile[i + 1].timeAsSeconds) : Double(secondsInDay)
+            let durationHours = (nextTime - currentTime) / 3600.0
+            totalBasal += current.value * durationHours
+        }
+
+        return totalBasal
+    }
+
     // MARK: - Day row
 
     private static func drawDayRow(ctx: CGContext, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat,
                                    day: String, dayData: DayData, cfg: EndoReportConfig,
-                                   simpleVM _: SimpleStatsViewModel)
+                                   basalProfile: [MainViewController.basalProfileStruct])
     {
         ctx.setFillColor(C_WHITE.cgColor); ctx.fill(CGRect(x: x, y: y, width: w, height: h))
         ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.5)
@@ -761,25 +783,34 @@ enum EndoReportGenerator {
         let statsX = x + w - 120
         let vals = dayData.bg.map { Double($0.sgv) }
 
+        // Calculate total insulin for the day
+        let totalBolus = dayData.bolus.map { $0.value }.reduce(0, +)
+        let totalSMB = dayData.smb.map { $0.value }.reduce(0, +)
+        let totalInsulin = totalBolus + totalSMB
+
+        // Calculate total scheduled basal for the day
+        let dailyProgrammedBasal = calculateDailyProgrammedBasal(basalProfile: basalProfile)
+
         if !vals.isEmpty {
             let n = Double(vals.count)
             let avg = vals.reduce(0,+) / n
             let tir = Double(vals.filter { $0 >= 70 && $0 <= 180 }.count) / n * 100
-            // removed bolus/basal totals and ratios per request
 
             let sa: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE]
             let sv: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: C_INK]
             let tirC: UIColor = tir >= 70 ? C_IN : tir >= 50 ? C_HIGH : C_VLOW
             let tirA: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: tirC]
-            let acA: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: cfg.accentColor]
 
-            let cols: [(String, CGFloat)] = [("Avg", 0), ("TIR", 30)]
+            let statsXAdjusted = x + w - 200 // Adjust to make space for new columns
+            let cols: [(String, CGFloat)] = [("Avg", 0), ("TIR", 40), ("Insulin", 80), ("Basal", 120)]
             for (lbl, ox) in cols {
-                (lbl as NSString).draw(at: CGPoint(x: statsX + ox, y: y + 5), withAttributes: sa)
+                (lbl as NSString).draw(at: CGPoint(x: statsXAdjusted + ox, y: y + 5), withAttributes: sa)
             }
 
-            cfg.fmtBG(avg).draw(at: CGPoint(x: statsX, y: y + 14), withAttributes: sv)
-            String(format: "%.0f%%", tir).draw(at: CGPoint(x: statsX + 28, y: y + 14), withAttributes: tirA)
+            cfg.fmtBG(avg).draw(at: CGPoint(x: statsXAdjusted, y: y + 14), withAttributes: sv)
+            String(format: "%.0f%%", tir).draw(at: CGPoint(x: statsXAdjusted + 38, y: y + 14), withAttributes: tirA)
+            String(format: "%.1f U", totalInsulin).draw(at: CGPoint(x: statsXAdjusted + 78, y: y + 14), withAttributes: sv)
+            String(format: "%.1f U", dailyProgrammedBasal).draw(at: CGPoint(x: statsXAdjusted + 118, y: y + 14), withAttributes: sv)
         }
 
         let chartX = x + 10; let chartW = w - 140

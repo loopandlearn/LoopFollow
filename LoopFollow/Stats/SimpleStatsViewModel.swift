@@ -103,7 +103,7 @@ class SimpleStatsViewModel: ObservableObject {
         }
 
         let basalProfile = dataService.getBasalProfile()
-        let dailyProgrammedBasal = calculateProgrammedBasalFromProfile(basalProfile: basalProfile)
+        let dailyProgrammedBasal = EndoReportGenerator.calculateDailyProgrammedBasal(basalProfile: basalProfile)
         programmedBasal = dailyProgrammedBasal
 
         // Calculate actual basal using temp basal adjustments
@@ -307,31 +307,5 @@ class SimpleStatsViewModel: ObservableObject {
         }
 
         return min(uniqueDays.count, requestedDays)
-    }
-
-    private func calculateProgrammedBasalFromProfile(basalProfile: [MainViewController.basalProfileStruct]) -> Double {
-        guard !basalProfile.isEmpty else { return 0.0 }
-
-        let sortedProfile = basalProfile.sorted { $0.timeAsSeconds < $1.timeAsSeconds }
-
-        var totalBasal = 0.0
-        let secondsInDay = 24 * 60 * 60
-
-        for i in 0 ..< sortedProfile.count {
-            let current = sortedProfile[i]
-            let currentTime = Double(current.timeAsSeconds)
-
-            let nextTime: Double
-            if i < sortedProfile.count - 1 {
-                nextTime = Double(sortedProfile[i + 1].timeAsSeconds)
-            } else {
-                nextTime = Double(secondsInDay)
-            }
-
-            let durationHours = (nextTime - currentTime) / 3600.0
-            totalBasal += current.value * durationHours
-        }
-
-        return totalBasal
     }
 }
