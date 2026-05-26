@@ -23,4 +23,22 @@ When the user says "ready", execute these steps to create a clean upstream PR br
 2. `git checkout -b pr/<feature-name> origin/dev` — create a clean branch rooted at upstream's dev
 3. `git cherry-pick <commit-sha>` — apply only the relevant fix commit(s)
 4. `git push origin pr/<feature-name>` — push and open the PR from this branch
+
+## Upstream PR standards (loopandlearn/LoopFollow)
+- **One concern per PR** — one bug fix, one feature, or one improvement. Split unrelated changes into separate PRs.
+- **Branch naming** — use a descriptive name reflecting the purpose (e.g. `fix/mmol-color-display`).
+- **Do not update version numbers** — only project maintainers do that.
+
+## Commit message format
+Messages should complete the sentence: *"If applied, this commit will..."*
+
+- Use imperative mood: "Fix crash" not "Fixed crash"
+- Capitalise the first letter, no trailing period
+- Subject line: 50 characters max
+- Body (if needed): wrap at 72 characters
+
+Good examples:
+- `Fix mmol/L color comparison using display-unit precision`
+- `Add alarm snooze functionality`
+- `Update documentation for build process`
 EOF
