@@ -85,6 +85,6 @@ docs/PR_configurable_slots.md
 docs/LiveActivityTestPlan.md
 
 # Claude
-CLAUDE.md
+# CLAUDE.md is intentionally tracked so instructions persist across sessions
 
 node_modules/
