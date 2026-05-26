@@ -41,4 +41,18 @@ Good examples:
 - `Fix mmol/L color comparison using display-unit precision`
 - `Add alarm snooze functionality`
 - `Update documentation for build process`
+
+## No AI co-referencing
+Never mention Claude, AI, or any AI tooling in:
+- Code
+- Code comments
+- Commit messages
+- PR titles or descriptions
+
+All output should read as if written by a human developer.
+
+## SwiftLint
+All code and comments must comply with the project's SwiftLint configuration.
+- Do not introduce any SwiftLint violations
+- If editing existing code, clean up any violations in the lines touched
 EOF
