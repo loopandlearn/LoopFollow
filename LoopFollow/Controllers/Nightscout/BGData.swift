@@ -33,8 +33,10 @@ extension MainViewController {
                 return
             }
 
-            // Dexcom only returns 24 hrs of data. If we need more, call NS.
-            if graphHours > 24, IsNightscoutEnabled() {
+            // Supplement with NS if Dex data doesn't cover the full requested window.
+            let dexCutoff = dateTimeUtils.getNowTimeIntervalUTC() - Double(graphHours) * 3600
+            let dexCoversFull = data.last.map { $0.date <= dexCutoff } ?? false
+            if !dexCoversFull, IsNightscoutEnabled() {
                 self.webLoadNSBGData(dexData: data)
             } else {
                 self.ProcessDexBGData(data: data, sourceName: "Dexcom")
