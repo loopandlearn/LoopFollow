@@ -33,13 +33,26 @@ extension MainViewController {
                 return
             }
 
+            // Dexcom Share can return duplicate readings when multiple uploaders
+            // write to the same Dexcom account. Dedup before any further use.
+            var dedupedData: [ShareGlucoseData] = []
+            var lastDexTime = Double.infinity
+            var lastDexSGV: Int?
+            for reading in data {
+                if lastDexSGV == nil || lastDexSGV != reading.sgv || (lastDexTime - reading.date >= 30) {
+                    dedupedData.append(reading)
+                    lastDexTime = reading.date
+                    lastDexSGV = reading.sgv
+                }
+            }
+
             // Supplement with NS if Dex data doesn't cover the full requested window.
             let dexCutoff = dateTimeUtils.getNowTimeIntervalUTC() - Double(graphHours) * 3600
-            let dexCoversFull = data.last.map { $0.date <= dexCutoff } ?? false
+            let dexCoversFull = dedupedData.last.map { $0.date <= dexCutoff } ?? false
             if !dexCoversFull, IsNightscoutEnabled() {
-                self.webLoadNSBGData(dexData: data)
+                self.webLoadNSBGData(dexData: dedupedData)
             } else {
-                self.ProcessDexBGData(data: data, sourceName: "Dexcom")
+                self.ProcessDexBGData(data: dedupedData, sourceName: "Dexcom")
             }
         }
     }
