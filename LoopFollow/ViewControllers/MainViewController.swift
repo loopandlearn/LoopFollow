@@ -77,6 +77,7 @@ class MainViewController: UIViewController, UITableViewDataSource, ChartViewDele
     var profileManager = ProfileManager.shared
 
     var bgData: [ShareGlucoseData] = []
+    var yesterdayBGData: [ShareGlucoseData] = [] // readings already shifted +24h for the comparison overlay
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
     var basalScheduleData: [basalGraphStruct] = []

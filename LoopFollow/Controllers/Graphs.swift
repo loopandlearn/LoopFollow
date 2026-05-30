@@ -27,6 +27,7 @@ enum GraphDataIndex: Int {
     case smb = 16
     case tempTarget = 17
     case predictionCone = 18
+    case yesterday = 19
 }
 
 extension GraphDataIndex {
@@ -51,6 +52,7 @@ extension GraphDataIndex {
         case .smb: return "SMB"
         case .tempTarget: return "Temp Target"
         case .predictionCone: return "Prediction Cone"
+        case .yesterday: return "Yesterday"
         }
     }
 }
@@ -622,6 +624,16 @@ extension MainViewController {
         lineCone.axisDependency = YAxis.AxisDependency.right
         data.append(lineCone)
 
+        // Dataset 19: Yesterday's BG comparison overlay (thin dimmed gray line, no dots)
+        let lineYesterday = LineChartDataSet(entries: [ChartDataEntry](), label: "")
+        lineYesterday.lineWidth = 1.5
+        lineYesterday.setColor(NSUIColor.systemGray, alpha: 0.4)
+        lineYesterday.drawCirclesEnabled = false
+        lineYesterday.drawValuesEnabled = false
+        lineYesterday.highlightEnabled = false
+        lineYesterday.axisDependency = YAxis.AxisDependency.right
+        data.append(lineYesterday)
+
         data.setValueFont(UIFont.systemFont(ofSize: 12))
 
         // Add marker popups for bolus and carbs
@@ -813,6 +825,11 @@ extension MainViewController {
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
 
+        // Reflect the yesterday overlay toggle immediately, and reload the BG window
+        // so the extra day of history is fetched (or dropped) when the toggle changed.
+        updateYesterdayBGGraph()
+        TaskScheduler.shared.rescheduleTask(id: .fetchBG, to: Date())
+
         // Re-render prediction display in case display type changed
         updateOpenAPSPredictionDisplay()
     }
@@ -882,6 +899,8 @@ extension MainViewController {
         BGChartFull.data?.notifyDataChanged()
         BGChartFull.notifyDataSetChanged()
 
+        updateYesterdayBGGraph()
+
         if firstGraphLoad {
             var scaleX = CGFloat(Storage.shared.chartScaleX.value)
             if scaleX > CGFloat(ScaleXMax) {
@@ -897,6 +916,32 @@ extension MainViewController {
         if autoScrollPauseUntil == nil || Date() > autoScrollPauseUntil! {
             BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
         }
+    }
+
+    // Populates (or clears) the dimmed "yesterday" comparison overlay on the main graph.
+    // Points in yesterdayBGData are already shifted +24h so they align with today's clock time.
+    func updateYesterdayBGGraph() {
+        let dataIndex = GraphDataIndex.yesterday.rawValue
+        guard let lineData = BGChart.lineData,
+              dataIndex < lineData.dataSets.count,
+              let dataSet = lineData.dataSets[dataIndex] as? LineChartDataSet
+        else {
+            return
+        }
+
+        dataSet.removeAll(keepingCapacity: false)
+
+        if Storage.shared.showYesterdayLine.value {
+            for entry in yesterdayBGData {
+                // Clamp the plotted y-value to the same bounds the main BG line uses.
+                let plottedSgv = Double(min(max(entry.sgv, globalVariables.minDisplayGlucose), globalVariables.maxDisplayGlucose))
+                dataSet.append(ChartDataEntry(x: entry.date, y: plottedSgv))
+            }
+        }
+
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
     }
 
     func updatePredictionGraph(color: UIColor? = nil) {

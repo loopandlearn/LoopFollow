@@ -12,6 +12,7 @@ struct GraphSettingsView: View {
     @ObservedObject private var show30MinLine = Storage.shared.show30MinLine
     @ObservedObject private var show90MinLine = Storage.shared.show90MinLine
     @ObservedObject private var showMidnightLines = Storage.shared.showMidnightLines
+    @ObservedObject private var showYesterdayLine = Storage.shared.showYesterdayLine
     @ObservedObject private var smallGraphTreatments = Storage.shared.smallGraphTreatments
 
     @ObservedObject private var smallGraphHeight = Storage.shared.smallGraphHeight
@@ -43,6 +44,9 @@ struct GraphSettingsView: View {
 
                         Toggle("Show −90 min Line", isOn: $show90MinLine.value)
                             .onChange(of: show90MinLine.value) { _ in markDirty() }
+
+                        Toggle("Show Yesterday's BG", isOn: $showYesterdayLine.value)
+                            .onChange(of: showYesterdayLine.value) { _ in markDirty() }
                     }
 
                     Toggle("Show Midnight Lines", isOn: $showMidnightLines.value)
