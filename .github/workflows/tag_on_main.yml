@@ -1,0 +1,68 @@
+# -----------------------------------------------------------------------------
+# Workflow: Tag release on push to main
+#
+# Description:
+# Creates an annotated git tag whenever main advances to a release version
+# (X.Y.0). The version is read from LOOP_FOLLOW_MARKETING_VERSION in
+# Config.xcconfig and the tag name is `v<version>`.
+#
+# Triggered by: any push to main (release PR merge).
+# Skips if: the version on main is not X.Y.0 (e.g. a hotfix that didn't bump
+# minor/major), or if the tag already exists.
+# -----------------------------------------------------------------------------
+
+name: Tag release on main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag:
+    if: ${{ !github.event.repository.fork }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from Config.xcconfig
+        id: version
+        run: |
+          VERSION=$(grep -E "^LOOP_FOLLOW_MARKETING_VERSION[[:space:]]*=" Config.xcconfig | awk '{print $3}')
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not find LOOP_FOLLOW_MARKETING_VERSION in Config.xcconfig"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Found version: $VERSION"
+
+      - name: Skip non-release versions (only X.Y.0 is tagged)
+        id: check
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.0$ ]]; then
+            echo "is_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_release=false" >> "$GITHUB_OUTPUT"
+            echo "Version $VERSION is not a release version (X.Y.0); skipping tag."
+          fi
+
+      - name: Create and push tag if missing
+        if: steps.check.outputs.is_release == 'true'
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists; skipping."
+          else
+            git tag -a "$TAG" -m "$TAG"
+            git push origin "$TAG"
+            echo "Created and pushed tag $TAG"
+          fi
