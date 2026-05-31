@@ -1,14 +1,10 @@
-//
-//  ContentView.swift
-//  LoopFollowWatch Watch App
-//
-//  Created by Philippe Achkar on 2026-03-10.
-//  Copyright © 2026 Jon Fawcett. All rights reserved.
-//
+// LoopFollow
+// ContentView.swift
 
 import Combine
 import SwiftUI
 import WatchConnectivity
+import WatchKit
 
 // MARK: - Root view
 
@@ -28,6 +24,7 @@ struct ContentView: View {
                                 .foregroundColor(.secondary)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Settings")
 
                         Button { showRemote = true } label: {
                             Image(systemName: "antenna.radiowaves.left.and.right")
@@ -35,6 +32,7 @@ struct ContentView: View {
                                 .foregroundColor(.secondary)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Remote Commands")
                     }
                     .padding([.top, .trailing], 4)
                 }
@@ -45,8 +43,8 @@ struct ContentView: View {
                     NavigationStack { WatchAlertSettingsView() }
                 }
 
-            ForEach(Array(model.pages.enumerated()), id: \.offset) { _, page in
-                DataGridPage(slots: page, snapshot: model.snapshot)
+            ForEach(model.pages.indices, id: \.self) { idx in
+                DataGridPage(slots: model.pages[idx], snapshot: model.snapshot)
             }
 
             SlotSelectionView(model: model)
@@ -61,14 +59,15 @@ struct ContentView: View {
 final class WatchViewModel: ObservableObject {
     @Published var snapshot: GlucoseSnapshot?
     @Published var selectedSlots: [LiveActivitySlotOption] = LAAppGroupSettings.watchSelectedSlots()
-    @Published var showSnoozeSheet: Bool = false
-    @Published var pendingSnoozeType: WatchAlertType? = nil
-    @Published var isSnoozed: Bool = false
-    @Published var snoozeUntil: Date? = nil
-    @Published var hasActiveAlert: Bool = false
+    @Published var showSnoozeSheet = false
+    @Published var pendingSnoozeType: WatchAlertType?
+    @Published var isSnoozed = false
+    @Published var snoozeUntil: Date?
+    @Published var hasActiveAlert = false
 
     private var timer: Timer?
     private var notificationObserver: Any?
+    private var snoozeSheetObserver: Any?
 
     init() {
         snapshot = GlucoseSnapshotStore.shared.load()
@@ -86,7 +85,7 @@ final class WatchViewModel: ObservableObject {
                 self?.refresh()
             }
         }
-        NotificationCenter.default.addObserver(
+        snoozeSheetObserver = NotificationCenter.default.addObserver(
             forName: .showSnoozeSheet,
             object: nil,
             queue: .main
@@ -99,9 +98,8 @@ final class WatchViewModel: ObservableObject {
 
     deinit {
         timer?.invalidate()
-        if let obs = notificationObserver {
-            NotificationCenter.default.removeObserver(obs)
-        }
+        if let obs = notificationObserver { NotificationCenter.default.removeObserver(obs) }
+        if let obs = snoozeSheetObserver { NotificationCenter.default.removeObserver(obs) }
     }
 
     func refresh() {
@@ -109,14 +107,14 @@ final class WatchViewModel: ObservableObject {
             snapshot = loaded
         }
         selectedSlots = LAAppGroupSettings.watchSelectedSlots()
-        isSnoozed      = WatchAlertManager.shared.isGloballySnoozed
-        snoozeUntil    = WatchAlertManager.shared.globalSnoozeExpiryDate
+        isSnoozed = WatchAlertManager.shared.isGloballySnoozed
+        snoozeUntil = WatchAlertManager.shared.globalSnoozeExpiryDate
         hasActiveAlert = snapshot.map { WatchAlertManager.shared.hasActiveAlert(for: $0) } ?? false
     }
 
     func update(snapshot: GlucoseSnapshot) {
         self.snapshot = snapshot
-        selectedSlots  = LAAppGroupSettings.watchSelectedSlots()
+        selectedSlots = LAAppGroupSettings.watchSelectedSlots()
         hasActiveAlert = WatchAlertManager.shared.hasActiveAlert(for: snapshot)
     }
 
@@ -124,7 +122,7 @@ final class WatchViewModel: ObservableObject {
     var pages: [[LiveActivitySlotOption]] {
         guard !selectedSlots.isEmpty else { return [] }
         return stride(from: 0, to: selectedSlots.count, by: 4).map {
-            Array(selectedSlots[$0..<min($0 + 4, selectedSlots.count)])
+            Array(selectedSlots[$0 ..< min($0 + 4, selectedSlots.count)])
         }
     }
 
@@ -147,9 +145,11 @@ final class WatchViewModel: ObservableObject {
 struct GlucoseView: View {
     @ObservedObject var model: WatchViewModel
 
+    fileprivate static let staleThreshold: TimeInterval = 15 * 60
+
     var body: some View {
         Group {
-            if let s = model.snapshot, s.age < 900 {
+            if let s = model.snapshot, s.age < GlucoseView.staleThreshold {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("\(WatchFormat.glucose(s)) \(WatchFormat.trendArrow(s))")
                         .font(.system(size: 56, weight: .bold, design: .rounded))
@@ -231,7 +231,7 @@ struct DataGridPage: View {
             columns: [GridItem(.flexible()), GridItem(.flexible())],
             spacing: 8
         ) {
-            ForEach(0..<4, id: \.self) { i in
+            ForEach(0 ..< 4, id: \.self) { i in
                 if i < slots.count {
                     let option = slots[i]
                     MetricCell(
@@ -276,9 +276,13 @@ struct MetricCell: View {
 struct SlotSelectionView: View {
     @ObservedObject var model: WatchViewModel
 
+    private var displayedOptions: [LiveActivitySlotOption] {
+        LiveActivitySlotOption.allCases.filter { $0 != .none && $0 != .delta && $0 != .projectedBG }
+    }
+
     var body: some View {
         List {
-            ForEach(LiveActivitySlotOption.allCases.filter { $0 != .none && $0 != .delta && $0 != .projectedBG }, id: \.self) { option in
+            ForEach(displayedOptions, id: \.self) { option in
                 Button(action: { model.toggleSlot(option) }) {
                     HStack {
                         Text(option.displayName)
@@ -298,8 +302,6 @@ struct SlotSelectionView: View {
         .navigationTitle("Data")
     }
 }
-
-// MARK: - UIColor → SwiftUI Color bridge
 
 private extension UIColor {
     var swiftUIColor: Color { Color(self) }

@@ -1,6 +1,5 @@
 // LoopFollow
 // WatchCommandDispatcher.swift
-// Phone-side handler for Watch remote commands relayed via WCSession.
 
 import Foundation
 import HealthKit

@@ -1,12 +1,9 @@
+// LoopFollow
 // WatchAlertManager.swift
-// LoopFollowWatch Watch App
-//
-// Haptic alert manager for the Apple Watch extension.
-// See DESIGN.md for rationale and CHANGES.md for injection points.
 
 import Foundation
-import UserNotifications
 import os.log
+import UserNotifications
 
 private let alertLog = OSLog(
     subsystem: Bundle.main.bundleIdentifier ?? "com.loopfollow.watch",
@@ -24,21 +21,21 @@ enum WatchAlertType: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .lowBG:     return "⚠️ Low BG"
+        case .lowBG: return "⚠️ Low BG"
         case .urgentLow: return "🚨 Urgent Low"
-        case .highBG:    return "⚠️ High BG"
-        case .fastDrop:  return "⬇️ Dropping Fast"
-        case .fastRise:  return "⬆️ Rising Fast"
+        case .highBG: return "⚠️ High BG"
+        case .fastDrop: return "⬇️ Dropping Fast"
+        case .fastRise: return "⬆️ Rising Fast"
         }
     }
 
     var displayName: String {
         switch self {
-        case .lowBG:     return "Low BG"
+        case .lowBG: return "Low BG"
         case .urgentLow: return "Urgent Low"
-        case .highBG:    return "High BG"
-        case .fastDrop:  return "Fast Drop"
-        case .fastRise:  return "Fast Rise"
+        case .highBG: return "High BG"
+        case .fastDrop: return "Fast Drop"
+        case .fastRise: return "Fast Rise"
         }
     }
 
@@ -51,32 +48,32 @@ enum WatchAlertType: String, CaseIterable {
         }
     }
 
-    var cooldownKey: String    { "watchAlertCooldown_\(rawValue)" }
-    var snoozeKey: String      { "watchSnoozeUntil_\(rawValue)" }
+    var cooldownKey: String { "watchAlertCooldown_\(rawValue)" }
+    var snoozeKey: String { "watchSnoozeUntil_\(rawValue)" }
     var notificationID: String { "lf-alert-\(rawValue)" }
 }
 
 // MARK: - Thresholds
+
 // TODO: Wire to LAAppGroupSettings or App Group shared container to mirror iPhone settings.
 
 private struct WatchThresholds {
-    var low: Double       = 70
+    var low: Double = 70
     var urgentLow: Double = 55
-    var high: Double      = 180
-    var dropRate: Double  = 2.0   // mg/dL per minute
-    var riseRate: Double  = 2.0
+    var high: Double = 180
+    var dropRate: Double = 2.0 // mg/dL per minute
+    var riseRate: Double = 2.0
 }
 
 // MARK: - Manager
 
 final class WatchAlertManager: NSObject {
-
     static let shared = WatchAlertManager()
-    private override init() { super.init() }
+    override private init() { super.init() }
 
-    private let thresholds  = WatchThresholds()
-    private let settings    = WatchAppSettings.shared
-    private let alertQueue  = DispatchQueue(label: "com.loopfollow.watch.alertManager")
+    private let thresholds = WatchThresholds()
+    private let settings = WatchAppSettings.shared
+    private let alertQueue = DispatchQueue(label: "com.loopfollow.watch.alertManager")
 
     private let globalSnoozeKey = "watchGlobalSnoozeUntil"
 
@@ -87,18 +84,18 @@ final class WatchAlertManager: NSObject {
 
     /// Returns true if this alert type is currently suppressed (global OR per-type snooze active).
     func isSnoozed(for type: WatchAlertType) -> Bool {
-        let now     = Date().timeIntervalSince1970
-        let global  = defaults.double(forKey: globalSnoozeKey)
+        let now = Date().timeIntervalSince1970
+        let global = defaults.double(forKey: globalSnoozeKey)
         let perType = defaults.double(forKey: type.snoozeKey)
         return now < global || now < perType
     }
 
     /// Returns the latest active snooze expiry for this type (global or per-type), or nil.
     func snoozeUntil(for type: WatchAlertType) -> Date? {
-        let now     = Date().timeIntervalSince1970
-        let global  = defaults.double(forKey: globalSnoozeKey)
+        let now = Date().timeIntervalSince1970
+        let global = defaults.double(forKey: globalSnoozeKey)
         let perType = defaults.double(forKey: type.snoozeKey)
-        let until   = max(global, perType)
+        let until = max(global, perType)
         return until > now ? Date(timeIntervalSince1970: until) : nil
     }
 
@@ -110,7 +107,7 @@ final class WatchAlertManager: NSObject {
     /// Expiry date of the global snooze, or nil if not active.
     var globalSnoozeExpiryDate: Date? {
         let until = defaults.double(forKey: globalSnoozeKey)
-        let now   = Date().timeIntervalSince1970
+        let now = Date().timeIntervalSince1970
         return until > now ? Date(timeIntervalSince1970: until) : nil
     }
 
@@ -186,7 +183,7 @@ final class WatchAlertManager: NSObject {
     /// regardless of cooldown or snooze state. Used to decide whether to show the Snooze button.
     func hasActiveAlert(for snapshot: GlucoseSnapshot) -> Bool {
         guard snapshot.updatedAt > Date(timeIntervalSinceNow: -15 * 60) else { return false }
-        let bg    = snapshot.glucose
+        let bg = snapshot.glucose
         let delta = snapshot.deltaRate
         return bg <= thresholds.urgentLow
             || bg < thresholds.low
@@ -205,20 +202,20 @@ final class WatchAlertManager: NSObject {
         }
 
         alertQueue.sync {
-            let bg    = snapshot.glucose
+            let bg = snapshot.glucose
             let delta = snapshot.deltaRate
 
             // UrgentLow takes full priority — nothing else fires this cycle if triggered.
-            let urgentTriggered = bg <= thresholds.urgentLow   // inclusive: BG == threshold fires
+            let urgentTriggered = bg <= thresholds.urgentLow // inclusive: BG == threshold fires
             evaluate(.urgentLow, bg: bg, delta: delta, triggered: urgentTriggered)
             guard !urgentTriggered else { return }
 
             // lowBG suppresses fastDrop — if lowBG threshold is met, fastDrop is skipped.
             let lowTriggered = bg < thresholds.low
             evaluate(.lowBG, bg: bg, delta: delta, triggered: lowTriggered)
-            guard !lowTriggered else { return }   // lowBG suppresses fastDrop
+            guard !lowTriggered else { return } // lowBG suppresses fastDrop
 
-            evaluate(.highBG,   bg: bg, delta: delta, triggered: bg > thresholds.high)
+            evaluate(.highBG, bg: bg, delta: delta, triggered: bg > thresholds.high)
             evaluate(.fastDrop, bg: bg, delta: delta, triggered: delta.map { $0 < -thresholds.dropRate } ?? false)
             evaluate(.fastRise, bg: bg, delta: delta, triggered: delta.map { $0 > thresholds.riseRate } ?? false)
         }
@@ -229,7 +226,7 @@ final class WatchAlertManager: NSObject {
     private func evaluate(_ type: WatchAlertType, bg: Double, delta: Double?, triggered: Bool) {
         guard triggered, !isSnoozed(for: type) else { return }
 
-        let now       = Date().timeIntervalSince1970
+        let now = Date().timeIntervalSince1970
         let lastFired = defaults.double(forKey: type.cooldownKey)
         guard now - lastFired >= settings.cooldown(for: type) else { return }
 
@@ -239,16 +236,16 @@ final class WatchAlertManager: NSObject {
 
     private func fire(type: WatchAlertType, bg: Double, delta: Double?) {
         let content = UNMutableNotificationContent()
-        content.title              = type.title
-        content.body               = type.body(bg: bg, delta: delta)
-        content.sound              = nil          // haptic only — no audio
-        content.interruptionLevel  = (type == .urgentLow) ? .timeSensitive : .active
+        content.title = type.title
+        content.body = type.body(bg: bg, delta: delta)
+        content.sound = nil // haptic only — no audio
+        content.interruptionLevel = (type == .urgentLow) ? .timeSensitive : .active
         content.categoryIdentifier = "GLUCOSE_ALERT"
 
         let request = UNNotificationRequest(
-            identifier: type.notificationID,   // stable ID — replaces any pending same-type alert
+            identifier: type.notificationID, // stable ID — replaces any pending same-type alert
             content: content,
-            trigger: nil                        // immediate delivery
+            trigger: nil // immediate delivery
         )
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
@@ -265,13 +262,12 @@ final class WatchAlertManager: NSObject {
 // MARK: - UNUserNotificationCenterDelegate
 
 extension WatchAlertManager: UNUserNotificationCenterDelegate {
-
     func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
+        _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        let typeRaw   = response.notification.request.identifier
+        let typeRaw = response.notification.request.identifier
             .replacingOccurrences(of: "lf-alert-", with: "")
         let alertType = WatchAlertType(rawValue: typeRaw)
 
@@ -287,6 +283,7 @@ extension WatchAlertManager: UNUserNotificationCenterDelegate {
                     userInfo: alertType.map { ["alertType": $0.rawValue] }
                 )
             }
+
         default:
             break
         }
@@ -294,8 +291,8 @@ extension WatchAlertManager: UNUserNotificationCenterDelegate {
     }
 
     func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification,
+        _: UNUserNotificationCenter,
+        willPresent _: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         completionHandler([.banner, .badge])

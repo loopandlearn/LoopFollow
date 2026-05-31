@@ -1,6 +1,5 @@
+// LoopFollow
 // WatchComplicationProvider.swift
-// Philippe Achkar
-// 2026-03-10
 
 import ClockKit
 import Foundation
@@ -12,7 +11,6 @@ private let watchLog = OSLog(
 )
 
 final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
-
     // MARK: - Complication Descriptors
 
     func getComplicationDescriptors(handler: @escaping ([CLKComplicationDescriptor]) -> Void) {
@@ -34,7 +32,7 @@ final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
                 identifier: ComplicationID.debugCorner,
                 displayName: "LoopFollow Debug",
                 supportedFamilies: [.graphicCorner]
-            )
+            ),
         ]
         handler(descriptors)
     }
@@ -53,7 +51,7 @@ final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
         // Prefer the file store (persists across launches); fall back to the in-memory
         // cache in case the file write hasn't completed or the store is unavailable.
         guard let snapshot = GlucoseSnapshotStore.shared.load()
-                          ?? WatchSessionReceiver.shared.lastSnapshot
+            ?? WatchSessionReceiver.shared.lastSnapshot
         else {
             os_log("WatchComplicationProvider: no snapshot available (store and cache both nil)", log: watchLog, type: .error)
             handler(nil)
@@ -94,7 +92,7 @@ final class WatchComplicationProvider: NSObject, CLKComplicationDataSource {
     }
 
     func getPrivacyBehavior(
-        for complication: CLKComplication,
+        for _: CLKComplication,
         withHandler handler: @escaping (CLKComplicationPrivacyBehavior) -> Void
     ) {
         // Glucose is sensitive — hide on locked watch face

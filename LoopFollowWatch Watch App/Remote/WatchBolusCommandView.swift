@@ -1,6 +1,5 @@
 // LoopFollow
 // WatchBolusCommandView.swift
-// Bolus remote command view for Watch with passcode authentication.
 
 import LocalAuthentication
 import SwiftUI
@@ -122,8 +121,10 @@ struct WatchBolusCommandView: View {
             sendBolus()
             return
         }
-        context.evaluatePolicy(.deviceOwnerAuthentication,
-                                localizedReason: "Confirm identity to send \(String(format: "%.2f", bolusUnits))U insulin") { success, _ in
+        context.evaluatePolicy(
+            .deviceOwnerAuthentication,
+            localizedReason: "Confirm identity to send \(String(format: "%.2f", bolusUnits))U insulin"
+        ) { success, _ in
             DispatchQueue.main.async {
                 if success { sendBolus() } else {
                     alertMessage = "Authentication failed or cancelled"

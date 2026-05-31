@@ -1,9 +1,5 @@
+// LoopFollow
 // SnoozeView.swift
-// LoopFollowWatch Watch App
-//
-// Snooze sheet presented from GlucoseView or via notification action.
-// alertType: nil when opened manually (global snooze implied, no scope toggle shown).
-// alertType: non-nil when opened from a specific notification action (scope toggle shown).
 
 import SwiftUI
 
@@ -16,14 +12,14 @@ struct SnoozeView: View {
     @State private var snoozeAll: Bool
 
     private let step: Double = 30
-    private let range: ClosedRange<Double> = 30...720   // 30 min – 12 hr
+    private let range: ClosedRange<Double> = 30...720 // 30 min – 12 hr
 
     init(isPresented: Binding<Bool>, alertType: WatchAlertType?) {
-        self._isPresented = isPresented
-        self.alertType    = alertType
+        _isPresented = isPresented
+        self.alertType = alertType
         let s = WatchAppSettings.shared
-        self._snoozeMinutes = State(initialValue: Double(s.defaultSnoozeMinutes))
-        self._snoozeAll     = State(initialValue: s.snoozeAllByDefault)
+        _snoozeMinutes = State(initialValue: Double(s.defaultSnoozeMinutes))
+        _snoozeAll = State(initialValue: s.snoozeAllByDefault)
     }
 
     var body: some View {
@@ -64,10 +60,6 @@ struct SnoozeView: View {
                 }
             }
             .padding(.horizontal, 4)
-        }
-        .onAppear {
-            snoozeMinutes = Double(settings.defaultSnoozeMinutes)
-            snoozeAll     = settings.snoozeAllByDefault
         }
     }
 

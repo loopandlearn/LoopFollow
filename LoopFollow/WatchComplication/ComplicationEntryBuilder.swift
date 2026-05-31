@@ -1,6 +1,5 @@
+// LoopFollow
 // ComplicationEntryBuilder.swift
-// Philippe Achkar
-// 2026-03-25
 
 import ClockKit
 
@@ -23,7 +22,6 @@ enum ComplicationID {
 // MARK: - Entry builder
 
 enum ComplicationEntryBuilder {
-
     // MARK: - Live template
 
     static func template(
@@ -36,9 +34,9 @@ enum ComplicationEntryBuilder {
             return graphicCircularTemplate(snapshot: snapshot)
         case .graphicCorner:
             switch identifier {
-            case ComplicationID.stackCorner:  return graphicCornerStackTemplate(snapshot: snapshot)
-            case ComplicationID.debugCorner:  return graphicCornerDebugTemplate(snapshot: snapshot)
-            default:                          return graphicCornerGaugeTemplate(snapshot: snapshot)
+            case ComplicationID.stackCorner: return graphicCornerStackTemplate(snapshot: snapshot)
+            case ComplicationID.debugCorner: return graphicCornerDebugTemplate(snapshot: snapshot)
+            default: return graphicCornerGaugeTemplate(snapshot: snapshot)
             }
         default:
             return nil
@@ -114,6 +112,7 @@ enum ComplicationEntryBuilder {
     }
 
     // MARK: - Graphic Circular
+
     // BG (top, colored) + trend arrow (bottom).
 
     private static func graphicCircularTemplate(snapshot: GlucoseSnapshot) -> CLKComplicationTemplate {
@@ -127,6 +126,7 @@ enum ComplicationEntryBuilder {
     }
 
     // MARK: - Graphic Corner — Gauge Text (Complication 1)
+
     // Gauge arc fills from 0 (fresh) to 100% (15 min stale).
     // Outer text: BG (colored). Leading text: delta.
     // Stale / isNotLooping → "⚠" in yellow, gauge full.
@@ -167,6 +167,7 @@ enum ComplicationEntryBuilder {
     }
 
     // MARK: - Graphic Corner — Stacked Text (Complication 2)
+
     // Outer (top, large): BG value, colored.
     // Inner (bottom, small): "→ projected" (falls back to delta if no projection).
     // Stale / isNotLooping: outer = "--", inner = "".
@@ -197,6 +198,7 @@ enum ComplicationEntryBuilder {
     }
 
     // MARK: - Graphic Corner — Debug (Complication 3)
+
     // Outer (top): HH:mm of the snapshot's updatedAt — when the CGM reading arrived.
     // Inner (bottom): "↺ HH:mm" — when ClockKit last called getCurrentTimelineEntry.
     //
@@ -206,7 +208,7 @@ enum ComplicationEntryBuilder {
     //   inner stale    → reloadTimeline is not being called or ClockKit is ignoring it
 
     private static func graphicCornerDebugTemplate(snapshot: GlucoseSnapshot) -> CLKComplicationTemplate {
-        let dataTime  = WatchFormat.updateTime(snapshot)
+        let dataTime = WatchFormat.updateTime(snapshot)
         let buildTime = WatchFormat.currentTime()
 
         return CLKComplicationTemplateGraphicCornerStackText(
@@ -220,7 +222,7 @@ enum ComplicationEntryBuilder {
     /// snapshot.glucose is always in mg/dL (builder stores canonical mg/dL).
     static func thresholdColor(for snapshot: GlucoseSnapshot) -> UIColor {
         let t = LAAppGroupSettings.thresholdsMgdl()
-        if snapshot.glucose < t.low  { return .red }
+        if snapshot.glucose < t.low { return .red }
         if snapshot.glucose > t.high { return .orange }
         return .green
     }

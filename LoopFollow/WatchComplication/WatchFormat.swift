@@ -1,6 +1,5 @@
+// LoopFollow
 // WatchFormat.swift
-// Philippe Achkar
-// 2026-03-25
 
 import Foundation
 
@@ -8,7 +7,6 @@ import Foundation
 /// All glucose values in GlucoseSnapshot are stored in mg/dL; this module
 /// converts to mmol/L for display when snapshot.unit == .mmol.
 enum WatchFormat {
-
     // MARK: - Glucose
 
     static func glucose(_ s: GlucoseSnapshot) -> String {
@@ -37,14 +35,14 @@ enum WatchFormat {
 
     static func trendArrow(_ s: GlucoseSnapshot) -> String {
         switch s.trend {
-        case .upFast:     return "↑↑"
-        case .up:         return "↑"
-        case .upSlight:   return "↗"
-        case .flat:       return "→"
+        case .upFast: return "↑↑"
+        case .up: return "↑"
+        case .upSlight: return "↗"
+        case .flat: return "→"
         case .downSlight: return "↘"
-        case .down:       return "↓"
-        case .downFast:   return "↓↓"
-        case .unknown:    return "–"
+        case .down: return "↓"
+        case .downFast: return "↓↓"
+        case .unknown: return "–"
         }
     }
 
@@ -159,28 +157,28 @@ enum WatchFormat {
 
     static func slotValue(option: LiveActivitySlotOption, snapshot s: GlucoseSnapshot) -> String {
         switch option {
-        case .none:        return ""
-        case .delta:       return delta(s)
+        case .none: return ""
+        case .delta: return delta(s)
         case .projectedBG: return projected(s)
-        case .minMax:      return minMax(s)
-        case .iob:         return iob(s)
-        case .cob:         return cob(s)
-        case .recBolus:    return recBolus(s)
-        case .autosens:    return autosens(s)
-        case .tdd:         return tdd(s)
-        case .basal:       return basal(s)
-        case .pump:        return pump(s)
+        case .minMax: return minMax(s)
+        case .iob: return iob(s)
+        case .cob: return cob(s)
+        case .recBolus: return recBolus(s)
+        case .autosens: return autosens(s)
+        case .tdd: return tdd(s)
+        case .basal: return basal(s)
+        case .pump: return pump(s)
         case .pumpBattery: return pumpBattery(s)
-        case .battery:     return battery(s)
-        case .target:      return target(s)
-        case .isf:         return isf(s)
-        case .carbRatio:   return carbRatio(s)
-        case .sage:        return age(insertTime: s.sageInsertTime)
-        case .cage:        return age(insertTime: s.cageInsertTime)
-        case .iage:        return age(insertTime: s.iageInsertTime)
-        case .carbsToday:  return carbsToday(s)
-        case .override:    return override(s)
-        case .profile:     return profileName(s)
+        case .battery: return battery(s)
+        case .target: return target(s)
+        case .isf: return isf(s)
+        case .carbRatio: return carbRatio(s)
+        case .sage: return age(insertTime: s.sageInsertTime)
+        case .cage: return age(insertTime: s.cageInsertTime)
+        case .iage: return age(insertTime: s.iageInsertTime)
+        case .carbsToday: return carbsToday(s)
+        case .override: return override(s)
+        case .profile: return profileName(s)
         }
     }
 

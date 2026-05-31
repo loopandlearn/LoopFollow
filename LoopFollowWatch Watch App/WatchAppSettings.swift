@@ -1,15 +1,10 @@
+// LoopFollow
 // WatchAppSettings.swift
-// LoopFollowWatch Watch App
-//
-// Single source of truth for all editable alert settings.
-// Backed by the shared App Group container so settings survive
-// Watch app reinstalls and are accessible from both app and extension.
 
-import Foundation
 import Combine
+import Foundation
 
 final class WatchAppSettings: ObservableObject {
-
     static let shared = WatchAppSettings()
     private init() {}
 
@@ -20,7 +15,7 @@ final class WatchAppSettings: ObservableObject {
     // MARK: - UserDefaults keys
 
     private enum Key {
-        static let snoozeAllByDefault   = "watchSnoozeAllByDefault"
+        static let snoozeAllByDefault = "watchSnoozeAllByDefault"
         static let defaultSnoozeMinutes = "watchDefaultSnoozeMinutes"
         static func cooldown(_ type: WatchAlertType) -> String { "watchCooldown_\(type.rawValue)" }
     }
@@ -41,11 +36,11 @@ final class WatchAppSettings: ObservableObject {
 
     /// Default cooldowns in seconds. Used when no persisted value exists.
     static let defaultCooldowns: [WatchAlertType: TimeInterval] = [
-        .lowBG:     15 * 60,
-        .urgentLow:  5 * 60,
-        .highBG:    15 * 60,
-        .fastDrop:  10 * 60,
-        .fastRise:  10 * 60,
+        .lowBG: 15 * 60,
+        .urgentLow: 5 * 60,
+        .highBG: 15 * 60,
+        .fastDrop: 10 * 60,
+        .fastRise: 10 * 60,
     ]
 
     func cooldown(for type: WatchAlertType) -> TimeInterval {

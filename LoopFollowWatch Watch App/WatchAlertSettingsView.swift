@@ -1,15 +1,12 @@
+// LoopFollow
 // WatchAlertSettingsView.swift
-// LoopFollowWatch Watch App
-//
-// Alert settings tab. Presented inside a NavigationStack as the last tab in ContentView.
-// TODO: Add per-type enabled/disabled toggle when surfacing WatchAlertConfig.enabled.
 
 import SwiftUI
 
 struct WatchAlertSettingsView: View {
     @StateObject private var settings = WatchAppSettings.shared
 
-    private let snoozeOptions = stride(from: 30, through: 720, by: 30).map { $0 }
+    private let snoozeOptions = Array(stride(from: 30, through: 720, by: 30))
 
     var body: some View {
         List {
@@ -72,9 +69,8 @@ struct WatchAlertSettingsView: View {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
     }
 
-
     private func formattedMinutes(_ mins: Int) -> String {
-        mins < 60 ? "\(mins)m" : (mins % 60 == 0 ? "\(mins/60)h" : "\(mins/60)h \(mins%60)m")
+        mins < 60 ? "\(mins)m" : (mins % 60 == 0 ? "\(mins / 60)h" : "\(mins / 60)h \(mins % 60)m")
     }
 
     private func formattedSeconds(_ secs: TimeInterval) -> String {
@@ -107,7 +103,7 @@ private struct SnoozeDefaultPickerView: View {
     }
 
     private func label(for mins: Int) -> String {
-        mins < 60 ? "\(mins) min" : (mins % 60 == 0 ? "\(mins/60) hr" : "\(mins/60)h \(mins%60)m")
+        mins < 60 ? "\(mins) min" : (mins % 60 == 0 ? "\(mins / 60) hr" : "\(mins / 60)h \(mins % 60)m")
     }
 }
 
@@ -140,6 +136,6 @@ private struct CooldownPickerView: View {
 
     private func label(for secs: TimeInterval) -> String {
         let mins = Int(secs) / 60
-        return mins < 60 ? "\(mins) min" : "\(mins/60) hr"
+        return mins < 60 ? "\(mins) min" : "\(mins / 60) hr"
     }
 }

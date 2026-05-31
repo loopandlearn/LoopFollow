@@ -1,11 +1,10 @@
+// LoopFollow
 // LoopFollowWatchApp.swift
-// Philippe Achkar
-// 2026-03-10
 
+import OSLog
 import SwiftUI
 import WatchConnectivity
 import WatchKit
-import OSLog
 
 private let logger = Logger(
     subsystem: Bundle.main.bundleIdentifier ?? "com.loopfollow.watch",
@@ -14,7 +13,6 @@ private let logger = Logger(
 
 @main
 struct LoopFollowWatch_Watch_AppApp: App {
-
     @WKApplicationDelegateAdaptor(WatchAppDelegate.self) var delegate
 
     init() {
@@ -31,7 +29,6 @@ struct LoopFollowWatch_Watch_AppApp: App {
 // MARK: - App delegate for background tasks
 
 final class WatchAppDelegate: NSObject, WKApplicationDelegate {
-
     func applicationDidFinishLaunching() {
         WatchAlertManager.shared.setup()
         WatchAppDelegate.scheduleNextRefresh()
@@ -63,7 +60,8 @@ final class WatchAppDelegate: NSObject, WKApplicationDelegate {
         let storeSnapshot = GlucoseSnapshotStore.shared.load()
 
         if let ctx = contextSnapshot,
-           ctx.updatedAt > (storeSnapshot?.updatedAt ?? .distantPast) {
+           ctx.updatedAt > (storeSnapshot?.updatedAt ?? .distantPast)
+        {
             WatchAlertManager.shared.checkAndAlert(snapshot: ctx)
             GlucoseSnapshotStore.shared.save(ctx) {
                 WatchSessionReceiver.shared.triggerComplicationReload()
@@ -99,9 +97,5 @@ final class WatchAppDelegate: NSObject, WKApplicationDelegate {
             withPreferredDate: Date(timeIntervalSinceNow: 2 * 60),
             userInfo: nil
         ) { _ in }
-    }
-
-    private func scheduleNextRefresh() {
-        WatchAppDelegate.scheduleNextRefresh()
     }
 }

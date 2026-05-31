@@ -1,6 +1,5 @@
 // LoopFollow
 // WatchMealCommandView.swift
-// Carbs remote command view for Watch.
 
 import SwiftUI
 import UserNotifications
@@ -12,7 +11,7 @@ struct WatchMealCommandView: View {
     private let foodPresets: [(String, Double)] = [("🍭", 0.5), ("🌮", 3.0), ("🍕", 5.0)]
 
     @State private var carbsGrams: Int = 20
-    @State private var selectedFood: Int = 1  // default: taco (3 hr)
+    @State private var selectedFood: Int = 1 // default: taco (3 hr)
     @State private var showConfirm = false
     @State private var isSending = false
     @State private var alertMessage = ""
@@ -50,7 +49,7 @@ struct WatchMealCommandView: View {
 
                 // Food type selector
                 HStack(spacing: 8) {
-                    ForEach(0..<foodPresets.count, id: \.self) { idx in
+                    ForEach(0 ..< foodPresets.count, id: \.self) { idx in
                         let (emoji, _) = foodPresets[idx]
                         Button {
                             selectedFood = idx
@@ -110,7 +109,7 @@ struct WatchMealCommandView: View {
         let payload: [String: Any] = [
             "watchCmd": "carbs",
             "carbsAmount": Double(carbsGrams),
-            "absorptionTime": absorptionHours
+            "absorptionTime": absorptionHours,
         ]
         WCSession.default.sendMessage(payload) { reply in
             DispatchQueue.main.async {

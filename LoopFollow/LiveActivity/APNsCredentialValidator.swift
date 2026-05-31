@@ -1,3 +1,6 @@
+// LoopFollow
+// APNsCredentialValidator.swift
+
 import Foundation
 
 enum APNsCredentialValidator {

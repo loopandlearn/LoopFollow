@@ -1,6 +1,5 @@
 // LoopFollow
 // WatchRemoteCommandsView.swift
-// Root remote commands tab on the Watch.
 
 import SwiftUI
 
