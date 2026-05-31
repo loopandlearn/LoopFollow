@@ -1,0 +1,6 @@
+# Code owners for LoopFollow.
+# Owners listed here are automatically requested for review on PRs and,
+# when "Require review from Code Owners" is enabled in branch protection,
+# their approval is required before a PR can be merged.
+
+* @marionbarker @bjorkert @codebymini

@@ -109,6 +109,7 @@
 		DD4878052C7B2C970048F05C /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878042C7B2C970048F05C /* Storage.swift */; };
 		DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */; };
 		DD48780A2C7B30D40048F05C /* RemoteSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */; };
+		AB1CD0012C7B30D40048F05C /* RemoteDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1CD0022C7B30D40048F05C /* RemoteDiagnostics.swift */; };
 		DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */; };
 		DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */; };
 		DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878122C7B750D0048F05C /* TempTargetView.swift */; };
@@ -564,6 +565,7 @@
 		DD4878042C7B2C970048F05C /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsView.swift; sourceTree = "<group>"; };
 		DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsViewModel.swift; sourceTree = "<group>"; };
+		AB1CD0022C7B30D40048F05C /* RemoteDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteDiagnostics.swift; sourceTree = "<group>"; };
 		DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioRemoteControlViewModel.swift; sourceTree = "<group>"; };
 		DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioRemoteControlView.swift; sourceTree = "<group>"; };
 		DD4878122C7B750D0048F05C /* TempTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetView.swift; sourceTree = "<group>"; };
@@ -1090,6 +1092,7 @@
 				656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */,
 				DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */,
 				DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */,
+				AB1CD0022C7B30D40048F05C /* RemoteDiagnostics.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -2223,6 +2226,7 @@
 				DD13BC792C3FE63A0062313B /* InfoManager.swift in Sources */,
 				DD0C0C702C4AFFE800DBADDF /* RemoteViewController.swift in Sources */,
 				DD48780A2C7B30D40048F05C /* RemoteSettingsViewModel.swift in Sources */,
+				AB1CD0012C7B30D40048F05C /* RemoteDiagnostics.swift in Sources */,
 				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
 				DDDC31CE2E13A811009EA0F3 /* AlarmTile.swift in Sources */,
 				DDCF979424C0D380002C9752 /* UIViewExtension.swift in Sources */,

@@ -52,7 +52,7 @@ class NightscoutUtils {
             case .sgv:
                 return "/api/v1/entries.json"
             case .profile:
-                return "/api/v1/profile/current.json"
+                return "/api/v1/profiles.json"
             case .deviceStatus:
                 return "/api/v1/devicestatus.json"
             case .temporaryOverride, .temporaryOverrideCancel:
