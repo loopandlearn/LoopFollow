@@ -36,6 +36,7 @@ struct EndoReportView: View {
     @AppStorage("endoReport.basalRate") private var basalRate = ""
     @AppStorage("endoReport.targetGlucose") private var targetGlucose = ""
     @AppStorage("endoReport.customAidSystem") private var customAidSystem = ""
+    @AppStorage("endoReport.notes") private var notes = ""
 
     // Date range
     @State private var startDate: Date = StatsDateRange.lastComplete(days: 14).start
@@ -253,6 +254,19 @@ struct EndoReportView: View {
                                 }
                                 .padding(.top, 4)
                             }
+                        }
+                    }
+
+                    sectionCard("Clinician Notes", icon: "pencil.and.outline", color: .gray) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            TextEditor(text: $notes)
+                                .padding(10)
+                                .background(RoundedRectangle(cornerRadius: 14).fill(Color(UIColor.systemGray6)))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .stroke(Color.secondary.opacity(0.16), lineWidth: 1)
+                                )
+                                .frame(minHeight: 100)
                         }
                     }
 
@@ -730,6 +744,7 @@ struct EndoReportView: View {
                         targetGlucose: targetGlucose,
                         units: units,
                         accentColorHex: accentColorHex,
+                        notes: notes,
                         includeGlucoseSummary: includeGlucoseSummary,
                         includeInsulin: includeInsulin,
                         includeNutrition: includeNutrition,

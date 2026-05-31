@@ -68,6 +68,7 @@
 		A1A1A10001000000A0CFEED1 /* APNsCredentialValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */; };
 		A1A1A10002000000A0CFEED1 /* LogRedactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10002000000A0CFEED2 /* LogRedactor.swift */; };
 		ACE7F6DE0D065BEB52CDC0DB /* FutureCarbsAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D2A4EFD18B7B7748B6669E /* FutureCarbsAlarmEditor.swift */; };
+		C3B9188E2FC3CDC700B65FE5 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B9188D2FC3CDC000B65FE5 /* DashboardViewModel.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
 		DD026E592EA2C8A200A39CB5 /* InsulinPrecisionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD026E582EA2C8A200A39CB5 /* InsulinPrecisionManager.swift */; };
@@ -524,6 +525,7 @@
 		A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshManager.swift; sourceTree = "<group>"; };
 		B7D2A4EFD18B7B7748B6669E /* FutureCarbsAlarmEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureCarbsAlarmEditor.swift; sourceTree = "<group>"; };
 		BDFBE69CEF18416D84959974 /* Telemetry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Telemetry.swift; sourceTree = "<group>"; };
+		C3B9188D2FC3CDC000B65FE5 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCondition.swift; sourceTree = "<group>"; };
 		DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExpireCondition.swift; sourceTree = "<group>"; };
 		DD026E582EA2C8A200A39CB5 /* InsulinPrecisionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinPrecisionManager.swift; sourceTree = "<group>"; };
@@ -1455,6 +1457,7 @@
 		FC16A9782499657E003D6245 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				C3B9188D2FC3CDC000B65FE5 /* DashboardViewModel.swift */,
 				DD7E19802ACDA0EA00DBD158 /* Nightscout */,
 				FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */,
 				FC16A97924996673003D6245 /* NightScout.swift */,
@@ -2130,6 +2133,7 @@
 				DD4878202C7DAF890048F05C /* PushMessage.swift in Sources */,
 				DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */,
 				DDF6999B2C5AA32E0058A8D9 /* TempTargetPreset.swift in Sources */,
+				C3B9188E2FC3CDC700B65FE5 /* DashboardViewModel.swift in Sources */,
 				DD7F4C0F2DD51EC200D449E9 /* TempTargetStartCondition.swift in Sources */,
 				DDBD19962DFB44B0005C2D69 /* Alarm+byPriorityThenSpec.swift in Sources */,
 				656F8C102E49F36F0008DC1D /* QRCodeDisplayView.swift in Sources */,

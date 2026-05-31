@@ -21,6 +21,7 @@ struct EndoReportConfig {
     let targetGlucose: String
     let units: String // "mg/dL" or "mmol/L"
     let accentColorHex: String
+    let notes: String
 
     // Toggles
     let includeGlucoseSummary: Bool
@@ -58,8 +59,10 @@ enum EndoReportGenerator {
         let bgData = dataService.getBGData()
         guard !bgData.isEmpty else { throw ReportError.noData }
 
-        let agpData = AGPCalculator.calculate(bgData: bgData)
-        let tirData = TIRCalculator.calculate(bgData: bgData)
+        // Use the existing ViewModels for calculations
+        let agpVM = AGPViewModel(dataService: dataService)
+        agpVM.calculateAGP()
+
         let stats = ReportStats(bgData: bgData, dataService: dataService)
         let patterns = TimePatterns(bgData: bgData)
         let boluses = dataService.getBolusData()
@@ -82,7 +85,7 @@ enum EndoReportGenerator {
             // Page 1 — Summary
             ctx.beginPage()
             drawSummaryPage(ctx: ctx.cgContext, r: pageRect, cfg: config,
-                            bgData: bgData, agpData: agpData, tirData: tirData,
+                            bgData: bgData, agpData: agpVM.agpData,
                             stats: stats, patterns: patterns,
                             boluses: boluses, smbs: smbs, carbs: carbs,
                             simpleVM: simpleVM)
@@ -124,16 +127,32 @@ enum EndoReportGenerator {
 
     struct ReportStats {
         let avg, stdDev, cv, eA1C, minBG, maxBG, sensorPct, tir, tightTIR, days: Double
+        let veryLow, low, inRange, high, veryHigh: Double
         let readingCount: Int
+
         init(bgData: [ShareGlucoseData], dataService: StatsDataService) {
             let v = bgData.map { Double($0.sgv) }; let n = Double(v.count)
             let m = v.reduce(0,+) / n
             let variance = v.map { ($0 - m) * ($0 - m) }.reduce(0,+) / n
+
             avg = m; stdDev = sqrt(variance); cv = stdDev / m * 100; eA1C = (m + 46.7) / 28.7
             minBG = v.min() ?? 0; maxBG = v.max() ?? 0; readingCount = v.count
             days = Swift.max(dataService.endDate.timeIntervalSince1970 - dataService.startDate.timeIntervalSince1970, 86400) / 86400
             sensorPct = Swift.min(Double(v.count) / (days * 288) * 100, 100)
-            tir = Double(v.filter { $0 >= 70 && $0 <= 180 }.count) / n * 100
+
+            // Calculate TIR Buckets
+            let vLowCount = Double(v.filter { $0 < 54 }.count)
+            let lowCount = Double(v.filter { $0 >= 54 && $0 < 70 }.count)
+            let inRangeCount = Double(v.filter { $0 >= 70 && $0 <= 180 }.count)
+            let highCount = Double(v.filter { $0 > 180 && $0 <= 250 }.count)
+            let vHighCount = Double(v.filter { $0 > 250 }.count)
+
+            veryLow = (vLowCount / n) * 100
+            low = (lowCount / n) * 100
+            inRange = (inRangeCount / n) * 100
+            high = (highCount / n) * 100
+            veryHigh = (vHighCount / n) * 100
+            tir = inRange
             tightTIR = Double(v.filter { $0 >= 70 && $0 <= 140 }.count) / n * 100
         }
     }
@@ -216,6 +235,7 @@ enum EndoReportGenerator {
     private static let C_VHIGH = UIColor(red: 0.800, green: 0.340, blue: 0.340, alpha: 1)
     private static let C_BOLUS = UIColor(red: 0.380, green: 0.220, blue: 0.780, alpha: 0.85)
     private static let C_SMB = UIColor(red: 0.800, green: 0.200, blue: 0.600, alpha: 0.75)
+    private static let C_CARB = UIColor(red: 0.150, green: 0.600, blue: 0.150, alpha: 1.0)
     private static let C_BASAL = UIColor(red: 0.102, green: 0.451, blue: 0.933, alpha: 0.65)
 
     private static func bgColor(_ bg: Double) -> UIColor {
@@ -226,7 +246,7 @@ enum EndoReportGenerator {
 
     private static func drawSummaryPage(
         ctx: CGContext, r: CGRect, cfg: EndoReportConfig,
-        bgData _: [ShareGlucoseData], agpData: [AGPDataPoint], tirData: [TIRDataPoint],
+        bgData _: [ShareGlucoseData], agpData: [AGPDataPoint],
         stats: ReportStats, patterns: TimePatterns,
         boluses: [MainViewController.bolusGraphStruct],
         smbs: [MainViewController.bolusGraphStruct],
@@ -242,11 +262,11 @@ enum EndoReportGenerator {
             let gridW: CGFloat = r.width - m * 2 - 158
             let cw = gridW / 2 - 3; let ch: CGFloat = 36
             let cards: [(String, String, Bool)] = [
-                ("TIME IN RANGE", String(format: "%.0f%%", stats.tir), true),
-                ("GMI (EST. A1C)", String(format: "%.1f%%", stats.eA1C), false),
+                ("TIME IN RANGE (>70%)", String(format: "%.0f%%", stats.tir), true),
+                ("GMI (TARGET <7%)", String(format: "%.1f%%", stats.eA1C), false),
                 ("AVERAGE", cfg.fmtBG(stats.avg) + " \(cfg.units)", false),
                 ("STD DEVIATION", cfg.fmtBG(stats.stdDev), false),
-                ("CV", String(format: "%.0f%%", stats.cv), false),
+                ("CV (TARGET <36%)", String(format: "%.0f%%", stats.cv), false),
                 ("READINGS", "\(stats.readingCount)", false),
             ]
             var gy = y + 1
@@ -254,7 +274,7 @@ enum EndoReportGenerator {
                 statCard(c.0, val: c.1, x: m + CGFloat(i % 2) * (cw + 6), y: gy + CGFloat(i / 2) * (ch + 4),
                          w: cw, h: ch, accent: c.2, cfg: cfg, ctx: ctx)
             }
-            drawTIRBar(tirData: tirData, stats: stats, x: m + gridW + 10, y: y + 1,
+            drawTIRBar(stats: stats, x: m + gridW + 10, y: y + 1,
                        w: 148, h: ch * 3 + 7, cfg: cfg, ctx: ctx)
             y = gy + CGFloat(3) * (ch + 4) + 1
 
@@ -290,6 +310,10 @@ enum EndoReportGenerator {
                 if !cfg.targetGlucose.isEmpty { gridItems.append(("Target", cfg.targetGlucose)) }
             }
             y = drawSettingsGrid(gridItems, x: m, y: y + 1, width: r.width - m * 2, cfg: cfg, ctx: ctx)
+        }
+
+        if !cfg.notes.isEmpty {
+            y = drawNotesSection(cfg.notes, x: m, y: y + 2, width: r.width - m * 2, cfg: cfg, ctx: ctx)
         }
 
         if cfg.includeAGP, !agpData.isEmpty {
@@ -394,11 +418,10 @@ enum EndoReportGenerator {
 
     // MARK: - TIR vertical bar
 
-    private static func drawTIRBar(tirData: [TIRDataPoint], stats _: ReportStats,
+    private static func drawTIRBar(stats: ReportStats,
                                    x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat,
                                    cfg: EndoReportConfig, ctx: CGContext)
     {
-        guard let avg = tirData.first(where: { $0.period == .average }) else { return }
         let r = CGRect(x: x, y: y, width: w, height: h)
         ctx.setFillColor(C_CLOUD.cgColor); ctx.fill(r)
         ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.4); ctx.stroke(r)
@@ -408,8 +431,11 @@ enum EndoReportGenerator {
 
         // Shorten bar height to allow text room
         let bx = x + 10; let bw: CGFloat = 16; let by = y + 22; let bh = h - 50
-        let segs: [(Double, UIColor, String)] = [(avg.veryHigh, C_VHIGH, "Very High"), (avg.high, C_HIGH, "High"),
-                                                 (avg.inRange, C_IN, "In Range"), (avg.low, C_LOW, "Low"), (avg.veryLow, C_VLOW, "Very Low")]
+        let segs: [(Double, UIColor, String)] = [
+            (stats.veryHigh, C_VHIGH, "Very High"), (stats.high, C_HIGH, "High"),
+            (stats.inRange, C_IN, "In Range"), (stats.low, C_LOW, "Low"),
+            (stats.veryLow, C_VLOW, "Very Low"),
+        ]
         var sy = by
 
         for (pct, clr, _) in segs {
@@ -726,6 +752,21 @@ enum EndoReportGenerator {
         return y + maxH + 4
     }
 
+    @discardableResult
+    private static func drawNotesSection(_ notes: String, x: CGFloat, y: CGFloat, width: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat {
+        let headerY = sectionHdr("NOTES & OBSERVATIONS", y: y, m: x, w: width + x * 2, cfg: cfg, ctx: ctx)
+        let font = UIFont.systemFont(ofSize: 8)
+        let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: C_INK]
+
+        let textRect = CGRect(x: x + 6, y: headerY + 4, width: width - 12, height: 1000)
+        let size = (notes as NSString).boundingRect(with: textRect.size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil).size
+
+        let drawRect = CGRect(x: x + 6, y: headerY + 4, width: width - 12, height: size.height)
+        (notes as NSString).draw(in: drawRect, withAttributes: attributes)
+
+        return headerY + 4 + size.height + 4
+    }
+
     // MARK: - Format helpers
 
     private static func formatBasalRateForDisplay(_ input: String) -> String {
@@ -803,37 +844,64 @@ enum EndoReportGenerator {
         let dlA: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 9), .foregroundColor: C_INK]
         df2.string(from: date).draw(at: CGPoint(x: x + 10, y: y + 5), withAttributes: dlA)
 
-        let statsX = x + w - 120
+        // Statistics Container on the Right
+        let statsW: CGFloat = 115
+        let statsX = x + w - statsW
+        let boxRect = CGRect(x: statsX, y: y + 1, width: statsW - 1, height: h - 2)
+        ctx.setFillColor(C_CLOUD.cgColor)
+        ctx.fill(boxRect)
+
+        ctx.setStrokeColor(C_BORDER.cgColor)
+        ctx.setLineWidth(0.4)
+        ctx.move(to: CGPoint(x: statsX, y: y + 1))
+        ctx.addLine(to: CGPoint(x: statsX, y: y + h - 1))
+        ctx.strokePath()
+
         let vals = dayData.bg.map { Double($0.sgv) }
-
-        // Calculate total insulin for the day
-        let totalBolus = dayData.bolus.map { $0.value }.reduce(0, +)
-        let totalSMB = dayData.smb.map { $0.value }.reduce(0, +)
-        let totalInsulin = totalBolus + totalSMB
-
-        // Calculate total scheduled basal for the day
-        let dailyProgrammedBasal = calculateDailyProgrammedBasal(basalProfile: basalProfile)
-
         if !vals.isEmpty {
             let n = Double(vals.count)
             let avg = vals.reduce(0,+) / n
             let tir = Double(vals.filter { $0 >= 70 && $0 <= 180 }.count) / n * 100
+            let totalInsulin = dayData.bolus.map { $0.value }.reduce(0, +) + dayData.smb.map { $0.value }.reduce(0, +)
+            let dailyProgrammedBasal = calculateDailyProgrammedBasal(basalProfile: basalProfile)
 
-            let sa: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE]
-            let sv: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: C_INK]
+            let la: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: C_SLATE]
+            let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: C_INK]
             let tirC: UIColor = tir >= 70 ? C_IN : tir >= 50 ? C_HIGH : C_VLOW
             let tirA: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: tirC]
 
-            let statsXAdjusted = x + w - 200 // Adjust to make space for new columns
-            let cols: [(String, CGFloat)] = [("Avg", 0), ("TIR", 40), ("Insulin", 80), ("Basal", 120)]
-            for (lbl, ox) in cols {
-                (lbl as NSString).draw(at: CGPoint(x: statsXAdjusted + ox, y: y + 5), withAttributes: sa)
-            }
+            let padding: CGFloat = 8
+            let col2X = statsX + statsW / 2
 
-            cfg.fmtBG(avg).draw(at: CGPoint(x: statsXAdjusted, y: y + 14), withAttributes: sv)
-            String(format: "%.0f%%", tir).draw(at: CGPoint(x: statsXAdjusted + 38, y: y + 14), withAttributes: tirA)
-            String(format: "%.1f U", totalInsulin).draw(at: CGPoint(x: statsXAdjusted + 78, y: y + 14), withAttributes: sv)
-            String(format: "%.1f U", dailyProgrammedBasal).draw(at: CGPoint(x: statsXAdjusted + 118, y: y + 14), withAttributes: sv)
+            // Row 1: Avg & TIR
+            "Avg BG".draw(at: CGPoint(x: statsX + padding, y: y + 8), withAttributes: la)
+            cfg.fmtBG(avg).draw(at: CGPoint(x: statsX + padding, y: y + 15), withAttributes: va)
+
+            "TIR".draw(at: CGPoint(x: col2X, y: y + 8), withAttributes: la)
+            String(format: "%.0f%%", tir).draw(at: CGPoint(x: col2X, y: y + 15), withAttributes: tirA)
+
+            // Divider
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.3)
+            ctx.move(to: CGPoint(x: statsX + 5, y: y + 30))
+            ctx.addLine(to: CGPoint(x: x + w - 5, y: y + 30))
+            ctx.strokePath()
+
+            // Row 2: Bolus & Basal
+            "Bolus Total".draw(at: CGPoint(x: statsX + padding, y: y + 36), withAttributes: la)
+            String(format: "%.1f U", totalInsulin).draw(at: CGPoint(x: statsX + padding, y: y + 43), withAttributes: va)
+
+            "Basal Sched".draw(at: CGPoint(x: col2X, y: y + 36), withAttributes: la)
+            String(format: "%.1f U", dailyProgrammedBasal).draw(at: CGPoint(x: col2X, y: y + 43), withAttributes: va)
+
+            // Divider
+            ctx.move(to: CGPoint(x: statsX + 5, y: y + 58))
+            ctx.addLine(to: CGPoint(x: x + w - 5, y: y + 58))
+            ctx.strokePath()
+
+            // Row 3: Coverage
+            "Data Coverage".draw(at: CGPoint(x: statsX + padding, y: y + 64), withAttributes: la)
+            let coverage = String(format: "%.0f%%", Double(vals.count) / 2.88)
+            "\(vals.count) pts (\(coverage))".draw(at: CGPoint(x: statsX + padding, y: y + 71), withAttributes: va)
         }
 
         let chartX = x + 10; let chartW = w - 140
@@ -903,6 +971,14 @@ enum EndoReportGenerator {
             ctx.setStrokeColor(C_BASAL.cgColor); ctx.setLineWidth(0.9); ctx.addPath(lp); ctx.strokePath()
         }
 
+        // Draw Carbs as small green diamonds/circles at the top of the chart
+        for carb in dayData.carbs {
+            let cx = tx(carb.date)
+            let cy = chartY + 4
+            ctx.setFillColor(C_CARB.cgColor)
+            ctx.fillEllipse(in: CGRect(x: cx - 2.5, y: cy - 2.5, width: 5, height: 5))
+        }
+
         for smb in dayData.smb {
             let bx = tx(smb.date); let bh2 = max(CGFloat(Swift.min(smb.value / 15, 1)) * (chartH * 0.35), 2.5)
             ctx.setFillColor(C_SMB.cgColor)
@@ -915,7 +991,8 @@ enum EndoReportGenerator {
             ctx.fill(CGRect(x: bx - 2.5, y: chartY + chartH - bh2, width: 5, height: bh2))
         }
 
-        for r in dayData.bg.sorted { $0.date < $1.date } {
+        let sortedBG = dayData.bg.sorted(by: { $0.date < $1.date })
+        for r in sortedBG {
             let rx = tx(r.date); let ry = gy(Double(r.sgv))
             ctx.setFillColor(bgColor(Double(r.sgv)).cgColor)
             ctx.fillEllipse(in: CGRect(x: rx - 1.6, y: ry - 1.6, width: 3.2, height: 3.2))
@@ -931,15 +1008,14 @@ enum EndoReportGenerator {
             (lbl as NSString).draw(at: CGPoint(x: hx - sz.width / 2, y: chartY + chartH + 2), withAttributes: axA)
         }
 
-        if day == day {
-            let lgA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: C_SLATE]
-            var lgX = chartX + chartW + 4
-            for (lbl, clr) in [("● BG", C_IN), ("▮ Bolus", C_BOLUS), ("▮ SMB", C_SMB), ("— Basal", C_BASAL)] {
-                let a: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: clr]
-                (lbl as NSString).draw(at: CGPoint(x: lgX, y: chartY + 2), withAttributes: a)
-                lgX += (lbl as NSString).size(withAttributes: lgA).width + 5
-                if lgX > x + w - 4 { break }
-            }
+        // Legend moved to top area next to date
+        let lgA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: C_SLATE]
+        var lgX = x + 120
+        for (lbl, clr) in [("● BG", C_IN), ("● Carbs", C_CARB), ("▮ Bolus", C_BOLUS), ("▮ SMB", C_SMB), ("— Basal", C_BASAL)] {
+            let a: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: clr]
+            (lbl as NSString).draw(at: CGPoint(x: lgX, y: y + 7), withAttributes: a)
+            lgX += (lbl as NSString).size(withAttributes: lgA).width + 5
+            if lgX > statsX - 4 { break }
         }
     }
 

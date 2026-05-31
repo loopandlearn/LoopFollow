@@ -98,65 +98,57 @@ final class TelemetryClient {
         await send()
     }
 
+    struct TelemetryPayload: Encodable {
+        let appVersion: String?
+        let buildDate: String?
+        let isTestFlight: Bool
+        let instance: String
+        let idfv: String?
+        let device: String
+        let platform: String
+        let osVersion: String
+        let usesDexcom: Bool
+        let usesNightscout: Bool
+        let followingApp: String?
+        let backgroundRefreshMethod: String
+        let units: String
+        let remoteType: String
+        let appearanceMode: String
+        let contactEnabled: Bool
+        let calendarEnabled: Bool
+        let coldLaunches7d: Int
+    }
+
     /// The exact payload that would be POSTed right now. Pure function: useful
     /// both for sending and for the "What's sent" preview UI.
-    func buildPayload() -> [String: Any] {
+    func buildPayload() -> TelemetryPayload {
         let storage = Storage.shared
         let info = Bundle.main.infoDictionary ?? [:]
         let bd = BuildDetails.default
-
-        var payload: [String: Any] = [:]
-
-        if let v = info["CFBundleShortVersionString"] as? String { payload["appVersion"] = v }
-
-        // Date-only (YYYY-MM-DD) prefix of the ISO8601 build date. Time is
-        // dropped to keep the payload to a low-resolution build identifier.
-        if let date = bd.buildDateString, date.count >= 10 {
-            payload["buildDate"] = String(date.prefix(10))
-        }
-
-        // Only signal we can actually verify: receipt-based TestFlight check.
-        // macCatalyst is covered by `platform`; simulator is covered by the
-        // `Simulator …` prefix on `device`. Anything else is a local Xcode
-        // build (browser-build), which is just "isTestFlight == false".
-        payload["isTestFlight"] = bd.isTestFlightBuild()
-
-        payload["instance"] = AppConstants.appInstanceId
-
-        if let idfv = UIDevice.current.identifierForVendor?.uuidString {
-            payload["idfv"] = idfv
-        }
-
-        payload["device"] = Self.hardwareIdentifier()
-        payload["platform"] = Self.detectPlatform()
-        payload["osVersion"] = UIDevice.current.systemVersion
-
         let dexcomUser = storage.shareUserName.value.trimmingCharacters(in: .whitespacesAndNewlines)
-        payload["usesDexcom"] = !dexcomUser.isEmpty
-
         let nsURLRaw = storage.url.value.trimmingCharacters(in: .whitespacesAndNewlines)
-        payload["usesNightscout"] = !nsURLRaw.isEmpty
-
-        // Which closed-loop app is being followed (Loop / Trio / …). Field
-        // omitted when device hasn't been detected yet; absence is the signal.
         let device = storage.device.value.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !device.isEmpty {
-            payload["followingApp"] = device
-        }
 
-        payload["backgroundRefreshMethod"] = storage.backgroundRefreshType.value.rawValue
-
-        // Selected user-preference fields. Picked for product-decision value;
-        // none reveal personal or health information.
-        payload["units"] = storage.units.value // "mg/dL" / "mmol/L"
-        payload["remoteType"] = storage.remoteType.value.rawValue // which remote-command path
-        payload["appearanceMode"] = storage.appearanceMode.value.rawValue // light / dark / system
-        payload["contactEnabled"] = storage.contactEnabled.value // Contacts integration on?
-        payload["calendarEnabled"] = !storage.calendarIdentifier.value.isEmpty // calendar selected?
-
-        payload["coldLaunches7d"] = storage.telemetryColdLaunchTimes.value.count
-
-        return payload
+        return TelemetryPayload(
+            appVersion: info["CFBundleShortVersionString"] as? String,
+            buildDate: (bd.buildDateString?.count ?? 0) >= 10 ? String(bd.buildDateString!.prefix(10)) : nil,
+            isTestFlight: bd.isTestFlightBuild(),
+            instance: AppConstants.appInstanceId,
+            idfv: UIDevice.current.identifierForVendor?.uuidString,
+            device: Self.hardwareIdentifier(),
+            platform: Self.detectPlatform(),
+            osVersion: UIDevice.current.systemVersion,
+            usesDexcom: !dexcomUser.isEmpty,
+            usesNightscout: !nsURLRaw.isEmpty,
+            followingApp: device.isEmpty ? nil : device,
+            backgroundRefreshMethod: storage.backgroundRefreshType.value.rawValue,
+            units: storage.units.value,
+            remoteType: storage.remoteType.value.rawValue,
+            appearanceMode: storage.appearanceMode.value.rawValue,
+            contactEnabled: storage.contactEnabled.value,
+            calendarEnabled: !storage.calendarIdentifier.value.isEmpty,
+            coldLaunches7d: storage.telemetryColdLaunchTimes.value.count
+        )
     }
 
     /// Build payload, POST it, update last-sent state on 2xx. Fire-and-forget;
@@ -164,7 +156,7 @@ final class TelemetryClient {
     func send() async {
         let storage = Storage.shared
         let payload = buildPayload()
-        guard let body = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
+        guard let body = try? JSONEncoder().encode(payload) else {
             LogManager.shared.log(category: .telemetry, message: "skip send: payload not JSON-serializable", isDebug: true)
             return
         }
@@ -276,9 +268,8 @@ struct TelemetryPreviewView: View {
     }
 
     private static func renderPayload() -> String {
-        let payload = TelemetryClient.shared.buildPayload()
-        guard let data = try? JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys]),
-              let text = String(data: data, encoding: .utf8)
+        let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard let data = try? encoder.encode(TelemetryClient.shared.buildPayload()), let text = String(data: data, encoding: .utf8)
         else { return "Unable to render payload." }
         return text
     }
