@@ -115,6 +115,7 @@
 		DD4878052C7B2C970048F05C /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878042C7B2C970048F05C /* Storage.swift */; };
 		DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */; };
 		DD48780A2C7B30D40048F05C /* RemoteSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */; };
+		AB1CD0012C7B30D40048F05C /* RemoteDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1CD0022C7B30D40048F05C /* RemoteDiagnostics.swift */; };
 		DD48780E2C7B74A40048F05C /* TrioRemoteControlViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */; };
 		DD4878102C7B74BF0048F05C /* TrioRemoteControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */; };
 		DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878122C7B750D0048F05C /* TempTargetView.swift */; };
@@ -254,6 +255,7 @@
 		DDD10F0B2C54192A00D76A8E /* TemporaryTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */; };
 		DDDB86F12DF7223C00AADDAC /* DeleteAlarmSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */; };
 		DDDC01DD2E244B3100D9975C /* JWTManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC01DC2E244B3100D9975C /* JWTManager.swift */; };
+		A1A1A10002000000A0CFEED1 /* LogRedactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10002000000A0CFEED2 /* LogRedactor.swift */; };
 		DDDC31CC2E13A7DF009EA0F3 /* AddAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */; };
 		DDDC31CE2E13A811009EA0F3 /* AlarmTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */; };
 		DDDF6F492D479AF000884336 /* NoRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF6F482D479AEF00884336 /* NoRemoteView.swift */; };
@@ -296,6 +298,7 @@
 		FC1BDD3224A2585C001B652C /* DataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1BDD2E24A232A3001B652C /* DataStructs.swift */; };
 		FC3AE7B5249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC3AE7B3249E8E0E00AAE1E0 /* LoopFollow.xcdatamodeld */; };
 		FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC688592489554800A0279D /* BackgroundTaskAudio.swift */; };
+		A1A1A10001000000A0CFEED1 /* APNsCredentialValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */; };
 		FC5A5C3D2497B229009C550E /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FC5A5C3C2497B229009C550E /* Config.xcconfig */; };
 		FC7CE518248ABE37001F83B8 /* Siri_Alert_Calibration_Needed.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4A9248ABE2B001F83B8 /* Siri_Alert_Calibration_Needed.caf */; };
 		FC7CE519248ABE37001F83B8 /* Rise_And_Shine.caf in Resources */ = {isa = PBXBuildFile; fileRef = FC7CE4AA248ABE2B001F83B8 /* Rise_And_Shine.caf */; };
@@ -571,6 +574,7 @@
 		DD4878042C7B2C970048F05C /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsView.swift; sourceTree = "<group>"; };
 		DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsViewModel.swift; sourceTree = "<group>"; };
+		AB1CD0022C7B30D40048F05C /* RemoteDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteDiagnostics.swift; sourceTree = "<group>"; };
 		DD48780D2C7B74A40048F05C /* TrioRemoteControlViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioRemoteControlViewModel.swift; sourceTree = "<group>"; };
 		DD48780F2C7B74BF0048F05C /* TrioRemoteControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioRemoteControlView.swift; sourceTree = "<group>"; };
 		DD4878122C7B750D0048F05C /* TempTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempTargetView.swift; sourceTree = "<group>"; };
@@ -712,6 +716,7 @@
 		DDD10F0A2C54192A00D76A8E /* TemporaryTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTarget.swift; sourceTree = "<group>"; };
 		DDDB86F02DF7223C00AADDAC /* DeleteAlarmSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAlarmSection.swift; sourceTree = "<group>"; };
 		DDDC01DC2E244B3100D9975C /* JWTManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JWTManager.swift; sourceTree = "<group>"; };
+		A1A1A10002000000A0CFEED2 /* LogRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogRedactor.swift; sourceTree = "<group>"; };
 		DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmSheet.swift; sourceTree = "<group>"; };
 		DDDC31CD2E13A811009EA0F3 /* AlarmTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmTile.swift; sourceTree = "<group>"; };
 		DDDF6F482D479AEF00884336 /* NoRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoRemoteView.swift; sourceTree = "<group>"; };
@@ -880,6 +885,7 @@
 		FCA2DDE52501095000254A8C /* Timers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timers.swift; sourceTree = "<group>"; };
 		FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryKeyPath.swift; sourceTree = "<group>"; };
 		FCC688592489554800A0279D /* BackgroundTaskAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskAudio.swift; sourceTree = "<group>"; };
+		A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNsCredentialValidator.swift; sourceTree = "<group>"; };
 		FCC6885B2489559400A0279D /* blank.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blank.wav; sourceTree = "<group>"; };
 		FCC6885D24896A6C00A0279D /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
 		FCC6886624898F8000A0279D /* UserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValue.swift; sourceTree = "<group>"; };
@@ -1093,6 +1099,7 @@
 				656F8C132E49F3D20008DC1D /* RemoteCommandSettings.swift */,
 				DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */,
 				DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */,
+				AB1CD0022C7B30D40048F05C /* RemoteDiagnostics.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -1695,6 +1702,7 @@
 				FCC6886A24898FD800A0279D /* ObservationToken.swift */,
 				FCC6886C2489909D00A0279D /* AnyConvertible.swift */,
 				FCC688592489554800A0279D /* BackgroundTaskAudio.swift */,
+				A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */,
 				A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */,
 				FCFEEC9F2488157B00402A7F /* Chart.swift */,
 				FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */,
@@ -1713,6 +1721,7 @@
 				DDF699952C5582290058A8D9 /* TextFieldWithToolBar.swift */,
 				DDC7E5372DBD887400EB1127 /* isOnPhoneCall.swift */,
 				DDDC01DC2E244B3100D9975C /* JWTManager.swift */,
+				A1A1A10002000000A0CFEED2 /* LogRedactor.swift */,
 				6541341B2E1DC28000BDBE08 /* DateExtensions.swift */,
 			);
 			path = Helpers;
@@ -2224,6 +2233,7 @@
 				DD13BC7B2C3FE64A0062313B /* InfoTableView.swift in Sources */,
 				DD4E5F6A7B8C9D0E2F2A3B4C /* RemoteContentView.swift in Sources */,
 				DD48780A2C7B30D40048F05C /* RemoteSettingsViewModel.swift in Sources */,
+				AB1CD0012C7B30D40048F05C /* RemoteDiagnostics.swift in Sources */,
 				FCFEECA02488157B00402A7F /* Chart.swift in Sources */,
 				DDDC31CE2E13A811009EA0F3 /* AlarmTile.swift in Sources */,
 				DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */,
@@ -2306,6 +2316,7 @@
 				DD4A407E2E6AFEE6007B318B /* AuthService.swift in Sources */,
 				654134182E1DC09700BDBE08 /* OverridePresetsView.swift in Sources */,
 				DDDC01DD2E244B3100D9975C /* JWTManager.swift in Sources */,
+				A1A1A10002000000A0CFEED1 /* LogRedactor.swift in Sources */,
 				DDD10F072C529DE800D76A8E /* Observable.swift in Sources */,
 				DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */,
 				DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */,
@@ -2393,6 +2404,7 @@
 				DD493ADD2ACF21E0009A6922 /* Basals.swift in Sources */,
 				FC16A98124996C07003D6245 /* DateTime.swift in Sources */,
 				FC3CAB022493B6220068A152 /* BackgroundTaskAudio.swift in Sources */,
+				A1A1A10001000000A0CFEED1 /* APNsCredentialValidator.swift in Sources */,
 				DDCC3A582DDC9655006F1C10 /* MissedBolusAlarmEditor.swift in Sources */,
 				DDEF50402D479B8A00884336 /* LoopAPNSService.swift in Sources */,
 				DD485F142E454B2600CE8CBF /* SecureMessenger.swift in Sources */,

@@ -24,14 +24,9 @@ struct AggregatedStatsView: View {
         _showGMI = State(initialValue: UnitSettingsStore.shared.glycemicMetricMode == .gmi)
         _showStdDev = State(initialValue: UnitSettingsStore.shared.variabilityMetricMode == .stdDeviation)
 
-        let calendar = dateTimeUtils.displayCalendar()
-        let startOfToday = calendar.startOfDay(for: Date())
-        let end = calendar.date(byAdding: .second, value: -1, to: startOfToday) ?? Date()
-        let endDay = calendar.startOfDay(for: end)
-        let startDay = calendar.date(byAdding: .day, value: -7, to: endDay) ?? endDay
-        let start = calendar.startOfDay(for: startDay)
-        _startDate = State(initialValue: start)
-        _endDate = State(initialValue: end)
+        let range = StatsDateRange.lastComplete(days: 7)
+        _startDate = State(initialValue: range.start)
+        _endDate = State(initialValue: range.end)
     }
 
     var body: some View {

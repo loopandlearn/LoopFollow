@@ -276,12 +276,11 @@ class PushNotificationManager {
                 }
 
                 if let httpResponse = response as? HTTPURLResponse {
-                    print("Push notification sent.")
-                    print("Status code: \(httpResponse.statusCode)")
+                    LogManager.shared.log(category: .apns, message: "Push notification sent. Status code: \(httpResponse.statusCode)", isDebug: true)
 
                     var responseBodyMessage = ""
                     if let data = data, let responseBody = String(data: data, encoding: .utf8) {
-                        print("Response body: \(responseBody)")
+                        LogManager.shared.log(category: .apns, message: "Response body: \(responseBody)", isDebug: true)
                         if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                            let reason = json["reason"] as? String
                         {

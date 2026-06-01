@@ -37,7 +37,7 @@ extension MainViewController {
             if graphHours > 24, IsNightscoutEnabled() {
                 self.webLoadNSBGData(dexData: data)
             } else {
-                self.ProcessDexBGData(data: data, sourceName: "Dexcom")
+                self.ProcessDexBGData(data: self.deduplicateBGReadings(data), sourceName: "Dexcom")
             }
         }
     }
@@ -70,18 +70,7 @@ extension MainViewController {
                         nsData[i].date.round(FloatingPointRoundingRule.toNearestOrEven)
                     }
 
-                    var nsData2: [ShareGlucoseData] = []
-                    var lastAddedTime = Double.infinity
-                    var lastAddedSGV: Int?
-                    let minInterval: Double = 30
-
-                    for reading in nsData {
-                        if (lastAddedSGV == nil || lastAddedSGV != reading.sgv) || (lastAddedTime - reading.date >= minInterval) {
-                            nsData2.append(reading)
-                            lastAddedTime = reading.date
-                            lastAddedSGV = reading.sgv
-                        }
-                    }
+                    var nsData2 = self.deduplicateBGReadings(nsData)
 
                     // merge NS and Dex data if needed; use recent Dex data and older NS data
                     var sourceName = "Nightscout"
@@ -115,6 +104,21 @@ extension MainViewController {
                 return
             }
         }
+    }
+
+    /// Removes consecutive duplicate readings (same SGV within 30 s). Expects newest-first input.
+    func deduplicateBGReadings(_ readings: [ShareGlucoseData]) -> [ShareGlucoseData] {
+        var result: [ShareGlucoseData] = []
+        var lastTime = Double.infinity
+        var lastSGV: Int?
+        for reading in readings {
+            if lastSGV == nil || lastSGV != reading.sgv || lastTime - reading.date >= 30 {
+                result.append(reading)
+                lastTime = reading.date
+                lastSGV = reading.sgv
+            }
+        }
+        return result
     }
 
     /// Processes incoming BG data.

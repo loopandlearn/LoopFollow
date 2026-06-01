@@ -66,7 +66,7 @@ class ImportExportSettingsViewModel: ObservableObject {
 
     private func processImportedSettings(_ jsonString: String) {
         do {
-            LogManager.shared.log(category: .general, message: "Processing QR code data: \(jsonString.prefix(200))...")
+            LogManager.shared.log(category: .general, message: "Processing QR code data: \(LogRedactor.fingerprint(jsonString))")
 
             guard let data = jsonString.data(using: .utf8) else {
                 qrCodeErrorMessage = "Invalid QR code data"
@@ -78,7 +78,8 @@ class ImportExportSettingsViewModel: ObservableObject {
             // Try to decode as JSON first to see what we get
             do {
                 let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
-                LogManager.shared.log(category: .general, message: "JSON parsing successful: \(jsonObject)")
+                let topLevelKeys = (jsonObject as? [String: Any]).map { Array($0.keys).sorted() } ?? []
+                LogManager.shared.log(category: .general, message: "JSON parsing successful: keys=\(topLevelKeys)")
             } catch {
                 LogManager.shared.log(category: .general, message: "JSON parsing failed: \(error.localizedDescription)")
             }
@@ -263,7 +264,7 @@ class ImportExportSettingsViewModel: ObservableObject {
             (remoteType != nil && !remoteType!.isEmpty && remoteType != "None") ||
             alarmCount > 0
 
-        LogManager.shared.log(category: .general, message: "Import preview check - nightscoutURL: \(nightscoutURL ?? "nil"), dexcomUsername: \(dexcomUsername ?? "nil"), remoteType: \(remoteType ?? "nil"), alarmCount: \(alarmCount), hasAnySettings: \(hasAnySettings)")
+        LogManager.shared.log(category: .general, message: "Import preview check - nightscoutURL: \(nightscoutURL.map { LogRedactor.url($0) } ?? "nil"), dexcomUsername: \(dexcomUsername.map { LogRedactor.username($0) } ?? "nil"), remoteType: \(remoteType ?? "nil"), alarmCount: \(alarmCount), hasAnySettings: \(hasAnySettings)")
 
         if hasAnySettings {
             LogManager.shared.log(category: .general, message: "Creating import preview with settings")
@@ -274,7 +275,7 @@ class ImportExportSettingsViewModel: ObservableObject {
                 alarmCount: alarmCount,
                 alarmNames: alarmNames
             )
-            LogManager.shared.log(category: .general, message: "Created importPreview - nightscoutURL: \(importPreview?.nightscoutURL ?? "nil"), remoteType: \(importPreview?.remoteType ?? "nil"), alarmCount: \(importPreview?.alarmCount ?? 0)")
+            LogManager.shared.log(category: .general, message: "Created importPreview - nightscoutURL: \(importPreview?.nightscoutURL.map { LogRedactor.url($0) } ?? "nil"), remoteType: \(importPreview?.remoteType ?? "nil"), alarmCount: \(importPreview?.alarmCount ?? 0)")
             showImportConfirmation = true
             LogManager.shared.log(category: .general, message: "Set showImportConfirmation = true")
         } else {

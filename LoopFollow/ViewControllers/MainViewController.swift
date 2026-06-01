@@ -632,6 +632,12 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         // Capture before migrations run: true for existing users, false for fresh installs.
         let isExistingUser = Storage.shared.migrationStep.exists
 
+        // When adding a new migration step below:
+        //   1. Bump the `migrationStep` defaultValue in Storage.swift to the new latest step
+        //      number so fresh installs skip every migration.
+        //   2. Update any other StorageValue defaults in Storage.swift that this new step
+        //      mutates, so a fresh install ends up in the same state as a migrated user.
+
         // Step 1: Released in v3.0.0 (2025-07-07). Can be removed after 2026-07-07.
         if Storage.shared.migrationStep.value < 1 {
             Storage.shared.migrateStep1()
