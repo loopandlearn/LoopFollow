@@ -5,6 +5,7 @@ import CoreData
 import EventKit
 import UIKit
 import UserNotifications
+import WatchConnectivity
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -69,6 +70,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let bfu = !UIApplication.shared.isProtectedDataAvailable
         Storage.shared.needsBFUReload = bfu
         LogManager.shared.log(category: .general, message: "BFU check: isProtectedDataAvailable=\(!bfu), needsBFUReload=\(bfu)")
+
+        PhoneSessionManager.shared.startSession()
 
         return true
     }
