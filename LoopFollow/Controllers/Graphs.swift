@@ -882,7 +882,14 @@ extension MainViewController {
         BGChartFull.data?.notifyDataChanged()
         BGChartFull.notifyDataSetChanged()
 
-        if firstGraphLoad {
+        // The initial zoom is a one-shot, relative to the chart's current
+        // viewport. Skip it until the chart actually has a width — otherwise a
+        // refresh that lands while the view is loaded but off-screen (e.g. Home
+        // lives in the Menu, so MainViewController is force-loaded headless by
+        // bootstrap()) would consume firstGraphLoad against a zero-size viewport
+        // and leave the main graph blank. viewDidAppear re-runs updateBGGraph
+        // once a real frame exists, applying the zoom correctly.
+        if firstGraphLoad, BGChart.bounds.width > 0 {
             var scaleX = CGFloat(Storage.shared.chartScaleX.value)
             if scaleX > CGFloat(ScaleXMax) {
                 scaleX = CGFloat(ScaleXMax)

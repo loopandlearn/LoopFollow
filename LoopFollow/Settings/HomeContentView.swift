@@ -14,7 +14,16 @@ struct HomeContentView: UIViewControllerRepresentable {
     }
 
     func makeUIViewController(context _: Context) -> UIViewController {
-        let mainVC = MainViewController()
+        // Reuse the single long-lived instance rather than creating a new one,
+        // so there is exactly one data pipeline and MainViewController.shared is
+        // never displaced. bootstrap() is a no-op if it already exists.
+        MainViewController.bootstrap()
+        let mainVC = MainViewController.shared!
+        // Detach from any previous SwiftUI host (e.g. after a Menu push was
+        // popped and is now being re-pushed) before this representable embeds it.
+        mainVC.willMove(toParent: nil)
+        mainVC.removeFromParent()
+        mainVC.view.removeFromSuperview()
         mainVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
         return mainVC
     }

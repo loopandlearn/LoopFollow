@@ -14,6 +14,8 @@ struct MainTabView: View {
     @ObservedObject private var statisticsPosition = Storage.shared.statisticsPosition
     @ObservedObject private var treatmentsPosition = Storage.shared.treatmentsPosition
 
+    @State private var showTelemetryConsent = false
+
     private var orderedItems: [TabItem] {
         Storage.shared.orderedTabBarItems()
     }
@@ -37,6 +39,27 @@ struct MainTabView: View {
             .tag(4)
         }
         .preferredColorScheme(appearanceMode.value.colorScheme)
+        .onAppear {
+            // Start the data pipeline as soon as the UI appears, independent of
+            // tab layout. Without this, a user who moves Home into the Menu would
+            // have no MainViewController — and therefore no data fetching, alarms,
+            // or background audio — until they manually opened Home. Tying it to
+            // onAppear (not app launch) keeps it off the BG-only refresh path.
+            MainViewController.bootstrap()
+
+            // One-time consent prompt. Previously presented by SceneDelegate,
+            // which was removed in the storyboard→SwiftUI migration; without
+            // this, fresh installs stay permanently undecided and telemetry
+            // never sends. The storage flag keeps it to a single appearance.
+            if !Storage.shared.telemetryConsentDecisionMade.value {
+                showTelemetryConsent = true
+            }
+        }
+        .sheet(isPresented: $showTelemetryConsent) {
+            // User must explicitly choose — no swipe-to-dismiss.
+            TelemetryConsentView()
+                .interactiveDismissDisabled(true)
+        }
     }
 
     @ViewBuilder

@@ -24,9 +24,22 @@ private struct APNSCredentialSnapshot: Equatable {
 }
 
 class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificationCenterDelegate {
-    /// Singleton reference set during viewDidLoad. Used by code that needs
-    /// to reach MainViewController without walking the view hierarchy.
-    private(set) weak static var shared: MainViewController?
+    /// The single, long-lived MainViewController that owns the app's data
+    /// pipeline (scheduleAllTasks). Held strongly so it stays alive — and the
+    /// engine keeps running — regardless of which tabs are visible or whether
+    /// Home has been opened. Created once via bootstrap() on first foreground.
+    private(set) static var shared: MainViewController?
+
+    /// Creates and force-loads the shared instance if it does not yet exist.
+    /// loadViewIfNeeded() triggers viewDidLoad, which starts scheduleAllTasks.
+    /// Idempotent and main-thread only. Called from MainTabView on appear so
+    /// the engine runs even when Home lives in the Menu rather than a tab.
+    static func bootstrap() {
+        guard shared == nil else { return }
+        let vc = MainViewController()
+        shared = vc
+        vc.loadViewIfNeeded()
+    }
 
     var BGChart: LineChartView!
     var BGChartFull: LineChartView!
@@ -171,7 +184,12 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        MainViewController.shared = self
+        // Adopt the singleton only if it is not already set (normally bootstrap()
+        // has set it to this same instance). Guarding prevents a stray instance
+        // from displacing the long-lived engine and spawning a second pipeline.
+        if MainViewController.shared == nil {
+            MainViewController.shared = self
+        }
 
         setupUI()
 
@@ -758,6 +776,22 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         showHideNSDetails()
+
+        // Re-render the graph every time Home appears. The single MainViewController
+        // is reused across tab/Menu hosts, so its chart view gets re-parented when
+        // the user switches to Home or moves it between the tab bar and the Menu —
+        // and Charts does not redraw itself after a re-parent. Rebuilding here keeps
+        // the curve visible regardless of how Home was reached. It also recovers the
+        // one-shot firstGraphLoad zoom that is skipped while the view is off-screen
+        // (force-loaded headless when Home lives in the Menu). Deferred one runloop
+        // so the nested SwiftUI chart has its final frame; updateBGGraph's own
+        // width>0 guard skips the initial zoom until it does.
+        if !bgData.isEmpty {
+            DispatchQueue.main.async { [weak self] in
+                self?.updateBGGraph()
+            }
+        }
+
         #if !targetEnvironment(macCatalyst)
             LiveActivityManager.shared.startFromCurrentState()
         #endif
