@@ -7,6 +7,9 @@ struct InfoTableView: View {
     @ObservedObject var infoManager: InfoManager
     var timeZoneOverride: String?
 
+    @ScaledMetric(relativeTo: .body) private var fontSize: CGFloat = 17
+    @ScaledMetric(relativeTo: .body) private var rowHeight: CGFloat = 21
+
     var body: some View {
         List {
             if let tz = timeZoneOverride {
@@ -17,7 +20,7 @@ struct InfoTableView: View {
             }
         }
         .listStyle(.plain)
-        .environment(\.defaultMinListRowHeight, 21)
+        .environment(\.defaultMinListRowHeight, rowHeight)
     }
 
     private func row(name: String, value: String) -> some View {
@@ -27,8 +30,8 @@ struct InfoTableView: View {
             Text(value)
                 .foregroundStyle(.primary)
         }
-        .font(.system(size: 17))
-        .frame(height: 21)
+        .font(.system(size: fontSize))
+        .frame(height: rowHeight)
         .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
     }
 }

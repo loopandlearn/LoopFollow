@@ -40,6 +40,7 @@ struct MainHomeView: View {
 
                 if isNightscoutEnabled && !hideInfoTable.value {
                     InfoTableView(infoManager: infoManager, timeZoneOverride: timeZoneOverride)
+                        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                         .frame(minWidth: 160, maxWidth: 250)
                         .overlay(
                             Rectangle()
