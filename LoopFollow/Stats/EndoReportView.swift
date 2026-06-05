@@ -836,77 +836,167 @@ class NightscoutProfileFetcher: ObservableObject {
         let units: String
     }
 
+    // Lenient local structs — all fields optional to survive any Nightscout variant
+    private struct LenientProfile: Decodable {
+        let defaultProfile: String?
+        let units: String?
+        let store: [String: LenientStore]?
+    }
+
+    private struct LenientStore: Decodable {
+        let units: String?
+        let basal: [Entry]?
+        let sens: [Entry]?
+        let carbratio: [Entry]?
+        let target_low: [Entry]?
+        let target_high: [Entry]?
+
+        struct Entry: Decodable {
+            let value: Double?
+            let time: String?
+        }
+    }
+
     func fetch(completion: @escaping (FetchedSettings?) -> Void) {
         isFetching = true
         error = nil
         success = false
 
-        NightscoutUtils.executeRequest(
-            eventType: .profile,
+        let baseURL = Storage.shared.url.value
+        let token = Storage.shared.token.value
+
+        guard let url = NightscoutUtils.constructURL(
+            baseURL: baseURL,
+            token: token,
+            endpoint: "/api/v1/profile/current.json",
             parameters: [:]
-        ) { [weak self] (result: Result<NSProfile, Error>) in
+        ) else {
+            DispatchQueue.main.async {
+                self.isFetching = false
+                self.error = "Could not construct Nightscout URL. Check your site address in settings."
+            }
+            completion(nil)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, _, networkError in
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.isFetching = false
 
-                switch result {
-                case let .failure(err):
-                    self.error = err.localizedDescription
+                if let networkError {
+                    self.error = networkError.localizedDescription
                     completion(nil)
+                    return
+                }
 
-                case let .success(profile):
-                    let store = profile.store[profile.defaultProfile]
-                        ?? profile.store["default"]
-                        ?? profile.store["Default"]
-                        ?? profile.store.values.first
+                guard let data, !data.isEmpty else {
+                    self.error = "Empty response from Nightscout. Check your URL and token."
+                    completion(nil)
+                    return
+                }
 
-                    guard let s = store else {
-                        self.error = "No profile store found in Nightscout response."
+                // Try lenient decode first
+                let decoder = JSONDecoder()
+                guard let profile = try? decoder.decode(LenientProfile.self, from: data) else {
+                    // Fall back to raw JSON dictionary parsing
+                    guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                          let storeDict = json["store"] as? [String: Any],
+                          let firstStore = storeDict.values.first as? [String: Any]
+                    else {
+                        self.error = "Could not parse Nightscout profile. Tap to retry."
                         completion(nil)
                         return
                     }
-
-                    let isMMOL = s.units.lowercased().contains("mmol")
-
-                    func fmtValue(_ value: Double) -> String {
-                        if value == floor(value) {
-                            return String(format: "%.0f", value)
-                        }
-                        let raw = String(format: "%.2f", value)
-                        return raw.replacingOccurrences(of: "\\.?0+$", with: "", options: .regularExpression)
-                    }
-
-                    func fmtSchedule<T>(_ entries: [T],
-                                        value: (T) -> Double,
-                                        time: (T) -> String) -> String
-                    {
-                        if entries.count == 1 {
-                            return fmtValue(value(entries[0]))
-                        }
-                        // Output joined by newlines so it populates the multi-line UI cleanly
-                        return entries.map {
-                            "\(time($0)) = \(fmtValue(value($0)))"
-                        }.joined(separator: "\n")
-                    }
-
-                    let cr = fmtSchedule(s.carbratio, value: { $0.value }, time: { $0.time })
-                    let isf = fmtSchedule(s.sens, value: { $0.value }, time: { $0.time })
-                    let bas = fmtSchedule(s.basal, value: { $0.value }, time: { $0.time })
-
-                    let targetLow = s.target_low?.first.map { String(format: isMMOL ? "%.1f" : "%.0f", $0.value) } ?? ""
-                    let targetHigh = s.target_high?.first.map { String(format: isMMOL ? "%.1f" : "%.0f", $0.value) } ?? ""
-
-                    self.success = true
-                    completion(FetchedSettings(
-                        carbRatio: cr,
-                        isf: isf,
-                        basalRate: bas,
-                        targetLow: targetLow,
-                        targetHigh: targetHigh,
-                        units: isMMOL ? "mmol/L" : "mg/dL"
-                    ))
+                    self.parseRawStore(firstStore, completion: completion)
+                    return
                 }
+
+                // Pick the right store
+                let storeName = profile.defaultProfile ?? "default"
+                let store = profile.store?[storeName]
+                    ?? profile.store?["default"]
+                    ?? profile.store?["Default"]
+                    ?? profile.store?.values.first
+
+                guard let s = store else {
+                    self.error = "No profile store found in Nightscout response."
+                    completion(nil)
+                    return
+                }
+
+                let isMMOL = (s.units ?? profile.units ?? "mg/dL").lowercased().contains("mmol")
+                let result = self.buildSettings(store: s, isMMOL: isMMOL)
+                self.success = true
+                completion(result)
+            }
+        }.resume()
+    }
+
+    // Parse from lenient typed struct
+    private func buildSettings(store: LenientStore, isMMOL: Bool) -> FetchedSettings {
+        func fmt(_ v: Double) -> String {
+            v == floor(v) ? String(format: "%.0f", v) :
+                String(format: "%.2f", v).replacingOccurrences(of: #"\.?0+$"#, with: "", options: .regularExpression)
+        }
+
+        func schedule(_ entries: [LenientStore.Entry]?) -> String {
+            guard let entries = entries, !entries.isEmpty else { return "" }
+            let valid = entries.compactMap { e -> (String, Double)? in
+                guard let v = e.value, let t = e.time else { return nil }
+                return (t, v)
+            }
+            if valid.count == 1 { return fmt(valid[0].1) }
+            return valid.map { "\($0.0) = \(fmt($0.1))" }.joined(separator: "\n")
+        }
+
+        let fmtTarget = isMMOL ? "%.1f" : "%.0f"
+        let tLow = store.target_low?.first?.value.map { String(format: fmtTarget, $0) } ?? ""
+        let tHigh = store.target_high?.first?.value.map { String(format: fmtTarget, $0) } ?? ""
+
+        return FetchedSettings(
+            carbRatio: schedule(store.carbratio),
+            isf: schedule(store.sens),
+            basalRate: schedule(store.basal),
+            targetLow: tLow,
+            targetHigh: tHigh,
+            units: isMMOL ? "mmol/L" : "mg/dL"
+        )
+    }
+
+    // Last-resort raw dictionary parser
+    private func parseRawStore(_ raw: [String: Any], completion: @escaping (FetchedSettings?) -> Void) {
+        func entries(_ key: String) -> [(String, Double)] {
+            guard let arr = raw[key] as? [[String: Any]] else { return [] }
+            return arr.compactMap { e in
+                guard let v = e["value"] as? Double, let t = e["time"] as? String else { return nil }
+                return (t, v)
             }
         }
+        func schedule(_ key: String) -> String {
+            let e = entries(key)
+            guard !e.isEmpty else { return "" }
+            if e.count == 1 { return String(format: "%.2g", e[0].1) }
+            return e.map { "\($0.0) = \(String(format: "%.2g", $0.1))" }.joined(separator: "\n")
+        }
+
+        let units = (raw["units"] as? String ?? "mg/dL")
+        let isMMOL = units.lowercased().contains("mmol")
+        let fmtT = isMMOL ? "%.1f" : "%.0f"
+        let tLow = (raw["target_low"] as? [[String: Any]])?.first?["value"] as? Double
+        let tHigh = (raw["target_high"] as? [[String: Any]])?.first?["value"] as? Double
+
+        success = true
+        completion(FetchedSettings(
+            carbRatio: schedule("carbratio"),
+            isf: schedule("sens"),
+            basalRate: schedule("basal"),
+            targetLow: tLow.map { String(format: fmtT, $0) } ?? "",
+            targetHigh: tHigh.map { String(format: fmtT, $0) } ?? "",
+            units: isMMOL ? "mmol/L" : "mg/dL"
+        ))
     }
 }
