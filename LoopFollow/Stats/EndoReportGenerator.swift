@@ -470,23 +470,40 @@ enum EndoReportGenerator {
     {
         let ha: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: C_INK]
         "Glucose by Time of Day (\(cfg.units))".draw(at: CGPoint(x: m, y: y), withAttributes: ha)
+
         let periods = [patterns.night, patterns.earlyAM, patterns.morning,
                        patterns.afternoon, patterns.evening, patterns.late]
-        let cw = (w - m * 2) / CGFloat(periods.count); let ch: CGFloat = 38; let cy = y + 11
+        // Time range labels matching the GlycemicPatterns init hours
+        let timeRanges = ["00:00–03:00", "03:00–06:00", "06:00–12:00",
+                          "12:00–17:00", "17:00–21:00", "21:00–24:00"]
+
+        let cw = (w - m * 2) / CGFloat(periods.count)
+        let ch: CGFloat = 48 // taller to fit 3 rows: value + label + time range
+        let cy = y + 11
+
         for (i, p) in periods.enumerated() {
             let cx = m + CGFloat(i) * cw
             let rr = CGRect(x: cx, y: cy, width: cw - 2, height: ch)
             ctx.setFillColor(C_CLOUD.cgColor); ctx.fill(rr)
             ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.4); ctx.stroke(rr)
+
+            let timeRange = timeRanges[i]
+            let ta: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: C_SLATE]
+            let tsz = (timeRange as NSString).size(withAttributes: ta)
+            (timeRange as NSString).draw(at: CGPoint(x: cx + (cw - 2 - tsz.width) / 2, y: cy + 3), withAttributes: ta)
+
             guard p.count > 0 else { continue }
+
             let disp = cfg.fmtBG(p.avg)
             let vc: UIColor = p.avg < 70 ? C_LOW : p.avg < 140 ? accent(cfg) : p.avg < 180 ? C_INK : C_HIGH
             let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 13), .foregroundColor: vc]
             let la: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE]
+
             let vsz = (disp as NSString).size(withAttributes: va)
             let lsz = (p.label as NSString).size(withAttributes: la)
-            (disp as NSString).draw(at: CGPoint(x: cx + (cw - 2 - vsz.width) / 2, y: cy + 5), withAttributes: va)
-            (p.label as NSString).draw(at: CGPoint(x: cx + (cw - 2 - lsz.width) / 2, y: cy + 25), withAttributes: la)
+
+            (disp as NSString).draw(at: CGPoint(x: cx + (cw - 2 - vsz.width) / 2, y: cy + 13), withAttributes: va)
+            (p.label as NSString).draw(at: CGPoint(x: cx + (cw - 2 - lsz.width) / 2, y: cy + 29), withAttributes: la)
         }
         return cy + ch + 2
     }
