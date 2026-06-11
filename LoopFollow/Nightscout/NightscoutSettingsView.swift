@@ -23,9 +23,6 @@ struct NightscoutSettingsView: View {
 
             importSection
         }
-        .onDisappear {
-            viewModel.dismiss()
-        }
         .navigationDestination(isPresented: $showUnitsSetup) {
             UnitsOnboardingView {
                 dismiss()

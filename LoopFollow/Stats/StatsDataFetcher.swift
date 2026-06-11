@@ -4,11 +4,17 @@
 import Foundation
 
 class StatsDataFetcher {
-    weak var mainViewController: MainViewController?
+    /// See StatsDataService.mainViewController — the injected reference can be
+    /// nil at cold launch, so fall back to the shared engine.
+    private weak var injectedMainViewController: MainViewController?
+    var mainViewController: MainViewController? {
+        injectedMainViewController ?? MainViewController.shared
+    }
+
     weak var dataService: StatsDataService?
 
     init(mainViewController: MainViewController?) {
-        self.mainViewController = mainViewController
+        injectedMainViewController = mainViewController
     }
 
     func fetchBGData(days: Int, completion: @escaping () -> Void) {

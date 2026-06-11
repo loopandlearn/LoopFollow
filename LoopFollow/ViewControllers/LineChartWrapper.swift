@@ -11,9 +11,10 @@ struct LineChartWrapper: UIViewRepresentable {
         chartView
     }
 
-    func updateUIView(_ uiView: LineChartView, context _: Context) {
-        // The chart's data is mutated externally by MainViewController; this
-        // hook ensures any SwiftUI-driven re-render still flushes the chart.
-        uiView.notifyDataSetChanged()
+    func updateUIView(_: LineChartView, context _: Context) {
+        // Intentionally empty. MainViewController owns the chart and calls
+        // notifyDataSetChanged itself whenever it mutates the data; doing it
+        // here too would redo that work on every unrelated SwiftUI re-render
+        // of MainHomeView (e.g. the once-a-second minAgoText tick).
     }
 }

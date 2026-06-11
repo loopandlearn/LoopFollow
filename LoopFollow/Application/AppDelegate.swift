@@ -8,7 +8,6 @@ import UserNotifications
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let notificationCenter = UNUserNotificationCenter.current()
-    private let speechSynthesizer = AVSpeechSynthesizer()
 
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         LogManager.shared.log(category: .general, message: "App started")
@@ -166,23 +165,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    // MARK: - Quick Actions
+    // MARK: - Scene configuration
 
-    func application(_: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
-        guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
-            completionHandler(false)
-            return
+    // Under the scene-based lifecycle (which the SwiftUI App lifecycle uses),
+    // UIKit delivers Home Screen quick actions and opened URLs to the window
+    // scene delegate — application(_:performActionFor:) is never called.
+    // Injecting a delegate class here is the supported way to receive those
+    // events; SwiftUI still creates and manages the window itself.
+    func application(_: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options _: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let configuration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
+        if connectingSceneSession.role == .windowApplication {
+            configuration.delegateClass = AppSceneDelegate.self
         }
-        let expectedType = bundleIdentifier + ".toggleSpeakBG"
-        if shortcutItem.type == expectedType {
-            Storage.shared.speakBG.value.toggle()
-            let message = Storage.shared.speakBG.value ? "BG Speak is now on" : "BG Speak is now off"
-            let utterance = AVSpeechUtterance(string: message)
-            speechSynthesizer.speak(utterance)
-            completionHandler(true)
-        } else {
-            completionHandler(false)
-        }
+        return configuration
     }
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
@@ -214,6 +209,53 @@ extension Notification.Name {
     /// Posted by AppDelegate after a Before-First-Unlock recovery completes
     /// (Storage.reloadAll has run with the now-decrypted UserDefaults).
     static let bfuReloadCompleted = Notification.Name("LoopFollow.bfuReloadCompleted")
+}
+
+/// Window scene delegate installed via configurationForConnecting. SwiftUI owns
+/// the window; this class only handles the events UIKit routes to the scene
+/// delegate instead of the application delegate.
+final class AppSceneDelegate: NSObject, UIWindowSceneDelegate {
+    private let speechSynthesizer = AVSpeechSynthesizer()
+
+    /// A quick action used to cold-launch the app arrives in the connection
+    /// options; windowScene(_:performActionFor:) is not called for that launch.
+    func scene(_: UIScene, willConnectTo _: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        if let shortcutItem = connectionOptions.shortcutItem {
+            handleShortcutItem(shortcutItem)
+        }
+    }
+
+    /// Called when the user taps the "Speak BG" Home Screen quick action while
+    /// the app is already running.
+    func windowScene(_: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        completionHandler(handleShortcutItem(shortcutItem))
+    }
+
+    @discardableResult
+    private func handleShortcutItem(_ shortcutItem: UIApplicationShortcutItem) -> Bool {
+        guard let bundleIdentifier = Bundle.main.bundleIdentifier,
+              shortcutItem.type == bundleIdentifier + ".toggleSpeakBG"
+        else {
+            return false
+        }
+        Storage.shared.speakBG.value.toggle()
+        let message = Storage.shared.speakBG.value ? "BG Speak is now on" : "BG Speak is now off"
+        speechSynthesizer.speak(AVSpeechUtterance(string: message))
+        return true
+    }
+
+    /// With a custom scene delegate installed, UIKit delivers opened URLs here
+    /// rather than through SwiftUI's onOpenURL, so the Live Activity tap
+    /// handling from LoopFollowApp is mirrored. Posting twice is harmless —
+    /// the navigation it triggers is idempotent.
+    func scene(_: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard URLContexts.contains(where: { $0.url.scheme == AppGroupID.urlScheme && $0.url.host == "la-tap" }) else { return }
+        #if !targetEnvironment(macCatalyst)
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
+            }
+        #endif
+    }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
