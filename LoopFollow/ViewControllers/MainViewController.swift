@@ -166,6 +166,10 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
             onStatsTap: { [weak self] in self?.statsViewTapped() }
         )
         let hosting = UIHostingController(rootView: mainView)
+        // Exclude the keyboard from the hosting controller's safe area. Home has
+        // no text input, but a stale keyboard frame replayed on foregrounding can
+        // otherwise compress the layout until a rotation recomputes the safe area.
+        hosting.safeAreaRegions = .container
         hosting.view.translatesAutoresizingMaskIntoConstraints = false
         hosting.view.backgroundColor = .clear
 
