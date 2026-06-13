@@ -33,6 +33,18 @@ extension Storage {
         }
     }
 
+    func migrateStep8() {
+        // Migrate showTITR bool + custom lowLine/highLine into timeInRangeModeRaw.
+        LogManager.shared.log(category: .general, message: "Running migrateStep8 — timeInRangeMode migration")
+
+        if showTITR.value {
+            timeInRangeModeRaw.value = TimeInRangeDisplayMode.titr.rawValue
+        } else if lowLine.value != 70.0 || highLine.value != 180.0 {
+            timeInRangeModeRaw.value = TimeInRangeDisplayMode.custom.rawValue
+        }
+        // else: default "TIR" is already set
+    }
+
     func migrateStep7() {
         // Cancel notifications scheduled with old hardcoded identifiers.
         // Replaced with bundle-ID-scoped identifiers for multi-instance support.

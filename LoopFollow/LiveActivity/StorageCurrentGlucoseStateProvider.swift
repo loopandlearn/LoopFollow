@@ -134,9 +134,19 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
         #if targetEnvironment(macCatalyst)
             return false
         #else
-            let renewBy = Storage.shared.laRenewBy.value
-            let now = Date().timeIntervalSince1970
-            return renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
+            // iOS 17.2+ renews silently via push-to-start at the deadline, so the
+            // pre-emptive 30-minute "tap to update" overlay would be misleading
+            // during normal operation. Only show it once renewal has actually
+            // failed (no token, bad creds, rate-limited) — that is genuinely
+            // user-actionable. iOS 16.x keeps the time-based warning because
+            // renewal there requires the user to foreground the app.
+            if #available(iOS 17.2, *) {
+                return Storage.shared.laRenewalFailed.value
+            } else {
+                let renewBy = Storage.shared.laRenewBy.value
+                let now = Date().timeIntervalSince1970
+                return renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
+            }
         #endif
     }
 }

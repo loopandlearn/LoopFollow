@@ -38,21 +38,22 @@ class SimpleStatsViewModel: ObservableObject {
     }
 
     func calculateStats() {
+        let unitSettings = UnitSettingsStore.shared
         let bgData = dataService.getBGData()
         guard !bgData.isEmpty else { return }
 
         let totalGlucose = bgData.reduce(0) { $0 + $1.sgv }
         let avgBGmgdL = Double(totalGlucose) / Double(bgData.count)
-        avgGlucose = Storage.shared.units.value == "mg/dL" ? avgBGmgdL : avgBGmgdL * GlucoseConversion.mgDlToMmolL
+        avgGlucose = unitSettings.convertMgdlToDisplay(avgBGmgdL)
 
         let variance = bgData.reduce(0.0) { sum, reading in
             let diff = Double(reading.sgv) - avgBGmgdL
             return sum + (diff * diff)
         }
         let stdDevMgdL = sqrt(variance / Double(bgData.count))
-        stdDeviation = Storage.shared.units.value == "mg/dL" ? stdDevMgdL : stdDevMgdL * GlucoseConversion.mgDlToMmolL
+        stdDeviation = unitSettings.convertMgdlToDisplay(stdDevMgdL)
 
-        gmi = 3.31 + (0.02392 * avgBGmgdL)
+        gmi = GlycemicMetricCalculator.calculateGMI(avgGlucoseInDisplayUnits: avgGlucose)
 
         if avgBGmgdL > 0 {
             coefficientOfVariation = (stdDevMgdL / avgBGmgdL) * 100.0
@@ -66,7 +67,7 @@ class SimpleStatsViewModel: ObservableObject {
         let smbTotal = smbInPeriod.reduce(0.0) { $0 + $1.value }
         let totalBolusInPeriod = bolusTotal + smbTotal
 
-        let cutoffTime = Date().timeIntervalSince1970 - (Double(dataService.daysToAnalyze) * 24 * 60 * 60)
+        let cutoffTime = dataService.startDate.timeIntervalSince1970
         let allBolusDates = (bolusesInPeriod + smbInPeriod).map { $0.date }.filter { $0 >= cutoffTime }
         let actualDays = calculateActualDaysCovered(dates: allBolusDates, requestedDays: dataService.daysToAnalyze)
 
@@ -93,7 +94,7 @@ class SimpleStatsViewModel: ObservableObject {
 
         let totalCarbsInPeriod = dailyCarbs.values.reduce(0.0, +)
 
-        let daysWithData = max(dailyCarbs.count, 1)
+        let daysWithData = dataService.daysToAnalyze
 
         if daysWithData > 0 {
             avgCarbs = totalCarbsInPeriod / Double(daysWithData)
@@ -295,7 +296,7 @@ class SimpleStatsViewModel: ObservableObject {
         guard !dates.isEmpty else { return requestedDays }
 
         let calendar = dateTimeUtils.displayCalendar()
-        let cutoffTime = Date().timeIntervalSince1970 - (Double(requestedDays) * 24 * 60 * 60)
+        let cutoffTime = dataService.startDate.timeIntervalSince1970
         let filteredDates = dates.filter { $0 >= cutoffTime }
 
         var uniqueDays = Set<Date>()

@@ -6,9 +6,19 @@ import Foundation
 extension MainViewController {
     // NS Profile Web Call
     func webLoadNSProfile() {
-        NightscoutUtils.executeRequest(eventType: .profile, parameters: [:]) { (result: Result<NSProfile, Error>) in
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let parameters: [String: String] = [
+            "count": "1",
+            "find[startDate][$lte]": formatter.string(from: Date().addingTimeInterval(60)),
+        ]
+        NightscoutUtils.executeRequest(eventType: .profile, parameters: parameters) { (result: Result<[NSProfile], Error>) in
             switch result {
-            case let .success(profileData):
+            case let .success(profiles):
+                guard let profileData = profiles.first else {
+                    LogManager.shared.log(category: .nightscout, message: "webLoadNSProfile, no profile records returned")
+                    return
+                }
                 self.updateProfile(profileData: profileData)
             case let .failure(error):
                 LogManager.shared.log(category: .nightscout, message: "webLoadNSProfile, error fetching profile data: \(error.localizedDescription)")

@@ -61,8 +61,10 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
 
         case .omnipodDash:
             if let name = device.name {
-                // actual DASH or rPi DASH simulator
-                return name == "TWI BOARD" || name == " :: Fake POD ::"
+                // "TWI BOARD": original DASH pod
+                // "InPlay BLE": newer Atlas DASH pod
+                // " :: Fake POD ::": rPi DASH simulator
+                return name == "TWI BOARD" || name == "InPlay BLE" || name == " :: Fake POD ::"
             }
             return false
 

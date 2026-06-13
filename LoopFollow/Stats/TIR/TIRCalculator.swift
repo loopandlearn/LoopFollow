@@ -4,12 +4,13 @@
 import Foundation
 
 class TIRCalculator {
-    static func calculate(bgData: [ShareGlucoseData], useTightRange: Bool = false) -> [TIRDataPoint] {
+    static func calculate(bgData: [ShareGlucoseData]) -> [TIRDataPoint] {
         guard !bgData.isEmpty else { return [] }
 
+        let thresholds = UnitSettingsStore.shared.effectiveThresholds()
         let veryLowThreshold = 54.0
-        let lowThreshold = 70.0
-        let highThreshold = useTightRange ? 140.0 : 180.0
+        let lowThreshold = thresholds.low
+        let highThreshold = thresholds.high
         let veryHighThreshold = 250.0
         var periodData: [TIRPeriod: [Double]] = [:]
         let calendar = dateTimeUtils.displayCalendar()

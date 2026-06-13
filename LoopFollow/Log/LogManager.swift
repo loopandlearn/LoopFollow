@@ -2,6 +2,7 @@
 // LogManager.swift
 
 import Foundation
+import UIKit
 
 class LogManager {
     static let shared = LogManager()
@@ -29,6 +30,7 @@ class LogManager {
         case calendar = "Calendar"
         case deviceStatus = "Device Status"
         case remote = "Remote"
+        case telemetry = "Telemetry"
     }
 
     init() {
@@ -55,7 +57,8 @@ class LogManager {
     ///   - limitIdentifier: Optional key to rate-limit similar log messages.
     ///   - limitInterval: Time interval (in seconds) to wait before logging the same type again.
     func log(category: Category, message: String, isDebug: Bool = false, limitIdentifier: String? = nil, limitInterval: TimeInterval = 300) {
-        let logMessage = formattedLogMessage(for: category, message: message)
+        let safeMessage = LogRedactor.sweep(message)
+        let logMessage = formattedLogMessage(for: category, message: safeMessage)
 
         consoleQueue.async {
             print(logMessage)
@@ -113,6 +116,16 @@ class LogManager {
             let expirationHeaderString = buildDetails.expirationHeaderString
             let isMacApp = buildDetails.isMacApp()
             let isSimulatorBuild = buildDetails.isSimulatorBuild()
+            let osLabel: String
+            let osVersion: String
+            if isMacApp {
+                osLabel = "macOS"
+                let v = ProcessInfo.processInfo.operatingSystemVersion
+                osVersion = "\(v.majorVersion).\(v.minorVersion).\(v.patchVersion)"
+            } else {
+                osLabel = "iOS"
+                osVersion = UIDevice.current.systemVersion
+            }
 
             // Assemble header information
             var headerLines = [String]()
@@ -122,6 +135,7 @@ class LogManager {
             }
             headerLines.append("Built: \(formattedBuildDate)")
             headerLines.append("Branch: \(branchAndSha)")
+            headerLines.append("\(osLabel): \(osVersion)")
 
             let headerMessage = headerLines.joined(separator: ", ") + "\n"
             let logMessage = formattedLogMessage(for: .general, message: headerMessage)

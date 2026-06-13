@@ -1,14 +1,12 @@
 // LoopFollow
 // AppDelegate.swift
 
-import CoreData
+import AVFoundation
 import EventKit
 import UIKit
 import UserNotifications
 
-@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
     let notificationCenter = UNUserNotificationCenter.current()
 
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -48,14 +46,64 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         BackgroundRefreshManager.shared.register()
 
+        // Telemetry: record this cold launch (used by the rolling
+        // coldLaunches7d signal). If the running build's SHA differs from
+        // the one we last sent for, fire an immediate ping — the scheduler
+        // alone can't notice an app update. Otherwise let the 24h scheduler
+        // handle cadence: its first run is lastSentAt + 24h, so a relaunch
+        // a few hours after the previous send simply waits out the
+        // remainder. See Helpers/Telemetry.swift.
+        TelemetryClient.shared.recordColdLaunch()
+        Task.detached {
+            if TelemetryClient.shared.buildShaChangedSinceLastSend() {
+                await TelemetryClient.shared.maybeSend()
+            }
+            TelemetryClient.shared.scheduleRecurring()
+        }
+
         // Detect Before-First-Unlock launch. If protected data is unavailable here,
         // StorageValues were cached from encrypted UserDefaults and need a reload
-        // on the first foreground after the user unlocks.
+        // once the device is unlocked.
         let bfu = !UIApplication.shared.isProtectedDataAvailable
         Storage.shared.needsBFUReload = bfu
         LogManager.shared.log(category: .general, message: "BFU check: isProtectedDataAvailable=\(!bfu), needsBFUReload=\(bfu)")
 
+        // Recovery is driven from AppDelegate (not MainViewController) because under
+        // the SwiftUI App lifecycle the home tab's UIHostingController is materialized
+        // lazily — on a BG-only launch (BGAppRefreshTask, BLE wake) MainViewController
+        // may not exist when the device is unlocked, and would miss willEnterForeground.
+        // protectedDataDidBecomeAvailable fires the moment file protection lifts and
+        // is the authoritative signal; willEnterForeground is a fallback.
+        let nc = NotificationCenter.default
+        nc.addObserver(self, selector: #selector(protectedDataDidBecomeAvailable), name: UIApplication.protectedDataDidBecomeAvailableNotification, object: nil)
+        nc.addObserver(self, selector: #selector(handleWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+
+        // Race guard: protected data may have become available between the check
+        // above and the observer registration just now.
+        if Storage.shared.needsBFUReload, UIApplication.shared.isProtectedDataAvailable {
+            performBFUReloadIfNeeded()
+        }
+
         return true
+    }
+
+    // MARK: - BFU recovery
+
+    @objc private func protectedDataDidBecomeAvailable() {
+        performBFUReloadIfNeeded()
+    }
+
+    @objc private func handleWillEnterForeground() {
+        performBFUReloadIfNeeded()
+    }
+
+    private func performBFUReloadIfNeeded() {
+        guard Storage.shared.needsBFUReload else { return }
+        Storage.shared.needsBFUReload = false
+        LogManager.shared.log(category: .general, message: "BFU reload triggered — reloading all StorageValues")
+        Storage.shared.reloadAll()
+        LogManager.shared.log(category: .general, message: "BFU reload complete: url='\(Storage.shared.url.value)'")
+        NotificationCenter.default.post(name: .bfuReloadCompleted, object: nil)
     }
 
     func applicationWillTerminate(_: UIApplication) {
@@ -72,7 +120,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Observable.shared.loopFollowDeviceToken.value = tokenString
 
-        LogManager.shared.log(category: .apns, message: "Successfully registered for remote notifications with token: \(tokenString)")
+        LogManager.shared.log(category: .apns, message: "Successfully registered for remote notifications with token: \(LogRedactor.tail(tokenString))")
     }
 
     /// Called when failed to register for remote notifications
@@ -82,7 +130,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     /// Called when a remote notification is received
     func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        LogManager.shared.log(category: .apns, message: "Received remote notification: \(userInfo)")
+        let userInfoKeys = userInfo.keys.compactMap { $0 as? String }.sorted()
+        LogManager.shared.log(category: .apns, message: "Received remote notification: keys=\(userInfoKeys)")
 
         // Check if this is a response notification from Loop or Trio
         if let aps = userInfo["aps"] as? [String: Any] {
@@ -111,85 +160,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         completionHandler(.newData)
     }
 
-    // MARK: - URL handling
-
-    // Note: with scene-based lifecycle (iOS 13+), URLs are delivered to
-    // SceneDelegate.scene(_:openURLContexts:) — not here. The scene delegate
-    // handles <urlScheme>://la-tap for Live Activity tap navigation.
-
-    // MARK: UISceneSession Lifecycle
-
     func application(_: UIApplication, willFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // set the "prevent screen lock" option when the app is started
-        // This method doesn't seem to be working anymore. Added to view controllers as solution offered on SO
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value
-
         return true
     }
 
+    // MARK: - Scene configuration
+
+    // Under the scene-based lifecycle (which the SwiftUI App lifecycle uses),
+    // UIKit delivers Home Screen quick actions and opened URLs to the window
+    // scene delegate — application(_:performActionFor:) is never called.
+    // Injecting a delegate class here is the supported way to receive those
+    // events; SwiftUI still creates and manages the window itself.
     func application(_: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options _: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
-
-    func application(_: UIApplication, didDiscardSceneSessions _: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
-    }
-
-    // MARK: - Core Data stack
-
-    lazy var persistentContainer: NSPersistentCloudKitContainer = {
-        /*
-         The persistent container for the application. This implementation
-         creates and returns a container, having loaded the store for the
-         application to it. This property is optional since there are legitimate
-         error conditions that could cause the creation of the store to fail.
-         */
-        let container = NSPersistentCloudKitContainer(name: "LoopFollow")
-        container.loadPersistentStores(completionHandler: { _, error in
-            if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
-        })
-        return container
-    }()
-
-    // MARK: - Core Data Saving support
-
-    func saveContext() {
-        let context = persistentContainer.viewContext
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-            }
+        let configuration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
+        if connectingSceneSession.role == .windowApplication {
+            configuration.delegateClass = AppSceneDelegate.self
         }
+        return configuration
     }
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         if response.actionIdentifier == "OPEN_APP_ACTION" {
-            if let window {
-                window.rootViewController?.dismiss(animated: true, completion: nil)
-                window.rootViewController?.present(MainViewController(), animated: true, completion: nil)
-            }
+            // Dismiss any presented modal/sheet so the user actually sees Home
+            UIApplication.shared.topMost?.dismiss(animated: true)
+            Observable.shared.selectedTabIndex.value = 0
         }
 
         if response.actionIdentifier == "snooze" {
@@ -210,6 +205,59 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
+extension Notification.Name {
+    /// Posted by AppDelegate after a Before-First-Unlock recovery completes
+    /// (Storage.reloadAll has run with the now-decrypted UserDefaults).
+    static let bfuReloadCompleted = Notification.Name("LoopFollow.bfuReloadCompleted")
+}
+
+/// Window scene delegate installed via configurationForConnecting. SwiftUI owns
+/// the window; this class only handles the events UIKit routes to the scene
+/// delegate instead of the application delegate.
+final class AppSceneDelegate: NSObject, UIWindowSceneDelegate {
+    private let speechSynthesizer = AVSpeechSynthesizer()
+
+    /// A quick action used to cold-launch the app arrives in the connection
+    /// options; windowScene(_:performActionFor:) is not called for that launch.
+    func scene(_: UIScene, willConnectTo _: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        if let shortcutItem = connectionOptions.shortcutItem {
+            handleShortcutItem(shortcutItem)
+        }
+    }
+
+    /// Called when the user taps the "Speak BG" Home Screen quick action while
+    /// the app is already running.
+    func windowScene(_: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        completionHandler(handleShortcutItem(shortcutItem))
+    }
+
+    @discardableResult
+    private func handleShortcutItem(_ shortcutItem: UIApplicationShortcutItem) -> Bool {
+        guard let bundleIdentifier = Bundle.main.bundleIdentifier,
+              shortcutItem.type == bundleIdentifier + ".toggleSpeakBG"
+        else {
+            return false
+        }
+        Storage.shared.speakBG.value.toggle()
+        let message = Storage.shared.speakBG.value ? "BG Speak is now on" : "BG Speak is now off"
+        speechSynthesizer.speak(AVSpeechUtterance(string: message))
+        return true
+    }
+
+    /// With a custom scene delegate installed, UIKit delivers opened URLs here
+    /// rather than through SwiftUI's onOpenURL, so the Live Activity tap
+    /// handling from LoopFollowApp is mirrored. Posting twice is harmless —
+    /// the navigation it triggers is idempotent.
+    func scene(_: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard URLContexts.contains(where: { $0.url.scheme == AppGroupID.urlScheme && $0.url.host == "la-tap" }) else { return }
+        #if !targetEnvironment(macCatalyst)
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .liveActivityDidForeground, object: nil)
+            }
+        #endif
+    }
+}
+
 extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
@@ -217,7 +265,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     {
         // Log the notification
         let userInfo = notification.request.content.userInfo
-        LogManager.shared.log(category: .general, message: "Will present notification: \(userInfo)")
+        let userInfoKeys = userInfo.keys.compactMap { $0 as? String }.sorted()
+        LogManager.shared.log(category: .general, message: "Will present notification: keys=\(userInfoKeys)")
 
         // Show the notification even when app is in foreground
         completionHandler([.banner, .sound, .badge])

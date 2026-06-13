@@ -4,15 +4,15 @@
 import Combine
 import Foundation
 
-protocol NightscoutSettingsViewModelDelegate: AnyObject {
-    func nightscoutSettingsDidFinish()
-}
-
 class NightscoutSettingsViewModel: ObservableObject {
-    weak var delegate: NightscoutSettingsViewModelDelegate?
-
     private var initialURL: String
     private var initialToken: String
+
+    /// Whether the Nightscout connection is successfully verified
+    @Published var isConnected: Bool = false
+
+    /// Whether this is a fresh setup (URL was empty when view appeared)
+    private(set) var isFreshSetup: Bool = false
 
     @Published var nightscoutURL: String = Storage.shared.url.value {
         willSet {
@@ -41,6 +41,7 @@ class NightscoutSettingsViewModel: ObservableObject {
     init() {
         initialURL = Storage.shared.url.value
         initialToken = Storage.shared.token.value
+        isFreshSetup = initialURL.isEmpty
 
         setupDebounce()
         checkNightscoutStatus()
@@ -107,6 +108,7 @@ class NightscoutSettingsViewModel: ObservableObject {
 
     func updateStatusLabel(error: NightscoutUtils.NightscoutError?) {
         if let error = error {
+            isConnected = false
             switch error {
             case .invalidURL:
                 nightscoutStatus = "Invalid URL"
@@ -124,6 +126,7 @@ class NightscoutSettingsViewModel: ObservableObject {
                 nightscoutStatus = "Address Empty"
             }
         } else {
+            isConnected = true
             let authStatus: String
             if Storage.shared.nsAdminAuth.value {
                 authStatus = "Admin"
@@ -137,9 +140,5 @@ class NightscoutSettingsViewModel: ObservableObject {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
             }
         }
-    }
-
-    func dismiss() {
-        delegate?.nightscoutSettingsDidFinish()
     }
 }
