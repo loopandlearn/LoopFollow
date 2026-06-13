@@ -4,13 +4,7 @@
 import Combine
 import Foundation
 
-protocol NightscoutSettingsViewModelDelegate: AnyObject {
-    func nightscoutSettingsDidFinish()
-}
-
 class NightscoutSettingsViewModel: ObservableObject {
-    weak var delegate: NightscoutSettingsViewModelDelegate?
-
     private var initialURL: String
     private var initialToken: String
 
@@ -146,9 +140,5 @@ class NightscoutSettingsViewModel: ObservableObject {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
             }
         }
-    }
-
-    func dismiss() {
-        delegate?.nightscoutSettingsDidFinish()
     }
 }
