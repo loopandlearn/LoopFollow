@@ -3,10 +3,6 @@
 
 import SwiftUI
 
-extension Notification.Name {
-    static let appearanceDidChange = Notification.Name("appearanceDidChange")
-}
-
 enum AppearanceMode: String, CaseIterable, Codable {
     case system
     case light

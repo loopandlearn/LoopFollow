@@ -339,7 +339,11 @@ extension MPVolumeView {
             slider?.value = volume
         }
         // Optional - Remove the HUD
-        if let app = UIApplication.shared.delegate as? AppDelegate, let window = app.window {
+        let activeWindow = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }?
+            .windows.first(where: \.isKeyWindow)
+        if let window = activeWindow {
             volumeView.alpha = 0.000001
             window.addSubview(volumeView)
         }

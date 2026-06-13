@@ -20,59 +20,57 @@ struct CalendarSettingsView: View {
     // MARK: Body
 
     var body: some View {
-        NavigationView {
-            Form {
-                // ------------- Calendar write -------------
-                Section {
-                    Toggle("Save BG to Calendar",
-                           isOn: $writeCalendarEvent.value)
-                        .disabled(accessDenied) // prevent use when no access
-                } footer: {
-                    Text("""
-                    Add the Apple-Calendar complication to your watch or CarPlay \
-                    to see BG readings. Create a separate calendar (e.g. “Follow”) \
-                    — this view will **delete** events on the same calendar each time \
-                    it writes new readings.
-                    """)
-                }
+        Form {
+            // ------------- Calendar write -------------
+            Section {
+                Toggle("Save BG to Calendar",
+                       isOn: $writeCalendarEvent.value)
+                    .disabled(accessDenied) // prevent use when no access
+            } footer: {
+                Text("""
+                Add the Apple-Calendar complication to your watch or CarPlay \
+                to see BG readings. Create a separate calendar (e.g. “Follow”) \
+                — this view will **delete** events on the same calendar each time \
+                it writes new readings.
+                """)
+            }
 
-                // ------------- Access / calendar picker -------------
-                if accessDenied {
-                    Text("Calendar access denied")
-                        .foregroundColor(.red)
-                } else {
-                    if !calendars.isEmpty {
-                        Picker("Calendar",
-                               selection: $calendarIdentifier.value)
-                        {
-                            ForEach(calendars, id: \.calendarIdentifier) { cal in
-                                Text(cal.title).tag(cal.calendarIdentifier)
-                            }
+            // ------------- Access / calendar picker -------------
+            if accessDenied {
+                Text("Calendar access denied")
+                    .foregroundColor(.red)
+            } else {
+                if !calendars.isEmpty {
+                    Picker("Calendar",
+                           selection: $calendarIdentifier.value)
+                    {
+                        ForEach(calendars, id: \.calendarIdentifier) { cal in
+                            Text(cal.title).tag(cal.calendarIdentifier)
                         }
                     }
                 }
+            }
 
-                // ------------- Template lines -------------
-                Section("Calendar Text") {
-                    TextField("Line 1", text: $watchLine1.value)
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
+            // ------------- Template lines -------------
+            Section("Calendar Text") {
+                TextField("Line 1", text: $watchLine1.value)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
 
-                    TextField("Line 2", text: $watchLine2.value)
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
-                }
+                TextField("Line 2", text: $watchLine2.value)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+            }
 
-                // ------------- Variable cheat-sheet -------------
-                Section("Available Variables") {
-                    ForEach(variableDescriptions, id: \.self) { desc in
-                        Text(desc)
-                    }
+            // ------------- Variable cheat-sheet -------------
+            Section("Available Variables") {
+                ForEach(variableDescriptions, id: \.self) { desc in
+                    Text(desc)
                 }
             }
-            .task { // runs once on appear
-                await requestCalendarAccessAndLoad()
-            }
+        }
+        .task { // runs once on appear
+            await requestCalendarAccessAndLoad()
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Calendar", displayMode: .inline)

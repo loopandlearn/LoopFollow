@@ -29,7 +29,20 @@ struct RemoteSettingsView: View {
         self.viewModel = viewModel
     }
 
+    private let diagnosticsAnchorID = "remoteDiagnostics"
+
     var body: some View {
+        ScrollViewReader { proxy in
+            formContent
+                .onChange(of: viewModel.diagnostics.status) { _ in
+                    withAnimation {
+                        proxy.scrollTo(diagnosticsAnchorID, anchor: .top)
+                    }
+                }
+        }
+    }
+
+    private var formContent: some View {
         Form {
             // MARK: - Remote Type Section (Custom Rows)
 
@@ -175,6 +188,8 @@ struct RemoteSettingsView: View {
                     if Storage.shared.bolusIncrementDetected.value {
                         Text("Bolus Increment: \(Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()), specifier: "%.3f") U")
                     }
+                    diagnosticsRows
+                        .id(diagnosticsAnchorID)
                 }
             }
 
@@ -277,6 +292,8 @@ struct RemoteSettingsView: View {
                     if Storage.shared.bolusIncrementDetected.value {
                         Text("Bolus Increment: \(Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()), specifier: "%.3f") U")
                     }
+                    diagnosticsRows
+                        .id(diagnosticsAnchorID)
                 }
             }
         }
@@ -464,5 +481,120 @@ struct RemoteSettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Diagnostics
+
+    @ViewBuilder
+    private var diagnosticsRows: some View {
+        switch viewModel.diagnostics.status {
+        case .running:
+            HStack {
+                ProgressView()
+                Text("Checking Nightscout profile history…")
+                    .foregroundColor(.secondary)
+            }
+        case .unknown:
+            Button(action: { viewModel.runDiagnostics() }) {
+                HStack {
+                    Image(systemName: "stethoscope")
+                    Text("Run diagnostics")
+                }
+            }
+        case let .failed(message):
+            Button(action: { viewModel.runDiagnostics() }) {
+                HStack {
+                    Image(systemName: "stethoscope")
+                    Text("Run diagnostics again")
+                }
+            }
+            Text("Diagnostics unavailable: \(message)")
+                .font(.footnote)
+                .foregroundColor(.secondary)
+        case .ok:
+            Button(action: { viewModel.runDiagnostics() }) {
+                HStack {
+                    Image(systemName: "stethoscope")
+                    Text("Run diagnostics again")
+                }
+            }
+            if let mismatch = viewModel.diagnostics.bundleMismatch {
+                diagnosticWarning(
+                    title: "Profile uploaded by a different app",
+                    detail: "The current Nightscout profile was uploaded by \(mismatch.observedBundleId), but you're configured for \(mismatch.expectedDevice). When Loop and Trio share a Nightscout, they overwrite each other's profile."
+                )
+            }
+            if let bouncing = viewModel.diagnostics.bouncingTokens {
+                bouncingTokensWarning(bouncing)
+            }
+            if let future = viewModel.diagnostics.futureStartDate {
+                diagnosticWarning(
+                    title: "Future-dated profile record found",
+                    detail: "A profile record has startDate \(dateTimeUtils.formattedDate(from: future.startDate)). LoopFollow ignores future-dated records, but it will still appear as the current profile in your Nightscout dashboard. Consider deleting it — it usually means a phone with the wrong system clock is uploading."
+                )
+            }
+            if !viewModel.diagnostics.hasAnyWarning {
+                HStack {
+                    Image(systemName: "checkmark.seal")
+                        .foregroundColor(.green)
+                    Text("No issues detected")
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+
+    private func diagnosticWarning(title: String, detail: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Image(systemName: "exclamationmark.triangle")
+                    .foregroundColor(.orange)
+                Text(title)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.orange)
+            }
+            Text(detail)
+                .font(.footnote)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private func bouncingTokensWarning(_ bouncing: RemoteDiagnostics.BouncingTokens) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Image(systemName: "exclamationmark.triangle")
+                    .foregroundColor(.orange)
+                Text("Multiple devices uploading profiles")
+                    .fontWeight(.semibold)
+                    .foregroundColor(.orange)
+            }
+            Text("Device tokens are alternating in recent profile uploads (\(bouncing.distinctCount) tokens involved across \(bouncing.recordsScanned) records). This usually means more than one app installation is uploading to the same Nightscout. Remove the app from spare or unused phones.")
+                .font(.footnote)
+                .foregroundColor(.secondary)
+            if !bouncing.shifts.isEmpty {
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(Array(bouncing.shifts.enumerated()), id: \.offset) { _, shift in
+                        Text("\(shiftTimestampFormatter.string(from: shift.when))  \(abbreviateToken(shift.fromToken)) → \(abbreviateToken(shift.toToken))")
+                            .font(.system(.caption2, design: .monospaced))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.top, 2)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var shiftTimestampFormatter: DateFormatter {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd HH:mm"
+        return f
+    }
+
+    private func abbreviateToken(_ token: String) -> String {
+        guard token.count > 16 else { return token }
+        return "\(token.prefix(7))…\(token.suffix(6))"
     }
 }

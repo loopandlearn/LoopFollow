@@ -6,36 +6,36 @@ import UIKit
 
 /// A SwiftUI wrapper around MainViewController that displays the full Home screen.
 /// This can be used both in the tab bar and as a modal from the Menu.
-struct HomeContentView: UIViewControllerRepresentable {
+struct HomeContentView: View {
     let isModal: Bool
 
     init(isModal: Bool = false) {
         self.isModal = isModal
     }
 
+    var body: some View {
+        MainViewControllerRepresentable()
+            // Home has no text input, yet iOS sometimes replays a stale keyboard
+            // frame when the app returns to the foreground, which squeezes the
+            // whole screen up by a keyboard's height until a rotation forces the
+            // safe area to recompute. Opting out of keyboard avoidance prevents it.
+            .ignoresSafeArea(.keyboard)
+    }
+}
+
+private struct MainViewControllerRepresentable: UIViewControllerRepresentable {
     func makeUIViewController(context _: Context) -> UIViewController {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-
-        // Get the MainViewController from storyboard
-        guard let mainVC = storyboard.instantiateViewController(withIdentifier: "MainViewController") as? MainViewController else {
-            let fallbackVC = UIViewController()
-            fallbackVC.view.backgroundColor = .systemBackground
-            let label = UILabel()
-            label.text = "Unable to load Home screen"
-            label.textAlignment = .center
-            label.translatesAutoresizingMaskIntoConstraints = false
-            fallbackVC.view.addSubview(label)
-            NSLayoutConstraint.activate([
-                label.centerXAnchor.constraint(equalTo: fallbackVC.view.centerXAnchor),
-                label.centerYAnchor.constraint(equalTo: fallbackVC.view.centerYAnchor),
-            ])
-            return fallbackVC
-        }
-
+        // Reuse the single long-lived instance rather than creating a new one,
+        // so there is exactly one data pipeline and MainViewController.shared is
+        // never displaced. bootstrap() is a no-op if it already exists.
+        MainViewController.bootstrap()
+        let mainVC = MainViewController.shared!
+        // Detach from any previous SwiftUI host (e.g. after a Menu push was
+        // popped and is now being re-pushed) before this representable embeds it.
+        mainVC.willMove(toParent: nil)
+        mainVC.removeFromParent()
+        mainVC.view.removeFromSuperview()
         mainVC.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
-
-        mainVC.isPresentedAsModal = isModal
-
         return mainVC
     }
 
@@ -50,7 +50,7 @@ struct HomeModalView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             HomeContentView(isModal: true)
                 .navigationTitle("Home")
                 .navigationBarTitleDisplayMode(.inline)
