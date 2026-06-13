@@ -48,6 +48,8 @@ struct NSProfile: Decodable {
     let deviceToken: String?
     let teamID: String?
     let expirationDate: String?
+    let startDate: String?
+    let createdAt: String?
 
     struct TrioOverrideEntry: Decodable {
         let name: String
@@ -97,5 +99,7 @@ struct NSProfile: Decodable {
         case loopSettings
         case teamID
         case expirationDate
+        case startDate
+        case createdAt = "created_at"
     }
 }
