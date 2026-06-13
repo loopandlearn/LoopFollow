@@ -2,6 +2,7 @@
 // LogManager.swift
 
 import Foundation
+import UIKit
 
 class LogManager {
     static let shared = LogManager()
@@ -115,6 +116,16 @@ class LogManager {
             let expirationHeaderString = buildDetails.expirationHeaderString
             let isMacApp = buildDetails.isMacApp()
             let isSimulatorBuild = buildDetails.isSimulatorBuild()
+            let osLabel: String
+            let osVersion: String
+            if isMacApp {
+                osLabel = "macOS"
+                let v = ProcessInfo.processInfo.operatingSystemVersion
+                osVersion = "\(v.majorVersion).\(v.minorVersion).\(v.patchVersion)"
+            } else {
+                osLabel = "iOS"
+                osVersion = UIDevice.current.systemVersion
+            }
 
             // Assemble header information
             var headerLines = [String]()
@@ -124,6 +135,7 @@ class LogManager {
             }
             headerLines.append("Built: \(formattedBuildDate)")
             headerLines.append("Branch: \(branchAndSha)")
+            headerLines.append("\(osLabel): \(osVersion)")
 
             let headerMessage = headerLines.joined(separator: ", ") + "\n"
             let logMessage = formattedLogMessage(for: .general, message: headerMessage)

@@ -4,11 +4,17 @@
 import Foundation
 
 class StatsDataFetcher {
-    weak var mainViewController: MainViewController?
+    /// See StatsDataService.mainViewController — the injected reference can be
+    /// nil at cold launch, so fall back to the shared engine.
+    private weak var injectedMainViewController: MainViewController?
+    var mainViewController: MainViewController? {
+        injectedMainViewController ?? MainViewController.shared
+    }
+
     weak var dataService: StatsDataService?
 
     init(mainViewController: MainViewController?) {
-        self.mainViewController = mainViewController
+        injectedMainViewController = mainViewController
     }
 
     func fetchBGData(days: Int, completion: @escaping () -> Void) {
@@ -88,9 +94,20 @@ class StatsDataFetcher {
             return
         }
 
-        NightscoutUtils.executeRequest(eventType: .profile, parameters: [:]) { (result: Result<NSProfile, Error>) in
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let parameters: [String: String] = [
+            "count": "1",
+            "find[startDate][$lte]": formatter.string(from: Date().addingTimeInterval(60)),
+        ]
+        NightscoutUtils.executeRequest(eventType: .profile, parameters: parameters) { (result: Result<[NSProfile], Error>) in
             switch result {
-            case let .success(profileData):
+            case let .success(profiles):
+                guard let profileData = profiles.first else {
+                    LogManager.shared.log(category: .nightscout, message: "ensureBasalProfileLoaded, no profile records returned")
+                    DispatchQueue.main.async { completion() }
+                    return
+                }
                 let profileStore = profileData.store["default"] ??
                     profileData.store["Default"] ??
                     profileData.store[profileData.defaultProfile]

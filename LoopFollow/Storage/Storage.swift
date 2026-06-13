@@ -116,6 +116,9 @@ class Storage {
     var laEnabled = StorageValue<Bool>(key: "laEnabled", defaultValue: false)
     var laRenewBy = StorageValue<TimeInterval>(key: "laRenewBy", defaultValue: 0)
     var laRenewalFailed = StorageValue<Bool>(key: "laRenewalFailed", defaultValue: false)
+    var laPushToStartToken = StorageValue<String>(key: "laPushToStartToken", defaultValue: "")
+    var laLastPushToStartAt = StorageValue<TimeInterval>(key: "laLastPushToStartAt", defaultValue: 0)
+    var laPushToStartBackoff = StorageValue<TimeInterval>(key: "laPushToStartBackoff", defaultValue: 0)
 
     // Graph Settings [BEGIN]
     var showDots = StorageValue<Bool>(key: "showDots", defaultValue: true)
@@ -342,6 +345,9 @@ class Storage {
         laEnabled.reload()
         laRenewBy.reload()
         laRenewalFailed.reload()
+        laPushToStartToken.reload()
+        laLastPushToStartAt.reload()
+        laPushToStartBackoff.reload()
 
         showDots.reload()
         showLines.reload()
