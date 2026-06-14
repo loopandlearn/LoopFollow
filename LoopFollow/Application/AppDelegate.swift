@@ -263,12 +263,21 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
     {
-        // Log the notification
-        let userInfo = notification.request.content.userInfo
-        let userInfoKeys = userInfo.keys.compactMap { $0 as? String }.sorted()
-        LogManager.shared.log(category: .general, message: "Will present notification: keys=\(userInfoKeys)")
+        let content = notification.request.content
+        let userInfoKeys = content.userInfo.keys.compactMap { $0 as? String }.sorted()
+        LogManager.shared.log(
+            category: .general,
+            message: "Will present notification: keys=\(userInfoKeys), interruption=\(content.interruptionLevel.rawValue), title=\(content.title.isEmpty ? "empty" : "set"), body=\(content.body.isEmpty ? "empty" : "set")"
+        )
 
-        // Show the notification even when app is in foreground
+        // Suppress notifications iOS routes here that we never intended to surface:
+        // the Live Activity push-to-start uses interruption-level: passive with empty
+        // title/body and must not produce a banner or sound when LF is foregrounded.
+        if content.interruptionLevel == .passive || (content.title.isEmpty && content.body.isEmpty) {
+            completionHandler([])
+            return
+        }
+
         completionHandler([.banner, .sound, .badge])
     }
 }

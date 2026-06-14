@@ -26,7 +26,7 @@ class StatsDataFetcher {
         var parameters: [String: String] = [:]
         let utcISODateFormatter = ISO8601DateFormatter()
         let startDate = dataService?.startDate ?? dateTimeUtils.displayCalendar().date(byAdding: .day, value: -1 * days, to: Date())!
-        parameters["count"] = "\(days * 2 * 24 * 60 / 5)"
+        parameters["count"] = "\(days * globalVariables.maxExpectedUploaders * 24 * 60 / 5)"
         parameters["find[dateString][$gte]"] = utcISODateFormatter.string(from: startDate)
         parameters["find[type][$ne]"] = "cal"
 

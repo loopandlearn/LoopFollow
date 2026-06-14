@@ -7,6 +7,22 @@ import UIKit
 
 import Charts
 
+/// Fill colors for the override and temp-target bars on the BG graph.
+///
+/// Loop draws overrides green and temp targets purple, while Trio (and other
+/// OpenAPS-based algorithms) use the inverse — overrides purple, temp targets
+/// green. We follow the active backend's convention so the colors match the
+/// looping app the user is running.
+enum TreatmentGraphColors {
+    static var override: NSUIColor {
+        Storage.shared.device.value == "Loop" ? .systemGreen : .systemPurple
+    }
+
+    static var tempTarget: NSUIColor {
+        Storage.shared.device.value == "Loop" ? .systemPurple : .systemGreen
+    }
+}
+
 enum GraphDataIndex: Int {
     case bg = 0
     case prediction = 1
@@ -203,7 +219,7 @@ class TempTargetRenderer: LineChartRenderer {
                 }
 
                 context.saveGState()
-                context.setFillColor(NSUIColor.systemPurple.withAlphaComponent(0.5).cgColor)
+                context.setFillColor(TreatmentGraphColors.tempTarget.withAlphaComponent(0.5).cgColor)
                 context.fill(rect)
                 context.restoreGState()
             }
@@ -383,7 +399,7 @@ extension MainViewController {
         lineOverride.lineWidth = 0
         lineOverride.drawFilledEnabled = true
         lineOverride.fillFormatter = OverrideFillFormatter()
-        lineOverride.fillColor = NSUIColor.systemGreen
+        lineOverride.fillColor = TreatmentGraphColors.override
         lineOverride.fillAlpha = 0.6
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
@@ -1505,7 +1521,7 @@ extension MainViewController {
         lineOverride.lineWidth = 0
         lineOverride.drawFilledEnabled = true
         lineOverride.fillFormatter = OverrideFillFormatter()
-        lineOverride.fillColor = NSUIColor.systemGreen
+        lineOverride.fillColor = TreatmentGraphColors.override
         lineOverride.fillAlpha = 0.6
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
@@ -1728,6 +1744,9 @@ extension MainViewController {
         var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
         chart.clear()
         smallChart.clear()
+        // Refresh the fill color in case the backend (Loop vs Trio) changed.
+        chart.fillColor = TreatmentGraphColors.override
+        smallChart.fillColor = TreatmentGraphColors.override
         let thisData = overrideGraphData
 
         var colors = [NSUIColor]()

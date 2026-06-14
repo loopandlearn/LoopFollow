@@ -18,4 +18,10 @@ enum globalVariables {
     // BG readings and prediction values on the graph.
     static let minDisplayGlucose: Int = 39
     static let maxDisplayGlucose: Int = 400
+
+    // Number of apps that may upload BG to the same account (a looping system,
+    // the Dexcom app, Apple Watch, ...). Each one writes a duplicate reading per
+    // slot, so the Nightscout entry-count request is multiplied by this to avoid
+    // truncating history before the date filter bounds the window.
+    static let maxExpectedUploaders = 4
 }

@@ -8,6 +8,7 @@ struct LoopAPNSCarbsView: View {
     private typealias AbsorptionPreset = (hours: Int, minutes: Int)
 
     @Environment(\.presentationMode) var presentationMode
+    @ObservedObject private var quickPickMeals = QuickPickMealsManager.shared
     @State private var carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var absorptionHours = 3
     @State private var absorptionMinutes = 0
@@ -102,6 +103,30 @@ struct LoopAPNSCarbsView: View {
         NavigationView {
             VStack {
                 Form {
+                    if !quickPickMeals.quickPickMeals.isEmpty {
+                        Section(header: QuickPickSectionHeader(title: "Quick-Pick Meals", infoText: QuickPickSectionHeader.mealInfoText)) {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    ForEach(quickPickMeals.quickPickMeals) { meal in
+                                        Button {
+                                            carbsAmount = HKQuantity(unit: .gram(), doubleValue: meal.carbs)
+                                        } label: {
+                                            Text("\(Int(meal.carbs))g")
+                                                .font(.subheadline.weight(.medium))
+                                                .padding(.horizontal, 14)
+                                                .padding(.vertical, 8)
+                                                .background(Color.accentColor.opacity(0.15))
+                                                .foregroundColor(.accentColor)
+                                                .cornerRadius(8)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                    }
+
                     Section {
                         HKQuantityInputView(
                             label: "Carbs Amount",
@@ -384,6 +409,12 @@ struct LoopAPNSCarbsView: View {
                     alertType = .error
                     showAlert = true
                 }
+
+                quickPickMeals.refresh(
+                    maxCarbs: Storage.shared.maxCarbs.value.doubleValue(for: .gram()),
+                    includeFatProtein: false
+                )
+
                 // Reset timer state so it shows '-' until first tick
                 otpTimeRemaining = nil
                 // Don't reset TOTP usage flag here - let the timer handle it
@@ -534,6 +565,10 @@ struct LoopAPNSCarbsView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
+                    let sentCarbs = carbsAmount.doubleValue(for: .gram())
+                    if sentCarbs > 0 {
+                        QuickPickMealsManager.shared.recordMeal(carbs: sentCarbs)
+                    }
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
                     let timeFormatter = DateFormatter()
