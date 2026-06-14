@@ -24,14 +24,26 @@ struct InfoTableView: View {
     }
 
     private func row(name: String, value: String) -> some View {
-        HStack {
-            Text(name)
-            Spacer()
-            Text(value)
-                .foregroundStyle(.primary)
+        ViewThatFits(in: .horizontal) {
+            // Preferred: compact single line (label — value)
+            HStack {
+                Text(name)
+                Spacer()
+                Text(value)
+                    .foregroundStyle(.primary)
+            }
+
+            // Fallback when the single line won't fit: label over value
+            VStack(alignment: .leading, spacing: 0) {
+                Text(name)
+                Text(value)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
         }
         .font(.system(size: fontSize))
-        .frame(height: rowHeight)
+        .lineLimit(1)
+        .frame(minHeight: rowHeight)
         .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
     }
 }
