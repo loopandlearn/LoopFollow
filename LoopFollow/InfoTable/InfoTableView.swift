@@ -24,25 +24,30 @@ struct InfoTableView: View {
     }
 
     private func row(name: String, value: String) -> some View {
-        ViewThatFits(in: .horizontal) {
+        // Show a placeholder for any field that has no value yet,
+        // so the row reads as "no data" rather than appearing empty.
+        let displayValue = value.isEmpty ? "—" : value
+
+        return ViewThatFits(in: .horizontal) {
             // Preferred: compact single line (label — value)
             HStack {
                 Text(name)
                 Spacer()
-                Text(value)
+                Text(displayValue)
                     .foregroundStyle(.primary)
             }
 
             // Fallback when the single line won't fit: label over value
             VStack(alignment: .leading, spacing: 0) {
                 Text(name)
-                Text(value)
+                Text(displayValue)
                     .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
         .font(.system(size: fontSize))
         .lineLimit(1)
+        .minimumScaleFactor(0.5)
         .frame(minHeight: rowHeight)
         .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
     }
