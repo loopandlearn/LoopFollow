@@ -1092,7 +1092,6 @@
 			children = (
 				B500000000000000000000A5 /* QuickPickBoluses */,
 				B500000000000000000000B5 /* QuickPickMeals */,
-				DDDF6F4A2D479B6A00884336 /* Nightscout */,
 				DDEF503E2D479B8A00884336 /* LoopAPNS */,
 				DD4878112C7B74F90048F05C /* TRC */,
 				DD4878062C7B2E9E0048F05C /* Settings */,
@@ -1386,13 +1385,6 @@
 				DDDC31CB2E13A7DF009EA0F3 /* AddAlarmSheet.swift */,
 			);
 			path = AddAlarm;
-			sourceTree = "<group>";
-		};
-		DDDF6F4A2D479B6A00884336 /* Nightscout */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Nightscout;
 			sourceTree = "<group>";
 		};
 		DDEF503D2D32753A00999A5D /* Task */ = {
