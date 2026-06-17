@@ -1,771 +1,1041 @@
 // LoopFollow
 // EndoReportGenerator.swift
-//
-// Generates a PDF endo report by:
-//   1. Reusing the existing AGPCalculator, TIRCalculator, and StatsDataService
-//   2. Snapshotting the existing AGPGraphView and TIRGraphView into images
-//   3. Assembling a multi-page PDF with PDFKit
 
 import PDFKit
-import SwiftUI
 import UIKit
 
+// MARK: - Generator
+
 enum EndoReportGenerator {
+    enum ReportError: LocalizedError {
+        case noData
+        var errorDescription: String? { "No CGM data available for the selected date range." }
+    }
 
-    // MARK: - Public entry point
+    static func generate(config: EndoReportConfig, dataService: StatsDataService) throws -> URL {
+        let bgData = dataService.getBGData()
+        guard !bgData.isEmpty else { throw ReportError.noData }
 
-    /// Generates a PDF and returns the file URL, or throws on failure.
-    static func generate(
-        patientName: String,
-        dateOfBirth: String,
-        providerName: String,
-        startDate: Date,
-        endDate: Date,
-        dataService: StatsDataService
-    ) throws -> URL {
+        // Use the existing ViewModels for calculations
+        let agpVM = AGPViewModel(dataService: dataService)
+        agpVM.calculateAGP()
 
-        let bgData   = dataService.getBGData()
-        guard !bgData.isEmpty else {
-            throw ReportError.noData
-        }
+        let stats = ReportStats(bgData: bgData, dataService: dataService)
+        let patterns = TimePatterns(bgData: bgData)
+        let boluses = dataService.getBolusData()
+        let smbs = dataService.getSMBData()
+        let carbs = dataService.getCarbData()
+        let basals = dataService.getBasalData()
+        let basalProfile = dataService.getBasalProfile() // Get basal profile here
+        let simpleVM = SimpleStatsViewModel(dataService: dataService)
+        simpleVM.calculateStats()
 
-        let agpData  = AGPCalculator.calculate(bgData: bgData)
-        let tirData  = TIRCalculator.calculate(bgData: bgData)
-        let stats    = SimpleStats(bgData: bgData, dataService: dataService)
-
-        let pageRect = CGRect(origin: .zero, size: CGSize(width: 612, height: 792)) // US Letter
+        let pageRect = CGRect(origin: .zero, size: CGSize(width: 612, height: 792))
         let renderer = UIGraphicsPDFRenderer(bounds: pageRect)
-
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("EndoReport_\(Int(Date().timeIntervalSince1970)).pdf")
 
+        let dailyData = groupByDay(bgData: bgData, boluses: boluses, smbs: smbs, basals: basals, carbs: carbs)
+            .sorted { $0.key > $1.key }
+
         let data = renderer.pdfData { ctx in
-            // ── Page 1: Summary + AGP ──────────────────────────────────────
+            // Page 1 — Summary
             ctx.beginPage()
-            var cursor = drawHeader(
-                ctx: ctx.cgContext,
-                pageRect: pageRect,
-                patientName: patientName,
-                dateOfBirth: dateOfBirth,
-                providerName: providerName,
-                startDate: startDate,
-                endDate: endDate
-            )
+            drawSummaryPage(ctx: ctx.cgContext, r: pageRect, cfg: config,
+                            bgData: bgData, agpData: agpVM.agpData,
+                            stats: stats, patterns: patterns,
+                            boluses: boluses, smbs: smbs, carbs: carbs,
+                            simpleVM: simpleVM)
 
-            cursor = drawSectionTitle("Key Metrics", y: cursor, in: pageRect, ctx: ctx.cgContext)
-            cursor = drawKeyMetrics(stats: stats, y: cursor, in: pageRect, ctx: ctx.cgContext)
+            // Pages 2+ — Daily breakdowns
+            if config.includeDailyBreakdown && !dailyData.isEmpty {
+                let rowH: CGFloat = 88
+                let rowGap: CGFloat = 6
+                let topY: CGFloat = 52
+                let botY: CGFloat = 762
+                let usable = botY - topY
+                let perPage = Int((usable + rowGap) / (rowH + rowGap))
+                let pages = Int(ceil(Double(dailyData.count) / Double(perPage)))
 
-            cursor = drawSectionTitle("Time in Range", y: cursor, in: pageRect, ctx: ctx.cgContext)
-            cursor = drawTIRBar(tirData: tirData, y: cursor, in: pageRect, ctx: ctx.cgContext)
-            cursor = drawTIRTable(tirData: tirData, y: cursor, in: pageRect, ctx: ctx.cgContext)
-
-            cursor = drawSectionTitle("Ambulatory Glucose Profile (AGP)", y: cursor, in: pageRect, ctx: ctx.cgContext)
-            cursor = drawAGPChart(agpData: agpData, y: cursor, in: pageRect, ctx: ctx.cgContext)
-            drawFooter(ctx: ctx.cgContext, pageRect: pageRect, page: 1)
-
-            // ── Page 2: Daily stats + Insulin/Carbs ───────────────────────
-            ctx.beginPage()
-            var cursor2 = drawPageContinuationHeader(ctx: ctx.cgContext, pageRect: pageRect,
-                                                     patientName: patientName,
-                                                     startDate: startDate, endDate: endDate)
-
-            cursor2 = drawSectionTitle("Daily Glucose Summary", y: cursor2, in: pageRect, ctx: ctx.cgContext)
-            cursor2 = drawDailyTable(bgData: bgData, y: cursor2, in: pageRect, ctx: ctx.cgContext)
-
-            // Insulin & carbs if available
-            let boluses = dataService.getBolusData()
-            let smbs    = dataService.getSMBData()
-            let carbs   = dataService.getCarbData()
-            if !boluses.isEmpty || !smbs.isEmpty || !carbs.isEmpty {
-                cursor2 = drawSectionTitle("Insulin & Carbohydrate Summary",
-                                           y: cursor2, in: pageRect, ctx: ctx.cgContext)
-                cursor2 = drawInsulinCarbSummary(boluses: boluses, smbs: smbs, carbs: carbs,
-                                                  stats: stats, y: cursor2,
-                                                  in: pageRect, ctx: ctx.cgContext)
+                for p in 0 ..< pages {
+                    ctx.beginPage()
+                    let pageNum = p + 2
+                    let headerY = drawDailyPageHeader(ctx: ctx.cgContext, r: pageRect,
+                                                      cfg: config, page: pageNum,
+                                                      totalPages: pages + 1)
+                    let slice = Array(dailyData[p * perPage ..< min((p + 1) * perPage, dailyData.count)])
+                    var y = headerY + 8
+                    for (day, dayData) in slice {
+                        drawDayRow(ctx: ctx.cgContext, x: 28, y: y,
+                                   w: pageRect.width - 56, h: rowH,
+                                   day: day, dayData: dayData, cfg: config, basalProfile: basalProfile)
+                        y += rowH + rowGap
+                    }
+                    drawFooter(ctx: ctx.cgContext, r: pageRect, cfg: config,
+                               stats: stats, page: pageNum)
+                }
             }
-
-            drawFooter(ctx: ctx.cgContext, pageRect: pageRect, page: 2)
         }
-
         try data.write(to: url)
         return url
     }
 
-    // MARK: - Errors
+    // MARK: - Data models
 
-    enum ReportError: LocalizedError {
-        case noData
-        var errorDescription: String? {
-            switch self {
-            case .noData: return "No CGM data available for the selected date range."
-            }
-        }
-    }
-
-    // MARK: - Computed stats helper
-
-    struct SimpleStats {
-        let avg: Double
-        let stdDev: Double
-        let cv: Double
-        let eA1C: Double
-        let min: Double
-        let max: Double
-        let sensorPct: Double
+    struct ReportStats {
+        let avg, stdDev, cv, eA1C, minBG, maxBG, sensorPct, tir, tightTIR, days: Double
+        let veryLow, low, inRange, high, veryHigh: Double
         let readingCount: Int
 
         init(bgData: [ShareGlucoseData], dataService: StatsDataService) {
-            let vals = bgData.map { Double($0.sgv) }
-            let n    = Double(vals.count)
-            let mean = vals.reduce(0, +) / n
-            let variance = vals.map { ($0 - mean) * ($0 - mean) }.reduce(0, +) / n
-            avg      = mean
-            stdDev   = sqrt(variance)
-            cv       = stdDev / mean * 100
-            eA1C     = (mean + 46.7) / 28.7
-            min      = vals.min() ?? 0
-            max      = vals.max() ?? 0
-            readingCount = vals.count
+            let v = bgData.map { Double($0.sgv) }; let n = Double(v.count)
+            let m = v.reduce(0,+) / n
+            let variance = v.map { ($0 - m) * ($0 - m) }.reduce(0,+) / n
 
-            let days    = max(dataService.endDate.timeIntervalSince1970 - dataService.startDate.timeIntervalSince1970, 86400) / 86400
-            let expected = days * 288
-            sensorPct = Swift.min(Double(vals.count) / expected * 100, 100)
+            avg = m; stdDev = sqrt(variance); cv = stdDev / m * 100; eA1C = (m + 46.7) / 28.7
+            minBG = v.min() ?? 0; maxBG = v.max() ?? 0; readingCount = v.count
+            days = Swift.max(dataService.endDate.timeIntervalSince1970 - dataService.startDate.timeIntervalSince1970, 86400) / 86400
+            sensorPct = Swift.min(Double(v.count) / (days * 288) * 100, 100)
+
+            // Calculate TIR Buckets
+            let vLowCount = Double(v.filter { $0 < 54 }.count)
+            let lowCount = Double(v.filter { $0 >= 54 && $0 < 70 }.count)
+            let inRangeCount = Double(v.filter { $0 >= 70 && $0 <= 180 }.count)
+            let highCount = Double(v.filter { $0 > 180 && $0 <= 250 }.count)
+            let vHighCount = Double(v.filter { $0 > 250 }.count)
+
+            veryLow = (vLowCount / n) * 100
+            low = (lowCount / n) * 100
+            inRange = (inRangeCount / n) * 100
+            high = (highCount / n) * 100
+            veryHigh = (vHighCount / n) * 100
+            tir = inRange
+            tightTIR = Double(v.filter { $0 >= 70 && $0 <= 140 }.count) / n * 100
         }
     }
 
-    // MARK: - Layout constants
-
-    private static let margin: CGFloat    = 36
-    private static let bodyFont           = UIFont.systemFont(ofSize: 9)
-    private static let labelFont          = UIFont.systemFont(ofSize: 8)
-    private static let boldFont           = UIFont.boldSystemFont(ofSize: 9)
-    private static let titleFont          = UIFont.boldSystemFont(ofSize: 11)
-    private static let sectionFont        = UIFont.boldSystemFont(ofSize: 10)
-
-    private static let colorVeryLow       = UIColor(red: 0.957, green: 0.263, blue: 0.212, alpha: 1)
-    private static let colorLow           = UIColor(red: 1.000, green: 0.596, blue: 0.000, alpha: 1)
-    private static let colorInRange       = UIColor(red: 0.298, green: 0.686, blue: 0.314, alpha: 1)
-    private static let colorHigh          = UIColor(red: 1.000, green: 0.757, blue: 0.027, alpha: 1)
-    private static let colorVeryHigh      = UIColor(red: 1.000, green: 0.341, blue: 0.133, alpha: 1)
-    private static let colorBlue          = UIColor(red: 0.102, green: 0.451, blue: 0.933, alpha: 1)
-    private static let colorDark          = UIColor(red: 0.110, green: 0.169, blue: 0.227, alpha: 1)
-    private static let colorLightGray     = UIColor(red: 0.957, green: 0.961, blue: 0.976, alpha: 1)
-    private static let colorBorder        = UIColor(red: 0.867, green: 0.890, blue: 0.925, alpha: 1)
-
-    // MARK: - Header / Footer
-
-    @discardableResult
-    private static func drawHeader(
-        ctx: CGContext,
-        pageRect: CGRect,
-        patientName: String,
-        dateOfBirth: String,
-        providerName: String,
-        startDate: Date,
-        endDate: Date
-    ) -> CGFloat {
-
-        let headerH: CGFloat = 52
-        ctx.setFillColor(colorDark.cgColor)
-        ctx.fill(CGRect(x: 0, y: 0, width: pageRect.width, height: headerH))
-
-        let titleAttrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.boldSystemFont(ofSize: 14),
-            .foregroundColor: UIColor.white,
-        ]
-        "Continuous Glucose Monitor Report".draw(at: CGPoint(x: margin, y: 10), withAttributes: titleAttrs)
-
-        let df = DateFormatter()
-        df.dateFormat = "MMM d, yyyy"
-        let rangeStr = "\(df.string(from: startDate)) – \(df.string(from: endDate))"
-        let subAttrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 9),
-            .foregroundColor: UIColor(white: 0.8, alpha: 1),
-        ]
-        let rangeSize = (rangeStr as NSString).size(withAttributes: subAttrs)
-        (rangeStr as NSString).draw(
-            at: CGPoint(x: pageRect.width - margin - rangeSize.width, y: 12),
-            withAttributes: subAttrs
-        )
-
-        // Patient info bar
-        let infoY: CGFloat = 28
-        let infoAttrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 8.5),
-            .foregroundColor: UIColor(white: 0.75, alpha: 1),
-        ]
-        "Patient: \(patientName)".draw(at: CGPoint(x: margin, y: infoY), withAttributes: infoAttrs)
-        if !dateOfBirth.isEmpty {
-            "DOB: \(dateOfBirth)".draw(at: CGPoint(x: margin + 180, y: infoY), withAttributes: infoAttrs)
-        }
-        if !providerName.isEmpty {
-            let provStr = "Provider: \(providerName)"
-            let provSize = (provStr as NSString).size(withAttributes: infoAttrs)
-            (provStr as NSString).draw(
-                at: CGPoint(x: pageRect.width - margin - provSize.width, y: infoY),
-                withAttributes: infoAttrs
-            )
-        }
-
-        return headerH + 12
-    }
-
-    @discardableResult
-    private static func drawPageContinuationHeader(
-        ctx: CGContext, pageRect: CGRect,
-        patientName: String, startDate: Date, endDate: Date
-    ) -> CGFloat {
-        let headerH: CGFloat = 32
-        ctx.setFillColor(colorDark.cgColor)
-        ctx.fill(CGRect(x: 0, y: 0, width: pageRect.width, height: headerH))
-
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.boldSystemFont(ofSize: 11),
-            .foregroundColor: UIColor.white,
-        ]
-        "CGM Report — \(patientName)".draw(at: CGPoint(x: margin, y: 9), withAttributes: attrs)
-        return headerH + 12
-    }
-
-    private static func drawFooter(ctx: CGContext, pageRect: CGRect, page: Int) {
-        let footerY = pageRect.height - 28
-        ctx.setFillColor(colorLightGray.cgColor)
-        ctx.fill(CGRect(x: 0, y: footerY, width: pageRect.width, height: 28))
-
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 7.5),
-            .foregroundColor: UIColor.secondaryLabel,
-        ]
-        "LoopFollow CGM Report  |  For clinical use only  |  Targets 70–180 mg/dL"
-            .draw(at: CGPoint(x: margin, y: footerY + 8), withAttributes: attrs)
-
-        let pageStr = "Page \(page)"
-        let pageSize = (pageStr as NSString).size(withAttributes: attrs)
-        (pageStr as NSString).draw(
-            at: CGPoint(x: pageRect.width - margin - pageSize.width, y: footerY + 8),
-            withAttributes: attrs
-        )
-    }
-
-    // MARK: - Section title
-
-    @discardableResult
-    private static func drawSectionTitle(_ title: String, y: CGFloat, in pageRect: CGRect, ctx: CGContext) -> CGFloat {
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: sectionFont,
-            .foregroundColor: colorBlue,
-        ]
-        (title.uppercased() as NSString).draw(at: CGPoint(x: margin, y: y), withAttributes: attrs)
-
-        let lineY = y + 14
-        ctx.setStrokeColor(colorBorder.cgColor)
-        ctx.setLineWidth(0.5)
-        ctx.move(to: CGPoint(x: margin, y: lineY))
-        ctx.addLine(to: CGPoint(x: pageRect.width - margin, y: lineY))
-        ctx.strokePath()
-
-        return lineY + 8
-    }
-
-    // MARK: - Key metrics cards
-
-    @discardableResult
-    private static func drawKeyMetrics(stats: SimpleStats, y: CGFloat, in pageRect: CGRect, ctx: CGContext) -> CGFloat {
-        let units  = Storage.shared.units.value
-        let isMMOL = units == "mmol/L"
-
-        func fmtGlucose(_ v: Double) -> String {
-            isMMOL ? String(format: "%.1f", v * 0.0555) : String(format: "%.0f", v)
-        }
-
-        let cards: [(String, String, String)] = [
-            ("eA1C", String(format: "%.1f%%", stats.eA1C), "Estimated A1C"),
-            ("TIR", {
-                // grab from TIR calculator average
-                let t = TIRCalculator.calculate(bgData: []) // placeholder — we draw this separately
-                return "—"
-            }(), "70–180 mg/dL"),
-            ("Avg Glucose", fmtGlucose(stats.avg), units),
-            ("CV", String(format: "%.1f%%", stats.cv), "SD \(fmtGlucose(stats.stdDev))"),
-            ("Sensor Active", String(format: "%.0f%%", stats.sensorPct), "\(stats.readingCount) readings"),
-        ]
-
-        let cardW   = (pageRect.width - margin * 2) / CGFloat(cards.count)
-        let cardH:  CGFloat = 52
-        let startX  = margin
-
-        for (i, card) in cards.enumerated() {
-            let cardX = startX + CGFloat(i) * cardW
-            let rect  = CGRect(x: cardX, y: y, width: cardW - 4, height: cardH)
-
-            // Background
-            ctx.setFillColor(colorLightGray.cgColor)
-            ctx.fill(rect)
-            ctx.setStrokeColor(colorBorder.cgColor)
-            ctx.setLineWidth(0.5)
-            ctx.stroke(rect)
-
-            // Value
-            let valAttrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.boldSystemFont(ofSize: 17),
-                .foregroundColor: colorDark,
-            ]
-            let valSize = (card.1 as NSString).size(withAttributes: valAttrs)
-            let valX    = cardX + (cardW - 4 - valSize.width) / 2
-            (card.1 as NSString).draw(at: CGPoint(x: valX, y: y + 8), withAttributes: valAttrs)
-
-            // Label
-            let lblAttrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 7.5),
-                .foregroundColor: UIColor.secondaryLabel,
-            ]
-            let lblSize = (card.0 as NSString).size(withAttributes: lblAttrs)
-            (card.0 as NSString).draw(
-                at: CGPoint(x: cardX + (cardW - 4 - lblSize.width) / 2, y: y + 28),
-                withAttributes: lblAttrs
-            )
-
-            let subSize = (card.2 as NSString).size(withAttributes: lblAttrs)
-            (card.2 as NSString).draw(
-                at: CGPoint(x: cardX + (cardW - 4 - subSize.width) / 2, y: y + 39),
-                withAttributes: lblAttrs
-            )
-        }
-
-        return y + cardH + 12
-    }
-
-    // MARK: - TIR bar
-
-    @discardableResult
-    private static func drawTIRBar(tirData: [TIRDataPoint], y: CGFloat, in pageRect: CGRect, ctx: CGContext) -> CGFloat {
-        guard let avg = tirData.first(where: { $0.period == .average }) else { return y }
-
-        let barW  = pageRect.width - margin * 2
-        let barH: CGFloat = 20
-        var x     = margin
-
-        let segments: [(CGFloat, UIColor)] = [
-            (CGFloat(avg.veryLow / 100)  * barW, colorVeryLow),
-            (CGFloat(avg.low / 100)      * barW, colorLow),
-            (CGFloat(avg.inRange / 100)  * barW, colorInRange),
-            (CGFloat(avg.high / 100)     * barW, colorHigh),
-            (CGFloat(avg.veryHigh / 100) * barW, colorVeryHigh),
-        ]
-
-        for (w, clr) in segments {
-            if w > 0 {
-                ctx.setFillColor(clr.cgColor)
-                ctx.fill(CGRect(x: x, y: y, width: w, height: barH))
+    struct TimePatterns {
+        struct Period { let label: String; let avg: Double; let count: Int }
+        let night, earlyAM, morning, afternoon, evening, late: Period
+        init(bgData: [ShareGlucoseData]) {
+            func p(_ l: String, _ s: Int, _ e: Int) -> Period {
+                let cal = dateTimeUtils.displayCalendar()
+                let r = bgData.filter { let h = cal.component(.hour, from: Date(timeIntervalSince1970: $0.date)); return h >= s && h < e }
+                return Period(label: l, avg: r.isEmpty ? 0 : r.map { Double($0.sgv) }.reduce(0,+) / Double(r.count), count: r.count)
             }
-            x += w
+            night = p("Night", 0, 3); earlyAM = p("Early AM", 3, 6); morning = p("Morning", 6, 12)
+            afternoon = p("Afternoon", 12, 17); evening = p("Evening", 17, 21); late = p("Late", 21, 24)
         }
-
-        // Labels inside bar
-        x = margin
-        let pcts = [avg.veryLow, avg.low, avg.inRange, avg.high, avg.veryHigh]
-        let clrs  = [colorVeryLow, colorLow, colorInRange, colorHigh, colorVeryHigh]
-        for (i, pct) in pcts.enumerated() {
-            let w = CGFloat(pct / 100) * barW
-            if pct >= 5 {
-                let pctStr = String(format: "%.1f%%", pct)
-                let attrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.boldSystemFont(ofSize: 8),
-                    .foregroundColor: UIColor.white,
-                ]
-                let sz = (pctStr as NSString).size(withAttributes: attrs)
-                (pctStr as NSString).draw(
-                    at: CGPoint(x: x + (w - sz.width) / 2, y: y + (barH - sz.height) / 2),
-                    withAttributes: attrs
-                )
-            }
-            x += w
-        }
-
-        // Legend
-        let legendY = y + barH + 4
-        let legendItems: [(String, UIColor)] = [
-            ("Very Low <54", colorVeryLow),
-            ("Low 54-69", colorLow),
-            ("In Range 70-180", colorInRange),
-            ("High 181-250", colorHigh),
-            ("Very High >250", colorVeryHigh),
-        ]
-        let itemW = barW / CGFloat(legendItems.count)
-        for (i, item) in legendItems.enumerated() {
-            let ix = margin + CGFloat(i) * itemW
-            ctx.setFillColor(item.1.cgColor)
-            ctx.fill(CGRect(x: ix, y: legendY, width: 8, height: 8))
-            let attrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 7),
-                .foregroundColor: UIColor.secondaryLabel,
-            ]
-            (item.0 as NSString).draw(at: CGPoint(x: ix + 10, y: legendY), withAttributes: attrs)
-        }
-
-        return legendY + 16
     }
 
-    // MARK: - TIR table
-
-    @discardableResult
-    private static func drawTIRTable(tirData: [TIRDataPoint], y: CGFloat, in pageRect: CGRect, ctx: CGContext) -> CGFloat {
-        let cols: [CGFloat] = [100, 100, 70, 80, 70]
-        let headers          = ["Zone", "Range", "Your %", "ADA Target", "Status"]
-        let rows: [(String, String, Double, String, Bool)] = [
-            ("Very Low",  "< 54 mg/dL",   tirData.first(where:{$0.period == .average})?.veryLow ?? 0, "< 1%",  (tirData.first(where:{$0.period == .average})?.veryLow ?? 99) < 1),
-            ("Low",       "54–69 mg/dL",  tirData.first(where:{$0.period == .average})?.low ?? 0,     "< 4%",  (tirData.first(where:{$0.period == .average})?.low ?? 99) < 4),
-            ("In Range",  "70–180 mg/dL", tirData.first(where:{$0.period == .average})?.inRange ?? 0, "> 70%", (tirData.first(where:{$0.period == .average})?.inRange ?? 0) >= 70),
-            ("High",      "181–250 mg/dL",tirData.first(where:{$0.period == .average})?.high ?? 0,    "< 25%", (tirData.first(where:{$0.period == .average})?.high ?? 99) < 25),
-            ("Very High", "> 250 mg/dL",  tirData.first(where:{$0.period == .average})?.veryHigh ?? 0,"< 5%",  (tirData.first(where:{$0.period == .average})?.veryHigh ?? 99) < 5),
-        ]
-        let rowColors = [colorVeryLow, colorLow, colorInRange, colorHigh, colorVeryHigh]
-
-        let rowH:  CGFloat = 16
-        var curY   = y
-        var curX   = margin
-
-        // Header row
-        ctx.setFillColor(colorDark.cgColor)
-        let totalW = cols.reduce(0, +)
-        ctx.fill(CGRect(x: margin, y: curY, width: totalW, height: rowH))
-        for (i, h) in headers.enumerated() {
-            let attrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.boldSystemFont(ofSize: 8),
-                .foregroundColor: UIColor.white,
-            ]
-            (h as NSString).draw(at: CGPoint(x: curX + 4, y: curY + 4), withAttributes: attrs)
-            curX += cols[i]
-        }
-        curY += rowH
-
-        // Data rows
-        for (ri, row) in rows.enumerated() {
-            ctx.setFillColor((ri % 2 == 0 ? UIColor.white : colorLightGray).cgColor)
-            ctx.fill(CGRect(x: margin, y: curY, width: totalW, height: rowH))
-
-            // Zone color swatch in first cell
-            ctx.setFillColor(rowColors[ri].cgColor)
-            ctx.fill(CGRect(x: margin, y: curY, width: cols[0], height: rowH))
-
-            let cells = [row.0, row.1, String(format: "%.1f%%", row.2), row.3, row.4 ? "✓" : "↑"]
-            curX = margin
-            for (ci, cell) in cells.enumerated() {
-                let attrs: [NSAttributedString.Key: Any] = [
-                    .font: ci == 0 ? UIFont.boldSystemFont(ofSize: 8) : UIFont.systemFont(ofSize: 8),
-                    .foregroundColor: ci == 0 ? UIColor.white : colorDark,
-                ]
-                (cell as NSString).draw(at: CGPoint(x: curX + 4, y: curY + 4), withAttributes: attrs)
-                curX += cols[ci]
-            }
-
-            // Border
-            ctx.setStrokeColor(colorBorder.cgColor)
-            ctx.setLineWidth(0.3)
-            ctx.stroke(CGRect(x: margin, y: curY, width: totalW, height: rowH))
-            curY += rowH
-        }
-
-        return curY + 12
+    struct DayData {
+        let bg: [ShareGlucoseData]
+        let bolus: [MainViewController.bolusGraphStruct]
+        let smb: [MainViewController.bolusGraphStruct]
+        let basal: [MainViewController.basalGraphStruct]
+        let carbs: [MainViewController.carbGraphStruct]
     }
 
-    // MARK: - AGP chart (drawn natively with Core Graphics)
-
-    @discardableResult
-    private static func drawAGPChart(agpData: [AGPDataPoint], y: CGFloat, in pageRect: CGRect, ctx: CGContext) -> CGFloat {
-        guard !agpData.isEmpty else { return y }
-
-        let chartW: CGFloat = pageRect.width - margin * 2
-        let chartH: CGFloat = 140
-        let chartX: CGFloat = margin
-        let chartY: CGFloat = y
-
-        // Background
-        ctx.setFillColor(UIColor(white: 0.98, alpha: 1).cgColor)
-        ctx.fill(CGRect(x: chartX, y: chartY, width: chartW, height: chartH))
-
-        // Target zones
-        let yRange: CGFloat = 350 // 40–400
-        let yMin:   CGFloat = 40
-        func glucoseToY(_ g: Double) -> CGFloat {
-            chartY + chartH - (CGFloat(g) - yMin) / yRange * chartH
-        }
-        func timeToX(_ minutes: Int) -> CGFloat {
-            chartX + CGFloat(minutes) / (24 * 60) * chartW
-        }
-
-        // Very low zone
-        ctx.setFillColor(colorVeryLow.withAlphaComponent(0.08).cgColor)
-        ctx.fill(CGRect(x: chartX, y: glucoseToY(54), width: chartW, height: glucoseToY(40) - glucoseToY(54)))
-
-        // Low zone
-        ctx.setFillColor(colorLow.withAlphaComponent(0.08).cgColor)
-        ctx.fill(CGRect(x: chartX, y: glucoseToY(70), width: chartW, height: glucoseToY(54) - glucoseToY(70)))
-
-        // High zone
-        ctx.setFillColor(colorHigh.withAlphaComponent(0.08).cgColor)
-        ctx.fill(CGRect(x: chartX, y: glucoseToY(250), width: chartW, height: glucoseToY(180) - glucoseToY(250)))
-
-        // Target lines
-        ctx.setStrokeColor(colorLow.withAlphaComponent(0.6).cgColor)
-        ctx.setLineWidth(0.8)
-        ctx.setLineDash(phase: 0, lengths: [4, 3])
-        ctx.move(to: CGPoint(x: chartX, y: glucoseToY(70)))
-        ctx.addLine(to: CGPoint(x: chartX + chartW, y: glucoseToY(70)))
-        ctx.strokePath()
-
-        ctx.setStrokeColor(colorHigh.withAlphaComponent(0.6).cgColor)
-        ctx.move(to: CGPoint(x: chartX, y: glucoseToY(180)))
-        ctx.addLine(to: CGPoint(x: chartX + chartW, y: glucoseToY(180)))
-        ctx.strokePath()
-        ctx.setLineDash(phase: 0, lengths: [])
-
-        // 5–95 band
-        let p5Path  = CGMutablePath()
-        let p95Path = CGMutablePath()
-        var bandPath = CGMutablePath()
-
-        for (i, pt) in agpData.enumerated() {
-            let x = timeToX(pt.timeOfDay)
-            let y5  = glucoseToY(pt.p5)
-            let y95 = glucoseToY(pt.p95)
-            if i == 0 {
-                p5Path.move(to: CGPoint(x: x, y: y5))
-                p95Path.move(to: CGPoint(x: x, y: y95))
-                bandPath.move(to: CGPoint(x: x, y: y95))
-            } else {
-                p5Path.addLine(to: CGPoint(x: x, y: y5))
-                p95Path.addLine(to: CGPoint(x: x, y: y95))
-                bandPath.addLine(to: CGPoint(x: x, y: y95))
-            }
-        }
-        // Close band with p5 reversed
-        for pt in agpData.reversed() {
-            bandPath.addLine(to: CGPoint(x: timeToX(pt.timeOfDay), y: glucoseToY(pt.p5)))
-        }
-        bandPath.closeSubpath()
-        ctx.setFillColor(colorBlue.withAlphaComponent(0.12).cgColor)
-        ctx.addPath(bandPath)
-        ctx.fillPath()
-
-        // 25–75 band
-        var iqrPath = CGMutablePath()
-        for (i, pt) in agpData.enumerated() {
-            let x = timeToX(pt.timeOfDay)
-            if i == 0 { iqrPath.move(to: CGPoint(x: x, y: glucoseToY(pt.p75))) }
-            else       { iqrPath.addLine(to: CGPoint(x: x, y: glucoseToY(pt.p75))) }
-        }
-        for pt in agpData.reversed() {
-            iqrPath.addLine(to: CGPoint(x: timeToX(pt.timeOfDay), y: glucoseToY(pt.p25)))
-        }
-        iqrPath.closeSubpath()
-        ctx.setFillColor(colorBlue.withAlphaComponent(0.25).cgColor)
-        ctx.addPath(iqrPath)
-        ctx.fillPath()
-
-        // Median line
-        ctx.setStrokeColor(colorBlue.cgColor)
-        ctx.setLineWidth(1.8)
-        var first = true
-        for pt in agpData {
-            let pt2D = CGPoint(x: timeToX(pt.timeOfDay), y: glucoseToY(pt.p50))
-            if first { ctx.move(to: pt2D); first = false }
-            else      { ctx.addLine(to: pt2D) }
-        }
-        ctx.strokePath()
-
-        // X axis labels
-        let axisAttrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 7),
-            .foregroundColor: UIColor.secondaryLabel,
-        ]
-        for h in stride(from: 0, through: 24, by: 3) {
-            let lbl   = String(format: "%02d:00", h)
-            let lx    = timeToX(h * 60)
-            let lsize = (lbl as NSString).size(withAttributes: axisAttrs)
-            (lbl as NSString).draw(at: CGPoint(x: lx - lsize.width / 2, y: chartY + chartH + 2), withAttributes: axisAttrs)
-
-            // Vertical grid line
-            ctx.setStrokeColor(colorBorder.cgColor)
-            ctx.setLineWidth(0.3)
-            ctx.move(to: CGPoint(x: lx, y: chartY))
-            ctx.addLine(to: CGPoint(x: lx, y: chartY + chartH))
-            ctx.strokePath()
-        }
-
-        // Y axis labels
-        for bg in [54, 70, 140, 180, 250, 350] {
-            let ly   = glucoseToY(Double(bg))
-            let lbl  = "\(bg)"
-            let lsz  = (lbl as NSString).size(withAttributes: axisAttrs)
-            (lbl as NSString).draw(at: CGPoint(x: chartX - lsz.width - 3, y: ly - lsz.height / 2), withAttributes: axisAttrs)
-        }
-
-        // Border
-        ctx.setStrokeColor(colorBorder.cgColor)
-        ctx.setLineWidth(0.5)
-        ctx.stroke(CGRect(x: chartX, y: chartY, width: chartW, height: chartH))
-
-        // Legend
-        let lgY = chartY + chartH + 12
-        let legendItems: [(String, UIColor, Bool)] = [
-            ("Median", colorBlue, false),
-            ("25–75th %ile", colorBlue.withAlphaComponent(0.4), true),
-            ("5–95th %ile",  colorBlue.withAlphaComponent(0.18), true),
-        ]
-        var lgX = chartX
-        for item in legendItems {
-            ctx.setFillColor(item.1.cgColor)
-            ctx.fill(CGRect(x: lgX, y: lgY, width: item.2 ? 14 : 20, height: item.2 ? 8 : 2.5))
-            if !item.2 {
-                // line for median
-                ctx.setFillColor(item.1.cgColor)
-                ctx.fill(CGRect(x: lgX, y: lgY + 2, width: 20, height: 2))
-            }
-            let lgAttrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 7.5),
-                .foregroundColor: UIColor.secondaryLabel,
-            ]
-            let lsz = (item.0 as NSString).size(withAttributes: lgAttrs)
-            (item.0 as NSString).draw(at: CGPoint(x: lgX + (item.2 ? 18 : 24), y: lgY), withAttributes: lgAttrs)
-            lgX += lsz.width + (item.2 ? 18 : 24) + 16
-        }
-
-        return lgY + 20
-    }
-
-    // MARK: - Daily summary table
-
-    @discardableResult
-    private static func drawDailyTable(bgData: [ShareGlucoseData], y: CGFloat, in pageRect: CGRect, ctx: CGContext) -> CGFloat {
-        // Group by day
-        let calendar = dateTimeUtils.displayCalendar()
-        var byDay: [String: [Double]] = [:]
-        let df = DateFormatter()
-        df.dateFormat = "yyyy-MM-dd"
-
+    private static func groupByDay(
+        bgData: [ShareGlucoseData],
+        boluses: [MainViewController.bolusGraphStruct],
+        smbs: [MainViewController.bolusGraphStruct],
+        basals: [MainViewController.basalGraphStruct],
+        carbs: [MainViewController.carbGraphStruct]
+    ) -> [String: DayData] {
+        let df = DateFormatter(); df.dateFormat = "yyyy-MM-dd"
+        var bg: [String: [ShareGlucoseData]] = [:]
+        var bo: [String: [MainViewController.bolusGraphStruct]] = [:]
+        var sm: [String: [MainViewController.bolusGraphStruct]] = [:]
+        var ba: [String: [MainViewController.basalGraphStruct]] = [:]
+        var ca: [String: [MainViewController.carbGraphStruct]] = [:]
         for r in bgData {
-            let d = df.string(from: Date(timeIntervalSince1970: r.date))
-            byDay[d, default: []].append(Double(r.sgv))
+            let k = df.string(from: Date(timeIntervalSince1970: r.date)); bg[k, default: []].append(r)
         }
-
-        let cols: [CGFloat] = [90, 60, 50, 50, 55, 60, 60]
-        let headers = ["Date", "Avg", "SD", "Min", "Max", "TIR %", "Readings"]
-        let totalW  = cols.reduce(0, +)
-        let rowH: CGFloat = 14
-        var curY = y
-        var curX = margin
-
-        // Header
-        ctx.setFillColor(colorDark.cgColor)
-        ctx.fill(CGRect(x: margin, y: curY, width: totalW, height: rowH))
-        for (i, h) in headers.enumerated() {
-            let attrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.boldSystemFont(ofSize: 7.5),
-                .foregroundColor: UIColor.white,
-            ]
-            (h as NSString).draw(at: CGPoint(x: curX + 3, y: curY + 3), withAttributes: attrs)
-            curX += cols[i]
+        for r in boluses {
+            let k = df.string(from: Date(timeIntervalSince1970: r.date)); bo[k, default: []].append(r)
         }
-        curY += rowH
-
-        let dayAttrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 7.5),
-            .foregroundColor: colorDark,
-        ]
-        let df2 = DateFormatter()
-        df2.dateFormat = "EEE MMM d"
-
-        for (ri, day) in byDay.keys.sorted().enumerated() {
-            let vals = byDay[day]!
-            let n    = Double(vals.count)
-            let mean = vals.reduce(0, +) / n
-            let sd   = sqrt(vals.map { ($0 - mean) * ($0 - mean) }.reduce(0, +) / n)
-            let tir  = vals.filter { $0 >= 70 && $0 <= 180 }.count
-            let tirPct = Double(tir) / n * 100
-
-            let date = df.date(from: day) ?? Date()
-            let cells = [
-                df2.string(from: date),
-                String(format: "%.0f", mean),
-                String(format: "%.0f", sd),
-                String(format: "%.0f", vals.min() ?? 0),
-                String(format: "%.0f", vals.max() ?? 0),
-                String(format: "%.0f%%", tirPct),
-                "\(vals.count)",
-            ]
-
-            ctx.setFillColor((ri % 2 == 0 ? UIColor.white : colorLightGray).cgColor)
-            ctx.fill(CGRect(x: margin, y: curY, width: totalW, height: rowH))
-
-            curX = margin
-            for (ci, cell) in cells.enumerated() {
-                (cell as NSString).draw(at: CGPoint(x: curX + 3, y: curY + 3), withAttributes: dayAttrs)
-                curX += cols[ci]
-            }
-            ctx.setStrokeColor(colorBorder.cgColor)
-            ctx.setLineWidth(0.3)
-            ctx.stroke(CGRect(x: margin, y: curY, width: totalW, height: rowH))
-            curY += rowH
+        for r in smbs {
+            let k = df.string(from: Date(timeIntervalSince1970: r.date)); sm[k, default: []].append(r)
         }
-
-        return curY + 14
+        for r in basals {
+            let k = df.string(from: Date(timeIntervalSince1970: r.date)); ba[k, default: []].append(r)
+        }
+        for r in carbs {
+            let k = df.string(from: Date(timeIntervalSince1970: r.date)); ca[k, default: []].append(r)
+        }
+        var result: [String: DayData] = [:]
+        for k in bg.keys {
+            result[k] = DayData(bg: bg[k]!, bolus: bo[k] ?? [], smb: sm[k] ?? [], basal: ba[k] ?? [], carbs: ca[k] ?? [])
+        }
+        return result
     }
 
-    // MARK: - Insulin & carb summary
+    // MARK: - Colors / fonts
 
-    @discardableResult
-    private static func drawInsulinCarbSummary(
+    private static func accent(_ cfg: EndoReportConfig) -> UIColor { cfg.accentColor }
+    private static func accentDark(_ cfg: EndoReportConfig) -> UIColor {
+        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        cfg.accentColor.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+        return UIColor(hue: h, saturation: s, brightness: b * 0.72, alpha: a)
+    }
+
+    private static let C_INK = UIColor(red: 0.133, green: 0.157, blue: 0.192, alpha: 1)
+    private static let C_SLATE = UIColor(red: 0.400, green: 0.440, blue: 0.490, alpha: 1)
+    private static let C_CLOUD = UIColor(red: 0.960, green: 0.963, blue: 0.970, alpha: 1)
+    private static let C_BORDER = UIColor(red: 0.870, green: 0.885, blue: 0.905, alpha: 1)
+    private static let C_WHITE = UIColor.white
+    private static let C_VLOW = UIColor(red: 0.820, green: 0.180, blue: 0.180, alpha: 1)
+    private static let C_LOW = UIColor(red: 0.929, green: 0.490, blue: 0.188, alpha: 1)
+    private static let C_IN = UIColor(red: 0.200, green: 0.670, blue: 0.470, alpha: 1)
+    private static let C_HIGH = UIColor(red: 0.910, green: 0.740, blue: 0.220, alpha: 1)
+    private static let C_VHIGH = UIColor(red: 0.800, green: 0.340, blue: 0.340, alpha: 1)
+    private static let C_BOLUS = UIColor(red: 0.380, green: 0.220, blue: 0.780, alpha: 0.85)
+    private static let C_SMB = UIColor(red: 0.800, green: 0.200, blue: 0.600, alpha: 0.75)
+    private static let C_CARB = UIColor(red: 0.150, green: 0.600, blue: 0.150, alpha: 1.0)
+    private static let C_BASAL = UIColor(red: 0.102, green: 0.451, blue: 0.933, alpha: 0.65)
+
+    private static func bgColor(_ bg: Double) -> UIColor {
+        switch bg { case ..<54: return C_VLOW; case ..<70: return C_LOW; case ...180: return C_IN; case ...250: return C_HIGH; default: return C_VHIGH }
+    }
+
+    // MARK: - Page 1: Summary
+
+    private static func drawSummaryPage(
+        ctx: CGContext, r: CGRect, cfg: EndoReportConfig,
+        bgData _: [ShareGlucoseData], agpData: [AGPDataPoint],
+        stats: ReportStats, patterns: TimePatterns,
         boluses: [MainViewController.bolusGraphStruct],
         smbs: [MainViewController.bolusGraphStruct],
         carbs: [MainViewController.carbGraphStruct],
-        stats: SimpleStats,
-        y: CGFloat,
-        in pageRect: CGRect,
-        ctx: CGContext
-    ) -> CGFloat {
-        let days       = max(stats.sensorPct / 100 * 14, 1)
-        let totalBolus = boluses.map { $0.value }.reduce(0, +)
-            + smbs.map { $0.value }.reduce(0, +)
-        let totalCarbs = carbs.map { $0.value }.reduce(0, +)
+        simpleVM: SimpleStatsViewModel
+    ) {
+        let m: CGFloat = 24
+        var y = drawHero(ctx: ctx, r: r, cfg: cfg, stats: stats)
 
-        let cards: [(String, String, String)] = [
-            ("Avg Daily Bolus", String(format: "%.1f U", totalBolus / days), "Total \(String(format: "%.1f", totalBolus)) U"),
-            ("Bolus Count",     "\(boluses.count + smbs.count)",              "Over report period"),
-            ("Avg Daily Carbs", String(format: "%.0f g", totalCarbs / days),  "Total \(String(format: "%.0f", totalCarbs)) g"),
-            ("Carb Entries",    "\(carbs.count)",                              "Logged entries"),
-        ]
+        if cfg.includeGlucoseSummary {
+            y = sectionHdr("GLUCOSE SUMMARY", y: y + 2, m: m, w: r.width, cfg: cfg, ctx: ctx)
 
-        let cardW  = (pageRect.width - margin * 2) / CGFloat(cards.count)
-        let cardH: CGFloat = 48
-
-        for (i, card) in cards.enumerated() {
-            let cardX = margin + CGFloat(i) * cardW
-            let rect  = CGRect(x: cardX, y: y, width: cardW - 4, height: cardH)
-            ctx.setFillColor(colorLightGray.cgColor)
-            ctx.fill(rect)
-            ctx.setStrokeColor(colorBorder.cgColor)
-            ctx.setLineWidth(0.5)
-            ctx.stroke(rect)
-
-            let valAttrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.boldSystemFont(ofSize: 14),
-                .foregroundColor: colorDark,
+            let gridW: CGFloat = r.width - m * 2 - 158
+            let cw = gridW / 2 - 3; let ch: CGFloat = 36
+            let cards: [(String, String, Bool)] = [
+                ("TIME IN RANGE (>70%)", String(format: "%.0f%%", stats.tir), true),
+                ("GMI (TARGET <7%)", String(format: "%.1f%%", stats.eA1C), false),
+                ("AVERAGE", cfg.fmtBG(stats.avg) + " \(cfg.units)", false),
+                ("STD DEVIATION", cfg.fmtBG(stats.stdDev), false),
+                ("CV (TARGET <36%)", String(format: "%.0f%%", stats.cv), false),
+                ("READINGS", "\(stats.readingCount)", false),
             ]
-            let valSz = (card.1 as NSString).size(withAttributes: valAttrs)
-            (card.1 as NSString).draw(at: CGPoint(x: cardX + (cardW - 4 - valSz.width) / 2, y: y + 6), withAttributes: valAttrs)
+            var gy = y + 1
+            for (i, c) in cards.enumerated() {
+                statCard(c.0, val: c.1, x: m + CGFloat(i % 2) * (cw + 6), y: gy + CGFloat(i / 2) * (ch + 4),
+                         w: cw, h: ch, accent: c.2, cfg: cfg, ctx: ctx)
+            }
+            drawTIRBar(stats: stats, x: m + gridW + 10, y: y + 1,
+                       w: 148, h: ch * 3 + 7, cfg: cfg, ctx: ctx)
+            y = gy + CGFloat(3) * (ch + 4) + 1
 
-            let lblAttrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 7.5),
-                .foregroundColor: UIColor.secondaryLabel,
-            ]
-            let lsz = (card.0 as NSString).size(withAttributes: lblAttrs)
-            (card.0 as NSString).draw(at: CGPoint(x: cardX + (cardW - 4 - lsz.width) / 2, y: y + 24), withAttributes: lblAttrs)
-
-            let ssz = (card.2 as NSString).size(withAttributes: lblAttrs)
-            (card.2 as NSString).draw(at: CGPoint(x: cardX + (cardW - 4 - ssz.width) / 2, y: y + 34), withAttributes: lblAttrs)
+            y = timeStrip(patterns: patterns, cfg: cfg, y: y + 1, m: m, w: r.width, ctx: ctx)
         }
 
-        return y + cardH + 14
+        if cfg.includeInsulin && (!boluses.isEmpty || !smbs.isEmpty) {
+            y = sectionHdr("INSULIN DELIVERY", y: y + 2, m: m, w: r.width, cfg: cfg, ctx: ctx)
+            y = insulinSection(boluses: boluses, smbs: smbs, simpleVM: simpleVM,
+                               stats: stats, cfg: cfg, y: y + 1, m: m, w: r.width, ctx: ctx)
+        }
+
+        if cfg.includeNutrition && !carbs.isEmpty {
+            y = sectionHdr("NUTRITION & MEALS", y: y + 2, m: m, w: r.width, cfg: cfg, ctx: ctx)
+            y = nutritionSection(carbs: carbs, stats: stats, cfg: cfg, y: y + 1, m: m, w: r.width, ctx: ctx)
+        }
+
+        let hasDevice = cfg.includeDevices && (!cfg.pumpDevice.isEmpty || !cfg.cgmDevice.isEmpty || !cfg.insulinType.isEmpty)
+        let hasSettings = cfg.includeTherapySettings && (!cfg.carbRatio.isEmpty || !cfg.isf.isEmpty || !cfg.basalRate.isEmpty || !cfg.targetGlucose.isEmpty)
+
+        if hasDevice || hasSettings {
+            y = sectionHdr("SYSTEM & THERAPY SETTINGS", y: y + 2, m: m, w: r.width, cfg: cfg, ctx: ctx)
+            var gridItems: [(String, String)] = []
+            if hasDevice {
+                if !cfg.pumpDevice.isEmpty { gridItems.append(("Pump", cfg.pumpDevice)) }
+                if !cfg.cgmDevice.isEmpty { gridItems.append(("CGM", cfg.cgmDevice)) }
+                if !cfg.insulinType.isEmpty { gridItems.append(("Insulin", cfg.insulinType)) }
+            }
+            if hasSettings {
+                if !cfg.carbRatio.isEmpty { gridItems.append(("CR", cfg.carbRatio)) }
+                if !cfg.isf.isEmpty { gridItems.append(("ISF", cfg.isf)) }
+                if !cfg.basalRate.isEmpty { gridItems.append(("Basal", formatBasalRateForDisplay(cfg.basalRate))) }
+                if !cfg.targetGlucose.isEmpty { gridItems.append(("Target", cfg.targetGlucose)) }
+            }
+            y = drawSettingsGrid(gridItems, x: m, y: y + 1, width: r.width - m * 2, cfg: cfg, ctx: ctx)
+        }
+
+        if !cfg.notes.isEmpty {
+            y = drawNotesSection(cfg.notes, x: m, y: y + 2, width: r.width - m * 2, cfg: cfg, ctx: ctx)
+        }
+
+        if cfg.includeAGP, !agpData.isEmpty {
+            let agpAvail = r.height - y - 40
+            if agpAvail >= 80 {
+                y = sectionHdr("AMBULATORY GLUCOSE PROFILE", y: y + 6, m: m, w: r.width, cfg: cfg, ctx: ctx)
+                let agpH = Swift.min(agpAvail - 20, 130)
+                drawAGP(agpData: agpData, x: m, y: y + 4, w: r.width - m * 2, h: agpH, cfg: cfg, ctx: ctx)
+            }
+        }
+
+        drawFooter(ctx: ctx, r: r, cfg: cfg, stats: stats, page: 1)
+    }
+
+    // MARK: - Hero header
+
+    @discardableResult
+    private static func drawHero(ctx: CGContext, r: CGRect, cfg: EndoReportConfig, stats: ReportStats) -> CGFloat {
+        let h: CGFloat = 90; let ac = accent(cfg); let ad = accentDark(cfg)
+        ctx.setFillColor(ac.cgColor); ctx.fill(CGRect(x: 0, y: 0, width: r.width, height: h))
+        ctx.setFillColor(ad.cgColor); ctx.fill(CGRect(x: 0, y: 0, width: r.width, height: 21))
+
+        let a1: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8.5), .foregroundColor: C_WHITE.withAlphaComponent(0.8), .kern: 3.0]
+        "LOOP FOLLOW".draw(at: CGPoint(x: 26, y: 5), withAttributes: a1)
+
+        let a2: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 21), .foregroundColor: C_WHITE]
+        "Endocrinologist Visit Report".draw(at: CGPoint(x: 26, y: 26), withAttributes: a2)
+
+        let a3: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 9.5), .foregroundColor: C_WHITE.withAlphaComponent(0.82)]
+        "Automated Insulin Delivery Performance Summary".draw(at: CGPoint(x: 26, y: 52), withAttributes: a3)
+
+        let df = DateFormatter(); df.dateFormat = "MMMM d, yyyy"
+        let ds = "\(df.string(from: cfg.startDate)) — \(df.string(from: cfg.endDate)) (\(Int(stats.days.rounded())) Days)"
+        let a4: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 9), .foregroundColor: C_WHITE.withAlphaComponent(0.68)]
+        ds.draw(at: CGPoint(x: 26, y: 68), withAttributes: a4)
+
+        let a5: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 8.5), .foregroundColor: C_WHITE.withAlphaComponent(0.95)]
+        var lines: [String] = []
+        if !cfg.patientName.isEmpty { lines.append("Patient: \(cfg.patientName)") }
+        if !cfg.providerName.isEmpty { lines.append("Provider: \(cfg.providerName)") }
+        if !cfg.dateOfBirth.isEmpty { lines.append("DOB: \(cfg.dateOfBirth)") }
+        if !cfg.aidSystem.isEmpty { lines.append("AID: \(cfg.aidSystem)") }
+        if !cfg.diagnosisDate.isEmpty { lines.append("Dx: \(cfg.diagnosisDate)") }
+
+        for (i, l) in lines.enumerated() {
+            let sz = (l as NSString).size(withAttributes: a5)
+            (l as NSString).draw(at: CGPoint(x: r.width - 26 - sz.width, y: 24 + CGFloat(i) * 11.5), withAttributes: a5)
+        }
+        return h
+    }
+
+    // MARK: - Daily page header
+
+    @discardableResult
+    private static func drawDailyPageHeader(ctx: CGContext, r: CGRect, cfg: EndoReportConfig,
+                                            page: Int, totalPages: Int) -> CGFloat
+    {
+        let h: CGFloat = 40; let ac = accent(cfg)
+        ctx.setFillColor(ac.cgColor); ctx.fill(CGRect(x: 0, y: 0, width: r.width, height: h))
+        let a1: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 12), .foregroundColor: C_WHITE]
+        "Daily Glucose Breakdown".draw(at: CGPoint(x: 28, y: 11), withAttributes: a1)
+        let sub = "Newest to Oldest  •  Page \(page) of \(totalPages)"
+        let a2: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 8), .foregroundColor: C_WHITE.withAlphaComponent(0.75)]
+        let sz = (sub as NSString).size(withAttributes: a2)
+        (sub as NSString).draw(at: CGPoint(x: r.width - 28 - sz.width, y: 14), withAttributes: a2)
+        return h
+    }
+
+    // MARK: - Section header
+
+    @discardableResult
+    private static func sectionHdr(_ title: String, y: CGFloat, m: CGFloat, w: CGFloat,
+                                   cfg: EndoReportConfig, ctx: CGContext) -> CGFloat
+    {
+        ctx.setFillColor(accent(cfg).cgColor)
+        ctx.fill(CGRect(x: m, y: y, width: 3, height: 14))
+        let a: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 9), .foregroundColor: accent(cfg), .kern: 0.6]
+        (title as NSString).draw(at: CGPoint(x: m + 8, y: y), withAttributes: a)
+        ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.5)
+        ctx.move(to: CGPoint(x: m, y: y + 15)); ctx.addLine(to: CGPoint(x: w - m, y: y + 15)); ctx.strokePath()
+        return y + 16
+    }
+
+    // MARK: - Stat card
+
+    private static func statCard(_ label: String, val: String, x: CGFloat, y: CGFloat,
+                                 w: CGFloat, h: CGFloat, accent ac: Bool,
+                                 cfg: EndoReportConfig, ctx: CGContext)
+    {
+        let r = CGRect(x: x, y: y, width: w, height: h)
+        ctx.setFillColor(C_CLOUD.cgColor); ctx.fill(r)
+        if ac {
+            ctx.setFillColor(accent(cfg).withAlphaComponent(0.07).cgColor); ctx.fill(r)
+            ctx.setFillColor(accent(cfg).cgColor); ctx.fill(CGRect(x: x, y: y, width: 3, height: h))
+        }
+        ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.4); ctx.stroke(r)
+        let la: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE, .kern: 0.5]
+        let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 16), .foregroundColor: ac ? accent(cfg) : C_INK]
+        (label as NSString).draw(at: CGPoint(x: x + 8, y: y + 4), withAttributes: la)
+        (val as NSString).draw(at: CGPoint(x: x + 8, y: y + 14), withAttributes: va)
+    }
+
+    // MARK: - TIR vertical bar
+
+    private static func drawTIRBar(stats: ReportStats,
+                                   x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat,
+                                   cfg: EndoReportConfig, ctx: CGContext)
+    {
+        let r = CGRect(x: x, y: y, width: w, height: h)
+        ctx.setFillColor(C_CLOUD.cgColor); ctx.fill(r)
+        ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.4); ctx.stroke(r)
+
+        let ta: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 7.5), .foregroundColor: C_SLATE]
+        "Time in Range".draw(at: CGPoint(x: x + 8, y: y + 6), withAttributes: ta)
+
+        let targetLine1Y = y + h - 24
+        let targetLine2Y = y + h - 12
+
+        // Reserve explicit space above target lines so the five legend labels stay comfortably separated.
+        let bx = x + 10
+        let bw: CGFloat = 16
+        let by = y + 22
+        let legendTop = by + 1
+        let legendBottom = targetLine1Y - 13
+        let bh = max(legendBottom - by, 20)
+
+        let segs: [(Double, UIColor, String)] = [
+            (stats.veryHigh, C_VHIGH, "Very High"), (stats.high, C_HIGH, "High"),
+            (stats.inRange, C_IN, "In Range"), (stats.low, C_LOW, "Low"),
+            (stats.veryLow, C_VLOW, "Very Low"),
+        ]
+        var sy = by
+
+        for (pct, clr, _) in segs {
+            let sh = CGFloat(pct / 100) * bh
+            if sh > 0 {
+                ctx.setFillColor(clr.cgColor)
+                ctx.fill(CGRect(x: bx, y: sy, width: bw, height: sh))
+            }
+            sy += sh
+        }
+
+        // Always show all 5 zones regardless of percentage value.
+        let legendX = bx + bw + 8
+        let legendSpacing = max((legendBottom - legendTop) / CGFloat(segs.count - 1), 8)
+        for (index, (pct, clr, label)) in segs.enumerated() {
+            let ps = String(format: "%.0f%%", pct)
+            let isTarget = (label == "In Range")
+            let pa: [NSAttributedString.Key: Any] = [
+                .font: isTarget ? UIFont.boldSystemFont(ofSize: 7.5) : UIFont.systemFont(ofSize: 7),
+                .foregroundColor: isTarget ? accent(cfg) : C_SLATE,
+            ]
+            let textStr = "\(label) \(ps)"
+            let textY = legendTop + CGFloat(index) * legendSpacing
+
+            ctx.setFillColor(clr.cgColor)
+            ctx.fill(CGRect(x: legendX, y: textY + 2, width: 6, height: 6))
+            (textStr as NSString).draw(at: CGPoint(x: legendX + 9, y: textY), withAttributes: pa)
+        }
+
+        let na: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE]
+        "Target: 70-180".draw(at: CGPoint(x: x + 5, y: targetLine1Y), withAttributes: na)
+        "Time in Tight Range: 70-140".draw(at: CGPoint(x: x + 5, y: targetLine2Y), withAttributes: na)
+    }
+
+    // MARK: - Time-of-day strip
+
+    @discardableResult
+    private static func timeStrip(patterns: TimePatterns, cfg: EndoReportConfig,
+                                  y: CGFloat, m: CGFloat, w: CGFloat, ctx: CGContext) -> CGFloat
+    {
+        let ha: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: C_INK]
+        "Glucose by Time of Day (\(cfg.units))".draw(at: CGPoint(x: m, y: y), withAttributes: ha)
+
+        let periods = [patterns.night, patterns.earlyAM, patterns.morning,
+                       patterns.afternoon, patterns.evening, patterns.late]
+        // Time range labels matching the GlycemicPatterns init hours
+        let timeRanges = ["00:00–03:00", "03:00–06:00", "06:00–12:00",
+                          "12:00–17:00", "17:00–21:00", "21:00–24:00"]
+
+        let cw = (w - m * 2) / CGFloat(periods.count)
+        let ch: CGFloat = 48
+        let cy = y + 11
+
+        for (i, p) in periods.enumerated() {
+            let cx = m + CGFloat(i) * cw
+            let cardWidth = cw - 2
+            let rr = CGRect(x: cx, y: cy, width: cardWidth, height: ch)
+            ctx.setFillColor(C_CLOUD.cgColor); ctx.fill(rr)
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.4); ctx.stroke(rr)
+
+            let timeRange = timeRanges[i]
+            let topA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE]
+            let bottomA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 7), .foregroundColor: C_SLATE]
+
+            let disp = p.count > 0 ? cfg.fmtBG(p.avg) : "—"
+            let vc: UIColor = p.count > 0
+                ? (p.avg < 70 ? C_LOW : p.avg < 140 ? accent(cfg) : p.avg < 180 ? C_INK : C_HIGH)
+                : C_SLATE
+            let valueA: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 14), .foregroundColor: vc]
+
+            let topSize = (timeRange as NSString).size(withAttributes: topA)
+            let valueSize = (disp as NSString).size(withAttributes: valueA)
+            let bottomSize = (p.label as NSString).size(withAttributes: bottomA)
+
+            let topToValueGap: CGFloat = 3
+            let valueToBottomGap: CGFloat = 2
+            let stackHeight = topSize.height + topToValueGap + valueSize.height + valueToBottomGap + bottomSize.height
+            let startY = cy + (ch - stackHeight) / 2
+
+            let topX = cx + (cardWidth - topSize.width) / 2
+            let valueX = cx + (cardWidth - valueSize.width) / 2
+            let bottomX = cx + (cardWidth - bottomSize.width) / 2
+
+            (timeRange as NSString).draw(at: CGPoint(x: topX, y: startY), withAttributes: topA)
+            (disp as NSString).draw(at: CGPoint(x: valueX, y: startY + topSize.height + topToValueGap), withAttributes: valueA)
+            (p.label as NSString).draw(at: CGPoint(x: bottomX, y: startY + topSize.height + topToValueGap + valueSize.height + valueToBottomGap), withAttributes: bottomA)
+        }
+        return cy + ch + 2
+    }
+
+    // MARK: - Insulin section
+
+    @discardableResult
+    private static func insulinSection(boluses: [MainViewController.bolusGraphStruct],
+                                       smbs: [MainViewController.bolusGraphStruct],
+                                       simpleVM: SimpleStatsViewModel, stats _: ReportStats,
+                                       cfg: EndoReportConfig, y: CGFloat, m: CGFloat, w: CGFloat,
+                                       ctx: CGContext) -> CGFloat
+    {
+        let tdd = simpleVM.totalDailyDose ?? 0
+        let basalPct = tdd > 0 ? (simpleVM.actualBasal ?? 0) / tdd * 100 : 0
+        let bolusPct = tdd > 0 ? (simpleVM.avgBolus ?? 0) / tdd * 100 : 0
+        let cards: [(String, String)] = [("AVG TDD", tdd > 0 ? String(format: "%.1fU", tdd) : "—"),
+                                         ("BASAL", basalPct > 0 ? String(format: "%.0f%%", basalPct) : "—"),
+                                         ("BOLUS", bolusPct > 0 ? String(format: "%.0f%%", bolusPct) : "—")]
+        let cw = (w - m * 2) / 3 - 4; let ch: CGFloat = 36
+        for (i, c) in cards.enumerated() {
+            let cx = m + CGFloat(i) * (cw + 4)
+            let r2 = CGRect(x: cx, y: y, width: cw, height: ch)
+            ctx.setFillColor(C_CLOUD.cgColor); ctx.fill(r2)
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.4); ctx.stroke(r2)
+            let la: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE, .kern: 0.4]
+            let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 16), .foregroundColor: C_INK]
+            (c.0 as NSString).draw(at: CGPoint(x: cx + 8, y: y + 4), withAttributes: la)
+            (c.1 as NSString).draw(at: CGPoint(x: cx + 8, y: y + 14), withAttributes: va)
+        }
+        let ty = y + ch + 2
+        let total = (boluses + smbs).map { $0.value }.reduce(0,+)
+        let rows: [(String, String)] = [
+            ("Correction Boluses", "\(boluses.count)"),
+            ("SMB / Auto-Corrections", "\(smbs.count)"),
+            ("Total Bolus Insulin", String(format: "%.1f U", total)),
+            ("Programmed Basal", simpleVM.programmedBasal != nil ? String(format: "%.2f U/day", simpleVM.programmedBasal!) : "—"),
+            ("Actual Basal", simpleVM.actualBasal != nil ? String(format: "%.2f U/day", simpleVM.actualBasal!) : "—"),
+        ]
+        return metricTable(rows, x: m, y: ty, width: w - m * 2, cfg: cfg, ctx: ctx)
+    }
+
+    // MARK: - Nutrition section
+
+    @discardableResult
+    private static func nutritionSection(carbs: [MainViewController.carbGraphStruct],
+                                         stats: ReportStats, cfg _: EndoReportConfig,
+                                         y: CGFloat, m: CGFloat, w: CGFloat, ctx: CGContext) -> CGFloat
+    {
+        let total = carbs.map { $0.value }.reduce(0,+)
+        let cards: [(String, String)] = [
+            ("DAILY CARBS", String(format: "%.0fg", total / stats.days)),
+            ("MEALS LOGGED", "\(carbs.count)"),
+            ("PER MEAL AVG", String(format: "%.0fg", carbs.isEmpty ? 0 : total / Double(carbs.count))),
+        ]
+        let cw = (w - m * 2) / 3 - 4; let ch: CGFloat = 36
+        for (i, c) in cards.enumerated() {
+            let cx = m + CGFloat(i) * (cw + 4)
+            let r2 = CGRect(x: cx, y: y, width: cw, height: ch)
+            ctx.setFillColor(C_CLOUD.cgColor); ctx.fill(r2)
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.4); ctx.stroke(r2)
+            let la: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE, .kern: 0.4]
+            let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 16), .foregroundColor: C_INK]
+            (c.0 as NSString).draw(at: CGPoint(x: cx + 8, y: y + 4), withAttributes: la)
+            (c.1 as NSString).draw(at: CGPoint(x: cx + 8, y: y + 14), withAttributes: va)
+        }
+        return y + ch + 2
+    }
+
+    // MARK: - Tables
+
+    @discardableResult
+    private static func metricTable(_ rows: [(String, String)], x: CGFloat, y: CGFloat,
+                                    width: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat
+    {
+        let tw = width; let hh: CGFloat = 12; let rh: CGFloat = 11; var cy = y
+        ctx.setFillColor(accent(cfg).withAlphaComponent(0.10).cgColor)
+        ctx.fill(CGRect(x: x, y: cy, width: tw, height: hh))
+        let ha: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 7), .foregroundColor: accent(cfg), .kern: 0.4]
+        "METRIC".draw(at: CGPoint(x: x + 6, y: cy + 1), withAttributes: ha)
+        "VALUE".draw(at: CGPoint(x: x + tw * 0.58 + 6, y: cy + 1), withAttributes: ha)
+        cy += hh
+        for (i, row) in rows.enumerated() {
+            ctx.setFillColor((i % 2 == 0 ? C_WHITE : C_CLOUD).cgColor)
+            ctx.fill(CGRect(x: x, y: cy, width: tw, height: rh))
+            let ka: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 7), .foregroundColor: C_INK]
+            let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 7), .foregroundColor: accent(cfg)]
+            (row.0 as NSString).draw(at: CGPoint(x: x + 6, y: cy + 1), withAttributes: ka)
+            (row.1 as NSString).draw(at: CGPoint(x: x + tw * 0.58 + 6, y: cy + 1), withAttributes: va)
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.3)
+            ctx.move(to: CGPoint(x: x, y: cy + rh)); ctx.addLine(to: CGPoint(x: x + tw, y: cy + rh)); ctx.strokePath()
+            cy += rh
+        }
+        return cy + 1
+    }
+
+    // Dynamic settings table to handle multi-line text input neatly
+    @discardableResult
+    private static func settingsTable(_ rows: [(String, String)], x: CGFloat, y: CGFloat,
+                                      width: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat
+    {
+        let tw = width
+        let headerH: CGFloat = 12
+        var cy = y
+
+        ctx.setFillColor(accent(cfg).withAlphaComponent(0.10).cgColor)
+        ctx.fill(CGRect(x: x, y: cy, width: tw, height: headerH))
+
+        let ha: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 7), .foregroundColor: accent(cfg), .kern: 0.4]
+        "THERAPY SETTING & VALUES".draw(at: CGPoint(x: x + 6, y: cy + 3), withAttributes: ha)
+        cy += headerH
+
+        for (i, row) in rows.enumerated() {
+            let lines = row.1.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+            let rh = 11.0 + CGFloat(lines.count) * 10.5 + 4.0
+
+            ctx.setFillColor((i % 2 == 0 ? C_WHITE : C_CLOUD).cgColor)
+            ctx.fill(CGRect(x: x, y: cy, width: tw, height: rh))
+
+            let ka: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 7.5), .foregroundColor: C_SLATE]
+            let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: accent(cfg)]
+
+            (row.0 as NSString).draw(at: CGPoint(x: x + 6, y: cy + 3.5), withAttributes: ka)
+
+            var ly = cy + 12.5
+            for line in lines {
+                (line as NSString).draw(at: CGPoint(x: x + 6, y: ly), withAttributes: va)
+                ly += 10.5
+            }
+
+            ctx.setStrokeColor(C_BORDER.cgColor)
+            ctx.setLineWidth(0.3)
+            ctx.move(to: CGPoint(x: x, y: cy + rh))
+            ctx.addLine(to: CGPoint(x: x + tw, y: cy + rh))
+            ctx.strokePath()
+
+            cy += rh
+        }
+        return cy + 2
+    }
+
+    // MARK: - AGP
+
+    private static func drawAGP(agpData: [AGPDataPoint], x: CGFloat, y: CGFloat,
+                                w: CGFloat, h: CGFloat, cfg: EndoReportConfig, ctx: CGContext)
+    {
+        guard !agpData.isEmpty else { return }
+        let lPad: CGFloat = 26; let bPad: CGFloat = 24
+        let cw = w - lPad; let ch = h - bPad
+        let cx = x + lPad; let cy = y
+
+        ctx.setFillColor(UIColor(white: 0.985, alpha: 1).cgColor)
+        ctx.fill(CGRect(x: cx, y: cy, width: cw, height: ch))
+
+        let bgMin: CGFloat = 40; let bgRng: CGFloat = 320
+        func gy(_ g: Double) -> CGFloat { cy + ch - (CGFloat(g) - bgMin) / bgRng * ch }
+        func tx(_ mins: Int) -> CGFloat { cx + CGFloat(mins) / (24 * 60) * cw }
+
+        ctx.setFillColor(C_IN.withAlphaComponent(0.07).cgColor)
+        ctx.fill(CGRect(x: cx, y: gy(180), width: cw, height: gy(70) - gy(180)))
+
+        ctx.setLineDash(phase: 0, lengths: [3, 2])
+        for (val, clr) in [(70.0, C_LOW), (180.0, C_HIGH)] {
+            ctx.setStrokeColor(clr.withAlphaComponent(0.5).cgColor); ctx.setLineWidth(0.6)
+            ctx.move(to: CGPoint(x: cx, y: gy(val))); ctx.addLine(to: CGPoint(x: cx + cw, y: gy(val))); ctx.strokePath()
+        }
+        ctx.setLineDash(phase: 0, lengths: [])
+
+        var band = CGMutablePath()
+        for (i, pt) in agpData.enumerated() {
+            let p = CGPoint(x: tx(pt.timeOfDay), y: gy(pt.p95)); i == 0 ? band.move(to: p) : band.addLine(to: p)
+        }
+        for pt in agpData.reversed() {
+            band.addLine(to: CGPoint(x: tx(pt.timeOfDay), y: gy(pt.p5)))
+        }
+        band.closeSubpath()
+        ctx.setFillColor(accent(cfg).withAlphaComponent(0.10).cgColor); ctx.addPath(band); ctx.fillPath()
+
+        var iqr = CGMutablePath()
+        for (i, pt) in agpData.enumerated() {
+            let p = CGPoint(x: tx(pt.timeOfDay), y: gy(pt.p75)); i == 0 ? iqr.move(to: p) : iqr.addLine(to: p)
+        }
+        for pt in agpData.reversed() {
+            iqr.addLine(to: CGPoint(x: tx(pt.timeOfDay), y: gy(pt.p25)))
+        }
+        iqr.closeSubpath()
+        ctx.setFillColor(accent(cfg).withAlphaComponent(0.25).cgColor); ctx.addPath(iqr); ctx.fillPath()
+
+        ctx.setStrokeColor(accent(cfg).cgColor); ctx.setLineWidth(1.6)
+        var first = true
+        for pt in agpData {
+            let p = CGPoint(x: tx(pt.timeOfDay), y: gy(pt.p50)); first ? ctx.move(to: p) : ctx.addLine(to: p); first = false
+        }
+        ctx.strokePath()
+
+        let axA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE]
+        for bg in [70, 140, 180, 250] {
+            let ly = gy(Double(bg)); guard ly >= cy, ly <= cy + ch else { continue }
+            let lbl = cfg.isMMOL ? String(format: "%.1f", Double(bg) * 0.0555) : "\(bg)"
+            let lsz = (lbl as NSString).size(withAttributes: axA)
+            (lbl as NSString).draw(at: CGPoint(x: x + lPad - lsz.width - 3, y: ly - lsz.height / 2), withAttributes: axA)
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.25)
+            ctx.move(to: CGPoint(x: cx, y: ly)); ctx.addLine(to: CGPoint(x: cx + cw, y: ly)); ctx.strokePath()
+        }
+
+        for h2 in stride(from: 0, through: 24, by: 3) {
+            let lx = tx(h2 * 60)
+            let lbl = String(format: "%02d:00", h2)
+            let lsz = (lbl as NSString).size(withAttributes: axA)
+            let dx = Swift.max(cx, Swift.min(cx + cw - lsz.width, lx - lsz.width / 2))
+            (lbl as NSString).draw(at: CGPoint(x: dx, y: cy + ch + 3), withAttributes: axA)
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.25)
+            ctx.move(to: CGPoint(x: lx, y: cy)); ctx.addLine(to: CGPoint(x: lx, y: cy + ch)); ctx.strokePath()
+        }
+
+        ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.5)
+        ctx.stroke(CGRect(x: cx, y: cy, width: cw, height: ch))
+
+        let lgA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE]
+        let lgItems: [(String, UIColor, Bool)] = [("Median", accent(cfg), false),
+                                                  ("25–75th", accent(cfg).withAlphaComponent(0.4), true),
+                                                  ("5–95th", accent(cfg).withAlphaComponent(0.18), true)]
+        var lgX = cx + cw
+        for item in lgItems.reversed() {
+            let lsz = (item.0 as NSString).size(withAttributes: lgA)
+            lgX -= lsz.width
+            (item.0 as NSString).draw(at: CGPoint(x: lgX, y: cy + ch + 11), withAttributes: lgA)
+            lgX -= 15
+            item.2 ? { ctx.setFillColor(item.1.cgColor); ctx.fill(CGRect(x: lgX, y: cy + ch + 12, width: 12, height: 8)) }()
+                : { ctx.setFillColor(item.1.cgColor); ctx.fill(CGRect(x: lgX, y: cy + ch + 15, width: 12, height: 2)) }()
+            lgX -= 5
+        }
+    }
+
+    @discardableResult
+    private static func drawSettingsGrid(_ items: [(String, String)], x: CGFloat, y: CGFloat, width: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat {
+        let count = CGFloat(items.count)
+        guard count > 0 else { return y }
+        let spacing: CGFloat = 4
+        let cw = (width - (count - 1) * spacing) / count
+        var maxH: CGFloat = 0
+
+        for (i, item) in items.enumerated() {
+            let cx = x + CGFloat(i) * (cw + spacing)
+            let lines = item.1.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+            let h = 12.0 + CGFloat(lines.count) * 9.5 + 4.0
+            maxH = max(maxH, h)
+
+            ctx.setFillColor(C_CLOUD.cgColor)
+            ctx.fill(CGRect(x: cx, y: y, width: cw, height: h))
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.4); ctx.stroke(CGRect(x: cx, y: y, width: cw, height: h))
+
+            let la: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.8), .foregroundColor: C_SLATE]
+            let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 7), .foregroundColor: accent(cfg)]
+
+            (item.0 as NSString).draw(at: CGPoint(x: cx + 4, y: y + 2.5), withAttributes: la)
+            var ly = y + 10.5
+            for line in lines {
+                (line as NSString).draw(at: CGPoint(x: cx + 4, y: ly), withAttributes: va)
+                ly += 9.5
+            }
+        }
+        return y + maxH + 4
+    }
+
+    @discardableResult
+    private static func drawNotesSection(_ notes: String, x: CGFloat, y: CGFloat, width: CGFloat, cfg: EndoReportConfig, ctx: CGContext) -> CGFloat {
+        let headerY = sectionHdr("NOTES & OBSERVATIONS", y: y, m: x, w: width + x * 2, cfg: cfg, ctx: ctx)
+        let font = UIFont.systemFont(ofSize: 8)
+        let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: C_INK]
+
+        let textRect = CGRect(x: x + 6, y: headerY + 4, width: width - 12, height: 1000)
+        let size = (notes as NSString).boundingRect(with: textRect.size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil).size
+
+        let drawRect = CGRect(x: x + 6, y: headerY + 4, width: width - 12, height: size.height)
+        (notes as NSString).draw(in: drawRect, withAttributes: attributes)
+
+        return headerY + 4 + size.height + 4
+    }
+
+    // MARK: - Format helpers
+
+    private static func formatBasalRateForDisplay(_ input: String) -> String {
+        let lines = input.components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        // Helper to extract a double from a string that might contain units or other text
+        func extractDouble(_ s: String) -> Double? {
+            let cleaned = s.replacingOccurrences(of: ",", with: ".")
+                .components(separatedBy: CharacterSet(charactersIn: "0123456789.").inverted)
+                .joined()
+            return Double(cleaned)
+        }
+
+        if input.contains("=") || (input.contains(":") && lines.count > 1) {
+            var formatted: [String] = []
+            for line in lines {
+                let sep = line.contains("=") ? "=" : ":"
+                let parts = line.components(separatedBy: sep).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                if parts.count >= 2, let last = parts.last, let rate = extractDouble(last) {
+                    let timeKey = parts.dropLast().joined(separator: sep)
+                    formatted.append("\(timeKey) = \(String(format: "%.2f", rate))")
+                } else {
+                    formatted.append(line)
+                }
+            }
+            return formatted.isEmpty ? input : formatted.joined(separator: "\n")
+        }
+
+        if let value = extractDouble(input) {
+            return String(format: "%.2f U/hr", value)
+        }
+        return input
+    }
+
+    // MARK: - Basal Profile Helpers
+
+    static func calculateDailyProgrammedBasal(basalProfile: [MainViewController.basalProfileStruct]) -> Double {
+        guard !basalProfile.isEmpty else { return 0.0 }
+
+        let sortedProfile = basalProfile.sorted { $0.timeAsSeconds < $1.timeAsSeconds }
+
+        var totalBasal = 0.0
+        let secondsInDay = 24 * 60 * 60
+
+        for i in 0 ..< sortedProfile.count {
+            let current = sortedProfile[i]
+            let currentTime = Double(current.timeAsSeconds)
+
+            let nextTime: Double = (i < sortedProfile.count - 1) ? Double(sortedProfile[i + 1].timeAsSeconds) : Double(secondsInDay)
+            let durationHours = (nextTime - currentTime) / 3600.0
+            totalBasal += current.value * durationHours
+        }
+
+        return totalBasal
+    }
+
+    // MARK: - Day row
+
+    private static func drawDayRow(ctx: CGContext, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat,
+                                   day: String, dayData: DayData, cfg: EndoReportConfig,
+                                   basalProfile: [MainViewController.basalProfileStruct])
+    {
+        ctx.setFillColor(C_WHITE.cgColor); ctx.fill(CGRect(x: x, y: y, width: w, height: h))
+        ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.5)
+        ctx.stroke(CGRect(x: x, y: y, width: w, height: h))
+
+        ctx.setFillColor(cfg.accentColor.cgColor)
+        ctx.fill(CGRect(x: x, y: y, width: 3, height: h))
+
+        let df = DateFormatter(); df.dateFormat = "yyyy-MM-dd"
+        let df2 = DateFormatter(); df2.dateFormat = "EEEE, MMM d, yyyy"
+        let date = df.date(from: day) ?? Date()
+        let dlA: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 9), .foregroundColor: C_INK]
+        df2.string(from: date).draw(at: CGPoint(x: x + 10, y: y + 5), withAttributes: dlA)
+
+        // Statistics Container on the Right
+        let statsW: CGFloat = 115
+        let statsX = x + w - statsW
+        let boxRect = CGRect(x: statsX, y: y + 1, width: statsW - 1, height: h - 2)
+        ctx.setFillColor(C_CLOUD.cgColor)
+        ctx.fill(boxRect)
+
+        ctx.setStrokeColor(C_BORDER.cgColor)
+        ctx.setLineWidth(0.4)
+        ctx.move(to: CGPoint(x: statsX, y: y + 1))
+        ctx.addLine(to: CGPoint(x: statsX, y: y + h - 1))
+        ctx.strokePath()
+
+        let vals = dayData.bg.map { Double($0.sgv) }
+        if !vals.isEmpty {
+            let n = Double(vals.count)
+            let avg = vals.reduce(0,+) / n
+            let tir = Double(vals.filter { $0 >= 70 && $0 <= 180 }.count) / n * 100
+            let totalInsulin = dayData.bolus.map { $0.value }.reduce(0, +) + dayData.smb.map { $0.value }.reduce(0, +)
+            let dailyProgrammedBasal = calculateDailyProgrammedBasal(basalProfile: basalProfile)
+
+            let la: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: C_SLATE]
+            let va: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: C_INK]
+            let tirC: UIColor = tir >= 70 ? C_IN : tir >= 50 ? C_HIGH : C_VLOW
+            let tirA: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: tirC]
+
+            let padding: CGFloat = 8
+            let col2X = statsX + statsW / 2
+
+            // Row 1: Avg & TIR
+            "Avg BG".draw(at: CGPoint(x: statsX + padding, y: y + 8), withAttributes: la)
+            cfg.fmtBG(avg).draw(at: CGPoint(x: statsX + padding, y: y + 15), withAttributes: va)
+
+            "TIR".draw(at: CGPoint(x: col2X, y: y + 8), withAttributes: la)
+            String(format: "%.0f%%", tir).draw(at: CGPoint(x: col2X, y: y + 15), withAttributes: tirA)
+
+            // Divider
+            ctx.setStrokeColor(C_BORDER.cgColor); ctx.setLineWidth(0.3)
+            ctx.move(to: CGPoint(x: statsX + 5, y: y + 30))
+            ctx.addLine(to: CGPoint(x: x + w - 5, y: y + 30))
+            ctx.strokePath()
+
+            // Row 2: Bolus & Basal
+            "Bolus Total".draw(at: CGPoint(x: statsX + padding, y: y + 36), withAttributes: la)
+            String(format: "%.1f U", totalInsulin).draw(at: CGPoint(x: statsX + padding, y: y + 43), withAttributes: va)
+
+            "Basal Sched".draw(at: CGPoint(x: col2X, y: y + 36), withAttributes: la)
+            String(format: "%.1f U", dailyProgrammedBasal).draw(at: CGPoint(x: col2X, y: y + 43), withAttributes: va)
+
+            // Divider
+            ctx.move(to: CGPoint(x: statsX + 5, y: y + 58))
+            ctx.addLine(to: CGPoint(x: x + w - 5, y: y + 58))
+            ctx.strokePath()
+
+            // Row 3: Coverage
+            "Data Coverage".draw(at: CGPoint(x: statsX + padding, y: y + 64), withAttributes: la)
+            let coverage = String(format: "%.0f%%", Double(vals.count) / 2.88)
+            "\(vals.count) pts (\(coverage))".draw(at: CGPoint(x: statsX + padding, y: y + 71), withAttributes: va)
+        }
+
+        let chartX = x + 10; let chartW = w - 140
+        let chartY = y + 26
+        let axisLabelArea: CGFloat = 12
+        let chartH = h - 26 - axisLabelArea
+
+        guard !dayData.bg.isEmpty else { return }
+
+        ctx.saveGState()
+        ctx.clip(to: CGRect(x: chartX, y: chartY, width: chartW, height: chartH))
+
+        let bgMin: CGFloat = 40; let bgMax: CGFloat = 320; let bgRng = bgMax - bgMin
+        func gy(_ bg: Double) -> CGFloat { chartY + chartH - (CGFloat(bg) - bgMin) / bgRng * chartH }
+        func tx(_ ts: Double) -> CGFloat {
+            let cal = dateTimeUtils.displayCalendar()
+            let d = Date(timeIntervalSince1970: ts)
+            let c = cal.dateComponents([.hour, .minute], from: d)
+            let min = Double((c.hour ?? 0) * 60 + (c.minute ?? 0))
+            return chartX + CGFloat(min / (24 * 60)) * chartW
+        }
+
+        ctx.setFillColor(C_IN.withAlphaComponent(0.06).cgColor)
+        ctx.fill(CGRect(x: chartX, y: gy(180), width: chartW, height: gy(70) - gy(180)))
+
+        ctx.setLineDash(phase: 0, lengths: [2, 2]); ctx.setLineWidth(0.4)
+        ctx.setStrokeColor(C_LOW.withAlphaComponent(0.4).cgColor)
+        ctx.move(to: CGPoint(x: chartX, y: gy(70))); ctx.addLine(to: CGPoint(x: chartX + chartW, y: gy(70))); ctx.strokePath()
+        ctx.setStrokeColor(C_HIGH.withAlphaComponent(0.4).cgColor)
+        ctx.move(to: CGPoint(x: chartX, y: gy(180))); ctx.addLine(to: CGPoint(x: chartX + chartW, y: gy(180))); ctx.strokePath()
+        ctx.setLineDash(phase: 0, lengths: [])
+
+        ctx.setStrokeColor(C_BORDER.withAlphaComponent(0.5).cgColor); ctx.setLineWidth(0.25)
+        for h2 in stride(from: 3, through: 21, by: 3) {
+            let hx = chartX + CGFloat(h2) / 24 * chartW
+            ctx.move(to: CGPoint(x: hx, y: chartY)); ctx.addLine(to: CGPoint(x: hx, y: chartY + chartH)); ctx.strokePath()
+        }
+
+        if !dayData.basal.isEmpty {
+            let bH = chartH * 0.25; let bY = chartY + chartH - bH
+            let sorted = dayData.basal.sorted { $0.date < $1.date }
+            let maxR = Swift.max(sorted.map { $0.basalRate }.max() ?? 1, 0.01)
+
+            var path = CGMutablePath(); var first = true
+            for pt in sorted {
+                let px = tx(pt.date); let py = bY + bH - CGFloat(pt.basalRate / maxR) * bH
+                first ? path.move(to: CGPoint(x: px, y: py)) : path.addLine(to: CGPoint(x: px, y: py)); first = false
+            }
+            if let last = sorted.last {
+                path.addLine(to: CGPoint(x: tx(last.date), y: bY + bH))
+                path.addLine(to: CGPoint(x: chartX, y: bY + bH)); path.closeSubpath()
+                ctx.setFillColor(C_BASAL.withAlphaComponent(0.15).cgColor); ctx.addPath(path); ctx.fillPath()
+            }
+
+            var lp = CGMutablePath(); first = true
+            for (index, pt) in sorted.enumerated() {
+                let px = tx(pt.date); let py = bY + bH - CGFloat(pt.basalRate / maxR) * bH
+                first ? lp.move(to: CGPoint(x: px, y: py)) : lp.addLine(to: CGPoint(x: px, y: py)); first = false
+
+                if pt.basalRate > 0.01 {
+                    let nextX = index < sorted.count - 1 ? tx(sorted[index + 1].date) : (chartX + chartW)
+                    if (nextX - px) > 14 {
+                        let rateStr = String(format: "%.2f", pt.basalRate)
+                        let rA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 4.2), .foregroundColor: C_BASAL]
+                        rateStr.draw(at: CGPoint(x: px + 1, y: py - 7), withAttributes: rA)
+                    }
+                }
+            }
+            ctx.setStrokeColor(C_BASAL.cgColor); ctx.setLineWidth(0.9); ctx.addPath(lp); ctx.strokePath()
+        }
+
+        // Draw Carbs as small green diamonds/circles at the top of the chart
+        for carb in dayData.carbs {
+            let cx = tx(carb.date)
+            let cy = chartY + 4
+            ctx.setFillColor(C_CARB.cgColor)
+            ctx.fillEllipse(in: CGRect(x: cx - 2.5, y: cy - 2.5, width: 5, height: 5))
+        }
+
+        for smb in dayData.smb {
+            let bx = tx(smb.date); let bh2 = max(CGFloat(Swift.min(smb.value / 15, 1)) * (chartH * 0.35), 2.5)
+            ctx.setFillColor(C_SMB.cgColor)
+            ctx.fill(CGRect(x: bx - 2, y: chartY + chartH - bh2, width: 4, height: bh2))
+        }
+
+        for bolus in dayData.bolus {
+            let bx = tx(bolus.date); let bh2 = max(CGFloat(Swift.min(bolus.value / 15, 1)) * (chartH * 0.4), 3.0)
+            ctx.setFillColor(C_BOLUS.cgColor)
+            ctx.fill(CGRect(x: bx - 2.5, y: chartY + chartH - bh2, width: 5, height: bh2))
+        }
+
+        let sortedBG = dayData.bg.sorted(by: { $0.date < $1.date })
+        for r in sortedBG {
+            let rx = tx(r.date); let ry = gy(Double(r.sgv))
+            ctx.setFillColor(bgColor(Double(r.sgv)).cgColor)
+            ctx.fillEllipse(in: CGRect(x: rx - 1.6, y: ry - 1.6, width: 3.2, height: 3.2))
+        }
+
+        ctx.restoreGState()
+
+        let axA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: C_SLATE]
+        let axisLabelY = chartY + chartH + 4
+        for h2 in [0, 6, 12, 18, 24] {
+            let hx = chartX + CGFloat(h2) / 24 * chartW
+            let lbl = String(format: "%02d", h2)
+            let sz = (lbl as NSString).size(withAttributes: axA)
+            (lbl as NSString).draw(at: CGPoint(x: hx - sz.width / 2, y: axisLabelY), withAttributes: axA)
+        }
+
+        // Legend moved to top area next to date
+        let lgA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: C_SLATE]
+        var lgX = x + 120
+        for (lbl, clr) in [("● BG", C_IN), ("● Carbs", C_CARB), ("▮ Bolus", C_BOLUS), ("▮ SMB", C_SMB), ("— Basal", C_BASAL)] {
+            let a: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: clr]
+            (lbl as NSString).draw(at: CGPoint(x: lgX, y: y + 7), withAttributes: a)
+            lgX += (lbl as NSString).size(withAttributes: lgA).width + 5
+            if lgX > statsX - 4 { break }
+        }
+    }
+
+    // MARK: - Footer
+
+    private static func drawFooter(ctx: CGContext, r: CGRect, cfg _: EndoReportConfig,
+                                   stats: ReportStats, page: Int)
+    {
+        let fy = r.height - 28
+        ctx.setFillColor(C_INK.cgColor); ctx.fill(CGRect(x: 0, y: fy, width: r.width, height: 28))
+        let a: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_WHITE.withAlphaComponent(0.5)]
+        "Loop Follow — for informational purposes only. Not a substitute for professional medical advice."
+            .draw(at: CGPoint(x: 30, y: fy + 4), withAttributes: a)
+        let df = DateFormatter(); df.dateFormat = "MMM d, yyyy"
+        let meta = "Generated: \(df.string(from: Date()))  •  \(Int(stats.days.rounded())) Days  •  \(stats.readingCount) readings  •  Page \(page)"
+        let msz = (meta as NSString).size(withAttributes: a)
+        (meta as NSString).draw(at: CGPoint(x: r.width - 30 - msz.width, y: fy + 4), withAttributes: a)
     }
 }
