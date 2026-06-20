@@ -13,6 +13,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         LogManager.shared.log(category: .general, message: "App started")
         LogManager.shared.cleanupOldLogs()
 
+        configureTabBarAppearance()
+
         let options: UNAuthorizationOptions = [.alert, .sound, .badge]
         notificationCenter.requestAuthorization(options: options) {
             didAllow, _ in
@@ -85,6 +87,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         return true
+    }
+
+    // MARK: - Tab bar appearance
+
+    /// Pin the tab bar item titles to a fixed, non-scaling font so large
+    /// Dynamic Type sizes don't wrap or truncate the labels.
+    private func configureTabBarAppearance() {
+        // 10pt medium matches the system default tab bar label.
+        let titleFont = UIFont.systemFont(ofSize: 10, weight: .medium)
+        let attributes: [NSAttributedString.Key: Any] = [.font: titleFont]
+
+        func apply(to itemAppearance: UITabBarItemAppearance) {
+            itemAppearance.normal.titleTextAttributes = attributes
+            itemAppearance.selected.titleTextAttributes = attributes
+            itemAppearance.disabled.titleTextAttributes = attributes
+            itemAppearance.focused.titleTextAttributes = attributes
+        }
+
+        let appearance = UITabBarAppearance()
+        apply(to: appearance.stackedLayoutAppearance)
+        apply(to: appearance.inlineLayoutAppearance)
+        apply(to: appearance.compactInlineLayoutAppearance)
+
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
 
     // MARK: - BFU recovery
