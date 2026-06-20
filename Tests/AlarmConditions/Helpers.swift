@@ -28,6 +28,14 @@ extension Alarm {
         alarm.delta = delta
         return alarm
     }
+
+    static func low(belowBG: Double?, predictiveMinutes: Int? = nil, persistentMinutes: Int? = nil) -> Self {
+        var alarm = Alarm(type: .low)
+        alarm.belowBG = belowBG
+        alarm.predictiveMinutes = predictiveMinutes
+        alarm.persistentMinutes = persistentMinutes
+        return alarm
+    }
 }
 
 // MARK: - AlarmData helpers
@@ -70,6 +78,30 @@ extension AlarmData {
             recBolus: nil,
             COB: nil,
             sageInsertTime: insertTime,
+            pumpInsertTime: nil,
+            latestPumpVolume: nil,
+            IOB: nil,
+            recentBoluses: [],
+            latestBattery: nil,
+            latestPumpBattery: nil,
+            batteryHistory: [],
+            recentCarbs: []
+        )
+    }
+
+    static func withGlucose(readings: [GlucoseValue] = [], prediction: [GlucoseValue] = []) -> Self {
+        AlarmData(
+            bgReadings: readings,
+            predictionData: prediction,
+            expireDate: nil,
+            lastLoopTime: nil,
+            latestOverrideStart: nil,
+            latestOverrideEnd: nil,
+            latestTempTargetStart: nil,
+            latestTempTargetEnd: nil,
+            recBolus: nil,
+            COB: nil,
+            sageInsertTime: nil,
             pumpInsertTime: nil,
             latestPumpVolume: nil,
             IOB: nil,

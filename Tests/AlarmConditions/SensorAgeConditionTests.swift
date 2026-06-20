@@ -1,6 +1,7 @@
 // LoopFollow
 // SensorAgeConditionTests.swift
 
+import Foundation
 @testable import LoopFollow
 import Testing
 

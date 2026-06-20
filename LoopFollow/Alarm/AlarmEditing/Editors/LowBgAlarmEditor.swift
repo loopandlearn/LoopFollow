@@ -8,13 +8,13 @@ struct LowBgAlarmEditor: View {
 
     var body: some View {
         Group {
-            InfoBanner(text: "This warns you if the glucose is too low now or might be soon, based on predictions. Note: predictions is currently not available for Trio.")
+            InfoBanner(text: "This warns you if the glucose is too low now or might be soon, based on the forecast.")
 
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmBGSection(
                 header: "Low Limit",
-                footer: "Alert when any reading or prediction is at or below this value.",
+                footer: "Alert when any reading or forecast is at or below this value.",
                 title: "BG",
                 range: 40 ... 150,
                 value: $alarm.belowBG
@@ -33,7 +33,7 @@ struct LowBgAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "PREDICTION",
-                footer: "Look ahead this many minutes in Loop’s prediction; "
+                footer: "Look ahead this many minutes in the forecast; "
                     + "if any future value is at or below the threshold, "
                     + "you’ll be warned early. Set 0 to disable.",
                 title: "Predictive",
