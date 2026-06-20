@@ -39,12 +39,12 @@ enum OnboardingStep: CaseIterable, Hashable {
     }
 
     /// Steps that use the shared Back / Continue footer. Phases that contain their
-    /// own internal pages or custom primary buttons (connect, units, alarms,
-    /// notifications, telemetry) supply their own footer instead, as do the
+    /// own internal pages or custom primary buttons (overview, connect, units,
+    /// alarms, notifications, telemetry) supply their own footer instead, as do the
     /// full-bleed welcome and completion screens.
     var usesSharedFooter: Bool {
         switch self {
-        case .overview, .dataSource, .generalAlarms, .tabOrder:
+        case .dataSource, .generalAlarms, .tabOrder:
             return true
         default:
             return false

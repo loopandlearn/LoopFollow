@@ -152,10 +152,33 @@ final class OnboardingViewModel: ObservableObject {
 
     private var alarmsOffered: Bool { !offeredSeedAlarms.isEmpty }
 
+    /// True when a returning user already has a working data source and there are
+    /// no recommended alarms left to add — nothing essential to configure, so the
+    /// overview becomes a short "you're all set" confirmation instead of a plan.
+    var hasNothingToSetUp: Bool {
+        isAlreadyConfigured && !alarmsOffered
+    }
+
     /// The phases actually shown for the current configuration, in order. Optional
-    /// phases are included only when relevant.
+    /// phases are included only when relevant; a returning user skips the phases
+    /// they've already completed.
     var activeSteps: [OnboardingStep] {
-        var steps: [OnboardingStep] = [.welcome, .overview, .dataSource, .connect, .units]
+        var steps: [OnboardingStep] = [.welcome, .overview]
+
+        // Already set up and nothing to add — the overview is the last stop, with
+        // a "Done" that finishes. Notification/telemetry consent is still handled
+        // after dismissal, the same as when skipping.
+        if hasNothingToSetUp {
+            return steps
+        }
+
+        // A returning user with a working data source skips source selection and
+        // the connection screen; everyone else sets them up.
+        if !isAlreadyConfigured {
+            steps.append(contentsOf: [.dataSource, .connect])
+        }
+
+        steps.append(.units)
         if alarmsOffered {
             steps.append(contentsOf: [.generalAlarms, .alarms])
         }

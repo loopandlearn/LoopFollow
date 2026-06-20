@@ -60,7 +60,7 @@ struct OnboardingContainerView: View {
             case .welcome:
                 WelcomeStepView(viewModel: viewModel)
             case .overview:
-                OverviewStepView()
+                OverviewStepView(onboarding: viewModel)
             case .dataSource:
                 DataSourceChoiceStepView(viewModel: viewModel)
             case .connect:
