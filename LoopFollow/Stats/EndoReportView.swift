@@ -844,7 +844,7 @@ class NightscoutProfileFetcher: ObservableObject {
         NightscoutUtils.executeRequest(
             eventType: .profile,
             parameters: [:]
-        ) { [weak self] (result: Result<NSProfile, Error>) in
+        ) { [weak self] (result: Result<[NSProfile], Error>) in
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.isFetching = false
@@ -854,7 +854,13 @@ class NightscoutProfileFetcher: ObservableObject {
                     self.error = err.localizedDescription
                     completion(nil)
 
-                case let .success(profile):
+                case let .success(profiles):
+                    guard let profile = profiles.first else {
+                        self.error = "No profile data returned from Nightscout."
+                        completion(nil)
+                        return
+                    }
+
                     let store = profile.store[profile.defaultProfile]
                         ?? profile.store["default"]
                         ?? profile.store["Default"]

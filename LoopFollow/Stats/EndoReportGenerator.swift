@@ -195,8 +195,21 @@ enum EndoReportGenerator {
     private static let C_CARB = UIColor(red: 0.150, green: 0.600, blue: 0.150, alpha: 1.0)
     private static let C_BASAL = UIColor(red: 0.102, green: 0.451, blue: 0.933, alpha: 0.65)
 
+    // Shared TIR palette used in both the summary TIR card and daily BG rendering.
+    private static let C_TIR_VHIGH = UIColor(red: 0.78, green: 0.22, blue: 0.20, alpha: 1)
+    private static let C_TIR_HIGH = UIColor(red: 0.88, green: 0.75, blue: 0.29, alpha: 1)
+    private static let C_TIR_IN = UIColor(red: 0.35, green: 0.68, blue: 0.50, alpha: 1)
+    private static let C_TIR_LOW = UIColor(red: 0.88, green: 0.51, blue: 0.24, alpha: 1)
+    private static let C_TIR_VLOW = UIColor(red: 0.78, green: 0.22, blue: 0.20, alpha: 1)
+
     private static func bgColor(_ bg: Double) -> UIColor {
-        switch bg { case ..<54: return C_VLOW; case ..<70: return C_LOW; case ...180: return C_IN; case ...250: return C_HIGH; default: return C_VHIGH }
+        switch bg {
+        case ..<54: return C_TIR_VLOW
+        case ..<70: return C_TIR_LOW
+        case ...180: return C_TIR_IN
+        case ...250: return C_TIR_HIGH
+        default: return C_TIR_VHIGH
+        }
     }
 
     // MARK: - Page 1: Summary
@@ -226,7 +239,7 @@ enum EndoReportGenerator {
                 ("CV (TARGET <36%)", String(format: "%.0f%%", stats.cv), false),
                 ("READINGS", "\(stats.readingCount)", false),
             ]
-            var gy = y + 1
+            let gy = y + 1
             for (i, c) in cards.enumerated() {
                 statCard(c.0, val: c.1, x: m + CGFloat(i % 2) * (cw + 6), y: gy + CGFloat(i / 2) * (ch + 4),
                          w: cw, h: ch, accent: c.2, cfg: cfg, ctx: ctx)
@@ -377,7 +390,7 @@ enum EndoReportGenerator {
 
     private static func drawTIRBar(stats: ReportStats,
                                    x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat,
-                                   cfg: EndoReportConfig, ctx: CGContext)
+                                   cfg _: EndoReportConfig, ctx: CGContext)
     {
         let r = CGRect(x: x, y: y, width: w, height: h)
         ctx.setFillColor(C_CLOUD.cgColor); ctx.fill(r)
@@ -398,9 +411,9 @@ enum EndoReportGenerator {
         let bh = max(legendBottom - by, 20)
 
         let segs: [(Double, UIColor, String)] = [
-            (stats.veryHigh, C_VHIGH, "Very High"), (stats.high, C_HIGH, "High"),
-            (stats.inRange, C_IN, "In Range"), (stats.low, C_LOW, "Low"),
-            (stats.veryLow, C_VLOW, "Very Low"),
+            (stats.veryHigh, C_TIR_VHIGH, "Very High"), (stats.high, C_TIR_HIGH, "High"),
+            (stats.inRange, C_TIR_IN, "In Range"), (stats.low, C_TIR_LOW, "Low"),
+            (stats.veryLow, C_TIR_VLOW, "Very Low"),
         ]
         var sy = by
 
@@ -421,7 +434,7 @@ enum EndoReportGenerator {
             let isTarget = (label == "In Range")
             let pa: [NSAttributedString.Key: Any] = [
                 .font: isTarget ? UIFont.boldSystemFont(ofSize: 7.5) : UIFont.systemFont(ofSize: 7),
-                .foregroundColor: isTarget ? accent(cfg) : C_SLATE,
+                .foregroundColor: isTarget ? clr : C_SLATE,
             ]
             let textStr = "\(label) \(ps)"
             let textY = legendTop + CGFloat(index) * legendSpacing
@@ -433,7 +446,8 @@ enum EndoReportGenerator {
 
         let na: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 6.5), .foregroundColor: C_SLATE]
         "Target: 70-180".draw(at: CGPoint(x: x + 5, y: targetLine1Y), withAttributes: na)
-        "Time in Tight Range: 70-140".draw(at: CGPoint(x: x + 5, y: targetLine2Y), withAttributes: na)
+        let tightRangeText = String(format: "Tight Range 70-140: %.0f%%", stats.tightTIR)
+        tightRangeText.draw(at: CGPoint(x: x + 5, y: targetLine2Y), withAttributes: na)
     }
 
     // MARK: - Time-of-day strip
@@ -521,9 +535,9 @@ enum EndoReportGenerator {
         let ty = y + ch + 2
         let total = (boluses + smbs).map { $0.value }.reduce(0,+)
         let rows: [(String, String)] = [
-            ("Correction Boluses", "\(boluses.count)"),
-            ("SMB / Auto-Corrections", "\(smbs.count)"),
-            ("Total Bolus Insulin", String(format: "%.1f U", total)),
+            ("Manual/Traditional Bolus Events", "\(boluses.count)"),
+            ("Automated Microbolus (SMB/Auto-Correction) Events", "\(smbs.count)"),
+            ("Total Bolus Insulin (Manual + Automated)", String(format: "%.1f U", total)),
             ("Programmed Basal", simpleVM.programmedBasal != nil ? String(format: "%.2f U/day", simpleVM.programmedBasal!) : "—"),
             ("Actual Basal", simpleVM.actualBasal != nil ? String(format: "%.2f U/day", simpleVM.actualBasal!) : "—"),
         ]
@@ -656,7 +670,7 @@ enum EndoReportGenerator {
         }
         ctx.setLineDash(phase: 0, lengths: [])
 
-        var band = CGMutablePath()
+        let band = CGMutablePath()
         for (i, pt) in agpData.enumerated() {
             let p = CGPoint(x: tx(pt.timeOfDay), y: gy(pt.p95)); i == 0 ? band.move(to: p) : band.addLine(to: p)
         }
@@ -666,7 +680,7 @@ enum EndoReportGenerator {
         band.closeSubpath()
         ctx.setFillColor(accent(cfg).withAlphaComponent(0.10).cgColor); ctx.addPath(band); ctx.fillPath()
 
-        var iqr = CGMutablePath()
+        let iqr = CGMutablePath()
         for (i, pt) in agpData.enumerated() {
             let p = CGPoint(x: tx(pt.timeOfDay), y: gy(pt.p75)); i == 0 ? iqr.move(to: p) : iqr.addLine(to: p)
         }
@@ -842,8 +856,9 @@ enum EndoReportGenerator {
         let df = DateFormatter(); df.dateFormat = "yyyy-MM-dd"
         let df2 = DateFormatter(); df2.dateFormat = "EEEE, MMM d, yyyy"
         let date = df.date(from: day) ?? Date()
+        let dayLabel = df2.string(from: date)
         let dlA: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 9), .foregroundColor: C_INK]
-        df2.string(from: date).draw(at: CGPoint(x: x + 10, y: y + 5), withAttributes: dlA)
+        dayLabel.draw(at: CGPoint(x: x + 10, y: y + 5), withAttributes: dlA)
 
         // Statistics Container on the Right
         let statsW: CGFloat = 115
@@ -906,17 +921,27 @@ enum EndoReportGenerator {
         }
 
         let chartX = x + 10; let chartW = w - 140
-        let chartY = y + 26
+        let chartY = y + 22
         let axisLabelArea: CGFloat = 12
-        let chartH = h - 26 - axisLabelArea
+        let chartH = h - 22 - axisLabelArea
+
+        // Daily chart palette with stronger visual separation.
+        let dailyCarbColor = UIColor(red: 0.92, green: 0.50, blue: 0.18, alpha: 1)
+        let dailyBasalColor = UIColor(red: 0.38, green: 0.46, blue: 0.62, alpha: 1)
 
         guard !dayData.bg.isEmpty else { return }
+
+        let insulinLaneH = chartH * 0.24
+        let insulinLaneY = chartY + chartH - insulinLaneH
+        let bgInsulinGap: CGFloat = 4
+        let glucosePlotBottomY = insulinLaneY - bgInsulinGap
+        let glucosePlotH = max(glucosePlotBottomY - chartY, 24)
 
         ctx.saveGState()
         ctx.clip(to: CGRect(x: chartX, y: chartY, width: chartW, height: chartH))
 
         let bgMin: CGFloat = 40; let bgMax: CGFloat = 320; let bgRng = bgMax - bgMin
-        func gy(_ bg: Double) -> CGFloat { chartY + chartH - (CGFloat(bg) - bgMin) / bgRng * chartH }
+        func gy(_ bg: Double) -> CGFloat { chartY + glucosePlotH - (CGFloat(bg) - bgMin) / bgRng * glucosePlotH }
         func tx(_ ts: Double) -> CGFloat {
             let cal = dateTimeUtils.displayCalendar()
             let d = Date(timeIntervalSince1970: ts)
@@ -941,67 +966,170 @@ enum EndoReportGenerator {
             ctx.move(to: CGPoint(x: hx, y: chartY)); ctx.addLine(to: CGPoint(x: hx, y: chartY + chartH)); ctx.strokePath()
         }
 
-        if !dayData.basal.isEmpty {
-            let bH = chartH * 0.25; let bY = chartY + chartH - bH
-            let sorted = dayData.basal.sorted { $0.date < $1.date }
-            let maxR = Swift.max(sorted.map { $0.basalRate }.max() ?? 1, 0.01)
+        // Dedicated insulin lane to declutter the lower portion of the chart.
+        ctx.setFillColor(C_CLOUD.withAlphaComponent(0.55).cgColor)
+        ctx.fill(CGRect(x: chartX, y: insulinLaneY, width: chartW, height: insulinLaneH))
+        ctx.setStrokeColor(C_BORDER.withAlphaComponent(0.6).cgColor)
+        ctx.setLineWidth(0.25)
+        ctx.move(to: CGPoint(x: chartX, y: insulinLaneY))
+        ctx.addLine(to: CGPoint(x: chartX + chartW, y: insulinLaneY))
+        ctx.strokePath()
 
-            var path = CGMutablePath(); var first = true
-            for pt in sorted {
-                let px = tx(pt.date); let py = bY + bH - CGFloat(pt.basalRate / maxR) * bH
-                first ? path.move(to: CGPoint(x: px, y: py)) : path.addLine(to: CGPoint(x: px, y: py)); first = false
-            }
-            if let last = sorted.last {
-                path.addLine(to: CGPoint(x: tx(last.date), y: bY + bH))
-                path.addLine(to: CGPoint(x: chartX, y: bY + bH)); path.closeSubpath()
-                ctx.setFillColor(C_BASAL.withAlphaComponent(0.15).cgColor); ctx.addPath(path); ctx.fillPath()
-            }
+        if !dayData.basal.isEmpty || !basalProfile.isEmpty {
+            let actualBasal = dayData.basal.sorted { $0.date < $1.date }
+            let scheduledBasal = basalProfile.sorted { $0.timeAsSeconds < $1.timeAsSeconds }
+            let actualMax = actualBasal.map { $0.basalRate }.max() ?? 0
+            let scheduledMax = scheduledBasal.map { $0.value }.max() ?? 0
+            let maxR = Swift.max(actualMax, scheduledMax, 0.01)
 
-            var lp = CGMutablePath(); first = true
-            for (index, pt) in sorted.enumerated() {
-                let px = tx(pt.date); let py = bY + bH - CGFloat(pt.basalRate / maxR) * bH
-                first ? lp.move(to: CGPoint(x: px, y: py)) : lp.addLine(to: CGPoint(x: px, y: py)); first = false
-
-                if pt.basalRate > 0.01 {
-                    let nextX = index < sorted.count - 1 ? tx(sorted[index + 1].date) : (chartX + chartW)
-                    if (nextX - px) > 14 {
-                        let rateStr = String(format: "%.2f", pt.basalRate)
-                        let rA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 4.2), .foregroundColor: C_BASAL]
-                        rateStr.draw(at: CGPoint(x: px + 1, y: py - 7), withAttributes: rA)
+            // Clean solid step-line for actual basal.
+            if !actualBasal.isEmpty {
+                let stepPath = CGMutablePath()
+                var lastPoint: CGPoint?
+                for pt in actualBasal {
+                    let px = tx(pt.date)
+                    let py = insulinLaneY + insulinLaneH - CGFloat(pt.basalRate / maxR) * insulinLaneH
+                    if let prev = lastPoint {
+                        stepPath.addLine(to: CGPoint(x: px, y: prev.y))
+                        stepPath.addLine(to: CGPoint(x: px, y: py))
+                    } else {
+                        stepPath.move(to: CGPoint(x: px, y: py))
                     }
+                    lastPoint = CGPoint(x: px, y: py)
                 }
+                if let last = lastPoint {
+                    stepPath.addLine(to: CGPoint(x: chartX + chartW, y: last.y))
+                }
+
+                ctx.setStrokeColor(dailyBasalColor.cgColor)
+                ctx.setLineWidth(1.0)
+                ctx.addPath(stepPath)
+                ctx.strokePath()
             }
-            ctx.setStrokeColor(C_BASAL.cgColor); ctx.setLineWidth(0.9); ctx.addPath(lp); ctx.strokePath()
+
+            // Dotted step-line for scheduled basal profile.
+            if !scheduledBasal.isEmpty {
+                let schedPath = CGMutablePath()
+                var lastPoint: CGPoint?
+                for pt in scheduledBasal {
+                    let secs = Swift.max(0, Swift.min(pt.timeAsSeconds, 24 * 60 * 60))
+                    let px = chartX + CGFloat(Double(secs) / Double(24 * 60 * 60)) * chartW
+                    let py = insulinLaneY + insulinLaneH - CGFloat(pt.value / maxR) * insulinLaneH
+                    if let prev = lastPoint {
+                        schedPath.addLine(to: CGPoint(x: px, y: prev.y))
+                        schedPath.addLine(to: CGPoint(x: px, y: py))
+                    } else {
+                        schedPath.move(to: CGPoint(x: px, y: py))
+                    }
+                    lastPoint = CGPoint(x: px, y: py)
+                }
+                if let last = lastPoint {
+                    schedPath.addLine(to: CGPoint(x: chartX + chartW, y: last.y))
+                }
+
+                ctx.setStrokeColor(dailyBasalColor.withAlphaComponent(0.7).cgColor)
+                ctx.setLineWidth(0.9)
+                ctx.setLineDash(phase: 0, lengths: [2, 2])
+                ctx.addPath(schedPath)
+                ctx.strokePath()
+                ctx.setLineDash(phase: 0, lengths: [])
+            }
         }
 
-        // Draw Carbs as small green diamonds/circles at the top of the chart
+        // Draw carbs as orange diamonds in the top event row.
+        var carbPositions: [CGFloat] = []
         for carb in dayData.carbs {
             let cx = tx(carb.date)
             let cy = chartY + 4
-            ctx.setFillColor(C_CARB.cgColor)
-            ctx.fillEllipse(in: CGRect(x: cx - 2.5, y: cy - 2.5, width: 5, height: 5))
+            let carbRadius: CGFloat = 2.5
+            let diamond = CGMutablePath()
+            diamond.move(to: CGPoint(x: cx, y: cy - carbRadius))
+            diamond.addLine(to: CGPoint(x: cx + carbRadius, y: cy))
+            diamond.addLine(to: CGPoint(x: cx, y: cy + carbRadius))
+            diamond.addLine(to: CGPoint(x: cx - carbRadius, y: cy))
+            diamond.closeSubpath()
+            ctx.setFillColor(dailyCarbColor.withAlphaComponent(0.82).cgColor)
+            ctx.addPath(diamond)
+            ctx.fillPath()
+            carbPositions.append(cx)
         }
 
+        // Move SMB/Auto corrections into the top event row to declutter the bottom insulin lane.
         for smb in dayData.smb {
-            let bx = tx(smb.date); let bh2 = max(CGFloat(Swift.min(smb.value / 15, 1)) * (chartH * 0.35), 2.5)
-            ctx.setFillColor(C_SMB.cgColor)
-            ctx.fill(CGRect(x: bx - 2, y: chartY + chartH - bh2, width: 4, height: bh2))
+            let cx = tx(smb.date)
+            let nearCarb = carbPositions.contains { abs($0 - cx) < 5 }
+            let cy = chartY + (nearCarb ? 12 : 9)
+            let radius: CGFloat = 2.0
+            let diamond = CGMutablePath()
+            diamond.move(to: CGPoint(x: cx, y: cy - radius))
+            diamond.addLine(to: CGPoint(x: cx + radius, y: cy))
+            diamond.addLine(to: CGPoint(x: cx, y: cy + radius))
+            diamond.addLine(to: CGPoint(x: cx - radius, y: cy))
+            diamond.closeSubpath()
+            ctx.setFillColor(C_SMB.withAlphaComponent(0.82).cgColor)
+            ctx.addPath(diamond)
+            ctx.fillPath()
         }
 
         for bolus in dayData.bolus {
-            let bx = tx(bolus.date); let bh2 = max(CGFloat(Swift.min(bolus.value / 15, 1)) * (chartH * 0.4), 3.0)
-            ctx.setFillColor(C_BOLUS.cgColor)
-            ctx.fill(CGRect(x: bx - 2.5, y: chartY + chartH - bh2, width: 5, height: bh2))
+            let bx = tx(bolus.date)
+            let fixedBolusHeight = min(insulinLaneH * 0.55, 8.0)
+            let barRect = CGRect(x: bx - 2.3, y: chartY + chartH - fixedBolusHeight, width: 4.6, height: fixedBolusHeight)
+            ctx.setFillColor(C_BOLUS.withAlphaComponent(0.82).cgColor)
+            ctx.fill(barRect)
         }
 
         let sortedBG = dayData.bg.sorted(by: { $0.date < $1.date })
+
+        if sortedBG.count > 1 {
+            ctx.setLineWidth(1.15)
+            for i in 0 ..< (sortedBG.count - 1) {
+                let current = sortedBG[i]
+                let next = sortedBG[i + 1]
+                let sx = tx(current.date)
+                let sy = gy(Double(current.sgv))
+                let ex = tx(next.date)
+                let ey = gy(Double(next.sgv))
+                ctx.setStrokeColor(bgColor(Double(current.sgv)).withAlphaComponent(0.92).cgColor)
+                ctx.move(to: CGPoint(x: sx, y: sy))
+                ctx.addLine(to: CGPoint(x: ex, y: ey))
+                ctx.strokePath()
+            }
+        }
+
         for r in sortedBG {
-            let rx = tx(r.date); let ry = gy(Double(r.sgv))
-            ctx.setFillColor(bgColor(Double(r.sgv)).cgColor)
-            ctx.fillEllipse(in: CGRect(x: rx - 1.6, y: ry - 1.6, width: 3.2, height: 3.2))
+            let rx = tx(r.date)
+            let ry = gy(Double(r.sgv))
+            let pointColor = bgColor(Double(r.sgv))
+            ctx.setFillColor(pointColor.cgColor)
+            ctx.fillEllipse(in: CGRect(x: rx - 1.55, y: ry - 1.55, width: 3.1, height: 3.1))
+            ctx.setStrokeColor(C_WHITE.withAlphaComponent(0.8).cgColor)
+            ctx.setLineWidth(0.4)
+            ctx.strokeEllipse(in: CGRect(x: rx - 1.55, y: ry - 1.55, width: 3.1, height: 3.1))
         }
 
         ctx.restoreGState()
+
+        // Target tags in compact pills improve visibility over dense traces.
+        let targetTextA: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 5.4), .foregroundColor: C_WHITE]
+        func drawTargetTag(_ text: String, centerY: CGFloat) {
+            let padX: CGFloat = 2.8
+            let padY: CGFloat = 1.1
+            let textSize = (text as NSString).size(withAttributes: targetTextA)
+            let tagRect = CGRect(
+                x: chartX + chartW - textSize.width - (padX * 2) - 1.5,
+                y: centerY - (textSize.height + padY * 2) / 2,
+                width: textSize.width + padX * 2,
+                height: textSize.height + padY * 2
+            )
+            let tagPath = UIBezierPath(roundedRect: tagRect, cornerRadius: 2.6)
+            ctx.setFillColor(C_INK.withAlphaComponent(0.76).cgColor)
+            ctx.addPath(tagPath.cgPath)
+            ctx.fillPath()
+            (text as NSString).draw(at: CGPoint(x: tagRect.minX + padX, y: tagRect.minY + padY), withAttributes: targetTextA)
+        }
+        drawTargetTag("70", centerY: gy(70))
+        drawTargetTag("180", centerY: gy(180))
 
         let axA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: C_SLATE]
         let axisLabelY = chartY + chartH + 4
@@ -1012,14 +1140,31 @@ enum EndoReportGenerator {
             (lbl as NSString).draw(at: CGPoint(x: hx - sz.width / 2, y: axisLabelY), withAttributes: axA)
         }
 
-        // Legend moved to top area next to date
+        // Legend right-aligned beside the graph so it cannot collide with the date heading.
+        let legendItems: [(String, UIColor)] = [
+            ("— BG", C_TIR_IN),
+            ("◆ Carbs", dailyCarbColor),
+            ("▮ Bolus", C_BOLUS),
+            ("◆ SMB/Auto", C_SMB),
+            ("— Basal actual", dailyBasalColor),
+            ("⋯ Basal scheduled", dailyBasalColor.withAlphaComponent(0.72)),
+        ]
         let lgA: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: C_SLATE]
-        var lgX = x + 120
-        for (lbl, clr) in [("● BG", C_IN), ("● Carbs", C_CARB), ("▮ Bolus", C_BOLUS), ("▮ SMB", C_SMB), ("— Basal", C_BASAL)] {
+        let legendGap: CGFloat = 5
+        let legendTotalWidth = legendItems.reduce(CGFloat(0)) { partial, item in
+            partial + (item.0 as NSString).size(withAttributes: lgA).width
+        } + legendGap * CGFloat(max(legendItems.count - 1, 0))
+
+        let rightAlignedLegendX = statsX - 6 - legendTotalWidth
+        let dayLabelRightEdge = x + 10 + (dayLabel as NSString).size(withAttributes: dlA).width
+        let minLegendX = dayLabelRightEdge + 8
+        let legendY: CGFloat = rightAlignedLegendX < minLegendX ? y + 16 : y + 7
+
+        var lgX = rightAlignedLegendX
+        for (lbl, clr) in legendItems {
             let a: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 5.5), .foregroundColor: clr]
-            (lbl as NSString).draw(at: CGPoint(x: lgX, y: y + 7), withAttributes: a)
-            lgX += (lbl as NSString).size(withAttributes: lgA).width + 5
-            if lgX > statsX - 4 { break }
+            (lbl as NSString).draw(at: CGPoint(x: lgX, y: legendY), withAttributes: a)
+            lgX += (lbl as NSString).size(withAttributes: lgA).width + legendGap
         }
     }
 
