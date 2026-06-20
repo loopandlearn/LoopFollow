@@ -19,8 +19,6 @@ struct NightscoutConnectStepView: View {
     @State private var page: Page = .address
     @State private var mode: TokenMode = .haveToken
     @State private var apiSecret: String = ""
-    @State private var isProvisioning = false
-    @State private var provisioningError: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -221,10 +219,12 @@ struct NightscoutConnectStepView: View {
                 )
             }
 
-            Button(action: createToken) {
+            Button {
+                viewModel.createReadOnlyToken(fromSecret: apiSecret)
+            } label: {
                 HStack {
                     Spacer()
-                    if isProvisioning {
+                    if viewModel.isProvisioningToken {
                         ProgressView()
                     } else {
                         Text("Create Read-Only Token")
@@ -233,39 +233,14 @@ struct NightscoutConnectStepView: View {
                     Spacer()
                 }
             }
-            .disabled(isProvisioning
+            .disabled(viewModel.isProvisioningToken
                 || apiSecret.isEmpty
                 || viewModel.nightscoutURL.isEmpty)
 
-            if let provisioningError {
-                Text(provisioningError)
+            if let error = viewModel.tokenProvisionError {
+                Text(error)
                     .font(.footnote)
                     .foregroundColor(.red)
-            }
-        }
-    }
-
-    // MARK: - Token provisioning
-
-    private func createToken() {
-        provisioningError = nil
-        isProvisioning = true
-        let url = viewModel.nightscoutURL
-        let secret = apiSecret
-
-        Task {
-            do {
-                let token = try await NightscoutUtils.provisionReadOnlyToken(url: url, secret: secret)
-                await MainActor.run {
-                    apiSecret = ""
-                    viewModel.confirmProvisionedToken(token)
-                    isProvisioning = false
-                }
-            } catch {
-                await MainActor.run {
-                    isProvisioning = false
-                    provisioningError = message(for: error)
-                }
             }
         }
     }
@@ -290,24 +265,6 @@ struct NightscoutConnectStepView: View {
         case .needsToken: return "checkmark.circle"
         case .connected: return "checkmark.circle.fill"
         case .error: return "exclamationmark.triangle.fill"
-        }
-    }
-
-    private func message(for error: Error) -> String {
-        guard let nsError = error as? NightscoutUtils.NightscoutError else {
-            return "Could not create a token. Please try again."
-        }
-        switch nsError {
-        case .invalidToken:
-            return "That API secret was rejected. Check it and try again."
-        case .invalidURL, .emptyAddress:
-            return "Please enter a valid site URL first."
-        case .siteNotFound:
-            return "Couldn't reach that site. Check the URL."
-        case .networkError:
-            return "Network error. Check your connection and try again."
-        case .tokenRequired, .unknown:
-            return "Could not create a token. Please try again."
         }
     }
 }

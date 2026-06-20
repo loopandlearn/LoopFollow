@@ -98,6 +98,12 @@ class NightscoutSettingsViewModel: ObservableObject {
     /// the user can proceed from, not an error.
     @Published private(set) var provisionedTokenPending = false
 
+    /// True while a read-only token is being created from the API secret.
+    @Published var isProvisioningToken = false
+
+    /// The most recent token-provisioning failure, for inline display.
+    @Published var tokenProvisionError: String?
+
     init() {
         initialURL = Storage.shared.url.value
         initialToken = Storage.shared.token.value
@@ -213,6 +219,71 @@ class NightscoutSettingsViewModel: ObservableObject {
                     self.lastError = nil
                 }
             }
+        }
+    }
+
+    // MARK: - Token provisioning from API secret
+
+    /// Nightscout access tokens look like `name-<16 hex>`; anything else the user
+    /// puts in the token field — most often their API secret — won't match.
+    private static let tokenFormat = "^[^-\\s]+-[0-9a-fA-F]{16}$"
+
+    private func looksLikeToken(_ value: String) -> Bool {
+        value.range(of: Self.tokenFormat, options: .regularExpression) != nil
+    }
+
+    /// True when the token field holds something that isn't a token and the site
+    /// rejected it — most likely the user pasted their API secret instead of a
+    /// token. Drives the "create a token from this" affordance.
+    var tokenLooksLikeSecret: Bool {
+        guard !nightscoutToken.isEmpty, !looksLikeToken(nightscoutToken) else { return false }
+        switch lastError {
+        case .invalidToken, .tokenRequired: return true
+        default: return false
+        }
+    }
+
+    /// Creates (or reuses) a read-only token from the given API secret and applies
+    /// it. The secret authorizes the create call only and is never stored.
+    func createReadOnlyToken(fromSecret secret: String) {
+        let trimmed = secret.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        tokenProvisionError = nil
+        isProvisioningToken = true
+        let url = nightscoutURL
+
+        Task {
+            do {
+                let token = try await NightscoutUtils.provisionReadOnlyToken(url: url, secret: trimmed)
+                await MainActor.run {
+                    self.isProvisioningToken = false
+                    self.confirmProvisionedToken(token)
+                }
+            } catch {
+                await MainActor.run {
+                    self.isProvisioningToken = false
+                    self.tokenProvisionError = NightscoutSettingsViewModel.provisioningMessage(for: error)
+                }
+            }
+        }
+    }
+
+    static func provisioningMessage(for error: Error) -> String {
+        guard let nsError = error as? NightscoutUtils.NightscoutError else {
+            return "Could not create a token. Please try again."
+        }
+        switch nsError {
+        case .invalidToken:
+            return "That API secret was rejected. Check it and try again."
+        case .invalidURL, .emptyAddress:
+            return "Please enter a valid site URL first."
+        case .siteNotFound:
+            return "Couldn't reach that site. Check the URL."
+        case .networkError:
+            return "Network error. Check your connection and try again."
+        case .tokenRequired, .unknown:
+            return "Could not create a token. Please try again."
         }
     }
 
