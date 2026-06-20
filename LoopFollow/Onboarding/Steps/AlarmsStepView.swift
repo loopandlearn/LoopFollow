@@ -1,6 +1,7 @@
 // LoopFollow
 // AlarmsStepView.swift
 
+import HealthKit
 import SwiftUI
 
 /// The alarms phase: one recommended alarm per page, each with a toggle and a few
@@ -88,6 +89,10 @@ struct AlarmsStepView: View {
                 if seed.wrappedValue.isEnabled {
                     controls(for: seed)
                 }
+            } footer: {
+                if seed.wrappedValue.isEnabled, let text = explanation(for: seed.wrappedValue) {
+                    Text(text)
+                }
             }
         }
     }
@@ -104,7 +109,8 @@ struct AlarmsStepView: View {
             bgPicker(seed, title: "Alert above", range: 120 ... 350, keyPath: \.aboveBG)
             intStepper(seed, label: "Only after high for", range: 0 ... 60, step: 5, unit: "min", keyPath: \.persistentMinutes)
         case .fastDrop:
-            bgPicker(seed, title: "Drop of at least", range: 3 ... 54, keyPath: \.delta)
+            bgPicker(seed, title: "Drop per reading", range: 3 ... 54, keyPath: \.delta)
+            intStepper(seed, label: "Readings in a row", range: 1 ... 3, step: 1, unit: "", keyPath: \.monitoringWindow)
         case .missedReading:
             doubleStepper(seed, label: "No reading for", range: 11 ... 121, step: 5, unit: "min", keyPath: \.threshold)
         case .notLooping:
@@ -160,8 +166,35 @@ struct AlarmsStepView: View {
         keyPath: WritableKeyPath<Alarm, Int?>
     ) -> some View {
         let value = intBinding(seed, keyPath: keyPath)
+        let text = unit.isEmpty ? "\(value.wrappedValue)" : "\(value.wrappedValue) \(unit)"
         return Stepper(value: value, in: range, step: step) {
-            labelRow(label, value: "\(value.wrappedValue) \(unit)")
+            labelRow(label, value: text)
+        }
+    }
+
+    /// Plain-language summary of what a recommended alarm will do, shown as the
+    /// section footer. Fast drop earns one because its per-reading-times-window
+    /// behaviour isn't obvious from the two controls alone.
+    private func explanation(for seed: OnboardingViewModel.SeedAlarm) -> String? {
+        switch seed.type {
+        case .fastDrop:
+            let alarm = seed.alarm
+            let fallback = Alarm(type: .fastDrop)
+            let delta = alarm.delta ?? fallback.delta ?? 0
+            let window = alarm.monitoringWindow ?? fallback.monitoringWindow ?? 0
+            guard delta > 0, window > 0 else { return nil }
+
+            let unit = Localizer.getPreferredUnit().localizedShortUnitString
+            let perReading = Localizer.formatQuantity(delta)
+
+            if window == 1 {
+                return "Warns when glucose falls by at least \(perReading) \(unit) between two readings."
+            }
+            let total = Localizer.formatQuantity(delta * Double(window))
+            let minutes = window * 5
+            return "Warns when glucose falls by at least \(perReading) \(unit) on each of \(window) readings in a row — about \(total) \(unit) over roughly \(minutes) minutes."
+        default:
+            return nil
         }
     }
 

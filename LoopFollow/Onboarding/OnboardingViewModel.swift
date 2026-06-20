@@ -288,14 +288,14 @@ final class OnboardingViewModel: ObservableObject {
                  detail: "Warns when glucose is low, now or soon.",
                  requiresNightscout: false)
             {
-                $0.belowBG = 80
-                $0.predictiveMinutes = 15
+                $0.belowBG = 70
+                $0.predictiveMinutes = 20
             },
             seed(.low, title: "Urgent low",
                  detail: "A separate warning for when glucose is very low.",
                  requiresNightscout: false)
             {
-                $0.belowBG = 55
+                $0.belowBG = 54
                 $0.predictiveMinutes = 0
                 $0.persistentMinutes = 0
             },
