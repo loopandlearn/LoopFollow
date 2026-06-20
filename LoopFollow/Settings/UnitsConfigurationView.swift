@@ -5,7 +5,25 @@ import SwiftUI
 
 /// Reusable view for configuring units and metrics.
 /// Can be embedded in Forms or used standalone during onboarding.
+///
+/// Onboarding splits this into two lighter pages — the glucose unit on its own,
+/// and the LoopFollow statistics (range, glycemic, variability) on a second page
+/// — by rendering a subset of the sections via `sections`. Settings shows them
+/// all together (the default).
 struct UnitsConfigurationView: View {
+    /// Which groups of sections to render. Onboarding uses `.units` and
+    /// `.statistics` on separate pages; everywhere else uses `.all`.
+    struct Sections: OptionSet {
+        let rawValue: Int
+        /// Glucose display unit (mg/dL vs mmol/L).
+        static let units = Sections(rawValue: 1 << 0)
+        /// Range mode plus the glycemic and variability metrics.
+        static let statistics = Sections(rawValue: 1 << 1)
+        static let all: Sections = [.units, .statistics]
+    }
+
+    var sections: Sections = .all
+
     @State private var rangeMode = UnitSettingsStore.shared.timeInRangeMode
     @State private var glucoseUnit = UnitSettingsStore.shared.glucoseUnit
     @State private var lowValue = Storage.shared.lowLine.value
@@ -23,17 +41,32 @@ struct UnitsConfigurationView: View {
 
     var body: some View {
         Group {
-            Section("Glucose") {
-                Picker("Glucose Unit", selection: $glucoseUnit) {
-                    Text("mg/dL").tag(GlucoseDisplayUnit.mgdL)
-                    Text("mmol/L").tag(GlucoseDisplayUnit.mmolL)
-                }
-                .pickerStyle(.segmented)
-                .onChange(of: glucoseUnit) { newValue in
-                    UnitSettingsStore.shared.glucoseUnit = newValue
-                }
+            if sections.contains(.units) {
+                unitsSections
             }
+            if sections.contains(.statistics) {
+                statisticsSections
+            }
+        }
+    }
 
+    @ViewBuilder
+    private var unitsSections: some View {
+        Section("Glucose") {
+            Picker("Glucose Unit", selection: $glucoseUnit) {
+                Text("mg/dL").tag(GlucoseDisplayUnit.mgdL)
+                Text("mmol/L").tag(GlucoseDisplayUnit.mmolL)
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: glucoseUnit) { newValue in
+                UnitSettingsStore.shared.glucoseUnit = newValue
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var statisticsSections: some View {
+        Group {
             Section {
                 Picker("Range Mode", selection: $rangeMode) {
                     Text("TIR").tag(TimeInRangeDisplayMode.tir)

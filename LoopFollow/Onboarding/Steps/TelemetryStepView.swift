@@ -11,8 +11,6 @@ struct TelemetryStepView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer()
-
             VStack(alignment: .leading, spacing: 16) {
                 Image(systemName: "chart.bar.doc.horizontal")
                     .font(.system(size: 44, weight: .semibold))
@@ -36,7 +34,8 @@ struct TelemetryStepView: View {
                     .foregroundColor(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 28)
+            .padding(.horizontal)
+            .padding(.top, 8)
 
             Spacer()
 

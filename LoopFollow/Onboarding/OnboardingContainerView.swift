@@ -73,7 +73,7 @@ struct OnboardingContainerView: View {
                     NightscoutConnectStepView(viewModel: viewModel.nightscoutViewModel, onboarding: viewModel)
                 }
             case .units:
-                UnitsStepView()
+                UnitsStepView(onboarding: viewModel)
             case .generalAlarms:
                 GeneralAlarmsStepView()
             case .alarms:

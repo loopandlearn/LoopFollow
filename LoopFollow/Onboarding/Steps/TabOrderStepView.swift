@@ -12,8 +12,9 @@ struct TabOrderStepView: View {
             OnboardingStepHeader(
                 systemImage: "square.grid.2x2",
                 title: "Arrange your tabs",
-                subtitle: "Pick which features sit in the tab bar. The Menu can always open everything."
+                subtitle: "Pick which features sit in the tab bar. You can always reach everything through the Menu."
             )
+            .padding(.horizontal)
             .padding(.top, 8)
 
             TabCustomizationModal()

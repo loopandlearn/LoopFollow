@@ -14,6 +14,7 @@ struct DataSourceChoiceStepView: View {
                     title: "Choose a data source",
                     subtitle: "LoopFollow needs a glucose data source. Pick one now — you can change or add more later in Settings."
                 )
+                .padding(.horizontal)
 
                 VStack(spacing: 14) {
                     choiceCard(

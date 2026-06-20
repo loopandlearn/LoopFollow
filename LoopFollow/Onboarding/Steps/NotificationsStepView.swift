@@ -12,8 +12,6 @@ struct NotificationsStepView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer()
-
             VStack(alignment: .leading, spacing: 20) {
                 Image(systemName: "bell.badge.fill")
                     .font(.system(size: 44, weight: .semibold))
@@ -33,7 +31,8 @@ struct NotificationsStepView: View {
                     .multilineTextAlignment(.leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 28)
+            .padding(.horizontal)
+            .padding(.top, 8)
 
             Spacer()
 

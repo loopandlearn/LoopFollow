@@ -319,6 +319,7 @@
 		F38017DF9689DF1F7639653A /* NotificationAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A213D72341EF2C558030E88 /* NotificationAuthorization.swift */; };
 		F957B82F8D80D5D762CDE068 /* LoopFollowLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88F3D35D067D089482506CBF /* LoopFollowLogo.swift */; };
 		F9E4698DE8AE0D5FEB518AF1 /* OnboardingStepHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FDA7658658AD4AE5A3D14B /* OnboardingStepHeader.swift */; };
+		DDC0510A0001000000000002 /* ConnectionStatusPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC0510A0001000000000001 /* ConnectionStatusPill.swift */; };
 		FC16A97A24996673003D6245 /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97924996673003D6245 /* NightScout.swift */; };
 		FC16A97B249966A3003D6245 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7CE589248ABEA3001F83B8 /* AlarmSound.swift */; };
 		FC16A97D24996747003D6245 /* SpeakBG.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97C24996747003D6245 /* SpeakBG.swift */; };
@@ -503,6 +504,7 @@
 		17959684C89D6056922D9175 /* DataSourceChoiceStepView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DataSourceChoiceStepView.swift; sourceTree = "<group>"; };
 		201E9EC6620F89C9BC888A88 /* OverviewStepView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OverviewStepView.swift; sourceTree = "<group>"; };
 		23FDA7658658AD4AE5A3D14B /* OnboardingStepHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingStepHeader.swift; sourceTree = "<group>"; };
+		DDC0510A0001000000000001 /* ConnectionStatusPill.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConnectionStatusPill.swift; sourceTree = "<group>"; };
 		2B9BEC26E4E48EF9B811A372 /* PendingFutureCarb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingFutureCarb.swift; sourceTree = "<group>"; };
 		2EBAB9EECE7095238A558060 /* FutureCarbsCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureCarbsCondition.swift; sourceTree = "<group>"; };
 		374A77982F5BD8AB00E96858 /* APNSClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNSClient.swift; sourceTree = "<group>"; };
@@ -1161,6 +1163,7 @@
 				DB6C214697E4CF30F11EF561 /* OnboardingViewModel.swift */,
 				E62DB628D3B182C207B92ABC /* OnboardingContainerView.swift */,
 				23FDA7658658AD4AE5A3D14B /* OnboardingStepHeader.swift */,
+				DDC0510A0001000000000001 /* ConnectionStatusPill.swift */,
 				88F3D35D067D089482506CBF /* LoopFollowLogo.swift */,
 				BF1982C63D6BFEC44041F36C /* OnboardingNavFooter.swift */,
 			);
@@ -2581,6 +2584,7 @@
 				6D32AE9BDBC241941EAD3D53 /* OnboardingViewModel.swift in Sources */,
 				63AE109876D073B929203D51 /* OnboardingContainerView.swift in Sources */,
 				F9E4698DE8AE0D5FEB518AF1 /* OnboardingStepHeader.swift in Sources */,
+				DDC0510A0001000000000002 /* ConnectionStatusPill.swift in Sources */,
 				0E7F523C7C777DFDDFFCC2A8 /* WelcomeStepView.swift in Sources */,
 				510B3641E5D3A7FBBAA713DD /* DataSourceChoiceStepView.swift in Sources */,
 				2EADEE2EE5B46EF64ADF7348 /* NightscoutConnectStepView.swift in Sources */,

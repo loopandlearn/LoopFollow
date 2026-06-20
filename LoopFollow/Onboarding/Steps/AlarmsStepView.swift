@@ -98,29 +98,31 @@ struct AlarmsStepView: View {
     private func controls(for seed: Binding<OnboardingViewModel.SeedAlarm>) -> some View {
         switch seed.wrappedValue.type {
         case .low:
-            bgPicker(seed, title: "Alert below", range: 40 ... 150, keyPath: \.belowBG, default: 80)
-            intStepper(seed, label: "Warn early by", range: 0 ... 30, step: 5, unit: "min", keyPath: \.predictiveMinutes, default: 0)
+            bgPicker(seed, title: "Alert below", range: 40 ... 150, keyPath: \.belowBG)
+            intStepper(seed, label: "Warn early by", range: 0 ... 30, step: 5, unit: "min", keyPath: \.predictiveMinutes)
         case .high:
-            bgPicker(seed, title: "Alert above", range: 120 ... 350, keyPath: \.aboveBG, default: 180)
-            intStepper(seed, label: "Only after high for", range: 0 ... 60, step: 5, unit: "min", keyPath: \.persistentMinutes, default: 0)
+            bgPicker(seed, title: "Alert above", range: 120 ... 350, keyPath: \.aboveBG)
+            intStepper(seed, label: "Only after high for", range: 0 ... 60, step: 5, unit: "min", keyPath: \.persistentMinutes)
         case .fastDrop:
-            doubleStepper(seed, label: "Drop of at least", range: 5 ... 50, step: 1, unit: "mg/dL", keyPath: \.delta, default: 18)
+            bgPicker(seed, title: "Drop of at least", range: 3 ... 54, keyPath: \.delta)
         case .missedReading:
-            doubleStepper(seed, label: "No reading for", range: 11 ... 121, step: 5, unit: "min", keyPath: \.threshold, default: 16)
+            doubleStepper(seed, label: "No reading for", range: 11 ... 121, step: 5, unit: "min", keyPath: \.threshold)
         case .notLooping:
-            doubleStepper(seed, label: "No loop for", range: 16 ... 61, step: 5, unit: "min", keyPath: \.threshold, default: 31)
+            doubleStepper(seed, label: "No loop for", range: 16 ... 61, step: 5, unit: "min", keyPath: \.threshold)
         case .battery:
-            doubleStepper(seed, label: "At or below", range: 0 ... 100, step: 5, unit: "%", keyPath: \.threshold, default: 20)
+            doubleStepper(seed, label: "At or below", range: 0 ... 100, step: 5, unit: "%", keyPath: \.threshold)
         case .iob:
-            doubleStepper(seed, label: "Alert above", range: 0 ... 30, step: 1, unit: "U", keyPath: \.threshold, default: 6)
+            doubleStepper(seed, label: "Alert above", range: 0 ... 30, step: 1, unit: "U", keyPath: \.threshold)
         case .cob:
-            doubleStepper(seed, label: "Alert above", range: 0 ... 200, step: 5, unit: "g", keyPath: \.threshold, default: 20)
+            doubleStepper(seed, label: "Alert above", range: 0 ... 200, step: 5, unit: "g", keyPath: \.threshold)
         case .sensorChange:
-            doubleStepper(seed, label: "Remind after", range: 1 ... 15, step: 1, unit: "days", keyPath: \.threshold, default: 10)
+            doubleStepper(seed, label: "Remind after", range: 1 ... 15, step: 1, unit: "days", keyPath: \.threshold)
+            activePicker(seed)
         case .pumpChange:
-            doubleStepper(seed, label: "Remind after", range: 1 ... 7, step: 1, unit: "days", keyPath: \.threshold, default: 3)
+            doubleStepper(seed, label: "Remind after", range: 1 ... 7, step: 1, unit: "days", keyPath: \.threshold)
+            activePicker(seed)
         case .pump:
-            doubleStepper(seed, label: "Alert below", range: 0 ... 100, step: 5, unit: "U", keyPath: \.threshold, default: 10)
+            doubleStepper(seed, label: "Alert below", range: 0 ... 100, step: 5, unit: "U", keyPath: \.threshold)
         default:
             EmptyView()
         }
@@ -130,10 +132,9 @@ struct AlarmsStepView: View {
         _ seed: Binding<OnboardingViewModel.SeedAlarm>,
         title: String,
         range: ClosedRange<Double>,
-        keyPath: WritableKeyPath<Alarm, Double?>,
-        default def: Double
+        keyPath: WritableKeyPath<Alarm, Double?>
     ) -> some View {
-        BGPicker(title: title, range: range, value: doubleBinding(seed, keyPath: keyPath, default: def))
+        BGPicker(title: title, range: range, value: doubleBinding(seed, keyPath: keyPath))
     }
 
     private func doubleStepper(
@@ -142,10 +143,9 @@ struct AlarmsStepView: View {
         range: ClosedRange<Double>,
         step: Double,
         unit: String,
-        keyPath: WritableKeyPath<Alarm, Double?>,
-        default def: Double
+        keyPath: WritableKeyPath<Alarm, Double?>
     ) -> some View {
-        let value = doubleBinding(seed, keyPath: keyPath, default: def)
+        let value = doubleBinding(seed, keyPath: keyPath)
         return Stepper(value: value, in: range, step: step) {
             labelRow(label, value: "\(formatted(value.wrappedValue)) \(unit)")
         }
@@ -157,13 +157,22 @@ struct AlarmsStepView: View {
         range: ClosedRange<Int>,
         step: Int,
         unit: String,
-        keyPath: WritableKeyPath<Alarm, Int?>,
-        default def: Int
+        keyPath: WritableKeyPath<Alarm, Int?>
     ) -> some View {
-        let value = intBinding(seed, keyPath: keyPath, default: def)
+        let value = intBinding(seed, keyPath: keyPath)
         return Stepper(value: value, in: range, step: step) {
             labelRow(label, value: "\(value.wrappedValue) \(unit)")
         }
+    }
+
+    /// Day/night picker for reminder alarms (sensor/pump change), so they don't
+    /// fire overnight by default. Reuses the same menu picker as the full editor.
+    private func activePicker(_ seed: Binding<OnboardingViewModel.SeedAlarm>) -> some View {
+        let binding = Binding<ActiveOption>(
+            get: { seed.wrappedValue.alarm.activeOption },
+            set: { seed.wrappedValue.alarm.activeOption = $0 }
+        )
+        return AlarmEnumMenuPicker(title: "Active during", selection: binding)
     }
 
     private func labelRow(_ label: String, value: String) -> some View {
@@ -180,24 +189,34 @@ struct AlarmsStepView: View {
 
     private func doubleBinding(
         _ seed: Binding<OnboardingViewModel.SeedAlarm>,
-        keyPath: WritableKeyPath<Alarm, Double?>,
-        default def: Double
+        keyPath: WritableKeyPath<Alarm, Double?>
     ) -> Binding<Double> {
         Binding(
-            get: { seed.wrappedValue.alarm[keyPath: keyPath] ?? def },
+            get: { seed.wrappedValue.alarm[keyPath: keyPath] ?? typeDefault(seed, keyPath) },
             set: { seed.wrappedValue.alarm[keyPath: keyPath] = $0 }
         )
     }
 
     private func intBinding(
         _ seed: Binding<OnboardingViewModel.SeedAlarm>,
-        keyPath: WritableKeyPath<Alarm, Int?>,
-        default def: Int
+        keyPath: WritableKeyPath<Alarm, Int?>
     ) -> Binding<Int> {
         Binding(
-            get: { seed.wrappedValue.alarm[keyPath: keyPath] ?? def },
+            get: { seed.wrappedValue.alarm[keyPath: keyPath] ?? typeDefault(seed, keyPath) },
             set: { seed.wrappedValue.alarm[keyPath: keyPath] = $0 }
         )
+    }
+
+    /// Fallback value for a control, read from a fresh `Alarm(type:)` so the
+    /// onboarding controls share the one source of truth for per-type defaults
+    /// and can't drift from them. Only a safety net — seeded alarms already carry
+    /// these values, so the fallback is rarely exercised.
+    private func typeDefault(_ seed: Binding<OnboardingViewModel.SeedAlarm>, _ keyPath: KeyPath<Alarm, Double?>) -> Double {
+        Alarm(type: seed.wrappedValue.type)[keyPath: keyPath] ?? 0
+    }
+
+    private func typeDefault(_ seed: Binding<OnboardingViewModel.SeedAlarm>, _ keyPath: KeyPath<Alarm, Int?>) -> Int {
+        Alarm(type: seed.wrappedValue.type)[keyPath: keyPath] ?? 0
     }
 }
 

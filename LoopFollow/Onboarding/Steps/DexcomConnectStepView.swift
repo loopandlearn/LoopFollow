@@ -9,6 +9,17 @@ struct DexcomConnectStepView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            ConnectionStatusPill(
+                color: statusColor,
+                message: viewModel.statusMessage,
+                isLoading: viewModel.statusKind == .checking,
+                systemImage: statusIcon
+            )
+            .padding(.horizontal)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+            .animation(.easeInOut(duration: 0.25), value: viewModel.statusKind)
+
             form
             OnboardingNavFooter(
                 continueEnabled: viewModel.canVerifyProceed,
@@ -61,29 +72,26 @@ struct DexcomConnectStepView: View {
                 }
                 .pickerStyle(.segmented)
             }
-
-            Section {
-                HStack(spacing: 10) {
-                    statusIcon
-                        .frame(width: 20)
-                    Text(viewModel.statusMessage)
-                        .foregroundColor(.secondary)
-                }
-            }
         }
     }
 
-    @ViewBuilder
-    private var statusIcon: some View {
+    // MARK: - Status pill mapping
+
+    private var statusColor: Color {
         switch viewModel.statusKind {
-        case .idle:
-            Image(systemName: "circle").foregroundColor(.secondary)
-        case .checking:
-            ProgressView()
-        case .connected:
-            Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
-        case .error:
-            Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.red)
+        case .idle: return .secondary
+        case .checking: return .orange
+        case .connected: return .green
+        case .error: return .red
+        }
+    }
+
+    private var statusIcon: String? {
+        switch viewModel.statusKind {
+        case .idle: return "circle"
+        case .checking: return nil
+        case .connected: return "checkmark.circle.fill"
+        case .error: return "exclamationmark.triangle.fill"
         }
     }
 }

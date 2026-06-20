@@ -24,11 +24,16 @@ struct NightscoutConnectStepView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ConnectionStatusPill(kind: viewModel.statusKind, message: viewModel.friendlyStatus)
-                .padding(.horizontal)
-                .padding(.top, 8)
-                .padding(.bottom, 4)
-                .animation(.easeInOut(duration: 0.25), value: viewModel.statusKind)
+            ConnectionStatusPill(
+                color: statusColor,
+                message: viewModel.friendlyStatus,
+                isLoading: viewModel.statusKind == .checking,
+                systemImage: statusIcon
+            )
+            .padding(.horizontal)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+            .animation(.easeInOut(duration: 0.25), value: viewModel.statusKind)
 
             switch page {
             case .address:
@@ -265,6 +270,29 @@ struct NightscoutConnectStepView: View {
         }
     }
 
+    // MARK: - Status pill mapping
+
+    private var statusColor: Color {
+        switch viewModel.statusKind {
+        case .idle: return .secondary
+        case .checking: return .orange
+        case .pending: return .blue
+        case .needsToken, .connected: return .green
+        case .error: return .red
+        }
+    }
+
+    private var statusIcon: String? {
+        switch viewModel.statusKind {
+        case .idle: return "globe"
+        case .checking: return nil
+        case .pending: return "clock.badge.checkmark"
+        case .needsToken: return "checkmark.circle"
+        case .connected: return "checkmark.circle.fill"
+        case .error: return "exclamationmark.triangle.fill"
+        }
+    }
+
     private func message(for error: Error) -> String {
         guard let nsError = error as? NightscoutUtils.NightscoutError else {
             return "Could not create a token. Please try again."
@@ -280,64 +308,6 @@ struct NightscoutConnectStepView: View {
             return "Network error. Check your connection and try again."
         case .tokenRequired, .unknown:
             return "Could not create a token. Please try again."
-        }
-    }
-}
-
-/// A pinned, color-coded status banner that morphs as the connection state
-/// changes — replacing the static globe icon and "Status" row.
-private struct ConnectionStatusPill: View {
-    let kind: NightscoutSettingsViewModel.ConnectionStatusKind
-    let message: String
-
-    var body: some View {
-        HStack(spacing: 10) {
-            icon
-                .frame(width: 20)
-            Text(message)
-                .font(.subheadline.weight(.medium))
-                .foregroundColor(color)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(color.opacity(0.12))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(color.opacity(0.3), lineWidth: 1)
-        )
-    }
-
-    private var color: Color {
-        switch kind {
-        case .idle: return .secondary
-        case .checking: return .orange
-        case .pending: return .blue
-        case .needsToken, .connected: return .green
-        case .error: return .red
-        }
-    }
-
-    @ViewBuilder
-    private var icon: some View {
-        switch kind {
-        case .idle:
-            Image(systemName: "globe").foregroundColor(color)
-        case .checking:
-            ProgressView().scaleEffect(0.85)
-        case .pending:
-            Image(systemName: "clock.badge.checkmark").foregroundColor(color)
-        case .needsToken:
-            Image(systemName: "checkmark.circle").foregroundColor(color)
-        case .connected:
-            Image(systemName: "checkmark.circle.fill").foregroundColor(color)
-        case .error:
-            Image(systemName: "exclamationmark.triangle.fill").foregroundColor(color)
         }
     }
 }

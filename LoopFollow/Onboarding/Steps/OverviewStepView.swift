@@ -34,8 +34,9 @@ struct OverviewStepView: View {
                 OnboardingStepHeader(
                     systemImage: "list.bullet.rectangle",
                     title: "Here's what we'll do",
-                    subtitle: "A quick guided setup. It only takes a few minutes, and you can change anything later in Settings."
+                    subtitle: "A quick, straightforward setup — about 5 minutes. You can change anything later in Settings."
                 )
+                .padding(.horizontal)
 
                 VStack(spacing: 14) {
                     ForEach(items) { item in

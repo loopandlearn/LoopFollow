@@ -4,6 +4,11 @@
 import SwiftUI
 
 /// Consistent icon + title + subtitle header used at the top of each step body.
+///
+/// The header deliberately carries no horizontal margin: it shares whatever
+/// leading edge its container uses, so it lines up exactly with the content
+/// below it — the section cards in a `Form`, or the `.padding(.horizontal)`
+/// cards in a plain `VStack`. Callers add their own horizontal padding to match.
 struct OnboardingStepHeader: View {
     let systemImage: String
     let title: String
@@ -28,7 +33,6 @@ struct OnboardingStepHeader: View {
                 .multilineTextAlignment(.leading)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 24)
         .padding(.top, 8)
     }
 }
