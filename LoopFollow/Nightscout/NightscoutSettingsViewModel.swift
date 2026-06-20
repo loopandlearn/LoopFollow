@@ -126,8 +126,10 @@ class NightscoutSettingsViewModel: ObservableObject {
     private func triggerCheckStatus() {
         checkStatusWorkItem?.cancel()
 
-        // Any manual edit invalidates a pending-provisioned state.
+        // Any manual edit invalidates a pending-provisioned state and any earlier
+        // "this is your API secret" verdict.
         provisionedTokenPending = false
+        tokenIsVerifiedSecret = false
         nightscoutStatus = "Checking..."
 
         checkStatusWorkItem = DispatchWorkItem {
@@ -232,14 +234,34 @@ class NightscoutSettingsViewModel: ObservableObject {
         value.range(of: Self.tokenFormat, options: .regularExpression) != nil
     }
 
-    /// True when the token field holds something that isn't a token and the site
-    /// rejected it — most likely the user pasted their API secret instead of a
-    /// token. Drives the "create a token from this" affordance.
-    var tokenLooksLikeSecret: Bool {
-        guard !nightscoutToken.isEmpty, !looksLikeToken(nightscoutToken) else { return false }
-        switch lastError {
-        case .invalidToken, .tokenRequired: return true
-        default: return false
+    /// Set once the value in the token field has been confirmed to authenticate as
+    /// the site's API secret. Drives the "create a token from this" suggestion.
+    /// This is a verified result (an actual auth probe), not a format guess, so it
+    /// only appears when creating a token will genuinely work.
+    @Published private(set) var tokenIsVerifiedSecret = false
+
+    /// Bumped on every edit so a slow verification for an old value can't land on a
+    /// newer one.
+    private var secretCheckGeneration = 0
+
+    /// After a failed token check, find out whether what the user pasted is in fact
+    /// the API secret — verified against the server, not guessed from its shape.
+    private func verifyTokenIsSecret() {
+        let candidate = nightscoutToken
+        guard !candidate.isEmpty, !looksLikeToken(candidate) else {
+            tokenIsVerifiedSecret = false
+            return
+        }
+        secretCheckGeneration += 1
+        let generation = secretCheckGeneration
+        let url = nightscoutURL
+        Task {
+            let isSecret = await NightscoutUtils.verifyAPISecret(url: url, secret: candidate)
+            await MainActor.run {
+                guard generation == self.secretCheckGeneration,
+                      self.nightscoutToken == candidate else { return }
+                self.tokenIsVerifiedSecret = isSecret
+            }
         }
     }
 
@@ -308,8 +330,19 @@ class NightscoutSettingsViewModel: ObservableObject {
                 nightscoutStatus = "Address Empty"
             }
             NightscoutSocketManager.shared.disconnect()
+
+            // A site that's reachable but rejects the value as a token is the one
+            // case where the user may have pasted their API secret — verify it so
+            // we can offer to turn it into a token.
+            switch error {
+            case .invalidToken, .tokenRequired:
+                verifyTokenIsSecret()
+            default:
+                tokenIsVerifiedSecret = false
+            }
         } else {
             isConnected = true
+            tokenIsVerifiedSecret = false
             let authStatus: String
             if Storage.shared.nsAdminAuth.value {
                 authStatus = "Admin"

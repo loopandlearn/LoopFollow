@@ -436,6 +436,32 @@ class NightscoutUtils {
         return accessToken(forName: provisionedSubjectName, id: id, secretHash: secretHash)
     }
 
+    /// Returns `true` when `secret` authenticates as the site's API secret.
+    /// Read-only: it probes an admin-gated endpoint with the hashed secret and
+    /// creates nothing, so it's safe to call just to find out what the user pasted.
+    static func verifyAPISecret(url: String, secret: String) async -> Bool {
+        let trimmedURL = url.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedSecret = secret.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSecret.isEmpty,
+              let baseURL = URL(string: trimmedURL),
+              trimmedURL.hasPrefix("http://") || trimmedURL.hasPrefix("https://")
+        else { return false }
+
+        let endpoint = baseURL.appendingPathComponent("api/v2/authorization/subjects")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        request.setValue(sha1Hex(trimmedSecret), forHTTPHeaderField: "api-secret")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            return (response as? HTTPURLResponse)?.statusCode == 200
+        } catch {
+            return false
+        }
+    }
+
     private static func fetchProvisionedToken(baseURL: URL, secretHash: String) async throws -> String? {
         let url = baseURL.appendingPathComponent("api/v2/authorization/subjects")
         var request = URLRequest(url: url)

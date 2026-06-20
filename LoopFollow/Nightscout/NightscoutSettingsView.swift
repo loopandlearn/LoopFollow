@@ -60,7 +60,7 @@ struct NightscoutSettingsView: View {
                 )
             }
 
-            if viewModel.tokenLooksLikeSecret || viewModel.isProvisioningToken {
+            if viewModel.tokenIsVerifiedSecret || viewModel.isProvisioningToken {
                 Button {
                     viewModel.createReadOnlyToken(fromSecret: viewModel.nightscoutToken)
                 } label: {
@@ -70,7 +70,7 @@ struct NightscoutSettingsView: View {
                             Text("Creating read-only token…")
                         } else {
                             Image(systemName: "wand.and.stars")
-                            Text("Create a read-only token from this")
+                            Text("That's your API secret — create a read-only token")
                         }
                     }
                 }
