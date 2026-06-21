@@ -146,7 +146,7 @@ if [[ $confirm =~ ^[Yy]$ ]]; then
 
 \`auto_version_dev\` detects that \`Config.xcconfig\` was changed in this push and skips re-bumping.
 
-⚠️ **Use rebase-merge** (not squash or merge-commit) so \`dev\` and \`main\` end up at the same commit SHA after the release."
+⚠️ **Use \"Create a merge commit\"** (not squash or rebase) so \`dev\` and \`main\` share the same release lineage."
 
   echo; echo "📝  Opening release PR ${RELEASE_BRANCH} → ${MAIN_BRANCH} …"
   gh pr create \
@@ -157,7 +157,7 @@ if [[ $confirm =~ ^[Yy]$ ]]; then
 
 Merging this PR triggers the tagging workflow, which creates tag \`v${new_ver}\` from \`LOOP_FOLLOW_MARKETING_VERSION\` in \`Config.xcconfig\`.
 
-⚠️ **Use rebase-merge** (not squash or merge-commit) so \`dev\` and \`main\` end up at the same commit SHA after the release."
+⚠️ **Use \"Create a merge commit\"** (not squash or rebase) so \`main\` keeps the original feature-PR commits. Rebase rewrites them to new SHAs, which breaks GitHub's auto-generated release notes (no PR list, only the release author is credited) and diverges \`main\` from \`dev\`."
 
   echo; echo "🎉  All repos updated to v${new_ver} (local). Release PRs opened (sync → dev, release → main)."
   echo "👉  Review and merge both PRs — the tag will be created automatically by .github/workflows/tag_on_main.yml."
