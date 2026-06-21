@@ -104,7 +104,10 @@ echo_run git switch -c "$RELEASE_BRANCH"
 # --- bump version on the release branch ----
 sed -i '' "s/${MARKETING_KEY}[[:space:]]*=.*/${MARKETING_KEY} = ${new_ver}/" "$VERSION_FILE"
 echo_run git diff "$VERSION_FILE"; pause
-echo_run git commit -m "update version to ${new_ver} [skip ci]" "$VERSION_FILE"
+# No [skip ci] here on purpose: it would skip the required SwiftFormat lint check
+# (leaving the release PRs blocked) and the tag_on_main workflow (no auto-tag).
+# auto_version_dev already avoids re-bumping via its "Config.xcconfig changed" guard.
+echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
 
 echo "💻  Build & test release branch now."; pause
 queue_push push origin "$RELEASE_BRANCH"
