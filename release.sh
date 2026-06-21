@@ -68,6 +68,18 @@ update_follower () {
 PRIMARY_ABS_PATH="$(pwd -P)"
 echo "🏁  Working in $PRIMARY_ABS_PATH …"
 
+# --- guard: make sure we're running the latest release.sh from origin/dev ----
+# The release flow assumes the newest script. If this copy differs from the one
+# on origin/dev, we're likely running a stale version — abort and tell the user.
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+echo_run git fetch origin "$DEV_BRANCH"
+if ! diff -q <(git show "origin/${DEV_BRANCH}:release.sh") "$SCRIPT_PATH" >/dev/null 2>&1; then
+  echo "❌  This release.sh does not match origin/${DEV_BRANCH}:release.sh."
+  echo "    You're likely running an outdated copy of the release script."
+  echo "    Switch to the latest '${DEV_BRANCH}' (git switch ${DEV_BRANCH} && git pull) and re-run. Aborting."
+  exit 1
+fi
+
 # --- start out in main to capture old_ver ---- 
 echo_run git switch "$MAIN_BRANCH"
 echo_run git fetch
