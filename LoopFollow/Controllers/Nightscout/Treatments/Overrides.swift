@@ -80,7 +80,7 @@ extension MainViewController {
         }
 
         Observable.shared.override.value = activeOverrideNote
-        if Storage.shared.device.value == "Trio" {
+        if Storage.shared.device.value != "Loop" {
             if let note = activeOverrideNote {
                 infoManager.updateInfoData(type: .override, value: note)
             } else {

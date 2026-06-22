@@ -24,6 +24,12 @@ class Observable {
     var deltaText = ObservableValue<String>(default: "+0")
     var iobText = ObservableValue<String>(default: "--")
 
+    var serverText = ObservableValue<String>(default: "Server")
+    var loopStatusText = ObservableValue<String>(default: "")
+    var loopStatusColor = ObservableValue<Color>(default: .primary)
+    var predictionText = ObservableValue<String>(default: "")
+    var predictionColor = ObservableValue<Color>(default: .purple)
+
     var currentAlarm = ObservableValue<UUID?>(default: nil)
     var alarmSoundPlaying = ObservableValue<Bool>(default: false)
 
@@ -38,13 +44,14 @@ class Observable {
     var pumpBatteryLevel = ObservableValue<Double?>(default: nil)
     var enactedOrSuggested = ObservableValue<TimeInterval?>(default: nil)
 
-    var settingsPath = ObservableValue<NavigationPath>(default: NavigationPath())
-
     var lastSentTOTP = ObservableValue<String?>(default: nil)
 
     var loopFollowDeviceToken = ObservableValue<String>(default: "")
 
     var isNotLooping = ObservableValue<Bool>(default: false)
+
+    /// Selected tab index used by SwiftUI TabView — set from MainViewController to switch tabs
+    var selectedTabIndex = ObservableValue<Int>(default: 0)
 
     private init() {}
 }

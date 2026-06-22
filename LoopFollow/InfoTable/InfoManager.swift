@@ -1,22 +1,20 @@
 // LoopFollow
 // InfoManager.swift
 
+import Combine
 import Foundation
 import HealthKit
-import UIKit
 
-class InfoManager {
-    var tableData: [InfoData]
-    weak var tableView: UITableView?
+class InfoManager: ObservableObject {
+    @Published var tableData: [InfoData]
 
-    init(tableView: UITableView) {
-        tableData = InfoType.allCases.map { InfoData(name: $0.name) }
-        self.tableView = tableView
+    init() {
+        tableData = InfoType.allCases.map { InfoData(id: $0.rawValue, name: $0.name) }
     }
 
     func updateInfoData(type: InfoType, value: String) {
         tableData[type.rawValue].value = value
-        tableView?.reloadData()
+        objectWillChange.send()
     }
 
     func updateInfoData(type: InfoType, value: HKQuantity) {
@@ -55,33 +53,22 @@ class InfoManager {
 
     func clearInfoData(type: InfoType) {
         tableData[type.rawValue].value = ""
-        tableView?.reloadData()
+        objectWillChange.send()
     }
 
     func clearInfoData(types: [InfoType]) {
         for type in types {
             tableData[type.rawValue].value = ""
         }
-        tableView?.reloadData()
+        objectWillChange.send()
     }
 
-    func numberOfRows() -> Int {
-        return Storage.shared.infoSort.value.filter { Storage.shared.infoVisible.value[$0] }.count
-    }
-
-    func dataForIndexPath(_ indexPath: IndexPath) -> InfoData? {
-        let sortedAndVisibleIndexes = Storage.shared.infoSort.value.filter { Storage.shared.infoVisible.value[$0] }
-
-        guard indexPath.row < sortedAndVisibleIndexes.count else {
-            return nil
-        }
-
-        let infoIndex = sortedAndVisibleIndexes[indexPath.row]
-
-        guard infoIndex < tableData.count else {
-            return nil
-        }
-
-        return tableData[infoIndex]
+    var visibleRows: [InfoData] {
+        Storage.shared.infoSort.value
+            .filter { $0 < Storage.shared.infoVisible.value.count && Storage.shared.infoVisible.value[$0] }
+            .compactMap { index in
+                guard index < tableData.count else { return nil }
+                return tableData[index]
+            }
     }
 }

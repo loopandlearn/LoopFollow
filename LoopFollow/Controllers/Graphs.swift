@@ -7,6 +7,22 @@ import UIKit
 
 import Charts
 
+/// Fill colors for the override and temp-target bars on the BG graph.
+///
+/// Loop draws overrides green and temp targets purple, while Trio (and other
+/// OpenAPS-based algorithms) use the inverse — overrides purple, temp targets
+/// green. We follow the active backend's convention so the colors match the
+/// looping app the user is running.
+enum TreatmentGraphColors {
+    static var override: NSUIColor {
+        Storage.shared.device.value == "Loop" ? .systemGreen : .systemPurple
+    }
+
+    static var tempTarget: NSUIColor {
+        Storage.shared.device.value == "Loop" ? .systemPurple : .systemGreen
+    }
+}
+
 enum GraphDataIndex: Int {
     case bg = 0
     case prediction = 1
@@ -27,6 +43,7 @@ enum GraphDataIndex: Int {
     case smb = 16
     case tempTarget = 17
     case predictionCone = 18
+    case yesterday = 19
 }
 
 extension GraphDataIndex {
@@ -51,6 +68,7 @@ extension GraphDataIndex {
         case .smb: return "SMB"
         case .tempTarget: return "Temp Target"
         case .predictionCone: return "Prediction Cone"
+        case .yesterday: return "Yesterday"
         }
     }
 }
@@ -201,7 +219,7 @@ class TempTargetRenderer: LineChartRenderer {
                 }
 
                 context.saveGState()
-                context.setFillColor(NSUIColor.systemPurple.withAlphaComponent(0.5).cgColor)
+                context.setFillColor(TreatmentGraphColors.tempTarget.withAlphaComponent(0.5).cgColor)
                 context.fill(rect)
                 context.restoreGState()
             }
@@ -381,7 +399,7 @@ extension MainViewController {
         lineOverride.lineWidth = 0
         lineOverride.drawFilledEnabled = true
         lineOverride.fillFormatter = OverrideFillFormatter()
-        lineOverride.fillColor = NSUIColor.systemGreen
+        lineOverride.fillColor = TreatmentGraphColors.override
         lineOverride.fillAlpha = 0.6
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
@@ -622,6 +640,16 @@ extension MainViewController {
         lineCone.axisDependency = YAxis.AxisDependency.right
         data.append(lineCone)
 
+        // Dataset 19: Yesterday's BG comparison overlay (thin dimmed gray line, no dots)
+        let lineYesterday = LineChartDataSet(entries: [ChartDataEntry](), label: "")
+        lineYesterday.lineWidth = 1.5
+        lineYesterday.setColor(NSUIColor.systemGray, alpha: 0.4)
+        lineYesterday.drawCirclesEnabled = false
+        lineYesterday.drawValuesEnabled = false
+        lineYesterday.highlightEnabled = false
+        lineYesterday.axisDependency = YAxis.AxisDependency.right
+        data.append(lineYesterday)
+
         data.setValueFont(UIFont.systemFont(ofSize: 12))
 
         // Add marker popups for bolus and carbs
@@ -813,6 +841,11 @@ extension MainViewController {
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
 
+        // Reflect the yesterday overlay toggle immediately, and reload the BG window
+        // so the extra day of history is fetched (or dropped) when the toggle changed.
+        updateYesterdayBGGraph()
+        TaskScheduler.shared.rescheduleTask(id: .fetchBG, to: Date())
+
         // Re-render prediction display in case display type changed
         updateOpenAPSPredictionDisplay()
     }
@@ -882,7 +915,16 @@ extension MainViewController {
         BGChartFull.data?.notifyDataChanged()
         BGChartFull.notifyDataSetChanged()
 
-        if firstGraphLoad {
+        updateYesterdayBGGraph()
+
+        // The initial zoom is a one-shot, relative to the chart's current
+        // viewport. Skip it until the chart actually has a width — otherwise a
+        // refresh that lands while the view is loaded but off-screen (e.g. Home
+        // lives in the Menu, so MainViewController is force-loaded headless by
+        // bootstrap()) would consume firstGraphLoad against a zero-size viewport
+        // and leave the main graph blank. viewDidAppear re-runs updateBGGraph
+        // once a real frame exists, applying the zoom correctly.
+        if firstGraphLoad, BGChart.bounds.width > 0 {
             var scaleX = CGFloat(Storage.shared.chartScaleX.value)
             if scaleX > CGFloat(ScaleXMax) {
                 scaleX = CGFloat(ScaleXMax)
@@ -897,6 +939,32 @@ extension MainViewController {
         if autoScrollPauseUntil == nil || Date() > autoScrollPauseUntil! {
             BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
         }
+    }
+
+    // Populates (or clears) the dimmed "yesterday" comparison overlay on the main graph.
+    // Points in yesterdayBGData are already shifted +24h so they align with today's clock time.
+    func updateYesterdayBGGraph() {
+        let dataIndex = GraphDataIndex.yesterday.rawValue
+        guard let lineData = BGChart.lineData,
+              dataIndex < lineData.dataSets.count,
+              let dataSet = lineData.dataSets[dataIndex] as? LineChartDataSet
+        else {
+            return
+        }
+
+        dataSet.removeAll(keepingCapacity: false)
+
+        if Storage.shared.showYesterdayLine.value {
+            for entry in yesterdayBGData {
+                // Clamp the plotted y-value to the same bounds the main BG line uses.
+                let plottedSgv = Double(min(max(entry.sgv, globalVariables.minDisplayGlucose), globalVariables.maxDisplayGlucose))
+                dataSet.append(ChartDataEntry(x: entry.date, y: plottedSgv))
+            }
+        }
+
+        BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.notifyDataChanged()
+        BGChart.notifyDataSetChanged()
     }
 
     func updatePredictionGraph(color: UIColor? = nil) {
@@ -1453,7 +1521,7 @@ extension MainViewController {
         lineOverride.lineWidth = 0
         lineOverride.drawFilledEnabled = true
         lineOverride.fillFormatter = OverrideFillFormatter()
-        lineOverride.fillColor = NSUIColor.systemGreen
+        lineOverride.fillColor = TreatmentGraphColors.override
         lineOverride.fillAlpha = 0.6
         lineOverride.drawCirclesEnabled = false
         lineOverride.axisDependency = YAxis.AxisDependency.right
@@ -1676,6 +1744,9 @@ extension MainViewController {
         var smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
         chart.clear()
         smallChart.clear()
+        // Refresh the fill color in case the backend (Loop vs Trio) changed.
+        chart.fillColor = TreatmentGraphColors.override
+        smallChart.fillColor = TreatmentGraphColors.override
         let thisData = overrideGraphData
 
         var colors = [NSUIColor]()
@@ -1991,9 +2062,11 @@ extension MainViewController {
 
             var coneData = [ConeChartDataEntry]()
             if !allArrays.isEmpty {
-                let maxLength = min(allArrays.map { $0.count }.max()!, toLoad + 1)
+                // Cap at the shortest predBG array length so every cone point uses
+                // the same set of contributing arrays. Matches Trio's ForecastSetup.
+                let coneLength = min(allArrays.map { $0.count }.min()!, toLoad + 1)
                 var t = predictionStart
-                for i in 0 ..< maxLength {
+                for i in 0 ..< coneLength {
                     var valuesAtIndex = [Double]()
                     for arr in allArrays where i < arr.count {
                         valuesAtIndex.append(arr[i])
