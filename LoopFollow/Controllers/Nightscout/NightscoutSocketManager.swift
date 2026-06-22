@@ -41,7 +41,9 @@ class NightscoutSocketManager {
         }
 
         let url = Storage.shared.url.value
-        let token = Storage.shared.token.value
+        // Sanitize defensively: tokens saved before this fix may still hold a stray
+        // whitespace/control char that crashes Socket.IO's URL builder on iOS 26.
+        let token = NightscoutUtils.sanitizeToken(Storage.shared.token.value)
 
         guard !url.isEmpty else {
             disconnect()

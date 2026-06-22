@@ -27,7 +27,7 @@ class NightscoutSettingsViewModel: ObservableObject {
     @Published var nightscoutToken: String = Storage.shared.token.value {
         willSet {
             if newValue != nightscoutToken {
-                Storage.shared.token.value = newValue
+                Storage.shared.token.value = NightscoutUtils.sanitizeToken(newValue)
                 triggerCheckStatus()
             }
         }
