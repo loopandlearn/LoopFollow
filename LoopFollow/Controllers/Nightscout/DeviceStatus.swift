@@ -1,10 +1,9 @@
 // LoopFollow
 // DeviceStatus.swift
 
-import Charts
 import Foundation
 import HealthKit
-import UIKit
+import SwiftUI
 
 extension MainViewController {
     func webLoadNSDeviceStatus() {
@@ -36,7 +35,6 @@ extension MainViewController {
     }
 
     func evaluateNotLooping() {
-        guard let statusStackView = LoopStatusLabel.superview as? UIStackView else { return }
         guard let lastLoopTime = Observable.shared.alertLastLoopTime.value, lastLoopTime > 0 else {
             return
         }
@@ -47,15 +45,9 @@ extension MainViewController {
         if IsNightscoutEnabled(), (now - lastLoopTime) >= nonLoopingTimeThreshold, lastLoopTime > 0 {
             IsNotLooping = true
             Observable.shared.isNotLooping.value = true
-            statusStackView.distribution = .fill
 
-            PredictionLabel.isHidden = true
-            LoopStatusLabel.frame = CGRect(x: 0, y: 0, width: statusStackView.frame.width, height: statusStackView.frame.height)
-
-            LoopStatusLabel.textAlignment = .center
-            LoopStatusLabel.text = "⚠️ Not Looping!"
-            LoopStatusLabel.textColor = UIColor.systemYellow
-            LoopStatusLabel.font = UIFont.boldSystemFont(ofSize: 18)
+            Observable.shared.loopStatusText.value = "⚠️ Not Looping!"
+            Observable.shared.loopStatusColor.value = .yellow
             #if !targetEnvironment(macCatalyst)
                 LiveActivityManager.shared.refreshFromCurrentState(reason: "notLooping")
             #endif
@@ -63,20 +55,8 @@ extension MainViewController {
         } else {
             IsNotLooping = false
             Observable.shared.isNotLooping.value = false
-            statusStackView.distribution = .fillEqually
-            PredictionLabel.isHidden = false
 
-            LoopStatusLabel.textAlignment = .right
-            LoopStatusLabel.font = UIFont.systemFont(ofSize: 17)
-
-            switch Storage.shared.appearanceMode.value {
-            case .dark:
-                LoopStatusLabel.textColor = UIColor.white
-            case .light:
-                LoopStatusLabel.textColor = UIColor.black
-            case .system:
-                LoopStatusLabel.textColor = UIColor.label
-            }
+            Observable.shared.loopStatusColor.value = .primary
             #if !targetEnvironment(macCatalyst)
                 LiveActivityManager.shared.refreshFromCurrentState(reason: "loopingResumed")
             #endif
@@ -213,37 +193,28 @@ extension MainViewController {
         let secondsAgo = now - (Observable.shared.alertLastLoopTime.value ?? 0)
 
         DispatchQueue.main.async {
+            var interval: Double
             if secondsAgo >= (20 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .deviceStatus,
-                    to: Date().addingTimeInterval(5 * 60)
-                )
-
+                interval = 5 * 60
             } else if secondsAgo >= (10 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .deviceStatus,
-                    to: Date().addingTimeInterval(60)
-                )
-
+                interval = 60
             } else if secondsAgo >= (7 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .deviceStatus,
-                    to: Date().addingTimeInterval(30)
-                )
-
+                interval = 30
             } else if secondsAgo >= (5 * 60) {
-                TaskScheduler.shared.rescheduleTask(
-                    id: .deviceStatus,
-                    to: Date().addingTimeInterval(10)
-                )
+                interval = 10
             } else {
-                let interval = (310 - secondsAgo)
-                TaskScheduler.shared.rescheduleTask(
-                    id: .deviceStatus,
-                    to: Date().addingTimeInterval(interval)
-                )
+                interval = 310 - secondsAgo
                 TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(3))
             }
+
+            if NightscoutSocketManager.shared.connectionState == .authenticated {
+                interval = max(interval * 3, 60)
+            }
+
+            TaskScheduler.shared.rescheduleTask(
+                id: .deviceStatus,
+                to: Date().addingTimeInterval(interval)
+            )
         }
 
         evaluateNotLooping()
