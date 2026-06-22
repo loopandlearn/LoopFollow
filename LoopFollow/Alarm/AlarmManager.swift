@@ -42,6 +42,12 @@ class AlarmManager {
     }
 
     func checkAlarms(data: AlarmData) {
+        // Don't evaluate against stale pre-unlock state before the BFU reload runs.
+        if Storage.shared.needsBFUReload {
+            LogManager.shared.log(category: .alarm, message: "Skipping alarm check — BFU reload pending", isDebug: true)
+            return
+        }
+
         let now = Date()
         var alarmTriggered = false
 
