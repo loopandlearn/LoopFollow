@@ -163,9 +163,11 @@ class NightscoutUtils {
     }
 
     // Strip whitespace/newlines/control characters that can sneak in via paste.
-    // A raw one breaks WebSocket connect (invalid percent-encoded query traps on iOS 26).
-    static func sanitizeToken(_ token: String) -> String {
-        token.unicodeScalars
+    // Neither a URL nor a token may legally contain them, and a stray one breaks
+    // WebSocket connect (invalid percent-encoded query traps on iOS 26) or makes
+    // URL parsing fall back to a lossy cleanup that mangles the address.
+    static func sanitizeConnectionInput(_ input: String) -> String {
+        input.unicodeScalars
             .filter { !CharacterSet.whitespacesAndNewlines.contains($0) && !CharacterSet.controlCharacters.contains($0) }
             .map(String.init)
             .joined()
