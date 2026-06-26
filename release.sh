@@ -48,7 +48,7 @@ update_follower () {
   # 3 · Pause if any conflict markers remain
   if git ls-files -u | grep -q .; then
     echo "⚠️  Conflicts detected."
-    echo "    If Fastfile or build_LoopFollow.yml were modified, these are expected."
+    echo "    If build_LoopFollow.yml was modified, a conflict on the UPSTREAM_REPO line is expected."
     echo "    Open your merge tool, resolve, then press Enter."
     pause
   fi
