@@ -25,6 +25,7 @@ queue_push() { push_cmds+=("git -C \"$(pwd)\" $*"); echo "+ [queued] (in $(pwd))
 
 update_follower () {
   local DIR="$1"
+  local build_minute="$2"                     # staggered Sunday-build minute (see calls below)
   local suffix=".${DIR#${APP_NAME}_}"        # LoopFollow_Second  -> .Second
   local display="$DIR"                        # LoopFollow_Second
   local upstream="loopandlearn/${DIR}"        # loopandlearn/LoopFollow_Second
@@ -36,11 +37,6 @@ update_follower () {
   echo_run git switch "$MAIN_BRANCH"
   echo_run git fetch
   echo_run git pull
-
-  # Preserve this instance's scheduled-build minute (the cron is staggered so a
-  # user who forked all three apps doesn't trigger three simultaneous builds).
-  local cron_line
-  cron_line=$(grep -m1 -E '^[[:space:]]*- cron:' .github/workflows/build_LoopFollow.yml || true)
 
   # 2 · Full mirror of the release tree from the primary repo.
   #     Every tracked file (including the overlay files) is synced; only git
@@ -56,9 +52,7 @@ update_follower () {
   perl -i -pe "s|^app_suffix\s*=.*|app_suffix = ${suffix}|"      LoopFollowDisplayNameConfig.xcconfig
   perl -i -pe "s|^display_name\s*=.*|display_name = ${display}|" LoopFollowDisplayNameConfig.xcconfig
   perl -i -pe "s|^(\s*)UPSTREAM_REPO:.*|\${1}UPSTREAM_REPO: ${upstream}|" .github/workflows/build_LoopFollow.yml
-  if [ -n "$cron_line" ]; then
-    CRON_LINE="$cron_line" perl -i -pe 's|^\s*- cron:.*|$ENV{CRON_LINE}|' .github/workflows/build_LoopFollow.yml
-  fi
+  perl -i -pe "s|^(\s*)- cron:.*|\${1}- cron: \"${build_minute} 10 * * 0\" # Sunday at UTC 10:${build_minute}|" .github/workflows/build_LoopFollow.yml
 
   # 4 · Rename the synced workspace to this instance's name
   rm -rf "${DIR}.xcworkspace"
@@ -126,9 +120,12 @@ echo "💻  Build & test release branch now."; pause
 queue_push push origin "$RELEASE_BRANCH"
 
 # --- mirror the release tree into the sister repos ----
+# Second arg = each app's scheduled browser-build minute (Sundays at 10:xx UTC),
+# staggered from the main app (:17) so a user who forked all three apps doesn't
+# trigger three simultaneous builds.
 cd ..
-update_follower "$SECOND_DIR"
-update_follower "$THIRD_DIR"
+update_follower "$SECOND_DIR" "27"
+update_follower "$THIRD_DIR"  "40"
 
 # ---------- GitHub Actions Test ---------
 echo; 
