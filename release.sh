@@ -40,14 +40,12 @@ update_follower () {
 
   # 2 · Full mirror of the release tree from the primary repo.
   #     Every tracked file (including the overlay files) is synced; only git
-  #     metadata, local/build dirs and the local team override are protected.
-  #     --delete makes the tree an exact mirror, auto-correcting any drift.
+  #     metadata and local/build dirs are protected. --delete makes the tree an
+  #     exact mirror, auto-correcting any drift.
   echo_run rsync -a --delete \
     --exclude='.git/' \
     --exclude='.claude/' \
     --exclude='build/' \
-    --exclude='DerivedData/' \
-    --exclude='LoopFollowConfigOverride.xcconfig' \
     "$PRIMARY_ABS_PATH"/ ./
 
   # 3 · Re-apply this instance's overlay on top of the mirror
