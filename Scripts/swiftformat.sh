@@ -1,14 +1,11 @@
 #! /bin/sh
 
-# Only run inside a LoopFollow* directory (LoopFollow, LoopFollow_Second, LoopFollow_Third)
+# Check if the folder name is exactly "LoopFollow"
 FOLDER_NAME=$(basename "${SRCROOT}")
-case "${FOLDER_NAME}" in
-    LoopFollow*) ;;
-    *)
-        echo "Skipping swiftformat: This script only runs in a LoopFollow* directory, not in '${FOLDER_NAME}'"
-        exit 0
-        ;;
-esac
+if [ "${FOLDER_NAME}" != "LoopFollow" ]; then
+    echo "Skipping swiftformat: This script only runs in the LoopFollow directory, not in '${FOLDER_NAME}'"
+    exit 0
+fi
 
 function assertEnvironment {
 	if [ -z $1 ]; then 
