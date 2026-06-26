@@ -131,10 +131,10 @@ jobs:
         if: steps.workflow-permission.outputs.has_permission != 'true'
         run: |
           echo "### :calendar: Scheduled Sync and Build Disabled :mobile_phone_off:" >> $GITHUB_STEP_SUMMARY
-          echo "You have not yet configured the scheduled sync and build for LoopFollow's browser build." >> $GITHUB_STEP_SUMMARY
-          echo "Synchronizing your fork of <code>LoopFollow</code> with the upstream repository <code>loopandlearn/LoopFollow</code> will be skipped." >> $GITHUB_STEP_SUMMARY
-          echo "If you want to enable automatic builds and updates for your LoopFollow, please follow the instructions \
-              under the following path <code>LoopFollow/fastlane/testflight.md</code>." >> $GITHUB_STEP_SUMMARY
+          echo "You have not yet configured the scheduled sync and build for ${{ github.event.repository.name }}'s browser build." >> $GITHUB_STEP_SUMMARY
+          echo "Synchronizing your fork of <code>${{ github.event.repository.name }}</code> with the upstream repository <code>${{ env.UPSTREAM_REPO }}</code> will be skipped." >> $GITHUB_STEP_SUMMARY
+          echo "If you want to enable automatic builds and updates for your ${{ github.event.repository.name }}, please follow the instructions \
+              under the following path <code>${{ github.event.repository.name }}/fastlane/testflight.md</code>." >> $GITHUB_STEP_SUMMARY
 
       # Set a logic flag if this is the second instance of this day-of-week in this month
       - name: Check if this is the second time this day-of-week happens this month
@@ -161,7 +161,7 @@ jobs:
           (vars.SCHEDULED_BUILD != 'false' && needs.check_status.outputs.IS_SECOND_IN_MONTH == 'true') ||
           (vars.SCHEDULED_SYNC != 'false' && needs.check_status.outputs.NEW_COMMITS == 'true' )
 
-  # Builds LoopFollow
+  # Builds the app
   build:
     name: Build
     needs: [check_certs, check_status]
@@ -203,7 +203,7 @@ jobs:
       - name: Sync clock
         run: sudo sntp -sS time.windows.com
 
-      # Build signed LoopFollow IPA file
+      # Build signed IPA file
       - name: Fastlane Build & Archive
         run: bundle exec fastlane build_LoopFollow
         env:
