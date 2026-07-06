@@ -41,6 +41,7 @@ class Observable {
     var previousAlertLastLoopTime = ObservableValue<TimeInterval?>(default: nil)
     var deviceRecBolus = ObservableValue<Double?>(default: nil)
     var deviceBatteryLevel = ObservableValue<Double?>(default: nil)
+    var deviceBatteryIsCharging = ObservableValue<Bool?>(default: nil)
     var pumpBatteryLevel = ObservableValue<Double?>(default: nil)
     var enactedOrSuggested = ObservableValue<TimeInterval?>(default: nil)
 

@@ -51,6 +51,7 @@ extension AlarmData {
             IOB: nil,
             recentBoluses: [],
             latestBattery: level,
+            latestBatteryIsCharging: nil,
             latestPumpBattery: nil,
             batteryHistory: [],
             recentCarbs: []
@@ -75,6 +76,7 @@ extension AlarmData {
             IOB: nil,
             recentBoluses: [],
             latestBattery: nil,
+            latestBatteryIsCharging: nil,
             latestPumpBattery: nil,
             batteryHistory: [],
             recentCarbs: []
@@ -99,6 +101,7 @@ extension AlarmData {
             IOB: nil,
             recentBoluses: [],
             latestBattery: nil,
+            latestBatteryIsCharging: nil,
             latestPumpBattery: nil,
             batteryHistory: [],
             recentCarbs: carbs
