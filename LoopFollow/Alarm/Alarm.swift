@@ -76,6 +76,10 @@ struct Alarm: Identifiable, Codable, Equatable {
     /// Number of minutes that must satisfy the alarm criteria
     var persistentMinutes: Int?
 
+    /// When set, the low alarm stays silent while BG is rising (positive delta),
+    /// only firing when the latest reading is flat or still falling.
+    var suppressIfRising: Bool = false
+
     /// Size of window to observe values, for example battery drop of x within this number of minutes,
     var monitoringWindow: Int?
 
@@ -101,7 +105,7 @@ struct Alarm: Identifiable, Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case id, type, name, isEnabled, snoozedUntil
         case aboveBG, belowBG, threshold, predictiveMinutes, delta
-        case persistentMinutes, monitoringWindow, soundFile
+        case persistentMinutes, suppressIfRising, monitoringWindow, soundFile
         case snoozeDuration, playSoundOption, repeatSoundOption
         case soundDelay, activeOption
         case missedBolusPrebolusWindow, missedBolusIgnoreSmallBolusUnits
@@ -124,6 +128,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         predictiveMinutes = try container.decodeIfPresent(Int.self, forKey: .predictiveMinutes)
         delta = try container.decodeIfPresent(Double.self, forKey: .delta)
         persistentMinutes = try container.decodeIfPresent(Int.self, forKey: .persistentMinutes)
+        suppressIfRising = try container.decodeIfPresent(Bool.self, forKey: .suppressIfRising) ?? false
         monitoringWindow = try container.decodeIfPresent(Int.self, forKey: .monitoringWindow)
         soundFile = try container.decode(SoundFile.self, forKey: .soundFile)
         snoozeDuration = try container.decodeIfPresent(Int.self, forKey: .snoozeDuration) ?? 5
@@ -154,6 +159,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(predictiveMinutes, forKey: .predictiveMinutes)
         try container.encodeIfPresent(delta, forKey: .delta)
         try container.encodeIfPresent(persistentMinutes, forKey: .persistentMinutes)
+        try container.encode(suppressIfRising, forKey: .suppressIfRising)
         try container.encodeIfPresent(monitoringWindow, forKey: .monitoringWindow)
         try container.encode(soundFile, forKey: .soundFile)
         try container.encode(snoozeDuration, forKey: .snoozeDuration)
