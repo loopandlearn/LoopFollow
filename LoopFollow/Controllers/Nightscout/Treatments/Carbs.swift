@@ -81,7 +81,7 @@ extension MainViewController {
         }
 
         let resultString = String(format: "%.0f", totalCarbs)
-        infoManager.updateInfoData(type: .carbsToday, value: resultString)
+        infoManager.updateInfoData(type: .carbsToday, value: resultString, numericValue: totalCarbs)
         Storage.shared.lastCarbsToday.value = totalCarbs
     }
 }

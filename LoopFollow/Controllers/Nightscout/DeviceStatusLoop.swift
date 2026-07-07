@@ -102,7 +102,7 @@ extension MainViewController {
             }
             if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
                 let formattedRecBolus = String(format: "%.2fU", recBolus)
-                infoManager.updateInfoData(type: .recBolus, value: formattedRecBolus)
+                infoManager.updateInfoData(type: .recBolus, value: formattedRecBolus, numericValue: recBolus)
                 Observable.shared.deviceRecBolus.value = recBolus
             }
             if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {

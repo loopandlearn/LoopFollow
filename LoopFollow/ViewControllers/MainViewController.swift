@@ -697,6 +697,11 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
             Storage.shared.migrateStep9()
             Storage.shared.migrationStep.value = 9
         }
+
+        if Storage.shared.migrationStep.value < 10 {
+            Storage.shared.migrateStep10()
+            Storage.shared.migrationStep.value = 10
+        }
     }
 
     @objc func appDidBecomeActive() {
@@ -1042,36 +1047,23 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     }
 
     private func synchronizeInfoTypes() {
-        var sortArray = Storage.shared.infoSort.value
-        var visibleArray = Storage.shared.infoVisible.value
+        // Safety net: fold any leftover legacy infoSort/infoVisible into
+        // infoDisplayItems for users whose migrationStep predates that key.
+        Storage.shared.migrateInfoDisplayItems()
 
-        // Current valid indices based on InfoType
-        let currentValidIndices = InfoType.allCases.map { $0.rawValue }
+        var items = Storage.shared.infoDisplayItems.value
 
-        // Add missing indices to sortArray
-        for index in currentValidIndices {
-            if !sortArray.contains(index) {
-                sortArray.append(index)
-            }
+        // Drop items whose InfoType no longer exists.
+        let validTypes = Set(InfoType.allCases)
+        items.removeAll { !validTypes.contains($0.type) }
+
+        // Append any newly added InfoType.
+        let present = Set(items.map(\.type))
+        for type in InfoType.allCases where !present.contains(type) {
+            items.append(InfoDisplayItem(type: type, isVisible: type.defaultVisible, coloring: InfoColoring()))
         }
 
-        // Remove deprecated indices
-        sortArray = sortArray.filter { currentValidIndices.contains($0) }
-
-        // Ensure visibleArray is updated with new entries
-        if visibleArray.count < currentValidIndices.count {
-            for i in visibleArray.count ..< currentValidIndices.count {
-                visibleArray.append(InfoType(rawValue: i)?.defaultVisible ?? false)
-            }
-        }
-
-        // Trim excess elements if there are more than needed
-        if visibleArray.count > currentValidIndices.count {
-            visibleArray = Array(visibleArray.prefix(currentValidIndices.count))
-        }
-
-        Storage.shared.infoSort.value = sortArray
-        Storage.shared.infoVisible.value = visibleArray
+        Storage.shared.infoDisplayItems.value = items
     }
 
     // MARK: - First Time Setup

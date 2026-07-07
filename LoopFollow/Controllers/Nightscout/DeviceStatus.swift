@@ -126,7 +126,7 @@ extension MainViewController {
             if let pumpBatteryRecord = lastPumpRecord["battery"] as? [String: AnyObject],
                let pumpBatteryPercent = pumpBatteryRecord["percent"] as? Double
             {
-                infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", pumpBatteryPercent) + "%")
+                infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", pumpBatteryPercent) + "%", numericValue: pumpBatteryPercent)
                 Observable.shared.pumpBatteryLevel.value = pumpBatteryPercent
             }
 
@@ -139,7 +139,7 @@ extension MainViewController {
                 } else {
                     batteryText = String(format: "%.0f", upbat) + "%"
                 }
-                infoManager.updateInfoData(type: .battery, value: batteryText)
+                infoManager.updateInfoData(type: .battery, value: batteryText, numericValue: upbat)
                 Observable.shared.deviceBatteryLevel.value = upbat
 
                 let timestamp = uploader["timestamp"] as? Date ?? Date()
