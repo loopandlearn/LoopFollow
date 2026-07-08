@@ -12,94 +12,41 @@ struct MoreMenuView: View {
     @State private var alertMessage = ""
     @State private var showAlert = false
     @State private var currentVersion: String = AppVersionManager().version()
+    @State private var searchText = ""
+    @ObservedObject private var nightscoutURL = Storage.shared.url
+
+    private var isSearching: Bool {
+        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     var body: some View {
         List {
-            // Settings
-            Section {
-                NavigationLink(value: SettingsRoute.settings) {
-                    Label("Settings", systemImage: "gearshape")
-                }
-            }
-
-            // Features
-            Section("Features") {
-                ForEach(TabItem.featureOrder) { item in
-                    FullRowButton(showsChevron: true) {
-                        let tabs = Storage.shared.orderedTabBarItems()
-                        if let tabIndex = tabs.firstIndex(of: item) {
-                            Observable.shared.selectedTabIndex.value = tabIndex
-                        } else {
-                            pendingRoute = MenuRoute(item)
-                        }
-                    } label: {
-                        Label(item.displayName, systemImage: item.icon)
-                    }
-                }
-            }
-
-            // Logging
-            Section("Logging") {
-                FullRowButton(showsChevron: true) { pendingRoute = .log } label: {
-                    Label("View Log", systemImage: "doc.text.magnifyingglass")
-                }
-
-                FullRowButton { shareLogs() } label: {
-                    Label("Share Logs", systemImage: "square.and.arrow.up")
-                }
-            }
-
-            // Support & Community
-            Section("Support & Community") {
-                Link(destination: URL(string: "https://loopfollowdocs.org/")!) {
-                    HStack {
-                        Label("LoopFollow Docs", systemImage: "book")
-                        Spacer()
-                        Image(systemName: "arrow.up.right.square")
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-
-                Link(destination: URL(string: "https://discord.gg/KQgk3gzuYU")!) {
-                    HStack {
-                        Label("Loop and Learn Discord", systemImage: "bubble.left.and.bubble.right")
-                        Spacer()
-                        Image(systemName: "arrow.up.right.square")
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-
-                Link(destination: URL(string: "https://www.facebook.com/groups/loopfollowlnl")!) {
-                    HStack {
-                        Label("LoopFollow Facebook Group", systemImage: "person.2.fill")
-                        Spacer()
-                        Image(systemName: "arrow.up.right.square")
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-            }
-
-            // Build Information
-            Section("Build Information") {
-                buildInfoRow(title: "Version", value: currentVersion, color: versionTint)
-                buildInfoRow(title: "Latest version", value: latestVersion ?? "Fetching…", color: .secondary)
-
-                let build = BuildDetails.default
-                if !(build.isMacApp() || build.isSimulatorBuild()) {
-                    buildInfoRow(
-                        title: build.expirationHeaderString,
-                        value: dateTimeUtils.formattedDate(from: build.calculateExpirationDate()),
-                        color: .secondary
-                    )
-                }
-
-                buildInfoRow(title: "Built", value: dateTimeUtils.formattedDate(from: build.buildDate()), color: .secondary)
-                buildInfoRow(title: "Branch", value: build.branchAndSha, color: .secondary)
+            if isSearching {
+                searchResultsSection
+            } else {
+                menuContent
             }
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Menu")
         .navigationBarTitleDisplayMode(.large)
+        .searchable(text: $searchText, prompt: "Search")
+        .overlay {
+            if isSearching, filteredSearchItems.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.largeTitle)
+                        .foregroundColor(.secondary)
+                    Text("No Results")
+                        .font(.headline)
+                    Text("No matches for “\(searchText)”.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal)
+            }
+        }
         .task {
             await fetchVersionInfo()
         }
@@ -117,6 +64,168 @@ struct MoreMenuView: View {
         ) {
             if let route = pendingRoute {
                 route.destination
+            }
+        }
+    }
+
+    // MARK: - Menu content
+
+    @ViewBuilder
+    private var menuContent: some View {
+        // Settings
+        Section {
+            NavigationLink(value: SettingsRoute.settings) {
+                Label("Settings", systemImage: "gearshape")
+            }
+        }
+
+        // Features
+        Section("Features") {
+            ForEach(TabItem.featureOrder) { item in
+                FullRowButton(showsChevron: true) {
+                    selectFeature(item)
+                } label: {
+                    Label(item.displayName, systemImage: item.icon)
+                }
+            }
+        }
+
+        // Logging
+        Section("Logging") {
+            FullRowButton(showsChevron: true) { pendingRoute = .log } label: {
+                Label("View Log", systemImage: "doc.text.magnifyingglass")
+            }
+
+            FullRowButton { shareLogs() } label: {
+                Label("Share Logs", systemImage: "square.and.arrow.up")
+            }
+        }
+
+        // Support & Community
+        Section("Support & Community") {
+            ForEach(MoreMenuView.supportLinks, id: \.url) { link in
+                Link(destination: link.url) {
+                    HStack {
+                        Label(link.title, systemImage: link.icon)
+                        Spacer()
+                        Image(systemName: "arrow.up.right.square")
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            }
+        }
+
+        // Build Information
+        Section("Build Information") {
+            buildInfoRow(title: "Version", value: currentVersion, color: versionTint)
+            buildInfoRow(title: "Latest version", value: latestVersion ?? "Fetching…", color: .secondary)
+
+            let build = BuildDetails.default
+            if !(build.isMacApp() || build.isSimulatorBuild()) {
+                buildInfoRow(
+                    title: build.expirationHeaderString,
+                    value: dateTimeUtils.formattedDate(from: build.calculateExpirationDate()),
+                    color: .secondary
+                )
+            }
+
+            buildInfoRow(title: "Built", value: dateTimeUtils.formattedDate(from: build.buildDate()), color: .secondary)
+            buildInfoRow(title: "Branch", value: build.branchAndSha, color: .secondary)
+        }
+    }
+
+    private func selectFeature(_ item: TabItem) {
+        let tabs = Storage.shared.orderedTabBarItems()
+        if let tabIndex = tabs.firstIndex(of: item) {
+            Observable.shared.selectedTabIndex.value = tabIndex
+        } else {
+            pendingRoute = MenuRoute(item)
+        }
+    }
+
+    // MARK: - Search
+
+    /// External Support & Community links, shared by the menu and search so their
+    /// titles live in one place.
+    private static let supportLinks: [(title: String, icon: String, url: URL)] = [
+        ("LoopFollow Docs", "book", URL(string: "https://loopfollowdocs.org/")!),
+        ("Loop and Learn Discord", "bubble.left.and.bubble.right", URL(string: "https://discord.gg/KQgk3gzuYU")!),
+        ("LoopFollow Facebook Group", "person.2.fill", URL(string: "https://www.facebook.com/groups/loopfollowlnl")!),
+    ]
+
+    /// The searchable universe, assembled from the same sources that render the
+    /// menu — the Settings routes, the tab features, and the static rows — so it
+    /// never needs to be kept in sync by hand.
+    private var searchItems: [MenuSearchItem] {
+        var items: [MenuSearchItem] = [
+            MenuSearchItem(title: "Settings", icon: "gearshape", keywords: [], kind: .settings(.settings)),
+        ]
+
+        for (_, routes) in SettingsRoute.menuSections(nightscoutConfigured: !nightscoutURL.value.isEmpty) {
+            for route in routes {
+                items.append(MenuSearchItem(title: route.title, icon: route.icon, keywords: route.keywords, kind: .settings(route)))
+            }
+        }
+
+        for item in TabItem.featureOrder {
+            items.append(MenuSearchItem(title: item.displayName, icon: item.icon, keywords: [], kind: .feature(item)))
+        }
+
+        items.append(MenuSearchItem(title: "View Log", icon: "doc.text.magnifyingglass", keywords: ["logging"], kind: .viewLog))
+        items.append(MenuSearchItem(title: "Share Logs", icon: "square.and.arrow.up", keywords: ["logging"], kind: .shareLogs))
+
+        for link in MoreMenuView.supportLinks {
+            items.append(MenuSearchItem(title: link.title, icon: link.icon, keywords: ["support", "community"], kind: .link(link.url)))
+        }
+
+        return items
+    }
+
+    private var filteredSearchItems: [MenuSearchItem] {
+        searchItems.filter(matches)
+    }
+
+    private func matches(_ item: MenuSearchItem) -> Bool {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return true }
+        return item.title.localizedCaseInsensitiveContains(query)
+            || item.keywords.contains { $0.localizedCaseInsensitiveContains(query) }
+    }
+
+    @ViewBuilder
+    private var searchResultsSection: some View {
+        Section {
+            ForEach(filteredSearchItems) { item in
+                searchRow(for: item)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func searchRow(for item: MenuSearchItem) -> some View {
+        switch item.kind {
+        case let .settings(route):
+            NavigationRow(title: item.title, icon: item.icon, value: route)
+        case let .feature(feature):
+            FullRowButton(showsChevron: true) { selectFeature(feature) } label: {
+                Label(item.title, systemImage: item.icon)
+            }
+        case .viewLog:
+            FullRowButton(showsChevron: true) { pendingRoute = .log } label: {
+                Label(item.title, systemImage: item.icon)
+            }
+        case .shareLogs:
+            FullRowButton { shareLogs() } label: {
+                Label(item.title, systemImage: item.icon)
+            }
+        case let .link(url):
+            Link(destination: url) {
+                HStack {
+                    Label(item.title, systemImage: item.icon)
+                    Spacer()
+                    Image(systemName: "arrow.up.right.square")
+                        .foregroundStyle(.tertiary)
+                }
             }
         }
     }
@@ -208,6 +317,36 @@ struct MoreMenuView: View {
             : newer ? .orange
             : latest == currentVersion ? .green
             : .secondary
+    }
+}
+
+// MARK: – Search model
+
+/// A single searchable menu entry. Assembled from the menu's existing data
+/// sources (see `MoreMenuView.searchItems`); `kind` carries how tapping it
+/// should behave so results reuse the same navigation as the live rows.
+private struct MenuSearchItem: Identifiable {
+    let title: String
+    let icon: String
+    let keywords: [String]
+    let kind: Kind
+
+    enum Kind {
+        case settings(SettingsRoute)
+        case feature(TabItem)
+        case viewLog
+        case shareLogs
+        case link(URL)
+    }
+
+    var id: String {
+        switch kind {
+        case let .settings(route): return "settings.\(route)"
+        case let .feature(item): return "feature.\(item.rawValue)"
+        case .viewLog: return "viewLog"
+        case .shareLogs: return "shareLogs"
+        case let .link(url): return "link.\(url.absoluteString)"
+        }
     }
 }
 
