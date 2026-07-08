@@ -37,15 +37,21 @@ struct AlarmListView: View {
         !snoozedAlarms.isEmpty || !activeAlarms.isEmpty || !inactiveAlarms.isEmpty
     }
 
+    // Snapshot of "now" used to categorize snoozed vs. active alarms. SwiftUI does
+    // not re-render when the wall clock passes a snooze's expiry, so we refresh this
+    // whenever the screen appears or the app returns to the foreground.
+    @State private var now = Date()
+    @Environment(\.scenePhase) private var scenePhase
+
     // MARK: - Categorized Alarms
 
     private var snoozedAlarms: [Alarm] {
-        store.value.filter { $0.snoozedUntil ?? .distantPast > Date() && $0.isEnabled && matches($0) }
+        store.value.filter { $0.snoozedUntil ?? .distantPast > now && $0.isEnabled && matches($0) }
             .sorted(by: Alarm.byPriorityThenSpec)
     }
 
     private var activeAlarms: [Alarm] {
-        store.value.filter { $0.isEnabled && ($0.snoozedUntil ?? .distantPast <= Date()) && matches($0) }
+        store.value.filter { $0.isEnabled && ($0.snoozedUntil ?? .distantPast <= now) && matches($0) }
             .sorted(by: Alarm.byPriorityThenSpec)
     }
 
@@ -121,6 +127,10 @@ struct AlarmListView: View {
                 Button { sheetInfo = .picker } label: { Image(systemName: "plus") }
             }
         }
+        .onAppear { now = Date() }
+        .onChange(of: scenePhase) { phase in
+            if phase == .active { now = Date() }
+        }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 
@@ -142,7 +152,7 @@ struct AlarmListView: View {
                     Text(alarm.name)
                         .foregroundColor(.primary)
 
-                    if let until = alarm.snoozedUntil, until > Date() {
+                    if let until = alarm.snoozedUntil, until > now {
                         HStack(spacing: 4) {
                             Image(systemName: "zzz")
                                 .font(.caption2)
