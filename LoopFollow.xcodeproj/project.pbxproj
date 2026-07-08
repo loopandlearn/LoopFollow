@@ -251,8 +251,6 @@
 		DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A872D85FD33004DF4DD /* AlarmData.swift */; };
 		DDCF9A8C2D86005E004DF4DD /* AlarmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A8B2D86005E004DF4DD /* AlarmManager.swift */; };
 		DDCFCAF22B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */; };
-		DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */; };
-		DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */; };
 		DDD10F032C518A6500D76A8E /* TreatmentResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */; };
 		DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F042C529DA200D76A8E /* ObservableValue.swift */; };
 		DDD10F072C529DE800D76A8E /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F062C529DE800D76A8E /* Observable.swift */; };
@@ -427,10 +425,6 @@
 		FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */; };
 		FCC6885C2489559400A0279D /* blank.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885B2489559400A0279D /* blank.wav */; };
 		FCC6885E24896A6C00A0279D /* silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885D24896A6C00A0279D /* silence.mp3 */; };
-		FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886624898F8000A0279D /* UserDefaultsValue.swift */; };
-		FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */; };
-		FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886A24898FD800A0279D /* ObservationToken.swift */; };
-		FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886C2489909D00A0279D /* AnyConvertible.swift */; };
 		FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886E2489A53800A0279D /* AppConstants.swift */; };
 		9C7FB98C98BE4FF98F4815EE /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFBE69CEF18416D84959974 /* Telemetry.swift */; };
 		FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD2A27C24C9D044009F7B7B /* Globals.swift */; };
@@ -720,8 +714,6 @@
 		DDCF9A872D85FD33004DF4DD /* AlarmData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmData.swift; sourceTree = "<group>"; };
 		DDCF9A8B2D86005E004DF4DD /* AlarmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmManager.swift; sourceTree = "<group>"; };
 		DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = LoopFollowDisplayNameConfig.xcconfig; sourceTree = "<group>"; };
-		DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableUserDefaultsValue.swift; sourceTree = "<group>"; };
-		DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableUserDefaults.swift; sourceTree = "<group>"; };
 		DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreatmentResponse.swift; sourceTree = "<group>"; };
 		DDD10F042C529DA200D76A8E /* ObservableValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableValue.swift; sourceTree = "<group>"; };
 		DDD10F062C529DE800D76A8E /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
@@ -899,10 +891,6 @@
 		A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNsCredentialValidator.swift; sourceTree = "<group>"; };
 		FCC6885B2489559400A0279D /* blank.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blank.wav; sourceTree = "<group>"; };
 		FCC6885D24896A6C00A0279D /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
-		FCC6886624898F8000A0279D /* UserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValue.swift; sourceTree = "<group>"; };
-		FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValueGroups.swift; sourceTree = "<group>"; };
-		FCC6886A24898FD800A0279D /* ObservationToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationToken.swift; sourceTree = "<group>"; };
-		FCC6886C2489909D00A0279D /* AnyConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyConvertible.swift; sourceTree = "<group>"; };
 		FCC6886E2489A53800A0279D /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		BDFBE69CEF18416D84959974 /* Telemetry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Telemetry.swift; sourceTree = "<group>"; };
 		FCC688702489A57C00A0279D /* Loop Follow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Follow.entitlements"; sourceTree = "<group>"; };
@@ -1339,7 +1327,6 @@
 			isa = PBXGroup;
 			children = (
 				FCC688512489363F00A0279D /* Framework */,
-				DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */,
 				DDD10F062C529DE800D76A8E /* Observable.swift */,
 				DD4878042C7B2C970048F05C /* Storage.swift */,
 				DD8316472DE49EE5004467AA /* Storage+Migrate.swift */,
@@ -1698,9 +1685,6 @@
 		FCC688512489363F00A0279D /* Framework */ = {
 			isa = PBXGroup;
 			children = (
-				FCC6886624898F8000A0279D /* UserDefaultsValue.swift */,
-				FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */,
-				DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */,
 				DDD10F042C529DA200D76A8E /* ObservableValue.swift */,
 				DD4878022C7B297E0048F05C /* StorageValue.swift */,
 				DD16AF0C2C98485400FB655A /* SecureStorageValue.swift */,
@@ -1724,8 +1708,6 @@
 				DDF6999C2C5AAA4C0058A8D9 /* Views */,
 				FCC6886E2489A53800A0279D /* AppConstants.swift */,
 				BDFBE69CEF18416D84959974 /* Telemetry.swift */,
-				FCC6886A24898FD800A0279D /* ObservationToken.swift */,
-				FCC6886C2489909D00A0279D /* AnyConvertible.swift */,
 				FCC688592489554800A0279D /* BackgroundTaskAudio.swift */,
 				A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */,
 				A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */,
@@ -2174,7 +2156,6 @@
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
 				656F8C122E49F3780008DC1D /* QRCodeGenerator.swift in Sources */,
 				6541341A2E1DC27900BDBE08 /* OverridePresetData.swift in Sources */,
-				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				DD7F4C092DD504A700D449E9 /* OverrideStartCondition.swift in Sources */,
 				DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */,
 				DD7F4C052DD4BBE200D449E9 /* NotLoopingCondition.swift in Sources */,
@@ -2203,7 +2184,6 @@
 				DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */,
 				DDCF9A8C2D86005E004DF4DD /* AlarmManager.swift in Sources */,
 				DDCC3A4F2DDC5B54006F1C10 /* BatteryDropCondition.swift in Sources */,
-				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,
 				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
 				DDB9FC7B2DDB573F00EFAA76 /* IOBCondition.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
@@ -2329,7 +2309,6 @@
 				DDC6CA492DD8E47A0060EE25 /* PumpVolumeCondition.swift in Sources */,
 				DD9ACA0A2D33095600415D8A /* MinAgoTask.swift in Sources */,
 				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
-				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
 				DDB9FC7D2DDB575300EFAA76 /* IOBAlarmEditor.swift in Sources */,
 				DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */,
 				DD7F4C0B2DD51C5500D449E9 /* OverrideEndCondition.swift in Sources */,
@@ -2367,7 +2346,6 @@
 				DD493AD92ACF2171009A6922 /* Carbs.swift in Sources */,
 				DD493AE92ACF2445009A6922 /* BGData.swift in Sources */,
 				DD0650A92DCA8A10004D3B41 /* AlarmBGSection.swift in Sources */,
-				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				DD4AFB6B2DB6BF2A00BB593F /* Binding+Optional.swift in Sources */,
 				DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */,
 				DD5DA27C2DC930D6003D44FC /* GlucoseValue.swift in Sources */,
@@ -2385,7 +2363,6 @@
 				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
 				65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
-				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */,
 				DD7F4C212DD66BB200D449E9 /* FastRiseAlarmEditor.swift in Sources */,
 				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
@@ -2423,7 +2400,6 @@
 				379BECAA2F6588300069DC62 /* RestartLiveActivityIntent.swift in Sources */,
 				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
 				DD7F4C132DD51FD500D449E9 /* TempTargetEndCondition.swift in Sources */,
-				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
 				DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */,
 				DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */,
