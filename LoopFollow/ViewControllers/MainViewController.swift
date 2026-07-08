@@ -381,8 +381,7 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
                 // Check if current remote type is invalid for the device
                 let shouldReset = (currentRemoteType == .loopAPNS && !isLoopDevice) ||
-                    (currentRemoteType == .trc && !isTrioDevice) ||
-                    (currentRemoteType == .nightscout && !isTrioDevice)
+                    (currentRemoteType == .trc && !isTrioDevice)
 
                 if shouldReset {
                     Storage.shared.remoteType.value = .none

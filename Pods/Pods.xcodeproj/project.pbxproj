@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BEEF11110000000000000002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BEEF11110000000000000001 /* PrivacyInfo.xcprivacy */; };
 		0031CEAD857A1BA158C0D2BE1870A438 /* Animator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB10D8BF2F0C2E9B18C2130751D75984 /* Animator.swift */; };
 		00351B69906B07C1950B97C40F65FABE /* RadarChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C51F17D0D2858BA593E783811A2CF7E6 /* RadarChartData.swift */; };
 		00E171A24B8B214FDC447BED6BB62C31 /* BarLineScatterCandleBubbleChartDataSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B90B940BBEE17272D0FA9602CB3F1E1 /* BarLineScatterCandleBubbleChartDataSet.swift */; };
@@ -220,6 +221,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BEEF11110000000000000001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		0047677618FCD329E548FDDC0454A8AC /* LineChartView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LineChartView.swift; path = Source/Charts/Charts/LineChartView.swift; sourceTree = "<group>"; };
 		0055C3AB0AE0067E0AF50DA569843398 /* BarChartView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BarChartView.swift; path = Source/Charts/Charts/BarChartView.swift; sourceTree = "<group>"; };
 		0187F74F0F2E1ADE4F205C203F88DE85 /* RadarChartView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RadarChartView.swift; path = Source/Charts/Charts/RadarChartView.swift; sourceTree = "<group>"; };
@@ -759,6 +761,7 @@
 		E5EBEB4E3DD769CF77FBA0FB4DD5A204 /* Charts */ = {
 			isa = PBXGroup;
 			children = (
+				BEEF11110000000000000001 /* PrivacyInfo.xcprivacy */,
 				64FE9452040001E25B5A3EB8D58108DB /* Core */,
 				AEDEF3B82F3D135001FB2D1778DAD53F /* Support Files */,
 			);
@@ -944,6 +947,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BEEF11110000000000000002 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

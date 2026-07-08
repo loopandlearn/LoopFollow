@@ -201,7 +201,7 @@ extension MainViewController {
                     Storage.shared.lastMinBgMgdl.value = minPredBG
                     Storage.shared.lastMaxBgMgdl.value = maxPredBG
                 } else {
-                    infoManager.updateInfoData(type: .minMax, value: "N/A")
+                    infoManager.clearInfoData(type: .minMax)
                 }
 
                 updateOpenAPSPredictionDisplay()

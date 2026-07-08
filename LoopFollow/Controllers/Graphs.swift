@@ -2062,9 +2062,11 @@ extension MainViewController {
 
             var coneData = [ConeChartDataEntry]()
             if !allArrays.isEmpty {
-                let maxLength = min(allArrays.map { $0.count }.max()!, toLoad + 1)
+                // Cap at the shortest predBG array length so every cone point uses
+                // the same set of contributing arrays. Matches Trio's ForecastSetup.
+                let coneLength = min(allArrays.map { $0.count }.min()!, toLoad + 1)
                 var t = predictionStart
-                for i in 0 ..< maxLength {
+                for i in 0 ..< coneLength {
                     var valuesAtIndex = [Double]()
                     for arr in allArrays where i < arr.count {
                         valuesAtIndex.append(arr[i])

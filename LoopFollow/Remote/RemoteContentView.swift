@@ -10,13 +10,6 @@ struct RemoteContentView: View {
     var body: some View {
         Group {
             switch remoteType.value {
-            case .nightscout:
-                if device.value == "Trio" {
-                    TrioNightscoutRemoteView()
-                } else {
-                    NoRemoteView()
-                }
-
             case .trc:
                 if device.value == "Trio" {
                     TrioRemoteControlView(viewModel: TrioRemoteControlViewModel())
@@ -29,19 +22,6 @@ struct RemoteContentView: View {
 
             case .none:
                 Text("Please select a Remote Type in Settings.")
-            }
-        }
-        .onAppear {
-            verifyNightscoutAuth()
-        }
-    }
-
-    private func verifyNightscoutAuth() {
-        guard remoteType.value == .nightscout, !Storage.shared.nsWriteAuth.value else { return }
-        NightscoutUtils.verifyURLAndToken { _, _, nsWriteAuth, nsAdminAuth in
-            DispatchQueue.main.async {
-                Storage.shared.nsWriteAuth.value = nsWriteAuth
-                Storage.shared.nsAdminAuth.value = nsAdminAuth
             }
         }
     }
