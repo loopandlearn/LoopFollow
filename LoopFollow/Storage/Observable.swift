@@ -53,5 +53,8 @@ class Observable {
     /// Selected tab index used by SwiftUI TabView — set from MainViewController to switch tabs
     var selectedTabIndex = ObservableValue<Int>(default: 0)
 
+    /// Currently visible app-wide banner (nil = hidden). Managed by BannerManager.
+    var activeBanner = ObservableValue<BannerMessage?>(default: nil)
+
     private init() {}
 }

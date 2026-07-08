@@ -22,6 +22,7 @@ extension MainViewController {
         dexShare?.fetchData(count) { err, result in
             if let error = err {
                 LogManager.shared.log(category: .dexcom, message: "Error fetching Dexcom data: \(error.localizedDescription)", limitIdentifier: "Error fetching Dexcom data")
+                BannerManager.shared.reportDexcomFailure(error, nightscoutFallback: IsNightscoutEnabled())
                 self.webLoadNSBGData()
                 return
             }
@@ -31,6 +32,8 @@ extension MainViewController {
                 self.webLoadNSBGData()
                 return
             }
+
+            BannerManager.shared.clear(.dexcom)
 
             // If Dex data is old, load from NS instead
             let latestDate = data[0].date
@@ -60,6 +63,7 @@ extension MainViewController {
     func webLoadNSBGData(dexData: [ShareGlucoseData] = []) {
         // This kicks it out in the instance where dexcom fails but they aren't using NS &&
         if !IsNightscoutEnabled() {
+            BannerManager.shared.clear(.nightscout)
             Storage.shared.lastBGChecked.value = Date()
             return
         }
@@ -75,6 +79,7 @@ extension MainViewController {
         NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
             switch result {
             case let .success(entriesResponse):
+                BannerManager.shared.clear(.nightscout)
                 var nsData = entriesResponse
                 DispatchQueue.main.async {
                     // transform NS data to look like Dex data
@@ -103,6 +108,7 @@ extension MainViewController {
                 }
             case let .failure(error):
                 LogManager.shared.log(category: .nightscout, message: "Failed to fetch bg data: \(error)", limitIdentifier: "Failed to fetch bg data")
+                BannerManager.shared.reportNightscoutFetchFailure(error)
                 DispatchQueue.main.async {
                     TaskScheduler.shared.rescheduleTask(
                         id: .fetchBG,

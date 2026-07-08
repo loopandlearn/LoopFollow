@@ -251,8 +251,14 @@ class NightscoutUtils {
                     completion(.unknown, nil, false, false)
                 }
             } else {
-                if let _ = error {
-                    completion(.siteNotFound, nil, false, false)
+                if let urlError = error as? URLError {
+                    switch urlError.code {
+                    case .notConnectedToInternet, .networkConnectionLost, .timedOut, .dataNotAllowed:
+                        completion(.networkError, nil, false, false)
+                    default:
+                        // cannotFindHost, cannotConnectToHost, etc. — the address is wrong or the site is down.
+                        completion(.siteNotFound, nil, false, false)
+                    }
                 } else {
                     completion(.networkError, nil, false, false)
                 }
