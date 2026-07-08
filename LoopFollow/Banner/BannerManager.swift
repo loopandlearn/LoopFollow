@@ -9,6 +9,7 @@ import ShareClient
 enum BannerSource: Hashable {
     case nightscout
     case dexcom
+    case heartbeat
     case custom(String)
 }
 
