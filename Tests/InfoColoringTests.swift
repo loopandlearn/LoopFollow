@@ -44,4 +44,28 @@ struct InfoColoringTests {
         #expect(coloring.color(for: 20, direction: .below) == .green)
         #expect(coloring.color(for: 15, direction: .below) == .red)
     }
+
+    @Test("pump reservoir colors on the way down, and a capped 50+ reads green")
+    func pumpReservoir() throws {
+        let config = try #require(InfoType.pump.colorConfig)
+        let coloring = InfoColoring(enabled: true, warning: config.defaultWarning, urgent: config.defaultUrgent)
+        #expect(coloring.color(for: 50, direction: config.direction) == .green)
+        #expect(coloring.color(for: 20, direction: config.direction) == .yellow)
+        #expect(coloring.color(for: 10, direction: config.direction) == .red)
+    }
+
+    @Test("thresholds that need decimals get a fractional step")
+    func fractionalSteps() {
+        #expect(InfoType.recBolus.colorConfig?.step == 0.1)
+        #expect(InfoType.iob.colorConfig?.step == 0.5)
+        #expect(InfoType.sage.colorConfig?.fractionDigits == 1)
+        #expect(InfoType.cob.colorConfig?.fractionDigits == 0)
+    }
+
+    @Test("non-numeric rows are not colorable")
+    func notColorable() {
+        #expect(InfoType.basal.isColorable == false)
+        #expect(InfoType.minMax.isColorable == false)
+        #expect(InfoType.pump.isColorable)
+    }
 }

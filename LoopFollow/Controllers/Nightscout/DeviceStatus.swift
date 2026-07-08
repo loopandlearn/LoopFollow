@@ -113,11 +113,13 @@ extension MainViewController {
 
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
-                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U")
+                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U", numericValue: reservoirData)
                     Storage.shared.lastPumpReservoirU.value = reservoirData
                 } else {
+                    // Pumps that only report "50+" get treated as exactly 50, both
+                    // for the volume alarm and for the info row's coloring.
                     latestPumpVolume = 50.0
-                    infoManager.updateInfoData(type: .pump, value: "50+U")
+                    infoManager.updateInfoData(type: .pump, value: "50+U", numericValue: 50.0)
                     Storage.shared.lastPumpReservoirU.value = nil
                 }
             }

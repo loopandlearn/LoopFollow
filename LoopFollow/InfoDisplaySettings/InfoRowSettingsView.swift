@@ -12,18 +12,18 @@ struct InfoRowSettingsView: View {
                 Toggle("Show in Info Display", isOn: $item.isVisible)
             }
 
-            if item.type.isColorable {
+            if let config = item.type.colorConfig {
                 Section(
                     header: Text("Color"),
-                    footer: Text(colorFooter)
+                    footer: Text(colorFooter(config))
                 ) {
-                    Toggle("Enable coloring", isOn: $item.coloring.enabled)
+                    Toggle("Enable coloring", isOn: enabledBinding(config))
 
                     if item.coloring.enabled {
-                        thresholdField(title: "Yellow at", value: $item.coloring.warning)
-                        thresholdField(title: "Red at", value: $item.coloring.urgent)
+                        thresholdRow(title: "Yellow at", value: $item.coloring.warning, default: config.defaultWarning, config: config)
+                        thresholdRow(title: "Red at", value: $item.coloring.urgent, default: config.defaultUrgent, config: config)
 
-                        if let thresholdWarning {
+                        if let thresholdWarning = thresholdWarning(config) {
                             Label(thresholdWarning, systemImage: "exclamationmark.triangle.fill")
                                 .font(.footnote)
                                 .foregroundStyle(.orange)
@@ -36,14 +36,51 @@ struct InfoRowSettingsView: View {
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
 
+    /// Turning coloring on seeds any unset threshold, so the steppers and the
+    /// stored values always agree.
+    private func enabledBinding(_ config: InfoColorConfig) -> Binding<Bool> {
+        Binding(
+            get: { item.coloring.enabled },
+            set: { isOn in
+                if isOn {
+                    item.coloring.warning = item.coloring.warning ?? config.defaultWarning
+                    item.coloring.urgent = item.coloring.urgent ?? config.defaultUrgent
+                }
+                item.coloring.enabled = isOn
+            }
+        )
+    }
+
+    private func thresholdRow(title: String, value: Binding<Double?>, default defaultValue: Double, config: InfoColorConfig) -> some View {
+        SettingsStepperRow(
+            title: title,
+            range: config.range,
+            step: config.step,
+            value: Binding(
+                get: { value.wrappedValue ?? defaultValue },
+                set: { value.wrappedValue = $0 }
+            ),
+            format: { formatted($0, config) }
+        )
+    }
+
+    private func formatted(_ value: Double, _ config: InfoColorConfig) -> String {
+        let number = Localizer.formatToLocalizedString(
+            value,
+            maxFractionDigits: config.fractionDigits,
+            minFractionDigits: config.fractionDigits
+        )
+        return "\(number) \(config.unit)"
+    }
+
     /// Non-blocking sanity check: red should be more severe than yellow, in the
     /// metric's fixed direction. `nil` when consistent or a threshold is unset.
-    private var thresholdWarning: String? {
+    private func thresholdWarning(_ config: InfoColorConfig) -> String? {
         guard item.coloring.enabled,
               let warning = item.coloring.warning,
               let urgent = item.coloring.urgent
         else { return nil }
-        switch item.type.colorDirection {
+        switch config.direction {
         case .above:
             return urgent < warning ? "Red should be at or above yellow." : nil
         case .below:
@@ -51,43 +88,12 @@ struct InfoRowSettingsView: View {
         }
     }
 
-    private var colorFooter: String {
-        switch item.type.colorDirection {
+    private func colorFooter(_ config: InfoColorConfig) -> String {
+        switch config.direction {
         case .above:
             return "The value turns yellow at or above the yellow level and red at or above the red level. In range it shows green. A visual cue only — it never triggers an alarm."
         case .below:
             return "The value turns yellow at or below the yellow level and red at or below the red level. In range it shows green. A visual cue only — it never triggers an alarm."
         }
-    }
-
-    private func thresholdField(title: String, value: Binding<Double?>) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            TextField("—", text: text(for: value))
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
-                .frame(maxWidth: 120)
-            if let unit = item.type.colorUnitLabel {
-                Text(unit).foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    /// Bridges an optional Double threshold to an editable text field.
-    /// Empty text clears the threshold (that color is then unused); accepts both
-    /// "." and "," as the decimal separator.
-    private func text(for value: Binding<Double?>) -> Binding<String> {
-        Binding(
-            get: { value.wrappedValue.map { formatted($0) } ?? "" },
-            set: { newText in
-                let normalized = newText.replacingOccurrences(of: ",", with: ".")
-                value.wrappedValue = normalized.isEmpty ? nil : Double(normalized)
-            }
-        )
-    }
-
-    private func formatted(_ value: Double) -> String {
-        value == value.rounded() ? String(Int(value)) : String(value)
     }
 }

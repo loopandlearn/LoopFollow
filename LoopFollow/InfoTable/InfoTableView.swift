@@ -26,10 +26,11 @@ struct InfoTableView: View {
     /// Threshold-based color for a row's value, or nil to use the default color.
     private func color(for item: InfoData) -> Color? {
         guard let numericValue = item.numericValue,
-              let type = InfoType(rawValue: item.id)
+              let type = InfoType(rawValue: item.id),
+              let config = type.colorConfig
         else { return nil }
         return Storage.shared.infoDisplayItems.value.item(for: type)?
-            .coloring.color(for: numericValue, direction: type.colorDirection)
+            .coloring.color(for: numericValue, direction: config.direction)
     }
 
     private func row(name: String, value: String, valueColor: Color? = nil) -> some View {
