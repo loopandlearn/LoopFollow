@@ -27,7 +27,7 @@ class NightscoutSettingsViewModel: ObservableObject {
     @Published var nightscoutToken: String = Storage.shared.token.value {
         willSet {
             if newValue != nightscoutToken {
-                Storage.shared.token.value = newValue
+                Storage.shared.token.value = NightscoutUtils.sanitizeConnectionInput(newValue)
                 triggerCheckStatus()
             }
         }
@@ -93,6 +93,12 @@ class NightscoutSettingsViewModel: ObservableObject {
     }
 
     func processURL(_ value: String) {
+        // Strip whitespace/newlines/control chars first. A URL can't legally contain
+        // them, and a stray one (e.g. a trailing newline from a paste) otherwise makes
+        // URLComponents parsing fail and falls through to the lossy fallback below,
+        // mangling a URL-with-embedded-token into an invalid address.
+        let value = NightscoutUtils.sanitizeConnectionInput(value)
+
         var useTokenUrl = false
 
         if let urlComponents = URLComponents(string: value), let queryItems = urlComponents.queryItems {

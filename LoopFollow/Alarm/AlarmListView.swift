@@ -22,6 +22,20 @@ struct AlarmListView: View {
     @State private var sheetInfo: SheetInfo?
     @State private var deleteAfterDismiss: UUID?
     @State private var selectedAlarm: Alarm?
+    @State private var searchText = ""
+
+    // MARK: - Search
+
+    private func matches(_ alarm: Alarm) -> Bool {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return true }
+        return alarm.name.localizedCaseInsensitiveContains(query)
+            || alarm.type.rawValue.localizedCaseInsensitiveContains(query)
+    }
+
+    private var hasResults: Bool {
+        !snoozedAlarms.isEmpty || !activeAlarms.isEmpty || !inactiveAlarms.isEmpty
+    }
 
     // Snapshot of "now" used to categorize snoozed vs. active alarms. SwiftUI does
     // not re-render when the wall clock passes a snooze's expiry, so we refresh this
@@ -32,17 +46,17 @@ struct AlarmListView: View {
     // MARK: - Categorized Alarms
 
     private var snoozedAlarms: [Alarm] {
-        store.value.filter { $0.snoozedUntil ?? .distantPast > now && $0.isEnabled }
+        store.value.filter { $0.snoozedUntil ?? .distantPast > now && $0.isEnabled && matches($0) }
             .sorted(by: Alarm.byPriorityThenSpec)
     }
 
     private var activeAlarms: [Alarm] {
-        store.value.filter { $0.isEnabled && ($0.snoozedUntil ?? .distantPast <= now) }
+        store.value.filter { $0.isEnabled && ($0.snoozedUntil ?? .distantPast <= now) && matches($0) }
             .sorted(by: Alarm.byPriorityThenSpec)
     }
 
     private var inactiveAlarms: [Alarm] {
-        store.value.filter { !$0.isEnabled }
+        store.value.filter { !$0.isEnabled && matches($0) }
             .sorted(by: Alarm.byPriorityThenSpec)
     }
 
@@ -87,6 +101,23 @@ struct AlarmListView: View {
                 }
             }
         }
+        .overlay {
+            if !hasResults, !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.largeTitle)
+                        .foregroundColor(.secondary)
+                    Text("No Results")
+                        .font(.headline)
+                    Text("No alarms match “\(searchText)”.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal)
+            }
+        }
+        .searchable(text: $searchText, prompt: "Search alarms")
         .sheet(item: $sheetInfo, onDismiss: handleSheetDismiss) { info in
             sheetContent(for: info)
         }
