@@ -100,9 +100,12 @@ extension MainViewController {
                 infoManager.clearInfoData(type: .minMax)
                 updatePredictionGraph()
             }
-            if let recBolus = InsulinMetric(from: lastLoopRecord, key: "recommendedBolus") {
-                infoManager.updateInfoData(type: .recBolus, value: recBolus)
-                Observable.shared.deviceRecBolus.value = recBolus.value
+            if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
+                infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(recBolus))
+                Observable.shared.deviceRecBolus.value = recBolus
+            } else {
+                infoManager.clearInfoData(type: .recBolus)
+                Observable.shared.deviceRecBolus.value = nil
             }
             if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
                 if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
