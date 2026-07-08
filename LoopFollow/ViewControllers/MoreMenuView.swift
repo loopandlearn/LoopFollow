@@ -161,7 +161,9 @@ struct MoreMenuView: View {
             MenuSearchItem(title: "Settings", icon: "gearshape", keywords: [], kind: .settings(.settings)),
         ]
 
-        for (_, routes) in SettingsRoute.menuSections(nightscoutConfigured: !nightscoutURL.value.isEmpty) {
+        let settingsSections = SettingsRoute.menuSections(nightscoutConfigured: !nightscoutURL.value.isEmpty)
+
+        for (_, routes) in settingsSections {
             for route in routes {
                 items.append(MenuSearchItem(title: route.title, icon: route.icon, keywords: route.keywords, kind: .settings(route)))
             }
@@ -176,6 +178,23 @@ struct MoreMenuView: View {
 
         for link in MoreMenuView.supportLinks {
             items.append(MenuSearchItem(title: link.title, icon: link.icon, keywords: ["support", "community"], kind: .link(link.url)))
+        }
+
+        // Bottom-level settings inside each sub-screen. A hit opens the screen
+        // that contains the setting. Appended last so screen- and feature-level
+        // matches rank above individual settings.
+        for (_, routes) in settingsSections {
+            for route in routes {
+                for leaf in route.leaves {
+                    items.append(MenuSearchItem(
+                        title: leaf.title,
+                        icon: route.icon,
+                        keywords: leaf.keywords,
+                        kind: .settings(route),
+                        subtitle: "Settings → \(route.title)"
+                    ))
+                }
+            }
         }
 
         return items
@@ -205,7 +224,7 @@ struct MoreMenuView: View {
     private func searchRow(for item: MenuSearchItem) -> some View {
         switch item.kind {
         case let .settings(route):
-            NavigationRow(title: item.title, icon: item.icon, value: route)
+            NavigationRow(title: item.title, subtitle: item.subtitle, icon: item.icon, value: route)
         case let .feature(feature):
             FullRowButton(showsChevron: true) { selectFeature(feature) } label: {
                 Label(item.title, systemImage: item.icon)
@@ -330,6 +349,7 @@ private struct MenuSearchItem: Identifiable {
     let icon: String
     let keywords: [String]
     let kind: Kind
+    var subtitle: String? = nil
 
     enum Kind {
         case settings(SettingsRoute)
@@ -340,8 +360,10 @@ private struct MenuSearchItem: Identifiable {
     }
 
     var id: String {
+        // Leaf settings share their screen's route, so the title is part of
+        // the identity.
         switch kind {
-        case let .settings(route): return "settings.\(route)"
+        case let .settings(route): return "settings.\(route).\(title)"
         case let .feature(item): return "feature.\(item.rawValue)"
         case .viewLog: return "viewLog"
         case .shareLogs: return "shareLogs"

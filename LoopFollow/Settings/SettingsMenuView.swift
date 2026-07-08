@@ -35,6 +35,19 @@ enum SettingsSection: String, CaseIterable, Hashable {
     case advanced = "Advanced Settings"
 }
 
+/// A single setting inside a settings screen, exposed to Menu search. Leaves
+/// are not navigable on their own — a search hit opens the screen
+/// (`SettingsRoute`) that contains it.
+struct SettingsLeaf: Hashable {
+    let title: String
+    let keywords: [String]
+
+    init(_ title: String, _ keywords: [String] = []) {
+        self.title = title
+        self.keywords = keywords
+    }
+}
+
 enum SettingsRoute: Hashable, Identifiable {
     case settings
     case units
@@ -119,6 +132,130 @@ enum SettingsRoute: Hashable, Identifiable {
         case .liveActivity: return ["dynamic island", "lock screen"]
         case .importExport: return ["import", "export", "backup"]
         default: return []
+        }
+    }
+
+    /// The individual settings inside this screen, so Menu search can find a
+    /// bottom-level setting (e.g. "Graph Basal") and open the screen containing
+    /// it. Titles mirror the row (or section) titles in each screen's view —
+    /// keep them in sync when adding or renaming rows.
+    var leaves: [SettingsLeaf] {
+        switch self {
+        case .nightscout: return [
+                SettingsLeaf("URL"),
+                SettingsLeaf("Access Token", ["token"]),
+                SettingsLeaf("Enable WebSocket", ["websocket", "real-time"]),
+            ]
+        case .dexcom: return [
+                SettingsLeaf("User Name", ["username"]),
+                SettingsLeaf("Password"),
+                SettingsLeaf("Server"),
+            ]
+        case .general: return [
+                SettingsLeaf("Display App Badge", ["badge"]),
+                SettingsLeaf("Persistent Notification"),
+                SettingsLeaf("Appearance", ["dark mode", "light mode", "theme"]),
+                SettingsLeaf("Display Stats"),
+                SettingsLeaf("Display Small Graph"),
+                SettingsLeaf("Color BG Text"),
+                SettingsLeaf("Keep Screen Active", ["screen lock", "screenlock"]),
+                SettingsLeaf("Show Display Name"),
+                SettingsLeaf("Snoozer emoji"),
+                SettingsLeaf("Force portrait mode", ["orientation", "landscape"]),
+                SettingsLeaf("Time Zone Override", ["timezone"]),
+                SettingsLeaf("Speak BG", ["voice", "speech"]),
+                SettingsLeaf("Send anonymous usage stats", ["telemetry", "diagnostics"]),
+            ]
+        case .graph: return [
+                SettingsLeaf("Display Dots"),
+                SettingsLeaf("Display Lines"),
+                SettingsLeaf("Show DIA Lines", ["dia"]),
+                SettingsLeaf("Show −30 min Line", ["-30"]),
+                SettingsLeaf("Show −90 min Line", ["-90"]),
+                SettingsLeaf("Show Yesterday's BG", ["yesterday"]),
+                SettingsLeaf("Show Midnight Lines"),
+                SettingsLeaf("Show Carb/Bolus Values", ["carbs"]),
+                SettingsLeaf("Show Carb Absorption"),
+                SettingsLeaf("Treatments on Small Graph"),
+                SettingsLeaf("Small Graph Height", ["height"]),
+                SettingsLeaf("Hours of Prediction", ["prediction"]),
+                SettingsLeaf("Prediction Style"),
+                SettingsLeaf("Min Basal", ["basal scale"]),
+                SettingsLeaf("Min BG Scale"),
+                SettingsLeaf("Show Days Back", ["history", "days back"]),
+            ]
+        case .infoDisplay:
+            return [SettingsLeaf("Hide Information Table")]
+                + InfoType.allCases.map { SettingsLeaf($0.name) }
+        case .units: return [
+                SettingsLeaf("Glucose Unit"),
+                SettingsLeaf("Range Mode", ["tir", "titr", "time in range"]),
+                SettingsLeaf("Glycemic Metrics", ["hba1c", "ehba1c", "gmi"]),
+                SettingsLeaf("Variability", ["standard deviation", "cv"]),
+            ]
+        case .backgroundRefresh: return [
+                SettingsLeaf("Background Refresh Type", ["silent tune", "bluetooth", "rileylink", "omnipod", "heartbeat"]),
+            ]
+        case .importExport: return [
+                SettingsLeaf("Scan QR Code to Import Settings", ["qr"]),
+                SettingsLeaf("Export Settings To QR Code", ["qr"]),
+            ]
+        case .apn: return [
+                SettingsLeaf("APNS Key ID", ["apns"]),
+                SettingsLeaf("APNS Key", ["apns", "p8"]),
+            ]
+        #if !targetEnvironment(macCatalyst)
+            case .liveActivity: return [
+                    SettingsLeaf("Enable Live Activity"),
+                    SettingsLeaf("Restart Live Activity"),
+                    SettingsLeaf("Grid Slots", ["carplay", "watch"]),
+                ]
+        #endif
+        case .remote: return [
+                SettingsLeaf("Loop Remote Control"),
+                SettingsLeaf("Trio Remote Control", ["trc"]),
+                SettingsLeaf("Meal with Bolus"),
+                SettingsLeaf("Meal with Fat/Protein"),
+                SettingsLeaf("Guardrails", ["max bolus", "max carbs", "max fat", "max protein"]),
+                SettingsLeaf("Bolus Increment"),
+                SettingsLeaf("Shared Secret"),
+                SettingsLeaf("QR Code URL", ["qr"]),
+            ]
+        case .alarmSettings: return [
+                SettingsLeaf("All Alerts Snoozed", ["snooze all"]),
+                SettingsLeaf("All Sounds Muted", ["mute all"]),
+                SettingsLeaf("Day starts", ["schedule", "day/night"]),
+                SettingsLeaf("Night starts", ["schedule", "day/night"]),
+                SettingsLeaf("Override System Volume", ["volume"]),
+                SettingsLeaf("Audio During Calls"),
+                SettingsLeaf("Ignore Zero BG"),
+                SettingsLeaf("Auto-Snooze CGM Start", ["autosnooze"]),
+                SettingsLeaf("Volume Buttons Snooze Alarms"),
+            ]
+        case .calendar: return [
+                SettingsLeaf("Save BG to Calendar", ["watch", "carplay"]),
+                SettingsLeaf("Calendar Text"),
+            ]
+        case .contact: return [
+                SettingsLeaf("Enable Contact BG Updates", ["watch face"]),
+                SettingsLeaf("Background Color"),
+                SettingsLeaf("Color Mode"),
+                SettingsLeaf("Text Color"),
+                SettingsLeaf("Show Trend"),
+                SettingsLeaf("Show Delta"),
+                SettingsLeaf("Show IOB"),
+            ]
+        case .advanced: return [
+                SettingsLeaf("Download Treatments"),
+                SettingsLeaf("Download Prediction"),
+                SettingsLeaf("Graph Basal"),
+                SettingsLeaf("Graph Bolus"),
+                SettingsLeaf("Graph Carbs"),
+                SettingsLeaf("Graph Other Treatments"),
+                SettingsLeaf("BG Update Delay", ["delay"]),
+                SettingsLeaf("Debug Log Level", ["logging"]),
+            ]
+        case .tabSettings, .settings, .aggregatedStats: return []
         }
     }
 
