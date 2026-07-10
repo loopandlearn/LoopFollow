@@ -282,13 +282,14 @@ final class BGChartModel: ObservableObject {
         return runs
     }
 
-    /// Minimum drawn spacing between two treatments of the same kind, and the
-    /// furthest a treatment may be moved from its true time to reach it. Boluses
-    /// and SMBs draw a small symbol; carbs carry a wider "30 3h" label, so they
-    /// need — and are allowed — more room.
+    /// Minimum drawn spacing between two treatments of the same population, and
+    /// the furthest a treatment may be moved from its true time to reach it.
+    /// Boluses and SMBs share a y-anchor and symbol footprint, so they are
+    /// decluttered as one population; carbs carry a wider "30 3h" label, so
+    /// they need — and are allowed — more room.
     private enum Spread {
         static let bolusGap: TimeInterval = 240
-        static let bolusShift: TimeInterval = 150
+        static let bolusShift: TimeInterval = 240
         static let carbGap: TimeInterval = 250
         static let carbShift: TimeInterval = 250
     }
@@ -299,14 +300,74 @@ final class BGChartModel: ObservableObject {
     /// really happened, and an isolated one never moves at all.
     private static func spread(_ points: [TreatmentPoint], minGap: TimeInterval, maxShift: TimeInterval) -> [TreatmentPoint] {
         var out = points.sorted { $0.date < $1.date }
-        guard out.count > 1 else { return out }
-        for i in stride(from: out.count - 2, through: 0, by: -1) {
-            let latest = out[i + 1].drawnDate.addingTimeInterval(-minGap)
-            if out[i].drawnDate > latest {
-                out[i].drawnDate = max(latest, out[i].date.addingTimeInterval(-maxShift))
+        spreadSorted(&out, minGap: minGap, maxShift: maxShift)
+        return out
+    }
+
+    /// Spreads two treatment kinds as a single population — a bolus dot and an
+    /// SMB triangle drawn at the same minute overlap just like two dots would —
+    /// then hands each kind back its own points.
+    private static func spreadTogether(_ first: [TreatmentPoint], _ second: [TreatmentPoint], minGap: TimeInterval, maxShift: TimeInterval) -> ([TreatmentPoint], [TreatmentPoint]) {
+        let tagged = (first.map { (isFirst: true, point: $0) } + second.map { (isFirst: false, point: $0) })
+            .sorted { $0.point.date < $1.point.date }
+        var points = tagged.map(\.point)
+        spreadSorted(&points, minGap: minGap, maxShift: maxShift)
+        var outFirst: [TreatmentPoint] = []
+        var outSecond: [TreatmentPoint] = []
+        for (tag, point) in zip(tagged, points) {
+            if tag.isFirst {
+                outFirst.append(point)
+            } else {
+                outSecond.append(point)
             }
         }
-        return out
+        return (outFirst, outSecond)
+    }
+
+    /// `points` must be sorted ascending by `date`.
+    private static func spreadSorted(_ out: inout [TreatmentPoint], minGap: TimeInterval, maxShift: TimeInterval) {
+        guard out.count > 1 else { return }
+
+        // Walking left from the newest point, each point yields to its right
+        // neighbor until it hits its own left bound (`date - maxShift`).
+        var clamped = [Bool](repeating: false, count: out.count)
+        for i in stride(from: out.count - 2, through: 0, by: -1) {
+            let wanted = out[i + 1].drawnDate.addingTimeInterval(-minGap)
+            guard out[i].drawnDate > wanted else { continue }
+            let leftBound = out[i].date.addingTimeInterval(-maxShift)
+            if wanted <= leftBound {
+                out[i].drawnDate = leftBound
+                clamped[i] = true
+            } else {
+                out[i].drawnDate = wanted
+            }
+        }
+
+        // A chain of clamped points was squeezed against its left bound and may
+        // have piled up there (several same-time treatments all land at
+        // date - maxShift). Re-space each chain evenly between that bound and
+        // the first point to its right that still had room.
+        var i = 0
+        while i < out.count - 1 {
+            guard clamped[i] else {
+                i += 1
+                continue
+            }
+            var last = i
+            while clamped[last + 1] {
+                last += 1
+            }
+            let anchorIndex = last + 1
+            let anchor = out[anchorIndex].drawnDate
+            let leftBound = out[i].date.addingTimeInterval(-maxShift)
+            let spacing = anchor.timeIntervalSince(leftBound) / Double(anchorIndex - i)
+            for k in i ... last {
+                let ideal = anchor.addingTimeInterval(-spacing * Double(anchorIndex - k))
+                let boundK = out[k].date.addingTimeInterval(-maxShift)
+                out[k].drawnDate = min(max(ideal, boundK), out[k].date)
+            }
+            i = anchorIndex + 1
+        }
     }
 
     /// Schedules a rebuild, coalescing bursts: a refresh cycle calls a dozen
@@ -373,7 +434,7 @@ final class BGChartModel: ObservableObject {
         cobPrediction = vc.cobPredictionData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), color: .purple) }
         uamPrediction = vc.uamPredictionData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), color: .purple) }
 
-        boluses = Self.spread(vc.bolusData.map {
+        let bolusPoints = vc.bolusData.map {
             let dose = self.formatDose($0.value)
             return TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
@@ -382,7 +443,7 @@ final class BGChartModel: ObservableObject {
                 label: dose,
                 pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
-        }, minGap: Spread.bolusGap, maxShift: Spread.bolusShift)
+        }
         carbs = Self.spread(vc.carbData.map {
             let grams = Int($0.value)
             var label = "\(grams)"
@@ -397,7 +458,7 @@ final class BGChartModel: ObservableObject {
                 pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
-        smbs = Self.spread(vc.smbData.map {
+        let smbPoints = vc.smbData.map {
             let dose = self.formatDose($0.value)
             return TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
@@ -406,7 +467,8 @@ final class BGChartModel: ObservableObject {
                 label: dose,
                 pillText: "SMB\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
-        }, minGap: Spread.bolusGap, maxShift: Spread.bolusShift)
+        }
+        (boluses, smbs) = Self.spreadTogether(bolusPoints, smbPoints, minGap: Spread.bolusGap, maxShift: Spread.bolusShift)
         bgChecks = vc.bgCheckData.map {
             TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
