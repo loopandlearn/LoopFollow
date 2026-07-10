@@ -6,6 +6,9 @@ import SwiftUI
 /// The LoopFollow mark, rebuilt in SwiftUI as the full app-icon face — a glassy
 /// rounded square with the blue "loop" ring — so it has real visual mass when
 /// tilted in 3D (a bare ring collapses to a line edge-on).
+///
+/// Geometry and layers mirror the icon source artwork (loopfollow-icon.svg,
+/// 1024×1024): all fractions below are the SVG coordinates divided by 1024.
 struct LoopFollowLogo: View {
     var size: CGFloat = 120
 
@@ -16,64 +19,129 @@ struct LoopFollowLogo: View {
 
     var body: some View {
         let corner = size * 0.225
-        let ringInset = size * 0.20
-        let ringWidth = size * 0.17
+        let ringDiameter = size * 0.879 // outer r = 450
+        let holeDiameter = size * 0.615 // inner r = 315
 
         ZStack {
-            // Glassy white card (the icon face).
+            // Glassy near-white card (the icon face).
             RoundedRectangle(cornerRadius: corner, style: .continuous)
                 .fill(
                     LinearGradient(
-                        colors: [Color(white: 0.99), Color.white, Color(white: 0.93)],
+                        colors: [
+                            Color(red: 0.973, green: 0.976, blue: 0.980), // #F8F9FA
+                            .white,
+                            Color(red: 0.941, green: 0.949, blue: 0.961), // #F0F2F5
+                        ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
 
-            // Soft sheen across the top half.
-            RoundedRectangle(cornerRadius: corner, style: .continuous)
+            // Soft highlight fading down the top half of the card.
+            LinearGradient(
+                stops: [
+                    .init(color: .white.opacity(0.6), location: 0),
+                    .init(color: .white.opacity(0.3), location: 0.2),
+                    .init(color: .clear, location: 0.5),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+
+            // Curved glass reflection over the upper half.
+            radialGlow(
+                width: size * 1.172, height: size * 0.781,
+                stops: [
+                    .init(color: .white.opacity(0.5), location: 0),
+                    .init(color: .white.opacity(0.2), location: 0.5),
+                    .init(color: .clear, location: 1),
+                ]
+            )
+            .offset(y: -size * 0.25)
+            .opacity(0.8)
+
+            // Blue glass disc.
+            Circle()
                 .fill(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.75), Color.clear],
-                        startPoint: .top,
-                        endPoint: .center
+                        stops: [
+                            .init(color: lightBlue, location: 0),
+                            .init(color: midBlue, location: 0.3),
+                            .init(color: midBlue, location: 0.7),
+                            .init(color: darkBlue, location: 1),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
                     )
                 )
+                .frame(width: ringDiameter, height: ringDiameter)
 
-            // Blue glass ring.
+            // Darkening toward the disc's outer edge for depth.
             Circle()
-                .stroke(
-                    LinearGradient(
-                        colors: [lightBlue, midBlue, darkBlue],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: ringWidth
+                .fill(
+                    RadialGradient(
+                        stops: [
+                            .init(color: .clear, location: 0.7),
+                            .init(color: .black.opacity(0.15), location: 0.85),
+                            .init(color: .black.opacity(0.25), location: 1),
+                        ],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: ringDiameter / 2
+                    )
                 )
-                .padding(ringInset)
+                .frame(width: ringDiameter, height: ringDiameter)
 
-            // Inner shadow on the ring for depth.
+            // White hole that turns the disc into the loop ring.
             Circle()
-                .stroke(Color.black.opacity(0.16), lineWidth: ringWidth * 0.2)
-                .blur(radius: ringWidth * 0.12)
-                .padding(ringInset)
-                .mask(Circle().stroke(lineWidth: ringWidth).padding(ringInset))
+                .fill(Color.white.opacity(0.98))
+                .frame(width: holeDiameter, height: holeDiameter)
 
-            // Specular highlight on the upper-left of the ring.
-            Circle()
-                .trim(from: 0.55, to: 0.80)
-                .stroke(
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.9), Color.white.opacity(0.0)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    style: StrokeStyle(lineWidth: ringWidth * 0.42, lineCap: .round)
-                )
-                .blur(radius: ringWidth * 0.08)
-                .padding(ringInset)
+            // Glass highlight on the white hole.
+            radialGlow(
+                width: size * 0.742, height: size * 0.391,
+                stops: [
+                    .init(color: .white.opacity(0.4), location: 0),
+                    .init(color: .white.opacity(0.1), location: 0.6),
+                    .init(color: .clear, location: 1),
+                ]
+            )
+            .offset(y: -size * 0.129)
+            .opacity(0.7)
+
+            // Broad sheen across the top of the ring; its lower edge draws the
+            // glass "cut line" just below the middle of the icon.
+            Ellipse()
+                .fill(Color.white.opacity(0.25))
+                .frame(width: size * 0.82, height: size * 0.488)
+                .offset(y: -size * 0.188)
+                .blur(radius: size * 0.003)
+
+            // Subtle shadow pooling under the ring.
+            Ellipse()
+                .fill(Color.black.opacity(0.05))
+                .frame(width: size * 0.879, height: size * 0.195)
+                .offset(y: size * 0.184)
+                .blur(radius: size * 0.002)
         }
         .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
+    }
+
+    /// Elliptical radial glow: SwiftUI's RadialGradient is circular, so draw it
+    /// in a circle and squash vertically to match the SVG's elliptical gradients.
+    private func radialGlow(width: CGFloat, height: CGFloat, stops: [Gradient.Stop]) -> some View {
+        Circle()
+            .fill(
+                RadialGradient(
+                    gradient: Gradient(stops: stops),
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: width / 2
+                )
+            )
+            .frame(width: width, height: width)
+            .scaleEffect(x: 1, y: height / width)
     }
 }
 

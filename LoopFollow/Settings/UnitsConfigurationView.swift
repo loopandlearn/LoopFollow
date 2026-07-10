@@ -104,7 +104,7 @@ struct UnitsConfigurationView: View {
             } header: {
                 Text("Range")
             } footer: {
-                Text("TIR — Time in Range, the share of readings within \(rangeBounds(70, 180)). TITR — Time in Tight Range, within \(rangeBounds(70, 140)). Custom — set your own low and high.")
+                Text("TIR — Time in Range, the share of readings within \(rangeBounds(70, 180)).\nTITR — Time in Tight Range, within \(rangeBounds(70, 140)).\nCustom — set your own low and high.")
             }
 
             Section {
