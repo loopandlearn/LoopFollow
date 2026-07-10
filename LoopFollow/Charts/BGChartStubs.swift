@@ -103,9 +103,11 @@ extension MainViewController {
             let allArrays = types.compactMap { predBGs[$0] }.filter { !$0.isEmpty }
             var coneData: [BGChartModel.ConePoint] = []
             if !allArrays.isEmpty {
-                let maxLength = min(allArrays.map { $0.count }.max()!, toLoad + 1)
+                // Cap at the shortest predBG array length so every cone point uses
+                // the same set of contributing arrays. Matches Trio's ForecastSetup.
+                let coneLength = min(allArrays.map { $0.count }.min()!, toLoad + 1)
                 var t = predictionStart
-                for i in 0 ..< maxLength {
+                for i in 0 ..< coneLength {
                     let valuesAtIndex = allArrays.compactMap { i < $0.count ? $0[i] : nil }
                     if !valuesAtIndex.isEmpty {
                         var yMin = max(valuesAtIndex.min()!, Double(minDisplay))

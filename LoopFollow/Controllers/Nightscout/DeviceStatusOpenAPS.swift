@@ -32,7 +32,9 @@ extension MainViewController {
             // ISF
             let profileISF = profileManager.currentISF()
             var enactedISF: HKQuantity?
-            if let enactedISFValue = enactedOrSuggested["ISF"] as? Double {
+            // Some uploaders (e.g. Trio Swift oref with dynamic ISF) report a
+            // placeholder 0 in the structured ISF field; treat that as missing.
+            if let enactedISFValue = enactedOrSuggested["ISF"] as? Double, enactedISFValue != 0 {
                 enactedISF = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: enactedISFValue)
             }
             if let profileISF = profileISF, let enactedISF = enactedISF, profileISF != enactedISF {
@@ -44,9 +46,14 @@ extension MainViewController {
             }
 
             // Carb Ratio (CR)
+            // Prefer the structured CR field; fall back to parsing it out of the
+            // reason string for uploaders that don't expose it (a CR of 0 is never
+            // valid, so it's treated as missing).
             let profileCR = profileManager.currentCarbRatio()
             var enactedCR: Double?
-            if let reasonString = enactedOrSuggested["reason"] as? String {
+            if let structuredCR = enactedOrSuggested["CR"] as? Double, structuredCR != 0 {
+                enactedCR = structuredCR
+            } else if let reasonString = enactedOrSuggested["reason"] as? String {
                 let pattern = "CR: (\\d+(?:\\.\\d+)?)"
                 if let regex = try? NSRegularExpression(pattern: pattern) {
                     let nsString = reasonString as NSString
@@ -201,7 +208,7 @@ extension MainViewController {
                     Storage.shared.lastMinBgMgdl.value = minPredBG
                     Storage.shared.lastMaxBgMgdl.value = maxPredBG
                 } else {
-                    infoManager.updateInfoData(type: .minMax, value: "N/A")
+                    infoManager.clearInfoData(type: .minMax)
                 }
 
                 updateOpenAPSPredictionDisplay()
