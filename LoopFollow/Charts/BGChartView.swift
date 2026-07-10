@@ -943,7 +943,6 @@ private struct BGChartCanvas: View, Equatable {
             } else {
                 chart.chartXAxis {
                     AxisMarks(values: xAxisMarkDates()) { value in
-                        AxisGridLine()
                         AxisValueLabel {
                             if let date = value.as(Date.self) {
                                 xAxisLabel(for: date)
@@ -1075,7 +1074,7 @@ private struct BGChartCanvas: View, Equatable {
                 y: .value("rate", pt.rate * basalScale),
                 series: .value("series", "basalScheduled")
             )
-            .lineStyle(StrokeStyle(lineWidth: 0.5, dash: [2, 1]))
+            .lineStyle(StrokeStyle(lineWidth: 2, dash: [10, 5]))
             .foregroundStyle(Color.blue.opacity(0.8))
         }
     }
@@ -1297,11 +1296,11 @@ private struct BGChartCanvas: View, Equatable {
     @ChartContentBuilder
     private var ruleMarks: some ChartContent {
         RuleMark(y: .value("low", model.lowLine))
-            .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 2]))
+            .lineStyle(StrokeStyle(lineWidth: 2))
             .foregroundStyle(Color.red.opacity(0.5))
 
         RuleMark(y: .value("high", model.highLine))
-            .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 2]))
+            .lineStyle(StrokeStyle(lineWidth: 2))
             .foregroundStyle(Color.yellow.opacity(0.5))
 
         if model.now >= windowStart, model.now <= windowEnd {
@@ -1382,7 +1381,6 @@ private struct StaticYAxisOverlay: View, Equatable {
         }
         .chartYAxis {
             AxisMarks(position: .trailing) { value in
-                AxisGridLine()
                 AxisTick()
                 AxisValueLabel {
                     if let v = value.as(Double.self) {
