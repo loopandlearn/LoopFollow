@@ -50,7 +50,19 @@ final class BGChartModel: ObservableObject {
         let sgv: Double
         let label: String
         let pillText: String
+        /// Where the symbol is drawn. Equals `date` unless `spread` nudged it
+        /// left to keep a crowded run of treatments from stacking up.
+        var drawnDate: Date
         var id: Double { date.timeIntervalSince1970 }
+
+        init(date: Date, value: Double, sgv: Double, label: String, pillText: String) {
+            self.date = date
+            self.value = value
+            self.sgv = sgv
+            self.label = label
+            self.pillText = pillText
+            drawnDate = date
+        }
     }
 
     struct BasalStep: Identifiable {
@@ -238,10 +250,10 @@ final class BGChartModel: ObservableObject {
         return finalMessage.isEmpty ? nil : finalMessage
     }
 
-    private func colorFor(_ sgv: Int) -> Color {
-        if Double(sgv) >= Storage.shared.highLine.value {
+    private func colorFor(_ sgv: Int, thresholds: (low: Double, high: Double)) -> Color {
+        if Double(sgv) >= thresholds.high {
             return .yellow
-        } else if Double(sgv) <= Storage.shared.lowLine.value {
+        } else if Double(sgv) <= thresholds.low {
             return .red
         } else {
             return .green
@@ -270,6 +282,33 @@ final class BGChartModel: ObservableObject {
         return runs
     }
 
+    /// Minimum drawn spacing between two treatments of the same kind, and the
+    /// furthest a treatment may be moved from its true time to reach it. Boluses
+    /// and SMBs draw a small symbol; carbs carry a wider "30 3h" label, so they
+    /// need — and are allowed — more room.
+    private enum Spread {
+        static let bolusGap: TimeInterval = 240
+        static let bolusShift: TimeInterval = 150
+        static let carbGap: TimeInterval = 250
+        static let carbShift: TimeInterval = 250
+    }
+
+    /// Nudges crowded treatments left so their symbols don't stack. The newest
+    /// point in a run keeps its true time and earlier ones give way, never by
+    /// more than `maxShift` — so a treatment is at most `maxShift` from where it
+    /// really happened, and an isolated one never moves at all.
+    private static func spread(_ points: [TreatmentPoint], minGap: TimeInterval, maxShift: TimeInterval) -> [TreatmentPoint] {
+        var out = points.sorted { $0.date < $1.date }
+        guard out.count > 1 else { return out }
+        for i in stride(from: out.count - 2, through: 0, by: -1) {
+            let latest = out[i + 1].drawnDate.addingTimeInterval(-minGap)
+            if out[i].drawnDate > latest {
+                out[i].drawnDate = max(latest, out[i].date.addingTimeInterval(-maxShift))
+            }
+        }
+        return out
+    }
+
     /// Schedules a rebuild, coalescing bursts: a refresh cycle calls a dozen
     /// legacy update*Graph() shims back-to-back, and rebuilding once per
     /// runloop turn is enough.
@@ -292,8 +331,12 @@ final class BGChartModel: ObservableObject {
 
         let maxBGValue = Double(vc.calculateMaxBgGraphValue())
         maxBG = max(maxBGValue, Storage.shared.minBGScale.value)
-        lowLine = Storage.shared.lowLine.value
-        highLine = Storage.shared.highLine.value
+
+        // Same thresholds the stats and main header use: fixed 70–180 / 70–140
+        // for the TIR/TITR range modes, the user's lines for custom mode.
+        let thresholds = UnitSettingsStore.shared.effectiveThresholds()
+        lowLine = thresholds.low
+        highLine = thresholds.high
 
         showLines = Storage.shared.showLines.value
         showDots = Storage.shared.showDots.value
@@ -312,7 +355,7 @@ final class BGChartModel: ObservableObject {
         let maxDisplay = globalVariables.maxDisplayGlucose
         func clampSgv(_ sgv: Int) -> Double { Double(min(max(sgv, minDisplay), maxDisplay)) }
 
-        bg = vc.bgData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: clampSgv($0.sgv), color: colorFor($0.sgv)) }
+        bg = vc.bgData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: clampSgv($0.sgv), color: colorFor($0.sgv, thresholds: thresholds)) }
         bgRuns = Self.makeRuns(bg)
 
         // Yesterday comparison overlay (#665): already +24h shifted, dimmed gray, no dots.
@@ -330,7 +373,7 @@ final class BGChartModel: ObservableObject {
         cobPrediction = vc.cobPredictionData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), color: .purple) }
         uamPrediction = vc.uamPredictionData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), color: .purple) }
 
-        boluses = vc.bolusData.map {
+        boluses = Self.spread(vc.bolusData.map {
             let dose = self.formatDose($0.value)
             return TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
@@ -339,8 +382,8 @@ final class BGChartModel: ObservableObject {
                 label: dose,
                 pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
-        }
-        carbs = vc.carbData.map {
+        }, minGap: Spread.bolusGap, maxShift: Spread.bolusShift)
+        carbs = Self.spread(vc.carbData.map {
             let grams = Int($0.value)
             var label = "\(grams)"
             if $0.absorptionTime > 0, Storage.shared.showAbsorption.value {
@@ -353,8 +396,8 @@ final class BGChartModel: ObservableObject {
                 label: label,
                 pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
-        }
-        smbs = vc.smbData.map {
+        }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
+        smbs = Self.spread(vc.smbData.map {
             let dose = self.formatDose($0.value)
             return TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
@@ -363,7 +406,7 @@ final class BGChartModel: ObservableObject {
                 label: dose,
                 pillText: "SMB\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
-        }
+        }, minGap: Spread.bolusGap, maxShift: Spread.bolusShift)
         bgChecks = vc.bgCheckData.map {
             TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
@@ -440,7 +483,14 @@ final class BGChartModel: ObservableObject {
         now = currentNow
         let hoursBack = TimeInterval(Storage.shared.downloadDays.value * 24 * 3600)
         domainStart = currentNow.addingTimeInterval(-hoursBack)
-        domainEnd = currentNow.addingTimeInterval(3 * 3600)
+        // Everything drawn in the future (predictions, cone, override/temp-target
+        // bands) is bounded by the "Hours of Prediction" setting, so the scale
+        // domain ends there too — matching the legacy chart, whose x range
+        // auto-fit to the last plotted point. The 15-minute floor keeps room for
+        // follow mode's right-side padding when predictions are set to 0 (and
+        // matches the floor Overrides.swift uses for future bands).
+        let hoursForward = max(Storage.shared.predictionToLoad.value, 0.25) * 3600
+        domainEnd = currentNow.addingTimeInterval(hoursForward)
 
         // 30/90 min lookback markers
         thirtyMinMark = currentNow.addingTimeInterval(-1800)
