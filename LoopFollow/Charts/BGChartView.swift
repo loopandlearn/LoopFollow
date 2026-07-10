@@ -103,6 +103,9 @@ private struct MainBGChart: View {
     /// selection overlay uses it for its value-to-pixel maps.
     @State private var plotFrame: CGRect = .zero
 
+    /// Measured size of the visible selection pill (see PillSizePreferenceKey).
+    @State private var pillSize: CGSize = .zero
+
     // Pinch state: live preview stretch plus the anchor captured at pinch
     // start so the zoom stays anchored under the pinch centroid.
     @State private var pinchScale: CGFloat = 1
@@ -230,6 +233,7 @@ private struct MainBGChart: View {
                 }
         )
         .onPreferenceChange(PlotFramePreferenceKey.self) { plotFrame = $0 }
+        .onPreferenceChange(PillSizePreferenceKey.self) { pillSize = $0 }
         .onChange(of: interaction.scrollPosition) { _, _ in
             updateRenderWindow()
             updateFollowState()
@@ -692,7 +696,7 @@ private struct MainBGChart: View {
             let d = abs(p.date.timeIntervalSince(selected))
             if d < bestBGDistance {
                 bestBGDistance = d
-                bestBG = SelectionAnchor(date: p.date, value: p.value, text: "BG\n\(Localizer.toDisplayUnits(String(Int(p.value))))")
+                bestBG = SelectionAnchor(date: p.date, value: p.value, text: "BG\n\(Localizer.toDisplayUnits(String(Int(p.value))))\n\(model.pillTimeString(for: p.date))")
             }
         }
 
@@ -737,7 +741,7 @@ private struct MainBGChart: View {
         forEachTreatmentAnchor(consider)
         if best == nil {
             for p in model.bg {
-                consider(p.date, p.value, "BG\n\(Localizer.toDisplayUnits(String(Int(p.value))))")
+                consider(p.date, p.value, "BG\n\(Localizer.toDisplayUnits(String(Int(p.value))))\n\(model.pillTimeString(for: p.date))")
             }
         }
         if best == nil {
@@ -784,6 +788,12 @@ private struct MainBGChart: View {
     /// Vertical indicator + pill for the current selection, rendered in the
     /// shell with the same linear maps the canvas uses — neither scrubbing
     /// nor a tapped pill ever re-lays the canvas.
+    ///
+    /// The pill wraps long texts (notes) at its max width; placement uses the
+    /// measured pill size so the pill always sits fully on screen, below the
+    /// anchor when there is room and above it otherwise. (The legacy chart did
+    /// this by inserting line breaks every 40 characters; SwiftUI's own word
+    /// wrapping respects the actual font metrics, so no manual splitting.)
     @ViewBuilder
     private func selectionOverlay(viewportWidth: CGFloat) -> some View {
         if plotFrame.height > 0, let anchor = activeAnchor() {
@@ -796,10 +806,16 @@ private struct MainBGChart: View {
                     .frame(width: 1, height: plotFrame.height)
                     .position(x: x, y: plotFrame.midY)
 
-                let useAbove = anchor.value >= 300
-                let labelY = useAbove ? max(y - 40, 10) : min(y + 30, plotFrame.maxY - 10)
-                let labelX = min(max(x, 40), viewportWidth - 40)
-                PillLabel(text: anchor.text)
+                // Measured size lags the text by one frame; fall back to a
+                // small nominal size until the first measurement lands.
+                let pillW = max(pillSize.width, 60)
+                let pillH = max(pillSize.height, 28)
+                let labelX = min(max(x, pillW / 2 + 4), viewportWidth - pillW / 2 - 4)
+                let below = y + 14 + pillH / 2
+                let above = y - 14 - pillH / 2
+                let fitsBelow = below + pillH / 2 <= plotFrame.maxY - 4
+                let labelY = fitsBelow ? below : max(above, plotFrame.minY + pillH / 2 + 4)
+                PillLabel(text: anchor.text, maxWidth: min(300, viewportWidth - 16))
                     .position(x: labelX, y: labelY)
             }
         }
@@ -1090,7 +1106,8 @@ private struct BGChartCanvas: View, Equatable {
                 yStart: .value("yMin", pt.yMin),
                 yEnd: .value("yMax", pt.yMax)
             )
-            .foregroundStyle(Color.purple.opacity(0.18))
+            // Same fill as the legacy ConeOfUncertaintyRenderer (and Trio's cone).
+            .foregroundStyle(Color(.systemBlue).opacity(0.4))
             .interpolationMethod(.monotone)
         }
     }
@@ -1419,6 +1436,15 @@ private struct PlotFramePreferenceKey: PreferenceKey {
     }
 }
 
+/// Rendered size of the visible selection pill, reported so the shell can
+/// clamp its position using the real (wrapped) dimensions.
+private struct PillSizePreferenceKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        value = nextValue()
+    }
+}
+
 // MARK: - Shared pieces
 
 private struct DownwardTriangle: ChartSymbolShape {
@@ -1436,11 +1462,16 @@ private struct DownwardTriangle: ChartSymbolShape {
 
 private struct PillLabel: View {
     let text: String
+    let maxWidth: CGFloat
 
     var body: some View {
         Text(text)
             .font(.caption2)
             .foregroundColor(.primary)
+            .multilineTextAlignment(.center)
+            // Bound pathological texts; a note this long is better read in
+            // Nightscout than on a chart pill.
+            .lineLimit(10)
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
             .background(
@@ -1451,5 +1482,13 @@ private struct PillLabel: View {
                             .stroke(Color.primary, lineWidth: 0.5)
                     )
             )
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(key: PillSizePreferenceKey.self, value: geo.size)
+                }
+            )
+            // Transparent flexible container: it caps the width the text can
+            // wrap to, while the visible pill above still hugs its content.
+            .frame(maxWidth: maxWidth)
     }
 }

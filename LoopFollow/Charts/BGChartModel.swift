@@ -177,6 +177,67 @@ final class BGChartModel: ObservableObject {
         Self.doseFormatter.string(from: NSNumber(value: value)) ?? String(value)
     }
 
+    /// Formatter for the time line at the bottom of every selection pill.
+    /// Recreated on each rebuild so 12/24-hour and graph-time-zone settings apply.
+    private var pillTimeFormatter = BGChartModel.makePillTimeFormatter()
+
+    private static func makePillTimeFormatter() -> DateFormatter {
+        let df = DateFormatter()
+        df.setLocalizedDateFormatFromTemplate(dateTimeUtils.is24Hour() ? "HH:mm" : "hh:mm")
+        if Storage.shared.graphTimeZoneEnabled.value,
+           let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+        {
+            df.timeZone = tz
+        }
+        return df
+    }
+
+    /// The pill's time line for a given point in time.
+    func pillTimeString(for date: Date) -> String {
+        pillTimeFormatter.string(from: date)
+    }
+
+    /// Legacy Nightscout remote-command error notes embed a JSON payload after
+    /// the human-readable message ("Error text {\"bolus-entry\": 1.5, ...}").
+    /// Returns the message plus a compact summary of the payload, or nil when
+    /// the note contains no JSON.
+    private static func extractMessage(from note: String) -> String? {
+        guard let jsonStartIndex = note.range(of: "{\"")?.lowerBound else {
+            return nil
+        }
+
+        let errorMessage = String(note[..<jsonStartIndex])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        var actionContext = ""
+        if let jsonData = String(note[jsonStartIndex...]).data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any]
+        {
+            var actionParts: [String] = []
+            if let bolusAmount = json["bolus-entry"] as? Double {
+                actionParts.append("Bolus: \(bolusAmount) U")
+            }
+            if let carbsAmount = json["carbs-entry"] as? Double {
+                actionParts.append("Carbs: \(carbsAmount) g")
+            }
+            if let absorptionTime = json["absorption-time"] as? Double {
+                actionParts.append("Absorption: \(absorptionTime) hrs")
+            }
+            if let otp = json["otp"] as? String {
+                actionParts.append("OTP: \(otp)")
+            }
+            if let enteredBy = json["entered-by"] as? String {
+                actionParts.append("From: \(enteredBy)")
+            }
+            if !actionParts.isEmpty {
+                actionContext = " [" + actionParts.joined(separator: ", ") + "]"
+            }
+        }
+
+        let finalMessage = errorMessage + actionContext
+        return finalMessage.isEmpty ? nil : finalMessage
+    }
+
     private func colorFor(_ sgv: Int) -> Color {
         if Double(sgv) >= Storage.shared.highLine.value {
             return .yellow
@@ -227,6 +288,8 @@ final class BGChartModel: ObservableObject {
     private func performRebuild() {
         guard let vc = MainViewController.shared else { return }
 
+        pillTimeFormatter = Self.makePillTimeFormatter()
+
         let maxBGValue = Double(vc.calculateMaxBgGraphValue())
         maxBG = max(maxBGValue, Storage.shared.minBGScale.value)
         lowLine = Storage.shared.lowLine.value
@@ -274,7 +337,7 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "Bolus\n\(dose)U"
+                pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         carbs = vc.carbData.map {
@@ -288,7 +351,7 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: label,
-                pillText: "Carbs\n\(grams)g"
+                pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         smbs = vc.smbData.map {
@@ -298,7 +361,7 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "SMB\n\(dose)U"
+                pillText: "SMB\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         bgChecks = vc.bgCheckData.map {
@@ -307,20 +370,26 @@ final class BGChartModel: ObservableObject {
                 value: Double($0.sgv),
                 sgv: Double($0.sgv),
                 label: "",
-                pillText: "BG Check\n\(Localizer.toDisplayUnits(String($0.sgv)))"
+                pillText: "BG Check\n\(Localizer.toDisplayUnits(String($0.sgv)))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         suspends = vc.suspendGraphData.map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Suspend")
+            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Suspend\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
         resumes = vc.resumeGraphData.map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Resume")
+            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Resume\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
         sensorStarts = vc.sensorStartGraphData.map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Sensor Start")
+            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Sensor Start\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
         notes = vc.noteGraphData.map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: $0.note, pillText: $0.note)
+            TreatmentPoint(
+                date: Date(timeIntervalSince1970: $0.date),
+                value: Double($0.sgv),
+                sgv: Double($0.sgv),
+                label: $0.note,
+                pillText: "\(Self.extractMessage(from: $0.note) ?? $0.note)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+            )
         }
 
         basalScheduled = vc.basalScheduleData.map {
@@ -353,7 +422,7 @@ final class BGChartModel: ObservableObject {
                 end: Date(timeIntervalSince1970: $0.endDate),
                 yBottom: yBottom,
                 yTop: yTop,
-                pillText: "Override x\(String(format: "%.2f", $0.insulNeedsScaleFactor))"
+                pillText: "Override x\(String(format: "%.2f", $0.insulNeedsScaleFactor))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         tempTargets = vc.tempTargetGraphData.map {
@@ -363,7 +432,7 @@ final class BGChartModel: ObservableObject {
                 end: Date(timeIntervalSince1970: $0.endDate),
                 yBottom: yBottom,
                 yTop: yTop,
-                pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))"
+                pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
 
