@@ -15,7 +15,8 @@ struct StatsDisplayView: View {
                 pieRange: model.pieRange,
                 pieHigh: model.pieHigh
             )
-            .frame(width: 100, height: 100)
+            .frame(width: 80, height: 80)
+            .padding(.leading, 8)
 
             VStack(spacing: 10) {
                 HStack {
@@ -48,37 +49,31 @@ struct StatsDisplayView: View {
     }
 }
 
-struct StatsPieChartView: UIViewRepresentable {
+struct StatsPieChartView: View {
     var pieLow: Double
     var pieRange: Double
     var pieHigh: Double
 
-    func makeUIView(context _: Context) -> PieChartView {
-        let chart = PieChartView()
-        chart.legend.enabled = false
-        chart.drawEntryLabelsEnabled = false
-        chart.drawHoleEnabled = false
-        chart.rotationEnabled = false
-        chart.isUserInteractionEnabled = false
-        chart.backgroundColor = .clear
-        return chart
+    private struct Slice: Identifiable {
+        let id: String
+        let value: Double
+        let color: Color
     }
 
-    func updateUIView(_ chart: PieChartView, context _: Context) {
-        let entries = [
-            PieChartDataEntry(value: max(pieLow, 0.1)),
-            PieChartDataEntry(value: max(pieRange, 0.1)),
-            PieChartDataEntry(value: max(pieHigh, 0.1)),
+    private var slices: [Slice] {
+        [
+            Slice(id: "low", value: max(pieLow, 0.1), color: .red),
+            Slice(id: "range", value: max(pieRange, 0.1), color: .green),
+            Slice(id: "high", value: max(pieHigh, 0.1), color: .yellow),
         ]
+    }
 
-        let dataSet = PieChartDataSet(entries: entries, label: "")
-        dataSet.drawIconsEnabled = false
-        dataSet.sliceSpace = 0
-        dataSet.drawValuesEnabled = false
-        dataSet.valueLineWidth = 0
-        dataSet.formLineWidth = 0
-        dataSet.colors = [.systemRed, .systemGreen, .systemYellow]
-
-        chart.data = PieChartData(dataSet: dataSet)
+    var body: some View {
+        Chart(slices) { slice in
+            SectorMark(angle: .value("share", slice.value))
+                .foregroundStyle(slice.color)
+        }
+        .chartLegend(.hidden)
+        .allowsHitTesting(false)
     }
 }

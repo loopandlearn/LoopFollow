@@ -3,99 +3,76 @@
 
 import Charts
 import SwiftUI
-import UIKit
 
-struct TIRGraphView: UIViewRepresentable {
+struct TIRGraphView: View {
     let tirData: [TIRDataPoint]
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
+    private enum Band: String, CaseIterable, Plottable {
+        case veryLow = "Very Low"
+        case low = "Low"
+        case inRange = "In Range"
+        case high = "High"
+        case veryHigh = "Very High"
 
-    func makeUIView(context _: Context) -> UIView {
-        let containerView = NonInteractiveContainerView()
-        containerView.backgroundColor = .systemBackground
-
-        let chartView = BarChartView()
-        chartView.backgroundColor = .systemBackground
-        chartView.rightAxis.enabled = false
-        chartView.leftAxis.enabled = true
-        chartView.xAxis.labelPosition = .bottom
-        chartView.xAxis.granularity = 1.0
-        chartView.leftAxis.axisMinimum = 0.0
-        chartView.leftAxis.axisMaximum = 100.0
-        chartView.leftAxis.valueFormatter = PercentageAxisValueFormatter()
-        chartView.leftAxis.labelCount = 5
-        chartView.rightAxis.drawGridLinesEnabled = false
-        chartView.leftAxis.drawGridLinesEnabled = true
-        chartView.leftAxis.gridLineDashLengths = [5, 5]
-        chartView.xAxis.drawGridLinesEnabled = false
-        chartView.legend.enabled = false
-        chartView.chartDescription.enabled = false
-        chartView.isUserInteractionEnabled = false
-
-        containerView.addSubview(chartView)
-        chartView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            chartView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            chartView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            chartView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            chartView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-        ])
-
-        return containerView
-    }
-
-    class Coordinator {}
-
-    func updateUIView(_ containerView: UIView, context _: Context) {
-        guard let chartView = containerView.subviews.first as? BarChartView else { return }
-        guard !tirData.isEmpty else { return }
-
-        var dataEntries: [BarChartDataEntry] = []
-        var xAxisLabels: [String] = []
-
-        for (index, point) in tirData.enumerated() {
-            let entry = BarChartDataEntry(
-                x: Double(index),
-                yValues: [
-                    point.veryLow,
-                    point.low,
-                    point.inRange,
-                    point.high,
-                    point.veryHigh,
-                ]
-            )
-            dataEntries.append(entry)
-            xAxisLabels.append(point.period.rawValue)
+        var color: Color {
+            switch self {
+            case .veryLow: return .red.opacity(0.8)
+            case .low: return .red.opacity(0.5)
+            case .inRange: return .green.opacity(0.7)
+            case .high: return .yellow.opacity(0.7)
+            case .veryHigh: return .orange.opacity(0.7)
+            }
         }
-
-        let dataSet = BarChartDataSet(entries: dataEntries, label: "Time in Range")
-        dataSet.colors = [
-            UIColor.systemRed.withAlphaComponent(0.8),
-            UIColor.systemRed.withAlphaComponent(0.5),
-            UIColor.systemGreen.withAlphaComponent(0.7),
-            UIColor.systemYellow.withAlphaComponent(0.7),
-            UIColor.systemOrange.withAlphaComponent(0.7),
-        ]
-        dataSet.stackLabels = ["Very Low", "Low", "In Range", "High", "Very High"]
-        dataSet.drawValuesEnabled = false
-
-        let data = BarChartData(dataSet: dataSet)
-        data.barWidth = 0.6
-
-        chartView.data = data
-
-        chartView.xAxis.valueFormatter = IndexAxisValueFormatter(values: xAxisLabels)
-        chartView.xAxis.labelRotationAngle = 0
-        chartView.xAxis.labelCount = xAxisLabels.count
-
-        chartView.notifyDataSetChanged()
     }
-}
 
-class PercentageAxisValueFormatter: AxisValueFormatter {
-    func stringForValue(_ value: Double, axis _: AxisBase?) -> String {
-        return String(format: "%.0f%%", value)
+    private struct Slice: Identifiable {
+        let period: TIRPeriod
+        let band: Band
+        let value: Double
+        var id: String { "\(period.rawValue)-\(band.rawValue)" }
+    }
+
+    private var slices: [Slice] {
+        tirData.flatMap { point in
+            [
+                Slice(period: point.period, band: .veryLow, value: point.veryLow),
+                Slice(period: point.period, band: .low, value: point.low),
+                Slice(period: point.period, band: .inRange, value: point.inRange),
+                Slice(period: point.period, band: .high, value: point.high),
+                Slice(period: point.period, band: .veryHigh, value: point.veryHigh),
+            ]
+        }
+    }
+
+    var body: some View {
+        Chart(slices) { slice in
+            BarMark(
+                x: .value("period", slice.period.rawValue),
+                y: .value("pct", slice.value),
+                width: .ratio(0.6)
+            )
+            .foregroundStyle(by: .value("band", slice.band))
+        }
+        .chartForegroundStyleScale(domain: Band.allCases, range: Band.allCases.map(\.color))
+        .chartLegend(.hidden)
+        .chartYScale(domain: 0 ... 100)
+        .chartYAxis {
+            AxisMarks(position: .leading, values: [0, 25, 50, 75, 100]) { value in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [5, 5]))
+                AxisTick()
+                AxisValueLabel {
+                    if let pct = value.as(Int.self) {
+                        Text("\(pct)%")
+                    }
+                }
+            }
+        }
+        .chartXAxis {
+            AxisMarks(position: .bottom) { _ in
+                AxisValueLabel()
+            }
+        }
+        .allowsHitTesting(false)
+        .background(Color(.systemBackground))
     }
 }

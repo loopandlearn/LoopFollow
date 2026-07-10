@@ -1,0 +1,162 @@
+// LoopFollow
+// BGChartStubs.swift
+
+import Foundation
+import SwiftUI
+import UIKit
+
+/// Thin compatibility shims for call sites that still invoke the legacy
+/// `update*Graph()` / `createGraph()` API. All real rendering now happens
+/// via BGChartModel + BGChartView (Apple Swift Charts). These shims update
+/// lightweight state (topBG / topPredictionBG / prediction arrays) and
+/// trigger a (coalesced) model rebuild.
+extension MainViewController {
+    func createGraph() {
+        chartModel.rebuild()
+        // The legacy createGraph also armed the once-a-minute "now" tick; the
+        // chart's follow/auto-return logic runs off model.now, so keep it.
+        startGraphNowTimer()
+    }
+
+    func createSmallBGGraph() {}
+
+    func updateBGGraphSettings() {
+        chartModel.rebuild()
+    }
+
+    private func recomputeTopBG() {
+        let maxBGOffset: Double = 50
+        topBG = Storage.shared.minBGScale.value
+        for entry in bgData {
+            if Double(entry.sgv) > topBG - maxBGOffset {
+                topBG = Double(entry.sgv) + maxBGOffset
+            }
+        }
+    }
+
+    private func recomputeTopPredictionBG() {
+        let maxBGOffset: Double = 20
+        topPredictionBG = Storage.shared.minBGScale.value
+        let allPredictions = predictionData + ztPredictionData + iobPredictionData + cobPredictionData + uamPredictionData
+        for entry in allPredictions {
+            let v = Double(entry.sgv)
+            if v > topPredictionBG - maxBGOffset {
+                topPredictionBG = v + maxBGOffset
+            }
+        }
+    }
+
+    func updateBGGraph() {
+        recomputeTopBG()
+        chartModel.rebuild()
+    }
+
+    func updatePredictionGraph(color _: UIColor? = nil) {
+        recomputeTopPredictionBG()
+        chartModel.rebuild()
+    }
+
+    func updatePredictionGraphGeneric(
+        dataIndex: Int,
+        predictionData: [ShareGlucoseData],
+        chartLabel _: String,
+        color _: UIColor
+    ) {
+        switch dataIndex {
+        case 12: ztPredictionData = predictionData
+        case 13: iobPredictionData = predictionData
+        case 14: cobPredictionData = predictionData
+        case 15: uamPredictionData = predictionData
+        default: break
+        }
+        recomputeTopPredictionBG()
+        chartModel.rebuild()
+    }
+
+    // Routes OpenAPS/Trio predictions either into a cone band or individual
+    // prediction lines, mirroring the legacy Graphs.updateOpenAPSPredictionDisplay.
+    // Cone is only for OpenAPS-based backends; Loop always uses lines.
+    func updateOpenAPSPredictionDisplay() {
+        guard let predBGs = openAPSPredBGs else {
+            chartModel.cone = []
+            return
+        }
+
+        let displayType: PredictionDisplayType = Storage.shared.device.value == "Loop"
+            ? .lines
+            : Storage.shared.predictionDisplayType.value
+        let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
+        let predictionStart = openAPSPredUpdatedTime ?? Date().timeIntervalSince1970
+        let types = ["ZT", "IOB", "COB", "UAM"]
+        let minDisplay = globalVariables.minDisplayGlucose
+        let maxDisplay = globalVariables.maxDisplayGlucose
+
+        topPredictionBG = Storage.shared.minBGScale.value
+
+        if displayType == .cone {
+            // Clear individual prediction lines.
+            ztPredictionData = []
+            iobPredictionData = []
+            cobPredictionData = []
+            uamPredictionData = []
+
+            let allArrays = types.compactMap { predBGs[$0] }.filter { !$0.isEmpty }
+            var coneData: [BGChartModel.ConePoint] = []
+            if !allArrays.isEmpty {
+                let maxLength = min(allArrays.map { $0.count }.max()!, toLoad + 1)
+                var t = predictionStart
+                for i in 0 ..< maxLength {
+                    let valuesAtIndex = allArrays.compactMap { i < $0.count ? $0[i] : nil }
+                    if !valuesAtIndex.isEmpty {
+                        var yMin = max(valuesAtIndex.min()!, Double(minDisplay))
+                        var yMax = min(valuesAtIndex.max()!, Double(maxDisplay))
+                        // Keep a minimum ±1 mg/dL band so the cone stays visible when predictions agree.
+                        if yMin == yMax {
+                            yMin -= 1
+                            yMax += 1
+                        }
+                        coneData.append(BGChartModel.ConePoint(
+                            date: Date(timeIntervalSince1970: t),
+                            yMin: yMin,
+                            yMax: yMax
+                        ))
+                        if yMax > topPredictionBG - 20 { topPredictionBG = yMax + 20 }
+                    }
+                    t += 300
+                }
+            }
+            chartModel.cone = coneData
+        } else {
+            chartModel.cone = []
+
+            // dataIndex mapping matches updatePredictionGraphGeneric: 12=ZT 13=IOB 14=COB 15=UAM
+            for (offset, type) in types.enumerated() {
+                var predictionData: [ShareGlucoseData] = []
+                if let graphData = predBGs[type] {
+                    var t = predictionStart
+                    for i in 0 ... toLoad where i < graphData.count {
+                        let clamped = min(max(Int(round(graphData[i])), minDisplay), maxDisplay)
+                        predictionData.append(ShareGlucoseData(sgv: clamped, date: t, direction: "flat"))
+                        t += 300
+                    }
+                }
+                updatePredictionGraphGeneric(dataIndex: 12 + offset, predictionData: predictionData, chartLabel: type, color: .clear)
+            }
+        }
+
+        chartModel.rebuild()
+    }
+
+    func updateBasalGraph() { chartModel.rebuild() }
+    func updateBolusGraph() { chartModel.rebuild() }
+    func updateCarbGraph() { chartModel.rebuild() }
+    func updateBasalScheduledGraph() { chartModel.rebuild() }
+    func updateOverrideGraph() { chartModel.rebuild() }
+    func updateBGCheckGraph() { chartModel.rebuild() }
+    func updateSuspendGraph() { chartModel.rebuild() }
+    func updateResumeGraph() { chartModel.rebuild() }
+    func updateSensorStart() { chartModel.rebuild() }
+    func updateNotes() { chartModel.rebuild() }
+    func updateSmbGraph() { chartModel.rebuild() }
+    func updateTempTargetGraph() { chartModel.rebuild() }
+}
