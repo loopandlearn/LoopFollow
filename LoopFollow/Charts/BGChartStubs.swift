@@ -48,6 +48,13 @@ extension MainViewController {
 
     func updateBGGraph() {
         recomputeTopBG()
+        // Profile processing defers building the scheduled-basal segments until
+        // the first BG render has happened (Profile.swift checks firstGraphLoad).
+        // The legacy Graphs.updateBGGraph consumed the flag; do it here or the
+        // scheduled basal line never gets data.
+        if !bgData.isEmpty {
+            firstGraphLoad = false
+        }
         chartModel.rebuild()
     }
 
