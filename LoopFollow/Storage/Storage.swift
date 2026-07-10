@@ -290,9 +290,14 @@ class Storage {
 
         contactTrend.reload()
         contactDelta.reload()
+        contactIOB.reload()
+        contactTrendTarget.reload()
+        contactDeltaTarget.reload()
+        contactIOBTarget.reload()
         contactEnabled.reload()
         contactBackgroundColor.reload()
         contactTextColor.reload()
+        contactColorMode.reload()
 
         sensorScheduleOffset.reload()
         alarms.reload()
@@ -305,6 +310,7 @@ class Storage {
         lastRecBolusNotified.reload()
         lastCOBNotified.reload()
         lastMissedBolusNotified.reload()
+        pendingFutureCarbs.reload()
 
         appBadge.reload()
         colorBGText.reload()
@@ -363,6 +369,7 @@ class Storage {
         show30MinLine.reload()
         show90MinLine.reload()
         showMidnightLines.reload()
+        showYesterdayLine.reload()
         smallGraphTreatments.reload()
         smallGraphHeight.reload()
         predictionToLoad.reload()
@@ -405,9 +412,17 @@ class Storage {
         lastVersionUpdateNotificationShown.reload()
         lastExpirationNotificationShown.reload()
 
+        telemetryEnabled.reload()
+        telemetryConsentDecisionMade.reload()
+        telemetryLastSentAt.reload()
+        telemetryLastSentSha.reload()
+        telemetryColdLaunchTimes.reload()
+
         hideInfoTable.reload()
         token.reload()
         units.reload()
+        hasConfiguredUnits.reload()
+        hasCompletedOnboarding.reload()
         infoSort.reload()
         infoVisible.reload()
 
@@ -415,6 +430,7 @@ class Storage {
         device.reload()
         nsWriteAuth.reload()
         nsAdminAuth.reload()
+        webSocketEnabled.reload()
 
         // migrationStep intentionally excluded — see method comment above.
 
