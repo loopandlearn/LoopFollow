@@ -3,6 +3,10 @@ run-name: Lint (${{ github.head_ref || github.ref_name }})
 
 on:
   pull_request:
+    # 'edited' so the lint re-runs when a PR's base branch is changed; otherwise
+    # retargeting (e.g. main -> dev) leaves the required SwiftFormat check with no
+    # run on the new base and the PR stays blocked indefinitely.
+    types: [opened, synchronize, reopened, edited]
   workflow_dispatch:
 
 concurrency:
@@ -15,6 +19,9 @@ permissions:
 jobs:
   swiftformat:
     name: SwiftFormat
+    # Run on open/sync/reopen always; on 'edited' only when the base branch
+    # actually changed, so routine title/description edits don't re-lint.
+    if: ${{ github.event.action != 'edited' || github.event.changes.base != null }}
     runs-on: ubuntu-latest
     container: swift:6.0
     steps:

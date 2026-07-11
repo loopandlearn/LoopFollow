@@ -4,7 +4,13 @@
 import Foundation
 
 class StatsDataService {
-    weak var mainViewController: MainViewController?
+    /// The injected reference can be nil when the stats UI is built before
+    /// MainViewController.bootstrap() has run (cold launch with Statistics as
+    /// the selected tab), so resolve lazily and fall back to the shared engine.
+    private weak var injectedMainViewController: MainViewController?
+    var mainViewController: MainViewController? {
+        injectedMainViewController ?? MainViewController.shared
+    }
 
     var daysToAnalyze: Int = 14 // Keep for backward compatibility
     var startDate: Date = dateTimeUtils.displayCalendar().date(byAdding: .day, value: -14, to: Date()) ?? Date()
@@ -23,7 +29,7 @@ class StatsDataService {
     }
 
     init(mainViewController: MainViewController?) {
-        self.mainViewController = mainViewController
+        injectedMainViewController = mainViewController
         dataFetcher = StatsDataFetcher(mainViewController: mainViewController)
         dataFetcher.dataService = self
     }

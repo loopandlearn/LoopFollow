@@ -52,7 +52,7 @@ class NightscoutUtils {
             case .sgv:
                 return "/api/v1/entries.json"
             case .profile:
-                return "/api/v1/profile/current.json"
+                return "/api/v1/profiles.json"
             case .deviceStatus:
                 return "/api/v1/devicestatus.json"
             case .temporaryOverride, .temporaryOverrideCancel:
@@ -160,6 +160,17 @@ class NightscoutUtils {
         var request = URLRequest(url: requestURL)
         request.httpMethod = "GET"
         return request
+    }
+
+    // Strip whitespace/newlines/control characters that can sneak in via paste.
+    // Neither a URL nor a token may legally contain them, and a stray one breaks
+    // WebSocket connect (invalid percent-encoded query traps on iOS 26) or makes
+    // URL parsing fall back to a lossy cleanup that mangles the address.
+    static func sanitizeConnectionInput(_ input: String) -> String {
+        input.unicodeScalars
+            .filter { !CharacterSet.whitespacesAndNewlines.contains($0) && !CharacterSet.controlCharacters.contains($0) }
+            .map(String.init)
+            .joined()
     }
 
     static func constructURL(baseURL: String, token: String?, endpoint: String, parameters: [String: String]) -> URL? {

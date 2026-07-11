@@ -12,117 +12,115 @@ struct ContactSettingsView: View {
     @State private var alertMessage: String = ""
 
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Contact Integration")) {
-                    Text("Add the contact named '\(viewModel.contactName)' to your watch face to show the current BG value in real time. Make sure to give the app full access to Contacts when prompted.")
+        Form {
+            Section(header: Text("Contact Integration")) {
+                Text("Add the contact named '\(viewModel.contactName)' to your watch face to show the current BG value in real time. Make sure to give the app full access to Contacts when prompted.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .padding(.vertical, 4)
+
+                Toggle("Enable Contact BG Updates", isOn: $viewModel.contactEnabled)
+                    .toggleStyle(SwitchToggleStyle())
+                    .onChange(of: viewModel.contactEnabled) { isEnabled in
+                        if isEnabled {
+                            requestContactAccess()
+                        }
+                    }
+            }
+
+            if viewModel.contactEnabled {
+                Section(header: Text("Color Options")) {
+                    Text("Select the colors for your BG values. Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                         .padding(.vertical, 4)
 
-                    Toggle("Enable Contact BG Updates", isOn: $viewModel.contactEnabled)
-                        .toggleStyle(SwitchToggleStyle())
-                        .onChange(of: viewModel.contactEnabled) { isEnabled in
-                            if isEnabled {
-                                requestContactAccess()
-                            }
+                    Picker("Background Color", selection: $viewModel.contactBackgroundColor) {
+                        ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
+                            Text(option.rawValue.capitalized).tag(option.rawValue)
                         }
-                }
+                    }
 
-                if viewModel.contactEnabled {
-                    Section(header: Text("Color Options")) {
-                        Text("Select the colors for your BG values. Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors.")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                            .padding(.vertical, 4)
+                    Picker("Color Mode", selection: $viewModel.contactColorMode) {
+                        ForEach(ContactColorMode.allCases, id: \.self) { mode in
+                            Text(mode.displayName).tag(mode)
+                        }
+                    }
 
-                        Picker("Background Color", selection: $viewModel.contactBackgroundColor) {
+                    if viewModel.contactColorMode == .staticColor {
+                        Picker("Text Color", selection: $viewModel.contactTextColor) {
                             ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
                                 Text(option.rawValue.capitalized).tag(option.rawValue)
                             }
                         }
+                    } else {
+                        Text("Dynamic mode colors text based on BG range: Green (in range), Yellow (high), Red (low)")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
+                }
 
-                        Picker("Color Mode", selection: $viewModel.contactColorMode) {
-                            ForEach(ContactColorMode.allCases, id: \.self) { mode in
-                                Text(mode.displayName).tag(mode)
-                            }
+                Section(header: Text("Additional Information")) {
+                    Text("To see your trend, delta, or IOB, include them in another contact or create separate contacts. When using 'Include', select which contact to add the value to.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .padding(.vertical, 4)
+
+                    Text("Trend")
+                        .font(.subheadline)
+                    Picker("Show Trend", selection: $viewModel.contactTrend) {
+                        ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                            Text(option.rawValue).tag(option)
                         }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
 
-                        if viewModel.contactColorMode == .staticColor {
-                            Picker("Text Color", selection: $viewModel.contactTextColor) {
-                                ForEach(ContactColorOption.allCases, id: \.rawValue) { option in
-                                    Text(option.rawValue.capitalized).tag(option.rawValue)
-                                }
+                    if viewModel.contactTrend == .include {
+                        Picker("Include Trend in", selection: $viewModel.contactTrendTarget) {
+                            ForEach(viewModel.availableTargets(for: .Trend), id: \.self) { target in
+                                Text(target.rawValue).tag(target)
                             }
-                        } else {
-                            Text("Dynamic mode colors text based on BG range: Green (in range), Yellow (high), Red (low)")
-                                .font(.footnote)
-                                .foregroundColor(.secondary)
                         }
                     }
 
-                    Section(header: Text("Additional Information")) {
-                        Text("To see your trend, delta, or IOB, include them in another contact or create separate contacts. When using 'Include', select which contact to add the value to.")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                            .padding(.vertical, 4)
+                    Text("Delta")
+                        .font(.subheadline)
+                    Picker("Show Delta", selection: $viewModel.contactDelta) {
+                        ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
 
-                        Text("Trend")
-                            .font(.subheadline)
-                        Picker("Show Trend", selection: $viewModel.contactTrend) {
-                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
-                                Text(option.rawValue).tag(option)
+                    if viewModel.contactDelta == .include {
+                        Picker("Include Delta in", selection: $viewModel.contactDeltaTarget) {
+                            ForEach(viewModel.availableTargets(for: .Delta), id: \.self) { target in
+                                Text(target.rawValue).tag(target)
                             }
                         }
-                        .pickerStyle(SegmentedPickerStyle())
+                    }
 
-                        if viewModel.contactTrend == .include {
-                            Picker("Include Trend in", selection: $viewModel.contactTrendTarget) {
-                                ForEach(viewModel.availableTargets(for: .Trend), id: \.self) { target in
-                                    Text(target.rawValue).tag(target)
-                                }
-                            }
+                    Text("IOB")
+                        .font(.subheadline)
+                    Picker("Show IOB", selection: $viewModel.contactIOB) {
+                        ForEach(ContactIncludeOption.allCases, id: \.self) { option in
+                            Text(option.rawValue).tag(option)
                         }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
 
-                        Text("Delta")
-                            .font(.subheadline)
-                        Picker("Show Delta", selection: $viewModel.contactDelta) {
-                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
-                                Text(option.rawValue).tag(option)
-                            }
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-
-                        if viewModel.contactDelta == .include {
-                            Picker("Include Delta in", selection: $viewModel.contactDeltaTarget) {
-                                ForEach(viewModel.availableTargets(for: .Delta), id: \.self) { target in
-                                    Text(target.rawValue).tag(target)
-                                }
-                            }
-                        }
-
-                        Text("IOB")
-                            .font(.subheadline)
-                        Picker("Show IOB", selection: $viewModel.contactIOB) {
-                            ForEach(ContactIncludeOption.allCases, id: \.self) { option in
-                                Text(option.rawValue).tag(option)
-                            }
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-
-                        if viewModel.contactIOB == .include {
-                            Picker("Include IOB in", selection: $viewModel.contactIOBTarget) {
-                                ForEach(viewModel.availableTargets(for: .IOB), id: \.self) { target in
-                                    Text(target.rawValue).tag(target)
-                                }
+                    if viewModel.contactIOB == .include {
+                        Picker("Include IOB in", selection: $viewModel.contactIOBTarget) {
+                            ForEach(viewModel.availableTargets(for: .IOB), id: \.self) { target in
+                                Text(target.rawValue).tag(target)
                             }
                         }
                     }
                 }
             }
-            .alert(isPresented: $showAlert) {
-                Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-            }
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Contact", displayMode: .inline)
