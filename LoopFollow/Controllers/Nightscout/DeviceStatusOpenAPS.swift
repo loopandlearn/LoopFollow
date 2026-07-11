@@ -12,17 +12,36 @@ extension MainViewController {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
         } else {
-            guard let enactedOrSuggested = lastLoopRecord["suggested"] as? [String: AnyObject] ?? lastLoopRecord["enacted"] as? [String: AnyObject] else {
+            // Trio writes BOTH `suggested` (the current loop's recommendation:
+            // fresh bg / IOB / COB / ISF / CR / predBGs / reason / etc., but no
+            // timestamp or TDD) and `enacted` (the last actually-applied state:
+            // carries timestamp and TDD, but may linger at a previous loop's
+            // values if the new loop didn't change anything). We merge and prefer
+            // suggested on conflicts so each field reflects the latest loop's
+            // view, then fall back to enacted for fields suggested doesn't have.
+            let suggestedBlock = lastLoopRecord["suggested"] as? [String: AnyObject] ?? [:]
+            let enactedBlock = lastLoopRecord["enacted"] as? [String: AnyObject] ?? [:]
+            guard !suggestedBlock.isEmpty || !enactedBlock.isEmpty else {
                 Observable.shared.loopStatusText.value = "↻"
                 latestLoopStatusString = "↻"
                 return
             }
+            let enactedOrSuggested = enactedBlock.merging(suggestedBlock) { _, suggestedValue in suggestedValue }
 
             var updatedTime: TimeInterval?
 
-            if let timestamp = enactedOrSuggested["timestamp"] as? String,
-               let parsedTime = formatter.date(from: timestamp)?.timeIntervalSince1970
+            // For "Updated", prefer suggested.timestamp (latest loop's time), then
+            // the record's outer created_at (when NS received the upload — also
+            // ~latest loop's time), then enacted.timestamp (may be stale). We use
+            // NightscoutUtils.parseDate instead of ISO8601DateFormatter so we
+            // tolerate the trailing "Z" and fractional seconds NS often emits.
+            let timestampSource = (suggestedBlock["timestamp"] as? String)
+                ?? (lastDeviceStatus?["created_at"] as? String)
+                ?? (enactedBlock["timestamp"] as? String)
+            if let ts = timestampSource,
+               let parsedDate = NightscoutUtils.parseDate(ts)
             {
+                let parsedTime = parsedDate.timeIntervalSince1970
                 updatedTime = parsedTime
                 let formattedTime = Localizer.formatTimestampToLocalString(parsedTime)
                 infoManager.updateInfoData(type: .updated, value: formattedTime)
@@ -119,6 +138,17 @@ extension MainViewController {
                 Observable.shared.deviceRecBolus.value = rec.value
             } else {
                 Observable.shared.deviceRecBolus.value = nil
+            }
+
+            // Smoothed BG (Trio applies CGM smoothing and reports the smoothed value here).
+            // Append to in-memory history so each loop run's smoothed value can be matched to its glucose dot.
+            // Skip entirely when the feature toggle is off so we don't pay the parse / append cost.
+            if Storage.shared.displaySmoothedBG.value,
+               let smoothedBgValue = enactedOrSuggested["bg"] as? Double,
+               let updatedTime = updatedTime
+            {
+                appendSmoothedBgPoint(time: updatedTime, bgMgdl: smoothedBgValue)
+                infoManager.updateInfoData(type: .smoothedBg, value: Localizer.toDisplayUnits(String(smoothedBgValue)))
             }
 
             // Eventual BG

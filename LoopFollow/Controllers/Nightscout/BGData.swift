@@ -147,6 +147,15 @@ extension MainViewController {
 
         let latestReading = data[0]
         let sensorTimestamp = latestReading.date
+
+        // If this is a brand-new reading (newer than what we last processed), pull
+        // devicestatus right away so the smoothed BG for this dot lands on the chart
+        // alongside the dot itself, not on the next 5-min devicestatus poll.
+        let previouslyProcessedBgTime = Storage.shared.lastBgReadingTimeSeconds.value ?? 0
+        if sensorTimestamp > previouslyProcessedBgTime, IsNightscoutEnabled() {
+            // Tiny buffer so the loop has a moment to write its devicestatus record.
+            TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(1))
+        }
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         // secondsAgo is how old the newest reading is
         let secondsAgo = now - sensorTimestamp

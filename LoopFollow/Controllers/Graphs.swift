@@ -44,6 +44,7 @@ enum GraphDataIndex: Int {
     case tempTarget = 17
     case predictionCone = 18
     case yesterday = 19
+    case smoothedBg = 20
 }
 
 extension GraphDataIndex {
@@ -69,6 +70,7 @@ extension GraphDataIndex {
         case .tempTarget: return "Temp Target"
         case .predictionCone: return "Prediction Cone"
         case .yesterday: return "Yesterday"
+        case .smoothedBg: return "Smoothed BG"
         }
     }
 }
@@ -650,6 +652,20 @@ extension MainViewController {
         lineYesterday.axisDependency = YAxis.AxisDependency.right
         data.append(lineYesterday)
 
+        // Dataset 20: Smoothed BG line — light-grey straight segments connecting
+        // Trio's smoothed values, no dots. Populated only when displaySmoothedBG
+        // is on. Linear mode (passes through each value Trio reported, no curve
+        // interpolation).
+        let lineSmoothedBg = LineChartDataSet(entries: [ChartDataEntry](), label: "")
+        lineSmoothedBg.setColor(NSUIColor.systemCyan)
+        lineSmoothedBg.lineWidth = 1.5
+        lineSmoothedBg.drawCirclesEnabled = false
+        lineSmoothedBg.drawValuesEnabled = false
+        lineSmoothedBg.highlightEnabled = false
+        lineSmoothedBg.axisDependency = YAxis.AxisDependency.right
+        lineSmoothedBg.mode = .linear
+        data.append(lineSmoothedBg)
+
         data.setValueFont(UIFont.systemFont(ofSize: 12))
 
         // Add marker popups for bolus and carbs
@@ -707,6 +723,14 @@ extension MainViewController {
         BGChart.scaleYEnabled = false
         BGChart.drawGridBackgroundEnabled = true
         BGChart.gridBackgroundColor = NSUIColor.secondarySystemBackground
+
+        // Bumped from the library default of 100 to 150 so the bolus / carb / SMB
+        // value labels still render at the 3h zoom level after the smoothing-line
+        // dataset added ~280 entries to the chart's total entry count. DGCharts
+        // hides values when total-entries × scaleX exceeds maxVisibleCount × scaleX;
+        // 150 absorbs the new dataset while keeping ≥6h zooms hiding values, as
+        // before.
+        BGChart.maxVisibleCount = 150
 
         BGChart.highlightValue(nil, callDelegate: false)
 
@@ -800,20 +824,17 @@ extension MainViewController {
         let dataIndexPrediction = 1
         let lineBG = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
         let linePrediction = BGChart.lineData!.dataSets[dataIndexPrediction] as! LineChartDataSet
-        if Storage.shared.showLines.value {
-            lineBG.lineWidth = 2
-            linePrediction.lineWidth = 2
-        } else {
+        // When smoothing is on, BG renders dots-only (the white smoothing line replaces
+        // the BG connecting line). The user-controlled toggles only apply when off.
+        if Storage.shared.displaySmoothedBG.value {
             lineBG.lineWidth = 0
-            linePrediction.lineWidth = 0
-        }
-        if Storage.shared.showDots.value {
             lineBG.drawCirclesEnabled = true
-            linePrediction.drawCirclesEnabled = true
         } else {
-            lineBG.drawCirclesEnabled = false
-            linePrediction.drawCirclesEnabled = false
+            lineBG.lineWidth = Storage.shared.showLines.value ? 2 : 0
+            lineBG.drawCirclesEnabled = Storage.shared.showDots.value
         }
+        linePrediction.lineWidth = Storage.shared.showLines.value ? 2 : 0
+        linePrediction.drawCirclesEnabled = Storage.shared.showDots.value
 
         BGChart.rightAxis.axisMinimum = 0
 
@@ -866,6 +887,7 @@ extension MainViewController {
 
         topBG = Storage.shared.minBGScale.value
         let thresholds = graphRangeThresholds()
+        let showSmoothed = Storage.shared.displaySmoothedBG.value
         for i in 0 ..< entries.count {
             // Clamp the plotted y-value to the same bounds the header text uses
             // (HIGH/LOW), so the graph stays consistent with the main display.
@@ -874,7 +896,15 @@ extension MainViewController {
             if plottedSgv > topBG - maxBGOffset {
                 topBG = plottedSgv + maxBGOffset
             }
-            let value = ChartDataEntry(x: Double(entries[i].date), y: plottedSgv, data: formatPillText(line1: Localizer.toDisplayUnits(String(entries[i].sgv)), time: entries[i].date))
+            let cgmLine = Localizer.toDisplayUnits(String(entries[i].sgv))
+            // When the smoothed BG is available, render it ABOVE the raw CGM line.
+            let pillText: String
+            if showSmoothed, let smoothed = smoothedBg(near: entries[i].date) {
+                pillText = formatPillText(line1: "✨ \(Localizer.toDisplayUnits(String(smoothed))) ✨", time: entries[i].date, line2: cgmLine)
+            } else {
+                pillText = formatPillText(line1: cgmLine, time: entries[i].date)
+            }
+            let value = ChartDataEntry(x: Double(entries[i].date), y: plottedSgv, data: pillText)
             mainChart.append(value)
             smallChart.append(value)
 
@@ -905,13 +935,54 @@ extension MainViewController {
             }
         }
 
+        // When smoothing is on, force the main BG dataset to render dots-only (no
+        // connecting line) so the smoothing line is the only line drawn through
+        // the readings. When off, honor the user's Display Lines/Dots toggles.
+        // The small chart keeps its original line-only style (set at creation in
+        // createSmallBGGraph) so we don't touch lineBGSmall here.
+        if showSmoothed {
+            lineBG.lineWidth = 0
+            lineBG.drawCirclesEnabled = true
+        } else {
+            lineBG.lineWidth = Storage.shared.showLines.value ? 2 : 0
+            lineBG.drawCirclesEnabled = Storage.shared.showDots.value
+        }
+
+        // Populate the smoothed-BG line dataset on the main chart only.
+        // We iterate `smoothedBgData` directly so the line always extends to the
+        // most recent smoothed value Trio has reported. To avoid the line being
+        // pulled toward bolus / carb dots (Trio writes extra openaps records on
+        // every treatment-triggered loop run, with timestamps that can land
+        // between the regular 5-minute cycles), we skip any record that lands
+        // within 4 minutes of the previously kept one. Regular runs are ~5 min
+        // apart so they pass through; treatment-triggered runs that fire shortly
+        // after a regular one are filtered out.
+        let smoothedIndex = GraphDataIndex.smoothedBg.rawValue
+        if let mainSmoothed = BGChart.lineData?.dataSets[smoothedIndex] as? LineChartDataSet {
+            mainSmoothed.removeAll(keepingCapacity: false)
+            if showSmoothed, !smoothedBgData.isEmpty {
+                let firstBgTime = entries.first?.date ?? -.infinity
+                let lastBgTime = entries.last?.date ?? .infinity
+                let minSpacing: TimeInterval = 240
+                var lastKeptTime: TimeInterval = -.infinity
+                for sb in smoothedBgData where sb.time >= firstBgTime && sb.time <= lastBgTime + 150 {
+                    if sb.time - lastKeptTime < minSpacing { continue }
+                    let plotted = min(max(sb.bgMgdl, Double(globalVariables.minDisplayGlucose)), Double(globalVariables.maxDisplayGlucose))
+                    mainSmoothed.append(ChartDataEntry(x: sb.time, y: plotted))
+                    lastKeptTime = sb.time
+                }
+            }
+        }
+
         BGChart.rightAxis.axisMaximum = Double(calculateMaxBgGraphValue())
         BGChart.setVisibleXRangeMinimum(600)
         BGChart.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChart.data?.dataSets[smoothedIndex].notifyDataSetChanged()
         BGChart.data?.notifyDataChanged()
         BGChart.notifyDataSetChanged()
         BGChartFull.rightAxis.axisMaximum = Double(calculateMaxBgGraphValue())
         BGChartFull.data?.dataSets[dataIndex].notifyDataSetChanged()
+        BGChartFull.data?.dataSets[smoothedIndex].notifyDataSetChanged()
         BGChartFull.data?.notifyDataChanged()
         BGChartFull.notifyDataSetChanged()
 
@@ -1716,6 +1787,28 @@ extension MainViewController {
         lineConeSmall.highlightEnabled = false
         lineConeSmall.axisDependency = YAxis.AxisDependency.right
         data.append(lineConeSmall)
+
+        // Dataset 19: Yesterday overlay placeholder (not rendered on small chart —
+        // the yesterday line only draws on the main graph, but the dataset must
+        // exist here so shared GraphDataIndex values line up across both charts).
+        let lineYesterdaySmall = LineChartDataSet(entries: [ChartDataEntry](), label: "")
+        lineYesterdaySmall.lineWidth = 0
+        lineYesterdaySmall.drawCirclesEnabled = false
+        lineYesterdaySmall.drawValuesEnabled = false
+        lineYesterdaySmall.highlightEnabled = false
+        lineYesterdaySmall.axisDependency = YAxis.AxisDependency.right
+        data.append(lineYesterdaySmall)
+
+        // Dataset 20: Smoothed BG line on the small graph too.
+        let lineSmoothedBgSmall = LineChartDataSet(entries: [ChartDataEntry](), label: "")
+        lineSmoothedBgSmall.setColor(NSUIColor.systemCyan)
+        lineSmoothedBgSmall.lineWidth = 1.0
+        lineSmoothedBgSmall.drawCirclesEnabled = false
+        lineSmoothedBgSmall.drawValuesEnabled = false
+        lineSmoothedBgSmall.highlightEnabled = false
+        lineSmoothedBgSmall.axisDependency = YAxis.AxisDependency.right
+        lineSmoothedBgSmall.mode = .cubicBezier
+        data.append(lineSmoothedBgSmall)
 
         BGChartFull.highlightPerDragEnabled = true
         BGChartFull.leftAxis.enabled = false
