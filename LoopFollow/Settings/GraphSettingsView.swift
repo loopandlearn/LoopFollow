@@ -146,7 +146,7 @@ struct GraphSettingsView: View {
     @ViewBuilder
     private var smoothingFooter: some View {
         if displaySmoothedBG.value {
-            Text("Display Dots and Display Lines are managed automatically while Display Smoothed BG is on (CGM dots shown, white smoothing line replaces the connecting line).")
+            Text("Display Dots and Display Lines are managed automatically while Display Smoothed BG is on (CGM dots shown, cyan smoothing line replaces the connecting line).")
         } else {
             EmptyView()
         }

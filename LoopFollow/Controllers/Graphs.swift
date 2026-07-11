@@ -657,7 +657,7 @@ extension MainViewController {
         // is on. Linear mode (passes through each value Trio reported, no curve
         // interpolation).
         let lineSmoothedBg = LineChartDataSet(entries: [ChartDataEntry](), label: "")
-        lineSmoothedBg.setColor(NSUIColor.lightGray)
+        lineSmoothedBg.setColor(NSUIColor.systemCyan)
         lineSmoothedBg.lineWidth = 1.5
         lineSmoothedBg.drawCirclesEnabled = false
         lineSmoothedBg.drawValuesEnabled = false
@@ -1801,7 +1801,7 @@ extension MainViewController {
 
         // Dataset 20: Smoothed BG line on the small graph too.
         let lineSmoothedBgSmall = LineChartDataSet(entries: [ChartDataEntry](), label: "")
-        lineSmoothedBgSmall.setColor(NSUIColor.lightGray)
+        lineSmoothedBgSmall.setColor(NSUIColor.systemCyan)
         lineSmoothedBgSmall.lineWidth = 1.0
         lineSmoothedBgSmall.drawCirclesEnabled = false
         lineSmoothedBgSmall.drawValuesEnabled = false
