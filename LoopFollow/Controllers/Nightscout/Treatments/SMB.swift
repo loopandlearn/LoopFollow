@@ -35,7 +35,6 @@ extension MainViewController {
 
         if Storage.shared.graphBolus.value {
             updateSmbGraph()
-            updateChartRenderers()
         }
     }
 }
