@@ -209,7 +209,7 @@ final class BGChartModel: ObservableObject {
         pillTimeFormatter.string(from: date)
     }
 
-    /// Legacy Nightscout remote-command error notes embed a JSON payload after
+    /// Nightscout remote-command error notes embed a JSON payload after
     /// the human-readable message ("Error text {\"bolus-entry\": 1.5, ...}").
     /// Returns the message plus a compact summary of the payload, or nil when
     /// the note contains no JSON.
