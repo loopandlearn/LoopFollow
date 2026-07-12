@@ -5,16 +5,16 @@ import Foundation
 import SwiftUI
 import UIKit
 
-/// Thin compatibility shims for call sites that still invoke the legacy
-/// `update*Graph()` / `createGraph()` API. All real rendering now happens
-/// via BGChartModel + BGChartView (Apple Swift Charts). These shims update
-/// lightweight state (topBG / topPredictionBG / prediction arrays) and
-/// trigger a (coalesced) model rebuild.
+/// The `update*Graph()` / `createGraph()` entry points the rest of the app
+/// calls to refresh the chart. Rendering happens in BGChartModel +
+/// BGChartView (Apple Swift Charts); these update lightweight state
+/// (topBG / topPredictionBG / prediction arrays) and trigger a (coalesced)
+/// model rebuild.
 extension MainViewController {
     func createGraph() {
         chartModel.rebuild()
-        // The legacy createGraph also armed the once-a-minute "now" tick; the
-        // chart's follow/auto-return logic runs off model.now, so keep it.
+        // The chart's follow/auto-return logic runs off model.now, so arm the
+        // once-a-minute "now" tick.
         startGraphNowTimer()
     }
 
@@ -50,8 +50,7 @@ extension MainViewController {
         recomputeTopBG()
         // Profile processing defers building the scheduled-basal segments until
         // the first BG render has happened (Profile.swift checks firstGraphLoad).
-        // The legacy Graphs.updateBGGraph consumed the flag; do it here or the
-        // scheduled basal line never gets data.
+        // Clear the flag here or the scheduled basal line never gets data.
         if !bgData.isEmpty {
             firstGraphLoad = false
         }
@@ -81,8 +80,8 @@ extension MainViewController {
     }
 
     // Routes OpenAPS/Trio predictions either into a cone band or individual
-    // prediction lines, mirroring the legacy Graphs.updateOpenAPSPredictionDisplay.
-    // Cone is only for OpenAPS-based backends; Loop always uses lines.
+    // prediction lines. Cone is only for OpenAPS-based backends; Loop always
+    // uses lines.
     func updateOpenAPSPredictionDisplay() {
         guard let predBGs = openAPSPredBGs else {
             chartModel.cone = []

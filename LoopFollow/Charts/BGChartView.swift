@@ -42,7 +42,7 @@ private enum BGChartConfig {
     /// leaving room on the right for predictions/cone.
     static let followNowFraction = 0.7
     /// How long after the last navigation in history before a data tick pulls
-    /// the chart back to "now" (mirrors the legacy autoScrollPauseUntil).
+    /// the chart back to "now".
     static let autoFollowPause: TimeInterval = 5 * 60
     /// Max distance between the scrub date and an anchor for it to be selected.
     static let selectionTolerance: TimeInterval = 20 * 60
@@ -75,8 +75,7 @@ struct BGChartView: View {
 
 /// The interactive BG chart.
 ///
-/// Rendering/interaction strategy (adapted from Trio's MainChartView,
-/// https://github.com/nightscout/Trio, MIT license): the chart content is
+/// Rendering/interaction strategy: the chart content is
 /// laid out ONCE per (data, zoom) change onto a wide fixed-width canvas
 /// covering a render window around the visible viewport. Panning translates
 /// that canvas with a pure `.offset` transform — the canvas is an Equatable
@@ -148,8 +147,7 @@ private struct MainBGChart: View {
 
     /// While the user is (or recently was) navigating history, auto-return to
     /// "now" is paused until this instant. Refreshed by every scroll movement
-    /// away from the live edge, cleared on return to it — the successor of the
-    /// legacy autoScrollPauseUntil.
+    /// away from the live edge, cleared on return to it.
     @State private var autoFollowPausedUntil: Date?
 
     private var timeZoneForAxis: TimeZone {
@@ -246,7 +244,7 @@ private struct MainBGChart: View {
                 scrollToNow(animated: true)
             } else if let pausedUntil = autoFollowPausedUntil, Date() >= pausedUntil {
                 // Idle in history past the pause: the next data tick pulls the
-                // chart back to live, like the legacy chart did.
+                // chart back to live.
                 scrollToNow(animated: true)
             }
             updateRenderWindow()
@@ -773,9 +771,9 @@ private struct MainBGChart: View {
     ///
     /// The pill wraps long texts (notes) at its max width; placement uses the
     /// measured pill size so the pill always sits fully on screen, below the
-    /// anchor when there is room and above it otherwise. (The legacy chart did
-    /// this by inserting line breaks every 40 characters; SwiftUI's own word
-    /// wrapping respects the actual font metrics, so no manual splitting.)
+    /// anchor when there is room and above it otherwise. Wrapping relies on
+    /// SwiftUI's word wrapping, which respects the actual font metrics, so
+    /// there is no manual line splitting.
     @ViewBuilder
     private func selectionOverlay(viewportWidth: CGFloat) -> some View {
         if plotFrame.height > 0, let anchor = activeAnchor() {
@@ -1087,7 +1085,7 @@ private struct BGChartCanvas: View, Equatable {
                 yStart: .value("yMin", pt.yMin),
                 yEnd: .value("yMax", pt.yMax)
             )
-            // Same fill as the legacy ConeOfUncertaintyRenderer (and Trio's cone).
+            // Same fill as Trio's cone.
             .foregroundStyle(Color(.systemBlue).opacity(0.4))
             .interpolationMethod(.monotone)
         }
