@@ -11,9 +11,9 @@ These instructions allow you to build this Open-Source app without having access
 >
 > The browser build defaults to automatically updating and building a new version of the app according to this schedule:
 >
-> * automatically checks for updates weekly on Wednesdays and if updates are found, it will build a new version of the app
-> * automatically builds once a month regardless of whether there are updates on the first of the month
-> * with each scheduled run (weekly or monthly), a successful Build log appears - if the time is very short, it did not need to build - only the long actions (>5 minutes) built a new app
+> * automatically checks for updates weekly on Sundays and if updates are found, it will build a new version of the app
+> * automatically builds once a month regardless of whether there are updates, on the second Sunday of the month
+> * if a scheduled run finds nothing new to build, the run is cancelled and shows as cancelled (grey) in the Actions list - a green check always means a new build was made and uploaded to TestFlight
 >
 > It also creates an alive branch, if you don't already have one. See [Why do I have an alive branch?](#why-do-i-have-an-alive-branch).
 >
@@ -195,7 +195,7 @@ You can modify the automation by creating and using some variables.
 
 To configure the automated build more granularly involves creating up to two environment variables: `SCHEDULED_BUILD` and/or `SCHEDULED_SYNC`. See [How to configure a variable](#how-to-configure-a-variable).
 
-Note that the weekly and monthly Build Trio actions will continue, but the actions are modified if one or more of these variables is set to false. **A successful Action Log will still appear, even if no automatic activity happens**.
+Note that the weekly and monthly scheduled actions will continue, but the actions are modified if one or more of these variables is set to false. **When a scheduled run ends without building, it shows as cancelled (grey) instead of successful - a green check always means a new build was made**.
 
 * If you want to manually decide when to update your repository to the latest commit, but you want the monthly builds and keep-alive to continue: set `SCHEDULED_SYNC` to false and either do not create `SCHEDULED_BUILD` or set it to true
 * If you want to only build when an update has been found: set `SCHEDULED_BUILD` to false and either do not create `SCHEDULED_SYNC` or set it to true
@@ -228,12 +228,13 @@ Note that the weekly and monthly Build Trio actions will continue, but the actio
 Your build will run on the following conditions:
 
 * Default behaviour:
-  * Run weekly, every Wednesday to check for changes; if there are changes, it will update your repository and build
-  * Run monthly, every first of the month, if there are changes, it will update your repository; regardless of changes, it will build
+  * Run weekly, every Sunday to check for changes; if there are changes, it will update your repository and build
+  * Run monthly, on the second Sunday of the month, if there are changes, it will update your repository; regardless of changes, it will build
   * Each time the action runs, it makes a keep-alive commit to the `alive` branch if necessary
-* If you disable any automation (both variables set to `false`), no updates, keep-alive or building happens when Build Trio runs
-* If you disabled just scheduled synchronization (`SCHEDULED_SYNC` set to`false`), it will only run once a month, on the first of the month, no update will happen; keep-alive will run
-* If you disabled just scheduled build (`SCHEDULED_BUILD` set to `false`), it will run once weekly, every Wednesday, to check for changes; if there are changes, it will update and build; keep-alive will run
+  * If a scheduled run ends without building, it shows as cancelled (grey) instead of successful
+* If you disable any automation (both variables set to `false`), no updates, keep-alive or building happens when the scheduled action runs; the run shows as cancelled
+* If you disabled just scheduled synchronization (`SCHEDULED_SYNC` set to`false`), it will only build once a month, on the second Sunday of the month, no update will happen; keep-alive will run
+* If you disabled just scheduled build (`SCHEDULED_BUILD` set to `false`), it will run once weekly, every Sunday, to check for changes; if there are changes, it will update and build; keep-alive will run
 
 ## What if I build using more than one GitHub username
 
