@@ -66,6 +66,7 @@ extension MainViewController {
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
         let previousIOBText = Observable.shared.iobText.value
+        let previousDeviceWasLoop = Storage.shared.device.value == "Loop"
         infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
@@ -186,6 +187,17 @@ extension MainViewController {
         // OpenAPS - handle new data
         if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String: AnyObject]? {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
+        }
+
+        // If the active looping system flipped (Loop ⇄ Trio/OpenAPS), drop the previous
+        // system's forecast so it doesn't linger next to the one just drawn above.
+        let currentDeviceIsLoop = Storage.shared.device.value == "Loop"
+        if currentDeviceIsLoop != previousDeviceWasLoop {
+            if currentDeviceIsLoop {
+                clearOpenAPSPredictionGraph()
+            } else {
+                clearLoopPredictionGraph()
+            }
         }
 
         // Start the timer based on the timestamp

@@ -565,29 +565,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     @objc func refresh() {
         LogManager.shared.log(category: .general, message: "Refreshing")
 
-        // Clear prediction for both Loop or OpenAPS
-
-        // Check if Loop prediction data exists and clear it if necessary
-        if !predictionData.isEmpty {
-            predictionData.removeAll()
-            updatePredictionGraph()
-        }
-
-        // Check if OpenAPS prediction data exists and clear it if necessary
-        let openAPSDataIndices = [12, 13, 14, 15]
-        for dataIndex in openAPSDataIndices {
-            let mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
-            let smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
-            if !mainChart.entries.isEmpty || !smallChart.entries.isEmpty {
-                updatePredictionGraphGeneric(
-                    dataIndex: dataIndex,
-                    predictionData: [],
-                    chartLabel: "",
-                    color: UIColor.systemGray
-                )
-            }
-        }
-
         Observable.shared.minAgoText.value = "Refreshing"
         scheduleAllTasks()
         NightscoutSocketManager.shared.connectIfNeeded()
