@@ -15,8 +15,10 @@ struct AGPView: View {
 
                 AGPGraphView(agpData: viewModel.agpData)
                     .frame(height: 200)
+                    .padding(.top, 10)
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 4)
                     .allowsHitTesting(false)
-                    .clipped()
 
                 // Legend
                 HStack(spacing: 16) {

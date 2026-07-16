@@ -55,7 +55,7 @@ struct TIRGraphView: View {
         }
         .chartForegroundStyleScale(domain: Band.allCases, range: Band.allCases.map(\.color))
         .chartLegend(.hidden)
-        .chartYScale(domain: 0 ... 100)
+        .chartYScale(domain: 0 ... 102)
         .chartYAxis {
             AxisMarks(position: .leading, values: [0, 25, 50, 75, 100]) { value in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [5, 5]))

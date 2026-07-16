@@ -83,6 +83,7 @@ final class BGChartModel: ObservableObject {
         let end: Date
         let yBottom: Double
         let yTop: Double
+        let label: String
         let pillText: String
         var id: String { "\(start.timeIntervalSince1970)-\(end.timeIntervalSince1970)" }
     }
@@ -521,12 +522,15 @@ final class BGChartModel: ObservableObject {
         let yTop = maxBG - 5
         let yBottom = maxBG - 25
         overrides = vc.overrideGraphData.map {
-            BandRect(
+            let overrideName = $0.reason.trimmingCharacters(in: .whitespacesAndNewlines)
+            let displayName = overrideName.isEmpty ? "Override" : overrideName
+            return BandRect(
                 start: Date(timeIntervalSince1970: $0.date),
                 end: Date(timeIntervalSince1970: $0.endDate),
                 yBottom: yBottom,
                 yTop: yTop,
-                pillText: "Override x\(String(format: "%.2f", $0.insulNeedsScaleFactor))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                label: displayName,
+                pillText: "Override\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         tempTargets = vc.tempTargetGraphData.map {
@@ -536,6 +540,7 @@ final class BGChartModel: ObservableObject {
                 end: Date(timeIntervalSince1970: $0.endDate),
                 yBottom: yBottom,
                 yTop: yTop,
+                label: "Temp Target",
                 pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }

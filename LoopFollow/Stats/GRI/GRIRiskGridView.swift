@@ -84,7 +84,7 @@ struct GRIRiskGridView: View {
         )
         .chartLegend(.hidden)
         .chartXScale(domain: 0 ... 30)
-        .chartYScale(domain: 0 ... 60)
+        .chartYScale(domain: 0 ... 61)
         .chartXAxis {
             AxisMarks(position: .bottom) { value in
                 AxisTick()

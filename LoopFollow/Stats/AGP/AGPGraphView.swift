@@ -48,15 +48,64 @@ struct AGPGraphView: View {
         }
     }
 
+    private var activeThresholds: (low: Double, high: Double) {
+        UnitSettingsStore.shared.effectiveThresholds()
+    }
+
+    private var lowThresholdLabel: String {
+        Localizer.toDisplayUnits(String(activeThresholds.low))
+    }
+
+    private var highThresholdLabel: String {
+        Localizer.toDisplayUnits(String(activeThresholds.high))
+    }
+
+    private var plottedMinValue: Double {
+        min(points.map(\.value).min() ?? activeThresholds.low, activeThresholds.low)
+    }
+
+    private var plottedMaxValue: Double {
+        max(points.map(\.value).max() ?? activeThresholds.high, activeThresholds.high)
+    }
+
+    private var yDomain: ClosedRange<Double> {
+        let span = max(plottedMaxValue - plottedMinValue, 1)
+        let topPadding = max(span * 0.05, 1)
+        return plottedMinValue ... (plottedMaxValue + topPadding)
+    }
+
+    private var yAxisEndpoints: [Double] {
+        if abs(plottedMaxValue - plottedMinValue) < 0.0001 {
+            return [plottedMinValue]
+        }
+        return [plottedMinValue, plottedMaxValue]
+    }
+
     var body: some View {
-        Chart(points) { point in
-            LineMark(
-                x: .value("hour", point.hour),
-                y: .value("bg", point.value)
-            )
-            .foregroundStyle(by: .value("percentile", point.percentile))
-            .lineStyle(StrokeStyle(lineWidth: point.percentile.lineWidth))
-            .interpolationMethod(.linear)
+        Chart {
+            RuleMark(y: .value("lowBoundary", activeThresholds.low))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                .annotation(position: .leading, alignment: .leading) {
+                    Text(lowThresholdLabel)
+                        .font(.caption2)
+                }
+
+            RuleMark(y: .value("highBoundary", activeThresholds.high))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                .annotation(position: .leading, alignment: .leading) {
+                    Text(highThresholdLabel)
+                        .font(.caption2)
+                }
+
+            ForEach(points) { point in
+                LineMark(
+                    x: .value("hour", point.hour),
+                    y: .value("bg", point.value)
+                )
+                .foregroundStyle(by: .value("percentile", point.percentile))
+                .lineStyle(StrokeStyle(lineWidth: point.percentile.lineWidth))
+                .interpolationMethod(.linear)
+            }
         }
         .chartForegroundStyleScale(
             domain: Percentile.allCases,
@@ -64,6 +113,7 @@ struct AGPGraphView: View {
         )
         .chartLegend(.hidden)
         .chartXScale(domain: 0 ... 24)
+        .chartYScale(domain: yDomain)
         .chartXAxis {
             AxisMarks(position: .bottom, values: Array(stride(from: 0, through: 24, by: 3))) { value in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
@@ -77,7 +127,7 @@ struct AGPGraphView: View {
             }
         }
         .chartYAxis {
-            AxisMarks(position: .trailing) { value in
+            AxisMarks(position: .leading, values: yAxisEndpoints) { value in
                 AxisValueLabel {
                     if let raw = value.as(Double.self) {
                         Text(Localizer.toDisplayUnits(String(raw)))
