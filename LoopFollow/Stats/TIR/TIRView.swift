@@ -27,8 +27,10 @@ struct TIRView: View {
                     if !viewModel.tirData.isEmpty {
                         TIRGraphView(tirData: viewModel.tirData)
                             .frame(height: 250)
+                            .padding(.top, 10)
+                            .padding(.horizontal, 8)
+                            .padding(.bottom, 4)
                             .allowsHitTesting(false)
-                            .clipped()
 
                         VStack(alignment: .leading, spacing: 8) {
                             if let average = viewModel.tirData.first(where: { $0.period == .average }) {
