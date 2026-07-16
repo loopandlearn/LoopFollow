@@ -53,11 +53,11 @@ struct AGPGraphView: View {
     }
 
     private var lowThresholdLabel: String {
-        thresholdLabel(for: activeThresholds.low)
+        Localizer.toDisplayUnits(String(activeThresholds.low))
     }
 
     private var highThresholdLabel: String {
-        thresholdLabel(for: activeThresholds.high)
+        Localizer.toDisplayUnits(String(activeThresholds.high))
     }
 
     private var plottedMinValue: Double {
@@ -79,12 +79,6 @@ struct AGPGraphView: View {
             return [plottedMinValue]
         }
         return [plottedMinValue, plottedMaxValue]
-    }
-
-    private func thresholdLabel(for mgdlValue: Double) -> String {
-        let display = UnitSettingsStore.shared.convertMgdlToDisplay(mgdlValue)
-        let digits = UnitSettingsStore.shared.glucoseUnit.fractionDigits
-        return String(format: "%.*f", digits, display)
     }
 
     var body: some View {
