@@ -967,6 +967,30 @@ extension MainViewController {
         BGChart.notifyDataSetChanged()
     }
 
+    // Removes the Loop forecast line. Used when the active system switches away from Loop.
+    func clearLoopPredictionGraph() {
+        guard !predictionData.isEmpty else { return }
+        predictionData.removeAll()
+        updatePredictionGraph()
+    }
+
+    // Removes the Trio/OpenAPS forecast lines (ZT/IOB/COB/UAM). Used when the active system switches away from Trio/OpenAPS.
+    func clearOpenAPSPredictionGraph() {
+        let openAPSDataIndices = [12, 13, 14, 15]
+        for dataIndex in openAPSDataIndices {
+            let mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
+            let smallChart = BGChartFull.lineData!.dataSets[dataIndex] as! LineChartDataSet
+            if !mainChart.entries.isEmpty || !smallChart.entries.isEmpty {
+                updatePredictionGraphGeneric(
+                    dataIndex: dataIndex,
+                    predictionData: [],
+                    chartLabel: "",
+                    color: UIColor.systemGray
+                )
+            }
+        }
+    }
+
     func updatePredictionGraph(color: UIColor? = nil) {
         let dataIndex = 1
         var mainChart = BGChart.lineData!.dataSets[dataIndex] as! LineChartDataSet
