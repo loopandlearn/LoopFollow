@@ -156,6 +156,17 @@ extension MainViewController {
 
         // Loop - handle new data
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String: AnyObject]? {
+            // Some pumps report no `pump.clock`; without it alertLastLoopTime stays 0
+            // and the forecast anchors to epoch 0. Fall back to the loop cycle timestamp.
+            if (lastDeviceStatus?["pump"] as? [String: AnyObject])?["clock"] == nil,
+               let loopTimestampString = lastLoopRecord["timestamp"] as? String,
+               let loopTimestamp = formatter.date(from: loopTimestampString)?.timeIntervalSince1970,
+               loopTimestamp > (Observable.shared.alertLastLoopTime.value ?? 0)
+            {
+                Observable.shared.alertLastLoopTime.value = loopTimestamp
+                Storage.shared.lastLoopTime.value = loopTimestamp
+            }
+
             DeviceStatusLoop(formatter: formatter, lastLoopRecord: lastLoopRecord)
 
             var oText = ""
