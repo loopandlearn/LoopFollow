@@ -20,8 +20,6 @@ extension MainViewController {
 
             var updatedTime: TimeInterval?
 
-            // Prefer deliverAt: Trio copies it into timestamp when both exist, but
-            // some uploads (Trio SMB follow-ups, oref0 rigs) only carry deliverAt.
             if let timestamp = enactedOrSuggested["deliverAt"] as? String ?? enactedOrSuggested["timestamp"] as? String,
                let parsedTime = formatter.date(from: timestamp)?.timeIntervalSince1970
             {
@@ -164,8 +162,6 @@ extension MainViewController {
             }
 
             // TDD
-            // Trio's SMB follow-up uploads re-send a suggested object without TDD;
-            // the enacted object in the same record still has it.
             if let tddMetric = InsulinMetric(from: enactedOrSuggested, key: "TDD")
                 ?? InsulinMetric(from: lastLoopRecord["enacted"], key: "TDD")
             {
