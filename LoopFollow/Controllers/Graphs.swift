@@ -939,6 +939,11 @@ extension MainViewController {
         if autoScrollPauseUntil == nil || Date() > autoScrollPauseUntil! {
             BGChart.moveViewToAnimated(xValue: dateTimeUtils.getNowTimeIntervalUTC() - (BGChart.visibleXRange * 0.7), yValue: 0.0, axis: .right, duration: 1, easingOption: .easeInBack)
         }
+
+        // Re-render OpenAPS predictions so any entry now at-or-before the latest BG
+        // is dropped from the dataset (otherwise the stale dot stays hit-testable
+        // beneath the new BG dot and steals the popup).
+        updateOpenAPSPredictionDisplay()
     }
 
     // Populates (or clears) the dimmed "yesterday" comparison overlay on the main graph.
@@ -2066,6 +2071,12 @@ extension MainViewController {
         let displayType: PredictionDisplayType = Storage.shared.device.value == "Loop" ? .lines : Storage.shared.predictionDisplayType.value
         let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
         let predictionStart = openAPSPredUpdatedTime ?? Date().timeIntervalSince1970
+        // Drop prediction entries within ~1 min of the latest BG. Anything closer
+        // either (a) is a stale entry sitting at-or-before the new BG and would
+        // steal the chart's hit-test, or (b) is the loop's "now" prediction that
+        // visually duplicates the BG dot. The first kept entry is always cleanly
+        // separated from the BG dot.
+        let predictionMinTime = bgData.last.map { $0.date + 60 }
 
         let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
             ("ZT", "ZT", GraphDataIndex.ztPrediction.rawValue),
@@ -2095,7 +2106,7 @@ extension MainViewController {
                     for arr in allArrays where i < arr.count {
                         valuesAtIndex.append(arr[i])
                     }
-                    if !valuesAtIndex.isEmpty {
+                    if !valuesAtIndex.isEmpty, predictionMinTime.map({ t > $0 }) ?? true {
                         var yMin = max(valuesAtIndex.min()!, Double(globalVariables.minDisplayGlucose))
                         var yMax = min(valuesAtIndex.max()!, Double(globalVariables.maxDisplayGlucose))
                         // Ensure minimum ±1 mg/dL range so the cone is visible when predictions agree
@@ -2128,7 +2139,9 @@ extension MainViewController {
                         if i < graphdata.count {
                             let v = graphdata[i]
                             let clamped = min(max(Int(round(v)), globalVariables.minDisplayGlucose), globalVariables.maxDisplayGlucose)
-                            predictionData.append(ShareGlucoseData(sgv: clamped, date: t, direction: "flat"))
+                            if predictionMinTime.map({ t > $0 }) ?? true {
+                                predictionData.append(ShareGlucoseData(sgv: clamped, date: t, direction: "flat"))
+                            }
                             t += 300
                         }
                     }
@@ -2159,15 +2172,7 @@ extension MainViewController {
                 topPredictionBG = predictionVal + maxBGOffset
             }
 
-            if i == 0 {
-                if Storage.shared.showDots.value {
-                    colors.append(color.withAlphaComponent(0.0))
-                } else {
-                    colors.append(color.withAlphaComponent(1.0))
-                }
-            } else {
-                colors.append(color)
-            }
+            colors.append(color)
 
             let value = ChartDataEntry(
                 x: predictionData[i].date,
