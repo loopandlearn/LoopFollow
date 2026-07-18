@@ -15,21 +15,19 @@ These instructions allow you to build this Open-Source app without having access
 > * automatically builds once a month regardless of whether there are updates, on the second Sunday of the month
 > * if a scheduled run finds nothing new to build, the run is cancelled and shows as cancelled (grey) in the Actions list - a green check always means a new build was made and uploaded to TestFlight
 >
-> It also creates an alive branch, if you don't already have one. See [Why do I have an alive branch?](#why-do-i-have-an-alive-branch).
->
 > The [**Optional**](#optional) section provides instructions to modify the default behavior if desired.
 
 ## Introduction
 
 The setup steps are somewhat involved, but nearly all are one time steps. Subsequent builds are trivial. Your app must be updated once every 90 days, but it's a simple click to make a new build and can be done from anywhere.
 
-Note that installing with TestFlight requires the Apple ID account holder for the phone be 13 years or older (age varies with country). This can be circumvented by logging into Media & Purchase on the child's phone with an adult's account. More details on this can be found in [LoopDocs](https://loopkit.github.io/loopdocs/gh-actions/gh-deploy/#install-testflight-loop-for-child).
+Note that installing with TestFlight requires the Apple ID account holder for the phone be 13 years or older (age varies with country). This can be circumvented by logging into Media & Purchase on the child's phone with an adult's account. More details on this can be found in [LoopDocs](https://loopkit.github.io/loopdocs/browser/phone-install/#testflight-for-a-child).
 
 This method for building without a Mac was ported from Loop. If you have used this method for Loop or one of the other DIY apps (LoopCaregiver, Trio, xDrip4iOS), some of the steps can be re-used and the full set of instructions does not need to be repeated. This will be mentioned in relevant sections below.
 
-There are more detailed instructions in LoopDocs for doing Browser Builds of Loop and other apps, including troubleshooting and build errors. Please refer to [LoopDocs](https://loopkit.github.io/loopdocs/gh-actions/gh-other-apps/) for more details.
+There are more detailed instructions in LoopDocs for doing Browser Builds of Loop and other apps, including troubleshooting and build errors. Please refer to [LoopDocs](https://loopkit.github.io/loopdocs/browser/other-apps/) for more details.
 
-If you build multiple apps, it is strongly recommended that you configure a free *GitHub* organization and do all your building in the organization. This means you enter items one time for the organization (6 SECRETS required to build and 1 VARIABLE required to automatically update your certificates annually). Otherwise, those 6 SECRETS must be entered for every repository. Please refer to [LoopDocs: Use a *GitHub* Organization Account](https://loopkit.github.io/loopdocs/gh-actions/gh-other-apps/#use-a-github-organization-account).
+If you build multiple apps, it is strongly recommended that you configure a free *GitHub* organization and do all your building in the organization. This means you enter items one time for the organization (6 SECRETS required to build and 1 VARIABLE required to automatically update your certificates annually). Otherwise, those 6 SECRETS must be entered for every repository. Please refer to [LoopDocs: Create a Free *GitHub* Organization](https://loopkit.github.io/loopdocs/browser/secrets/#create-a-free-github-organization).
 
 ## Prerequisites
 
@@ -49,7 +47,7 @@ Each secret is indentified below by `ALL_CAPITAL_LETTER_NAMES`.
 * Be sure to save the 6 Secrets in a text file using a text editor
   * Do **NOT** use a smart editor, which might auto-correct and change case, because these Secrets are case sensitive
 
-Refer to [LoopDocs: Make a Secrets Reference File](https://loopkit.github.io/loopdocs/gh-actions/gh-first-time/#make-a-secrets-reference-file) for a handy template to use when saving your Secrets.
+Refer to [LoopDocs: Make a Secrets Reference File](https://loopkit.github.io/loopdocs/browser/intro-summary/#make-a-secrets-reference-file) for a handy template to use when saving your Secrets.
 
 ## Generate App Store Connect API Key
 
@@ -155,17 +153,7 @@ Once a year, you will get an email from Apple indicating your certificate will e
 
 ## TestFlight and Deployment Details
 
-For more details, please refer to [LoopDocs: Set Up Users](https://loopkit.github.io/loopdocs/gh-actions/gh-first-time/#set-up-users-and-access-testflight) and [LoopDocs: Deploy](https://loopkit.github.io/loopdocs/gh-actions/gh-deploy/)
-
-## Automatic Build FAQs
-
-### Why do I have an `alive` branch?
-
-If a GitHub repository has no activity (no commits are made) in 60 days, then GitHub disables the ability to use automated actions for that repository. We need to take action more frequently than that or the automated build process won't work.
-
-The `build_LoopFollow.yml` file uses a special branch called `alive` and adds a dummy commit to the `alive` branch at regular intervals. This "trick" keeps the Actions enabled so the automated build works.
-
-The branch `alive` is created automatically for you. Do not delete or rename it! Do not modify `alive` yourself; it is not used for building the app. (There are actually 2 alive branches: `alive-main` and `alive-dev`; they both serve a similar purpose and should be left alone.)
+For more details, please refer to [LoopDocs: TestFlight Overview](https://loopkit.github.io/loopdocs/browser/tf-users) and [LoopDocs: Install on Phone](https://loopkit.github.io/loopdocs/browser/phone-install/)
 
 ## OPTIONAL
 
@@ -197,16 +185,16 @@ To configure the automated build more granularly involves creating up to two env
 
 Note that the weekly and monthly scheduled actions will continue, but the actions are modified if one or more of these variables is set to false. **When a scheduled run ends without building, it shows as cancelled (grey) instead of successful - a green check always means a new build was made**.
 
-* If you want to manually decide when to update your repository to the latest commit, but you want the monthly builds and keep-alive to continue: set `SCHEDULED_SYNC` to false and either do not create `SCHEDULED_BUILD` or set it to true
+* If you want to manually decide when to update your repository to the latest commit, but you want the monthly builds to continue: set `SCHEDULED_SYNC` to false and either do not create `SCHEDULED_BUILD` or set it to true
 * If you want to only build when an update has been found: set `SCHEDULED_BUILD` to false and either do not create `SCHEDULED_SYNC` or set it to true
     * **Warning**: if no updates to your default branch are detected within 90 days, your previous TestFlight build may expire requiring a manual build
 
 |`SCHEDULED_SYNC`|`SCHEDULED_BUILD`|Automatic Actions|
 |---|---|---|
-| `true` (or NA) | `true` (or NA) | keep-alive, weekly update check (auto update/build), monthly build with auto update |
-| `true` (or NA) | `false` | keep-alive, weekly update check with auto update, only builds if update detected |
-| `false` | `true` (or NA) | keep-alive, monthly build, no auto update |
-| `false` | `false` | no automatic activity, no keep-alive |
+| `true` (or NA) | `true` (or NA) | weekly update check (auto update/build), monthly build with auto update |
+| `true` (or NA) | `false` | weekly update check with auto update, only builds if update detected |
+| `false` | `true` (or NA) | monthly build, no auto update |
+| `false` | `false` | no automatic activity |
 
 ### How to configure a variable
 
@@ -230,11 +218,10 @@ Your build will run on the following conditions:
 * Default behaviour:
   * Run weekly, every Sunday to check for changes; if there are changes, it will update your repository and build
   * Run monthly, on the second Sunday of the month, if there are changes, it will update your repository; regardless of changes, it will build
-  * Each time the action runs, it makes a keep-alive commit to the `alive` branch if necessary
   * If a scheduled run ends without building, it shows as cancelled (grey) instead of successful
-* If you disable any automation (both variables set to `false`), no updates, keep-alive or building happens when the scheduled action runs; the run shows as cancelled
-* If you disabled just scheduled synchronization (`SCHEDULED_SYNC` set to`false`), it will only build once a month, on the second Sunday of the month, no update will happen; keep-alive will run
-* If you disabled just scheduled build (`SCHEDULED_BUILD` set to `false`), it will run once weekly, every Sunday, to check for changes; if there are changes, it will update and build; keep-alive will run
+* If you disable any automation (both variables set to `false`), no updates or building happens when the scheduled action runs; the run shows as cancelled
+* If you disabled just scheduled synchronization (`SCHEDULED_SYNC` set to`false`), it will only build once a month, on the second Sunday of the month, no update will happen
+* If you disabled just scheduled build (`SCHEDULED_BUILD` set to `false`), it will run once weekly, every Sunday, to check for changes; if there are changes, it will update and build
 
 ## What if I build using more than one GitHub username
 
