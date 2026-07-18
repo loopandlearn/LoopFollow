@@ -44,6 +44,7 @@ class NightscoutUtils {
         case iage = "Insulin Change"
         case temporaryOverride = "Temporary Override"
         case temporaryOverrideCancel = "Temporary Override Cancel"
+        case dbSize
 
         var endpoint: String {
             switch self {
@@ -57,6 +58,8 @@ class NightscoutUtils {
                 return "/api/v1/devicestatus.json"
             case .temporaryOverride, .temporaryOverrideCancel:
                 return "/api/v2/notifications/loop"
+            case .dbSize:
+                return "/api/v2/properties/dbsize"
             }
         }
     }

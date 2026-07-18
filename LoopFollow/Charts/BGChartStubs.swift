@@ -79,6 +79,26 @@ extension MainViewController {
         chartModel.rebuild()
     }
 
+    // Removes the Loop forecast line. Used when the active system switches away from Loop.
+    func clearLoopPredictionGraph() {
+        guard !predictionData.isEmpty else { return }
+        predictionData.removeAll()
+        updatePredictionGraph()
+    }
+
+    // Removes the Trio/OpenAPS forecast (ZT/IOB/COB/UAM lines and the cone). Used when the active system switches away from Trio/OpenAPS.
+    func clearOpenAPSPredictionGraph() {
+        let hasLineData = !ztPredictionData.isEmpty || !iobPredictionData.isEmpty || !cobPredictionData.isEmpty || !uamPredictionData.isEmpty
+        guard hasLineData || !chartModel.cone.isEmpty else { return }
+        ztPredictionData = []
+        iobPredictionData = []
+        cobPredictionData = []
+        uamPredictionData = []
+        chartModel.cone = []
+        recomputeTopPredictionBG()
+        chartModel.rebuild()
+    }
+
     // Routes OpenAPS/Trio predictions either into a cone band or individual
     // prediction lines. Cone is only for OpenAPS-based backends; Loop always
     // uses lines.

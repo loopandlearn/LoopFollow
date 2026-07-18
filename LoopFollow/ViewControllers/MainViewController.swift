@@ -555,37 +555,6 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     @objc func refresh() {
         LogManager.shared.log(category: .general, message: "Refreshing")
 
-        // Clear prediction for both Loop or OpenAPS
-
-        // Check if Loop prediction data exists and clear it if necessary
-        if !predictionData.isEmpty {
-            predictionData.removeAll()
-            updatePredictionGraph()
-        }
-
-        // Check if OpenAPS prediction data exists and clear it if necessary
-        let openAPSDataIndices = [12, 13, 14, 15]
-        for dataIndex in openAPSDataIndices {
-            let hasData: Bool = {
-                switch dataIndex {
-                case 12: return !ztPredictionData.isEmpty
-                case 13: return !iobPredictionData.isEmpty
-                case 14: return !cobPredictionData.isEmpty
-                case 15: return !uamPredictionData.isEmpty
-                default: return false
-                }
-            }()
-            if hasData {
-                updatePredictionGraphGeneric(
-                    dataIndex: dataIndex,
-                    predictionData: [],
-                    chartLabel: "",
-                    color: UIColor.systemGray
-                )
-            }
-        }
-        chartModel.cone = []
-
         Observable.shared.minAgoText.value = "Refreshing"
         scheduleAllTasks()
         NightscoutSocketManager.shared.connectIfNeeded()
@@ -643,12 +612,6 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         //      number so fresh installs skip every migration.
         //   2. Update any other StorageValue defaults in Storage.swift that this new step
         //      mutates, so a fresh install ends up in the same state as a migrated user.
-
-        // Step 1: Released in v3.0.0 (2025-07-07). Can be removed after 2026-07-07.
-        if Storage.shared.migrationStep.value < 1 {
-            Storage.shared.migrateStep1()
-            Storage.shared.migrationStep.value = 1
-        }
 
         // Step 2: Released in v3.1.0 (2025-07-21). Can be removed after 2026-07-21.
         if Storage.shared.migrationStep.value < 2 {

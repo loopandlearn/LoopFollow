@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		18BA6357F867577712A116EB /* DBSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B81E18A2489A364AFC0A9E4 /* DBSize.swift */; };
 		2D8068C66833EEAED7B4BEB8 /* FutureCarbsCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EBAB9EECE7095238A558060 /* FutureCarbsCondition.swift */; };
 		2F99F2B5C902F3018383C086 /* BGChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F575C47A06818042D6CB8C /* BGChartView.swift */; };
 		374A77992F5BD8B200E96858 /* APNSClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374A77982F5BD8AB00E96858 /* APNSClient.swift */; };
@@ -67,6 +68,7 @@
 		65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */; };
 		66E3D12E66AA4534A144A54B /* BackgroundRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */; };
 		92664FA270DA9905E1F08676 /* BGChartStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C508E0E86BEC0B13280F34B /* BGChartStubs.swift */; };
+		9727B75402723679BD39CDE5 /* DBSizeTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBE9ECA96BEA20DBD21B570D /* DBSizeTask.swift */; };
 		9C7FB98C98BE4FF98F4815EE /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFBE69CEF18416D84959974 /* Telemetry.swift */; };
 		9F24B79D2722BB040AE3311F /* BGChartModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8CB992D98689FC7D019CEC /* BGChartModel.swift */; };
 		A1A1A10001000000A0CFEED1 /* APNsCredentialValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */; };
@@ -83,6 +85,7 @@
 		B500000000000000000000C2 /* QuickPickSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500000000000000000000C1 /* QuickPickSectionHeader.swift */; };
 		BB2C3D4E5F6A7B8C9D0E2F2A /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2C3D4E5F6A7B8C9D0E1F2A /* MainTabView.swift */; };
 		CC3D4E5F6A7B8C9D0E2F2A3B /* MoreMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3D4E5F6A7B8C9D0E1F2A3B /* MoreMenuView.swift */; };
+		D53B243FBA69EC2A82755CDF /* DBSizeAlarmEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EBF6ACF259782445DA1A7E /* DBSizeAlarmEditor.swift */; };
 		DD0247592DB2E89600FCADF6 /* AlarmCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */; };
 		DD0247712DB4337700FCADF6 /* BuildExpireCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD02475B2DB2E8FB00FCADF6 /* BuildExpireCondition.swift */; };
 		DD026E592EA2C8A200A39CB5 /* InsulinPrecisionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD026E582EA2C8A200A39CB5 /* InsulinPrecisionManager.swift */; };
@@ -106,7 +109,6 @@
 		DD0C0C682C48529400DBADDF /* Metric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C672C48529400DBADDF /* Metric.swift */; };
 		DD0C0C6B2C48562000DBADDF /* InsulinMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6A2C48562000DBADDF /* InsulinMetric.swift */; };
 		DD0C0C6D2C48606200DBADDF /* CarbMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */; };
-		DD4E5F6A7B8C9D0E2F2A3B4C /* RemoteContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E5F6A7B8C9D0E1F2A3B4C /* RemoteContentView.swift */; };
 		DD12D4872E1705E6004E0112 /* AlarmsContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD12D4862E1705E6004E0112 /* AlarmsContainerView.swift */; };
 		DD13BC752C3FD6210062313B /* InfoType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC742C3FD6200062313B /* InfoType.swift */; };
 		DD13BC772C3FD64E0062313B /* InfoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD13BC762C3FD64E0062313B /* InfoData.swift */; };
@@ -150,6 +152,7 @@
 		DD4AFB612DB68BBC00BB593F /* AlarmListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */; };
 		DD4AFB672DB68C5500BB593F /* UUID+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB662DB68C5500BB593F /* UUID+Identifiable.swift */; };
 		DD4AFB6B2DB6BF2A00BB593F /* Binding+Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4AFB6A2DB6BF2A00BB593F /* Binding+Optional.swift */; };
+		DD4E5F6A7B8C9D0E2F2A3B4C /* RemoteContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E5F6A7B8C9D0E1F2A3B4C /* RemoteContentView.swift */; };
 		DD50C10A2F60A00000000001 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DD50C10A2F60A00000000003 /* SocketIO */; };
 		DD50C10A2F60B00000000002 /* NightscoutSocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C10A2F60B00000000001 /* NightscoutSocketManager.swift */; };
 		DD50C10A2F60B00000000004 /* NightscoutSocketDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50C10A2F60B00000000003 /* NightscoutSocketDataHandler.swift */; };
@@ -260,8 +263,6 @@
 		DDCF9A882D85FD33004DF4DD /* AlarmData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A872D85FD33004DF4DD /* AlarmData.swift */; };
 		DDCF9A8C2D86005E004DF4DD /* AlarmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCF9A8B2D86005E004DF4DD /* AlarmManager.swift */; };
 		DDCFCAF22B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */; };
-		DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */; };
-		DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */; };
 		DDD10F032C518A6500D76A8E /* TreatmentResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */; };
 		DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F042C529DA200D76A8E /* ObservableValue.swift */; };
 		DDD10F072C529DE800D76A8E /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD10F062C529DE800D76A8E /* Observable.swift */; };
@@ -296,6 +297,7 @@
 		DDFF3D852D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D842D14279B00BF9D9E /* BackgroundRefreshSettingsView.swift */; };
 		DDFF3D872D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D862D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift */; };
 		DDFF3D892D1429AB00BF9D9E /* BackgroundRefreshType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFF3D882D1429AB00BF9D9E /* BackgroundRefreshType.swift */; };
+		E2BE9B6A33AE4F0FD750767E /* DBSizeCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0728C33E857F13E8D9C2AD /* DBSizeCondition.swift */; };
 		EE5F6A7B8C9D0E2F2A3B4C5D /* NightscoutContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5F6A7B8C9D0E1F2A3B4C5D /* NightscoutContentView.swift */; };
 		F19449721F3B792730A0F4FD /* PendingFutureCarb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9BEC26E4E48EF9B811A372 /* PendingFutureCarb.swift */; };
 		FC16A97A24996673003D6245 /* NightScout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A97924996673003D6245 /* NightScout.swift */; };
@@ -432,10 +434,6 @@
 		FCC0FAC224922A22003E610E /* DictionaryKeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC0FAC124922A22003E610E /* DictionaryKeyPath.swift */; };
 		FCC6885C2489559400A0279D /* blank.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885B2489559400A0279D /* blank.wav */; };
 		FCC6885E24896A6C00A0279D /* silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FCC6885D24896A6C00A0279D /* silence.mp3 */; };
-		FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886624898F8000A0279D /* UserDefaultsValue.swift */; };
-		FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */; };
-		FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886A24898FD800A0279D /* ObservationToken.swift */; };
-		FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886C2489909D00A0279D /* AnyConvertible.swift */; };
 		FCC6886F2489A53800A0279D /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC6886E2489A53800A0279D /* AppConstants.swift */; };
 		FCD2A27D24C9D044009F7B7B /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD2A27C24C9D044009F7B7B /* Globals.swift */; };
 		FCE537BC249A4D7D00F80BF8 /* carbBolusArrays.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE537BB249A4D7D00F80BF8 /* carbBolusArrays.swift */; };
@@ -476,6 +474,7 @@
 
 /* Begin PBXFileReference section */
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
+		21EBF6ACF259782445DA1A7E /* DBSizeAlarmEditor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DBSizeAlarmEditor.swift; sourceTree = "<group>"; };
 		2B9BEC26E4E48EF9B811A372 /* PendingFutureCarb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingFutureCarb.swift; sourceTree = "<group>"; };
 		2EBAB9EECE7095238A558060 /* FutureCarbsCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureCarbsCondition.swift; sourceTree = "<group>"; };
 		374A77982F5BD8AB00E96858 /* APNSClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNSClient.swift; sourceTree = "<group>"; };
@@ -496,6 +495,7 @@
 		37A4BDDC2F5B6B4A00EEB289 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
 		37E4DD0C2F7E0967000511C8 /* LALivenessStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LALivenessStore.swift; sourceTree = "<group>"; };
 		37E4DD0F2F7E0985000511C8 /* LALivenessMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LALivenessMarker.swift; sourceTree = "<group>"; };
+		5D0728C33E857F13E8D9C2AD /* DBSizeCondition.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DBSizeCondition.swift; sourceTree = "<group>"; };
 		654132E62E19EA7E00BDBE08 /* SimpleQRCodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleQRCodeScannerView.swift; sourceTree = "<group>"; };
 		654132E92E19F24800BDBE08 /* TOTPGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTPGenerator.swift; sourceTree = "<group>"; };
 		654134172E1DC09700BDBE08 /* OverridePresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetsView.swift; sourceTree = "<group>"; };
@@ -530,6 +530,7 @@
 		65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonHandler.swift; sourceTree = "<group>"; };
 		6C508E0E86BEC0B13280F34B /* BGChartStubs.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BGChartStubs.swift; sourceTree = "<group>"; };
 		7C8CB992D98689FC7D019CEC /* BGChartModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BGChartModel.swift; sourceTree = "<group>"; };
+		8B81E18A2489A364AFC0A9E4 /* DBSize.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DBSize.swift; sourceTree = "<group>"; };
 		A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNsCredentialValidator.swift; sourceTree = "<group>"; };
 		A1A1A10002000000A0CFEED2 /* LogRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogRedactor.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* StatsDisplayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsDisplayModel.swift; sourceTree = "<group>"; };
@@ -571,7 +572,6 @@
 		DD0C0C672C48529400DBADDF /* Metric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metric.swift; sourceTree = "<group>"; };
 		DD0C0C6A2C48562000DBADDF /* InsulinMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinMetric.swift; sourceTree = "<group>"; };
 		DD0C0C6C2C48606200DBADDF /* CarbMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbMetric.swift; sourceTree = "<group>"; };
-		DD4E5F6A7B8C9D0E1F2A3B4C /* RemoteContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteContentView.swift; sourceTree = "<group>"; };
 		DD12D4862E1705E6004E0112 /* AlarmsContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmsContainerView.swift; sourceTree = "<group>"; };
 		DD13BC742C3FD6200062313B /* InfoType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoType.swift; sourceTree = "<group>"; };
 		DD13BC762C3FD64E0062313B /* InfoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoData.swift; sourceTree = "<group>"; };
@@ -615,6 +615,7 @@
 		DD4AFB602DB68BBC00BB593F /* AlarmListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmListView.swift; sourceTree = "<group>"; };
 		DD4AFB662DB68C5500BB593F /* UUID+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UUID+Identifiable.swift"; sourceTree = "<group>"; };
 		DD4AFB6A2DB6BF2A00BB593F /* Binding+Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Binding+Optional.swift"; sourceTree = "<group>"; };
+		DD4E5F6A7B8C9D0E1F2A3B4C /* RemoteContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteContentView.swift; sourceTree = "<group>"; };
 		DD50C10A2F60B00000000001 /* NightscoutSocketManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSocketManager.swift; sourceTree = "<group>"; };
 		DD50C10A2F60B00000000003 /* NightscoutSocketDataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSocketDataHandler.swift; sourceTree = "<group>"; };
 		DD50C7542D0862770057AE6F /* ContactImageUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImageUpdater.swift; sourceTree = "<group>"; };
@@ -726,8 +727,6 @@
 		DDCF9A872D85FD33004DF4DD /* AlarmData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmData.swift; sourceTree = "<group>"; };
 		DDCF9A8B2D86005E004DF4DD /* AlarmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmManager.swift; sourceTree = "<group>"; };
 		DDCFCAF12B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = LoopFollowDisplayNameConfig.xcconfig; sourceTree = "<group>"; };
-		DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableUserDefaultsValue.swift; sourceTree = "<group>"; };
-		DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableUserDefaults.swift; sourceTree = "<group>"; };
 		DDD10F022C518A6500D76A8E /* TreatmentResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreatmentResponse.swift; sourceTree = "<group>"; };
 		DDD10F042C529DA200D76A8E /* ObservableValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableValue.swift; sourceTree = "<group>"; };
 		DDD10F062C529DE800D76A8E /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
@@ -763,6 +762,7 @@
 		DDFF3D862D14280500BF9D9E /* BackgroundRefreshSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshSettingsViewModel.swift; sourceTree = "<group>"; };
 		DDFF3D882D1429AB00BF9D9E /* BackgroundRefreshType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshType.swift; sourceTree = "<group>"; };
 		E7C2676561D686C6459CAA2D /* APNSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNSettingsView.swift; sourceTree = "<group>"; };
+		EBE9ECA96BEA20DBD21B570D /* DBSizeTask.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DBSizeTask.swift; sourceTree = "<group>"; };
 		ECA3EFB4037410B4973BB632 /* Pods-LoopFollow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.debug.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.debug.xcconfig"; sourceTree = "<group>"; };
 		EE5F6A7B8C9D0E1F2A3B4C5D /* NightscoutContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutContentView.swift; sourceTree = "<group>"; };
 		FC16A97924996673003D6245 /* NightScout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightScout.swift; sourceTree = "<group>"; };
@@ -901,10 +901,6 @@
 		FCC688592489554800A0279D /* BackgroundTaskAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskAudio.swift; sourceTree = "<group>"; };
 		FCC6885B2489559400A0279D /* blank.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blank.wav; sourceTree = "<group>"; };
 		FCC6885D24896A6C00A0279D /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
-		FCC6886624898F8000A0279D /* UserDefaultsValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValue.swift; sourceTree = "<group>"; };
-		FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsValueGroups.swift; sourceTree = "<group>"; };
-		FCC6886A24898FD800A0279D /* ObservationToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationToken.swift; sourceTree = "<group>"; };
-		FCC6886C2489909D00A0279D /* AnyConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyConvertible.swift; sourceTree = "<group>"; };
 		FCC6886E2489A53800A0279D /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		FCC688702489A57C00A0279D /* Loop Follow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Follow.entitlements"; sourceTree = "<group>"; };
 		FCD2A27C24C9D044009F7B7B /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
@@ -915,10 +911,50 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		37A4BDDE2F5B6B4A00EEB289 /* LoopFollowLAExtension */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = LoopFollowLAExtension; sourceTree = "<group>"; };
-		65AC25F52ECFD5E800421360 /* Stats */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Stats; sourceTree = "<group>"; };
-		65AC26702ED245DF00421360 /* Treatments */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Treatments; sourceTree = "<group>"; };
-		DDCC3AD72DDE1790006F1C10 /* Tests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Tests; sourceTree = "<group>"; };
+		37A4BDDE2F5B6B4A00EEB289 /* LoopFollowLAExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = LoopFollowLAExtension;
+			sourceTree = "<group>";
+		};
+		65AC25F52ECFD5E800421360 /* Stats */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Stats;
+			sourceTree = "<group>";
+		};
+		65AC26702ED245DF00421360 /* Treatments */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Treatments;
+			sourceTree = "<group>";
+		};
+		DDCC3AD72DDE1790006F1C10 /* Tests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1091,6 +1127,7 @@
 				DD0247582DB2E89600FCADF6 /* AlarmCondition.swift */,
 				DD0650EE2DCE96FF004D3B41 /* HighBGCondition.swift */,
 				DD0650F02DCE9A9E004D3B41 /* MissedReadingCondition.swift */,
+				5D0728C33E857F13E8D9C2AD /* DBSizeCondition.swift */,
 			);
 			path = AlarmCondition;
 			sourceTree = "<group>";
@@ -1229,6 +1266,7 @@
 				DD5334222C60ED3600062F9D /* IAge.swift */,
 				DD50C10A2F60B00000000001 /* NightscoutSocketManager.swift */,
 				DD50C10A2F60B00000000003 /* NightscoutSocketDataHandler.swift */,
+				8B81E18A2489A364AFC0A9E4 /* DBSize.swift */,
 			);
 			path = Nightscout;
 			sourceTree = "<group>";
@@ -1339,6 +1377,7 @@
 				DDC7E53E2DBD8A1600EB1127 /* LowBgAlarmEditor.swift */,
 				DD0650F22DCE9B3D004D3B41 /* MissedReadingEditor.swift */,
 				DD0650F82DCFE7BE004D3B41 /* FastDropAlarmEditor.swift */,
+				21EBF6ACF259782445DA1A7E /* DBSizeAlarmEditor.swift */,
 			);
 			path = Editors;
 			sourceTree = "<group>";
@@ -1357,7 +1396,6 @@
 			isa = PBXGroup;
 			children = (
 				FCC688512489363F00A0279D /* Framework */,
-				DDD10F002C510C6B00D76A8E /* ObservableUserDefaults.swift */,
 				DDD10F062C529DE800D76A8E /* Observable.swift */,
 				DD4878042C7B2C970048F05C /* Storage.swift */,
 				DD8316472DE49EE5004467AA /* Storage+Migrate.swift */,
@@ -1417,6 +1455,7 @@
 				DD9ACA032D32821200415D8A /* DeviceStatusTask.swift */,
 				DDEF503E2D32754A00999A5D /* ProfileTask.swift */,
 				DDEF503B2D31BE2A00999A5D /* TaskScheduler.swift */,
+				EBE9ECA96BEA20DBD21B570D /* DBSizeTask.swift */,
 			);
 			path = Task;
 			sourceTree = "<group>";
@@ -1716,9 +1755,6 @@
 		FCC688512489363F00A0279D /* Framework */ = {
 			isa = PBXGroup;
 			children = (
-				FCC6886624898F8000A0279D /* UserDefaultsValue.swift */,
-				FCC6886824898FB100A0279D /* UserDefaultsValueGroups.swift */,
-				DDD10EFE2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift */,
 				DDD10F042C529DA200D76A8E /* ObservableValue.swift */,
 				DD4878022C7B297E0048F05C /* StorageValue.swift */,
 				DD16AF0C2C98485400FB655A /* SecureStorageValue.swift */,
@@ -1742,8 +1778,6 @@
 				DDF6999C2C5AAA4C0058A8D9 /* Views */,
 				FCC6886E2489A53800A0279D /* AppConstants.swift */,
 				BDFBE69CEF18416D84959974 /* Telemetry.swift */,
-				FCC6886A24898FD800A0279D /* ObservationToken.swift */,
-				FCC6886C2489909D00A0279D /* AnyConvertible.swift */,
 				FCC688592489554800A0279D /* BackgroundTaskAudio.swift */,
 				A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */,
 				A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */,
@@ -2186,7 +2220,6 @@
 				DD7FFAFD2A72953000C3A304 /* EKEventStore+Extensions.swift in Sources */,
 				656F8C122E49F3780008DC1D /* QRCodeGenerator.swift in Sources */,
 				6541341A2E1DC27900BDBE08 /* OverridePresetData.swift in Sources */,
-				FCC6886724898F8000A0279D /* UserDefaultsValue.swift in Sources */,
 				DD7F4C092DD504A700D449E9 /* OverrideStartCondition.swift in Sources */,
 				DDEF503F2D32754F00999A5D /* ProfileTask.swift in Sources */,
 				DD7F4C052DD4BBE200D449E9 /* NotLoopingCondition.swift in Sources */,
@@ -2215,7 +2248,6 @@
 				DD07B5C929E2F9C400C6A635 /* NightscoutUtils.swift in Sources */,
 				DDCF9A8C2D86005E004DF4DD /* AlarmManager.swift in Sources */,
 				DDCC3A4F2DDC5B54006F1C10 /* BatteryDropCondition.swift in Sources */,
-				FCC6886924898FB100A0279D /* UserDefaultsValueGroups.swift in Sources */,
 				DDF2C0122BEFB733007A20E6 /* AppVersionManager.swift in Sources */,
 				DDB9FC7B2DDB573F00EFAA76 /* IOBCondition.swift in Sources */,
 				DD7E19862ACDA59700DBD158 /* BGCheck.swift in Sources */,
@@ -2338,7 +2370,6 @@
 				DDC6CA492DD8E47A0060EE25 /* PumpVolumeCondition.swift in Sources */,
 				DD9ACA0A2D33095600415D8A /* MinAgoTask.swift in Sources */,
 				DD9ED0CC2D35526E000D2A63 /* SearchBar.swift in Sources */,
-				DDD10EFF2C510C3C00D76A8E /* ObservableUserDefaultsValue.swift in Sources */,
 				DDB9FC7D2DDB575300EFAA76 /* IOBAlarmEditor.swift in Sources */,
 				DD58171A2D299EF80041FB98 /* DexcomHeartbeatBluetoothDevice.swift in Sources */,
 				DD7F4C0B2DD51C5500D449E9 /* OverrideEndCondition.swift in Sources */,
@@ -2376,7 +2407,6 @@
 				DD493AD92ACF2171009A6922 /* Carbs.swift in Sources */,
 				DD493AE92ACF2445009A6922 /* BGData.swift in Sources */,
 				DD0650A92DCA8A10004D3B41 /* AlarmBGSection.swift in Sources */,
-				FCC6886B24898FD800A0279D /* ObservationToken.swift in Sources */,
 				DD4AFB6B2DB6BF2A00BB593F /* Binding+Optional.swift in Sources */,
 				DD608A082C1F584900F91132 /* DeviceStatusLoop.swift in Sources */,
 				DD5DA27C2DC930D6003D44FC /* GlucoseValue.swift in Sources */,
@@ -2394,7 +2424,6 @@
 				DD4878132C7B750D0048F05C /* TempTargetView.swift in Sources */,
 				65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */,
 				DD0C0C682C48529400DBADDF /* Metric.swift in Sources */,
-				FCC6886D2489909D00A0279D /* AnyConvertible.swift in Sources */,
 				DDC6CA432DD8CED20060EE25 /* SensorAgeCondition.swift in Sources */,
 				DD7F4C212DD66BB200D449E9 /* FastRiseAlarmEditor.swift in Sources */,
 				DD0C0C662C46E54C00DBADDF /* InfoDataSeparator.swift in Sources */,
@@ -2432,7 +2461,6 @@
 				379BECAA2F6588300069DC62 /* RestartLiveActivityIntent.swift in Sources */,
 				DDCF9A802D85FD0B004DF4DD /* Alarm.swift in Sources */,
 				DD7F4C132DD51FD500D449E9 /* TempTargetEndCondition.swift in Sources */,
-				DDD10F012C510C6B00D76A8E /* ObservableUserDefaults.swift in Sources */,
 				DD16AF0D2C98485400FB655A /* SecureStorageValue.swift in Sources */,
 				DDC7E5CF2DC77C2000EB1127 /* SnoozerViewModel.swift in Sources */,
 				DD2C2E4F2D3B8AF1006413A5 /* NightscoutSettingsView.swift in Sources */,
@@ -2455,6 +2483,10 @@
 				9F24B79D2722BB040AE3311F /* BGChartModel.swift in Sources */,
 				2F99F2B5C902F3018383C086 /* BGChartView.swift in Sources */,
 				92664FA270DA9905E1F08676 /* BGChartStubs.swift in Sources */,
+				18BA6357F867577712A116EB /* DBSize.swift in Sources */,
+				9727B75402723679BD39CDE5 /* DBSizeTask.swift in Sources */,
+				E2BE9B6A33AE4F0FD750767E /* DBSizeCondition.swift in Sources */,
+				D53B243FBA69EC2A82755CDF /* DBSizeAlarmEditor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2862,7 +2894,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		DD50C10A2F60A00000000002 /* XCRemoteSwiftPackageReference "socket" */ = {
+		DD50C10A2F60A00000000002 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
 			requirement = {
@@ -2875,7 +2907,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		DD50C10A2F60A00000000003 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = DD50C10A2F60A00000000002 /* XCRemoteSwiftPackageReference "socket" */;
+			package = DD50C10A2F60A00000000002 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */;
 			productName = SocketIO;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -34,6 +34,7 @@ class AlarmManager {
             BatteryCondition.self,
             BatteryDropCondition.self,
             FutureCarbsCondition.self,
+            DBSizeCondition.self,
         ]
     ) {
         var dict = [AlarmType: AlarmCondition]()
