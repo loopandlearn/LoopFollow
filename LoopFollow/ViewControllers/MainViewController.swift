@@ -623,12 +623,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         //   2. Update any other StorageValue defaults in Storage.swift that this new step
         //      mutates, so a fresh install ends up in the same state as a migrated user.
 
-        // Step 1: Released in v3.0.0 (2025-07-07). Can be removed after 2026-07-07.
-        if Storage.shared.migrationStep.value < 1 {
-            Storage.shared.migrateStep1()
-            Storage.shared.migrationStep.value = 1
-        }
-
         // Step 2: Released in v3.1.0 (2025-07-21). Can be removed after 2026-07-21.
         if Storage.shared.migrationStep.value < 2 {
             Storage.shared.migrateStep2()
