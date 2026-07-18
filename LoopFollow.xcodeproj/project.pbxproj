@@ -121,6 +121,8 @@
 		DD2C2E512D3B8B0C006413A5 /* NightscoutSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */; };
 		DD485F142E454B2600CE8CBF /* SecureMessenger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD485F132E454B2600CE8CBF /* SecureMessenger.swift */; };
 		DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878022C7B297E0048F05C /* StorageValue.swift */; };
+		5106EAD100000000000000A2 /* StorageReadiness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5106EAD100000000000000A1 /* StorageReadiness.swift */; };
+		5106EAD100000000000000B2 /* StorageLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5106EAD100000000000000B1 /* StorageLoadingView.swift */; };
 		DD4878052C7B2C970048F05C /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878042C7B2C970048F05C /* Storage.swift */; };
 		DD4878082C7B30BF0048F05C /* RemoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */; };
 		DD48780A2C7B30D40048F05C /* RemoteSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */; };
@@ -584,6 +586,8 @@
 		DD2C2E502D3B8B0B006413A5 /* NightscoutSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutSettingsViewModel.swift; sourceTree = "<group>"; };
 		DD485F132E454B2600CE8CBF /* SecureMessenger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureMessenger.swift; sourceTree = "<group>"; };
 		DD4878022C7B297E0048F05C /* StorageValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageValue.swift; sourceTree = "<group>"; };
+		5106EAD100000000000000A1 /* StorageReadiness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageReadiness.swift; sourceTree = "<group>"; };
+		5106EAD100000000000000B1 /* StorageLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageLoadingView.swift; sourceTree = "<group>"; };
 		DD4878042C7B2C970048F05C /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		DD4878072C7B30BF0048F05C /* RemoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsView.swift; sourceTree = "<group>"; };
 		DD4878092C7B30D40048F05C /* RemoteSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettingsViewModel.swift; sourceTree = "<group>"; };
@@ -1515,6 +1519,7 @@
 			children = (
 				FC9788172485969B00A7906C /* AppDelegate.swift */,
 				AA1B2C3D4E5F6A7B8C9D0E1F /* LoopFollowApp.swift */,
+				5106EAD100000000000000B1 /* StorageLoadingView.swift */,
 				BB2C3D4E5F6A7B8C9D0E1F2A /* MainTabView.swift */,
 				FC9788272485969C00A7906C /* LaunchScreen.storyboard */,
 			);
@@ -1740,6 +1745,7 @@
 				DDD10F042C529DA200D76A8E /* ObservableValue.swift */,
 				DD4878022C7B297E0048F05C /* StorageValue.swift */,
 				DD16AF0C2C98485400FB655A /* SecureStorageValue.swift */,
+				5106EAD100000000000000A1 /* StorageReadiness.swift */,
 			);
 			path = Framework;
 			sourceTree = "<group>";
@@ -2423,6 +2429,8 @@
 				DD026E5B2EA2C9C300A39CB5 /* InsulinFormatter.swift in Sources */,
 				DD5334B02D1447C500CDD6EA /* BLEManager.swift in Sources */,
 				DD4878032C7B297E0048F05C /* StorageValue.swift in Sources */,
+				5106EAD100000000000000A2 /* StorageReadiness.swift in Sources */,
+				5106EAD100000000000000B2 /* StorageLoadingView.swift in Sources */,
 				FC1BDD2B24A22650001B652C /* Stats.swift in Sources */,
 				DDA9ACAC2D6B317100E6F1A9 /* ContactType.swift in Sources */,
 				DDD10F052C529DA200D76A8E /* ObservableValue.swift in Sources */,
