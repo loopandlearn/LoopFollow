@@ -149,8 +149,15 @@ if [[ $confirm =~ ^[Yy]$ ]]; then
   for cmd in "${push_cmds[@]}"; do echo "+ $cmd"; bash -c "$cmd"; done
   echo "🎉  All pushes completed."
 
+  # --- resolve the GitHub repo explicitly so gh doesn't depend on a default ----
+  # Clones with multiple remotes have no inferred default repo, which makes
+  # `gh pr create` fail. Derive owner/repo from the origin remote URL.
+  # Handles both https://github.com/owner/repo(.git) and git@github.com:owner/repo(.git)
+  REPO_SLUG="$(git remote get-url origin | sed -E -e 's#\.git$##' -e 's#^.*github\.com[:/]##')"
+
   echo; echo "📝  Opening sync PR ${RELEASE_BRANCH} → ${DEV_BRANCH} …"
   gh pr create \
+    --repo "$REPO_SLUG" \
     --base "$DEV_BRANCH" \
     --head "$RELEASE_BRANCH" \
     --title "Sync v${new_ver} version bump to dev" \
@@ -162,6 +169,7 @@ if [[ $confirm =~ ^[Yy]$ ]]; then
 
   echo; echo "📝  Opening release PR ${RELEASE_BRANCH} → ${MAIN_BRANCH} …"
   gh pr create \
+    --repo "$REPO_SLUG" \
     --base "$MAIN_BRANCH" \
     --head "$RELEASE_BRANCH" \
     --title "Release v${new_ver}" \
