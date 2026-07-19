@@ -157,7 +157,7 @@ if [[ $confirm =~ ^[Yy]$ ]]; then
 
 Merging this PR triggers the tagging workflow, which creates tag \`v${new_ver}\` from \`LOOP_FOLLOW_MARKETING_VERSION\` in \`Config.xcconfig\`.
 
-⚠️ **Use \"Create a merge commit\"** (not squash or rebase) so \`main\` keeps the original feature-PR commits. Rebase rewrites them to new SHAs, which breaks GitHub's auto-generated release notes (no PR list, only the release author is credited) and diverges \`main\` from \`dev\`."
+⚠️ **Use \"Create a merge commit\"** (not squash or rebase) so \`main\` keeps the original feature-PR commits."
 
   echo; echo "🎉  All repos updated to v${new_ver} (local). Release PRs opened (sync → dev, release → main)."
   echo "👉  Review and merge both PRs — the tag will be created automatically by .github/workflows/tag_on_main.yml."
