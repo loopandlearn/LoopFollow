@@ -2,7 +2,6 @@
 // MainViewController.swift
 
 import AVFAudio
-import Charts
 import Combine
 import CoreBluetooth
 import EventKit
@@ -23,7 +22,7 @@ private struct APNSCredentialSnapshot: Equatable {
     let lfKeyId: String
 }
 
-class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificationCenterDelegate {
+class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     /// The single, long-lived MainViewController that owns the app's data
     /// pipeline (scheduleAllTasks). Held strongly so it stays alive — and the
     /// engine keeps running — regardless of which tabs are visible or whether
@@ -41,8 +40,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
         vc.loadViewIfNeeded()
     }
 
-    var BGChart: LineChartView!
-    var BGChartFull: LineChartView!
     var statsDisplayModel = StatsDisplayModel()
 
     /// The hosting controller's view — hidden during loading / first-time setup.
@@ -90,6 +87,10 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     var overrideGraphData: [DataStructs.overrideStruct] = []
     var tempTargetGraphData: [DataStructs.tempTargetStruct] = []
     var predictionData: [ShareGlucoseData] = []
+    var ztPredictionData: [ShareGlucoseData] = []
+    var iobPredictionData: [ShareGlucoseData] = []
+    var cobPredictionData: [ShareGlucoseData] = []
+    var uamPredictionData: [ShareGlucoseData] = []
     var openAPSPredBGs: [String: [Double]]?
     var openAPSPredUpdatedTime: TimeInterval?
     var bgCheckData: [ShareGlucoseData] = []
@@ -97,7 +98,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
     var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
     var noteGraphData: [DataStructs.noteStruct] = []
-    var chartData = LineChartData()
     var deviceBatteryData: [DataStructs.batteryStruct] = []
     var lastCalDate: Double = 0
     var latestLoopStatusString = ""
@@ -127,11 +127,11 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     // Stores the timestamp of the last BG value that was spoken.
     var lastSpokenBGDate: TimeInterval = 0
 
-    var autoScrollPauseUntil: Date?
-
     var IsNotLooping = false
 
     let contactImageUpdater = ContactImageUpdater()
+
+    let chartModel = BGChartModel()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -150,17 +150,10 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     private func setupUI() {
         view.backgroundColor = .systemBackground
 
-        BGChart = LineChartView()
-        BGChart.backgroundColor = .systemBackground
-
-        BGChartFull = LineChartView()
-        BGChartFull.backgroundColor = .systemBackground
-
         infoManager = InfoManager()
 
         let mainView = MainHomeView(
-            bgChart: BGChart,
-            bgChartFull: BGChartFull,
+            chartModel: chartModel,
             infoManager: infoManager,
             statsModel: statsDisplayModel,
             onRefresh: { [weak self] in self?.refresh() },
@@ -213,9 +206,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
 
         // setup show/hide graphs (first-time setup check)
         updateGraphVisibility()
-
-        BGChart.delegate = self
-        BGChartFull.delegate = self
 
         // Apply initial appearance mode
         updateAppearance(Storage.shared.appearanceMode.value)
@@ -961,16 +951,6 @@ class MainViewController: UIViewController, ChartViewDelegate, UNUserNotificatio
     }
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive _: UNNotificationResponse, withCompletionHandler _: @escaping () -> Void) {}
-
-    // User has scrolled the chart
-    func chartTranslated(_: ChartViewBase, dX _: CGFloat, dY _: CGFloat) {
-        let isViewingLatestData = abs(BGChart.highestVisibleX - BGChart.chartXMax) < 0.001
-        if isViewingLatestData {
-            autoScrollPauseUntil = nil // User is back at the latest data, allow auto-scrolling
-        } else {
-            autoScrollPauseUntil = Date().addingTimeInterval(5 * 60) // User is viewing historical data, pause auto-scrolling
-        }
-    }
 
     func calculateMaxBgGraphValue() -> Float {
         return max(Float(topBG), Float(topPredictionBG))
