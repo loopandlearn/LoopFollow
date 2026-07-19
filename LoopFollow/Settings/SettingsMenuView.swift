@@ -339,8 +339,6 @@ struct AggregatedStatsViewWrapper: View {
 
 // MARK: – UIKit helpers (unchanged)
 
-import UIKit
-
 extension UIApplication {
     var topMost: UIViewController? {
         // `keyWindow` is deprecated and returns nil on Mac Catalyst / multi-window iPad.
