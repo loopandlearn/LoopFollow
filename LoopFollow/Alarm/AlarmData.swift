@@ -23,4 +23,5 @@ struct AlarmData: Codable {
     let latestPumpBattery: Double?
     let batteryHistory: [DataStructs.batteryStruct]
     let recentCarbs: [CarbSample]
+    let dbSizePercentage: Double?
 }

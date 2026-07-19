@@ -15,6 +15,10 @@ extension MainViewController {
     func deviceStatusAction() {
         // If no NS config, we wait 60s before trying again:
         guard IsNightscoutEnabled() else {
+            // No device-status source (e.g. Dexcom-only): drop any forecast left over
+            // from a previous Loop/Trio source so it doesn't linger on the chart.
+            clearLoopPredictionGraph()
+            clearOpenAPSPredictionGraph()
             TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(60))
             return
         }

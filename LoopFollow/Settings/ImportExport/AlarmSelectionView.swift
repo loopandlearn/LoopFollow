@@ -239,6 +239,8 @@ struct AlarmSelectionRow: View {
             return "Temp Target Ended"
         case .buildExpire:
             return "Looping app expiration"
+        case .dbSize:
+            return "Nightscout Database Size"
         }
     }
 }
