@@ -25,6 +25,14 @@ struct PhoneBatteryAlarmEditor: View {
                 value: $alarm.threshold
             )
 
+            Section(
+                header: Text("CHARGING"),
+                footer: Text("Stay silent while the phone is charging. Requires the "
+                    + "uploader to report charging status; if it doesn't, the alert still sounds.")
+            ) {
+                Toggle("Skip while charging", isOn: $alarm.suppressIfCharging)
+            }
+
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)

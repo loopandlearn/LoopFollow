@@ -43,6 +43,14 @@ struct LowBgAlarmEditor: View {
                 value: $alarm.predictiveMinutes
             )
 
+            Section(
+                header: Text("RISING BG"),
+                footer: Text("Stay silent while BG is rising. The alert only sounds "
+                    + "when the latest reading is flat or still falling.")
+            ) {
+                Toggle("Skip if BG is rising", isOn: $alarm.suppressIfRising)
+            }
+
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)

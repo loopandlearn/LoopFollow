@@ -136,14 +136,16 @@ extension MainViewController {
             if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
                let upbat = uploader["battery"] as? Double
             {
+                let isCharging = uploader["isCharging"] as? Bool
                 let batteryText: String
-                if let isCharging = uploader["isCharging"] as? Bool, isCharging {
+                if isCharging == true {
                     batteryText = "⚡️ " + String(format: "%.0f", upbat) + "%"
                 } else {
                     batteryText = String(format: "%.0f", upbat) + "%"
                 }
                 infoManager.updateInfoData(type: .battery, value: batteryText, numericValue: upbat)
                 Observable.shared.deviceBatteryLevel.value = upbat
+                Observable.shared.deviceBatteryIsCharging.value = isCharging
 
                 let timestamp = uploader["timestamp"] as? Date ?? Date()
                 let currentBattery = DataStructs.batteryStruct(batteryLevel: upbat, timestamp: timestamp)
