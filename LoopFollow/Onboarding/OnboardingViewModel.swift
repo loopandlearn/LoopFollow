@@ -311,6 +311,7 @@ final class OnboardingViewModel: ObservableObject {
                  detail: "Warns when glucose is low, now or soon.",
                  requiresNightscout: false)
             {
+                $0.name = "Low glucose"
                 $0.belowBG = 70
                 $0.predictiveMinutes = 20
             },
@@ -318,6 +319,7 @@ final class OnboardingViewModel: ObservableObject {
                  detail: "A separate warning for when glucose is very low.",
                  requiresNightscout: false)
             {
+                $0.name = "Urgent low"
                 $0.belowBG = 54
                 $0.predictiveMinutes = 0
                 $0.persistentMinutes = 0

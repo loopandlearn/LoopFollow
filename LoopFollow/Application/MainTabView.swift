@@ -69,12 +69,15 @@ struct MainTabView: View {
             // prompt is deferred until onboarding is dismissed so the two never
             // appear on top of one another.
             if !Storage.shared.hasCompletedOnboarding.value {
+                Observable.shared.isOnboardingActive.value = true
                 showOnboarding = true
             } else {
                 runPostOnboardingPrompts()
             }
         }
         .fullScreenCover(isPresented: $showOnboarding, onDismiss: {
+            Observable.shared.isOnboardingActive.value = false
+
             // Covers both finishing and skipping onboarding — the telemetry and
             // notification steps live inside the flow, so anyone who skips still
             // needs these handled here.

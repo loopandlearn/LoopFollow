@@ -58,5 +58,9 @@ class Observable {
     /// Currently visible app-wide banner (nil = hidden). Managed by BannerManager.
     var activeBanner = ObservableValue<BannerMessage?>(default: nil)
 
+    /// True while the onboarding cover is on screen; AlarmManager doesn't act
+    /// on alarms while set. In-memory, so background launches are unaffected.
+    var isOnboardingActive = ObservableValue<Bool>(default: false)
+
     private init() {}
 }
