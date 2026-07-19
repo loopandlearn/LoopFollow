@@ -19,6 +19,14 @@ extension MainViewController {
             to: Date().addingTimeInterval(60)
         )
 
+        // A deconfigured source can no longer be in an error state.
+        if Storage.shared.shareUserName.value == "" || Storage.shared.sharePassword.value == "" {
+            BannerManager.shared.clear(.dexcom)
+        }
+        if !IsNightscoutEnabled() {
+            BannerManager.shared.clear(.nightscout)
+        }
+
         // If no Dexcom credentials and no Nightscout, schedule a retry in 60 seconds.
         if Storage.shared.shareUserName.value == "",
            Storage.shared.sharePassword.value == "",

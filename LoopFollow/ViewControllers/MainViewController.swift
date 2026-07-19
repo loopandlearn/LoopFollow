@@ -218,9 +218,9 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // when runMigrationsIfNeeded() is called. This catches migrations deferred by a
         // background BGAppRefreshTask launch in Before-First-Unlock state.
         notificationCenter.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
-        // Posted by AppDelegate after Storage.reloadAll has refreshed every StorageValue
-        // following a BFU launch. If we're alive when this fires, our scheduled tasks
-        // were set up with BFU defaults (url='') and need to be redone.
+        // Posted by AppDelegate after BFU recovery. Vestigial with the readiness gate
+        // (this controller is built only after storage is ready, so it never fires
+        // while we're alive); retained one release as a safety net.
         notificationCenter.addObserver(self, selector: #selector(handleBFUReloadCompleted), name: .bfuReloadCompleted, object: nil)
 
         #if !targetEnvironment(macCatalyst)
@@ -680,8 +680,9 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     }
 
     @objc func appCameToForeground() {
-        // BFU recovery (Storage.reloadAll) is driven by AppDelegate; this controller
-        // reacts via .bfuReloadCompleted in handleBFUReloadCompleted() above.
+        // BFU recovery (StorageReadiness.recover) is driven by AppDelegate before this
+        // controller exists (the readiness gate), so handleBFUReloadCompleted() above
+        // is a vestigial no-op in the gated flow.
 
         // reset screenlock state if needed
         UIApplication.shared.isIdleTimerDisabled = Storage.shared.screenlockSwitchState.value

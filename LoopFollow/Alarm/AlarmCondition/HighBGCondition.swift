@@ -35,6 +35,16 @@ struct HighBGCondition: AlarmCondition {
             }
         }
 
+        // Optional: stay silent while the latest reading is below the previous one;
+        // only alarm when BG is flat or still rising.
+        if alarm.suppressIfFalling, data.bgReadings.count >= 2 {
+            let last = data.bgReadings[data.bgReadings.count - 1]
+            let previous = data.bgReadings[data.bgReadings.count - 2]
+            if last.sgv > 0, previous.sgv > 0, last.sgv < previous.sgv {
+                return false
+            }
+        }
+
         return persistentOK
     }
 }

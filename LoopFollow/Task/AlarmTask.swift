@@ -50,6 +50,7 @@ extension MainViewController {
                 IOB: self.latestIOB?.value,
                 recentBoluses: bolusEntries,
                 latestBattery: latestBattery,
+                latestBatteryIsCharging: Observable.shared.deviceBatteryIsCharging.value,
                 latestPumpBattery: latestPumpBattery,
                 batteryHistory: self.deviceBatteryData,
                 recentCarbs: recentCarbs,

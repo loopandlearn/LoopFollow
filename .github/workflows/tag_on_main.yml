@@ -17,6 +17,10 @@ on:
   push:
     branches:
       - main
+  # Manual fallback: if the push-triggered run was ever skipped (e.g. a commit
+  # with [skip ci] landing on main), the tag can be created by dispatching this
+  # workflow against main. It is idempotent — it skips if the tag already exists.
+  workflow_dispatch:
 
 jobs:
   tag:

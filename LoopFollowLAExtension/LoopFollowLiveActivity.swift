@@ -44,60 +44,27 @@ private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityA
 
 // MARK: - Live Activity widget
 
-/// Single widget for all supported OS versions.
-/// - iOS 18+: enables supplemental `.small` family and routes via `LockScreenFamilyAdaptiveView`.
-/// - iOS 16.1–17.x: uses the regular lock screen view.
-@available(iOSApplicationExtension 16.1, *)
+/// Single widget for the Live Activity. Enables the supplemental `.small` family
+/// (CarPlay Dashboard / Watch Smart Stack) and routes the lock screen layout via
+/// `LockScreenFamilyAdaptiveView`.
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
-        if #available(iOSApplicationExtension 18.0, *) {
-            return ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-                LockScreenFamilyAdaptiveView(state: context.state)
-                    .id(context.state.seq)
-                    .background(
-                        LALivenessMarker(
-                            seq: context.state.seq,
-                            producedAt: context.state.producedAt
-                        )
+        ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
+            LockScreenFamilyAdaptiveView(state: context.state)
+                .id(context.state.seq)
+                .background(
+                    LALivenessMarker(
+                        seq: context.state.seq,
+                        producedAt: context.state.producedAt
                     )
-                    .activitySystemActionForegroundColor(.white)
-                    .applyActivityContentMarginsFixIfAvailable()
-                    .widgetURL(URL(string: "\(AppGroupID.urlScheme)://la-tap")!)
-            } dynamicIsland: { context in
-                makeDynamicIsland(context: context)
-            }
-            .supplementalActivityFamilies([.small])
-        } else {
-            return ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-                LockScreenLiveActivityView(state: context.state)
-                    .id(context.state.seq)
-                    .background(
-                        LALivenessMarker(
-                            seq: context.state.seq,
-                            producedAt: context.state.producedAt
-                        )
-                    )
-                    .activitySystemActionForegroundColor(.white)
-                    .activityBackgroundTint(LAColors.backgroundTint(for: context.state.snapshot))
-                    .applyActivityContentMarginsFixIfAvailable()
-                    .widgetURL(URL(string: "\(AppGroupID.urlScheme)://la-tap")!)
-            } dynamicIsland: { context in
-                makeDynamicIsland(context: context)
-            }
+                )
+                .activitySystemActionForegroundColor(.white)
+                .contentMargins(.all, 0)
+                .widgetURL(URL(string: "\(AppGroupID.urlScheme)://la-tap")!)
+        } dynamicIsland: { context in
+            makeDynamicIsland(context: context)
         }
-    }
-}
-
-// MARK: - Live Activity content margins helper
-
-private extension View {
-    @ViewBuilder
-    func applyActivityContentMarginsFixIfAvailable() -> some View {
-        if #available(iOS 17.0, *) {
-            contentMargins(Edge.Set.all, 0)
-        } else {
-            self
-        }
+        .supplementalActivityFamilies([.small])
     }
 }
 
@@ -106,7 +73,6 @@ private extension View {
 /// Reads the activityFamily environment value and routes to the appropriate layout.
 /// - `.small` → CarPlay Dashboard & Watch Smart Stack
 /// - everything else → full lock screen layout
-@available(iOS 18.0, *)
 private struct LockScreenFamilyAdaptiveView: View {
     let state: GlucoseLiveActivityAttributes.ContentState
 
@@ -125,7 +91,6 @@ private struct LockScreenFamilyAdaptiveView: View {
 
 // MARK: - Small family view (CarPlay Dashboard + Watch Smart Stack)
 
-@available(iOS 18.0, *)
 private struct SmallFamilyView: View {
     let snapshot: GlucoseSnapshot
 
