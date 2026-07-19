@@ -1,12 +1,13 @@
 // LoopFollow
 // MainHomeView.swift
 
-import Charts
 import SwiftUI
 
 struct MainHomeView: View {
-    let bgChart: LineChartView
-    let bgChartFull: LineChartView
+    // Deliberately not @ObservedObject: this view only passes the model on.
+    // The chart views observe what they each need, so data and (especially)
+    // per-frame pan/zoom updates don't re-evaluate this whole screen.
+    let chartModel: BGChartModel
     @ObservedObject var infoManager: InfoManager
     @ObservedObject var statsModel: StatsDisplayModel
 
@@ -53,11 +54,11 @@ struct MainHomeView: View {
             .fixedSize(horizontal: false, vertical: true)
 
             // Main chart (fills remaining space)
-            LineChartWrapper(chartView: bgChart)
+            BGChartView(model: chartModel, config: .main)
 
             // Small overview chart
             if showSmallGraph.value {
-                LineChartWrapper(chartView: bgChartFull)
+                BGChartView(model: chartModel, config: .small)
                     .frame(height: CGFloat(smallGraphHeight.value))
             }
 

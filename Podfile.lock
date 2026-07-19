@@ -1,19 +1,8 @@
 PODS:
-  - Charts (4.1.0):
-    - Charts/Core (= 4.1.0)
-  - Charts/Core (4.1.0):
-    - SwiftAlgorithms (~> 1.0)
   - ShareClient (1.2)
-  - SwiftAlgorithms (1.0.0)
 
 DEPENDENCIES:
-  - Charts
   - ShareClient (from `https://github.com/loopandlearn/dexcom-share-client-swift.git`, branch `loopfollow`)
-
-SPEC REPOS:
-  trunk:
-    - Charts
-    - SwiftAlgorithms
 
 EXTERNAL SOURCES:
   ShareClient:
@@ -26,10 +15,8 @@ CHECKOUT OPTIONS:
     :git: https://github.com/loopandlearn/dexcom-share-client-swift.git
 
 SPEC CHECKSUMS:
-  Charts: ce0768268078eee0336f122c3c4ca248e4e204c5
   ShareClient: 60b911c95e73b0ea9c5aad6d194a9c6b5f34b741
-  SwiftAlgorithms: 38dda4731d19027fdeee1125f973111bf3386b53
 
-PODFILE CHECKSUM: d241dda366d5454279fe3ff8869458d19e1bbebb
+PODFILE CHECKSUM: 617b13cfc623f15ca31e14e19086cb729b408fd7
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.16.2

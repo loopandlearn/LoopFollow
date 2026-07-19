@@ -29,6 +29,7 @@ enum AlarmType: String, CaseIterable, Codable {
     case tempTargetStart = "Temp Target Started"
     case tempTargetEnd = "Temp Target Ended"
     case buildExpire = "Looping app expiration"
+    case dbSize = "Nightscout Database Size"
 }
 
 extension AlarmType {

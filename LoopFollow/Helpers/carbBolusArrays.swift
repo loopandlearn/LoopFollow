@@ -32,32 +32,4 @@ extension MainViewController {
 
         return (false, 0)
     }
-
-    func findNextCarbTime(timeWithin: Int, needle: TimeInterval, haystack: [carbGraphStruct], startingIndex: Int) -> Bool {
-        if startingIndex > haystack.count - 2 { return false }
-        if haystack[startingIndex + 1].date - needle < Double(timeWithin) {
-            return true
-        }
-
-        return false
-    }
-
-    func findNextBolusTime(timeWithin: Int, needle: TimeInterval, haystack: [bolusGraphStruct], startingIndex: Int) -> Bool {
-        var last = false
-        var next = true
-        if startingIndex > haystack.count - 2 { return false }
-        if startingIndex == 0 { return false }
-
-        // Nothing to right that requires shift
-        if haystack[startingIndex + 1].date - needle > Double(timeWithin) {
-            return false
-        } else {
-            // Nothing to left preventing shift
-            if needle - haystack[startingIndex - 1].date > Double(timeWithin) {
-                return true
-            }
-        }
-
-        return false
-    }
 }
