@@ -190,7 +190,10 @@ class NightscoutUtils {
             queryItems.append(URLQueryItem(name: key, value: value))
         }
 
-        components?.queryItems = queryItems
+        // Assigning an empty array would still append a bare "?" to the URL.
+        if !queryItems.isEmpty {
+            components?.queryItems = queryItems
+        }
 
         return components?.url
     }

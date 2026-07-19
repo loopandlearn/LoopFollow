@@ -37,14 +37,12 @@ class NightscoutViewController: UIViewController {
             }
             .store(in: &cancellables)
 
-        var url = Storage.shared.url.value
-        let token = Storage.shared.token.value
-
-        if token != "" {
-            url = url + "?token=" + token
-        }
-
-        guard let myUrl = URL(string: url) else { return }
+        guard let myUrl = NightscoutUtils.constructURL(
+            baseURL: Storage.shared.url.value,
+            token: Storage.shared.token.value,
+            endpoint: "",
+            parameters: [:]
+        ) else { return }
 
         let webpagePreferences = WKWebpagePreferences()
         webpagePreferences.allowsContentJavaScript = true
