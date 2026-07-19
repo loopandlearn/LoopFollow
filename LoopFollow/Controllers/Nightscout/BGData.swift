@@ -2,7 +2,6 @@
 // BGData.swift
 
 import Foundation
-import UIKit
 
 extension MainViewController {
     /// Number of days of BG history to request from the source. One extra day is

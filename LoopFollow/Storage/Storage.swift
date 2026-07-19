@@ -3,7 +3,6 @@
 
 import Foundation
 import HealthKit
-import UIKit
 
 /*
  Observable persistant storage

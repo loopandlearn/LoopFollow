@@ -3,7 +3,6 @@
 
 import Foundation
 import HealthKit
-import UIKit
 
 extension MainViewController {
     // NS Temporary Target Response Processor

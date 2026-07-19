@@ -4,7 +4,6 @@
 import AVFoundation
 import HealthKit
 import SwiftUI
-import UIKit
 
 struct RemoteSettingsView: View {
     @ObservedObject var viewModel: RemoteSettingsViewModel
