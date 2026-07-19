@@ -12,7 +12,7 @@ extension AlarmType {
             return true
         // These are alarms without memory, if they only are acknowledged - they would alarm again immediately
         case
-            .batteryDrop, .missedReading, .notLooping, .battery, .pumpBattery, .buildExpire, .iob, .sensorChange, .pumpChange, .pump:
+            .batteryDrop, .missedReading, .notLooping, .battery, .pumpBattery, .buildExpire, .iob, .sensorChange, .pumpChange, .pump, .dbSize:
             return false
         }
     }
