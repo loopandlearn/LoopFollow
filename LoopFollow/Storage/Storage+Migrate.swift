@@ -60,6 +60,45 @@ extension Storage {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: legacyNotificationIDs)
     }
 
+    func migrateStep10() {
+        LogManager.shared.log(category: .general, message: "Running migrateStep10 — infoSort/infoVisible → infoDisplayItems")
+        migrateInfoDisplayItems()
+    }
+
+    /// Converts the legacy parallel `infoSort` / `infoVisible` arrays into the
+    /// unified `infoDisplayItems` store, then removes the legacy keys.
+    ///
+    /// Idempotent — does nothing once the legacy keys are gone. Called from
+    /// `migrateStep10()` and, as a safety net, unconditionally from
+    /// `synchronizeInfoTypes()`: fresh installs never persist a `migrationStep`,
+    /// so a user who customized their info display before this release would
+    /// otherwise have the step-10 guard skip their conversion.
+    func migrateInfoDisplayItems() {
+        let legacySort = StorageValue<[Int]>(key: "infoSort", defaultValue: [])
+        let legacyVisible = StorageValue<[Bool]>(key: "infoVisible", defaultValue: [])
+        guard legacySort.exists || legacyVisible.exists else { return }
+
+        let sort = legacySort.value
+        let visible = legacyVisible.value
+
+        var items: [InfoDisplayItem] = []
+        var seen = Set<Int>()
+        // Honor the saved order and per-index visibility.
+        for index in sort {
+            guard let type = InfoType(rawValue: index), seen.insert(index).inserted else { continue }
+            let isVisible = index < visible.count ? visible[index] : type.defaultVisible
+            items.append(InfoDisplayItem(type: type, isVisible: isVisible, coloring: InfoColoring()))
+        }
+        // Append any InfoType missing from the saved order (new cases, gaps).
+        for type in InfoType.allCases where seen.insert(type.rawValue).inserted {
+            items.append(InfoDisplayItem(type: type, isVisible: type.defaultVisible, coloring: InfoColoring()))
+        }
+
+        Storage.shared.infoDisplayItems.value = items
+        legacySort.remove()
+        legacyVisible.remove()
+    }
+
     func migrateStep9() {
         // Default for debugLogLevel changed from false to true so users ship useful
         // logs when they report a problem. Force-enable for existing users.

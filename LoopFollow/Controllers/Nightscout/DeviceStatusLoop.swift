@@ -101,7 +101,7 @@ extension MainViewController {
                 updatePredictionGraph()
             }
             if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
-                infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(recBolus))
+                infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(recBolus), numericValue: recBolus)
                 Observable.shared.deviceRecBolus.value = recBolus
             } else {
                 infoManager.clearInfoData(type: .recBolus)
