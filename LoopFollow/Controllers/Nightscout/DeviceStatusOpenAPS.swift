@@ -114,10 +114,11 @@ extension MainViewController {
             }
 
             // Recommended Bolus
-            if let rec = InsulinMetric(from: lastLoopRecord, key: "recommendedBolus") {
-                infoManager.updateInfoData(type: .recBolus, value: rec)
-                Observable.shared.deviceRecBolus.value = rec.value
+            if let rec = lastLoopRecord["recommendedBolus"] as? Double {
+                infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(rec))
+                Observable.shared.deviceRecBolus.value = rec
             } else {
+                infoManager.clearInfoData(type: .recBolus)
                 Observable.shared.deviceRecBolus.value = nil
             }
 
