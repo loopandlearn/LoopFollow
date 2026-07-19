@@ -76,6 +76,17 @@ struct Alarm: Identifiable, Codable, Equatable {
     /// Number of minutes that must satisfy the alarm criteria
     var persistentMinutes: Int?
 
+    /// When set, the low alarm stays silent while BG is rising (positive delta),
+    /// only firing when the latest reading is flat or still falling.
+    var suppressIfRising: Bool = false
+
+    /// When set, the high alarm stays silent while BG is falling (negative delta),
+    /// only firing when the latest reading is flat or still rising.
+    var suppressIfFalling: Bool = false
+
+    /// When set, the phone-battery alarm stays silent while the phone is charging.
+    var suppressIfCharging: Bool = false
+
     /// Size of window to observe values, for example battery drop of x within this number of minutes,
     var monitoringWindow: Int?
 
@@ -101,7 +112,8 @@ struct Alarm: Identifiable, Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case id, type, name, isEnabled, snoozedUntil
         case aboveBG, belowBG, threshold, predictiveMinutes, delta
-        case persistentMinutes, monitoringWindow, soundFile
+        case persistentMinutes, suppressIfRising, suppressIfFalling, suppressIfCharging
+        case monitoringWindow, soundFile
         case snoozeDuration, playSoundOption, repeatSoundOption
         case soundDelay, activeOption
         case missedBolusPrebolusWindow, missedBolusIgnoreSmallBolusUnits
@@ -124,6 +136,9 @@ struct Alarm: Identifiable, Codable, Equatable {
         predictiveMinutes = try container.decodeIfPresent(Int.self, forKey: .predictiveMinutes)
         delta = try container.decodeIfPresent(Double.self, forKey: .delta)
         persistentMinutes = try container.decodeIfPresent(Int.self, forKey: .persistentMinutes)
+        suppressIfRising = try container.decodeIfPresent(Bool.self, forKey: .suppressIfRising) ?? false
+        suppressIfFalling = try container.decodeIfPresent(Bool.self, forKey: .suppressIfFalling) ?? false
+        suppressIfCharging = try container.decodeIfPresent(Bool.self, forKey: .suppressIfCharging) ?? false
         monitoringWindow = try container.decodeIfPresent(Int.self, forKey: .monitoringWindow)
         soundFile = try container.decode(SoundFile.self, forKey: .soundFile)
         snoozeDuration = try container.decodeIfPresent(Int.self, forKey: .snoozeDuration) ?? 5
@@ -154,6 +169,9 @@ struct Alarm: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(predictiveMinutes, forKey: .predictiveMinutes)
         try container.encodeIfPresent(delta, forKey: .delta)
         try container.encodeIfPresent(persistentMinutes, forKey: .persistentMinutes)
+        try container.encode(suppressIfRising, forKey: .suppressIfRising)
+        try container.encode(suppressIfFalling, forKey: .suppressIfFalling)
+        try container.encode(suppressIfCharging, forKey: .suppressIfCharging)
         try container.encodeIfPresent(monitoringWindow, forKey: .monitoringWindow)
         try container.encode(soundFile, forKey: .soundFile)
         try container.encode(snoozeDuration, forKey: .snoozeDuration)
@@ -262,7 +280,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         AlarmManager.shared.sendNotification(title: type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
 
         if playSound {
-            AlarmSound.setSoundFile(str: soundFile.rawValue)
+            AlarmSound.setSoundFile(soundFile)
             // Only use delay if repeating is enabled, otherwise delay doesn't make sense
             let delay = shouldRepeat ? soundDelay : 0
             AlarmSound.play(repeating: shouldRepeat, delay: delay)

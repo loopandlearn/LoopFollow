@@ -68,6 +68,18 @@ update_follower () {
 PRIMARY_ABS_PATH="$(pwd -P)"
 echo "🏁  Working in $PRIMARY_ABS_PATH …"
 
+# --- guard: make sure we're running the latest release.sh from origin/dev ----
+# The release flow assumes the newest script. If this copy differs from the one
+# on origin/dev, we're likely running a stale version — abort and tell the user.
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+echo_run git fetch origin "$DEV_BRANCH"
+if ! diff -q <(git show "origin/${DEV_BRANCH}:release.sh") "$SCRIPT_PATH" >/dev/null 2>&1; then
+  echo "❌  This release.sh does not match origin/${DEV_BRANCH}:release.sh."
+  echo "    You're likely running an outdated copy of the release script."
+  echo "    Switch to the latest '${DEV_BRANCH}' (git switch ${DEV_BRANCH} && git pull) and re-run. Aborting."
+  exit 1
+fi
+
 # --- start out in main to capture old_ver ---- 
 echo_run git switch "$MAIN_BRANCH"
 echo_run git fetch
@@ -104,7 +116,10 @@ echo_run git switch -c "$RELEASE_BRANCH"
 # --- bump version on the release branch ----
 sed -i '' "s/${MARKETING_KEY}[[:space:]]*=.*/${MARKETING_KEY} = ${new_ver}/" "$VERSION_FILE"
 echo_run git diff "$VERSION_FILE"; pause
-echo_run git commit -m "update version to ${new_ver} [skip ci]" "$VERSION_FILE"
+# No [skip ci] here on purpose: it would skip the required SwiftFormat lint check
+# (leaving the release PRs blocked) and the tag_on_main workflow (no auto-tag).
+# auto_version_dev already avoids re-bumping via its "Config.xcconfig changed" guard.
+echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
 
 echo "💻  Build & test release branch now."; pause
 queue_push push origin "$RELEASE_BRANCH"
@@ -137,8 +152,15 @@ if [[ $confirm =~ ^[Yy]$ ]]; then
   for cmd in "${push_cmds[@]}"; do echo "+ $cmd"; bash -c "$cmd"; done
   echo "🎉  All pushes completed."
 
+  # --- resolve the GitHub repo explicitly so gh doesn't depend on a default ----
+  # Clones with multiple remotes have no inferred default repo, which makes
+  # `gh pr create` fail. Derive owner/repo from the origin remote URL.
+  # Handles both https://github.com/owner/repo(.git) and git@github.com:owner/repo(.git)
+  REPO_SLUG="$(git remote get-url origin | sed -E -e 's#\.git$##' -e 's#^.*github\.com[:/]##')"
+
   echo; echo "📝  Opening sync PR ${RELEASE_BRANCH} → ${DEV_BRANCH} …"
   gh pr create \
+    --repo "$REPO_SLUG" \
     --base "$DEV_BRANCH" \
     --head "$RELEASE_BRANCH" \
     --title "Sync v${new_ver} version bump to dev" \
@@ -150,6 +172,7 @@ if [[ $confirm =~ ^[Yy]$ ]]; then
 
   echo; echo "📝  Opening release PR ${RELEASE_BRANCH} → ${MAIN_BRANCH} …"
   gh pr create \
+    --repo "$REPO_SLUG" \
     --base "$MAIN_BRANCH" \
     --head "$RELEASE_BRANCH" \
     --title "Release v${new_ver}" \

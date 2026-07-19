@@ -13,6 +13,7 @@ struct MainTabView: View {
     @ObservedObject private var snoozerPosition = Storage.shared.snoozerPosition
     @ObservedObject private var statisticsPosition = Storage.shared.statisticsPosition
     @ObservedObject private var treatmentsPosition = Storage.shared.treatmentsPosition
+    @ObservedObject private var activeBanner = Observable.shared.activeBanner
 
     @State private var showTelemetryConsent = false
     @State private var showOnboarding = false
@@ -22,6 +23,21 @@ struct MainTabView: View {
     }
 
     var body: some View {
+        // The banner sits in a VStack above the TabView (rather than a
+        // .safeAreaInset) so the UIKit-hosted Home content is physically
+        // pushed down too — safe-area changes don't propagate into
+        // UIViewControllerRepresentable.
+        VStack(spacing: 0) {
+            if let message = activeBanner.value {
+                AppBannerView(message: message)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            tabView
+        }
+        .animation(.easeInOut(duration: 0.25), value: activeBanner.value)
+    }
+
+    private var tabView: some View {
         TabView(selection: $selectedTab.value) {
             ForEach(Array(orderedItems.prefix(4).enumerated()), id: \.element) { index, item in
                 tabContent(for: item)

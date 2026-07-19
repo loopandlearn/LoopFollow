@@ -20,7 +20,7 @@ extension MainViewController {
 
             var updatedTime: TimeInterval?
 
-            if let timestamp = enactedOrSuggested["timestamp"] as? String,
+            if let timestamp = enactedOrSuggested["deliverAt"] as? String ?? enactedOrSuggested["timestamp"] as? String,
                let parsedTime = formatter.date(from: timestamp)?.timeIntervalSince1970
             {
                 updatedTime = parsedTime
@@ -114,10 +114,11 @@ extension MainViewController {
             }
 
             // Recommended Bolus
-            if let rec = InsulinMetric(from: lastLoopRecord, key: "recommendedBolus") {
-                infoManager.updateInfoData(type: .recBolus, value: rec)
-                Observable.shared.deviceRecBolus.value = rec.value
+            if let rec = lastLoopRecord["recommendedBolus"] as? Double {
+                infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(rec))
+                Observable.shared.deviceRecBolus.value = rec
             } else {
+                infoManager.clearInfoData(type: .recBolus)
                 Observable.shared.deviceRecBolus.value = nil
             }
 
@@ -162,7 +163,9 @@ extension MainViewController {
             }
 
             // TDD
-            if let tddMetric = InsulinMetric(from: enactedOrSuggested, key: "TDD") {
+            if let tddMetric = InsulinMetric(from: enactedOrSuggested, key: "TDD")
+                ?? InsulinMetric(from: lastLoopRecord["enacted"], key: "TDD")
+            {
                 infoManager.updateInfoData(type: .tdd, value: tddMetric)
                 Storage.shared.lastTdd.value = tddMetric.value
             }
