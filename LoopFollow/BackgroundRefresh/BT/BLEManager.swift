@@ -14,6 +14,21 @@ class BLEManager: NSObject, ObservableObject {
     private var activeDevice: BluetoothDevice?
     private var readinessCancellable: AnyCancellable?
 
+    /// Arrival times of recent heartbeat dropouts. Main-queue-confined
+    /// (centralManager delivers on .main) and deliberately not persisted:
+    /// stale history must not resurrect the banner after a relaunch.
+    private var heartbeatDropoutTimes: [Date] = []
+
+    /// A beat this much later than expected counts as one dropout event.
+    /// Stricter than the 15% logging margin - normal jitter must not count.
+    private let dropoutFactor = 1.5
+
+    /// Sliding window over which dropout events are counted.
+    private let dropoutWindow: TimeInterval = 60 * 60
+
+    /// Dropout events within the window needed to raise the banner.
+    private let dropoutTriggerCount = 5
+
     override private init() {
         super.init()
 
@@ -65,6 +80,8 @@ class BLEManager: NSObject, ObservableObject {
             activeDevice = nil
             device.lastHeartbeatTime = nil
         }
+        heartbeatDropoutTimes.removeAll()
+        BannerManager.shared.clear(.heartbeat)
         Storage.shared.selectedBLEDevice.value = nil
     }
 
@@ -224,6 +241,7 @@ extension BLEManager: BluetoothDeviceDelegate {
                 let delay = elapsedTime - expectedInterval
                 LogManager.shared.log(category: .bluetooth, message: "Heartbeat triggered (Delayed by \(String(format: "%.1f", delay)) seconds)")
             }
+            recordHeartbeatOutcome(elapsed: elapsedTime, expectedInterval: expectedInterval, now: now)
         } else {
             LogManager.shared.log(category: .bluetooth, message: "Heartbeat triggered (First heartbeat)")
         }
@@ -231,6 +249,55 @@ extension BLEManager: BluetoothDeviceDelegate {
         device.lastHeartbeatTime = now
 
         TaskScheduler.shared.checkTasksNow()
+    }
+
+    /// Counts late heartbeats over a sliding window and raises a banner when
+    /// dropouts become frequent - the typical symptom of a dying transmitter
+    /// battery. Detection is arrival-based on purpose: a struggling battery
+    /// still delivers (late) beats, whereas total silence usually means
+    /// out-of-range or a dead device and is already surfaced by the
+    /// connection status in Background Refresh settings and by BG alarms.
+    private func recordHeartbeatOutcome(elapsed: TimeInterval, expectedInterval: TimeInterval, now: Date) {
+        heartbeatDropoutTimes.removeAll { now.timeIntervalSince($0) > dropoutWindow }
+
+        // A gap this large means out-of-range, Bluetooth off or a suspended
+        // app - not a struggling battery. Discard the history collected
+        // before the blind spot instead of counting it.
+        let resetGap = max(6 * expectedInterval, 30 * 60)
+        if elapsed > resetGap {
+            if !heartbeatDropoutTimes.isEmpty {
+                heartbeatDropoutTimes.removeAll()
+                LogManager.shared.log(category: .bluetooth, message: "Heartbeat gap of \(Int(elapsed)) seconds, resetting dropout history")
+            }
+        } else if elapsed > expectedInterval * dropoutFactor {
+            heartbeatDropoutTimes.append(now)
+            LogManager.shared.log(category: .bluetooth, message: "Heartbeat dropout recorded (\(heartbeatDropoutTimes.count) in the last hour)")
+        }
+
+        // Hysteresis: raise at the trigger count, clear only once the window
+        // is completely clean, so the banner doesn't flap at the boundary.
+        if heartbeatDropoutTimes.count >= dropoutTriggerCount {
+            BannerManager.shared.report(source: .heartbeat, severity: .warning, text: heartbeatDropoutBannerText())
+        } else if heartbeatDropoutTimes.isEmpty {
+            BannerManager.shared.clear(.heartbeat)
+        }
+    }
+
+    /// The text must stay stable while the condition persists (no counts or
+    /// durations) so BannerManager's dedupe keeps the banner from
+    /// re-animating on every beat and user dismissal keeps working.
+    private func heartbeatDropoutBannerText() -> String {
+        let name = activeDevice?.deviceName ?? "heartbeat device"
+        let cause: String
+        switch Storage.shared.backgroundRefreshType.value {
+        case .rileyLink:
+            cause = "a low RileyLink battery"
+        case .omnipodDash:
+            cause = "a low pod battery"
+        default:
+            cause = "a low transmitter battery"
+        }
+        return "Heartbeat: repeated Bluetooth dropouts from \(name). This can be a sign of \(cause) or a weak Bluetooth connection."
     }
 }
 

@@ -67,9 +67,11 @@
 		65E153C32E4BB69100693A4F /* URLTokenValidationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */; };
 		65E8A2862E44B0300065037B /* VolumeButtonHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */; };
 		66E3D12E66AA4534A144A54B /* BackgroundRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CA8BE0B3D247408FE088B4 /* BackgroundRefreshManager.swift */; };
+		87F526CE28FD073330D2F516 /* BannerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098BA6FC4279B166734A0E13 /* BannerManager.swift */; };
+		8897B18D53EA2F1963B8B4E0 /* AppBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8000BC181BCE5AA8553FB3B6 /* AppBannerView.swift */; };
+		9C7FB98C98BE4FF98F4815EE /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFBE69CEF18416D84959974 /* Telemetry.swift */; };
 		92664FA270DA9905E1F08676 /* BGChartStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C508E0E86BEC0B13280F34B /* BGChartStubs.swift */; };
 		9727B75402723679BD39CDE5 /* DBSizeTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBE9ECA96BEA20DBD21B570D /* DBSizeTask.swift */; };
-		9C7FB98C98BE4FF98F4815EE /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFBE69CEF18416D84959974 /* Telemetry.swift */; };
 		9F24B79D2722BB040AE3311F /* BGChartModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8CB992D98689FC7D019CEC /* BGChartModel.swift */; };
 		A1A1A10001000000A0CFEED1 /* APNsCredentialValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10001000000A0CFEED2 /* APNsCredentialValidator.swift */; };
 		A1A1A10002000000A0CFEED1 /* LogRedactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A10002000000A0CFEED2 /* LogRedactor.swift */; };
@@ -477,6 +479,7 @@
 
 /* Begin PBXFileReference section */
 		059B0FA59AABFE72FE13DDDA /* Pods-LoopFollow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LoopFollow.release.xcconfig"; path = "Target Support Files/Pods-LoopFollow/Pods-LoopFollow.release.xcconfig"; sourceTree = "<group>"; };
+		098BA6FC4279B166734A0E13 /* BannerManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BannerManager.swift; sourceTree = "<group>"; };
 		21EBF6ACF259782445DA1A7E /* DBSizeAlarmEditor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DBSizeAlarmEditor.swift; sourceTree = "<group>"; };
 		2B9BEC26E4E48EF9B811A372 /* PendingFutureCarb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingFutureCarb.swift; sourceTree = "<group>"; };
 		2EBAB9EECE7095238A558060 /* FutureCarbsCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureCarbsCondition.swift; sourceTree = "<group>"; };
@@ -531,6 +534,7 @@
 		65A100022F5AA00000AA1002 /* UnitsConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitsConfigurationView.swift; sourceTree = "<group>"; };
 		65E153C22E4BB69100693A4F /* URLTokenValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTokenValidationView.swift; sourceTree = "<group>"; };
 		65E8A2852E44B0300065037B /* VolumeButtonHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonHandler.swift; sourceTree = "<group>"; };
+		8000BC181BCE5AA8553FB3B6 /* AppBannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppBannerView.swift; sourceTree = "<group>"; };
 		6C508E0E86BEC0B13280F34B /* BGChartStubs.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BGChartStubs.swift; sourceTree = "<group>"; };
 		7C8CB992D98689FC7D019CEC /* BGChartModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BGChartModel.swift; sourceTree = "<group>"; };
 		8B81E18A2489A364AFC0A9E4 /* DBSize.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DBSize.swift; sourceTree = "<group>"; };
@@ -1046,6 +1050,16 @@
 				6589CC602E9E7D1600BB18FE /* TabCustomizationModal.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		6A3463E271ADFF0E844E3E61 /* Banner */ = {
+			isa = PBXGroup;
+			children = (
+				098BA6FC4279B166734A0E13 /* BannerManager.swift */,
+				8000BC181BCE5AA8553FB3B6 /* AppBannerView.swift */,
+			);
+			name = Banner;
+			path = Banner;
 			sourceTree = "<group>";
 		};
 		6A5880E0B811AF443B05AB02 /* Frameworks */ = {
@@ -1725,6 +1739,7 @@
 				DDC7E5CD2DC6637800EB1127 /* Storage */,
 				DDEF503D2D32753A00999A5D /* Task */,
 				FCC68871248A736700A0279D /* ViewControllers */,
+				6A3463E271ADFF0E844E3E61 /* Banner */,
 				CC1E389FE3B6E6EA3184474B /* Charts */,
 			);
 			path = LoopFollow;
@@ -2492,6 +2507,8 @@
 				DDEF50422D479BAA00884336 /* LoopAPNSCarbsView.swift in Sources */,
 				DDEF50432D479BBA00884336 /* LoopAPNSBolusView.swift in Sources */,
 				DDEF50452D479BDA00884336 /* LoopAPNSRemoteView.swift in Sources */,
+				87F526CE28FD073330D2F516 /* BannerManager.swift in Sources */,
+				8897B18D53EA2F1963B8B4E0 /* AppBannerView.swift in Sources */,
 				9F24B79D2722BB040AE3311F /* BGChartModel.swift in Sources */,
 				2F99F2B5C902F3018383C086 /* BGChartView.swift in Sources */,
 				92664FA270DA9905E1F08676 /* BGChartStubs.swift in Sources */,
