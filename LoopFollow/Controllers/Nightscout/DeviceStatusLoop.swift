@@ -68,7 +68,7 @@ extension MainViewController {
                 let prediction = predictdata["values"] as! [Double]
                 Observable.shared.predictionText.value = Localizer.toDisplayUnits(String(Int(round(prediction.last!))))
                 Observable.shared.predictionColor.value = .purple
-                if Storage.shared.downloadPrediction.value, previousLastLoopTime < lastLoopTime {
+                if Storage.shared.downloadPrediction.value, previousLastLoopTime < lastLoopTime || predictionData.isEmpty {
                     predictionData.removeAll()
                     var predictionTime = lastLoopTime
                     let toLoad = Int(Storage.shared.predictionToLoad.value * 12)

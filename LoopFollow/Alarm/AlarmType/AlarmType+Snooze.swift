@@ -7,7 +7,7 @@ extension AlarmType {
     /// What “unit” we use for snoozeDuration for this alarmType.
     var snoozeTimeUnit: TimeUnit {
         switch self {
-        case .buildExpire:
+        case .buildExpire, .dbSize:
             return .day
         case .low, .high, .fastDrop, .fastRise,
              .missedReading, .notLooping, .missedBolus,

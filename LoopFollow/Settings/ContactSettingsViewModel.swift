@@ -106,7 +106,6 @@ class ContactSettingsViewModel: ObservableObject {
         }
     }
 
-    private let storage = ObservableUserDefaults.shared
     private var cancellables = Set<AnyCancellable>()
 
     init() {

@@ -52,7 +52,8 @@ extension MainViewController {
                 latestBattery: latestBattery,
                 latestPumpBattery: latestPumpBattery,
                 batteryHistory: self.deviceBatteryData,
-                recentCarbs: recentCarbs
+                recentCarbs: recentCarbs,
+                dbSizePercentage: Observable.shared.dbSizePercentage.value
             )
 
             let finalAlarmData: AlarmData
