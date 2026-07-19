@@ -20,7 +20,7 @@ extension MainViewController {
 
             var updatedTime: TimeInterval?
 
-            if let timestamp = enactedOrSuggested["timestamp"] as? String,
+            if let timestamp = enactedOrSuggested["deliverAt"] as? String ?? enactedOrSuggested["timestamp"] as? String,
                let parsedTime = formatter.date(from: timestamp)?.timeIntervalSince1970
             {
                 updatedTime = parsedTime
@@ -162,7 +162,9 @@ extension MainViewController {
             }
 
             // TDD
-            if let tddMetric = InsulinMetric(from: enactedOrSuggested, key: "TDD") {
+            if let tddMetric = InsulinMetric(from: enactedOrSuggested, key: "TDD")
+                ?? InsulinMetric(from: lastLoopRecord["enacted"], key: "TDD")
+            {
                 infoManager.updateInfoData(type: .tdd, value: tddMetric)
                 Storage.shared.lastTdd.value = tddMetric.value
             }
