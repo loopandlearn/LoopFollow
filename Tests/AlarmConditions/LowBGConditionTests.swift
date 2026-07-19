@@ -147,4 +147,65 @@ struct LowBGConditionTests {
 
         #expect(!cond.evaluate(alarm: alarm, data: data, now: Date()))
     }
+
+    // MARK: - Immediate low (no persistence, no prediction)
+
+    @Test("#immediate — latest reading at/below threshold fires")
+    func immediateLowFires() {
+        let alarm = Alarm.low(belowBG: 80)
+        let data = AlarmData.withGlucose(readings: history([100, 90, 78]))
+
+        #expect(cond.evaluate(alarm: alarm, data: data, now: Date()))
+    }
+
+    @Test("#immediate — latest reading above threshold does not fire")
+    func immediateAboveThreshold() {
+        let alarm = Alarm.low(belowBG: 80)
+        let data = AlarmData.withGlucose(readings: history([85, 83, 82]))
+
+        #expect(!cond.evaluate(alarm: alarm, data: data, now: Date()))
+    }
+
+    @Test("#immediate — no readings does not fire even with a low forecast")
+    func noReadingsNoFire() {
+        let alarm = Alarm.low(belowBG: 80, predictiveMinutes: 30)
+        let data = AlarmData.withGlucose(readings: [], prediction: pred([60, 60]))
+
+        #expect(!cond.evaluate(alarm: alarm, data: data, now: Date()))
+    }
+
+    // MARK: - Full pipeline (shouldFire, including the BG-limit gate)
+
+    @Test("#pipeline — predictive low fires while BG is still above the threshold")
+    func predictiveFiresThroughGate() {
+        let alarm = Alarm.low(belowBG: 108, predictiveMinutes: 30, persistentMinutes: 0)
+        // The scenario predictive low exists for: BG hovering above the
+        // threshold while the forecast dips below it.
+        let data = AlarmData.withGlucose(
+            readings: history([110, 109, 110]),
+            prediction: pred([110, 101, 92, 82])
+        )
+
+        #expect(cond.shouldFire(alarm: alarm, data: data, now: Date(), config: .default))
+    }
+
+    @Test("#pipeline — BG above threshold with a high forecast does not fire")
+    func aboveThresholdHighForecastNoFire() {
+        let alarm = Alarm.low(belowBG: 108, predictiveMinutes: 30, persistentMinutes: 0)
+        let data = AlarmData.withGlucose(
+            readings: history([110, 109, 110]),
+            prediction: pred([110, 112, 115, 118])
+        )
+
+        #expect(!cond.shouldFire(alarm: alarm, data: data, now: Date(), config: .default))
+    }
+
+    @Test("#pipeline — BG-limit gate blocks other alarm types")
+    func gateAppliesToOtherTypes() {
+        var alarm = Alarm(type: .temporary)
+        alarm.belowBG = 108
+        let data = AlarmData.withGlucose(readings: history([110, 109, 110]))
+
+        #expect(!TemporaryCondition().shouldFire(alarm: alarm, data: data, now: Date(), config: .default))
+    }
 }

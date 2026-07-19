@@ -4,17 +4,23 @@
 import Foundation
 
 /// Fires when:
-/// • every BG in `persistentMinutes` (if set) **and** the latest BG are ≤ `threshold`; **or**
-/// • any predicted BG within `predictiveMinutes` is ≤ `threshold`.
+/// • every BG in `persistentMinutes` (if set) **and** the latest BG are ≤ `belowBG`; **or**
+/// • any predicted BG within `predictiveMinutes` is ≤ `belowBG`.
 struct LowBGCondition: AlarmCondition {
     static let type: AlarmType = .low
     init() {}
+
+    /// `belowBG` is this alarm's trigger threshold, not an activation limit:
+    /// the predictive look-ahead must be able to run while the latest BG is
+    /// still above it, so `evaluate` checks the threshold itself.
+    var checksOwnBGLimits: Bool { true }
 
     func evaluate(alarm: Alarm, data: AlarmData, now _: Date) -> Bool {
         // ────────────────────────────────
         // 0. sanity checks
         // ────────────────────────────────
         guard let belowBG = alarm.belowBG else { return false }
+        guard let latest = data.bgReadings.last, latest.sgv > 0 else { return false }
 
         func isLow(_ g: GlucoseValue) -> Bool {
             g.sgv > 0 && Double(g.sgv) <= belowBG
@@ -60,6 +66,6 @@ struct LowBGCondition: AlarmCondition {
         // ────────────────────────────────
         // 3. final decision
         // ────────────────────────────────
-        return persistentOK || predictiveTrigger
+        return (isLow(latest) && persistentOK) || predictiveTrigger
     }
 }
