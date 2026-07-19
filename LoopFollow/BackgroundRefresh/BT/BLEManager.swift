@@ -12,6 +12,7 @@ class BLEManager: NSObject, ObservableObject {
 
     private var centralManager: CBCentralManager!
     private var activeDevice: BluetoothDevice?
+    private var readinessCancellable: AnyCancellable?
 
     override private init() {
         super.init()
@@ -20,13 +21,28 @@ class BLEManager: NSObject, ObservableObject {
             delegate: self,
             queue: .main
         )
-        if let device = Storage.shared.selectedBLEDevice.value {
-            devices.append(device)
-            findAndUpdateDevice(with: device.id.uuidString) { device in
-                device.rssi = 0
+        connectSelectedDeviceIfNeeded()
+
+        // After BFU, selectedBLEDevice reads nil until hydration — reconnect when
+        // storage becomes ready. dropFirst skips the current value (init handled the
+        // already-ready case), so this fires only on the false→true recovery.
+        readinessCancellable = StorageReadiness.ready.$value
+            .dropFirst()
+            .filter { $0 }
+            .sink { [weak self] _ in
+                self?.connectSelectedDeviceIfNeeded()
             }
-            connect(device: device)
+    }
+
+    private func connectSelectedDeviceIfNeeded() {
+        guard activeDevice == nil, let device = Storage.shared.selectedBLEDevice.value else { return }
+        if !devices.contains(where: { $0.id == device.id }) {
+            devices.append(device)
         }
+        findAndUpdateDevice(with: device.id.uuidString) { device in
+            device.rssi = 0
+        }
+        connect(device: device)
     }
 
     func getSelectedDevice() -> BLEDevice? {
