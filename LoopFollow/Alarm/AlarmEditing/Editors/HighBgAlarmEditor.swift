@@ -34,6 +34,14 @@ struct HighBgAlarmEditor: View {
                 value: $alarm.persistentMinutes
             )
 
+            Section(
+                header: Text("FALLING BG"),
+                footer: Text("Stay silent while BG is falling. The alert only sounds "
+                    + "when the latest reading is flat or still rising.")
+            ) {
+                Toggle("Skip if BG is falling", isOn: $alarm.suppressIfFalling)
+            }
+
             AlarmActiveSection(alarm: $alarm)
             AlarmAudioSection(alarm: $alarm)
             AlarmSnoozeSection(alarm: $alarm)

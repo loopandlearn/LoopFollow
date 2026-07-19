@@ -58,7 +58,20 @@ struct LowBGCondition: AlarmCondition {
         }
 
         // ────────────────────────────────
-        // 3. final decision
+        // 3. rising BG suppression (optional)
+        //    Stay silent while the latest reading is above the previous one;
+        //    only alarm when BG is flat or still falling.
+        // ────────────────────────────────
+        if alarm.suppressIfRising, data.bgReadings.count >= 2 {
+            let last = data.bgReadings[data.bgReadings.count - 1]
+            let previous = data.bgReadings[data.bgReadings.count - 2]
+            if last.sgv > 0, previous.sgv > 0, last.sgv > previous.sgv {
+                return false
+            }
+        }
+
+        // ────────────────────────────────
+        // 4. final decision
         // ────────────────────────────────
         return persistentOK || predictiveTrigger
     }
