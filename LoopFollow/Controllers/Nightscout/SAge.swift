@@ -72,7 +72,7 @@ extension MainViewController {
             formatter.zeroFormattingBehavior = [.pad] // Pad with zeroes where appropriate for the locale
 
             if let formattedDuration = formatter.string(from: secondsAgo) {
-                infoManager.updateInfoData(type: .sage, value: formattedDuration)
+                infoManager.updateInfoData(type: .sage, value: formattedDuration, numericValue: secondsAgo / 86400)
             }
         }
     }
