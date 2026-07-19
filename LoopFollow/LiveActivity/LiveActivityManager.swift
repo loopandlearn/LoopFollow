@@ -10,11 +10,8 @@ import os
 import UIKit
 import UserNotifications
 
-// Live Activity manager for LoopFollow.
-//
-// Every LA creation (initial start, renewal, forced restart) goes through
-// APNs push-to-start. Updates ride the same APNs transport. One transport,
-// one credential failure mode that surfaces in settings.
+// Live Activity manager for LoopFollow. Every LA creation (start, renewal,
+// restart) and update goes through APNs push-to-start.
 
 final class LiveActivityManager {
     static let shared = LiveActivityManager()
@@ -81,9 +78,8 @@ final class LiveActivityManager {
         }
     }
 
-    /// Observes new Activity creations. When an activity is started by
-    /// push-to-start (iOS 17.2+), the app discovers it through this stream and
-    /// adopts it via the same bind/update path as an app-initiated start.
+    /// Observes new Activity creations so push-to-start activities are adopted
+    /// via the same bind/update path as an app-initiated start.
     private func startActivityUpdatesObservation() {
         activityUpdatesObservationTask?.cancel()
         LogManager.shared.log(
@@ -456,7 +452,7 @@ final class LiveActivityManager {
     /// The actual end+restart is run from handleDidBecomeActive() because
     /// Activity.request() returns `visibility` during willEnterForeground.
     private var pendingForegroundRestart = false
-    /// Observes `pushToStartTokenUpdates` (iOS 17.2+) and persists the token.
+    /// Observes `pushToStartTokenUpdates` and persists the token.
     /// Long-lived — started once at init and never cancelled.
     private var pushToStartObservationTask: Task<Void, Never>?
     /// Observes `Activity<>.activityUpdates` so activities started out-of-band
@@ -689,8 +685,8 @@ final class LiveActivityManager {
         oldActivity: Activity<GlucoseLiveActivityAttributes>?,
         snapshot: GlucoseSnapshot? = nil
     ) {
-        // Validate APNs credentials up-front — push-to-start is the ONLY transport
-        // on iOS 17.2+, so missing/invalid creds mean the LA will never display.
+        // Validate APNs credentials up-front — push-to-start is the only
+        // transport, so missing/invalid creds mean the LA will never display.
         let keyId = Storage.shared.lfKeyId.value
         let apnsKey = Storage.shared.lfApnsKey.value
         guard APNsCredentialValidator.isFullyConfigured(keyId: keyId, apnsKey: apnsKey) else {

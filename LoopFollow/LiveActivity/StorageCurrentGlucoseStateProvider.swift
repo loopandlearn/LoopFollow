@@ -134,11 +134,9 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
         #if targetEnvironment(macCatalyst)
             return false
         #else
-            // Renewal happens silently via push-to-start at the deadline, so the
-            // pre-emptive 30-minute "tap to update" overlay would be misleading
-            // during normal operation. Only show it once renewal has actually
-            // failed (no token, bad creds, rate-limited) — that is genuinely
-            // user-actionable.
+            // Push-to-start renews silently at the deadline, so only show the
+            // "tap to update" overlay once renewal has actually failed (no token,
+            // bad creds, rate-limited) — that is genuinely user-actionable.
             return Storage.shared.laRenewalFailed.value
         #endif
     }
