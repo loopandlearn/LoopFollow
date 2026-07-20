@@ -2,7 +2,7 @@
 // BackgroundRefreshManager.swift
 
 import BackgroundTasks
-import UIKit
+import Foundation
 
 class BackgroundRefreshManager {
     static let shared = BackgroundRefreshManager()

@@ -3,7 +3,6 @@
 
 import Foundation
 import HealthKit
-import UIKit
 
 /*
  Observable persistant storage
@@ -204,8 +203,12 @@ class Storage {
     var hasConfiguredUnits = StorageValue<Bool>(key: "hasConfiguredUnits", defaultValue: false)
     var hasCompletedOnboarding = StorageValue<Bool>(key: "hasCompletedOnboarding", defaultValue: false)
 
-    var infoSort = StorageValue<[Int]>(key: "infoSort", defaultValue: InfoType.allCases.map(\.sortOrder))
-    var infoVisible = StorageValue<[Bool]>(key: "infoVisible", defaultValue: InfoType.allCases.map(\.defaultVisible))
+    var infoDisplayItems = StorageValue<[InfoDisplayItem]>(
+        key: "infoDisplayItems",
+        defaultValue: InfoType.allCases.map {
+            InfoDisplayItem(type: $0, isVisible: $0.defaultVisible, coloring: InfoColoring())
+        }
+    )
 
     var url = StorageValue<String>(key: "url", defaultValue: "")
     var device = StorageValue<String>(key: "device", defaultValue: "")
@@ -216,7 +219,7 @@ class Storage {
     // When adding a new migration step in `runMigrationsIfNeeded()`, bump this default
     // to the new latest step number so fresh installs skip all migrations. Other defaults
     // in this file must reflect the post-migration final state for a fresh install.
-    var migrationStep = StorageValue<Int>(key: "migrationStep", defaultValue: 9)
+    var migrationStep = StorageValue<Int>(key: "migrationStep", defaultValue: 10)
 
     var persistentNotification = StorageValue<Bool>(key: "persistentNotification", defaultValue: false)
     var persistentNotificationLastBGTime = StorageValue<Date>(key: "persistentNotificationLastBGTime", defaultValue: .distantPast)

@@ -3,7 +3,6 @@
 
 import Combine
 import Foundation
-import UIKit
 
 /// A cached value that can re-read itself from disk after a BFU launch.
 protocol BFUReloadable: AnyObject {

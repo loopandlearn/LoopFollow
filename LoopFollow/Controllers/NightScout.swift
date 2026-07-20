@@ -2,7 +2,6 @@
 // NightScout.swift
 
 import Foundation
-import UIKit
 
 extension MainViewController {
     // NS Cage Struct

@@ -2,7 +2,6 @@
 // TaskScheduler.swift
 
 import Foundation
-import UIKit
 
 enum TaskID: CaseIterable {
     case profile
