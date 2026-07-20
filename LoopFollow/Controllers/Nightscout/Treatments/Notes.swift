@@ -2,7 +2,6 @@
 // Notes.swift
 
 import Foundation
-import UIKit
 
 extension MainViewController {
     // NS Note Response Processor

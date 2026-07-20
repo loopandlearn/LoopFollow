@@ -2,7 +2,6 @@
 // Overrides.swift
 
 import Foundation
-import UIKit
 
 extension MainViewController {
     func processNSOverrides(entries: [[String: AnyObject]]) {

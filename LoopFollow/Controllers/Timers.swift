@@ -2,7 +2,6 @@
 // Timers.swift
 
 import Foundation
-import UIKit
 
 extension MainViewController {
     func startGraphNowTimer(time: TimeInterval = 60) {

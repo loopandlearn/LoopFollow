@@ -3,7 +3,6 @@
 
 import Foundation
 import HealthKit
-import UIKit
 
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {

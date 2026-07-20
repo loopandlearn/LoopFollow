@@ -4,7 +4,6 @@
 import CoreBluetooth
 import Foundation
 import os
-import UIKit
 
 class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     weak var bluetoothDeviceDelegate: BluetoothDeviceDelegate?

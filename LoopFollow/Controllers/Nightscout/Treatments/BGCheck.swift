@@ -2,7 +2,6 @@
 // BGCheck.swift
 
 import Foundation
-import UIKit
 
 extension MainViewController {
     // NS BG Check Response Processor
