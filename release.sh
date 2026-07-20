@@ -14,7 +14,6 @@ VERSION_FILE="Config.xcconfig"
 MARKETING_KEY="LOOP_FOLLOW_MARKETING_VERSION"
 DEV_BRANCH="dev"
 MAIN_BRANCH="main"
-PATCH_DIR="../${APP_NAME}_update_patches"
 # ---------------------------------------
 
 # --- functions here ---
@@ -26,37 +25,48 @@ queue_push() { push_cmds+=("git -C \"$(pwd)\" $*"); echo "+ [queued] (in $(pwd))
 
 update_follower () {
   local DIR="$1"
+  local build_minute="$2"                     # staggered Sunday-build minute (see calls below)
+  local suffix=".${DIR#${APP_NAME}_}"        # LoopFollow_Second  -> .Second
+  local display="$DIR"                        # LoopFollow_Second
+  local upstream="loopandlearn/${DIR}"        # loopandlearn/LoopFollow_Second
+
   echo; echo "🔄  Updating $DIR …"
   cd "$DIR"
-
-  echo; echo "If there are custom changes needed to the patch, make the change before continuing"
-  pause
 
   # 1 · Make sure we’re on a clean, up-to-date main
   echo_run git switch "$MAIN_BRANCH"
   echo_run git fetch
   echo_run git pull
 
-  # 2 · Apply the patch
-  if ! git apply --whitespace=nowarn "$PATCH_FILE"; then
-    echo "‼️  Some changes could not be applied, so no changes were made."
-    echo "The command used was: git apply --whitespace=nowarn $PATCH_FILE"
-    echo; echo "Use a different terminal to fix and apply the patch before continuing"
-    pause
+  # 2 · Full mirror of the release tree from the primary repo.
+  #     Every tracked file (including the overlay files) is synced; only git
+  #     metadata and local/build dirs are protected. --delete makes the tree an
+  #     exact mirror, auto-correcting any drift.
+  echo_run rsync -a --delete \
+    --exclude='.git/' \
+    --exclude='.claude/' \
+    --exclude='build/' \
+    "$PRIMARY_ABS_PATH"/ ./
+
+  # 3 · Re-apply this instance's overlay on top of the mirror
+  perl -i -pe "s|^app_suffix\s*=.*|app_suffix = ${suffix}|"      LoopFollowDisplayNameConfig.xcconfig
+  perl -i -pe "s|^display_name\s*=.*|display_name = ${display}|" LoopFollowDisplayNameConfig.xcconfig
+  perl -i -pe "s|^(\s*)UPSTREAM_REPO:.*|\${1}UPSTREAM_REPO: ${upstream}|" .github/workflows/build_LoopFollow.yml
+  perl -i -pe "s|^(\s*)- cron:.*|\${1}- cron: \"${build_minute} 10 * * 0\" # Sunday at UTC 10:${build_minute}|" .github/workflows/build_LoopFollow.yml
+
+  # 4 · Rename the synced workspace to this instance's name
+  rm -rf "${DIR}.xcworkspace"
+  if [ -d "${APP_NAME}.xcworkspace" ]; then
+    mv "${APP_NAME}.xcworkspace" "${DIR}.xcworkspace"
   fi
 
-  # 3 · Pause if any conflict markers remain
-  if git ls-files -u | grep -q .; then
-    echo "⚠️  Conflicts detected."
-    echo "    If Fastfile or build_LoopFollow.yml were modified, these are expected."
-    echo "    Open your merge tool, resolve, then press Enter."
-    pause
+  # 5 · Single commit capturing the mirror + overlay
+  git add -A
+  if git diff --cached --quiet; then
+    echo "✓  $DIR already up to date — nothing to commit."
+  else
+    echo_run git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
   fi
-
-  # 4 · Single commit capturing all staged changes
-  git add -u
-  git add $(git ls-files --others --exclude-standard) 2>/dev/null || true
-  git commit -m "transfer v${new_ver} updates from LF to ${DIR}"
 
   echo_run git status
   echo "💻  Build & test $DIR now."; pause  # build & test checkpoint
@@ -124,16 +134,13 @@ echo_run git commit -m "update version to ${new_ver}" "$VERSION_FILE"
 echo "💻  Build & test release branch now."; pause
 queue_push push origin "$RELEASE_BRANCH"
 
-# --- create a patch from main..release branch (includes the bump) -----
-mkdir -p "$PATCH_DIR"
-PATCH_FILE="${PATCH_DIR}/LF_diff_${old_ver}_to_${new_ver}.patch"
-
-git diff -M --binary "$MAIN_BRANCH" "$RELEASE_BRANCH"  \
-  > "$PATCH_FILE"
-
+# --- mirror the release tree into the sister repos ----
+# Second arg = each app's scheduled browser-build minute (Sundays at 10:xx UTC),
+# staggered from the main app (:17) so a user who forked all three apps doesn't
+# trigger three simultaneous builds.
 cd ..
-update_follower "$SECOND_DIR"
-update_follower "$THIRD_DIR"
+update_follower "$SECOND_DIR" "27"
+update_follower "$THIRD_DIR"  "40"
 
 # ---------- GitHub Actions Test ---------
 echo; 
