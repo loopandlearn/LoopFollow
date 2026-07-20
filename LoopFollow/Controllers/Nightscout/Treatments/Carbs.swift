@@ -10,6 +10,7 @@ extension MainViewController {
         carbData.removeAll()
         var lastFoundIndex = 0
         var lastFoundBolus = 0
+        var lastFoundSmb = 0
 
         for currentEntry in entries.reversed() {
             var carbDate: String
@@ -35,7 +36,10 @@ extension MainViewController {
                 let bolusTime = findNearestBolusbyTime(timeWithin: 300, needle: dateTimeStamp, haystack: bolusData, startingIndex: lastFoundBolus)
                 lastFoundBolus = bolusTime.foundIndex
 
-                offset = bolusTime.offset ? 70 : 20
+                let smbTime = findNearestBolusbyTime(timeWithin: 300, needle: dateTimeStamp, haystack: smbData, startingIndex: lastFoundSmb)
+                lastFoundSmb = smbTime.foundIndex
+
+                offset = (bolusTime.offset || smbTime.offset) ? 70 : 20
             }
 
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (3600 * Storage.shared.predictionToLoad.value)) {
