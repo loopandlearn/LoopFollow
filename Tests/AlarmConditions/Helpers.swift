@@ -29,6 +29,14 @@ extension Alarm {
         return alarm
     }
 
+    static func low(belowBG: Double?, predictiveMinutes: Int? = nil, persistentMinutes: Int? = nil) -> Self {
+        var alarm = Alarm(type: .low)
+        alarm.belowBG = belowBG
+        alarm.predictiveMinutes = predictiveMinutes
+        alarm.persistentMinutes = persistentMinutes
+        return alarm
+    }
+
     static func fastDrop(delta: Double?, window: Int?) -> Self {
         var alarm = Alarm(type: .fastDrop)
         alarm.delta = delta
@@ -61,7 +69,8 @@ extension AlarmData {
             latestBatteryIsCharging: nil,
             latestPumpBattery: nil,
             batteryHistory: [],
-            recentCarbs: []
+            recentCarbs: [],
+            dbSizePercentage: nil
         )
     }
 
@@ -86,7 +95,8 @@ extension AlarmData {
             latestBatteryIsCharging: nil,
             latestPumpBattery: nil,
             batteryHistory: [],
-            recentCarbs: []
+            recentCarbs: [],
+            dbSizePercentage: nil
         )
     }
 
@@ -116,9 +126,37 @@ extension AlarmData {
             IOB: nil,
             recentBoluses: [],
             latestBattery: nil,
+            latestBatteryIsCharging: nil,
             latestPumpBattery: nil,
             batteryHistory: [],
-            recentCarbs: []
+            recentCarbs: [],
+            dbSizePercentage: nil
+        )
+    }
+
+    static func withGlucose(readings: [GlucoseValue] = [], prediction: [GlucoseValue] = []) -> Self {
+        AlarmData(
+            bgReadings: readings,
+            predictionData: prediction,
+            expireDate: nil,
+            lastLoopTime: nil,
+            latestOverrideStart: nil,
+            latestOverrideEnd: nil,
+            latestTempTargetStart: nil,
+            latestTempTargetEnd: nil,
+            recBolus: nil,
+            COB: nil,
+            sageInsertTime: nil,
+            pumpInsertTime: nil,
+            latestPumpVolume: nil,
+            IOB: nil,
+            recentBoluses: [],
+            latestBattery: nil,
+            latestBatteryIsCharging: nil,
+            latestPumpBattery: nil,
+            batteryHistory: [],
+            recentCarbs: [],
+            dbSizePercentage: nil
         )
     }
 
@@ -143,7 +181,8 @@ extension AlarmData {
             latestBatteryIsCharging: nil,
             latestPumpBattery: nil,
             batteryHistory: [],
-            recentCarbs: carbs
+            recentCarbs: carbs,
+            dbSizePercentage: nil
         )
     }
 }
