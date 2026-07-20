@@ -76,7 +76,10 @@ class BackgroundAlertManager {
         removeDeliveredNotifications()
 
         let isBluetoothActive = Storage.shared.backgroundRefreshType.value.isBluetooth
-        let expectedHeartbeat = BLEManager.shared.expectedHeartbeatInterval()
+        // Only query BLEManager for a Bluetooth mode — touching it otherwise would
+        // initialize CoreBluetooth and trigger the permission prompt for users
+        // (e.g. Silent Tune) who never opted into Bluetooth.
+        let expectedHeartbeat = isBluetoothActive ? BLEManager.shared.expectedHeartbeatInterval() : nil
 
         // Define alerts
         let alerts: [BackgroundAlert] = [

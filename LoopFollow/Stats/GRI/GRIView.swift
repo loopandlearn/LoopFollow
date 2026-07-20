@@ -43,9 +43,11 @@ struct GRIView: View {
                             gri: viewModel.gri ?? 0
                         )
                         .frame(height: 250)
+                        .padding(.top, 10)
                         .padding(.leading, yAxisLabelInset)
+                        .padding(.trailing, 8)
+                        .padding(.bottom, 4)
                         .allowsHitTesting(false)
-                        .clipped()
 
                         Text("Hyperglycemia Component (%)")
                             .font(.caption2)

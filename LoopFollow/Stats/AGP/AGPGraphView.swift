@@ -4,141 +4,138 @@
 import Charts
 import SwiftUI
 
-struct AGPGraphView: UIViewRepresentable {
+struct AGPGraphView: View {
     let agpData: [AGPDataPoint]
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
+    private enum Percentile: String, CaseIterable, Plottable {
+        case p5 = "5th"
+        case p25 = "25th"
+        case median = "Median"
+        case p75 = "75th"
+        case p95 = "95th"
 
-    func makeUIView(context _: Context) -> UIView {
-        let containerView = NonInteractiveContainerView()
-        containerView.backgroundColor = .systemBackground
-
-        let chartView = LineChartView()
-        chartView.rightAxis.enabled = true
-        chartView.leftAxis.enabled = false
-        chartView.xAxis.labelPosition = .bottom
-        chartView.rightAxis.drawGridLinesEnabled = false
-        chartView.leftAxis.drawGridLinesEnabled = false
-        chartView.xAxis.drawGridLinesEnabled = false
-        chartView.rightAxis.valueFormatter = ChartYMMOLValueFormatter()
-        chartView.legend.enabled = false
-        chartView.chartDescription.enabled = false
-        chartView.isUserInteractionEnabled = false
-
-        containerView.addSubview(chartView)
-        chartView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            chartView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            chartView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            chartView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            chartView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-        ])
-
-        return containerView
-    }
-
-    class Coordinator {}
-
-    func updateUIView(_ containerView: UIView, context _: Context) {
-        guard let chartView = containerView.subviews.first as? LineChartView else { return }
-        guard !agpData.isEmpty else { return }
-        var p5Entries: [ChartDataEntry] = []
-        var p25Entries: [ChartDataEntry] = []
-        var p50Entries: [ChartDataEntry] = []
-        var p75Entries: [ChartDataEntry] = []
-        var p95Entries: [ChartDataEntry] = []
-
-        for point in agpData {
-            let x = Double(point.timeOfDay) / 60.0
-            p5Entries.append(ChartDataEntry(x: x, y: point.p5))
-            p25Entries.append(ChartDataEntry(x: x, y: point.p25))
-            p50Entries.append(ChartDataEntry(x: x, y: point.p50))
-            p75Entries.append(ChartDataEntry(x: x, y: point.p75))
-            p95Entries.append(ChartDataEntry(x: x, y: point.p95))
-        }
-
-        let sortedP5 = p5Entries.sorted { $0.x < $1.x }
-        let sortedP25 = p25Entries.sorted { $0.x < $1.x }
-        let sortedP50 = p50Entries.sorted { $0.x < $1.x }
-        let sortedP75 = p75Entries.sorted { $0.x < $1.x }
-        let sortedP95 = p95Entries.sorted { $0.x < $1.x }
-
-        guard !sortedP5.isEmpty, !sortedP25.isEmpty, !sortedP50.isEmpty,
-              !sortedP75.isEmpty, !sortedP95.isEmpty
-        else {
-            return
-        }
-        let p5DataSet = LineChartDataSet(entries: sortedP5, label: "5th")
-        p5DataSet.colors = [NSUIColor.systemGray.withAlphaComponent(0.6)]
-        p5DataSet.lineWidth = 1.5
-        p5DataSet.drawCirclesEnabled = false
-        p5DataSet.drawValuesEnabled = false
-        p5DataSet.drawFilledEnabled = false
-        p5DataSet.mode = .linear
-
-        let p25DataSet = LineChartDataSet(entries: sortedP25, label: "25th")
-        p25DataSet.colors = [NSUIColor.systemBlue.withAlphaComponent(0.7)]
-        p25DataSet.lineWidth = 1.5
-        p25DataSet.drawCirclesEnabled = false
-        p25DataSet.drawValuesEnabled = false
-        p25DataSet.drawFilledEnabled = false
-        p25DataSet.mode = .linear
-
-        let p50DataSet = LineChartDataSet(entries: sortedP50, label: "Median")
-        p50DataSet.colors = [NSUIColor.systemBlue]
-        p50DataSet.lineWidth = 3
-        p50DataSet.drawCirclesEnabled = false
-        p50DataSet.drawValuesEnabled = false
-        p50DataSet.drawFilledEnabled = false
-        p50DataSet.mode = .linear
-
-        let p75DataSet = LineChartDataSet(entries: sortedP75, label: "75th")
-        p75DataSet.colors = [NSUIColor.systemBlue.withAlphaComponent(0.7)]
-        p75DataSet.lineWidth = 1.5
-        p75DataSet.drawCirclesEnabled = false
-        p75DataSet.drawValuesEnabled = false
-        p75DataSet.drawFilledEnabled = false
-        p75DataSet.mode = .linear
-
-        let p95DataSet = LineChartDataSet(entries: sortedP95, label: "95th")
-        p95DataSet.colors = [NSUIColor.systemGray.withAlphaComponent(0.6)]
-        p95DataSet.lineWidth = 1.5
-        p95DataSet.drawCirclesEnabled = false
-        p95DataSet.drawValuesEnabled = false
-        p95DataSet.drawFilledEnabled = false
-        p95DataSet.mode = .linear
-        let maxY = max(sortedP95.map { $0.y }.max() ?? 300, 300) + 10
-        let hourMinY = min(sortedP5.map { $0.y }.min() ?? 0, 0) - 10
-
-        var hourLines: [ChartDataEntry] = []
-        for hour in 0 ... 24 {
-            let x = Double(hour)
-            hourLines.append(ChartDataEntry(x: x, y: hourMinY))
-            hourLines.append(ChartDataEntry(x: x, y: maxY))
-            if hour < 24 {
-                hourLines.append(ChartDataEntry(x: x + 0.0001, y: hourMinY))
+        var color: Color {
+            switch self {
+            case .p5, .p95: return Color(.systemGray).opacity(0.6)
+            case .p25, .p75: return Color(.systemBlue).opacity(0.7)
+            case .median: return Color(.systemBlue)
             }
         }
 
-        let hourLinesDataSet = LineChartDataSet(entries: hourLines, label: "Hours")
-        hourLinesDataSet.colors = [NSUIColor.label.withAlphaComponent(0.3)]
-        hourLinesDataSet.lineWidth = 1
-        hourLinesDataSet.drawCirclesEnabled = false
-        hourLinesDataSet.drawValuesEnabled = false
-        hourLinesDataSet.drawFilledEnabled = false
+        var lineWidth: CGFloat {
+            self == .median ? 3 : 1.5
+        }
+    }
 
-        let data = LineChartData()
-        data.append(p5DataSet)
-        data.append(p25DataSet)
-        data.append(p50DataSet)
-        data.append(p75DataSet)
-        data.append(p95DataSet)
-        data.append(hourLinesDataSet)
+    private struct Point: Identifiable {
+        let percentile: Percentile
+        let hour: Double
+        let value: Double
+        var id: String { "\(percentile.rawValue)-\(hour)" }
+    }
 
-        chartView.data = data
-        chartView.notifyDataSetChanged()
-        chartView.setNeedsDisplay()
+    private var points: [Point] {
+        let sortedData = agpData.sorted { $0.timeOfDay < $1.timeOfDay }
+        return sortedData.flatMap { dp -> [Point] in
+            let hour = Double(dp.timeOfDay) / 60.0
+            return [
+                Point(percentile: .p5, hour: hour, value: dp.p5),
+                Point(percentile: .p25, hour: hour, value: dp.p25),
+                Point(percentile: .median, hour: hour, value: dp.p50),
+                Point(percentile: .p75, hour: hour, value: dp.p75),
+                Point(percentile: .p95, hour: hour, value: dp.p95),
+            ]
+        }
+    }
+
+    private var activeThresholds: (low: Double, high: Double) {
+        UnitSettingsStore.shared.effectiveThresholds()
+    }
+
+    private var lowThresholdLabel: String {
+        Localizer.toDisplayUnits(String(activeThresholds.low))
+    }
+
+    private var highThresholdLabel: String {
+        Localizer.toDisplayUnits(String(activeThresholds.high))
+    }
+
+    private var plottedMinValue: Double {
+        min(points.map(\.value).min() ?? activeThresholds.low, activeThresholds.low)
+    }
+
+    private var plottedMaxValue: Double {
+        max(points.map(\.value).max() ?? activeThresholds.high, activeThresholds.high)
+    }
+
+    private var yDomain: ClosedRange<Double> {
+        let span = max(plottedMaxValue - plottedMinValue, 1)
+        let topPadding = max(span * 0.05, 1)
+        return plottedMinValue ... (plottedMaxValue + topPadding)
+    }
+
+    private var yAxisEndpoints: [Double] {
+        if abs(plottedMaxValue - plottedMinValue) < 0.0001 {
+            return [plottedMinValue]
+        }
+        return [plottedMinValue, plottedMaxValue]
+    }
+
+    var body: some View {
+        Chart {
+            RuleMark(y: .value("lowBoundary", activeThresholds.low))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                .annotation(position: .leading, alignment: .leading) {
+                    Text(lowThresholdLabel)
+                        .font(.caption2)
+                }
+
+            RuleMark(y: .value("highBoundary", activeThresholds.high))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                .annotation(position: .leading, alignment: .leading) {
+                    Text(highThresholdLabel)
+                        .font(.caption2)
+                }
+
+            ForEach(points) { point in
+                LineMark(
+                    x: .value("hour", point.hour),
+                    y: .value("bg", point.value)
+                )
+                .foregroundStyle(by: .value("percentile", point.percentile))
+                .lineStyle(StrokeStyle(lineWidth: point.percentile.lineWidth))
+                .interpolationMethod(.linear)
+            }
+        }
+        .chartForegroundStyleScale(
+            domain: Percentile.allCases,
+            range: Percentile.allCases.map(\.color)
+        )
+        .chartLegend(.hidden)
+        .chartXScale(domain: 0 ... 24)
+        .chartYScale(domain: yDomain)
+        .chartXAxis {
+            AxisMarks(position: .bottom, values: Array(stride(from: 0, through: 24, by: 3))) { value in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
+                    .foregroundStyle(Color(.label).opacity(0.3))
+                AxisTick()
+                AxisValueLabel {
+                    if let hour = value.as(Int.self) {
+                        Text("\(hour)")
+                    }
+                }
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading, values: yAxisEndpoints) { value in
+                AxisValueLabel {
+                    if let raw = value.as(Double.self) {
+                        Text(Localizer.toDisplayUnits(String(raw)))
+                    }
+                }
+            }
+        }
+        .allowsHitTesting(false)
+        .background(Color(.systemBackground))
     }
 }

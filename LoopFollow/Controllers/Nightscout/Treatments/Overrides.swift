@@ -2,7 +2,6 @@
 // Overrides.swift
 
 import Foundation
-import UIKit
 
 extension MainViewController {
     func processNSOverrides(entries: [[String: AnyObject]]) {
@@ -69,7 +68,12 @@ extension MainViewController {
                     return [lo, hi]
                 }(),
                 enteredBy: e["enteredBy"] as? String ?? "unknown",
-                reason: e["reason"] as? String ?? "",
+                // Loop stores the override name in "reason"; Trio stores it in
+                // "notes". Prefer notes so Trio override names surface on the
+                // graph, matching the info table and treatments list.
+                reason: (e["notes"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                    ?? (e["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                    ?? "",
                 sgv: -20
             )
             overrideGraphData.append(dot)

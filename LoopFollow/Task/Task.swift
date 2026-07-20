@@ -12,5 +12,6 @@ extension MainViewController {
         scheduleMinAgoTask()
         scheduleCalendarTask()
         scheduleAlarmTask()
+        scheduleDBSizeTask()
     }
 }

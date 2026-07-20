@@ -61,6 +61,15 @@ class SettingsMigrationManager {
             )
         }
 
+        // Try to decode as APNSSettingsExport
+        if let apnsSettings = try? JSONDecoder().decode(APNSSettingsExport.self, from: data) {
+            LogManager.shared.log(category: .general, message: "Successfully decoded as APNSSettingsExport", isDebug: true)
+            return CombinedSettingsExport(
+                apns: apnsSettings,
+                exportType: "APNS Settings"
+            )
+        }
+
         LogManager.shared.log(category: .general, message: "Failed to decode as any known component", isDebug: true)
         return nil
     }

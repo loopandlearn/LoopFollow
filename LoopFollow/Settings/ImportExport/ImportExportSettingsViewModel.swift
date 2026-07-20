@@ -10,6 +10,7 @@ struct ImportPreview {
     let remoteType: String?
     let alarmCount: Int
     let alarmNames: [String]
+    let apnsKeyId: String?
 }
 
 class ImportExportSettingsViewModel: ObservableObject {
@@ -38,6 +39,7 @@ class ImportExportSettingsViewModel: ObservableObject {
         case nightscout = "Nightscout Settings"
         case dexcom = "Dexcom Share Settings"
         case remote = "Remote Settings"
+        case apns = "APNS Settings"
         case alarms = "Alarm Settings"
 
         var icon: String {
@@ -46,6 +48,17 @@ class ImportExportSettingsViewModel: ObservableObject {
             case .dexcom: return "network"
             case .remote: return "antenna.radiowaves.left.and.right"
             case .alarms: return "bell"
+            case .apns: return "key.horizontal"
+            }
+        }
+
+        var importDescription: String {
+            switch self {
+            case .nightscout: return "Nightscout Settings"
+            case .dexcom: return "Dexcom Share Settings"
+            case .remote: return "Remote Settings"
+            case .alarms: return "Alarm Settings"
+            case .apns: return "APNS Settings"
             }
         }
     }
@@ -91,7 +104,7 @@ class ImportExportSettingsViewModel: ObservableObject {
                 return
             }
 
-            LogManager.shared.log(category: .general, message: "QR code decoded successfully. Components: nightscout=\(settings.nightscout != nil), remote=\(settings.remote != nil), alarms=\(settings.alarms != nil)")
+            LogManager.shared.log(category: .general, message: "QR code decoded successfully. Components: nightscout=\(settings.nightscout != nil), remote=\(settings.remote != nil), alarms=\(settings.alarms != nil), apns=\(settings.apns != nil)")
 
             // Check version compatibility
             let currentVersion = AppVersionManager().version()
@@ -163,6 +176,16 @@ class ImportExportSettingsViewModel: ObservableObject {
             LogManager.shared.log(category: .general, message: "Alarm settings imported from \(source) (version: \(alarms.version), \(alarms.alarms.count) alarms)")
         }
 
+        if let apns = settings.apns {
+            if apns.hasValidSettings() {
+                apns.applyToStorage()
+                importedComponents.append("APNS settings")
+                LogManager.shared.log(category: .general, message: "APNS settings imported from \(source) (version: \(apns.version), keyId: \(apns.keyId))")
+            } else {
+                throw NSError(domain: "SettingsImport", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid APNS settings in \(source)"])
+            }
+        }
+
         // Update the success message with what was imported
         if !importedComponents.isEmpty {
             let componentsList = importedComponents.joined(separator: ", ")
@@ -220,6 +243,16 @@ class ImportExportSettingsViewModel: ObservableObject {
                 dexcom: dexcomSettings,
                 exportType: exportType.rawValue
             )
+        case .apns:
+            let apnsSettings = APNSSettingsExport.fromCurrentStorage()
+            if !apnsSettings.hasValidSettings() {
+                qrCodeErrorMessage = "Please configure your APNS settings first (valid APNS Key ID and APNS Key)"
+                return nil
+            }
+            settings = CombinedSettingsExport(
+                apns: apnsSettings,
+                exportType: exportType.rawValue
+            )
         }
 
         return settings?.encodeToJSON()
@@ -257,14 +290,16 @@ class ImportExportSettingsViewModel: ObservableObject {
         let remoteType = settings.remote?.remoteType != .none ? settings.remote?.remoteType.rawValue : nil
         let alarmCount = settings.alarms?.alarms.count ?? 0
         let alarmNames = settings.alarms?.alarms.map { $0.name } ?? []
+        let apnsKeyId = settings.apns?.keyId.isEmpty == false ? settings.apns?.keyId : nil
 
         // Check if any settings are actually present
         let hasAnySettings = (nightscoutURL != nil && !nightscoutURL!.isEmpty) ||
             (dexcomUsername != nil && !dexcomUsername!.isEmpty) ||
             (remoteType != nil && !remoteType!.isEmpty && remoteType != "None") ||
-            alarmCount > 0
+            alarmCount > 0 ||
+            (apnsKeyId != nil && !apnsKeyId!.isEmpty)
 
-        LogManager.shared.log(category: .general, message: "Import preview check - nightscoutURL: \(nightscoutURL.map { LogRedactor.url($0) } ?? "nil"), dexcomUsername: \(dexcomUsername.map { LogRedactor.username($0) } ?? "nil"), remoteType: \(remoteType ?? "nil"), alarmCount: \(alarmCount), hasAnySettings: \(hasAnySettings)")
+        LogManager.shared.log(category: .general, message: "Import preview check - nightscoutURL: \(nightscoutURL.map { LogRedactor.url($0) } ?? "nil"), dexcomUsername: \(dexcomUsername.map { LogRedactor.username($0) } ?? "nil"), remoteType: \(remoteType ?? "nil"), alarmCount: \(alarmCount), apnsKeyIdPresent: \(apnsKeyId != nil), hasAnySettings: \(hasAnySettings)")
 
         if hasAnySettings {
             LogManager.shared.log(category: .general, message: "Creating import preview with settings")
@@ -273,7 +308,8 @@ class ImportExportSettingsViewModel: ObservableObject {
                 dexcomUsername: dexcomUsername,
                 remoteType: remoteType,
                 alarmCount: alarmCount,
-                alarmNames: alarmNames
+                alarmNames: alarmNames,
+                apnsKeyId: apnsKeyId
             )
             LogManager.shared.log(category: .general, message: "Created importPreview - nightscoutURL: \(importPreview?.nightscoutURL.map { LogRedactor.url($0) } ?? "nil"), remoteType: \(importPreview?.remoteType ?? "nil"), alarmCount: \(importPreview?.alarmCount ?? 0)")
             showImportConfirmation = true

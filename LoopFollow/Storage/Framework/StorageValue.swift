@@ -4,12 +4,19 @@
 import Combine
 import Foundation
 
-class StorageValue<T: Codable & Equatable>: ObservableObject {
+class StorageValue<T: Codable & Equatable>: ObservableObject, BFUReloadable {
     let key: String
 
     @Published var value: T {
         didSet {
             guard value != oldValue else { return }
+
+            // Suspect BFU: keep in memory only — a poisoned-default write could be
+            // flushed over real data on unlock. Hydration reconciles from disk.
+            guard !StorageReadiness.isSuppressingWrites else {
+                StorageReadiness.noteSuppressedWrite(key: key)
+                return
+            }
 
             if let encodedData = try? JSONEncoder().encode(value) {
                 StorageValue.defaults.set(encodedData, forKey: key)
@@ -35,6 +42,8 @@ class StorageValue<T: Codable & Equatable>: ObservableObject {
         } else {
             value = defaultValue
         }
+
+        StorageReadiness.register(self)
     }
 
     func remove() {

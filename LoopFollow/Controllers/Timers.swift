@@ -2,10 +2,10 @@
 // Timers.swift
 
 import Foundation
-import UIKit
 
 extension MainViewController {
     func startGraphNowTimer(time: TimeInterval = 60) {
+        graphNowTimer.invalidate()
         graphNowTimer = Timer.scheduledTimer(timeInterval: time,
                                              target: self,
                                              selector: #selector(MainViewController.graphNowTimerDidEnd(_:)),
@@ -14,6 +14,6 @@ extension MainViewController {
     }
 
     @objc func graphNowTimerDidEnd(_: Timer) {
-        createVerticalLines()
+        chartModel.rebuild()
     }
 }

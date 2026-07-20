@@ -23,6 +23,27 @@ DEVICE_NAME = ENV["DEVICE_NAME"]
 DEVICE_ID = ENV["DEVICE_ID"]
 ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "120"
 
+# Reads the per-app suffix from LoopFollowDisplayNameConfig.xcconfig so the same
+# Fastfile produces the correct bundle identifiers in every sister repository
+# (LoopFollow, LoopFollow_Second, LoopFollow_Third) without per-repo edits.
+def loopfollow_app_suffix
+  root = GITHUB_WORKSPACE || File.expand_path("..", __dir__)
+  path = File.join(root, "LoopFollowDisplayNameConfig.xcconfig")
+  return "" unless File.exist?(path)
+
+  File.foreach(path) do |line|
+    next if line.strip.start_with?("//")
+    if (match = line.match(/^\s*app_suffix\s*=\s*(.*)$/))
+      return match[1].strip
+    end
+  end
+  ""
+end
+
+APP_SUFFIX = loopfollow_app_suffix
+APP_IDENTIFIER = "com.#{TEAMID}.LoopFollow#{APP_SUFFIX}"
+LA_IDENTIFIER = "#{APP_IDENTIFIER}.LoopFollowLAExtension"
+
 platform :ios do
   desc "Build Loop Follow"
   lane :build_LoopFollow do
@@ -40,7 +61,7 @@ platform :ios do
     )
 
     previous_build_number = latest_testflight_build_number(
-      app_identifier: "com.#{TEAMID}.LoopFollow",
+      app_identifier: APP_IDENTIFIER,
       api_key: api_key,
     )
 
@@ -55,8 +76,8 @@ platform :ios do
       type: "appstore",
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
       app_identifier: [
-        "com.#{TEAMID}.LoopFollow",
-        "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"
+        APP_IDENTIFIER,
+        LA_IDENTIFIER
       ]
     )
 
@@ -66,14 +87,14 @@ platform :ios do
 
     update_code_signing_settings(
       path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
-      profile_name: mapping["com.#{TEAMID}.LoopFollow"],
+      profile_name: mapping[APP_IDENTIFIER],
       code_sign_identity: "iPhone Distribution",
       targets: ["LoopFollow"]
     )
 
     update_code_signing_settings(
-      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",    
-      profile_name: mapping["com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"],
+      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
+      profile_name: mapping[LA_IDENTIFIER],
       code_sign_identity: "iPhone Distribution",
       targets: ["LoopFollowLAExtensionExtension"]
     )
@@ -87,10 +108,10 @@ platform :ios do
       buildlog_path: 'buildlog',
       export_options: {
         provisioningProfiles: {
-          "com.#{TEAMID}.LoopFollow" => mapping["com.#{TEAMID}.LoopFollow"],
-          "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension" => mapping["com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"]
+          APP_IDENTIFIER => mapping[APP_IDENTIFIER],
+          LA_IDENTIFIER => mapping[LA_IDENTIFIER]
         }
-      }	
+      }
     )
 
     copy_artifacts(
@@ -138,12 +159,12 @@ platform :ios do
       end
     end
 
-    configure_bundle_id("LoopFollow", "com.#{TEAMID}.LoopFollow", [
+    configure_bundle_id("LoopFollow", APP_IDENTIFIER, [
       Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS,
       Spaceship::ConnectAPI::BundleIdCapability::Type::PUSH_NOTIFICATIONS
     ])
-    
-    configure_bundle_id("LoopFollow Live Activity Extension", "com.#{TEAMID}.LoopFollow.LoopFollowLAExtension", [
+
+    configure_bundle_id("LoopFollow Live Activity Extension", LA_IDENTIFIER, [
       Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS
     ])
 
@@ -166,8 +187,8 @@ platform :ios do
       verbose: true,
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
       app_identifier: [
-        "com.#{TEAMID}.LoopFollow",
-	"com.#{TEAMID}.LoopFollow.LoopFollowLAExtension"
+        APP_IDENTIFIER,
+        LA_IDENTIFIER
       ]
     )
   end

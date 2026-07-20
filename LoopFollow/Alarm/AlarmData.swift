@@ -20,7 +20,9 @@ struct AlarmData: Codable {
     let IOB: Double?
     let recentBoluses: [BolusEntry]
     let latestBattery: Double?
+    let latestBatteryIsCharging: Bool?
     let latestPumpBattery: Double?
     let batteryHistory: [DataStructs.batteryStruct]
     let recentCarbs: [CarbSample]
+    let dbSizePercentage: Double?
 }

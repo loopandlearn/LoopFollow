@@ -49,16 +49,43 @@ struct NightscoutSettingsView: View {
     }
 
     private var tokenSection: some View {
-        Section(header: Text("Token")) {
+        Section {
             HStack {
                 Text("Access Token")
                 TogglableSecureInput(
-                    placeholder: "Enter Token",
+                    placeholder: "Token or API secret",
                     text: $viewModel.nightscoutToken,
                     style: .singleLine,
                     textContentType: .password
                 )
             }
+
+            if viewModel.tokenIsVerifiedSecret || viewModel.isProvisioningToken {
+                Button {
+                    viewModel.createReadOnlyToken(fromSecret: viewModel.nightscoutToken)
+                } label: {
+                    HStack {
+                        if viewModel.isProvisioningToken {
+                            ProgressView()
+                            Text("Creating read-only token…")
+                        } else {
+                            Image(systemName: "wand.and.stars")
+                            Text("That's your API secret — create a read-only token")
+                        }
+                    }
+                }
+                .disabled(viewModel.isProvisioningToken)
+            }
+
+            if let error = viewModel.tokenProvisionError {
+                Text(error)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+            }
+        } header: {
+            Text("Token")
+        } footer: {
+            Text("Paste a Nightscout token. If your site needs one and you only have the API secret, paste that instead — LoopFollow can create a read-only token for you.")
         }
     }
 

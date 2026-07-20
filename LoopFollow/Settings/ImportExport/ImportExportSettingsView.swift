@@ -3,7 +3,6 @@
 
 import AVFoundation
 import SwiftUI
-import UIKit
 
 struct ImportExportSettingsView: View {
     @StateObject private var viewModel = ImportExportSettingsViewModel()
@@ -83,7 +82,7 @@ struct ImportExportSettingsView: View {
                         )
                         .padding()
 
-                        Text("Scan this QR code with another LoopFollow app to import \(viewModel.exportType.rawValue.lowercased())")
+                        Text("Scan this QR code with another LoopFollow app to import \(viewModel.exportType.importDescription)")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -187,6 +186,15 @@ struct ImportConfirmationView: View {
                                     color: .red
                                 )
                             }
+
+                            if let apnsKeyId = preview.apnsKeyId, !apnsKeyId.isEmpty {
+                                SettingRowView(
+                                    icon: "key.horizontal",
+                                    title: "APNS Key ID",
+                                    value: apnsKeyId,
+                                    color: .purple
+                                )
+                            }
                         }
                         .padding(.horizontal)
                     }
@@ -206,6 +214,13 @@ struct ImportConfirmationView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
+
+                    if let apnsKeyId = viewModel.importPreview?.apnsKeyId, !apnsKeyId.isEmpty {
+                        Text("APNS warning: importing APNS settings will overwrite your existing APNS Key ID and APNS Key.")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                            .multilineTextAlignment(.center)
+                    }
                 }
                 .padding(.horizontal)
 

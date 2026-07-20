@@ -3,7 +3,6 @@
 
 import Foundation
 import HealthKit
-import UIKit
 
 extension MainViewController {
     // NS Temporary Target Response Processor
@@ -64,7 +63,6 @@ extension MainViewController {
 
         if Storage.shared.graphOtherTreatments.value {
             updateTempTargetGraph()
-            updateChartRenderers()
         }
 
         if let target = activeTempTarget {

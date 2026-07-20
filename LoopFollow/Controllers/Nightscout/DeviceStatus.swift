@@ -66,6 +66,7 @@ extension MainViewController {
     // NS Device Status Response Processor
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
         let previousIOBText = Observable.shared.iobText.value
+        let previousDeviceWasLoop = Storage.shared.device.value == "Loop"
         infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
@@ -113,11 +114,13 @@ extension MainViewController {
 
                 if let reservoirData = lastPumpRecord["reservoir"] as? Double {
                     latestPumpVolume = reservoirData
-                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U")
+                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U", numericValue: reservoirData)
                     Storage.shared.lastPumpReservoirU.value = reservoirData
                 } else {
+                    // Pumps that only report "50+" get treated as exactly 50, both
+                    // for the volume alarm and for the info row's coloring.
                     latestPumpVolume = 50.0
-                    infoManager.updateInfoData(type: .pump, value: "50+U")
+                    infoManager.updateInfoData(type: .pump, value: "50+U", numericValue: 50.0)
                     Storage.shared.lastPumpReservoirU.value = nil
                 }
             }
@@ -126,21 +129,23 @@ extension MainViewController {
             if let pumpBatteryRecord = lastPumpRecord["battery"] as? [String: AnyObject],
                let pumpBatteryPercent = pumpBatteryRecord["percent"] as? Double
             {
-                infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", pumpBatteryPercent) + "%")
+                infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", pumpBatteryPercent) + "%", numericValue: pumpBatteryPercent)
                 Observable.shared.pumpBatteryLevel.value = pumpBatteryPercent
             }
 
             if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
                let upbat = uploader["battery"] as? Double
             {
+                let isCharging = uploader["isCharging"] as? Bool
                 let batteryText: String
-                if let isCharging = uploader["isCharging"] as? Bool, isCharging {
+                if isCharging == true {
                     batteryText = "⚡️ " + String(format: "%.0f", upbat) + "%"
                 } else {
                     batteryText = String(format: "%.0f", upbat) + "%"
                 }
-                infoManager.updateInfoData(type: .battery, value: batteryText)
+                infoManager.updateInfoData(type: .battery, value: batteryText, numericValue: upbat)
                 Observable.shared.deviceBatteryLevel.value = upbat
+                Observable.shared.deviceBatteryIsCharging.value = isCharging
 
                 let timestamp = uploader["timestamp"] as? Date ?? Date()
                 let currentBattery = DataStructs.batteryStruct(batteryLevel: upbat, timestamp: timestamp)
@@ -155,6 +160,17 @@ extension MainViewController {
 
         // Loop - handle new data
         if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String: AnyObject]? {
+            // Some pumps report no `pump.clock`; without it alertLastLoopTime stays 0
+            // and the forecast anchors to epoch 0. Fall back to the loop cycle timestamp.
+            if (lastDeviceStatus?["pump"] as? [String: AnyObject])?["clock"] == nil,
+               let loopTimestampString = lastLoopRecord["timestamp"] as? String,
+               let loopTimestamp = formatter.date(from: loopTimestampString)?.timeIntervalSince1970,
+               loopTimestamp > (Observable.shared.alertLastLoopTime.value ?? 0)
+            {
+                Observable.shared.alertLastLoopTime.value = loopTimestamp
+                Storage.shared.lastLoopTime.value = loopTimestamp
+            }
+
             DeviceStatusLoop(formatter: formatter, lastLoopRecord: lastLoopRecord)
 
             var oText = ""
@@ -186,6 +202,17 @@ extension MainViewController {
         // OpenAPS - handle new data
         if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String: AnyObject]? {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
+        }
+
+        // If the active looping system flipped (Loop ⇄ Trio/OpenAPS), drop the previous
+        // system's forecast so it doesn't linger next to the one just drawn above.
+        let currentDeviceIsLoop = Storage.shared.device.value == "Loop"
+        if currentDeviceIsLoop != previousDeviceWasLoop {
+            if currentDeviceIsLoop {
+                clearOpenAPSPredictionGraph()
+            } else {
+                clearLoopPredictionGraph()
+            }
         }
 
         // Start the timer based on the timestamp

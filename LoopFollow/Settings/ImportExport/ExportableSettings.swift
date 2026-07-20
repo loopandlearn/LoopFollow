@@ -389,6 +389,44 @@ struct RemoteSettingsExport: Codable {
     }
 }
 
+// MARK: - APNS Settings Export
+
+struct APNSSettingsExport: Codable {
+    let version: String
+    let keyId: String
+    let apnsKey: String
+
+    static func fromCurrentStorage() -> APNSSettingsExport {
+        let storage = Storage.shared
+        return APNSSettingsExport(
+            version: AppVersionManager().version(),
+            keyId: storage.lfKeyId.value,
+            apnsKey: storage.lfApnsKey.value
+        )
+    }
+
+    func applyToStorage() {
+        let storage = Storage.shared
+        storage.lfKeyId.value = keyId
+
+        let apnsService = LoopAPNSService()
+        storage.lfApnsKey.value = apnsService.validateAndFixAPNSKey(apnsKey)
+    }
+
+    func encodeToJSON() -> String? {
+        do {
+            let data = try JSONEncoder().encode(self)
+            return String(data: data, encoding: .utf8)
+        } catch {
+            return nil
+        }
+    }
+
+    func hasValidSettings() -> Bool {
+        APNsCredentialValidator.isFullyConfigured(keyId: keyId, apnsKey: apnsKey)
+    }
+}
+
 // MARK: - Combined Settings Export
 
 struct CombinedSettingsExport: Codable {
@@ -398,6 +436,7 @@ struct CombinedSettingsExport: Codable {
     let dexcom: DexcomSettingsExport?
     let remote: RemoteSettingsExport?
     let alarms: AlarmSettingsExport?
+    let apns: APNSSettingsExport?
     let exportType: String
     let timestamp: Date
 
@@ -405,6 +444,7 @@ struct CombinedSettingsExport: Codable {
          dexcom: DexcomSettingsExport? = nil,
          remote: RemoteSettingsExport? = nil,
          alarms: AlarmSettingsExport? = nil,
+         apns: APNSSettingsExport? = nil,
          exportType: String)
     {
         version = "1.0"
@@ -413,6 +453,7 @@ struct CombinedSettingsExport: Codable {
         self.dexcom = dexcom
         self.remote = remote
         self.alarms = alarms
+        self.apns = apns
         self.exportType = exportType
         timestamp = Date()
     }
