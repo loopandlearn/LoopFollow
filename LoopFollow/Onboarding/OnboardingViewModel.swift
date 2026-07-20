@@ -85,6 +85,10 @@ final class OnboardingViewModel: ObservableObject {
         self.onClose = onClose
         includeTelemetryStep = !Storage.shared.telemetryConsentDecisionMade.value
         existingAlarmTypes = Set(Storage.shared.alarms.value.map(\.type))
+        let hasNightscout = !Storage.shared.url.value.isEmpty
+        let hasDexcom = !Storage.shared.shareUserName.value.isEmpty
+            && !Storage.shared.sharePassword.value.isEmpty
+        isAlreadyConfigured = hasNightscout || hasDexcom
         seedAlarms = OnboardingViewModel.defaultSeedAlarms()
 
         // Re-publish child changes so the footer's `canProceed` stays in sync
@@ -106,14 +110,14 @@ final class OnboardingViewModel: ObservableObject {
 
     // MARK: - Derived state
 
-    /// True when the user already has a working data source — used to make
-    /// skipping prominent for returning users.
-    var isAlreadyConfigured: Bool {
-        let nightscout = !Storage.shared.url.value.isEmpty
-        let dexcom = !Storage.shared.shareUserName.value.isEmpty
-            && !Storage.shared.sharePassword.value.isEmpty
-        return nightscout || dexcom
-    }
+    /// True when the user already had a working data source at launch — used to
+    /// make skipping prominent for returning users and to decide whether the
+    /// data-source/connect phases are shown. Captured once in `init`, not read
+    /// live: the connect step persists the URL/credentials as the user types, so
+    /// a live read would flip this to `true` mid-`.connect`, drop those phases
+    /// from `activeSteps`, and make `advance()` fall through to `finish()` —
+    /// silently skipping units, alarms, and the rest of setup.
+    let isAlreadyConfigured: Bool
 
     var canProceed: Bool {
         switch step {
@@ -234,13 +238,26 @@ final class OnboardingViewModel: ObservableObject {
 
     func advance() {
         phaseProgress = nil
-        guard let index = activeSteps.firstIndex(of: step),
-              index + 1 < activeSteps.count
-        else {
+        let steps = activeSteps
+        guard let index = steps.firstIndex(of: step) else {
+            // Defensive: the current step should always be in `activeSteps`.
+            // If it ever isn't (a state change removed it while we were on it),
+            // continue to the next still-active step in canonical order rather
+            // than silently ending setup via `finish()`.
+            let canonical = OnboardingStep.allCases
+            let currentRank = canonical.firstIndex(of: step) ?? canonical.count
+            if let next = steps.first(where: { (canonical.firstIndex(of: $0) ?? 0) > currentRank }) {
+                step = next
+            } else {
+                finish()
+            }
+            return
+        }
+        guard index + 1 < steps.count else {
             finish()
             return
         }
-        step = activeSteps[index + 1]
+        step = steps[index + 1]
     }
 
     func goBack() {

@@ -50,7 +50,7 @@ struct WelcomeStepView: View {
                     .buttonStyle(.borderedProminent)
 
                     Button { viewModel.skip() } label: {
-                        Text("Skip for now")
+                        Text("Skip")
                             .font(.body.weight(.medium))
                     }
                 }
