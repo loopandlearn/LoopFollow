@@ -129,7 +129,9 @@ enum SettingsRoute: Hashable, Identifiable {
         case .units: return ["mmol", "mgdl", "metrics"]
         case .infoDisplay: return ["info"]
         case .apn: return ["push", "notification"]
-        case .liveActivity: return ["dynamic island", "lock screen"]
+        #if !targetEnvironment(macCatalyst)
+            case .liveActivity: return ["dynamic island", "lock screen"]
+        #endif
         case .importExport: return ["import", "export", "backup"]
         default: return []
         }
