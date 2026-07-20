@@ -46,6 +46,15 @@ class AlarmManager {
         let now = Date()
         var alarmTriggered = false
 
+        // No alarm activity while onboarding is on screen — existing or
+        // QR-imported alarms shouldn't sound mid-setup.
+        if Observable.shared.isOnboardingActive.value {
+            if Observable.shared.currentAlarm.value != nil {
+                stopAlarm()
+            }
+            return
+        }
+
         let config = Storage.shared.alarmConfiguration.value
 
         // Honor the "Snooze All" setting. If active, stop any current alarm and exit.

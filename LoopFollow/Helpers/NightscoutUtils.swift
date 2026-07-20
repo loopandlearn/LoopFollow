@@ -1,6 +1,7 @@
 // LoopFollow
 // NightscoutUtils.swift
 
+import CryptoKit
 import Foundation
 
 class NightscoutUtils {
@@ -406,6 +407,163 @@ class NightscoutUtils {
         }
 
         return responseString
+    }
+
+    // MARK: - Token Provisioning
+
+    /// Name of the Nightscout authorization subject LoopFollow creates when a
+    /// user provisions a token from their API secret.
+    static let provisionedSubjectName = "LoopFollow"
+
+    private struct AuthSubject: Decodable {
+        let id: String?
+        let name: String?
+        let accessToken: String?
+        let roles: [String]?
+
+        enum CodingKeys: String, CodingKey {
+            case id = "_id"
+            case name, accessToken, roles
+        }
+    }
+
+    /// Creates (or reuses) a read-only Nightscout access token using the site's
+    /// API secret. The secret only authorizes these requests and is never
+    /// persisted. Returns the access token for a `readable` subject named
+    /// `provisionedSubjectName`.
+    ///
+    /// The full API secret authenticates as Nightscout's `admin` role (the `*`
+    /// permission), which includes `admin:api:subjects:create`.
+    ///
+    /// Nightscout serves the subjects list from an in-memory cache that doesn't
+    /// refresh promptly after a write, so a freshly-created subject (and its
+    /// token) can't be read back reliably right after creating it. Instead we
+    /// derive the token locally: it's a pure function of the subject's `_id`
+    /// (returned by the create call) and the API secret. See `accessToken(for:)`.
+    static func provisionReadOnlyToken(url: String, secret: String) async throws -> String {
+        let trimmedURL = url.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedURL.isEmpty else { throw NightscoutError.emptyAddress }
+        guard let baseURL = URL(string: trimmedURL),
+              trimmedURL.hasPrefix("http://") || trimmedURL.hasPrefix("https://")
+        else { throw NightscoutError.invalidURL }
+
+        let secretHash = sha1Hex(secret)
+
+        // Reuse an existing subject if one is already visible (idempotent re-runs
+        // once the site's cache has caught up).
+        if let existing = try await fetchProvisionedToken(baseURL: baseURL, secretHash: secretHash) {
+            return existing
+        }
+
+        let id = try await createReadOnlySubject(baseURL: baseURL, secretHash: secretHash)
+        return accessToken(forName: provisionedSubjectName, id: id, secretHash: secretHash)
+    }
+
+    /// Returns `true` when `secret` authenticates as the site's API secret.
+    /// Read-only: it probes an admin-gated endpoint with the hashed secret and
+    /// creates nothing, so it's safe to call just to find out what the user pasted.
+    static func verifyAPISecret(url: String, secret: String) async -> Bool {
+        let trimmedURL = url.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedSecret = secret.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSecret.isEmpty,
+              let baseURL = URL(string: trimmedURL),
+              trimmedURL.hasPrefix("http://") || trimmedURL.hasPrefix("https://")
+        else { return false }
+
+        let endpoint = baseURL.appendingPathComponent("api/v2/authorization/subjects")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        request.setValue(sha1Hex(trimmedSecret), forHTTPHeaderField: "api-secret")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            return (response as? HTTPURLResponse)?.statusCode == 200
+        } catch {
+            return false
+        }
+    }
+
+    private static func fetchProvisionedToken(baseURL: URL, secretHash: String) async throws -> String? {
+        let url = baseURL.appendingPathComponent("api/v2/authorization/subjects")
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue(secretHash, forHTTPHeaderField: "api-secret")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try validateProvisioningResponse(response)
+
+        let subjects = try JSONDecoder().decode([AuthSubject].self, from: data)
+        return subjects.first(where: { $0.name == provisionedSubjectName })?.accessToken
+    }
+
+    /// Creates the subject and returns its `_id`.
+    private static func createReadOnlySubject(baseURL: URL, secretHash: String) async throws -> String {
+        let url = baseURL.appendingPathComponent("api/v2/authorization/subjects")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(secretHash, forHTTPHeaderField: "api-secret")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: [
+            "name": provisionedSubjectName,
+            "roles": ["readable"],
+        ])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try validateProvisioningResponse(response)
+
+        // Nightscout returns the created subject wrapped in an array
+        // (`[{…}]`) on current versions, but a bare object on some older ones,
+        // so accept either shape.
+        let subject = try decodeCreatedSubject(from: data)
+        guard let id = subject.id, !id.isEmpty else { throw NightscoutError.unknown }
+        return id
+    }
+
+    private static func decodeCreatedSubject(from data: Data) throws -> AuthSubject {
+        let decoder = JSONDecoder()
+        if let array = try? decoder.decode([AuthSubject].self, from: data) {
+            guard let first = array.first else { throw NightscoutError.unknown }
+            return first
+        }
+        return try decoder.decode(AuthSubject.self, from: data)
+    }
+
+    /// Reproduces Nightscout's subject-token derivation (`lib/authorization`):
+    ///   abbrev = name lowercased, non-`\w` characters removed, first 10 chars
+    ///   digest = sha1( sha1Hex(apiSecret) + subjectId )
+    ///   token  = "\(abbrev)-\(digest[0..<16])"
+    private static func accessToken(forName name: String, id: String, secretHash: String) -> String {
+        let allowed = Set("abcdefghijklmnopqrstuvwxyz0123456789_")
+        let abbrev = String(name.lowercased().filter { allowed.contains($0) }.prefix(10))
+        let digest = sha1Hex(secretHash + id)
+        return abbrev + "-" + String(digest.prefix(16))
+    }
+
+    private static func validateProvisioningResponse(_ response: URLResponse) throws {
+        guard let http = response as? HTTPURLResponse else {
+            throw NightscoutError.networkError
+        }
+        switch http.statusCode {
+        case 200 ..< 300:
+            return
+        case 401, 403:
+            // The API secret was missing or wrong.
+            throw NightscoutError.invalidToken
+        case 404:
+            throw NightscoutError.siteNotFound
+        default:
+            throw NightscoutError.unknown
+        }
+    }
+
+    private static func sha1Hex(_ string: String) -> String {
+        Insecure.SHA1.hash(data: Data(string.utf8))
+            .map { String(format: "%02x", $0) }
+            .joined()
     }
 
     static func extractErrorReason(from responseString: String) -> String {

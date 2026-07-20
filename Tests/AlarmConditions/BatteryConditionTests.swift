@@ -1,6 +1,7 @@
 // LoopFollow
 // BatteryConditionTests.swift
 
+import Foundation
 @testable import LoopFollow
 import Testing
 

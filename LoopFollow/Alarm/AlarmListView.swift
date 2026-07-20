@@ -195,6 +195,9 @@ struct AlarmListView: View {
             AddAlarmSheet { type in
                 let new = Alarm(type: type)
                 store.value.append(new)
+                // First alarm the user adds is the moment notifications become
+                // useful — request authorization here rather than at app launch.
+                NotificationAuthorization.requestIfNeeded()
                 sheetInfo = .editor(id: new.id, isNew: true)
             }
 

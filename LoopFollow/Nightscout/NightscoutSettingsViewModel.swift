@@ -35,6 +35,29 @@ class NightscoutSettingsViewModel: ObservableObject {
 
     @Published var nightscoutStatus: String = "Checking..."
 
+    /// The most recent verification error, kept so the onboarding address page can
+    /// tell "reachable Nightscout that needs a token" apart from "can't reach it".
+    @Published var lastError: NightscoutUtils.NightscoutError?
+
+    /// True when the most recent error means the site is a reachable Nightscout
+    /// that simply needs (a different) token.
+    private var errorIsTokenRelated: Bool {
+        switch lastError {
+        case .tokenRequired, .invalidToken: return true
+        default: return false
+        }
+    }
+
+    /// The site responded as a Nightscout instance, even if it needs a token.
+    var addressReachable: Bool {
+        isConnected || errorIsTokenRelated
+    }
+
+    /// The site is reachable but requires a token we don't have yet.
+    var addressNeedsToken: Bool {
+        !isConnected && errorIsTokenRelated
+    }
+
     @Published var webSocketEnabled: Bool = Storage.shared.webSocketEnabled.value {
         didSet {
             Storage.shared.webSocketEnabled.value = webSocketEnabled
@@ -62,6 +85,25 @@ class NightscoutSettingsViewModel: ObservableObject {
     private var checkStatusSubject = PassthroughSubject<Void, Never>()
     private var checkStatusWorkItem: DispatchWorkItem?
 
+    /// While confirming a freshly provisioned token, the retry loop owns the
+    /// status label, so the ordinary debounced check is suppressed to avoid
+    /// flickering "Invalid Token" before the server has caught up.
+    private var isConfirmingProvisionedToken = false
+
+    /// Set when a token we just created is correct (the create call returned its
+    /// id, so the secret was valid and the token is a deterministic function of
+    /// it) but the site hasn't started accepting it yet. Some hosts only reload
+    /// their auth cache on a restart, which can take minutes — far longer than we
+    /// can spin during onboarding — so this is treated as a success-pending state
+    /// the user can proceed from, not an error.
+    @Published private(set) var provisionedTokenPending = false
+
+    /// True while a read-only token is being created from the API secret.
+    @Published var isProvisioningToken = false
+
+    /// The most recent token-provisioning failure, for inline display.
+    @Published var tokenProvisionError: String?
+
     init() {
         initialURL = Storage.shared.url.value
         initialToken = Storage.shared.token.value
@@ -84,6 +126,10 @@ class NightscoutSettingsViewModel: ObservableObject {
     private func triggerCheckStatus() {
         checkStatusWorkItem?.cancel()
 
+        // Any manual edit invalidates a pending-provisioned state and any earlier
+        // "this is your API secret" verdict.
+        provisionedTokenPending = false
+        tokenIsVerifiedSecret = false
         nightscoutStatus = "Checking..."
 
         checkStatusWorkItem = DispatchWorkItem {
@@ -127,6 +173,7 @@ class NightscoutSettingsViewModel: ObservableObject {
     }
 
     func checkNightscoutStatus() {
+        if isConfirmingProvisionedToken { return }
         NightscoutUtils.verifyURLAndToken { error, _, nsWriteAuth, nsAdminAuth in
             DispatchQueue.main.async {
                 Storage.shared.nsWriteAuth.value = nsWriteAuth
@@ -137,7 +184,139 @@ class NightscoutSettingsViewModel: ObservableObject {
         }
     }
 
+    /// Applies a token that LoopFollow just created and confirms it works.
+    ///
+    /// A freshly created subject isn't always recognized immediately: each
+    /// Nightscout server instance only reloads its in-memory subject cache on a
+    /// write, and multi-instance deployments don't share that cache — so the
+    /// first validation can be routed to an instance that hasn't caught up yet.
+    /// Rather than fail (and make the user tap again), we poll for a few seconds
+    /// with a reassuring status before surfacing any error.
+    func confirmProvisionedToken(_ token: String) {
+        isConfirmingProvisionedToken = true
+        provisionedTokenPending = false
+        isConnected = false
+        nightscoutStatus = "Finishing connection…"
+        nightscoutToken = token
+        verifyProvisionedTokenLoop(attempt: 0)
+    }
+
+    private func verifyProvisionedTokenLoop(attempt: Int) {
+        let maxAttempts = 8
+        NightscoutUtils.verifyURLAndToken { [weak self] error, _, nsWriteAuth, nsAdminAuth in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if error == nil {
+                    self.isConfirmingProvisionedToken = false
+                    self.provisionedTokenPending = false
+                    Storage.shared.nsWriteAuth.value = nsWriteAuth
+                    Storage.shared.nsAdminAuth.value = nsAdminAuth
+                    self.updateStatusLabel(error: nil)
+                } else if attempt + 1 < maxAttempts {
+                    self.nightscoutStatus = "Finishing connection…"
+                    let delay = min(0.5 + Double(attempt) * 0.25, 2.0)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        self.verifyProvisionedTokenLoop(attempt: attempt + 1)
+                    }
+                } else {
+                    // The token is correct but the site hasn't started accepting
+                    // it yet. Surface a calm "pending" state the user can proceed
+                    // from rather than a red error.
+                    self.isConfirmingProvisionedToken = false
+                    self.provisionedTokenPending = true
+                    self.lastError = nil
+                }
+            }
+        }
+    }
+
+    // MARK: - Token provisioning from API secret
+
+    /// Nightscout access tokens look like `name-<16 hex>`; anything else the user
+    /// puts in the token field — most often their API secret — won't match.
+    private static let tokenFormat = "^[^-\\s]+-[0-9a-fA-F]{16}$"
+
+    private func looksLikeToken(_ value: String) -> Bool {
+        value.range(of: Self.tokenFormat, options: .regularExpression) != nil
+    }
+
+    /// Set once the value in the token field has been confirmed to authenticate as
+    /// the site's API secret. Drives the "create a token from this" suggestion.
+    /// This is a verified result (an actual auth probe), not a format guess, so it
+    /// only appears when creating a token will genuinely work.
+    @Published private(set) var tokenIsVerifiedSecret = false
+
+    /// Bumped on every edit so a slow verification for an old value can't land on a
+    /// newer one.
+    private var secretCheckGeneration = 0
+
+    /// After a failed token check, find out whether what the user pasted is in fact
+    /// the API secret — verified against the server, not guessed from its shape.
+    private func verifyTokenIsSecret() {
+        let candidate = nightscoutToken
+        guard !candidate.isEmpty, !looksLikeToken(candidate) else {
+            tokenIsVerifiedSecret = false
+            return
+        }
+        secretCheckGeneration += 1
+        let generation = secretCheckGeneration
+        let url = nightscoutURL
+        Task {
+            let isSecret = await NightscoutUtils.verifyAPISecret(url: url, secret: candidate)
+            await MainActor.run {
+                guard generation == self.secretCheckGeneration,
+                      self.nightscoutToken == candidate else { return }
+                self.tokenIsVerifiedSecret = isSecret
+            }
+        }
+    }
+
+    /// Creates (or reuses) a read-only token from the given API secret and applies
+    /// it. The secret authorizes the create call only and is never stored.
+    func createReadOnlyToken(fromSecret secret: String) {
+        let trimmed = secret.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        tokenProvisionError = nil
+        isProvisioningToken = true
+        let url = nightscoutURL
+
+        Task {
+            do {
+                let token = try await NightscoutUtils.provisionReadOnlyToken(url: url, secret: trimmed)
+                await MainActor.run {
+                    self.isProvisioningToken = false
+                    self.confirmProvisionedToken(token)
+                }
+            } catch {
+                await MainActor.run {
+                    self.isProvisioningToken = false
+                    self.tokenProvisionError = NightscoutSettingsViewModel.provisioningMessage(for: error)
+                }
+            }
+        }
+    }
+
+    static func provisioningMessage(for error: Error) -> String {
+        guard let nsError = error as? NightscoutUtils.NightscoutError else {
+            return "Could not create a token. Please try again."
+        }
+        switch nsError {
+        case .invalidToken:
+            return "That API secret was rejected. Check it and try again."
+        case .invalidURL, .emptyAddress:
+            return "Please enter a valid site URL first."
+        case .siteNotFound:
+            return "Couldn't reach that site. Check the URL."
+        case .networkError:
+            return "Network error. Check your connection and try again."
+        case .tokenRequired, .unknown:
+            return "Could not create a token. Please try again."
+        }
+    }
+
     func updateStatusLabel(error: NightscoutUtils.NightscoutError?) {
+        lastError = error
         if let error = error {
             isConnected = false
             switch error {
@@ -157,8 +336,19 @@ class NightscoutSettingsViewModel: ObservableObject {
                 nightscoutStatus = "Address Empty"
             }
             NightscoutSocketManager.shared.disconnect()
+
+            // A site that's reachable but rejects the value as a token is the one
+            // case where the user may have pasted their API secret — verify it so
+            // we can offer to turn it into a token.
+            switch error {
+            case .invalidToken, .tokenRequired:
+                verifyTokenIsSecret()
+            default:
+                tokenIsVerifiedSecret = false
+            }
         } else {
             isConnected = true
+            tokenIsVerifiedSecret = false
             let authStatus: String
             if Storage.shared.nsAdminAuth.value {
                 authStatus = "Admin"
@@ -176,6 +366,52 @@ class NightscoutSettingsViewModel: ObservableObject {
 
     private func triggerRefresh() {
         NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
+    }
+
+    // MARK: - Adaptive status (onboarding)
+
+    enum ConnectionStatusKind {
+        case idle
+        case checking
+        case needsToken
+        case pending
+        case connected
+        case error
+    }
+
+    /// A coarse status used to drive the onboarding status pill's color and icon.
+    var statusKind: ConnectionStatusKind {
+        if isConfirmingProvisionedToken { return .checking }
+        if nightscoutURL.isEmpty { return .idle }
+        if isConnected { return .connected }
+        // Token created and correct, just not accepted by the site yet.
+        if provisionedTokenPending { return .pending }
+        if nightscoutStatus == "Checking..." { return .checking }
+        // The site is reachable and simply needs a token — that's an expected
+        // step, not an error, so it's shown positively rather than red.
+        if addressNeedsToken { return .needsToken }
+        return .error
+    }
+
+    /// A friendly, contextual status line that updates as the user fills fields,
+    /// rather than a fixed "Status" label that can read as stale.
+    var friendlyStatus: String {
+        switch statusKind {
+        case .idle:
+            return "Enter your site address to connect."
+        case .checking:
+            return isConfirmingProvisionedToken ? "Finishing connection…" : "Checking your connection…"
+        case .needsToken:
+            return "Site found — it needs a token."
+        case .pending:
+            return "Token created. Your site can take a few minutes to start accepting it — you can continue."
+        case .connected:
+            if Storage.shared.nsAdminAuth.value { return "Connected — admin access" }
+            if Storage.shared.nsWriteAuth.value { return "Connected — read & write" }
+            return "Connected — read-only"
+        case .error:
+            return nightscoutStatus
+        }
     }
 
     private func observeWebSocketState() {

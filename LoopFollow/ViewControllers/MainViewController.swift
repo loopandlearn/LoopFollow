@@ -199,10 +199,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // Synchronize info types to ensure arrays are the correct size
         synchronizeInfoTypes()
 
-        let shareUserName = Storage.shared.shareUserName.value
-        let sharePassword = Storage.shared.sharePassword.value
-        let shareServer = Storage.shared.shareServer.value == "US" ?KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
-        dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer)
+        configureDexShareClient()
 
         // setup show/hide graphs (first-time setup check)
         updateGraphVisibility()
@@ -323,19 +320,18 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             }
             .store(in: &cancellables)
 
-        Storage.shared.shareUserName.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.checkAndShowImportButtonIfNeeded()
-            }
-            .store(in: &cancellables)
-
-        Storage.shared.sharePassword.$value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.checkAndShowImportButtonIfNeeded()
-            }
-            .store(in: &cancellables)
+        // ShareClient captures the credentials at init, so it's rebuilt on any change.
+        Publishers.MergeMany(
+            Storage.shared.shareUserName.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.sharePassword.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.shareServer.$value.map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] in
+            self?.configureDexShareClient()
+            self?.checkAndShowImportButtonIfNeeded()
+        }
+        .store(in: &cancellables)
 
         Publishers.CombineLatest4(
             Storage.shared.remoteApnsKey.$value,
@@ -409,6 +405,14 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         }
 
         checkAndShowImportButtonIfNeeded()
+    }
+
+    /// Builds the Dexcom Share client from the stored credentials.
+    private func configureDexShareClient() {
+        let shareUserName = Storage.shared.shareUserName.value
+        let sharePassword = Storage.shared.sharePassword.value
+        let shareServer = Storage.shared.shareServer.value == "US" ? KnownShareServers.US.rawValue : KnownShareServers.NON_US.rawValue
+        dexShare = ShareClient(username: shareUserName, password: sharePassword, shareServer: shareServer)
     }
 
     // MARK: - Loading Overlay

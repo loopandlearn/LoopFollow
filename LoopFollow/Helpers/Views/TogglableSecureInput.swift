@@ -28,13 +28,14 @@ struct TogglableSecureInput: View {
                                 .submitLabel(.done)
                                 .focused($isFocused)
                         } else {
-                            HStack {
-                                Spacer()
-                                Text(maskString)
-                                    .font(.body.monospaced())
-                                    .foregroundColor(.primary)
-                                    .allowsHitTesting(false)
-                            }
+                            // A real (masked) SecureField, not static text, so the
+                            // value stays editable while hidden and — crucially —
+                            // iOS AutoFill/keychain has a secure field to fill.
+                            SecureField(placeholder, text: $text)
+                                .multilineTextAlignment(.trailing)
+                                .textContentType(textContentType)
+                                .submitLabel(.done)
+                                .focused($isFocused)
                         }
                     }
 
@@ -82,19 +83,15 @@ struct TogglableSecureInput: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            if !isVisible {
-                isVisible = true
-                if style == .singleLine {
-                    isFocused = true
-                } else if style == .multiLine {
-                    isMultilineFocused = true
-                }
-            } else {
-                if style == .singleLine {
-                    isFocused = true
-                } else if style == .multiLine {
-                    isMultilineFocused = true
-                }
+            switch style {
+            case .singleLine:
+                // The hidden state is already an editable SecureField, so tapping
+                // just focuses it — no need to reveal the plaintext to type.
+                isFocused = true
+            case .multiLine:
+                // The multi-line editor is only editable once revealed.
+                if !isVisible { isVisible = true }
+                isMultilineFocused = true
             }
         }
     }

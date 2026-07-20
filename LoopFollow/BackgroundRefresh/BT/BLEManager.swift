@@ -8,6 +8,12 @@ import Foundation
 class BLEManager: NSObject, ObservableObject {
     static let shared = BLEManager()
 
+    /// Whether the shared instance has been created (and therefore a
+    /// CBCentralManager exists / the Bluetooth prompt has been triggered).
+    /// Reading this does not instantiate `shared`, so callers can avoid forcing
+    /// Bluetooth initialization — and its permission prompt — when not needed.
+    private(set) static var isInitialized = false
+
     @Published private(set) var devices: [BLEDevice] = []
 
     private var centralManager: CBCentralManager!
@@ -31,6 +37,7 @@ class BLEManager: NSObject, ObservableObject {
 
     override private init() {
         super.init()
+        BLEManager.isInitialized = true
 
         centralManager = CBCentralManager(
             delegate: self,

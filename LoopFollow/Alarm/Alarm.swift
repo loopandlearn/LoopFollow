@@ -318,8 +318,8 @@ struct Alarm: Identifiable, Codable, Equatable {
             persistentMinutes = 0
         case .fastDrop:
             soundFile = .bigClockTicking
-            delta = 18
-            monitoringWindow = 2
+            delta = 15
+            monitoringWindow = 3
         case .fastRise:
             soundFile = .cartoonFailStringsTrumpet
             delta = 10
@@ -329,7 +329,7 @@ struct Alarm: Identifiable, Codable, Equatable {
             threshold = 16
         case .notLooping:
             soundFile = .sciFiEngineShutDown
-            threshold = 31
+            threshold = 16
         case .missedBolus:
             soundFile = .dholShuffleloop
             monitoringWindow = 15

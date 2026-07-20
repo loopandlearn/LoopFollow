@@ -2,7 +2,6 @@
 // AppDelegate.swift
 
 import AVFoundation
-import EventKit
 import UIKit
 import UserNotifications
 
@@ -12,6 +11,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         LogManager.shared.log(category: .general, message: "App started")
         LogManager.shared.cleanupOldLogs()
+
+        // Notification and calendar permissions are no longer requested here.
+        // They're deferred to the moment the user opts into the feature that
+        // needs them (alarms request notifications via NotificationAuthorization;
+        // the Calendar settings screen requests calendar access), so a fresh
+        // install isn't fronted with permission prompts before onboarding.
 
         // Before-First-Unlock detection. isProtectedDataAvailable is false on ANY
         // locked launch, so it alone isn't a BFU signal — post-first-unlock
@@ -44,29 +49,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
-        let options: UNAuthorizationOptions = [.alert, .sound, .badge]
-        notificationCenter.requestAuthorization(options: options) {
-            didAllow, _ in
-            if !didAllow {
-                LogManager.shared.log(category: .general, message: "User has declined notifications")
-            }
-        }
-
-        let store = EKEventStore()
-        store.requestCalendarAccess { granted, error in
-            if !granted {
-                LogManager.shared.log(category: .calendar, message: "Failed to get calendar access: \(String(describing: error))")
-                return
-            }
-        }
-
         let action = UNNotificationAction(identifier: "OPEN_APP_ACTION", title: "Open App", options: .foreground)
         let category = UNNotificationCategory(identifier: BackgroundAlertIdentifier.categoryIdentifier, actions: [action], intentIdentifiers: [], options: [])
         UNUserNotificationCenter.current().setNotificationCategories([category])
 
         UNUserNotificationCenter.current().delegate = self
 
-        _ = BLEManager.shared
+        // Only spin up Bluetooth if the user has chosen a BLE-based background
+        // refresh. Initializing BLEManager creates a CBCentralManager, which
+        // triggers the Bluetooth permission prompt — deferring it keeps that
+        // prompt off fresh installs until the feature is actually enabled.
+        if Storage.shared.backgroundRefreshType.value.isBluetooth {
+            _ = BLEManager.shared
+        }
         // Ensure VolumeButtonHandler is initialized so it can receive alarm notifications
         _ = VolumeButtonHandler.shared
 
