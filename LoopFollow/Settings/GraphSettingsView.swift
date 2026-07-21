@@ -56,9 +56,12 @@ struct GraphSettingsView: View {
             if nightscoutEnabled {
                 Section("Treatments") {
                     Toggle("Show Carb/Bolus Values", isOn: $showValues.value)
+                        .onChange(of: showValues.value) { _ in markDirty() }
                     Toggle("Show Carb Absorption", isOn: $showAbsorption.value)
+                        .onChange(of: showAbsorption.value) { _ in markDirty() }
                     Toggle("Treatments on Small Graph",
                            isOn: $smallGraphTreatments.value)
+                        .onChange(of: smallGraphTreatments.value) { _ in markDirty() }
                 }
             }
 
