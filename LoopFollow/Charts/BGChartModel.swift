@@ -174,6 +174,7 @@ final class BGChartModel: ObservableObject {
     @Published var show30Min: Bool = false
     @Published var show90Min: Bool = false
     @Published var showMidnight: Bool = false
+    @Published var smallGraphTreatments: Bool = true
 
     private static let doseFormatter: NumberFormatter = {
         let nf = NumberFormatter()
@@ -405,6 +406,7 @@ final class BGChartModel: ObservableObject {
         show30Min = Storage.shared.show30MinLine.value
         show90Min = Storage.shared.show90MinLine.value
         showMidnight = Storage.shared.showMidnightLines.value
+        smallGraphTreatments = Storage.shared.smallGraphTreatments.value
 
         let isLoop = Storage.shared.device.value == "Loop"
         overrideColor = isLoop ? .green : .purple

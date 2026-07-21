@@ -1011,21 +1011,28 @@ private struct BGChartCanvas: View, Equatable {
     }
 
     var body: some View {
+        let showTreatments = !isSmall || model.smallGraphTreatments
         let chart = Chart {
-            bgBandMarks
-            basalMarks
-            scheduledBasalMarks
+            if showTreatments {
+                bgBandMarks
+                basalMarks
+                scheduledBasalMarks
+            }
             coneMarks
-            yesterdayMarks
+            if !isSmall {
+                yesterdayMarks
+            }
             bgLineMarks
             bgPointsMark
             predictionLineMark
-            if !isSmall {
-                predictionVariantMarks
+            predictionVariantMarks
+            if showTreatments {
+                treatmentMarks
             }
-            treatmentMarks
             if !isSmall {
                 ruleMarks
+            } else if model.showMidnight {
+                midnightRuleMarks
             }
         }
         .chartXScale(domain: windowStart ... windowEnd)
@@ -1423,11 +1430,16 @@ private struct BGChartCanvas: View, Equatable {
             }
         }
         if model.showMidnight {
-            ForEach(model.midnightMarkers.filter { $0 >= windowStart && $0 <= windowEnd }, id: \.self) { d in
-                RuleMark(x: .value("midnight", d))
-                    .lineStyle(StrokeStyle(lineWidth: 0.5, dash: [5, 3]))
-                    .foregroundStyle(Color.teal.opacity(0.6))
-            }
+            midnightRuleMarks
+        }
+    }
+
+    @ChartContentBuilder
+    private var midnightRuleMarks: some ChartContent {
+        ForEach(model.midnightMarkers.filter { $0 >= windowStart && $0 <= windowEnd }, id: \.self) { d in
+            RuleMark(x: .value("midnight", d))
+                .lineStyle(StrokeStyle(lineWidth: 0.5, dash: [5, 3]))
+                .foregroundStyle(Color.teal.opacity(0.6))
         }
     }
 }
