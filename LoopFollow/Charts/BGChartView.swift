@@ -900,11 +900,15 @@ private struct MainBGChart: View {
     }
 }
 
-// MARK: - Small chart (overview + tap-to-navigate)
+// MARK: - Small chart (overview + tap/drag-to-navigate)
 
 private struct SmallBGChart: View {
     @ObservedObject var model: BGChartModel
     @ObservedObject var interaction: BGChartInteraction
+
+    /// True once the touch has travelled far enough to count as a drag; from
+    /// then on the main chart tracks the finger live instead of waiting for release.
+    @State private var isScrubbing = false
 
     var body: some View {
         GeometryReader { geo in
@@ -931,8 +935,16 @@ private struct SmallBGChart: View {
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        let distance = hypot(value.translation.width, value.translation.height)
+                        if isScrubbing || distance >= BGChartConfig.inspectMovementTolerance {
+                            isScrubbing = true
+                            navigate(toLocalX: value.location.x, width: width, domainSeconds: domainSeconds, animated: false)
+                        }
+                    }
                     .onEnded { value in
-                        navigate(toLocalX: value.location.x, width: width, domainSeconds: domainSeconds)
+                        navigate(toLocalX: value.location.x, width: width, domainSeconds: domainSeconds, animated: !isScrubbing)
+                        isScrubbing = false
                     }
             )
         }
@@ -951,10 +963,10 @@ private struct SmallBGChart: View {
             .offset(x: boxLeft)
     }
 
-    /// Maps a tap x to a time and recenters the main chart on it (clamped to
+    /// Maps a touch x to a time and recenters the main chart on it (clamped to
     /// the data window). Following re-arms automatically via the main chart's
     /// scroll observer if the user lands back at the latest data.
-    private func navigate(toLocalX x: CGFloat, width: CGFloat, domainSeconds: TimeInterval) {
+    private func navigate(toLocalX x: CGFloat, width: CGFloat, domainSeconds: TimeInterval, animated: Bool) {
         let fraction = min(max(x / width, 0), 1)
         let date = model.domainStart.addingTimeInterval(domainSeconds * TimeInterval(fraction))
         let length = interaction.visibleSeconds
@@ -965,8 +977,9 @@ private struct SmallBGChart: View {
             target = min(max(target, minStart), maxStart)
         }
         // Same rule as the main chart's scrollToNow: only nearby targets (still
-        // inside the render window) animate cleanly; long jumps snap.
-        if abs(target.timeIntervalSince(interaction.scrollPosition)) <= interaction.visibleSeconds {
+        // inside the render window) animate cleanly; long jumps snap. Live
+        // drag-tracking never animates — each move must land within the frame.
+        if animated, abs(target.timeIntervalSince(interaction.scrollPosition)) <= interaction.visibleSeconds {
             withAnimation(.easeInOut(duration: 0.3)) {
                 interaction.scrollPosition = target
             }
