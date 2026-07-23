@@ -15,7 +15,7 @@ class Observable {
     var tempTarget = ObservableValue<HKQuantity?>(default: nil)
     var override = ObservableValue<String?>(default: nil)
 
-    var minAgoText = ObservableValue<String>(default: "?? min ago")
+    var minAgoText = ObservableValue<String>(default: "?? ago")
     var bgText = ObservableValue<String>(default: "BG")
     var bg = ObservableValue<Int?>(default: nil)
     var bgStale = ObservableValue<Bool>(default: true)

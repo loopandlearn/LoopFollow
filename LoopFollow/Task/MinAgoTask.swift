@@ -29,17 +29,10 @@ extension MainViewController {
         let formatter = DateComponentsFormatter()
         formatter.unitsStyle = .positional
         formatter.zeroFormattingBehavior = .dropLeading
-
-        let shouldDisplaySeconds = secondsAgo >= 270 && secondsAgo < 720 // 4.5 to 12 minutes
-
-        if shouldDisplaySeconds {
-            formatter.allowedUnits = [.minute, .second]
-        } else {
-            formatter.allowedUnits = [.minute]
-        }
+        formatter.allowedUnits = [.minute, .second]
 
         let formattedDuration = formatter.string(from: secondsAgo) ?? ""
-        let minAgoDisplayText = formattedDuration + " min ago"
+        let minAgoDisplayText = formattedDuration + " ago"
 
         // Update UI only if the display text has changed
         if minAgoDisplayText != Observable.shared.minAgoText.value {
@@ -60,21 +53,7 @@ extension MainViewController {
 
         // Determine the next run interval based on the current state
         let nextUpdateInterval: TimeInterval
-        if shouldDisplaySeconds {
-            // Update every second when showing seconds
-            nextUpdateInterval = 1.0
-        } else if secondsAgo >= 240, secondsAgo < 720 {
-            // Schedule exactly at the transition point to start showing seconds
-            nextUpdateInterval = 270.0 - secondsAgo
-        } else {
-            // Schedule exactly at the transition point to next minute
-            let secondsToNextMinute = 60.0 - (secondsAgo.truncatingRemainder(dividingBy: 60.0))
-            nextUpdateInterval = secondsToNextMinute
-        }
-
-        // Ensure the nextUpdateInterval is not negative or too small
-        let safeNextInterval = max(nextUpdateInterval, 1.0)
-
-        TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date().addingTimeInterval(safeNextInterval))
+        nextUpdateInterval = 1.0
+        TaskScheduler.shared.rescheduleTask(id: .minAgoUpdate, to: Date().addingTimeInterval(nextUpdateInterval))
     }
 }
