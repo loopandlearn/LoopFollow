@@ -6,6 +6,7 @@ import SwiftUI
 struct LoopAPNSRemoteView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel = RemoteSettingsViewModel()
+    @ObservedObject private var activeOverrideNote = Observable.shared.override
 
     var body: some View {
         NavigationView {
@@ -20,7 +21,7 @@ struct LoopAPNSRemoteView: View {
                     LazyVGrid(columns: columns, spacing: 16) {
                         CommandButtonView(command: "Meal", iconName: "fork.knife", destination: LoopAPNSCarbsView())
                         CommandButtonView(command: "Bolus", iconName: "syringe", destination: LoopAPNSBolusView())
-                        CommandButtonView(command: "Overrides", iconName: "slider.horizontal.3", destination: OverridePresetsView())
+                        CommandButtonView(command: "Overrides", iconName: "slider.horizontal.3", destination: OverridePresetsView(), isActive: activeOverrideNote.value != nil)
                     }
                     .padding(.horizontal)
                 } else {

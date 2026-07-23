@@ -2,7 +2,6 @@
 // AppDelegate.swift
 
 import AVFoundation
-import EventKit
 import UIKit
 import UserNotifications
 
@@ -13,19 +12,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         LogManager.shared.log(category: .general, message: "App started")
         LogManager.shared.cleanupOldLogs()
 
-        let options: UNAuthorizationOptions = [.alert, .sound, .badge]
-        notificationCenter.requestAuthorization(options: options) {
-            didAllow, _ in
-            if !didAllow {
-                LogManager.shared.log(category: .general, message: "User has declined notifications")
-            }
-        }
+        // Notification and calendar permissions are no longer requested here.
+        // They're deferred to the moment the user opts into the feature that
+        // needs them (alarms request notifications via NotificationAuthorization;
+        // the Calendar settings screen requests calendar access), so a fresh
+        // install isn't fronted with permission prompts before onboarding.
 
-        let store = EKEventStore()
-        store.requestCalendarAccess { granted, error in
-            if !granted {
-                LogManager.shared.log(category: .calendar, message: "Failed to get calendar access: \(String(describing: error))")
-                return
+        // Before-First-Unlock detection. isProtectedDataAvailable is false on ANY
+        // locked launch, so it alone isn't a BFU signal — post-first-unlock
+        // UserDefaults (class C) reads fine while locked. Only true BFU makes a key
+        // that should exist read as absent. Suspect only when ALL presence probes
+        // are absent, so an existing user who updated but hasn't foregrounded this
+        // build isn't misread on an ordinary locked launch. Probes cover every user
+        // shape (marker / migrated / consented / NS-configured); presence, not value.
+        _ = Storage.shared // ensure every StorageValue is registered before recovery
+        let storageConfirmedReadable = StorageReadiness.markerExists
+            || Storage.shared.migrationStep.exists
+            || Storage.shared.telemetryConsentDecisionMade.exists
+            || Storage.shared.url.exists
+        let suspectBFU = !UIApplication.shared.isProtectedDataAvailable && !storageConfirmedReadable
+        StorageReadiness.configure(suspectBFU: suspectBFU)
+        LogManager.shared.log(category: .general, message: "BFU check: isProtectedDataAvailable=\(UIApplication.shared.isProtectedDataAvailable), storageConfirmedReadable=\(storageConfirmedReadable), suspectBFU=\(suspectBFU)")
+
+        if suspectBFU {
+            // Driven here, not MainViewController: on a BG-only launch (BGAppRefreshTask,
+            // BLE wake) the home VC may not exist yet. protectedDataDidBecomeAvailable is
+            // authoritative; willEnterForeground is a fallback.
+            let nc = NotificationCenter.default
+            nc.addObserver(self, selector: #selector(protectedDataDidBecomeAvailable), name: UIApplication.protectedDataDidBecomeAvailableNotification, object: nil)
+            nc.addObserver(self, selector: #selector(handleWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+
+            // Race guard: protected data may have become available between the check
+            // above and the observer registration just now.
+            if UIApplication.shared.isProtectedDataAvailable {
+                completeStorageRecovery()
             }
         }
 
@@ -35,7 +55,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         UNUserNotificationCenter.current().delegate = self
 
-        _ = BLEManager.shared
+        // Only spin up Bluetooth if the user has chosen a BLE-based background
+        // refresh. Initializing BLEManager creates a CBCentralManager, which
+        // triggers the Bluetooth permission prompt — deferring it keeps that
+        // prompt off fresh installs until the feature is actually enabled.
+        if Storage.shared.backgroundRefreshType.value.isBluetooth {
+            _ = BLEManager.shared
+        }
         // Ensure VolumeButtonHandler is initialized so it can receive alarm notifications
         _ = VolumeButtonHandler.shared
 
@@ -46,42 +72,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         BackgroundRefreshManager.shared.register()
 
-        // Telemetry: record this cold launch (used by the rolling
-        // coldLaunches7d signal). If the running build's SHA differs from
-        // the one we last sent for, fire an immediate ping — the scheduler
-        // alone can't notice an app update. Otherwise let the 24h scheduler
-        // handle cadence: its first run is lastSentAt + 24h, so a relaunch
-        // a few hours after the previous send simply waits out the
-        // remainder. See Helpers/Telemetry.swift.
-        TelemetryClient.shared.recordColdLaunch()
-        Task.detached {
-            if TelemetryClient.shared.buildShaChangedSinceLastSend() {
-                await TelemetryClient.shared.maybeSend()
+        // Telemetry mutates rolling history (coldLaunches7d), so defer past a BFU
+        // window — poisoned defaults would discard real history. Runs synchronously
+        // on a normal launch.
+        StorageReadiness.whenReady {
+            // SHA change fires an immediate ping (the scheduler can't notice an app
+            // update); otherwise the 24h scheduler handles cadence. See Telemetry.swift.
+            TelemetryClient.shared.recordColdLaunch()
+            Task.detached {
+                if TelemetryClient.shared.buildShaChangedSinceLastSend() {
+                    await TelemetryClient.shared.maybeSend()
+                }
+                TelemetryClient.shared.scheduleRecurring()
             }
-            TelemetryClient.shared.scheduleRecurring()
-        }
-
-        // Detect Before-First-Unlock launch. If protected data is unavailable here,
-        // StorageValues were cached from encrypted UserDefaults and need a reload
-        // once the device is unlocked.
-        let bfu = !UIApplication.shared.isProtectedDataAvailable
-        Storage.shared.needsBFUReload = bfu
-        LogManager.shared.log(category: .general, message: "BFU check: isProtectedDataAvailable=\(!bfu), needsBFUReload=\(bfu)")
-
-        // Recovery is driven from AppDelegate (not MainViewController) because under
-        // the SwiftUI App lifecycle the home tab's UIHostingController is materialized
-        // lazily — on a BG-only launch (BGAppRefreshTask, BLE wake) MainViewController
-        // may not exist when the device is unlocked, and would miss willEnterForeground.
-        // protectedDataDidBecomeAvailable fires the moment file protection lifts and
-        // is the authoritative signal; willEnterForeground is a fallback.
-        let nc = NotificationCenter.default
-        nc.addObserver(self, selector: #selector(protectedDataDidBecomeAvailable), name: UIApplication.protectedDataDidBecomeAvailableNotification, object: nil)
-        nc.addObserver(self, selector: #selector(handleWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-
-        // Race guard: protected data may have become available between the check
-        // above and the observer registration just now.
-        if Storage.shared.needsBFUReload, UIApplication.shared.isProtectedDataAvailable {
-            performBFUReloadIfNeeded()
         }
 
         return true
@@ -90,19 +93,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - BFU recovery
 
     @objc private func protectedDataDidBecomeAvailable() {
-        performBFUReloadIfNeeded()
+        completeStorageRecovery()
     }
 
     @objc private func handleWillEnterForeground() {
-        performBFUReloadIfNeeded()
+        completeStorageRecovery()
     }
 
-    private func performBFUReloadIfNeeded() {
-        guard Storage.shared.needsBFUReload else { return }
-        Storage.shared.needsBFUReload = false
-        LogManager.shared.log(category: .general, message: "BFU reload triggered — reloading all StorageValues")
-        Storage.shared.reloadAll()
-        LogManager.shared.log(category: .general, message: "BFU reload complete: url='\(Storage.shared.url.value)'")
+    private func completeStorageRecovery() {
+        // recover() hydrates every value and opens the gate; true only on the one
+        // transition that did the work, so the notification fires exactly once.
+        guard StorageReadiness.recover() else { return }
+        LogManager.shared.log(category: .general, message: "BFU recovery complete: url='\(Storage.shared.url.value)'")
         NotificationCenter.default.post(name: .bfuReloadCompleted, object: nil)
     }
 
@@ -207,7 +209,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension Notification.Name {
     /// Posted by AppDelegate after a Before-First-Unlock recovery completes
-    /// (Storage.reloadAll has run with the now-decrypted UserDefaults).
+    /// (StorageReadiness.recover has hydrated every value from the now-decrypted
+    /// UserDefaults).
     static let bfuReloadCompleted = Notification.Name("LoopFollow.bfuReloadCompleted")
 }
 

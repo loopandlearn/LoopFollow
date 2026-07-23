@@ -3,7 +3,6 @@
 
 import Foundation
 import HealthKit
-import UIKit
 
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
@@ -20,7 +19,7 @@ extension MainViewController {
 
             var updatedTime: TimeInterval?
 
-            if let timestamp = enactedOrSuggested["timestamp"] as? String,
+            if let timestamp = enactedOrSuggested["deliverAt"] as? String ?? enactedOrSuggested["timestamp"] as? String,
                let parsedTime = formatter.date(from: timestamp)?.timeIntervalSince1970
             {
                 updatedTime = parsedTime
@@ -32,7 +31,9 @@ extension MainViewController {
             // ISF
             let profileISF = profileManager.currentISF()
             var enactedISF: HKQuantity?
-            if let enactedISFValue = enactedOrSuggested["ISF"] as? Double {
+            // Some uploaders (e.g. Trio Swift oref with dynamic ISF) report a
+            // placeholder 0 in the structured ISF field; treat that as missing.
+            if let enactedISFValue = enactedOrSuggested["ISF"] as? Double, enactedISFValue != 0 {
                 enactedISF = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: enactedISFValue)
             }
             if let profileISF = profileISF, let enactedISF = enactedISF, profileISF != enactedISF {
@@ -44,9 +45,14 @@ extension MainViewController {
             }
 
             // Carb Ratio (CR)
+            // Prefer the structured CR field; fall back to parsing it out of the
+            // reason string for uploaders that don't expose it (a CR of 0 is never
+            // valid, so it's treated as missing).
             let profileCR = profileManager.currentCarbRatio()
             var enactedCR: Double?
-            if let reasonString = enactedOrSuggested["reason"] as? String {
+            if let structuredCR = enactedOrSuggested["CR"] as? Double, structuredCR != 0 {
+                enactedCR = structuredCR
+            } else if let reasonString = enactedOrSuggested["reason"] as? String {
                 let pattern = "CR: (\\d+(?:\\.\\d+)?)"
                 if let regex = try? NSRegularExpression(pattern: pattern) {
                     let nsString = reasonString as NSString
@@ -107,10 +113,11 @@ extension MainViewController {
             }
 
             // Recommended Bolus
-            if let rec = InsulinMetric(from: lastLoopRecord, key: "recommendedBolus") {
-                infoManager.updateInfoData(type: .recBolus, value: rec)
-                Observable.shared.deviceRecBolus.value = rec.value
+            if let rec = lastLoopRecord["recommendedBolus"] as? Double {
+                infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(rec))
+                Observable.shared.deviceRecBolus.value = rec
             } else {
+                infoManager.clearInfoData(type: .recBolus)
                 Observable.shared.deviceRecBolus.value = nil
             }
 
@@ -155,7 +162,9 @@ extension MainViewController {
             }
 
             // TDD
-            if let tddMetric = InsulinMetric(from: enactedOrSuggested, key: "TDD") {
+            if let tddMetric = InsulinMetric(from: enactedOrSuggested, key: "TDD")
+                ?? InsulinMetric(from: lastLoopRecord["enacted"], key: "TDD")
+            {
                 infoManager.updateInfoData(type: .tdd, value: tddMetric)
                 Storage.shared.lastTdd.value = tddMetric.value
             }

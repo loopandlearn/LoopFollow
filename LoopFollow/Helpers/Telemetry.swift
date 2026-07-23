@@ -348,7 +348,7 @@ struct TelemetryConsentView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("You can choose to share anonymous information with the developers to help improve LoopFollow—such as app and iOS version, device type, which app you're following, and a few settings. Your health data, credentials, time zone, and logs remain on your device.")
 
-                    Text("You can change this any time in Settings → Diagnostics.")
+                    Text("You can change this any time in Settings → General → Diagnostics.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
 

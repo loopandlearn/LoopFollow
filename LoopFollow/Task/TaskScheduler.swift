@@ -2,7 +2,6 @@
 // TaskScheduler.swift
 
 import Foundation
-import UIKit
 
 enum TaskID: CaseIterable {
     case profile
@@ -13,6 +12,7 @@ enum TaskID: CaseIterable {
     case calendarWrite
     case alarmCheck
     case telemetry
+    case dbSize
 }
 
 struct ScheduledTask {

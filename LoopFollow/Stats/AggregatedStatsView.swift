@@ -2,7 +2,6 @@
 // AggregatedStatsView.swift
 
 import SwiftUI
-import UIKit
 
 struct AggregatedStatsView: View {
     @ObservedObject var viewModel: AggregatedStatsViewModel

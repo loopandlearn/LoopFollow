@@ -55,7 +55,7 @@ extension MainViewController {
             formatter.zeroFormattingBehavior = [.pad]
 
             if let formattedDuration = formatter.string(from: secondsAgo) {
-                infoManager.updateInfoData(type: .iage, value: formattedDuration)
+                infoManager.updateInfoData(type: .iage, value: formattedDuration, numericValue: secondsAgo / 86400)
             }
         }
     }

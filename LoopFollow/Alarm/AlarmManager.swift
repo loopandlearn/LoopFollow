@@ -34,6 +34,7 @@ class AlarmManager {
             BatteryCondition.self,
             BatteryDropCondition.self,
             FutureCarbsCondition.self,
+            DBSizeCondition.self,
         ]
     ) {
         var dict = [AlarmType: AlarmCondition]()
@@ -44,6 +45,15 @@ class AlarmManager {
     func checkAlarms(data: AlarmData) {
         let now = Date()
         var alarmTriggered = false
+
+        // No alarm activity while onboarding is on screen — existing or
+        // QR-imported alarms shouldn't sound mid-setup.
+        if Observable.shared.isOnboardingActive.value {
+            if Observable.shared.currentAlarm.value != nil {
+                stopAlarm()
+            }
+            return
+        }
 
         let config = Storage.shared.alarmConfiguration.value
 
