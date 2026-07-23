@@ -59,7 +59,7 @@
                             get: { slots[index] },
                             set: { selectSlot($0, at: index) }
                         )) {
-                            ForEach(LiveActivitySlotOption.allCases, id: \.self) { option in
+                            ForEach(LiveActivitySlotOption.gridCases, id: \.self) { option in
                                 Text(option.displayName).tag(option)
                             }
                         }

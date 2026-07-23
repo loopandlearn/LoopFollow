@@ -106,6 +106,14 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
         }
     }
 
+    /// Options selectable for the lock-screen 2×2 grid. The active override is
+    /// excluded — the card has a dedicated override/temp-target countdown row.
+    /// It remains selectable for the single CarPlay/Watch slot, which has no
+    /// such row.
+    static var gridCases: [LiveActivitySlotOption] {
+        allCases.filter { $0 != .override }
+    }
+
     /// True when the underlying value may be nil (e.g. Dexcom-only users who have
     /// no Loop data). The widget renders "—" in those cases.
     var isOptional: Bool {
@@ -188,7 +196,11 @@ enum LAAppGroupSettings {
         guard let raw = defaults?.stringArray(forKey: Keys.slots), raw.count == 4 else {
             return LiveActivitySlotDefaults.all
         }
+        // .override is no longer a grid option (the card has a dedicated
+        // override/temp-target row); selections stored by older versions
+        // render as empty cells.
         return raw.map { LiveActivitySlotOption(rawValue: $0) ?? .none }
+            .map { $0 == .override ? .none : $0 }
     }
 
     // MARK: - Small widget slot (Write)

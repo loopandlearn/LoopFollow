@@ -235,6 +235,8 @@ private struct LockScreenLiveActivityView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
 
+            ActiveAdjustmentsView(snapshot: s)
+
             Text(LAAppGroupSettings.showDisplayName()
                 ? "\(LAAppGroupSettings.displayName()) — \(LAFormat.updated(s))"
                 : "Last Update: \(LAFormat.updated(s))")
@@ -365,6 +367,84 @@ private struct SlotView: View {
     }
 }
 
+/// Conditional row showing the active override and/or temp target with a
+/// self-ticking countdown. Shared by the lock screen card and the expanded
+/// Dynamic Island bottom region; renders nothing when neither is active.
+private struct ActiveAdjustmentsView: View {
+    let snapshot: GlucoseSnapshot
+
+    /// Above this remaining time the ticker is skipped (name/value only) —
+    /// a multi-hour or multi-day countdown reads poorly in the compact row.
+    private static let tickerMaxRemaining: TimeInterval = 2 * 3600
+
+    // Ends already in the past are stale data waiting for the next refresh —
+    // drop them rather than render a dead 0:00 timer.
+    private var overrideEnd: Date? {
+        guard let t = snapshot.overrideEndAt, t > Date().timeIntervalSince1970 else { return nil }
+        return Date(timeIntervalSince1970: t)
+    }
+
+    private var tempTargetEnd: Date? {
+        guard let t = snapshot.tempTargetEndAt, t > Date().timeIntervalSince1970 else { return nil }
+        return Date(timeIntervalSince1970: t)
+    }
+
+    /// nil end with a non-nil name means indefinite — keep showing the name;
+    /// a timed override whose end has passed is hidden entirely.
+    private var overrideName: String? {
+        guard let name = snapshot.override else { return nil }
+        if snapshot.overrideEndAt != nil, overrideEnd == nil { return nil }
+        return name
+    }
+
+    private var tempTargetText: String? {
+        guard tempTargetEnd != nil else { return nil }
+        return LAFormat.tempTargetValue(snapshot)
+    }
+
+    var body: some View {
+        if overrideName != nil || tempTargetText != nil {
+            HStack(spacing: 5) {
+                Text("⏱")
+                    .font(.system(size: 11))
+                if let name = overrideName {
+                    Text(name)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .layoutPriority(1)
+                    if let end = overrideEnd, end.timeIntervalSinceNow <= Self.tickerMaxRemaining {
+                        countdown(to: end)
+                    }
+                }
+                if overrideName != nil, tempTargetText != nil {
+                    Text("·")
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+                if let tt = tempTargetText, let end = tempTargetEnd {
+                    Text("TT \(tt)")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    if end.timeIntervalSinceNow <= Self.tickerMaxRemaining {
+                        countdown(to: end)
+                    }
+                }
+            }
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .monospacedDigit()
+            .foregroundStyle(.white.opacity(0.85))
+            .frame(maxWidth: .infinity, alignment: .center)
+        }
+    }
+
+    @ViewBuilder
+    private func countdown(to end: Date) -> some View {
+        // Text(timerInterval:) claims flexible width; cap it so the row stays centered.
+        Text(timerInterval: Date() ... end, countsDown: true)
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: end.timeIntervalSinceNow >= 3600 ? 62 : 46, alignment: .leading)
+    }
+}
+
 // MARK: - Dynamic Island
 
 private struct DynamicIslandLeadingView: View {
@@ -435,11 +515,14 @@ private struct DynamicIslandBottomView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
         } else {
-            Text("Updated at: \(LAFormat.updated(snapshot))")
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.92))
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
+            VStack(spacing: 2) {
+                ActiveAdjustmentsView(snapshot: snapshot)
+                Text("Updated at: \(LAFormat.updated(snapshot))")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.92))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
         }
     }
 }
@@ -651,6 +734,11 @@ private enum LAFormat {
 
     static func override(_ s: GlucoseSnapshot) -> String {
         s.override ?? "—"
+    }
+
+    static func tempTargetValue(_ s: GlucoseSnapshot) -> String? {
+        guard let tt = s.tempTargetMgdl, tt > 0 else { return nil }
+        return formatGlucoseValue(tt, unit: s.unit)
     }
 
     static func profileName(_ s: GlucoseSnapshot) -> String {
