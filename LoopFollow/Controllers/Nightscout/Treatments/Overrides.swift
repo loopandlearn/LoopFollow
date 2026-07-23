@@ -43,8 +43,11 @@ extension MainViewController {
                 return NightscoutUtils.parseDate(nextDateStr)?.timeIntervalSince1970
             }()
 
-            let isIndefinite = (e["durationType"] as? String) == "indefinite" // Only for Loop overrides
             let durationSeconds = (e["duration"] as? Double ?? 5) * 60
+            // Loop marks indefinite overrides explicitly; Trio represents them
+            // as a ~30-day duration. Treat a week or longer as indefinite.
+            let isIndefinite = (e["durationType"] as? String) == "indefinite"
+                || durationSeconds >= 7 * 24 * 3600
 
             var end: TimeInterval = isIndefinite ? maxEndDate : start + durationSeconds
 

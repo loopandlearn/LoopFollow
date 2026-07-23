@@ -60,7 +60,9 @@ extension MainViewController {
             let currentTime = Date().timeIntervalSince1970
             if currentTime < endDate {
                 activeTempTarget = Int(targetValue!)
-                activeTempTargetEndAt = endDate
+                // Trio represents indefinite temp targets as a ~30-day duration;
+                // treat a week or longer as indefinite (no end to display).
+                activeTempTargetEndAt = duration >= 7 * 24 * 3600 ? nil : endDate
             }
         }
 
