@@ -7,6 +7,7 @@ extension MainViewController {
     func processNSOverrides(entries: [[String: AnyObject]]) {
         overrideGraphData.removeAll()
         var activeOverrideNote: String?
+        var activeOverrideEndAt: TimeInterval?
 
         let sorted = entries.sorted { lhs, rhs in
             guard
@@ -35,19 +36,25 @@ extension MainViewController {
 
             let start = max(startDate.timeIntervalSince1970, graphHorizon)
 
-            var end: TimeInterval
-            if (e["durationType"] as? String) == "indefinite" { // Only for Loop overrides
-                end = maxEndDate
-            } else {
-                end = start + (e["duration"] as? Double ?? 5) * 60
-            }
+            let nextStart: TimeInterval? = {
+                guard i + 1 < sorted.count,
+                      let nextDateStr = (sorted[i + 1]["timestamp"] as? String) ?? (sorted[i + 1]["created_at"] as? String)
+                else { return nil }
+                return NightscoutUtils.parseDate(nextDateStr)?.timeIntervalSince1970
+            }()
 
-            if i + 1 < sorted.count,
-               let nextDateStr = (sorted[i + 1]["timestamp"] as? String) ?? (sorted[i + 1]["created_at"] as? String),
-               let nextStart = NightscoutUtils.parseDate(nextDateStr)?
-               .timeIntervalSince1970
-            {
+            let isIndefinite = (e["durationType"] as? String) == "indefinite" // Only for Loop overrides
+            let durationSeconds = (e["duration"] as? Double ?? 5) * 60
+
+            var end: TimeInterval = isIndefinite ? maxEndDate : start + durationSeconds
+
+            // True end for countdown display: based on the raw start and never
+            // clamped to the graph edge; nil while indefinite.
+            var trueEnd: TimeInterval? = isIndefinite ? nil : startDate.timeIntervalSince1970 + durationSeconds
+
+            if let nextStart = nextStart {
                 end = min(end, nextStart - 60) // avoid overlapping overrides
+                trueEnd = trueEnd.map { min($0, nextStart - 60) }
             }
 
             end = min(end, maxEndDate)
@@ -80,10 +87,12 @@ extension MainViewController {
 
             if now >= start, now < end {
                 activeOverrideNote = e["notes"] as? String ?? e["reason"] as? String
+                activeOverrideEndAt = trueEnd
             }
         }
 
         Observable.shared.override.value = activeOverrideNote
+        Observable.shared.overrideEndAt.value = activeOverrideEndAt
         if Storage.shared.device.value != "Loop" {
             if let note = activeOverrideNote {
                 infoManager.updateInfoData(type: .override, value: note)
@@ -94,5 +103,9 @@ extension MainViewController {
         if Storage.shared.graphOtherTreatments.value {
             updateOverrideGraph()
         }
+
+        #if !targetEnvironment(macCatalyst)
+            LiveActivityManager.shared.refreshFromCurrentState(reason: "overrideChanged")
+        #endif
     }
 }

@@ -9,6 +9,7 @@ extension MainViewController {
     func processNSTemporaryTarget(entries: [[String: AnyObject]]) {
         tempTargetGraphData.removeAll()
         var activeTempTarget: Int?
+        var activeTempTargetEndAt: TimeInterval?
 
         for (index, currentEntry) in entries.reversed().enumerated() {
             guard let dateStr = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else { continue }
@@ -27,6 +28,7 @@ extension MainViewController {
                 if let activeIndex = tempTargetGraphData.lastIndex(where: { $0.endDate > dateTimeStamp }) {
                     tempTargetGraphData[activeIndex].endDate = dateTimeStamp
                     activeTempTarget = nil
+                    activeTempTargetEndAt = nil
                 }
                 continue
             }
@@ -58,6 +60,7 @@ extension MainViewController {
             let currentTime = Date().timeIntervalSince1970
             if currentTime < endDate {
                 activeTempTarget = Int(targetValue!)
+                activeTempTargetEndAt = endDate
             }
         }
 
@@ -72,5 +75,10 @@ extension MainViewController {
         } else {
             Observable.shared.tempTarget.value = nil
         }
+        Observable.shared.tempTargetEndAt.value = activeTempTargetEndAt
+
+        #if !targetEnvironment(macCatalyst)
+            LiveActivityManager.shared.refreshFromCurrentState(reason: "tempTargetChanged")
+        #endif
     }
 }

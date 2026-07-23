@@ -7,6 +7,7 @@ struct OverridePresetsView: View {
     @StateObject private var viewModel = OverridePresetsViewModel()
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var overrideNote = Observable.shared.override
+    @ObservedObject var overrideEndAt = Observable.shared.overrideEndAt
 
     var body: some View {
         NavigationView {
@@ -28,6 +29,12 @@ struct OverridePresetsView: View {
                                     Text(activeNote)
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
+
+                                    if let endAt = overrideEndAt.value {
+                                        RemainingTimeText(endAt: endAt)
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
                                 }
 
                                 Spacer()
