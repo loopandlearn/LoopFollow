@@ -46,6 +46,10 @@ class DataStructs {
         var enteredBy: String
         var reason: String
         var sgv: Float
+        /// Scheduled end (start + duration); unlike `endDate` it is never
+        /// clamped to the graph horizon. Nil when the override runs
+        /// indefinitely, so the end is not known in advance.
+        var scheduledEndDate: TimeInterval?
     }
 
     struct tempTargetStruct: Codable {

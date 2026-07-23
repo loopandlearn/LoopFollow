@@ -35,12 +35,18 @@ extension MainViewController {
 
             let start = max(startDate.timeIntervalSince1970, graphHorizon)
 
+            let isIndefinite = (e["durationType"] as? String) == "indefinite" // Only for Loop overrides
             var end: TimeInterval
-            if (e["durationType"] as? String) == "indefinite" { // Only for Loop overrides
+            if isIndefinite {
                 end = maxEndDate
             } else {
                 end = start + (e["duration"] as? Double ?? 5) * 60
             }
+
+            // The scheduled end is kept unclamped so the end alarm's early
+            // warning can see ends beyond the graph horizon; nil when the
+            // override runs indefinitely.
+            var scheduledEnd: TimeInterval? = isIndefinite ? nil : end
 
             if i + 1 < sorted.count,
                let nextDateStr = (sorted[i + 1]["timestamp"] as? String) ?? (sorted[i + 1]["created_at"] as? String),
@@ -48,6 +54,7 @@ extension MainViewController {
                .timeIntervalSince1970
             {
                 end = min(end, nextStart - 60) // avoid overlapping overrides
+                scheduledEnd = scheduledEnd.map { min($0, nextStart - 60) }
             }
 
             end = min(end, maxEndDate)
@@ -74,7 +81,8 @@ extension MainViewController {
                 reason: (e["notes"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
                     ?? (e["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
                     ?? "",
-                sgv: -20
+                sgv: -20,
+                scheduledEndDate: scheduledEnd
             )
             overrideGraphData.append(dot)
 
