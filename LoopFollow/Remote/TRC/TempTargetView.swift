@@ -10,6 +10,7 @@ struct TempTargetView: View {
 
     @ObservedObject var device = Storage.shared.device
     @ObservedObject var tempTarget = Observable.shared.tempTarget
+    @ObservedObject var tempTargetEndAt = Observable.shared.tempTargetEndAt
 
     @State private var newHKTarget = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0.0)
     @State private var duration = HKQuantity(unit: .minute(), doubleValue: 0.0)
@@ -50,6 +51,14 @@ struct TempTargetView: View {
                                     Spacer()
                                     Text(Localizer.formatQuantity(tempTargetValue))
                                     Text(Localizer.getPreferredUnit().localizedShortUnitString).foregroundColor(.secondary)
+                                }
+                                if let endAt = tempTargetEndAt.value {
+                                    HStack {
+                                        Text("Time Remaining")
+                                        Spacer()
+                                        RemainingTimeText(endAt: endAt)
+                                            .foregroundColor(.secondary)
+                                    }
                                 }
                                 Button {
                                     alertType = .confirmCancellation
