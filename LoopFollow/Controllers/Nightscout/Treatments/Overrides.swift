@@ -51,8 +51,9 @@ extension MainViewController {
 
             var end: TimeInterval = isIndefinite ? maxEndDate : start + durationSeconds
 
-            // True end for countdown display: based on the raw start and never
-            // clamped to the graph edge; nil while indefinite.
+            // True end for countdown display and the end alarm's early
+            // warning: based on the raw start and never clamped to the graph
+            // edge; nil while indefinite.
             var trueEnd: TimeInterval? = isIndefinite ? nil : startDate.timeIntervalSince1970 + durationSeconds
 
             if let nextStart = nextStart {
@@ -84,7 +85,8 @@ extension MainViewController {
                 reason: (e["notes"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
                     ?? (e["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
                     ?? "",
-                sgv: -20
+                sgv: -20,
+                scheduledEndDate: trueEnd
             )
             overrideGraphData.append(dot)
 

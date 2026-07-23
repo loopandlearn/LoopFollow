@@ -133,9 +133,11 @@ class AlarmManager {
             }
 
             // Fire the alarm and break the loop; we only allow one alarm per evaluation tick.
+            let titleOverride = checker.notificationTitle(alarm: alarm, data: data, now: now)
+            Observable.shared.currentAlarmTitleOverride.value = titleOverride
             Observable.shared.currentAlarm.value = alarm.id
 
-            alarm.trigger(config: Storage.shared.alarmConfiguration.value, now: now)
+            alarm.trigger(config: Storage.shared.alarmConfiguration.value, now: now, titleOverride: titleOverride)
 
             // Store the latest bg time so we don't use it again
             if alarm.type.isBGBased,
@@ -183,6 +185,7 @@ class AlarmManager {
     func stopAlarm() {
         AlarmSound.stop()
         Observable.shared.currentAlarm.value = nil
+        Observable.shared.currentAlarmTitleOverride.value = nil
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
 
