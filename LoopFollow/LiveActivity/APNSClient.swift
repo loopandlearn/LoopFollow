@@ -246,6 +246,9 @@ class APNSClient {
         if let cob = snapshot.cob { snapshotDict["cob"] = cob }
         if let projected = snapshot.projected { snapshotDict["projected"] = projected }
         if let override = snapshot.override { snapshotDict["override"] = override }
+        if let overrideEndAt = snapshot.overrideEndAt { snapshotDict["overrideEndAt"] = overrideEndAt }
+        if let tempTargetMgdl = snapshot.tempTargetMgdl { snapshotDict["tempTargetMgdl"] = tempTargetMgdl }
+        if let tempTargetEndAt = snapshot.tempTargetEndAt { snapshotDict["tempTargetEndAt"] = tempTargetEndAt }
         if let recBolus = snapshot.recBolus { snapshotDict["recBolus"] = recBolus }
         if let battery = snapshot.battery { snapshotDict["battery"] = battery }
         if let pumpBattery = snapshot.pumpBattery { snapshotDict["pumpBattery"] = pumpBattery }

@@ -72,11 +72,15 @@ extension MainViewController {
 
     func clearOldOverride() {
         overrideGraphData.removeAll()
+        Observable.shared.override.value = nil
+        Observable.shared.overrideEndAt.value = nil
         updateOverrideGraph()
     }
 
     func clearOldTempTarget() {
         tempTargetGraphData.removeAll()
+        Observable.shared.tempTarget.value = nil
+        Observable.shared.tempTargetEndAt.value = nil
         updateTempTargetGraph()
     }
 

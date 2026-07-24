@@ -537,11 +537,14 @@ final class BGChartModel: ObservableObject {
         }
         tempTargets = vc.tempTargetGraphData.map {
             let target = $0.correctionRange.first.map { String($0) } ?? ""
+            // Temp targets render at the BG level they target (±5 mg/dL);
+            // only overrides live in the top strip.
+            let yCenter = Double($0.correctionRange.first ?? 0)
             return BandRect(
                 start: Date(timeIntervalSince1970: $0.date),
                 end: Date(timeIntervalSince1970: $0.endDate),
-                yBottom: yBottom,
-                yTop: yTop,
+                yBottom: yCenter - 5,
+                yTop: yCenter + 5,
                 label: "Temp Target",
                 pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )

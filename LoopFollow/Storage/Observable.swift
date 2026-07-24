@@ -15,6 +15,11 @@ class Observable {
     var tempTarget = ObservableValue<HKQuantity?>(default: nil)
     var override = ObservableValue<String?>(default: nil)
 
+    /// End of the active override as Unix epoch seconds; nil = no override or indefinite.
+    var overrideEndAt = ObservableValue<TimeInterval?>(default: nil)
+    /// End of the active temp target as Unix epoch seconds; nil = no active temp target.
+    var tempTargetEndAt = ObservableValue<TimeInterval?>(default: nil)
+
     var minAgoText = ObservableValue<String>(default: "?? min ago")
     var bgText = ObservableValue<String>(default: "BG")
     var bg = ObservableValue<Int?>(default: nil)

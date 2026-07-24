@@ -52,6 +52,17 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     /// Active override name (nil if no active override)
     let override: String?
 
+    /// End of the active override as Unix epoch seconds. Only meaningful while
+    /// `override` is non-nil; nil with a non-nil name means the override is
+    /// indefinite (no countdown).
+    let overrideEndAt: TimeInterval?
+
+    /// Active temporary target in mg/dL (nil if no active temp target)
+    let tempTargetMgdl: Double?
+
+    /// End of the active temporary target as Unix epoch seconds (nil if no active temp target)
+    let tempTargetEndAt: TimeInterval?
+
     /// Recommended bolus in units (nil if not available)
     let recBolus: Double?
 
@@ -134,6 +145,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         cob: Double?,
         projected: Double?,
         override: String? = nil,
+        overrideEndAt: TimeInterval? = nil,
+        tempTargetMgdl: Double? = nil,
+        tempTargetEndAt: TimeInterval? = nil,
         recBolus: Double? = nil,
         battery: Double? = nil,
         pumpBattery: Double? = nil,
@@ -164,6 +178,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         self.cob = cob
         self.projected = projected
         self.override = override
+        self.overrideEndAt = overrideEndAt
+        self.tempTargetMgdl = tempTargetMgdl
+        self.tempTargetEndAt = tempTargetEndAt
         self.recBolus = recBolus
         self.battery = battery
         self.pumpBattery = pumpBattery
@@ -207,6 +224,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
             cob: cob,
             projected: projected,
             override: override,
+            overrideEndAt: overrideEndAt,
+            tempTargetMgdl: tempTargetMgdl,
+            tempTargetEndAt: tempTargetEndAt,
             recBolus: recBolus,
             battery: battery,
             pumpBattery: pumpBattery,
@@ -243,6 +263,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         try container.encodeIfPresent(cob, forKey: .cob)
         try container.encodeIfPresent(projected, forKey: .projected)
         try container.encodeIfPresent(override, forKey: .override)
+        try container.encodeIfPresent(overrideEndAt, forKey: .overrideEndAt)
+        try container.encodeIfPresent(tempTargetMgdl, forKey: .tempTargetMgdl)
+        try container.encodeIfPresent(tempTargetEndAt, forKey: .tempTargetEndAt)
         try container.encodeIfPresent(recBolus, forKey: .recBolus)
         try container.encodeIfPresent(battery, forKey: .battery)
         try container.encodeIfPresent(pumpBattery, forKey: .pumpBattery)
@@ -276,6 +299,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         cob = try container.decodeIfPresent(Double.self, forKey: .cob)
         projected = try container.decodeIfPresent(Double.self, forKey: .projected)
         override = try container.decodeIfPresent(String.self, forKey: .override)
+        overrideEndAt = try container.decodeIfPresent(Double.self, forKey: .overrideEndAt)
+        tempTargetMgdl = try container.decodeIfPresent(Double.self, forKey: .tempTargetMgdl)
+        tempTargetEndAt = try container.decodeIfPresent(Double.self, forKey: .tempTargetEndAt)
         recBolus = try container.decodeIfPresent(Double.self, forKey: .recBolus)
         battery = try container.decodeIfPresent(Double.self, forKey: .battery)
         pumpBattery = try container.decodeIfPresent(Double.self, forKey: .pumpBattery)
@@ -302,7 +328,8 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case glucose, delta, trend, updatedAt
         case iob, cob, projected
-        case override, recBolus, battery, pumpBattery, basalRate, pumpReservoirU
+        case override, overrideEndAt, tempTargetMgdl, tempTargetEndAt
+        case recBolus, battery, pumpBattery, basalRate, pumpReservoirU
         case autosens, tdd, targetLowMgdl, targetHighMgdl, isfMgdlPerU, carbRatio, carbsToday
         case profileName, sageInsertTime, cageInsertTime, iageInsertTime, minBgMgdl, maxBgMgdl
         case unit, isNotLooping, showRenewalOverlay

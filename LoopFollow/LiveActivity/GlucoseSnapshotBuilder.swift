@@ -33,6 +33,15 @@ protocol CurrentGlucoseStateProviding {
     /// Active override name (nil if no active override).
     var override: String? { get }
 
+    /// End of the active override as Unix epoch seconds (nil = no override or indefinite).
+    var overrideEndAt: TimeInterval? { get }
+
+    /// Active temporary target in mg/dL (nil if no active temp target).
+    var tempTargetMgdl: Double? { get }
+
+    /// End of the active temporary target as Unix epoch seconds.
+    var tempTargetEndAt: TimeInterval? { get }
+
     /// Recommended bolus in units.
     var recBolus: Double? { get }
 
@@ -141,6 +150,9 @@ enum GlucoseSnapshotBuilder {
             cob: provider.cob,
             projected: provider.projectedMgdl,
             override: provider.override,
+            overrideEndAt: provider.overrideEndAt,
+            tempTargetMgdl: provider.tempTargetMgdl,
+            tempTargetEndAt: provider.tempTargetEndAt,
             recBolus: provider.recBolus,
             battery: provider.battery,
             pumpBattery: provider.pumpBattery,
