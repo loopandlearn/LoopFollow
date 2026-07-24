@@ -87,9 +87,13 @@ extension MainViewController {
     }
 
     // Removes the Trio/OpenAPS forecast (ZT/IOB/COB/UAM lines and the cone). Used when the active system switches away from Trio/OpenAPS.
+    // Also drops the stored predBGs: the device observer calls updateOpenAPSPredictionDisplay after this runs,
+    // and would otherwise redraw the cleared forecast from them.
     func clearOpenAPSPredictionGraph() {
         let hasLineData = !ztPredictionData.isEmpty || !iobPredictionData.isEmpty || !cobPredictionData.isEmpty || !uamPredictionData.isEmpty
-        guard hasLineData || !chartModel.cone.isEmpty else { return }
+        guard hasLineData || !chartModel.cone.isEmpty || openAPSPredBGs != nil else { return }
+        openAPSPredBGs = nil
+        openAPSPredUpdatedTime = nil
         ztPredictionData = []
         iobPredictionData = []
         cobPredictionData = []
