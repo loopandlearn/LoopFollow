@@ -1280,7 +1280,7 @@ private struct BGChartCanvas: View, Equatable {
                 y: .value("bg", pt.value),
                 series: .value("series", "zt")
             )
-            .foregroundStyle(Color(.systemGray))
+            .foregroundStyle(Color("ZT"))
             .lineStyle(StrokeStyle(lineWidth: 2))
         }
 
@@ -1290,7 +1290,7 @@ private struct BGChartCanvas: View, Equatable {
                 y: .value("bg", pt.value),
                 series: .value("series", "iob")
             )
-            .foregroundStyle(Color(.systemBlue))
+            .foregroundStyle(Color("Insulin"))
             .lineStyle(StrokeStyle(lineWidth: 2))
         }
 
@@ -1310,7 +1310,7 @@ private struct BGChartCanvas: View, Equatable {
                 y: .value("bg", pt.value),
                 series: .value("series", "uam")
             )
-            .foregroundStyle(Color(.systemPink))
+            .foregroundStyle(Color("UAM"))
             .lineStyle(StrokeStyle(lineWidth: 2))
         }
     }
