@@ -69,13 +69,25 @@ struct LowestForecastTests {
         #expect(result.count == 12)
     }
 
-    @Test("#default cap is 12 points")
+    @Test("#the default cap reaches 60 minutes ahead")
     func defaultCap() {
         let long = Array(repeating: 100.0, count: 30)
         let result = MainViewController.lowestForecast(forecasts: [long], start: start)
 
         #expect(result.count == MainViewController.alarmForecastPointCap)
-        #expect(result.count == 12)
+        // The first point is the current value, so the last one is 60 minutes out.
+        #expect(result.last?.date.timeIntervalSince1970 == start + 3600)
+    }
+
+    @Test("#a short forecast does not cap the rest")
+    func shortForecastDoesNotCapTheRest() {
+        // Which forecast runs shortest varies from cycle to cycle, so the series
+        // has to follow the longest one rather than the first to run out.
+        let short = Array(repeating: 100.0, count: 8)
+        let long = Array(repeating: 100.0, count: 20)
+        let result = MainViewController.lowestForecast(forecasts: [short, long], start: start)
+
+        #expect(result.count == MainViewController.alarmForecastPointCap)
     }
 
     // MARK: - Timestamps & rounding

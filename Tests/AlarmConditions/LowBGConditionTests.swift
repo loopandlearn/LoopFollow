@@ -34,7 +34,7 @@ struct LowBGConditionTests {
     @Test("#loop — predictive low within window fires")
     func loopPredictiveLowFires() {
         let alarm = Alarm.low(belowBG: 80, predictiveMinutes: 30, persistentMinutes: 15)
-        // ceil(30/5) = 6 points looked at; index 5 dips to 75
+        // 30 minutes ahead is index 6; the dip to 75 sits at index 5
         let data = AlarmData.withGlucose(readings: recentHigh, prediction: pred([120, 110, 100, 90, 85, 75]))
 
         #expect(cond.evaluate(alarm: alarm, data: data, now: Date()))
@@ -43,8 +43,40 @@ struct LowBGConditionTests {
     @Test("#loop — forecast low beyond window does not fire")
     func loopPredictiveLowBeyondWindow() {
         let alarm = Alarm.low(belowBG: 80, predictiveMinutes: 15, persistentMinutes: 15)
-        // ceil(15/5) = 3 points looked at (120, 110, 100); the low only appears later
+        // 15 minutes ahead is index 3, so 120, 110, 100 and 90; the low only appears later
         let data = AlarmData.withGlucose(readings: recentHigh, prediction: pred([120, 110, 100, 90, 85, 75]))
+
+        #expect(!cond.evaluate(alarm: alarm, data: data, now: Date()))
+    }
+
+    @Test("#loop — the look-ahead reaches the full requested horizon")
+    func loopHorizonReachesRequestedMinutes() {
+        // The dip sits exactly 20 minutes out, at index 4. A 20-minute
+        // look-ahead must reach it; a 15-minute one must stop short.
+        let forecast = pred([118, 106, 95, 85, 70, 62])
+        let data = AlarmData.withGlucose(readings: recentHigh, prediction: forecast)
+
+        let twenty = Alarm.low(belowBG: 80, predictiveMinutes: 20, persistentMinutes: 15)
+        let fifteen = Alarm.low(belowBG: 80, predictiveMinutes: 15, persistentMinutes: 15)
+
+        #expect(cond.evaluate(alarm: twenty, data: data, now: Date()))
+        #expect(!cond.evaluate(alarm: fifteen, data: data, now: Date()))
+    }
+
+    @Test("#loop — a horizon longer than the forecast uses what is published")
+    func loopHorizonBeyondSeriesLength() {
+        // 60 minutes asks for 13 points but only 3 exist. The look-ahead must
+        // stay in bounds and still see the low at the end of what is published.
+        let alarm = Alarm.low(belowBG: 80, predictiveMinutes: 60, persistentMinutes: 15)
+        let data = AlarmData.withGlucose(readings: recentHigh, prediction: pred([120, 100, 75]))
+
+        #expect(cond.evaluate(alarm: alarm, data: data, now: Date()))
+    }
+
+    @Test("#loop — a single forecast point is the current value only")
+    func loopSinglePointForecast() {
+        let alarm = Alarm.low(belowBG: 80, predictiveMinutes: 30, persistentMinutes: 15)
+        let data = AlarmData.withGlucose(readings: recentHigh, prediction: pred([120]))
 
         #expect(!cond.evaluate(alarm: alarm, data: data, now: Date()))
     }
@@ -97,6 +129,24 @@ struct LowBGConditionTests {
         let data = AlarmData.withGlucose(readings: recentHigh, prediction: combined)
 
         #expect(!cond.evaluate(alarm: alarm, data: data, now: Date()))
+    }
+
+    @Test("#trio — a forecast running short does not shorten the look-ahead")
+    func trioShortForecastKeepsHorizon() {
+        // ZT stops after three points while IOB keeps falling to 69 at index 5.
+        // A 25-minute look-ahead has to reach it.
+        let alarm = Alarm.low(belowBG: 80, predictiveMinutes: 25, persistentMinutes: 15)
+        let forecasts: [[Double]] = [
+            [118, 115, 113], // ZT
+            [118, 106, 95, 85, 76, 69], // IOB
+            [118, 116, 114, 113, 112, 111], // COB
+            [118, 112, 108, 105, 103, 101], // UAM
+        ]
+        let combined = MainViewController.lowestForecast(forecasts: forecasts, start: Date().timeIntervalSince1970)
+        let data = AlarmData.withGlucose(readings: recentHigh, prediction: combined)
+
+        #expect(combined.count == 6)
+        #expect(cond.evaluate(alarm: alarm, data: data, now: Date()))
     }
 
     @Test("#trio — deep forecast below display floor still fires (not masked)")
