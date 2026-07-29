@@ -17,6 +17,10 @@ final class BGChartInteraction: ObservableObject {
     /// when the user pans back into history, re-armed when they return to the edge.
     @Published var followLatest: Bool = true
 
+    /// Set once the main chart has done its initial scroll-to-now; kept out of
+    /// view @State so a chart remount (see BGChartView) keeps the user's place.
+    var hasInitializedViewport = false
+
     init() {
         let seconds = Self.visibleSeconds(forScale: Storage.shared.chartScaleX.value)
         visibleSeconds = seconds
