@@ -74,11 +74,22 @@ struct BGChartView: View {
     let model: BGChartModel
     let config: Config
 
+    /// Remount key. A system-cancelled touch can wedge SwiftUI's gesture graph
+    /// for this subtree; bumping this on foregrounding rebuilds the gesture
+    /// attachments while BGChartInteraction preserves the viewport.
+    @State private var gestureMountEpoch = 0
+
     var body: some View {
-        if config == .small {
-            SmallBGChart(model: model, interaction: model.interaction)
-        } else {
-            MainBGChart(model: model, interaction: model.interaction)
+        Group {
+            if config == .small {
+                SmallBGChart(model: model, interaction: model.interaction)
+            } else {
+                MainBGChart(model: model, interaction: model.interaction)
+            }
+        }
+        .id(gestureMountEpoch)
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            gestureMountEpoch &+= 1
         }
     }
 }
@@ -102,13 +113,21 @@ private struct MainBGChart: View {
     @ObservedObject var model: BGChartModel
     @ObservedObject var interaction: BGChartInteraction
 
-    @State private var didInitialize = false
-
     /// Rendered slice of the domain. The canvas covers only this window
     /// (visible ± `renderWindowPadFactor` viewports), bounding canvas width
     /// and per-layout cost no matter how long the data domain grows.
-    @State private var renderWindowStart = Date()
-    @State private var renderWindowEnd = Date().addingTimeInterval(3600)
+    @State private var renderWindowStart: Date
+    @State private var renderWindowEnd: Date
+
+    init(model: BGChartModel, interaction: BGChartInteraction) {
+        _model = ObservedObject(wrappedValue: model)
+        _interaction = ObservedObject(wrappedValue: interaction)
+        // Seed the render window around the current viewport so a remount's
+        // first frame draws in place.
+        let pad = BGChartConfig.renderWindowPadFactor * interaction.visibleSeconds
+        _renderWindowStart = State(initialValue: interaction.scrollPosition.addingTimeInterval(-pad))
+        _renderWindowEnd = State(initialValue: interaction.scrollPosition.addingTimeInterval(interaction.visibleSeconds + pad))
+    }
 
     /// Plot area of the static axis overlay, in shell coordinates. The
     /// selection overlay uses it for its value-to-pixel maps.
@@ -265,15 +284,19 @@ private struct MainBGChart: View {
             updateRenderWindow()
         }
         .onAppear {
-            if !didInitialize {
-                didInitialize = true
+            if !interaction.hasInitializedViewport {
+                interaction.hasInitializedViewport = true
                 scrollToNow(animated: false)
-                updateRenderWindow(force: true)
+            } else if !interaction.followLatest {
+                // Remounted while in history: re-arm the auto-return pause.
+                autoFollowPausedUntil = Date().addingTimeInterval(BGChartConfig.autoFollowPause)
             }
+            updateRenderWindow(force: true)
         }
         .onDisappear {
             momentumTask?.cancel()
-            inspectHoldTask?.cancel()
+            momentumTask = nil
+            resetGestureState()
         }
     }
 
@@ -394,6 +417,13 @@ private struct MainBGChart: View {
             .onChanged { value in
                 momentumTask?.cancel()
                 momentumTask = nil
+                // A touch's first event has zero translation and precedes any
+                // pinch, so gesture state still set here was leaked by a
+                // system-cancelled touch (its onEnded never fired) and would
+                // swallow this and every later touch.
+                if value.translation == .zero, hasLeakedGestureState {
+                    resetGestureState()
+                }
                 guard !isPinching else {
                     inspectHoldTask?.cancel()
                     if selection != nil { selection = nil }
@@ -452,6 +482,24 @@ private struct MainBGChart: View {
                 let velocity = -timeDelta(forTranslation: value.velocity.width, viewportWidth: viewportWidth)
                 startMomentum(velocitySecondsPerSecond: velocity)
             }
+    }
+
+    private var hasLeakedGestureState: Bool {
+        pinchAnchor != nil || pinchScale != 1 || isInspectLatched
+            || touchDownTime != nil || panBaseline != nil || selection != nil
+    }
+
+    private func resetGestureState() {
+        inspectHoldTask?.cancel()
+        inspectHoldTask = nil
+        pinchAnchor = nil
+        pinchScale = 1
+        isInspectLatched = false
+        touchDownTime = nil
+        panBaseline = nil
+        selection = nil
+        lastTouchLocation = nil
+        lastHapticAnchorDate = nil
     }
 
     /// Arms the inspect hold: after `inspectHoldDelay`, if the touch is still
@@ -936,6 +984,11 @@ private struct SmallBGChart: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
+                        // Zero translation = fresh touch; clear a scrub flag
+                        // leaked by a system-cancelled touch.
+                        if value.translation == .zero {
+                            isScrubbing = false
+                        }
                         let distance = hypot(value.translation.width, value.translation.height)
                         if isScrubbing || distance >= BGChartConfig.inspectMovementTolerance {
                             isScrubbing = true
