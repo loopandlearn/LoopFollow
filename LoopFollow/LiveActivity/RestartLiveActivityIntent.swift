@@ -32,13 +32,25 @@
         }
     }
 
-    struct LoopFollowAppShortcuts: AppShortcutsProvider {
+struct LoopFollowAppShortcuts: AppShortcutsProvider {
         static var appShortcuts: [AppShortcut] {
             AppShortcut(
                 intent: RestartLiveActivityIntent(),
                 phrases: ["Restart Live Activity in \(.applicationName)"],
                 shortTitle: "Restart Live Activity",
                 systemImageName: "dot.radiowaves.left.and.right"
+            )
+            AppShortcut(
+                intent: EnableSpeakBGIntent(),
+                phrases: ["Enable BG speech in \(.applicationName)"],
+                shortTitle: "Enable BG Speech",
+                systemImageName: "speaker.wave.2"
+            )
+            AppShortcut(
+                intent: DisableSpeakBGIntent(),
+                phrases: ["Disable BG speech in \(.applicationName)"],
+                shortTitle: "Disable BG Speech",
+                systemImageName: "speaker.slash"
             )
         }
     }
