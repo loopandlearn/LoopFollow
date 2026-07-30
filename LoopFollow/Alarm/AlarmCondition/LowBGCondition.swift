@@ -34,15 +34,11 @@ struct LowBGCondition: AlarmCondition {
            predictiveMinutes > 0,
            !data.predictionData.isEmpty
         {
-            let lookAhead = min(
-                data.predictionData.count,
-                Int(ceil(Double(predictiveMinutes) / 5.0))
-            )
+            // The first point is the current value, so reaching `predictiveMinutes`
+            // ahead takes ceil(minutes / 5) points beyond it.
+            let points = Int(ceil(Double(predictiveMinutes) / 5.0)) + 1
 
-            for i in 0 ..< lookAhead where isLow(data.predictionData[i]) {
-                predictiveTrigger = true
-                break
-            }
+            predictiveTrigger = data.predictionData.prefix(points).contains(where: isLow)
         }
 
         // ────────────────────────────────

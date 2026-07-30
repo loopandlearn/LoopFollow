@@ -94,9 +94,10 @@ extension MainViewController {
         )
     }
 
-    /// Maximum number of forward points (5-minute spacing) the low alarm looks at:
-    /// 12 points = 60 minutes, matching the predictive look-ahead's upper bound.
-    static let alarmForecastPointCap = 12
+    /// Maximum number of points (5-minute spacing) the low alarm looks at. The
+    /// first is the current value, so 13 points reach 60 minutes ahead, matching
+    /// the predictive look-ahead's upper bound.
+    static let alarmForecastPointCap = 13
 
     /// Collapses several forecasts into a single series by taking the **lowest**
     /// value at each point in time, oldest .. newest at 5-minute spacing.
@@ -104,7 +105,8 @@ extension MainViewController {
     /// Trio/OpenAPS reports four forecasts (ZT, IOB, COB, UAM) rather than the
     /// single one Loop provides, so this lets the predictive-low alarm fire if
     /// *any* forecast dips to or below the threshold. Empty forecasts are ignored,
-    /// and each point uses whichever forecasts still extend that far.
+    /// and each point uses whichever forecasts still extend that far, so one short
+    /// forecast does not shorten the look-ahead.
     static func lowestForecast(
         forecasts: [[Double]],
         start: TimeInterval,
