@@ -16,6 +16,7 @@ struct AggregatedStatsView: View {
     @State private var loadingError = false
     @State private var loadingTimer: Timer?
     @State private var timeoutTimer: Timer?
+    @State private var showEndoReport = false
 
     init(viewModel: AggregatedStatsViewModel, onDismiss: (() -> Void)? = nil) {
         self.viewModel = viewModel
@@ -107,14 +108,24 @@ struct AggregatedStatsView: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Refresh") {
-                    loadingError = false
-                    isLoadingData = true
-                    viewModel.updateDateRange(start: startDate, end: endDate) {
-                        isLoadingData = false
+                HStack {
+                    Button {
+                        showEndoReport = true
+                    } label: {
+                        Label("Endo Report", systemImage: "doc.richtext")
+                    }
+                    Button("Refresh") {
+                        loadingError = false
+                        isLoadingData = true
+                        viewModel.updateDateRange(start: startDate, end: endDate) {
+                            isLoadingData = false
+                        }
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showEndoReport) {
+            EndoReportView(dataService: viewModel.dataService)
         }
         .onAppear {
             loadingError = false
