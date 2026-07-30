@@ -58,8 +58,10 @@ class Storage {
 
     var lastOverrideStartNotified = StorageValue<TimeInterval?>(key: "lastOverrideStartNotified", defaultValue: nil)
     var lastOverrideEndNotified = StorageValue<TimeInterval?>(key: "lastOverrideEndNotified", defaultValue: nil)
+    var lastOverridePreEndNotified = StorageValue<TimeInterval?>(key: "lastOverridePreEndNotified", defaultValue: nil)
     var lastTempTargetStartNotified = StorageValue<TimeInterval?>(key: "lastTempTargetStartNotified", defaultValue: nil)
     var lastTempTargetEndNotified = StorageValue<TimeInterval?>(key: "lastTempTargetEndNotified", defaultValue: nil)
+    var lastTempTargetPreEndNotified = StorageValue<TimeInterval?>(key: "lastTempTargetPreEndNotified", defaultValue: nil)
     var lastRecBolusNotified = StorageValue<Double?>(key: "lastRecBolusNotified", defaultValue: nil)
     var lastCOBNotified = StorageValue<Double?>(key: "lastCOBNotified", defaultValue: nil)
     var lastMissedBolusNotified = StorageValue<Date?>(key: "lastMissedBolusNotified", defaultValue: nil)
