@@ -45,6 +45,9 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     /// The hosting controller's view — hidden during loading / first-time setup.
     private var mainContentView: UIView!
 
+    // Zoom buttons for chart time period selection
+    var zoomButtonsStackView: UIStackView!
+
     // Setup buttons for first-time configuration
     private var setupNightscoutButton: UIButton!
     private var setupDexcomButton: UIButton!
@@ -203,6 +206,17 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
 
         // setup show/hide graphs (first-time setup check)
         updateGraphVisibility()
+
+        // Setup zoom buttons for chart time period selection
+        setupZoomButtons()
+
+        // Disable pinch-to-zoom on macOS to prevent crash (trackpad pinch doesn't work reliably)
+        #if targetEnvironment(macCatalyst)
+            BGChart.pinchZoomEnabled = false
+            BGChart.scaleXEnabled = false
+            BGChartFull.pinchZoomEnabled = false
+            BGChartFull.scaleXEnabled = false
+        #endif
 
         // Apply initial appearance mode
         updateAppearance(Storage.shared.appearanceMode.value)
@@ -1213,6 +1227,173 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
                 self.setupLoadingState()
                 self.showLoadingOverlay()
                 self.refresh()
+            }
+        }
+    }
+}
+
+// MARK: - Zoom Buttons
+
+extension MainViewController {
+    /// Sets up the zoom buttons stack view above the chart
+    func setupZoomButtons() {
+        // Create zoom out button (magnifying glass with minus)
+        let zoomOutButton = UIButton(type: .system)
+        let zoomOutImage = UIImage(systemName: "minus.magnifyingglass", withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .medium))
+        zoomOutButton.setImage(zoomOutImage, for: .normal)
+        zoomOutButton.tag = -1 // Special tag for zoom out
+        zoomOutButton.addTarget(self, action: #selector(zoomInOutButtonTapped(_:)), for: .touchUpInside)
+        zoomOutButton.backgroundColor = UIColor.systemGray5
+        zoomOutButton.layer.cornerRadius = 6
+
+        // Create zoom buttons for different time periods
+        let zoomPeriods: [(title: String, hours: Double)] = [
+            ("1h", 1),
+            ("2h", 2),
+            ("3h", 3),
+            ("6h", 6),
+            ("12h", 12),
+            ("24h", 24),
+        ]
+
+        var periodButtons: [UIButton] = []
+
+        for period in zoomPeriods {
+            let button = UIButton(type: .system)
+            button.setTitle(period.title, for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+            button.tag = Int(period.hours)
+            button.addTarget(self, action: #selector(zoomButtonTapped(_:)), for: .touchUpInside)
+            button.backgroundColor = UIColor.systemGray5
+            button.layer.cornerRadius = 5
+            periodButtons.append(button)
+        }
+
+        // Create a nested stack view for period buttons with equal distribution
+        let periodStackView = UIStackView(arrangedSubviews: periodButtons)
+        periodStackView.axis = .horizontal
+        periodStackView.distribution = .fillEqually
+        periodStackView.spacing = 4
+
+        // Create zoom in button (magnifying glass with plus)
+        let zoomInButton = UIButton(type: .system)
+        let zoomInImage = UIImage(systemName: "plus.magnifyingglass", withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .medium))
+        zoomInButton.setImage(zoomInImage, for: .normal)
+        zoomInButton.tag = -2 // Special tag for zoom in
+        zoomInButton.addTarget(self, action: #selector(zoomInOutButtonTapped(_:)), for: .touchUpInside)
+        zoomInButton.backgroundColor = UIColor.systemGray5
+        zoomInButton.layer.cornerRadius = 6
+
+        // Create main horizontal stack view with: [+] [period buttons] [-]
+        zoomButtonsStackView = UIStackView(arrangedSubviews: [zoomInButton, periodStackView, zoomOutButton])
+        zoomButtonsStackView.axis = .horizontal
+        zoomButtonsStackView.distribution = .fill
+        zoomButtonsStackView.spacing = 8
+        zoomButtonsStackView.translatesAutoresizingMaskIntoConstraints = false
+
+        // Set +/- buttons to fixed width that works well on both iPhone and Mac
+        zoomOutButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        zoomInButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
+
+        // Find the parent stack view that contains BGChart and insert buttons above it
+        if let chartStackView = BGChart.superview as? UIStackView {
+            // Insert at position 0 (before the chart)
+            chartStackView.insertArrangedSubview(zoomButtonsStackView, at: 0)
+
+            // Set height constraint for the buttons stack
+            zoomButtonsStackView.heightAnchor.constraint(equalToConstant: 32).isActive = true
+        }
+    }
+
+    /// Handles zoom in/out button taps for incremental zoom
+    @objc func zoomInOutButtonTapped(_ sender: UIButton) {
+        guard BGChart.data != nil else { return }
+
+        let currentScale = BGChart.scaleX
+        let zoomFactor: CGFloat = sender.tag == -2 ? 1.5 : 0.67 // Zoom in or out
+        var newScale = currentScale * zoomFactor
+
+        // Clamp the scale
+        newScale = min(max(newScale, 1.0), CGFloat(ScaleXMax))
+
+        // Get the center point for zooming
+        let centerX = BGChart.viewPortHandler.contentCenter.x
+        let centerY = BGChart.viewPortHandler.contentCenter.y
+
+        // Apply zoom
+        BGChart.zoom(scaleX: zoomFactor, scaleY: 1.0, x: centerX, y: centerY)
+
+        // Store the scale
+        Storage.shared.chartScaleX.value = Double(BGChart.scaleX)
+
+        // Clear time period button selection since we're doing custom zoom
+        updateZoomButtonSelection(selectedHours: 0)
+
+        // Pause auto-scrolling
+        autoScrollPauseUntil = Date().addingTimeInterval(30)
+    }
+
+    /// Handles zoom button taps to set chart to specific time period
+    @objc func zoomButtonTapped(_ sender: UIButton) {
+        let hours = Double(sender.tag)
+        setChartZoomToHours(hours)
+
+        // Visual feedback - highlight the selected button
+        updateZoomButtonSelection(selectedHours: hours)
+    }
+
+    /// Sets the chart zoom level to show the specified number of hours
+    func setChartZoomToHours(_ hours: Double) {
+        guard BGChart.data != nil else { return }
+
+        // Calculate the time range in seconds
+        let hoursInSeconds = hours * 60 * 60
+
+        // Get the current time
+        let now = dateTimeUtils.getNowTimeIntervalUTC()
+
+        // Calculate scale factor based on total data range vs desired visible range
+        // The chart's full x-axis range is based on downloaded data
+        let graphHours = Double(24 * Storage.shared.downloadDays.value)
+        let graphSeconds = graphHours * 60 * 60
+
+        // Calculate the required scale to show 'hours' worth of data
+        let requiredScale = graphSeconds / hoursInSeconds
+
+        // Limit scale to reasonable bounds
+        let clampedScale = min(max(requiredScale, 1.0), ScaleXMax)
+
+        // Reset and apply new zoom
+        BGChart.fitScreen()
+        BGChart.zoom(scaleX: CGFloat(clampedScale), scaleY: 1.0, x: 0, y: 0)
+
+        // Move to show current time at the right edge (with some padding)
+        let targetX = now - (hoursInSeconds * 0.7)
+        BGChart.moveViewToX(targetX)
+
+        // Store the scale
+        Storage.shared.chartScaleX.value = clampedScale
+
+        // Pause auto-scrolling briefly to let user see the selected view
+        autoScrollPauseUntil = Date().addingTimeInterval(30)
+    }
+
+    /// Updates the visual selection state of zoom buttons
+    func updateZoomButtonSelection(selectedHours: Double) {
+        guard let stackView = zoomButtonsStackView else { return }
+
+        // Find the period buttons stack view (middle element)
+        for subview in stackView.arrangedSubviews {
+            if let periodStackView = subview as? UIStackView {
+                for case let button as UIButton in periodStackView.arrangedSubviews {
+                    if button.tag == Int(selectedHours) {
+                        button.backgroundColor = UIColor.systemBlue
+                        button.setTitleColor(.white, for: .normal)
+                    } else {
+                        button.backgroundColor = UIColor.systemGray5
+                        button.setTitleColor(.systemBlue, for: .normal)
+                    }
+                }
             }
         }
     }
