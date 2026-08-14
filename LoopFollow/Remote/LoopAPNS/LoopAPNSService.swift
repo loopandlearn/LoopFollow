@@ -682,7 +682,7 @@ class LoopAPNSService {
             "alert": alertText,
         ]
 
-        if let duration = duration, duration > 0 {
+        if let duration = duration {
             payload["override-duration-minutes"] = Int(duration / 60)
         }
 

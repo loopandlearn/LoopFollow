@@ -302,7 +302,7 @@ struct OverrideActivationModal: View {
                 // Action Buttons
                 VStack(spacing: 12) {
                     Button(action: {
-                        let duration: TimeInterval? = enableIndefinitely ? nil : (durationHours * 3600)
+                        let duration: TimeInterval? = enableIndefinitely ? 0 : (durationHours * 3600)
                         onActivate(duration)
                     }) {
                         Text("Activate Override")
