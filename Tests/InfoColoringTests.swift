@@ -54,6 +54,15 @@ struct InfoColoringTests {
         #expect(coloring.color(for: 10, direction: config.direction) == .red)
     }
 
+    @Test("pump reservoir parser preserves real zero and still handles 50+ sentinels")
+    func pumpReservoirParser() {
+        #expect(PumpReservoirParser.parseValue(from: 0) == 0)
+        #expect(PumpReservoirParser.parseValue(from: "0") == 0)
+        #expect(PumpReservoirParser.parseValue(from: "50+") == 50)
+        #expect(PumpReservoirParser.parseValue(from: "12.5") == 12.5)
+        #expect(PumpReservoirParser.parseValue(from: nil) == nil)
+    }
+
     @Test("thresholds that need decimals get a fractional step")
     func fractionalSteps() {
         #expect(InfoType.recBolus.colorConfig?.step == 0.1)

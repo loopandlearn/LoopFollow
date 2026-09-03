@@ -5,6 +5,26 @@ import Foundation
 import HealthKit
 import SwiftUI
 
+enum PumpReservoirParser {
+    static func parseValue(from rawValue: Any?) -> Double? {
+        switch rawValue {
+        case let value as Double:
+            return value
+        case let value as Int:
+            return Double(value)
+        case let value as NSNumber:
+            return value.doubleValue
+        case let value as String:
+            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return nil }
+            let normalized = trimmed.hasSuffix("+") ? String(trimmed.dropLast()) : trimmed
+            return Double(normalized)
+        default:
+            return nil
+        }
+    }
+}
+
 extension MainViewController {
     func webLoadNSDeviceStatus() {
         let parameters = ["count": "1"]
@@ -112,13 +132,18 @@ extension MainViewController {
                     Storage.shared.lastLoopTime.value = lastPumpTime
                 }
 
-                if let reservoirData = lastPumpRecord["reservoir"] as? Double {
-                    latestPumpVolume = reservoirData
-                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U", numericValue: reservoirData)
-                    Storage.shared.lastPumpReservoirU.value = reservoirData
+                let reservoirValue = PumpReservoirParser.parseValue(from: lastPumpRecord["reservoir"])
+                if let reservoirData = reservoirValue {
+                    let isSentinel50Plus = (lastPumpRecord["reservoir"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines).hasSuffix("+") == true
+                    let normalizedVolume = (isSentinel50Plus && reservoirData >= 50) ? 50.0 : reservoirData
+
+                    latestPumpVolume = normalizedVolume
+                    let pumpValueText = isSentinel50Plus && normalizedVolume >= 50 ? "50+U" : String(format: "%.0f", normalizedVolume) + "U"
+                    infoManager.updateInfoData(type: .pump, value: pumpValueText, numericValue: normalizedVolume)
+                    Storage.shared.lastPumpReservoirU.value = normalizedVolume
                 } else {
-                    // Pumps that only report "50+" get treated as exactly 50, both
-                    // for the volume alarm and for the info row's coloring.
+                    // Missing pump reservoir data should not masquerade as a valid zero/low value.
+                    // We only treat a true "50+" string as the 50U sentinel.
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U", numericValue: 50.0)
                     Storage.shared.lastPumpReservoirU.value = nil
