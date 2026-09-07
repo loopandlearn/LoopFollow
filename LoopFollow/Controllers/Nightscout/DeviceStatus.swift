@@ -112,15 +112,30 @@ extension MainViewController {
                     Storage.shared.lastLoopTime.value = lastPumpTime
                 }
 
-                if let reservoirData = lastPumpRecord["reservoir"] as? Double {
-                    latestPumpVolume = reservoirData
-                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + "U", numericValue: reservoirData)
-                    Storage.shared.lastPumpReservoirU.value = reservoirData
-                } else {
+                let reservoir = PumpReservoirResolver.resolve(
+                    reservoir: lastPumpRecord["reservoir"] as? Double,
+                    pumpID: lastPumpRecord["pumpID"] as? String,
+                    manufacturer: lastPumpRecord["manufacturer"] as? String,
+                    model: lastPumpRecord["model"] as? String,
+                    cache: Storage.shared.pumpReservoirCache.value,
+                    now: Date()
+                )
+                Storage.shared.pumpReservoirCache.value = reservoir.cache
+
+                switch reservoir.state {
+                case let .units(units):
+                    latestPumpVolume = units
+                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", units) + "U", numericValue: units)
+                    Storage.shared.lastPumpReservoirU.value = units
+                case .aboveReportingLimit:
                     // Pumps that only report "50+" get treated as exactly 50, both
                     // for the volume alarm and for the info row's coloring.
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U", numericValue: 50.0)
+                    Storage.shared.lastPumpReservoirU.value = nil
+                case .unknown:
+                    // The row stays cleared, which the info table renders as an em dash.
+                    latestPumpVolume = nil
                     Storage.shared.lastPumpReservoirU.value = nil
                 }
             }
