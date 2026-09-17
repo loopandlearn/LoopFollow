@@ -56,6 +56,7 @@ struct GeneralSettingsView: View {
                     Toggle("Dynamic BG Color", isOn: $dynamicBGColor.value)
                         .onChange(of: dynamicBGColor.value) { _ in
                             PhoneSessionManager.shared.sendConfig()
+                            markChartSettingsDirty()
                         }
                 }
 
