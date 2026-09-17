@@ -180,6 +180,7 @@ final class BGChartModel: ObservableObject {
     @Published var show90Min: Bool = false
     @Published var showMidnight: Bool = false
     @Published var smallGraphTreatments: Bool = true
+    @Published var showPriorDayTime: Bool = false
 
     private static let doseFormatter: NumberFormatter = {
         let nf = NumberFormatter()
@@ -412,6 +413,7 @@ final class BGChartModel: ObservableObject {
         show90Min = Storage.shared.show90MinLine.value
         showMidnight = Storage.shared.showMidnightLines.value
         smallGraphTreatments = Storage.shared.smallGraphTreatments.value
+        showPriorDayTime = Storage.shared.showPriorDayTimeLines.value
 
         // Advanced-settings visibility toggles. The Nightscout controllers
         // collect the data regardless (it also feeds the info rows), so hidden
