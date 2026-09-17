@@ -24,13 +24,20 @@ struct BGColorSettings {
         )
     }
 
-    func color(_ bg: Double) -> Color {
-        guard colorBGText else { return .primary }
+    /// Color for charted BG values: always colored, matching the iPhone's
+    /// graph, which does not consult "Color BG Text".
+    func pointColor(_ bg: Double) -> Color {
         guard dynamicBGColor else {
             if bg >= high { return .yellow }
             if bg <= low { return .red }
             return .green
         }
         return bgDynamicColor(bg)
+    }
+
+    /// Color for the current-BG number, which honors "Color BG Text" the way
+    /// the iPhone's main screen does.
+    func textColor(_ bg: Double) -> Color {
+        colorBGText ? pointColor(bg) : .primary
     }
 }

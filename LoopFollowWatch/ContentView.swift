@@ -123,19 +123,19 @@ struct ContentView: View {
         else {
             // Fall back to single color from current reading
             if let reading = visible.first ?? bgHistory.last {
-                return LinearGradient(colors: [colors.bgColor(Double(reading.bgValue)).opacity(0.4)], startPoint: .leading, endPoint: .trailing)
+                return LinearGradient(colors: [colors.bgPointColor(Double(reading.bgValue)).opacity(0.4)], startPoint: .leading, endPoint: .trailing)
             }
-            return LinearGradient(colors: [colors.bgColor(100).opacity(0.4)], startPoint: .leading, endPoint: .trailing)
+            return LinearGradient(colors: [colors.bgPointColor(100).opacity(0.4)], startPoint: .leading, endPoint: .trailing)
         }
         let span = last.timeIntervalSince(first)
         let step = max(1, visible.count / 10)
         var stops: [Gradient.Stop] = []
         for i in stride(from: 0, to: visible.count, by: step) {
             let t = visible[i].timestamp.timeIntervalSince(first) / span
-            stops.append(.init(color: colors.bgColor(Double(visible[i].bgValue)).opacity(0.4), location: t))
+            stops.append(.init(color: colors.bgPointColor(Double(visible[i].bgValue)).opacity(0.4), location: t))
         }
         if let lastReading = visible.last {
-            stops.append(.init(color: colors.bgColor(Double(lastReading.bgValue)).opacity(0.4), location: 1.0))
+            stops.append(.init(color: colors.bgPointColor(Double(lastReading.bgValue)).opacity(0.4), location: 1.0))
         }
         return LinearGradient(stops: stops, startPoint: .leading, endPoint: .trailing)
     }
@@ -148,7 +148,7 @@ struct ContentView: View {
 
     @ViewBuilder
     private func mainView(reading: BGReading, config: WatchConfig) -> some View {
-        let bgColor = config.bgColor(Double(reading.bgValue))
+        let bgColor = config.bgTextColor(Double(reading.bgValue))
         let stale = isTimeTravel ? false : reading.isStale
 
         ZStack {

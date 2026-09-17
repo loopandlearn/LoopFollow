@@ -172,7 +172,7 @@ private struct SparklineView: View {
                             let lineWidth = 0.3 + t * 1.7
                             let opacity = min(t * 1.4, 1.0)
                             let midBG = Double(sorted[i].value + sorted[i + 1].value) / 2.0
-                            let segColor = colorSettings.color(midBG)
+                            let segColor = colorSettings.pointColor(midBG)
 
                             // Fill slice under this segment
                             buildSegmentFill(points: screenPoints, index: i, height: topInset + chartH)
@@ -315,7 +315,7 @@ private struct StatsPanel: View {
             // Big BG value
             Text(bgText)
                 .font(.system(size: 54, weight: .regular))
-                .foregroundColor(isStale ? .secondary : BGColorSettings.current.color(Double(data.bgValue)))
+                .foregroundColor(isStale ? .secondary : BGColorSettings.current.textColor(Double(data.bgValue)))
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
                 .widgetAccentable()
