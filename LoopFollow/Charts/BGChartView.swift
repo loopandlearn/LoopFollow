@@ -44,15 +44,6 @@ private enum BGChartConfig {
     /// How long after the last navigation in history before a data tick pulls
     /// the chart back to "now".
     static let autoFollowPause: TimeInterval = 5 * 60
-    /// Max distance between the scrub date and an anchor for it to be selected.
-    static let selectionTolerance: TimeInterval = 20 * 60
-    /// Half-width (pt) of the scrub capture band: treatments whose symbol is
-    /// within this screen distance of the finger join the pill alongside the
-    /// (ever-present) nearest BG reading.
-    static let scrubCaptureRadius: CGFloat = 22
-    /// Time cap on the capture band, so wide zooms — where a finger-width
-    /// covers hours — don't sweep far-away treatments into the pill.
-    static let scrubCaptureMaxSeconds: TimeInterval = 5 * 60
     /// Screen-space radius (pt) within which a tap selects a mark.
     static let tapHitRadius: CGFloat = 30
 }
@@ -532,9 +523,8 @@ private struct MainBGChart: View {
             interaction.visibleSeconds * TimeInterval(fraction)
         )
         selection = date
-        // A featherlight tick whenever the indicator snaps to a different item.
-        let captureWindow = scrubCaptureWindow(viewportWidth: viewportWidth)
-        if let anchor = selectionAnchor(for: date, captureWindow: captureWindow), anchor.date != lastHapticAnchorDate {
+        // A featherlight tick whenever the indicator snaps to a different slot.
+        if let anchor = selectionAnchor(for: date), anchor.date != lastHapticAnchorDate {
             lastHapticAnchorDate = anchor.date
             scrubHaptic.selectionChanged()
             scrubHaptic.prepare()
@@ -688,14 +678,14 @@ private struct MainBGChart: View {
         let texts: [String]
     }
 
-    /// Feeds every treatment mark to `body` as (drawnDate, value, pillText).
-    /// Single source for both the scrub lookup and the tap hit test.
-    private func forEachTreatmentAnchor(_ body: (Date, Double, String) -> Void) {
+    /// Feeds every treatment mark to `body`. Single source for both the scrub
+    /// lookup and the tap hit test.
+    private func forEachTreatmentAnchor(_ body: (BGChartModel.TreatmentPoint) -> Void) {
         for group in [model.boluses, model.carbs, model.smbs, model.bgChecks,
                       model.notes, model.suspends, model.resumes, model.sensorStarts]
         {
             for t in group {
-                body(t.drawnDate, t.sgv, t.pillText)
+                body(t)
             }
         }
     }
@@ -739,76 +729,45 @@ private struct MainBGChart: View {
         return nil
     }
 
-    /// Seconds of chart time covered by `scrubCaptureRadius` at the current
-    /// zoom, bounded by `scrubCaptureMaxSeconds`.
-    private func scrubCaptureWindow(viewportWidth: CGFloat) -> TimeInterval {
-        min(
-            BGChartConfig.scrubCaptureMaxSeconds,
-            TimeInterval(BGChartConfig.scrubCaptureRadius / viewportWidth) * interaction.visibleSeconds
-        )
-    }
+    /// Scrub lookup (time-only). The finger resolves to the grid mark whose
+    /// block contains the scrub time (see BGChartScrubSlots); the indicator
+    /// stands on the mark. The pill stacks every treatment in the block, then
+    /// every BG reading in it, then any band at the mark, so it is constant
+    /// across the block. The indicator's height comes from the reading nearest
+    /// the mark, else the nearest treatment, else the band; an empty block
+    /// shows nothing.
+    private func selectionAnchor(for selected: Date) -> SelectionAnchor? {
+        let slot = model.scrubSlots.slot(containing: selected)
+        let mark = slot.date
 
-    /// Scrub lookup (time-only). Collects everything under the finger instead
-    /// of picking a single winner: every treatment inside the capture window
-    /// joins the pill, and the nearest BG reading always does — so treatments
-    /// and glucose readings can never hide one another. The indicator snaps
-    /// to the nearest collected item; the pill stacks them all (treatments in
-    /// drawn order, BG last).
-    private func selectionAnchor(for selected: Date, captureWindow: TimeInterval) -> SelectionAnchor? {
-        struct Item {
-            let date: Date
-            let value: Double
-            let text: String
-            let distance: TimeInterval
+        var treatments: [BGChartModel.TreatmentPoint] = []
+        forEachTreatmentAnchor { t in
+            if slot.contains(t.date) { treatments.append(t) }
         }
+        treatments.sort { $0.date < $1.date }
+        let readings = model.bg.filter { slot.contains($0.date) }
 
-        var captured: [Item] = []
-        var nearestTreatment: Item?
-        forEachTreatmentAnchor { date, value, text in
-            let item = Item(date: date, value: value, text: text, distance: abs(date.timeIntervalSince(selected)))
-            if item.distance <= captureWindow {
-                captured.append(item)
-            }
-            if item.distance < (nearestTreatment?.distance ?? .greatestFiniteMagnitude) {
-                nearestTreatment = item
-            }
-        }
-        captured.sort { $0.date < $1.date }
+        var texts = treatments.map(\.pillText) + readings.map(bgPillText)
+        let bandTexts = bandPillTexts(at: mark)
+        texts += bandTexts
 
-        var nearestBG: Item?
-        for p in model.bg {
-            let d = abs(p.date.timeIntervalSince(selected))
-            if d < (nearestBG?.distance ?? .greatestFiniteMagnitude) {
-                nearestBG = Item(date: p.date, value: p.value, text: bgPillText(for: p), distance: d)
+        func distanceToMark(_ date: Date) -> TimeInterval { abs(date.timeIntervalSince(mark)) }
+
+        var value: Double?
+        if let reading = readings.min(by: { distanceToMark($0.date) < distanceToMark($1.date) }) {
+            value = reading.value
+        } else if let nearest = treatments.min(by: { distanceToMark($0.date) < distanceToMark($1.date) }) {
+            value = nearest.sgv
+        } else if !bandTexts.isEmpty {
+            if let band = model.overrides.first(where: { mark >= $0.start && mark <= $0.end })
+                ?? model.tempTargets.first(where: { mark >= $0.start && mark <= $0.end })
+            {
+                value = (band.yTop + band.yBottom) / 2
             }
         }
 
-        var items = captured
-        if let nearestBG, nearestBG.distance <= BGChartConfig.selectionTolerance {
-            items.append(nearestBG)
-        }
-        if let primary = items.min(by: { $0.distance < $1.distance }) {
-            let texts = items.map(\.text) + bandPillTexts(at: selected)
-            return SelectionAnchor(date: primary.date, value: primary.value, texts: texts)
-        }
-
-        // Nothing under the finger. Reach for the nearest treatment (data gaps
-        // leave treatments without BG neighbors), then for a band (any height)
-        // at the scrub time.
-        if let nearestTreatment, nearestTreatment.distance <= BGChartConfig.selectionTolerance {
-            let texts = [nearestTreatment.text] + bandPillTexts(at: selected)
-            return SelectionAnchor(date: nearestTreatment.date, value: nearestTreatment.value, texts: texts)
-        }
-        for band in model.overrides where selected >= band.start && selected <= band.end {
-            let midY = (band.yTop + band.yBottom) / 2
-            return SelectionAnchor(date: selected, value: midY, texts: [band.pillText])
-        }
-        for band in model.tempTargets where selected >= band.start && selected <= band.end {
-            let midY = (band.yTop + band.yBottom) / 2
-            return SelectionAnchor(date: selected, value: midY, texts: [band.pillText])
-        }
-
-        return nil
+        guard let value else { return nil }
+        return SelectionAnchor(date: mark, value: value, texts: texts)
     }
 
     /// Tap hit test (screen-space, 2D). Treatments take priority, then BG
@@ -829,7 +788,7 @@ private struct MainBGChart: View {
             }
         }
 
-        forEachTreatmentAnchor(consider)
+        forEachTreatmentAnchor { consider($0.drawnDate, $0.sgv, $0.pillText) }
         if best == nil {
             for p in model.bg {
                 consider(p.date, p.value, bgPillText(for: p))
@@ -854,9 +813,9 @@ private struct MainBGChart: View {
     }
 
     /// The anchor the overlay should show: a live scrub wins over a sticky tap.
-    private func activeAnchor(viewportWidth: CGFloat) -> SelectionAnchor? {
+    private func activeAnchor() -> SelectionAnchor? {
         if isInspectLatched, let selected = selection {
-            return selectionAnchor(for: selected, captureWindow: scrubCaptureWindow(viewportWidth: viewportWidth))
+            return selectionAnchor(for: selected)
         }
         return tapped
     }
@@ -922,7 +881,7 @@ private struct MainBGChart: View {
     /// there is no manual line splitting.
     @ViewBuilder
     private func selectionOverlay(viewportWidth: CGFloat) -> some View {
-        if plotFrame.height > 0, let anchor = activeAnchor(viewportWidth: viewportWidth) {
+        if plotFrame.height > 0, let anchor = activeAnchor() {
             let x = xPosition(for: anchor.date, viewportWidth: viewportWidth)
             if x >= 0, x <= viewportWidth {
                 let y = yPosition(forValue: anchor.value)

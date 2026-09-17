@@ -111,6 +111,8 @@ final class BGChartModel: ObservableObject {
     }
 
     @Published var bg: [BGPoint] = []
+    /// Scrub timeline on the BG cadence; rebuilt together with `bg`.
+    private(set) var scrubSlots = BGChartScrubSlots(readingDates: [])
     @Published var bgRuns: [BGRun] = []
     @Published var yesterday: [BGPoint] = []
     @Published var prediction: [BGPoint] = []
@@ -430,6 +432,7 @@ final class BGChartModel: ObservableObject {
         let maxDisplay = globalVariables.maxDisplayGlucose
         func clampSgv(_ sgv: Int) -> Double { Double(min(max(sgv, minDisplay), maxDisplay)) }
 
+        scrubSlots = BGChartScrubSlots(readingDates: vc.bgData.map { Date(timeIntervalSince1970: $0.date) })
         bg = vc.bgData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: clampSgv($0.sgv), color: colorFor($0.sgv, thresholds: thresholds)) }
         bgRuns = Self.makeRuns(bg)
 
