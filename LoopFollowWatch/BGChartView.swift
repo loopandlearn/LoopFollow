@@ -279,7 +279,7 @@ struct BGChartView: View {
     }
 
     private func pointColor(bgValue: Int) -> Color {
-        return bgDynamicColor(Double(bgValue))
+        return config.bgColor(Double(bgValue))
     }
 
     @ChartContentBuilder
@@ -320,7 +320,7 @@ struct BGChartView: View {
 
                 for i in 0 ..< (pts.count - 1) {
                     let midBG = Double(screenPoints[i].bgValue + screenPoints[i + 1].bgValue) / 2.0
-                    let segColor = bgDynamicColor(midBG)
+                    let segColor = config.bgColor(midBG)
 
                     let fillPath = segmentFillPath(points: pts, index: i, bottomY: size.height)
                     context.fill(

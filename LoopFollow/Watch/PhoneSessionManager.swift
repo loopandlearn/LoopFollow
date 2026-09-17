@@ -28,6 +28,10 @@ class PhoneSessionManager: NSObject, WCSessionDelegate {
         let lfBundleId = Bundle.main.bundleIdentifier ?? ""
         let lfProductionEnv = BuildDetails.default.isTestFlightBuild()
 
+        // Resolved here rather than on the watch: the phone's coloring
+        // thresholds depend on timeInRangeMode, which the watch never sees.
+        let bgColorThresholds = UnitSettingsStore.shared.effectiveThresholds()
+
         return [
             "nsURL": Storage.shared.url.value,
             "nsToken": Storage.shared.token.value,
@@ -55,6 +59,10 @@ class PhoneSessionManager: NSObject, WCSessionDelegate {
             "lfTeamId": lfTeamId,
             "lfBundleId": lfBundleId,
             "lfProductionEnv": lfProductionEnv,
+            "colorBGText": Storage.shared.colorBGText.value,
+            "dynamicBGColor": Storage.shared.dynamicBGColor.value,
+            "bgColorLow": bgColorThresholds.low,
+            "bgColorHigh": bgColorThresholds.high,
             "mealWithFatProtein": Storage.shared.mealWithFatProtein.value,
             "maxProtein": Storage.shared.maxProtein.value.doubleValue(for: .gram()),
             "maxFat": Storage.shared.maxFat.value.doubleValue(for: .gram()),

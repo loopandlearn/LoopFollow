@@ -41,6 +41,14 @@ struct WatchConfig: Equatable {
     // Nightscout write auth
     var nsWriteAuth: Bool
 
+    // BG coloring (synced from iPhone)
+    var colorBGText: Bool
+    var dynamicBGColor: Bool
+    /// Already resolved on the phone from its timeInRangeMode, so the watch
+    /// colors from the same thresholds the phone does.
+    var bgColorLow: Double
+    var bgColorHigh: Double
+
     // Meal settings (synced from iPhone)
     var mealWithFatProtein: Bool
     var maxProtein: Double
@@ -96,6 +104,10 @@ struct WatchConfig: Equatable {
             "lfBundleId": lfBundleId,
             "lfProductionEnv": lfProductionEnv,
             "nsWriteAuth": nsWriteAuth,
+            "colorBGText": colorBGText,
+            "dynamicBGColor": dynamicBGColor,
+            "bgColorLow": bgColorLow,
+            "bgColorHigh": bgColorHigh,
             "mealWithFatProtein": mealWithFatProtein,
             "maxProtein": maxProtein,
             "maxFat": maxFat,
@@ -129,6 +141,10 @@ struct WatchConfig: Equatable {
         lfBundleId = dict["lfBundleId"] as? String ?? ""
         lfProductionEnv = dict["lfProductionEnv"] as? Bool ?? false
         nsWriteAuth = dict["nsWriteAuth"] as? Bool ?? false
+        colorBGText = dict["colorBGText"] as? Bool ?? true
+        dynamicBGColor = dict["dynamicBGColor"] as? Bool ?? false
+        bgColorLow = dict["bgColorLow"] as? Double ?? 70.0
+        bgColorHigh = dict["bgColorHigh"] as? Double ?? 180.0
         mealWithFatProtein = dict["mealWithFatProtein"] as? Bool ?? false
         maxProtein = dict["maxProtein"] as? Double ?? 30.0
         maxFat = dict["maxFat"] as? Double ?? 30.0
@@ -143,6 +159,12 @@ struct WatchConfig: Equatable {
         if let shared = UserDefaults(suiteName: WidgetData.appGroupID) {
             shared.set(nsURL, forKey: "nsURL")
             shared.set(nsToken, forKey: "nsToken")
+
+            // Complications run in their own process and read these directly.
+            shared.set(colorBGText, forKey: "colorBGText")
+            shared.set(dynamicBGColor, forKey: "dynamicBGColor")
+            shared.set(bgColorLow, forKey: "bgColorLow")
+            shared.set(bgColorHigh, forKey: "bgColorHigh")
         }
     }
 

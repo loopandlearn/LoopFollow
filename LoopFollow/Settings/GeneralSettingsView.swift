@@ -5,6 +5,7 @@ import SwiftUI
 
 struct GeneralSettingsView: View {
     @ObservedObject var colorBGText = Storage.shared.colorBGText
+    @ObservedObject var dynamicBGColor = Storage.shared.dynamicBGColor
     @ObservedObject var appBadge = Storage.shared.appBadge
     @ObservedObject var appearanceMode = Storage.shared.appearanceMode
     @ObservedObject var showStats = Storage.shared.showStats
@@ -46,7 +47,18 @@ struct GeneralSettingsView: View {
                 }
                 Toggle("Display Stats", isOn: $showStats.value)
                 Toggle("Display Small Graph", isOn: $showSmallGraph.value)
-                Toggle("Color BG Text", isOn: $colorBGText.value)
+                Toggle("Color BG Text", isOn: $colorBGText.value.animation())
+                    .onChange(of: colorBGText.value) { _ in
+                        PhoneSessionManager.shared.sendConfig()
+                    }
+
+                if colorBGText.value {
+                    Toggle("Dynamic BG Color", isOn: $dynamicBGColor.value)
+                        .onChange(of: dynamicBGColor.value) { _ in
+                            PhoneSessionManager.shared.sendConfig()
+                        }
+                }
+
                 Toggle("Keep Screen Active", isOn: $screenlockSwitchState.value)
                 Toggle("Show Display Name", isOn: $showDisplayName.value)
                 Toggle("Snoozer emoji", isOn: $snoozerEmoji.value)
