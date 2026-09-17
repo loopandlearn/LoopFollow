@@ -42,14 +42,14 @@
             )
             AppShortcut(
                 intent: EnableSpeakBGIntent(),
-                phrases: ["Enable BG speech in \(.applicationName)"],
-                shortTitle: "Enable BG Speech",
+                phrases: ["Turn on Speak BG in \(.applicationName)"],
+                shortTitle: "Turn On Speak BG",
                 systemImageName: "speaker.wave.2"
             )
             AppShortcut(
                 intent: DisableSpeakBGIntent(),
-                phrases: ["Disable BG speech in \(.applicationName)"],
-                shortTitle: "Disable BG Speech",
+                phrases: ["Turn off Speak BG in \(.applicationName)"],
+                shortTitle: "Turn Off Speak BG",
                 systemImageName: "speaker.slash"
             )
         }
