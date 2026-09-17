@@ -1095,6 +1095,9 @@ private struct BGChartCanvas: View, Equatable {
             if showTreatments {
                 treatmentMarks
             }
+            if model.showPriorDayTime {
+                priorDayTimeRuleMarks
+            }
             if !isSmall {
                 ruleMarks
             } else if model.showMidnight {
@@ -1459,6 +1462,15 @@ private struct BGChartCanvas: View, Equatable {
             )
             .symbolSize(isSmall ? 22 : 54)
             .foregroundStyle(Color.gray.opacity(0.75))
+        }
+    }
+
+    @ChartContentBuilder
+    private var priorDayTimeRuleMarks: some ChartContent {
+        ForEach(model.priorDayTimeMarkers.filter { $0 >= windowStart && $0 <= windowEnd }, id: \.self) { d in
+            RuleMark(x: .value("same time on prior day", d))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: isSmall ? [2, 2] : [2, 5]))
+                .foregroundStyle(Color.orange.opacity(isSmall ? 1 : 0.5))
         }
     }
 

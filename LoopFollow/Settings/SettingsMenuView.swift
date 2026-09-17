@@ -176,6 +176,7 @@ enum SettingsRoute: Hashable, Identifiable {
                 SettingsLeaf("Show −90 min Line", ["-90"]),
                 SettingsLeaf("Show Yesterday's BG", ["yesterday"]),
                 SettingsLeaf("Show Midnight Lines"),
+                SettingsLeaf("Show Prior Day Time Lines", ["prior day", "same time", "yesterday"]),
                 SettingsLeaf("Show Carb/Bolus Values", ["carbs"]),
                 SettingsLeaf("Show Carb Absorption"),
                 SettingsLeaf("Treatments on Small Graph"),
