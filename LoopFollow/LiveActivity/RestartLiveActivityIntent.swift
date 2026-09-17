@@ -32,7 +32,7 @@
         }
     }
 
-struct LoopFollowAppShortcuts: AppShortcutsProvider {
+    struct LoopFollowAppShortcuts: AppShortcutsProvider {
         static var appShortcuts: [AppShortcut] {
             AppShortcut(
                 intent: RestartLiveActivityIntent(),
