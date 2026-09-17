@@ -9,6 +9,20 @@ import SwiftUI
  Observable in memory storage
  */
 
+struct TreatmentDetailRequest: Equatable {
+    enum Kind: Equatable {
+        case carb
+        case bolus
+        case automaticBolus
+        case override
+        case tempTarget
+    }
+
+    let kind: Kind
+    let timestamp: TimeInterval
+    let amount: Double?
+}
+
 class Observable {
     static let shared = Observable()
 
@@ -59,6 +73,9 @@ class Observable {
 
     /// Selected tab index used by SwiftUI TabView — set from MainViewController to switch tabs
     var selectedTabIndex = ObservableValue<Int>(default: 0)
+
+    /// Treatment selected from the chart and awaiting its existing detail view.
+    var pendingTreatmentDetail = ObservableValue<TreatmentDetailRequest?>(default: nil)
 
     /// Currently visible app-wide banner (nil = hidden). Managed by BannerManager.
     var activeBanner = ObservableValue<BannerMessage?>(default: nil)

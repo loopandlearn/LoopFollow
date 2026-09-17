@@ -21,9 +21,11 @@ struct TreatmentsView: View {
 
     @StateObject private var viewModel = TreatmentsViewModel()
     @State private var selectedFilter: TreatmentFilter = .all
+    @State private var routedTreatment: Treatment?
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject private var graphTimeZoneEnabled = Storage.shared.graphTimeZoneEnabled
     @ObservedObject private var graphTimeZoneIdentifier = Storage.shared.graphTimeZoneIdentifier
+    @ObservedObject private var pendingTreatmentDetail = Observable.shared.pendingTreatmentDetail
 
     private var isLoopDevice: Bool {
         device.value == "Loop"
@@ -56,6 +58,15 @@ struct TreatmentsView: View {
     var body: some View {
         NavigationView {
             VStack {
+                NavigationLink(isActive: treatmentDetailIsPresented) {
+                    if let routedTreatment {
+                        TreatmentDetailView(treatment: routedTreatment)
+                    }
+                } label: {
+                    EmptyView()
+                }
+                .hidden()
+
                 Text("Treatments")
                     .font(.largeTitle.weight(.bold))
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -190,16 +201,59 @@ struct TreatmentsView: View {
                 .refreshable {
                     viewModel.refreshTreatments()
                 }
+                .onChange(of: pendingTreatmentDetail.value) { _ in
+                    routePendingTreatment(in: viewModel.groupedTreatments)
+                }
+                .onReceive(viewModel.$groupedTreatments) { groupedTreatments in
+                    DispatchQueue.main.async {
+                        routePendingTreatment(in: groupedTreatments)
+                    }
+                }
                 .onAppear {
                     if viewModel.groupedTreatments.isEmpty {
                         viewModel.loadInitialTreatments()
                     }
                     normalizeSelectedFilter(for: device.value)
+                    routePendingTreatment(in: viewModel.groupedTreatments)
                 }
                 .onChange(of: device.value) { newValue in
                     normalizeSelectedFilter(for: newValue)
                 }
             }
+        }
+    }
+
+    private var treatmentDetailIsPresented: Binding<Bool> {
+        Binding(
+            get: { routedTreatment != nil },
+            set: { isPresented in
+                guard !isPresented else { return }
+                routedTreatment = nil
+                pendingTreatmentDetail.value = nil
+            }
+        )
+    }
+
+    private func routePendingTreatment(in groupedTreatments: [String: [Treatment]]) {
+        guard routedTreatment == nil, let request = pendingTreatmentDetail.value else { return }
+
+        let treatments = groupedTreatments.values.flatMap { $0 }
+        if let treatment = request.bestMatch(in: treatments) {
+            routedTreatment = treatment
+            return
+        }
+
+        guard !viewModel.isInitialLoading, !viewModel.isLoadingMore else { return }
+        guard viewModel.hasMoreData else {
+            pendingTreatmentDetail.value = nil
+            return
+        }
+        guard let oldestDate = treatments.map(\.date).min() else { return }
+
+        if oldestDate > request.timestamp - TreatmentDetailRequest.matchTolerance {
+            viewModel.loadMoreIfNeeded()
+        } else {
+            pendingTreatmentDetail.value = nil
         }
     }
 
@@ -389,6 +443,52 @@ private struct DayRow: Identifiable {
     let id: String
     let hourLabel: String?
     let treatment: Treatment?
+}
+
+extension TreatmentDetailRequest {
+    static let matchTolerance: TimeInterval = 90
+
+    func bestMatch(in treatments: [Treatment]) -> Treatment? {
+        treatments
+            .filter { supports($0.type) && abs($0.date - timestamp) <= Self.matchTolerance }
+            .min { lhs, rhs in
+                let lhsAmountDistance = amountDistance(for: lhs)
+                let rhsAmountDistance = amountDistance(for: rhs)
+                if lhsAmountDistance != rhsAmountDistance {
+                    return lhsAmountDistance < rhsAmountDistance
+                }
+
+                let lhsDateDistance = abs(lhs.date - timestamp)
+                let rhsDateDistance = abs(rhs.date - timestamp)
+                if lhsDateDistance != rhsDateDistance {
+                    return lhsDateDistance < rhsDateDistance
+                }
+                return lhs.id < rhs.id
+            }
+    }
+
+    private func supports(_ type: TreatmentType) -> Bool {
+        switch kind {
+        case .carb:
+            return type == .carb
+        case .bolus:
+            return type == .bolusManual || type == .bolusAutomatic || type == .smb
+        case .automaticBolus:
+            return type == .bolusAutomatic || type == .smb
+        case .override:
+            return type == .override
+        case .tempTarget:
+            return type == .tempTarget
+        }
+    }
+
+    private func amountDistance(for treatment: Treatment) -> Double {
+        guard let amount else { return 0 }
+        guard let treatmentAmount = Double(treatment.title.prefix {
+            $0.isNumber || $0 == "." || $0 == "-"
+        }) else { return .infinity }
+        return abs(treatmentAmount - amount)
+    }
 }
 
 struct TreatmentDetailView: View {
