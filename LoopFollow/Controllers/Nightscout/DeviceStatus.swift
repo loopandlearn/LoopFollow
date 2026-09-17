@@ -67,7 +67,7 @@ extension MainViewController {
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
         let previousIOBText = Observable.shared.iobText.value
         let previousDeviceWasLoop = Storage.shared.device.value == "Loop"
-        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
+        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd, .smoothedBg])
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
         if Storage.shared.device.value == "Loop" {
@@ -200,8 +200,11 @@ extension MainViewController {
         }
 
         // OpenAPS - handle new data
+        var processedOpenAPS = false
+        var parsedOpenAPSTimestamp = false
         if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String: AnyObject]? {
-            DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
+            processedOpenAPS = true
+            parsedOpenAPSTimestamp = DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
         }
 
         // If the active looping system flipped (Loop ⇄ Trio/OpenAPS), drop the previous
@@ -219,7 +222,35 @@ extension MainViewController {
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         let secondsAgo = now - (Observable.shared.alertLastLoopTime.value ?? 0)
 
+        // Trio can upload a thin devicestatus record between full loop records.
+        // While the newest BG is fresh, poll quickly if that record did not
+        // repopulate the loop timestamp or if its matching smoothed value has
+        // not arrived yet. Keep this OpenAPS-only so Loop users never inherit
+        // the smoothing retry cadence.
+        let latestBgTime = bgData.last?.date ?? Storage.shared.lastBgReadingTimeSeconds.value
+        let latestBgAge = latestBgTime.map { max(0, now - $0) } ?? .infinity
+        let smoothingRetryEnabled = processedOpenAPS && Storage.shared.displaySmoothedBG.value
+        let recordIsSparse = smoothingRetryEnabled && !parsedOpenAPSTimestamp
+        let needsSmoothedBgRetry: Bool = {
+            guard smoothingRetryEnabled,
+                  let latestBg = bgData.last,
+                  latestBgAge < 300
+            else { return false }
+            return smoothedBg(near: latestBg.date) == nil
+        }()
+        let needsSparseRecordRetry = recordIsSparse && latestBgAge < 300
+        let needsRetry = needsSmoothedBgRetry || needsSparseRecordRetry
+        let retryDelay: TimeInterval = latestBgAge < 60 ? 3 : 15
+
         DispatchQueue.main.async {
+            if needsRetry {
+                TaskScheduler.shared.rescheduleTask(
+                    id: .deviceStatus,
+                    to: Date().addingTimeInterval(retryDelay)
+                )
+                return
+            }
+
             var interval: Double
             if secondsAgo >= (20 * 60) {
                 interval = 5 * 60
@@ -248,6 +279,13 @@ extension MainViewController {
 
         // Mark device status as loaded for initial loading state
         markDataLoaded("deviceStatus")
+
+        if processedOpenAPS,
+           Storage.shared.displaySmoothedBG.value,
+           !hasFetchedSmoothedBgHistory
+        {
+            webLoadNSSmoothedBgHistory()
+        }
 
         if Storage.shared.contactEnabled.value, Storage.shared.contactIOB.value != .off,
            Observable.shared.iobText.value != previousIOBText

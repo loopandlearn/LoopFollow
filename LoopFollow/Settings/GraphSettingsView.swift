@@ -6,6 +6,9 @@ import SwiftUI
 struct GraphSettingsView: View {
     @ObservedObject private var showDots = Storage.shared.showDots
     @ObservedObject private var showLines = Storage.shared.showLines
+    @ObservedObject private var displaySmoothedBG = Storage.shared.displaySmoothedBG
+    @ObservedObject private var nightscoutURL = Storage.shared.url
+    @ObservedObject private var device = Storage.shared.device
     @ObservedObject private var showValues = Storage.shared.showValues
     @ObservedObject private var showAbsorption = Storage.shared.showAbsorption
     @ObservedObject private var showDIALines = Storage.shared.showDIALines
@@ -28,12 +31,16 @@ struct GraphSettingsView: View {
     var body: some View {
         Form {
             // ── Graph Display ────────────────────────────────────────────
-            Section("Graph Display") {
+            Section(header: Text("Graph Display"), footer: smoothingFooter) {
                 Toggle("Display Dots", isOn: $showDots.value)
                     .onChange(of: showDots.value) { _ in markDirty() }
+                    .disabled(smoothingActive)
+                    .foregroundColor(smoothingActive ? .secondary : .primary)
 
                 Toggle("Display Lines", isOn: $showLines.value)
                     .onChange(of: showLines.value) { _ in markDirty() }
+                    .disabled(smoothingActive)
+                    .foregroundColor(smoothingActive ? .secondary : .primary)
 
                 if nightscoutEnabled {
                     Toggle("Show DIA Lines", isOn: $showDIALines.value)
@@ -143,5 +150,18 @@ struct GraphSettingsView: View {
     /// Marks the chart as needing a redraw
     private func markDirty() {
         Observable.shared.chartSettingsChanged.value = true
+    }
+
+    @ViewBuilder
+    private var smoothingFooter: some View {
+        if smoothingActive {
+            Text("Display Dots and Display Lines are managed automatically while Display Smoothed BG is on (CGM dots shown, cyan smoothing line replaces the connecting line).")
+        } else {
+            EmptyView()
+        }
+    }
+
+    private var smoothingActive: Bool {
+        displaySmoothedBG.value && !nightscoutURL.value.isEmpty && device.value != "Loop"
     }
 }

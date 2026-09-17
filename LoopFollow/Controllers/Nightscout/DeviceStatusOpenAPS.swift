@@ -5,23 +5,42 @@ import Foundation
 import HealthKit
 
 extension MainViewController {
-    func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
+    func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) -> Bool {
         Storage.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
         if lastLoopRecord["failureReason"] != nil {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
+            return false
         } else {
-            guard let enactedOrSuggested = lastLoopRecord["suggested"] as? [String: AnyObject] ?? lastLoopRecord["enacted"] as? [String: AnyObject] else {
+            // Suggested is the current loop's view, while enacted can carry
+            // fields such as TDD that are omitted when no new action was needed.
+            // Merge both and prefer suggested values on collisions.
+            let suggested = lastLoopRecord["suggested"] as? [String: AnyObject] ?? [:]
+            let enacted = lastLoopRecord["enacted"] as? [String: AnyObject] ?? [:]
+            guard !suggested.isEmpty || !enacted.isEmpty else {
                 Observable.shared.loopStatusText.value = "↻"
                 latestLoopStatusString = "↻"
-                return
+                return false
             }
+            let enactedOrSuggested = enacted.merging(suggested) { _, suggestedValue in suggestedValue }
 
             var updatedTime: TimeInterval?
 
-            if let timestamp = enactedOrSuggested["deliverAt"] as? String ?? enactedOrSuggested["timestamp"] as? String,
-               let parsedTime = formatter.date(from: timestamp)?.timeIntervalSince1970
-            {
+            // Prefer the current suggestion, then the outer Nightscout record,
+            // and finally the potentially older enacted timestamp. parseDate
+            // tolerates fractional seconds and the common trailing Z.
+            let timestampCandidates: [String?] = [
+                suggested["deliverAt"] as? String,
+                suggested["timestamp"] as? String,
+                lastDeviceStatus?["created_at"] as? String,
+                enacted["deliverAt"] as? String,
+                enacted["timestamp"] as? String,
+            ]
+            let parsedTime = timestampCandidates
+                .compactMap { $0.flatMap { SmoothedBgSeries.parseDate($0) } }
+                .first?
+                .timeIntervalSince1970
+            if let parsedTime {
                 updatedTime = parsedTime
                 let formattedTime = Localizer.formatTimestampToLocalString(parsedTime)
                 infoManager.updateInfoData(type: .updated, value: formattedTime)
@@ -119,6 +138,39 @@ extension MainViewController {
             } else {
                 infoManager.clearInfoData(type: .recBolus)
                 Observable.shared.deviceRecBolus.value = nil
+            }
+
+            let smoothedBgPoint: SmoothedBgPoint? = {
+                if let bg = suggested["bg"] as? Double {
+                    return SmoothedBgSeries.point(
+                        bg: bg,
+                        timestampCandidates: [
+                            suggested["deliverAt"] as? String,
+                            suggested["timestamp"] as? String,
+                            lastDeviceStatus?["created_at"] as? String,
+                            enacted["deliverAt"] as? String,
+                            enacted["timestamp"] as? String,
+                        ]
+                    )
+                }
+                if let bg = enacted["bg"] as? Double {
+                    return SmoothedBgSeries.point(
+                        bg: bg,
+                        timestampCandidates: [
+                            enacted["deliverAt"] as? String,
+                            enacted["timestamp"] as? String,
+                            lastDeviceStatus?["created_at"] as? String,
+                        ]
+                    )
+                }
+                return nil
+            }()
+            if Storage.shared.displaySmoothedBG.value, let smoothedBgPoint {
+                appendSmoothedBgPoint(time: smoothedBgPoint.time, bgMgdl: smoothedBgPoint.bgMgdl)
+                infoManager.updateInfoData(
+                    type: .smoothedBg,
+                    value: Localizer.toDisplayUnits(String(smoothedBgPoint.bgMgdl))
+                )
             }
 
             // Eventual BG
@@ -241,6 +293,7 @@ extension MainViewController {
             // Live Activity storage
             Storage.shared.lastIOB.value = latestIOB?.value
             Storage.shared.lastCOB.value = latestCOB?.value
+            return updatedTime != nil
         }
     }
 }
