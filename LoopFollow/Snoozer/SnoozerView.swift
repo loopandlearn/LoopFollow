@@ -48,6 +48,7 @@ struct SnoozerView: View {
                     } else {
                         VStack(spacing: 0) {
                             leftColumn(isLandscape: false, barShowing: barShowing)
+                                .layoutPriority(1)
                             rightColumn(isLandscape: false)
                         }
                     }
@@ -157,10 +158,10 @@ struct SnoozerView: View {
 
     private func leftColumn(isLandscape: Bool, barShowing: Bool) -> some View {
         let topPad: CGFloat = barShowing ? 0 : 16
-        let bigMaxH: CGFloat = barShowing ? (isLandscape ? 210 : 220) : 240
-        let dirMaxH: CGFloat = barShowing ? (isLandscape ? 72 : 72) : 80
-        let deltaMaxH: CGFloat = barShowing ? (isLandscape ? 60 : 60) : 68
-        let ageMaxH: CGFloat = barShowing ? 36 : 40
+        let bigMaxH: CGFloat = barShowing ? (isLandscape ? 210 : 200) : 240
+        let dirMaxH: CGFloat = barShowing ? (isLandscape ? 72 : 90) : (isLandscape ? 80 : 110)
+        let deltaMaxH: CGFloat = barShowing ? (isLandscape ? 60 : 80) : (isLandscape ? 68 : 100)
+        let ageMaxH: CGFloat = barShowing ? (isLandscape ? 36 : 60) : (isLandscape ? 40 : 80)
 
         return VStack(spacing: 0) {
             if !isLandscape && showDisplayName.value {
@@ -185,29 +186,29 @@ struct SnoozerView: View {
                     Text(directionText.value)
                         .font(.system(size: 90, weight: .black))
                     Text(deltaText.value)
-                        .font(.system(size: 70))
+                        .font(.system(size: 70).monospacedDigit())
                 }
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: dirMaxH)
             } else {
                 Text(directionText.value)
-                    .font(.system(size: 110, weight: .black))
+                    .font(.system(size: 160, weight: .black))
                     .minimumScaleFactor(0.5)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, maxHeight: dirMaxH)
 
                 Text(deltaText.value)
-                    .font(.system(size: 70))
+                    .font(.system(size: 140).monospacedDigit())
                     .minimumScaleFactor(0.5)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity, maxHeight: deltaMaxH)
             }
 
             Text(minAgoText.value)
-                .font(.system(size: 60))
+                .font(.system(size: isLandscape ? 60 : 80).monospacedDigit())
                 .minimumScaleFactor(0.5)
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: ageMaxH)
         }
         .padding(.top, topPad)
@@ -224,32 +225,23 @@ struct SnoozerView: View {
                     .padding(.bottom, 8)
             }
 
-            if snoozerEmoji.value {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    VStack(spacing: 4) {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                VStack(spacing: 4) {
+                    if snoozerEmoji.value {
                         Text(bgEmoji)
                             .font(.system(size: 128))
                             .minimumScaleFactor(0.5)
+                            .frame(minHeight: isLandscape ? nil : 70)
+                    }
 
-                        Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
-                            .font(.system(size: 70))
-                            .minimumScaleFactor(0.5)
-                            .foregroundColor(.white)
-                            .frame(height: 78)
-                    }
-                }
-            } else {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    VStack(spacing: 4) {
-                        Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
-                            .font(.system(size: 70))
-                            .minimumScaleFactor(0.5)
-                            .foregroundColor(.white)
-                            .frame(height: 78)
-                    }
+                    Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
+                        .font(.system(size: isLandscape ? 70 : 100).monospacedDigit())
+                        .minimumScaleFactor(0.5)
+                        .foregroundColor(.white)
+                        .frame(minHeight: isLandscape ? 78 : 80, maxHeight: isLandscape ? 78 : 100)
                 }
             }
-            Spacer()
+            Spacer(minLength: isLandscape ? nil : 16)
         }
     }
 
