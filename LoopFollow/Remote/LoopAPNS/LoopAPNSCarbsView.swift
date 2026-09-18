@@ -455,7 +455,7 @@ struct LoopAPNSCarbsView: View {
                 switch alertType {
                 case .success:
                     return Alert(
-                        title: Text("Success"),
+                        title: Text("Command Sent"),
                         message: Text(alertMessage),
                         dismissButton: .default(Text("OK")) {
                             presentationMode.wrappedValue.dismiss()
@@ -571,9 +571,7 @@ struct LoopAPNSCarbsView: View {
                     }
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
-                    let timeFormatter = DateFormatter()
-                    timeFormatter.timeStyle = .short
-                    self.alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"
+                    self.alertMessage = RemoteCommandMessage.sent
                     self.alertType = .success
                     LogManager.shared.log(
                         category: .apns,
