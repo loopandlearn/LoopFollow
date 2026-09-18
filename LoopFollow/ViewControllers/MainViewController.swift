@@ -784,7 +784,11 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         }
 
         #if !targetEnvironment(macCatalyst)
-            LiveActivityManager.shared.startFromCurrentState()
+            // Creation at launch belongs to didBecomeActive; this covers
+            // returning to the tab while the app is already active.
+            if UIApplication.shared.applicationState == .active {
+                LiveActivityManager.shared.startFromCurrentState()
+            }
         #endif
     }
 

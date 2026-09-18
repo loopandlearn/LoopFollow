@@ -518,7 +518,9 @@ final class LiveActivityManager {
                 // now so the background push-to-start renewal (and its banner) is
                 // not needed later. On failure the existing LA is kept.
                 let remaining = renewBy - now
-                if renewBy > 0, remaining < LiveActivityManager.opportunisticRenewalThreshold, isAppVisibleForLiveActivityStart() {
+                if renewBy > 0, remaining < LiveActivityManager.opportunisticRenewalThreshold,
+                   isAppVisibleForLiveActivityStart(), !isAwaitingPushToStartAdoption
+                {
                     if attemptLocalCreate(reason: "opportunistic-renew", oldActivity: existing) {
                         return
                     }
@@ -702,21 +704,28 @@ final class LiveActivityManager {
         oldActivity: Activity<GlucoseLiveActivityAttributes>?,
         snapshot: GlucoseSnapshot? = nil
     ) {
+        if isAwaitingPushToStartAdoption {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] create (\(reason)): a push-to-start is awaiting adoption — not creating"
+            )
+            return
+        }
         if isAppVisibleForLiveActivityStart() {
             if attemptLocalCreate(reason: reason, oldActivity: oldActivity, snapshot: snapshot) {
                 return
             }
-        } else if UIApplication.shared.connectedScenes.contains(where: { $0.activationState == .foregroundInactive }) {
-            // The app is on its way to the foreground — didBecomeActive is
-            // imminent and will create locally. Firing push-to-start here races
-            // that create and produces two activities within a second.
-            LogManager.shared.log(
-                category: .general,
-                message: "[LA] create (\(reason)): scene is foregroundInactive — deferring to didBecomeActive"
-            )
-            return
         }
         attemptPushToStartCreate(reason: reason, oldActivity: oldActivity, snapshot: snapshot)
+    }
+
+    /// A push-to-start accepted by APNs this recently is still expected to
+    /// arrive through activityUpdates; creating meanwhile would replace the LA twice.
+    static let pushToStartAdoptionWindow: TimeInterval = 30
+
+    private var isAwaitingPushToStartAdoption: Bool {
+        guard let sentAt = lastPushToStartSuccessAt else { return false }
+        return Date().timeIntervalSince(sentAt) < LiveActivityManager.pushToStartAdoptionWindow
     }
 
     /// Foreground-only local creation via Activity.request(pushType: .token).
@@ -769,6 +778,12 @@ final class LiveActivityManager {
             Storage.shared.laRenewalFailed.value = false
             cancelRenewalFailedNotification()
             pendingForegroundRestart = false
+            // The new activity's token arrives through its own observation;
+            // the old token must not be used for updates meanwhile.
+            pushToken = nil
+            lastPushToStartSuccessAt = nil
+            pushToStartSendsWithoutAdoption = 0
+            Storage.shared.laPushToStartBackoff.value = 0
             // Bind before ending the old activity so its .dismissed is never
             // misclassified as a user swipe.
             bind(to: activity, logReason: "local-create-\(reason)")
