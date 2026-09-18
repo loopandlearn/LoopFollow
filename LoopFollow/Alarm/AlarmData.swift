@@ -12,6 +12,10 @@ struct AlarmData: Codable {
     let latestOverrideEnd: TimeInterval?
     let latestTempTargetStart: TimeInterval?
     let latestTempTargetEnd: TimeInterval?
+    /// Scheduled end of the currently-active override/temp target, if known
+    /// in advance — used by the end alarms' early warning.
+    var activeOverrideEnd: TimeInterval?
+    var activeTempTargetEnd: TimeInterval?
     let recBolus: Double?
     let COB: Double?
     let sageInsertTime: TimeInterval?

@@ -6,6 +6,7 @@ import Foundation
 
 final class SnoozerViewModel: ObservableObject {
     @Published var activeAlarm: Alarm?
+    @Published var alarmTitle: String = ""
     @Published var snoozeUnits: Int = 5
     @Published var timeUnitLabel: String = "minutes"
 
@@ -21,9 +22,17 @@ final class SnoozerViewModel: ObservableObject {
             .sink { [weak self] alarm in
                 self?.activeAlarm = alarm
                 if let a = alarm {
+                    self?.alarmTitle = Observable.shared.currentAlarmTitleOverride.value ?? a.name
                     self?.snoozeUnits = a.snoozeDuration
                     self?.timeUnitLabel = a.type.snoozeTimeUnit.label
                 }
+            }
+            .store(in: &cancellables)
+        Observable.shared.currentAlarmTitleOverride.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] title in
+                guard let self, let alarm = self.activeAlarm else { return }
+                self.alarmTitle = title ?? alarm.name
             }
             .store(in: &cancellables)
         if let alarm = activeAlarm {
