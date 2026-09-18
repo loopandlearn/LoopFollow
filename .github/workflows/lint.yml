@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Cache SwiftFormat build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: BuildTools/.build
           key: ${{ runner.os }}-swiftformat-${{ hashFiles('BuildTools/Package.resolved', 'BuildTools/Package.swift') }}
