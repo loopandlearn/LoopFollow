@@ -126,14 +126,20 @@ class AlarmManager {
                 continue
             }
 
-            // If this alarm is active, and still fulfill the requirements, let it be active
-            // Break the loop, nothing else to do
+            let titleOverride = checker.firedTitle
+
+            // An active alarm that still fulfills the requirements stays active.
+            // A different phase of it (an end alarm's early warning followed
+            // by the end itself) is announced with its own title.
             if Observable.shared.currentAlarm.value == alarm.id {
+                if titleOverride != Observable.shared.currentAlarmTitleOverride.value {
+                    Observable.shared.currentAlarmTitleOverride.value = titleOverride
+                    alarm.trigger(config: Storage.shared.alarmConfiguration.value, now: now, titleOverride: titleOverride)
+                }
                 break
             }
 
             // Fire the alarm and break the loop; we only allow one alarm per evaluation tick.
-            let titleOverride = checker.notificationTitle(alarm: alarm, data: data, now: now)
             Observable.shared.currentAlarmTitleOverride.value = titleOverride
             Observable.shared.currentAlarm.value = alarm.id
 

@@ -15,7 +15,7 @@ struct OverrideEndAlarmEditor: View {
             AlarmStepperSection(
                 header: "Early Warning",
                 footer: "Also alert this many minutes before the override "
-                    + "is scheduled to end.  Set to 0 to alert only when it ends.",
+                    + "is scheduled to end. Set to 0 to alert only when it ends.",
                 title: "Warn before end",
                 range: 0 ... 30,
                 step: 5,

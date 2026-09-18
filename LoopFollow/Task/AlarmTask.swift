@@ -20,7 +20,7 @@ extension MainViewController {
             let latestTempTargetStart = self.tempTargetGraphData.last { $0.date <= now }?.date
             let latestTempTargetEnd = self.tempTargetGraphData.last { $0.endDate <= now }?.endDate
             let activeOverrideEnd = self.overrideGraphData.last { $0.date <= now && ($0.scheduledEndDate ?? 0) > now }?.scheduledEndDate
-            let activeTempTargetEnd = self.tempTargetGraphData.last { $0.date <= now && $0.endDate > now }?.endDate
+            let activeTempTargetEnd = self.tempTargetGraphData.last { $0.date <= now && $0.endDate > now }?.scheduledEndDate
             let recBolus = Observable.shared.deviceRecBolus.value
             let COB = self.latestCOB?.value
             let sensorInsertedAt = Storage.shared.sageInsertTime.value

@@ -22,7 +22,7 @@ struct OverrideEndConditionTests {
         let now = Date()
         let end = now.timeIntervalSince1970 - 60
         let alarm = Alarm.overrideEnd()
-        let data = AlarmData.withOverrideEnds(latestEnd: end)
+        let data = AlarmData.withEnds(latestOverrideEnd: end)
 
         #expect(cond.evaluate(alarm: alarm, data: data, now: now))
         #expect(!cond.evaluate(alarm: alarm, data: data, now: now))
@@ -34,7 +34,7 @@ struct OverrideEndConditionTests {
         let now = Date()
         let end = now.timeIntervalSince1970 - 16 * 60
         let alarm = Alarm.overrideEnd()
-        let data = AlarmData.withOverrideEnds(latestEnd: end)
+        let data = AlarmData.withEnds(latestOverrideEnd: end)
 
         #expect(!cond.evaluate(alarm: alarm, data: data, now: now))
     }
@@ -46,7 +46,7 @@ struct OverrideEndConditionTests {
         reset()
         let now = Date()
         let end = now.timeIntervalSince1970 + 4 * 60
-        let data = AlarmData.withOverrideEnds(activeEnd: end)
+        let data = AlarmData.withEnds(activeOverrideEnd: end)
 
         #expect(!cond.evaluate(alarm: .overrideEnd(), data: data, now: now))
         #expect(!cond.evaluate(alarm: .overrideEnd(warnBefore: 0), data: data, now: now))
@@ -57,7 +57,7 @@ struct OverrideEndConditionTests {
         reset()
         let now = Date()
         let alarm = Alarm.overrideEnd(warnBefore: 10)
-        let data = AlarmData.withOverrideEnds(activeEnd: nil)
+        let data = AlarmData.withEnds(activeOverrideEnd: nil)
 
         #expect(!cond.evaluate(alarm: alarm, data: data, now: now))
     }
@@ -68,7 +68,7 @@ struct OverrideEndConditionTests {
         let now = Date()
         let end = now.timeIntervalSince1970 + 5 * 60
         let alarm = Alarm.overrideEnd(warnBefore: 10)
-        let data = AlarmData.withOverrideEnds(activeEnd: end)
+        let data = AlarmData.withEnds(activeOverrideEnd: end)
 
         #expect(cond.evaluate(alarm: alarm, data: data, now: now))
         #expect(!cond.evaluate(alarm: alarm, data: data, now: now))
@@ -80,7 +80,7 @@ struct OverrideEndConditionTests {
         let now = Date()
         let end = now.timeIntervalSince1970 + 6 * 60
         let alarm = Alarm.overrideEnd(warnBefore: 5)
-        let data = AlarmData.withOverrideEnds(activeEnd: end)
+        let data = AlarmData.withEnds(activeOverrideEnd: end)
 
         #expect(!cond.evaluate(alarm: alarm, data: data, now: now))
     }
@@ -92,14 +92,14 @@ struct OverrideEndConditionTests {
         let end = now.timeIntervalSince1970 + 4 * 60
         let alarm = Alarm.overrideEnd(warnBefore: 5)
 
-        let preData = AlarmData.withOverrideEnds(activeEnd: end)
+        let preData = AlarmData.withEnds(activeOverrideEnd: end)
         #expect(cond.evaluate(alarm: alarm, data: preData, now: now))
-        #expect(cond.notificationTitle(alarm: alarm, data: preData, now: now) == "Override Ending Soon")
+        #expect(cond.firedTitle == "Override Ending Soon")
 
         let endNow = Date(timeIntervalSince1970: end + 60)
-        let endData = AlarmData.withOverrideEnds(latestEnd: end)
+        let endData = AlarmData.withEnds(latestOverrideEnd: end)
         #expect(cond.evaluate(alarm: alarm, data: endData, now: endNow))
-        #expect(cond.notificationTitle(alarm: alarm, data: endData, now: endNow) == nil)
+        #expect(cond.firedTitle == nil)
     }
 
     @Test("extending the override re-arms the early warning for the new end")
@@ -109,10 +109,35 @@ struct OverrideEndConditionTests {
         let firstEnd = now.timeIntervalSince1970 + 4 * 60
         let alarm = Alarm.overrideEnd(warnBefore: 5)
 
-        #expect(cond.evaluate(alarm: alarm, data: .withOverrideEnds(activeEnd: firstEnd), now: now))
+        #expect(cond.evaluate(alarm: alarm, data: .withEnds(activeOverrideEnd: firstEnd), now: now))
 
         let extendedEnd = firstEnd + 30 * 60
         let laterNow = Date(timeIntervalSince1970: extendedEnd - 4 * 60)
-        #expect(cond.evaluate(alarm: alarm, data: .withOverrideEnds(activeEnd: extendedEnd), now: laterNow))
+        #expect(cond.evaluate(alarm: alarm, data: .withEnds(activeOverrideEnd: extendedEnd), now: laterNow))
+    }
+
+    @Test("a replacement whose end is earlier than a warned end still warns")
+    func replacementWithEarlierEndWarns() {
+        reset()
+        let now = Date()
+        let alarm = Alarm.overrideEnd(warnBefore: 30)
+        let firstEnd = now.timeIntervalSince1970 + 25 * 60
+        #expect(cond.evaluate(alarm: alarm, data: .withEnds(activeOverrideEnd: firstEnd), now: now))
+
+        let replacementEnd = now.timeIntervalSince1970 + 10 * 60
+        #expect(cond.evaluate(alarm: alarm, data: .withEnds(activeOverrideEnd: replacementEnd), now: now))
+        #expect(cond.firedTitle == "Override Ending Soon")
+    }
+
+    @Test("no early warning when the lead time covers the whole event")
+    func noEarlyWarningForEventShorterThanLead() {
+        reset()
+        let now = Date()
+        let alarm = Alarm.overrideEnd(warnBefore: 30)
+        let start = now.timeIntervalSince1970 - 60
+        let end = now.timeIntervalSince1970 + 20 * 60
+        let data = AlarmData.withEnds(latestOverrideStart: start, activeOverrideEnd: end)
+
+        #expect(!cond.evaluate(alarm: alarm, data: data, now: now))
     }
 }

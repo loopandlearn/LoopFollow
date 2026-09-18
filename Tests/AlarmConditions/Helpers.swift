@@ -172,46 +172,25 @@ extension AlarmData {
         )
     }
 
-    static func withTempTargetEnds(latestEnd: TimeInterval? = nil, activeEnd: TimeInterval? = nil) -> Self {
+    static func withEnds(
+        latestTempTargetStart: TimeInterval? = nil,
+        latestTempTargetEnd: TimeInterval? = nil,
+        activeTempTargetEnd: TimeInterval? = nil,
+        latestOverrideStart: TimeInterval? = nil,
+        latestOverrideEnd: TimeInterval? = nil,
+        activeOverrideEnd: TimeInterval? = nil
+    ) -> Self {
         AlarmData(
             bgReadings: [],
             predictionData: [],
             expireDate: nil,
             lastLoopTime: nil,
-            latestOverrideStart: nil,
-            latestOverrideEnd: nil,
-            latestTempTargetStart: nil,
-            latestTempTargetEnd: latestEnd,
-            activeOverrideEnd: nil,
-            activeTempTargetEnd: activeEnd,
-            recBolus: nil,
-            COB: nil,
-            sageInsertTime: nil,
-            pumpInsertTime: nil,
-            latestPumpVolume: nil,
-            IOB: nil,
-            recentBoluses: [],
-            latestBattery: nil,
-            latestBatteryIsCharging: nil,
-            latestPumpBattery: nil,
-            batteryHistory: [],
-            recentCarbs: [],
-            dbSizePercentage: nil
-        )
-    }
-
-    static func withOverrideEnds(latestEnd: TimeInterval? = nil, activeEnd: TimeInterval? = nil) -> Self {
-        AlarmData(
-            bgReadings: [],
-            predictionData: [],
-            expireDate: nil,
-            lastLoopTime: nil,
-            latestOverrideStart: nil,
-            latestOverrideEnd: latestEnd,
-            latestTempTargetStart: nil,
-            latestTempTargetEnd: nil,
-            activeOverrideEnd: activeEnd,
-            activeTempTargetEnd: nil,
+            latestOverrideStart: latestOverrideStart,
+            latestOverrideEnd: latestOverrideEnd,
+            latestTempTargetStart: latestTempTargetStart,
+            latestTempTargetEnd: latestTempTargetEnd,
+            activeOverrideEnd: activeOverrideEnd,
+            activeTempTargetEnd: activeTempTargetEnd,
             recBolus: nil,
             COB: nil,
             sageInsertTime: nil,

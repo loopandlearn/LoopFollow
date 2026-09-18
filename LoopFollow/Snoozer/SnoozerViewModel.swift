@@ -28,6 +28,13 @@ final class SnoozerViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+        Observable.shared.currentAlarmTitleOverride.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] title in
+                guard let self, let alarm = self.activeAlarm else { return }
+                self.alarmTitle = title ?? alarm.name
+            }
+            .store(in: &cancellables)
         if let alarm = activeAlarm {
             snoozeUnits = alarm.snoozeDuration
         }
