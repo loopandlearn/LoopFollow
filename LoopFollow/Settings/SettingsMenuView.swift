@@ -180,6 +180,7 @@ enum SettingsRoute: Hashable, Identifiable {
                 SettingsLeaf("Show Carb/Bolus Values", ["carbs"]),
                 SettingsLeaf("Show Carb Absorption"),
                 SettingsLeaf("Treatments on Small Graph"),
+                SettingsLeaf("Show IOB/COB History", ["insulin", "carbs", "on board"]),
                 SettingsLeaf("Small Graph Height", ["height"]),
                 SettingsLeaf("Hours of Prediction", ["prediction"]),
                 SettingsLeaf("Prediction Style"),

@@ -110,6 +110,17 @@ final class BGChartModel: ObservableObject {
         let points: [BGPoint]
     }
 
+    struct OnBoardPoint: Identifiable, Equatable {
+        let date: Date
+        let value: Double
+        var id: TimeInterval { date.timeIntervalSince1970 }
+    }
+
+    struct OnBoardRun: Identifiable, Equatable {
+        let id: Int
+        let points: [OnBoardPoint]
+    }
+
     @Published var bg: [BGPoint] = []
     @Published var bgRuns: [BGRun] = []
     @Published var yesterday: [BGPoint] = []
@@ -118,6 +129,15 @@ final class BGChartModel: ObservableObject {
     @Published var iobPrediction: [BGPoint] = []
     @Published var cobPrediction: [BGPoint] = []
     @Published var uamPrediction: [BGPoint] = []
+
+    @Published var iobHistory: [OnBoardPoint] = []
+    @Published var cobHistory: [OnBoardPoint] = []
+    @Published var iobHistoryRuns: [OnBoardRun] = []
+    @Published var cobHistoryRuns: [OnBoardRun] = []
+    @Published var iobHistoryMaximum: Double = 1
+    @Published var cobHistoryMaximum: Double = 1
+    @Published var currentIOB: Double?
+    @Published var currentCOB: Double?
 
     /// Prediction cone band (min/max envelope). Set by updateOpenAPSPredictionDisplay;
     /// preserved across rebuild() since it has no source array on the view controller.
@@ -179,6 +199,7 @@ final class BGChartModel: ObservableObject {
     @Published var show30Min: Bool = false
     @Published var show90Min: Bool = false
     @Published var showMidnight: Bool = false
+    @Published var showIOBCOBHistory: Bool = true
     @Published var smallGraphTreatments: Bool = true
     @Published var showPriorDayTime: Bool = false
 
@@ -289,6 +310,90 @@ final class BGChartModel: ObservableObject {
         return runs
     }
 
+    static let onBoardLaneFraction = 0.22
+    static let onBoardGapInterval: TimeInterval = 12 * 60
+    static let onBoardSelectionTolerance: TimeInterval = 7.5 * 60
+    static let onBoardCurrentFreshness: TimeInterval = 15 * 60
+
+    static func onBoardLaneCeiling(maxBG: Double, lowLine: Double) -> Double {
+        max(0, min(maxBG * onBoardLaneFraction, lowLine * 0.9))
+    }
+
+    static func scaledOnBoardValue(
+        _ value: Double,
+        maximum: Double,
+        laneCeiling: Double
+    ) -> Double {
+        guard value.isFinite, maximum.isFinite, maximum > 0, laneCeiling > 0 else {
+            return 0
+        }
+        return min(max(value, 0) / maximum, 1) * laneCeiling
+    }
+
+    static func onBoardMaximum(for points: [OnBoardPoint]) -> Double {
+        max(points.lazy.map(\.value).filter { $0.isFinite && $0 > 0 }.max() ?? 0, 1)
+    }
+
+    static func makeOnBoardRuns(
+        _ points: [OnBoardPoint],
+        maximumGap: TimeInterval = onBoardGapInterval
+    ) -> [OnBoardRun] {
+        guard let first = points.first else { return [] }
+
+        var runs: [OnBoardRun] = []
+        var runPoints = [first]
+
+        for point in points.dropFirst() {
+            if let previous = runPoints.last,
+               point.date.timeIntervalSince(previous.date) > maximumGap
+            {
+                runs.append(OnBoardRun(id: runs.count, points: runPoints))
+                runPoints = [point]
+            } else {
+                runPoints.append(point)
+            }
+        }
+
+        runs.append(OnBoardRun(id: runs.count, points: runPoints))
+        return runs
+    }
+
+    static func nearestOnBoardPoint(
+        in points: [OnBoardPoint],
+        to date: Date,
+        tolerance: TimeInterval = onBoardSelectionTolerance
+    ) -> OnBoardPoint? {
+        guard !points.isEmpty else { return nil }
+
+        var lower = 0
+        var upper = points.count
+        while lower < upper {
+            let middle = (lower + upper) / 2
+            if points[middle].date < date {
+                lower = middle + 1
+            } else {
+                upper = middle
+            }
+        }
+
+        var candidates: [OnBoardPoint] = []
+        if lower < points.count {
+            candidates.append(points[lower])
+        }
+        if lower > 0 {
+            candidates.append(points[lower - 1])
+        }
+
+        guard let nearest = candidates.min(by: {
+            abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date))
+        }), abs(nearest.date.timeIntervalSince(date)) <= tolerance
+        else {
+            return nil
+        }
+
+        return nearest
+    }
+
     /// Minimum drawn spacing between two treatments of the same population, and
     /// the furthest a treatment may be moved from its true time to reach it.
     /// Boluses and SMBs share a y-anchor and symbol footprint, so they are
@@ -395,6 +500,7 @@ final class BGChartModel: ObservableObject {
     private func performRebuild() {
         guard let vc = MainViewController.shared else { return }
 
+        let currentNow = Date(timeIntervalSince1970: dateTimeUtils.getNowTimeIntervalUTC())
         pillTimeFormatter = Self.makePillTimeFormatter()
 
         let maxBGValue = Double(vc.calculateMaxBgGraphValue())
@@ -412,6 +518,7 @@ final class BGChartModel: ObservableObject {
         show30Min = Storage.shared.show30MinLine.value
         show90Min = Storage.shared.show90MinLine.value
         showMidnight = Storage.shared.showMidnightLines.value
+        showIOBCOBHistory = Storage.shared.showIOBCOBHistory.value
         smallGraphTreatments = Storage.shared.smallGraphTreatments.value
         showPriorDayTime = Storage.shared.showPriorDayTimeLines.value
 
@@ -450,6 +557,55 @@ final class BGChartModel: ObservableObject {
         iobPrediction = vc.iobPredictionData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), color: .purple) }
         cobPrediction = vc.cobPredictionData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), color: .purple) }
         uamPrediction = vc.uamPredictionData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), color: .purple) }
+
+        if showIOBCOBHistory {
+            let historyCutoff = currentNow.addingTimeInterval(
+                -TimeInterval(max(Storage.shared.downloadDays.value, 1) * 24 * 3600)
+            )
+            let samples = vc.deviceStatusMetricHistory.filter {
+                $0.date >= historyCutoff && $0.date <= currentNow.addingTimeInterval(10 * 60)
+            }
+
+            iobHistory = samples.compactMap { sample in
+                guard let value = sample.iob, value.isFinite else { return nil }
+                return OnBoardPoint(date: sample.date, value: value)
+            }
+            cobHistory = samples.compactMap { sample in
+                guard let value = sample.cob, value.isFinite else { return nil }
+                return OnBoardPoint(date: sample.date, value: value)
+            }
+            iobHistoryMaximum = Self.onBoardMaximum(for: iobHistory)
+            cobHistoryMaximum = Self.onBoardMaximum(for: cobHistory)
+            iobHistoryRuns = Self.makeOnBoardRuns(iobHistory)
+            cobHistoryRuns = Self.makeOnBoardRuns(cobHistory)
+
+            if let point = iobHistory.last,
+               currentNow.timeIntervalSince(point.date) >= -10 * 60,
+               currentNow.timeIntervalSince(point.date) <= Self.onBoardCurrentFreshness
+            {
+                currentIOB = point.value
+            } else {
+                currentIOB = nil
+            }
+
+            if let point = cobHistory.last,
+               currentNow.timeIntervalSince(point.date) >= -10 * 60,
+               currentNow.timeIntervalSince(point.date) <= Self.onBoardCurrentFreshness
+            {
+                currentCOB = point.value
+            } else {
+                currentCOB = nil
+            }
+        } else {
+            iobHistory = []
+            cobHistory = []
+            iobHistoryRuns = []
+            cobHistoryRuns = []
+            iobHistoryMaximum = 1
+            cobHistoryMaximum = 1
+            currentIOB = nil
+            currentCOB = nil
+        }
 
         let bolusPoints = (showBolus ? vc.bolusData : []).map {
             let dose = self.formatDose($0.value)
@@ -565,7 +721,6 @@ final class BGChartModel: ObservableObject {
             )
         }
 
-        let currentNow = Date(timeIntervalSince1970: dateTimeUtils.getNowTimeIntervalUTC())
         now = currentNow
         let hoursBack = TimeInterval(Storage.shared.downloadDays.value * 24 * 3600)
         domainStart = currentNow.addingTimeInterval(-hoursBack)

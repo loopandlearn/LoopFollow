@@ -31,6 +31,10 @@ extension MainViewController {
         // The yesterday overlay is built during the BG fetch and needs an
         // extra day of history, so reload the BG window when it's toggled.
         TaskScheduler.shared.rescheduleTask(id: .fetchBG, to: Date())
+
+        // Increasing "Show Days Back" requires a wider one-time device-status
+        // backfill for the on-board history overlay.
+        loadDeviceStatusMetricHistoryIfNeeded()
     }
 
     private func recomputeTopBG() {

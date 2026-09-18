@@ -99,6 +99,13 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
     var noteGraphData: [DataStructs.noteStruct] = []
     var deviceBatteryData: [DataStructs.batteryStruct] = []
+    var deviceStatusMetricHistory: [DeviceStatusMetricSample] = []
+    var deviceStatusMetricHistoryLoadedDays = 0
+    var isLoadingDeviceStatusMetricHistory = false
+    var deviceStatusMetricHistorySource = ""
+    var deviceStatusMetricHistoryDevice = ""
+    var deviceStatusMetricHistoryGeneration = 0
+    var deviceStatusRequestGeneration = 0
     var lastCalDate: Double = 0
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
@@ -309,6 +316,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         Storage.shared.url.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
+                self?.prepareDeviceStatusMetricHistorySource()
                 self?.checkAndShowImportButtonIfNeeded()
             }
             .store(in: &cancellables)
@@ -316,6 +324,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         Storage.shared.token.$value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
+                self?.prepareDeviceStatusMetricHistorySource()
                 self?.checkAndShowImportButtonIfNeeded()
             }
             .store(in: &cancellables)

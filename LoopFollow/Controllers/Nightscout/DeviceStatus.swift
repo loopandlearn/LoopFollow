@@ -7,20 +7,37 @@ import SwiftUI
 
 extension MainViewController {
     func webLoadNSDeviceStatus() {
+        prepareDeviceStatusMetricHistorySource()
+        let requestedSource = deviceStatusMetricHistorySource
+        deviceStatusRequestGeneration += 1
+        let requestGeneration = deviceStatusRequestGeneration
         let parameters = ["count": "1"]
         NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
-            switch result {
-            case let .success(json):
-                if let jsonDeviceStatus = json as? [[String: AnyObject]] {
-                    DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                guard requestedSource == self.deviceStatusMetricHistorySource,
+                      requestGeneration == self.deviceStatusRequestGeneration
+                else {
+                    return
+                }
+
+                switch result {
+                case let .success(json):
+                    if let jsonDeviceStatus = json as? [[String: AnyObject]] {
+                        let currentDevice = DeviceStatusMetricHistoryParser
+                            .newestEntry(in: jsonDeviceStatus)?["device"] as? String
+                        self.prepareDeviceStatusMetricHistoryDevice(currentDevice)
+                        self.mergeCurrentDeviceStatusMetricHistory(
+                            DeviceStatusMetricHistoryParser.samples(from: jsonDeviceStatus)
+                        )
                         self.updateDeviceStatusDisplay(jsonDeviceStatus: jsonDeviceStatus)
+                        self.loadDeviceStatusMetricHistoryIfNeeded()
                         Storage.shared.lastLoopingChecked.value = Date()
+                    } else {
+                        self.handleDeviceStatusError()
                     }
-                } else {
+                case .failure:
                     self.handleDeviceStatusError()
                 }
-            case .failure:
-                self.handleDeviceStatusError()
             }
         }
     }
@@ -81,7 +98,7 @@ extension MainViewController {
         }
 
         // Process the current data first
-        let lastDeviceStatus = jsonDeviceStatus[0] as [String: AnyObject]?
+        let lastDeviceStatus = DeviceStatusMetricHistoryParser.newestEntry(in: jsonDeviceStatus)
 
         // pump and uploader
         let formatter = ISO8601DateFormatter()
@@ -92,7 +109,7 @@ extension MainViewController {
 
         Observable.shared.previousAlertLastLoopTime.value = Observable.shared.alertLastLoopTime.value
 
-        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String: AnyObject]? {
+        if let lastPumpRecord = lastDeviceStatus?["pump"] as? [String: AnyObject] {
             if let bolusIncrement = lastPumpRecord["bolusIncrement"] as? Double, bolusIncrement > 0 {
                 Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: bolusIncrement)
                 Storage.shared.bolusIncrementDetected.value = true
@@ -159,7 +176,7 @@ extension MainViewController {
         }
 
         // Loop - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String: AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["loop"] as? [String: AnyObject] {
             // Some pumps report no `pump.clock`; without it alertLastLoopTime stays 0
             // and the forecast anchors to epoch 0. Fall back to the loop cycle timestamp.
             if (lastDeviceStatus?["pump"] as? [String: AnyObject])?["clock"] == nil,
@@ -200,7 +217,7 @@ extension MainViewController {
         }
 
         // OpenAPS - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String: AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["openaps"] as? [String: AnyObject] {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
         }
 

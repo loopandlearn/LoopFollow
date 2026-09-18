@@ -14,6 +14,7 @@ struct GraphSettingsView: View {
     @ObservedObject private var showMidnightLines = Storage.shared.showMidnightLines
     @ObservedObject private var showPriorDayTimeLines = Storage.shared.showPriorDayTimeLines
     @ObservedObject private var showYesterdayLine = Storage.shared.showYesterdayLine
+    @ObservedObject private var showIOBCOBHistory = Storage.shared.showIOBCOBHistory
     @ObservedObject private var smallGraphTreatments = Storage.shared.smallGraphTreatments
 
     @ObservedObject private var smallGraphHeight = Storage.shared.smallGraphHeight
@@ -59,6 +60,8 @@ struct GraphSettingsView: View {
             // ── Treatments ───────────────────────────────────────────────
             if nightscoutEnabled {
                 Section("Treatments") {
+                    Toggle("Show IOB/COB History", isOn: $showIOBCOBHistory.value)
+                        .onChange(of: showIOBCOBHistory.value) { _ in markDirty() }
                     Toggle("Show Carb/Bolus Values", isOn: $showValues.value)
                         .onChange(of: showValues.value) { _ in markDirty() }
                     Toggle("Show Carb Absorption", isOn: $showAbsorption.value)

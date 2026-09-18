@@ -19,6 +19,7 @@ extension MainViewController {
             // from a previous Loop/Trio source so it doesn't linger on the chart.
             clearLoopPredictionGraph()
             clearOpenAPSPredictionGraph()
+            clearDeviceStatusMetricHistory()
             TaskScheduler.shared.rescheduleTask(id: .deviceStatus, to: Date().addingTimeInterval(60))
             return
         }

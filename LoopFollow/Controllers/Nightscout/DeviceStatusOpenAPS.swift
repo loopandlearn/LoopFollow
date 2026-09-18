@@ -11,7 +11,9 @@ extension MainViewController {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
         } else {
-            guard let enactedOrSuggested = lastLoopRecord["suggested"] as? [String: AnyObject] ?? lastLoopRecord["enacted"] as? [String: AnyObject] else {
+            let suggested = lastLoopRecord["suggested"] as? [String: AnyObject]
+            let enacted = lastLoopRecord["enacted"] as? [String: AnyObject]
+            guard let enactedOrSuggested = suggested ?? enacted else {
                 Observable.shared.loopStatusText.value = "↻"
                 latestLoopStatusString = "↻"
                 return
@@ -79,10 +81,15 @@ extension MainViewController {
             }
 
             // COB
-            if let cobMetric = CarbMetric(from: enactedOrSuggested, key: "COB") {
+            if let cobMetric = suggested.flatMap({ CarbMetric(from: $0, key: "COB") })
+                ?? enacted.flatMap({ CarbMetric(from: $0, key: "COB") })
+            {
                 infoManager.updateInfoData(type: .cob, value: cobMetric)
                 latestCOB = cobMetric
-            } else if let reasonString = enactedOrSuggested["reason"] as? String {
+            } else if let reasonString = [suggested, enacted]
+                .compactMap({ $0?["reason"] as? String })
+                .first(where: { $0.range(of: "COB:") != nil })
+            {
                 // Fallback: Extract COB from reason string
                 let cobPattern = "COB: (\\d+(?:\\.\\d+)?)"
                 if let cobRegex = try? NSRegularExpression(pattern: cobPattern),

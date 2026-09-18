@@ -57,12 +57,45 @@ private enum BGChartConfig {
     static let tapHitRadius: CGFloat = 30
 }
 
+struct BGChartTapCandidate<Value> {
+    let value: Value
+    let distanceSquared: CGFloat
+}
+
+func nearestBGChartTapCandidate<Value>(
+    _ candidates: [BGChartTapCandidate<Value>],
+    within radius: CGFloat
+) -> Value? {
+    let maximumDistanceSquared = radius * radius
+    var best: BGChartTapCandidate<Value>?
+
+    for candidate in candidates where candidate.distanceSquared <= maximumDistanceSquared {
+        if let currentBest = best {
+            if candidate.distanceSquared < currentBest.distanceSquared {
+                best = candidate
+            }
+        } else {
+            best = candidate
+        }
+    }
+
+    return best?.value
+}
+
 /// Small y-domain headroom keeps the top axis label readable instead of
 /// pinning it to the chart edge.
 private func chartYDomainUpperBound(_ maxBG: Double) -> Double {
     let clampedMax = max(maxBG, 1)
     let topPadding = max(clampedMax * 0.02, 1)
     return clampedMax + topPadding
+}
+
+/// Keeps the last usable plot geometry while SwiftUI remounts the gesture
+/// subtree. Preference propagation may briefly report `.zero` during that
+/// transition; accepting it would make every tap fail its geometry guard.
+func retainedBGChartPlotFrame(current: CGRect, incoming: CGRect) -> CGRect {
+    guard incoming.width > 0, incoming.height > 0 else { return current }
+    return incoming
 }
 
 struct BGChartView: View {
@@ -79,12 +112,17 @@ struct BGChartView: View {
     /// attachments while BGChartInteraction preserves the viewport.
     @State private var gestureMountEpoch = 0
 
+    /// Plot geometry must outlive the gesture-only remount above. If this
+    /// state lives in MainBGChart, foregrounding resets it to zero and all
+    /// mark taps are discarded until the app is relaunched.
+    @State private var plotFrame: CGRect = .zero
+
     var body: some View {
         Group {
             if config == .small {
                 SmallBGChart(model: model, interaction: model.interaction)
             } else {
-                MainBGChart(model: model, interaction: model.interaction)
+                MainBGChart(model: model, interaction: model.interaction, plotFrame: $plotFrame)
             }
         }
         .id(gestureMountEpoch)
@@ -112,6 +150,7 @@ struct BGChartView: View {
 private struct MainBGChart: View {
     @ObservedObject var model: BGChartModel
     @ObservedObject var interaction: BGChartInteraction
+    @Binding private var plotFrame: CGRect
 
     /// Rendered slice of the domain. The canvas covers only this window
     /// (visible ± `renderWindowPadFactor` viewports), bounding canvas width
@@ -119,19 +158,16 @@ private struct MainBGChart: View {
     @State private var renderWindowStart: Date
     @State private var renderWindowEnd: Date
 
-    init(model: BGChartModel, interaction: BGChartInteraction) {
+    init(model: BGChartModel, interaction: BGChartInteraction, plotFrame: Binding<CGRect>) {
         _model = ObservedObject(wrappedValue: model)
         _interaction = ObservedObject(wrappedValue: interaction)
+        _plotFrame = plotFrame
         // Seed the render window around the current viewport so a remount's
         // first frame draws in place.
         let pad = BGChartConfig.renderWindowPadFactor * interaction.visibleSeconds
         _renderWindowStart = State(initialValue: interaction.scrollPosition.addingTimeInterval(-pad))
         _renderWindowEnd = State(initialValue: interaction.scrollPosition.addingTimeInterval(interaction.visibleSeconds + pad))
     }
-
-    /// Plot area of the static axis overlay, in shell coordinates. The
-    /// selection overlay uses it for its value-to-pixel maps.
-    @State private var plotFrame: CGRect = .zero
 
     /// Measured size of the visible selection pill (see PillSizePreferenceKey).
     @State private var pillSize: CGSize = .zero
@@ -235,6 +271,9 @@ private struct MainBGChart: View {
                 .frame(width: viewportWidth, height: viewport.height)
                 .allowsHitTesting(false)
 
+            onBoardHistoryLegend(viewport: viewport)
+                .allowsHitTesting(false)
+
             selectionOverlay(viewportWidth: viewportWidth)
                 .allowsHitTesting(false)
 
@@ -264,7 +303,9 @@ private struct MainBGChart: View {
                     }
                 }
         )
-        .onPreferenceChange(PlotFramePreferenceKey.self) { plotFrame = $0 }
+        .onPreferenceChange(PlotFramePreferenceKey.self) {
+            plotFrame = retainedBGChartPlotFrame(current: plotFrame, incoming: $0)
+        }
         .onPreferenceChange(PillSizePreferenceKey.self) { pillSize = $0 }
         .onChange(of: interaction.scrollPosition) { _, _ in
             updateRenderWindow()
@@ -314,6 +355,23 @@ private struct MainBGChart: View {
         .padding(.trailing, 44)
         .padding(.bottom, 28)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+    }
+
+    @ViewBuilder
+    private func onBoardHistoryLegend(viewport: CGSize) -> some View {
+        if model.showIOBCOBHistory,
+           plotFrame.height > 0,
+           model.currentIOB != nil || model.currentCOB != nil
+        {
+            OnBoardHistoryLegend(iob: model.currentIOB, cob: model.currentCOB)
+                .padding(.trailing, 4)
+                .padding(.bottom, max(viewport.height - plotFrame.maxY + 14, 14))
+                .frame(
+                    width: max(viewport.width, 1),
+                    height: max(viewport.height, 1),
+                    alignment: .bottomTrailing
+                )
+        }
     }
 
     // MARK: Render window / follow state
@@ -686,23 +744,107 @@ private struct MainBGChart: View {
         let value: Double
         /// One pill entry per item under the selector (see PillLabel).
         let texts: [String]
+        /// The event time shown once on the pill's bottom line. This can differ
+        /// from `date` when treatment decluttering shifts a symbol horizontally.
+        let timestamp: Date
+
+        init(date: Date, value: Double, texts: [String], timestamp: Date? = nil) {
+            self.date = date
+            self.value = value
+            self.texts = texts
+            self.timestamp = timestamp ?? date
+        }
     }
 
-    /// Feeds every treatment mark to `body` as (drawnDate, value, pillText).
+    private struct OnBoardSelection {
+        let date: Date
+        let plotValue: Double
+        let text: String
+    }
+
+    /// Feeds every treatment mark to `body` as
+    /// (drawnDate, eventDate, value, undatedPillText).
     /// Single source for both the scrub lookup and the tap hit test.
-    private func forEachTreatmentAnchor(_ body: (Date, Double, String) -> Void) {
+    private func forEachTreatmentAnchor(_ body: (Date, Date, Double, String) -> Void) {
         for group in [model.boluses, model.carbs, model.smbs, model.bgChecks,
                       model.notes, model.suspends, model.resumes, model.sensorStarts]
         {
             for t in group {
-                body(t.drawnDate, t.sgv, t.pillText)
+                body(t.drawnDate, t.date, t.sgv, withoutTrailingTime(t.pillText))
             }
         }
     }
 
+    private func forEachBGAnchor(_ body: (BGChartModel.BGPoint) -> Void) {
+        for group in [model.bg, model.prediction, model.ztPrediction,
+                      model.iobPrediction, model.cobPrediction, model.uamPrediction]
+        {
+            for point in group {
+                body(point)
+            }
+        }
+    }
+
+    private func withoutTrailingTime(_ text: String) -> String {
+        guard let finalLineBreak = text.lastIndex(of: "\n") else { return text }
+        return String(text[..<finalLineBreak])
+    }
+
     /// Pill entry for a BG reading. Shared by the scrub lookup and the tap hit test.
     private func bgPillText(for point: BGChartModel.BGPoint) -> String {
-        "BG\n\(Localizer.toDisplayUnits(String(Int(point.value))))\n\(model.pillTimeString(for: point.date))"
+        "BG\n\(Localizer.toDisplayUnits(String(Int(point.value))))"
+    }
+
+    private func onBoardSelection(near date: Date) -> OnBoardSelection? {
+        let iob = BGChartModel.nearestOnBoardPoint(in: model.iobHistory, to: date)
+        let cob = BGChartModel.nearestOnBoardPoint(in: model.cobHistory, to: date)
+        guard iob != nil || cob != nil else { return nil }
+
+        var values: [String] = []
+        if let iob {
+            let digits = abs(iob.value) >= 10 ? 0 : 1
+            let value = Localizer.formatToLocalizedString(
+                iob.value,
+                maxFractionDigits: digits,
+                minFractionDigits: 0
+            )
+            values.append("IOB \(value)U")
+        }
+        if let cob {
+            let value = Localizer.formatToLocalizedString(
+                cob.value,
+                maxFractionDigits: 0,
+                minFractionDigits: 0
+            )
+            values.append("COB \(value)g")
+        }
+
+        let anchor: (point: BGChartModel.OnBoardPoint, maximum: Double)
+        if let iob, let cob {
+            if abs(iob.date.timeIntervalSince(date)) <= abs(cob.date.timeIntervalSince(date)) {
+                anchor = (iob, model.iobHistoryMaximum)
+            } else {
+                anchor = (cob, model.cobHistoryMaximum)
+            }
+        } else if let iob {
+            anchor = (iob, model.iobHistoryMaximum)
+        } else if let cob {
+            anchor = (cob, model.cobHistoryMaximum)
+        } else {
+            return nil
+        }
+
+        let laneCeiling = BGChartModel.onBoardLaneCeiling(
+            maxBG: model.maxBG,
+            lowLine: model.lowLine
+        )
+        let plotValue = BGChartModel.scaledOnBoardValue(
+            anchor.point.value,
+            maximum: anchor.maximum,
+            laneCeiling: laneCeiling
+        )
+        let text = values.joined(separator: " • ")
+        return OnBoardSelection(date: anchor.point.date, plotValue: plotValue, text: text)
     }
 
     private func bandPillTexts(at date: Date) -> [String] {
@@ -711,13 +853,13 @@ private struct MainBGChart: View {
             .filter({ date >= $0.start && date <= $0.end })
             .max(by: { $0.start < $1.start })
         {
-            texts.append(band.pillText)
+            texts.append(withoutTrailingTime(band.pillText))
         }
         if let band = model.tempTargets
             .filter({ date >= $0.start && date <= $0.end })
             .max(by: { $0.start < $1.start })
         {
-            texts.append(band.pillText)
+            texts.append(withoutTrailingTime(band.pillText))
         }
         return texts
     }
@@ -727,13 +869,23 @@ private struct MainBGChart: View {
         for band in model.overrides where date >= band.start && date <= band.end {
             if value >= band.yBottom, value <= band.yTop {
                 let midY = (band.yTop + band.yBottom) / 2
-                return SelectionAnchor(date: date, value: midY, texts: [band.pillText])
+                return SelectionAnchor(
+                    date: date,
+                    value: midY,
+                    texts: [withoutTrailingTime(band.pillText)],
+                    timestamp: band.start
+                )
             }
         }
         for band in model.tempTargets where date >= band.start && date <= band.end {
             if value >= band.yBottom, value <= band.yTop {
                 let midY = (band.yTop + band.yBottom) / 2
-                return SelectionAnchor(date: date, value: midY, texts: [band.pillText])
+                return SelectionAnchor(
+                    date: date,
+                    value: midY,
+                    texts: [withoutTrailingTime(band.pillText)],
+                    timestamp: band.start
+                )
             }
         }
         return nil
@@ -757,6 +909,7 @@ private struct MainBGChart: View {
     private func selectionAnchor(for selected: Date, captureWindow: TimeInterval) -> SelectionAnchor? {
         struct Item {
             let date: Date
+            let timestamp: Date
             let value: Double
             let text: String
             let distance: TimeInterval
@@ -764,8 +917,14 @@ private struct MainBGChart: View {
 
         var captured: [Item] = []
         var nearestTreatment: Item?
-        forEachTreatmentAnchor { date, value, text in
-            let item = Item(date: date, value: value, text: text, distance: abs(date.timeIntervalSince(selected)))
+        forEachTreatmentAnchor { date, timestamp, value, text in
+            let item = Item(
+                date: date,
+                timestamp: timestamp,
+                value: value,
+                text: text,
+                distance: abs(date.timeIntervalSince(selected))
+            )
             if item.distance <= captureWindow {
                 captured.append(item)
             }
@@ -776,10 +935,16 @@ private struct MainBGChart: View {
         captured.sort { $0.date < $1.date }
 
         var nearestBG: Item?
-        for p in model.bg {
+        forEachBGAnchor { p in
             let d = abs(p.date.timeIntervalSince(selected))
             if d < (nearestBG?.distance ?? .greatestFiniteMagnitude) {
-                nearestBG = Item(date: p.date, value: p.value, text: bgPillText(for: p), distance: d)
+                nearestBG = Item(
+                    date: p.date,
+                    timestamp: p.date,
+                    value: p.value,
+                    text: bgPillText(for: p),
+                    distance: d
+                )
             }
         }
 
@@ -787,65 +952,152 @@ private struct MainBGChart: View {
         if let nearestBG, nearestBG.distance <= BGChartConfig.selectionTolerance {
             items.append(nearestBG)
         }
+        let onBoard = onBoardSelection(near: selected)
         if let primary = items.min(by: { $0.distance < $1.distance }) {
-            let texts = items.map(\.text) + bandPillTexts(at: selected)
-            return SelectionAnchor(date: primary.date, value: primary.value, texts: texts)
+            let texts = items.map(\.text)
+                + (onBoard.map { [$0.text] } ?? [])
+                + bandPillTexts(at: selected)
+            return SelectionAnchor(
+                date: primary.date,
+                value: primary.value,
+                texts: texts,
+                timestamp: primary.timestamp
+            )
         }
 
         // Nothing under the finger. Reach for the nearest treatment (data gaps
         // leave treatments without BG neighbors), then for a band (any height)
         // at the scrub time.
         if let nearestTreatment, nearestTreatment.distance <= BGChartConfig.selectionTolerance {
-            let texts = [nearestTreatment.text] + bandPillTexts(at: selected)
-            return SelectionAnchor(date: nearestTreatment.date, value: nearestTreatment.value, texts: texts)
+            let texts = [nearestTreatment.text]
+                + (onBoard.map { [$0.text] } ?? [])
+                + bandPillTexts(at: selected)
+            return SelectionAnchor(
+                date: nearestTreatment.date,
+                value: nearestTreatment.value,
+                texts: texts,
+                timestamp: nearestTreatment.timestamp
+            )
+        }
+        if let onBoard {
+            return SelectionAnchor(
+                date: onBoard.date,
+                value: onBoard.plotValue,
+                texts: [onBoard.text] + bandPillTexts(at: selected)
+            )
         }
         for band in model.overrides where selected >= band.start && selected <= band.end {
             let midY = (band.yTop + band.yBottom) / 2
-            return SelectionAnchor(date: selected, value: midY, texts: [band.pillText])
+            return SelectionAnchor(
+                date: selected,
+                value: midY,
+                texts: [withoutTrailingTime(band.pillText)],
+                timestamp: band.start
+            )
         }
         for band in model.tempTargets where selected >= band.start && selected <= band.end {
             let midY = (band.yTop + band.yBottom) / 2
-            return SelectionAnchor(date: selected, value: midY, texts: [band.pillText])
+            return SelectionAnchor(
+                date: selected,
+                value: midY,
+                texts: [withoutTrailingTime(band.pillText)],
+                timestamp: band.start
+            )
         }
 
         return nil
     }
 
-    /// Tap hit test (screen-space, 2D). Treatments take priority, then BG
-    /// points, then the override/temp-target bands under the finger.
+    /// Tap hit test (screen-space, 2D). The nearest treatment, BG, or forecast
+    /// sample wins; on-board traces and bands are fallbacks.
     /// Returns nil when the tap lands on nothing — which clears the pill.
     private func tappedAnchor(at location: CGPoint, viewportWidth: CGFloat) -> SelectionAnchor? {
         let radius = BGChartConfig.tapHitRadius
-        var best: SelectionAnchor?
-        var bestDistance2 = radius * radius
+        var primaryCandidates: [BGChartTapCandidate<SelectionAnchor>] = []
 
-        func consider(_ date: Date, _ value: Double, _ text: String) {
+        func consider(
+            _ date: Date,
+            timestamp: Date,
+            value: Double,
+            text: String
+        ) {
             let dx = xPosition(for: date, viewportWidth: viewportWidth) - location.x
             let dy = yPosition(forValue: value) - location.y
-            let d2 = dx * dx + dy * dy
-            if d2 <= bestDistance2 {
-                bestDistance2 = d2
-                best = SelectionAnchor(date: date, value: value, texts: [text])
-            }
+            primaryCandidates.append(BGChartTapCandidate(
+                value: SelectionAnchor(
+                    date: date,
+                    value: value,
+                    texts: [text],
+                    timestamp: timestamp
+                ),
+                distanceSquared: dx * dx + dy * dy
+            ))
         }
 
-        forEachTreatmentAnchor(consider)
-        if best == nil {
-            for p in model.bg {
-                consider(p.date, p.value, bgPillText(for: p))
-            }
+        forEachTreatmentAnchor { date, timestamp, value, text in
+            consider(date, timestamp: timestamp, value: value, text: text)
         }
-        if best == nil {
-            let date = interaction.scrollPosition.addingTimeInterval(
-                interaction.visibleSeconds * TimeInterval(location.x / viewportWidth)
+        forEachBGAnchor { point in
+            consider(
+                point.date,
+                timestamp: point.date,
+                value: point.value,
+                text: bgPillText(for: point)
             )
-            return bandAnchor(at: date, value: value(atY: location.y))
         }
-        if let best {
-            let texts = best.texts + bandPillTexts(at: best.date)
-            return SelectionAnchor(date: best.date, value: best.value, texts: texts)
+        if let best = nearestBGChartTapCandidate(primaryCandidates, within: radius) {
+            let metricText = onBoardSelection(near: best.date).map { [$0.text] } ?? []
+            let texts = best.texts + metricText + bandPillTexts(at: best.date)
+            return SelectionAnchor(
+                date: best.date,
+                value: best.value,
+                texts: texts,
+                timestamp: best.timestamp
+            )
         }
-        return nil
+
+        var bestOnBoard: SelectionAnchor?
+        var bestOnBoardDistance2 = radius * radius
+        func considerOnBoard(_ point: BGChartModel.OnBoardPoint, maximum: Double) {
+            let laneCeiling = BGChartModel.onBoardLaneCeiling(
+                maxBG: model.maxBG,
+                lowLine: model.lowLine
+            )
+            let plotValue = BGChartModel.scaledOnBoardValue(
+                point.value,
+                maximum: maximum,
+                laneCeiling: laneCeiling
+            )
+            let dx = xPosition(for: point.date, viewportWidth: viewportWidth) - location.x
+            let dy = yPosition(forValue: plotValue) - location.y
+            let distance2 = dx * dx + dy * dy
+            guard distance2 <= bestOnBoardDistance2,
+                  let selection = onBoardSelection(near: point.date)
+            else {
+                return
+            }
+            bestOnBoardDistance2 = distance2
+            bestOnBoard = SelectionAnchor(
+                date: point.date,
+                value: plotValue,
+                texts: [selection.text] + bandPillTexts(at: point.date)
+            )
+        }
+
+        for point in model.iobHistory {
+            considerOnBoard(point, maximum: model.iobHistoryMaximum)
+        }
+        for point in model.cobHistory {
+            considerOnBoard(point, maximum: model.cobHistoryMaximum)
+        }
+        if let bestOnBoard {
+            return bestOnBoard
+        }
+
+        let date = interaction.scrollPosition.addingTimeInterval(
+            interaction.visibleSeconds * TimeInterval(location.x / viewportWidth)
+        )
+        return bandAnchor(at: date, value: value(atY: location.y))
     }
 
     private func handleTap(at location: CGPoint, viewportWidth: CGFloat) {
@@ -941,8 +1193,12 @@ private struct MainBGChart: View {
                 let above = y - 14 - pillH / 2
                 let fitsBelow = below + pillH / 2 <= plotFrame.maxY - 4
                 let labelY = fitsBelow ? below : max(above, plotFrame.minY + pillH / 2 + 4)
-                PillLabel(texts: anchor.texts, maxWidth: min(300, viewportWidth - 16))
-                    .position(x: labelX, y: labelY)
+                PillLabel(
+                    texts: anchor.texts,
+                    timeText: model.pillTimeString(for: anchor.timestamp),
+                    maxWidth: min(300, viewportWidth - 16)
+                )
+                .position(x: labelX, y: labelY)
             }
         }
     }
@@ -1076,13 +1332,33 @@ private struct BGChartCanvas: View, Equatable {
         return model.maxBG / model.maxBasal
     }
 
+    private var onBoardLaneCeiling: Double {
+        BGChartModel.onBoardLaneCeiling(maxBG: model.maxBG, lowLine: model.lowLine)
+    }
+
+    private func onBoardPlotValue(_ value: Double, maximum: Double) -> Double {
+        BGChartModel.scaledOnBoardValue(
+            value,
+            maximum: maximum,
+            laneCeiling: onBoardLaneCeiling
+        )
+    }
+
     var body: some View {
         let showTreatments = !isSmall || model.smallGraphTreatments
         let chart = Chart {
             if showTreatments {
                 bgBandMarks
                 basalMarks
+            }
+            if !isSmall {
+                onBoardHistoryAreaMarks
+            }
+            if showTreatments {
                 scheduledBasalMarks
+            }
+            if !isSmall {
+                onBoardHistoryLineMarks
             }
             coneMarks
             if !isSmall {
@@ -1235,6 +1511,76 @@ private struct BGChartCanvas: View, Equatable {
                 yEnd: .value("rate", step.rate * basalScale)
             )
             .foregroundStyle(.blue.opacity(0.35))
+        }
+    }
+
+    @ChartContentBuilder
+    private var onBoardHistoryAreaMarks: some ChartContent {
+        ForEach(model.iobHistoryRuns) { run in
+            ForEach(windowedLine(run.points) { $0.date }) { point in
+                AreaMark(
+                    x: .value("time", point.date),
+                    yStart: .value("iob history baseline", 0),
+                    yEnd: .value(
+                        "iob history",
+                        onBoardPlotValue(point.value, maximum: model.iobHistoryMaximum)
+                    ),
+                    series: .value("series", "iob-history-area-\(run.id)")
+                )
+                .foregroundStyle(Color("Insulin").opacity(0.14))
+                .interpolationMethod(.linear)
+            }
+        }
+
+        ForEach(model.cobHistoryRuns) { run in
+            ForEach(windowedLine(run.points) { $0.date }) { point in
+                AreaMark(
+                    x: .value("time", point.date),
+                    yStart: .value("cob history baseline", 0),
+                    yEnd: .value(
+                        "cob history",
+                        onBoardPlotValue(point.value, maximum: model.cobHistoryMaximum)
+                    ),
+                    series: .value("series", "cob-history-area-\(run.id)")
+                )
+                .foregroundStyle(Color(.systemOrange).opacity(0.2))
+                .interpolationMethod(.linear)
+            }
+        }
+    }
+
+    @ChartContentBuilder
+    private var onBoardHistoryLineMarks: some ChartContent {
+        ForEach(model.iobHistoryRuns) { run in
+            ForEach(windowedLine(run.points) { $0.date }) { point in
+                LineMark(
+                    x: .value("time", point.date),
+                    y: .value(
+                        "iob history",
+                        onBoardPlotValue(point.value, maximum: model.iobHistoryMaximum)
+                    ),
+                    series: .value("series", "iob-history-line-\(run.id)")
+                )
+                .foregroundStyle(Color("Insulin"))
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.linear)
+            }
+        }
+
+        ForEach(model.cobHistoryRuns) { run in
+            ForEach(windowedLine(run.points) { $0.date }) { point in
+                LineMark(
+                    x: .value("time", point.date),
+                    y: .value(
+                        "cob history",
+                        onBoardPlotValue(point.value, maximum: model.cobHistoryMaximum)
+                    ),
+                    series: .value("series", "cob-history-line-\(run.id)")
+                )
+                .foregroundStyle(Color(.systemOrange))
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.linear)
+            }
         }
     }
 
@@ -1626,11 +1972,72 @@ private struct DownwardTriangle: ChartSymbolShape {
     }
 }
 
+private struct OnBoardHistoryLegend: View {
+    let iob: Double?
+    let cob: Double?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            if let iob {
+                item(
+                    color: Color("Insulin"),
+                    text: "IOB \(format(iob, fractionDigits: abs(iob) >= 10 ? 0 : 1))U"
+                )
+            }
+            if let cob {
+                item(
+                    color: Color(.systemOrange),
+                    text: "COB \(format(cob, fractionDigits: 0))g"
+                )
+            }
+        }
+        .font(.caption2.monospacedDigit())
+        .foregroundStyle(.primary)
+        .padding(.horizontal, 5)
+        .padding(.vertical, 3)
+        .background(
+            RoundedRectangle(cornerRadius: 5)
+                .fill(Color(.systemBackground).opacity(0.82))
+        )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityText)
+    }
+
+    private func item(color: Color, text: String) -> some View {
+        HStack(spacing: 3) {
+            Rectangle()
+                .fill(color)
+                .frame(width: 12, height: 2)
+            Text(text)
+        }
+    }
+
+    private func format(_ value: Double, fractionDigits: Int) -> String {
+        Localizer.formatToLocalizedString(
+            value,
+            maxFractionDigits: fractionDigits,
+            minFractionDigits: 0
+        )
+    }
+
+    private var accessibilityText: String {
+        var parts: [String] = []
+        if let iob {
+            parts.append("IOB \(format(iob, fractionDigits: abs(iob) >= 10 ? 0 : 1)) units")
+        }
+        if let cob {
+            parts.append("COB \(format(cob, fractionDigits: 0)) grams")
+        }
+        return parts.joined(separator: ", ")
+    }
+}
+
 private struct PillLabel: View {
     /// One entry per selected item. A lone entry keeps its multi-line layout;
     /// several stack as compact one-line-per-item rows so the pill stays
     /// readable over a busy cluster.
     let texts: [String]
+    let timeText: String
     let maxWidth: CGFloat
 
     var body: some View {
@@ -1658,9 +2065,12 @@ private struct PillLabel: View {
     @ViewBuilder
     private var content: some View {
         if texts.count == 1 {
-            // Bound pathological texts; a note this long is better read in
-            // Nightscout than on a chart pill.
-            entry(texts[0], lineLimit: 10)
+            VStack(spacing: 1) {
+                // Bound pathological texts; a note this long is better read in
+                // Nightscout than on a chart pill.
+                entry(texts[0], lineLimit: 9)
+                entry(timeText, lineLimit: 1)
+            }
         } else {
             VStack(spacing: 3) {
                 ForEach(texts.indices, id: \.self) { index in
@@ -1671,9 +2081,10 @@ private struct PillLabel: View {
                             .fill(Color.primary.opacity(0.25))
                             .frame(width: 46, height: 0.5)
                     }
-                    // Stacked items collapse to "Bolus 2.5U 14:32" rows.
+                    // Stacked items collapse to compact "Bolus 2.5U" rows.
                     entry(texts[index].replacingOccurrences(of: "\n", with: " "), lineLimit: 4)
                 }
+                entry(timeText, lineLimit: 1)
             }
         }
     }
