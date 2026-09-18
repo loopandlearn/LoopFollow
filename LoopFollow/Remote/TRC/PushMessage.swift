@@ -43,7 +43,17 @@ struct CommandPayload: Encodable {
     var fat: Int?
     var overrideName: String?
     var scheduledTime: TimeInterval?
+    var commandID: String?
+    var mealID: String?
+    var expectedCarbs: Int?
+    var expectedFat: Int?
+    var expectedProtein: Int?
+    var expectedMealTime: TimeInterval?
     var returnNotification: ReturnNotificationInfo?
+
+    var apnsCollapseID: String? {
+        commandType.isMealMutation ? commandID : commandType.rawValue
+    }
 
     struct ReturnNotificationInfo: Encodable {
         let productionEnvironment: Bool
@@ -52,6 +62,14 @@ struct CommandPayload: Encodable {
         let teamId: String
         let keyId: String
         let apnsKey: String
+
+        var isComplete: Bool {
+            !deviceToken.isEmpty &&
+                !bundleId.isEmpty &&
+                !teamId.isEmpty &&
+                !keyId.isEmpty &&
+                !apnsKey.isEmpty
+        }
 
         enum CodingKeys: String, CodingKey {
             case productionEnvironment = "production_environment"
@@ -75,6 +93,72 @@ struct CommandPayload: Encodable {
         case fat
         case overrideName
         case scheduledTime = "scheduled_time"
+        case commandID = "command_id"
+        case mealID = "meal_id"
+        case expectedCarbs = "expected_carbs"
+        case expectedFat = "expected_fat"
+        case expectedProtein = "expected_protein"
+        case expectedMealTime = "expected_meal_time"
         case returnNotification = "return_notification"
+    }
+}
+
+extension CommandPayload {
+    static func editMeal(
+        user: String,
+        timestamp: TimeInterval,
+        commandID: UUID,
+        mealID: UUID,
+        expectedCarbs: Int,
+        expectedFat: Int,
+        expectedProtein: Int,
+        expectedMealTime: TimeInterval,
+        carbs: Int,
+        fat: Int,
+        protein: Int,
+        scheduledTime: TimeInterval,
+        returnNotification: ReturnNotificationInfo
+    ) -> CommandPayload {
+        CommandPayload(
+            user: user,
+            commandType: .editMeal,
+            timestamp: timestamp,
+            carbs: carbs,
+            protein: protein,
+            fat: fat,
+            scheduledTime: scheduledTime,
+            commandID: commandID.uuidString,
+            mealID: mealID.uuidString,
+            expectedCarbs: expectedCarbs,
+            expectedFat: expectedFat,
+            expectedProtein: expectedProtein,
+            expectedMealTime: expectedMealTime,
+            returnNotification: returnNotification
+        )
+    }
+
+    static func deleteMeal(
+        user: String,
+        timestamp: TimeInterval,
+        commandID: UUID,
+        mealID: UUID,
+        expectedCarbs: Int,
+        expectedFat: Int,
+        expectedProtein: Int,
+        expectedMealTime: TimeInterval,
+        returnNotification: ReturnNotificationInfo
+    ) -> CommandPayload {
+        CommandPayload(
+            user: user,
+            commandType: .deleteMeal,
+            timestamp: timestamp,
+            commandID: commandID.uuidString,
+            mealID: mealID.uuidString,
+            expectedCarbs: expectedCarbs,
+            expectedFat: expectedFat,
+            expectedProtein: expectedProtein,
+            expectedMealTime: expectedMealTime,
+            returnNotification: returnNotification
+        )
     }
 }

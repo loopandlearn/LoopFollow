@@ -114,6 +114,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #endif
     }
 
+    func applicationWillEnterForeground(_: UIApplication) {
+        StorageReadiness.whenReady {
+            TRCMealMutationCoordinator.shared.recoverExpiredAttempts()
+        }
+    }
+
     // MARK: - Remote Notifications
 
     /// Called when successfully registered for remote notifications
@@ -134,6 +140,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         let userInfoKeys = userInfo.keys.compactMap { $0 as? String }.sorted()
         LogManager.shared.log(category: .apns, message: "Received remote notification: keys=\(userInfoKeys)")
+        handleTRCMealMutationResponse(userInfo)
 
         // Check if this is a response notification from Loop or Trio
         if let aps = userInfo["aps"] as? [String: Any] {
@@ -183,6 +190,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        handleTRCMealMutationResponse(response.notification.request.content.userInfo)
+
         if response.actionIdentifier == "OPEN_APP_ACTION" {
             // Dismiss any presented modal/sheet so the user actually sees Home
             UIApplication.shared.topMost?.dismiss(animated: true)
@@ -194,6 +203,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         completionHandler()
+    }
+
+    private func handleTRCMealMutationResponse(_ userInfo: [AnyHashable: Any]) {
+        // A background push may launch the app before first unlock, when persisted
+        // operations are still protected. The existing readiness gate retains the
+        // payload in memory and correlates it after StorageValue hydration.
+        StorageReadiness.whenReady {
+            _ = TRCMealMutationCoordinator.shared.handleRemoteNotification(userInfo: userInfo)
+        }
     }
 
     func application(_: UIApplication, supportedInterfaceOrientationsFor _: UIWindow?) -> UIInterfaceOrientationMask {
@@ -267,6 +285,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
     {
         let content = notification.request.content
+        handleTRCMealMutationResponse(content.userInfo)
         let userInfoKeys = content.userInfo.keys.compactMap { $0 as? String }.sorted()
         LogManager.shared.log(
             category: .general,

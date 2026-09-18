@@ -121,7 +121,10 @@ struct TreatmentsView: View {
                                             .padding(.bottom, 2)
                                             .background(Color(.systemBackground))
                                     } else if let treatment = row.treatment {
-                                        TreatmentRow(treatment: treatment)
+                                        TreatmentRow(
+                                            treatment: treatment,
+                                            rootMealTreatment: viewModel.loadedFPURoot(for: treatment)
+                                        )
                                     }
                                 }
                             } header: {
@@ -198,6 +201,9 @@ struct TreatmentsView: View {
                 }
                 .onChange(of: device.value) { newValue in
                     normalizeSelectedFilter(for: newValue)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .trcMealMutationDidComplete)) { _ in
+                    viewModel.refreshTreatments()
                 }
             }
         }
@@ -393,7 +399,19 @@ private struct DayRow: Identifiable {
 
 struct TreatmentDetailView: View {
     let treatment: Treatment
+    let rootMealTreatment: Treatment?
     @StateObject private var viewModel = TreatmentDetailViewModel()
+    @ObservedObject private var remoteType = Storage.shared.remoteType
+    @ObservedObject private var device = Storage.shared.device
+    @ObservedObject private var mutationCoordinator = TRCMealMutationCoordinator.shared
+    @State private var isShowingMealEditor = false
+    @State private var isShowingDeleteConfirmation = false
+    @State private var mutationErrorMessage: String?
+
+    init(treatment: Treatment, rootMealTreatment: Treatment? = nil) {
+        self.treatment = treatment
+        self.rootMealTreatment = rootMealTreatment
+    }
 
     var body: some View {
         List {
@@ -412,6 +430,79 @@ struct TreatmentDetailView: View {
                             .foregroundColor(.secondary)
                     }
                     Spacer()
+                }
+            }
+
+            if let meal = treatment.trioMeal {
+                Section(header: Text("Meal")) {
+                    TRCMealMacroRows(
+                        carbs: meal.carbs,
+                        fat: meal.fat,
+                        protein: meal.protein,
+                        mealTime: meal.mealTime
+                    )
+
+                    if let note = mealNote(meal) {
+                        HStack(alignment: .top) {
+                            Text("Notes")
+                            Spacer()
+                            Text(note)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+
+                    if meal.isGeneratedFPU {
+                        if let rootMealTreatment {
+                            NavigationLink(destination: TreatmentDetailView(treatment: rootMealTreatment)) {
+                                generatedFPUNotice(
+                                    detail: "Tap here to manage the root meal entry.",
+                                    isAction: true
+                                )
+                            }
+                            .accessibilityLabel("Generated FPU entry. Manage root meal entry")
+                            .accessibilityHint("Opens the original meal that generated this FPU entry.")
+                        } else {
+                            generatedFPUNotice(
+                                detail: "Its root meal entry isn’t currently available. Return to Treatments, then refresh or load more.",
+                                isAction: false
+                            )
+                        }
+                    }
+                }
+
+                if shouldShowRemoteMealActions(for: meal) {
+                    if let operation = mutationCoordinator.operation(forMealID: meal.mealID.uuidString) {
+                        TRCMealMutationStatusSection(operation: operation) { message in
+                            mutationErrorMessage = message
+                        }
+                    }
+
+                    Section(header: Text("Remote Meal Actions")) {
+                        Button("Edit Meal") {
+                            if let reason = remoteMealDisabledReason(for: meal) {
+                                mutationErrorMessage = reason
+                            } else {
+                                isShowingMealEditor = true
+                            }
+                        }
+                        .disabled(remoteMealDisabledReason(for: meal) != nil)
+
+                        Button("Delete Meal", role: .destructive) {
+                            if let reason = remoteMealDisabledReason(for: meal) {
+                                mutationErrorMessage = reason
+                            } else {
+                                isShowingDeleteConfirmation = true
+                            }
+                        }
+                        .disabled(remoteMealDisabledReason(for: meal) != nil)
+
+                        if let reason = remoteMealDisabledReason(for: meal) {
+                            Text(reason)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
             }
 
@@ -557,7 +648,135 @@ struct TreatmentDetailView: View {
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .onAppear {
             viewModel.loadDetails(for: treatment)
+            reconcileAppliedEditIfNeeded()
         }
+        .sheet(isPresented: $isShowingMealEditor) {
+            if let meal = treatment.trioMeal {
+                TRCMealEditView(meal: meal)
+            }
+        }
+        .confirmationDialog(
+            "Delete Meal in Trio?",
+            isPresented: $isShowingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Meal", role: .destructive) {
+                sendDelete()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            if let meal = treatment.trioMeal {
+                Text(deleteConfirmationMessage(for: meal))
+            }
+        }
+        .alert(
+            "Remote Meal Error",
+            isPresented: Binding(
+                get: { mutationErrorMessage != nil },
+                set: { if !$0 { mutationErrorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {
+                mutationErrorMessage = nil
+            }
+        } message: {
+            Text(mutationErrorMessage ?? "")
+        }
+    }
+
+    private func generatedFPUNotice(detail: String, isAction: Bool) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: "info.circle")
+                .foregroundColor(.secondary)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Generated FPU entry.")
+                    .foregroundColor(.secondary)
+                Text(detail)
+                    .foregroundColor(isAction ? .accentColor : .secondary)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .font(.subheadline)
+    }
+
+    private func shouldShowRemoteMealActions(for meal: TrioMealTreatment) -> Bool {
+        remoteType.value == .trc && device.value == "Trio" && !meal.isGeneratedFPU
+    }
+
+    private func remoteMealDisabledReason(for meal: TrioMealTreatment, at now: Date = Date()) -> String? {
+        if let operation = mutationCoordinator.blockingOperation(forMealID: meal.mealID.uuidString) {
+            if operation.state == .applied {
+                return "Waiting for refreshed Nightscout values. Return to the treatment list and reopen this meal after synchronization."
+            }
+            return "A previous request is still active: \(operation.statusTitle)."
+        }
+        if let operation = mutationCoordinator.operation(forMealID: meal.mealID.uuidString),
+           let error = TRCMealMutationUIValidation.staleSourceError(meal: meal, after: operation)
+        {
+            return error
+        }
+        if let error = TRCMealMutationUIValidation.sourceError(meal: meal, at: now) {
+            return error
+        }
+        return TRCMealMutationUIValidation.configurationError()
+    }
+
+    private func sendDelete() {
+        guard let meal = treatment.trioMeal else { return }
+        let now = Date()
+        if let reason = remoteMealDisabledReason(for: meal, at: now) {
+            mutationErrorMessage = reason
+            return
+        }
+
+        do {
+            _ = try mutationCoordinator.startDelete(
+                mealID: meal.mealID.uuidString,
+                user: Storage.shared.user.value,
+                expectedCarbs: meal.carbs,
+                expectedFat: meal.fat,
+                expectedProtein: meal.protein,
+                expectedMealTime: meal.mealTime,
+                at: now
+            )
+        } catch {
+            mutationErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func reconcileAppliedEditIfNeeded() {
+        guard let meal = treatment.trioMeal else { return }
+        mutationCoordinator.reconcileAppliedEdit(
+            mealID: meal.mealID.uuidString,
+            carbs: meal.carbs,
+            fat: meal.fat,
+            protein: meal.protein,
+            mealTime: meal.mealTime
+        )
+    }
+
+    private func mealNote(_ meal: TrioMealTreatment) -> String? {
+        if let notes = meal.notes, !notes.isEmpty {
+            return notes
+        }
+        if let foodType = meal.foodType, !foodType.isEmpty {
+            return foodType
+        }
+        return nil
+    }
+
+    private func deleteConfirmationMessage(for meal: TrioMealTreatment) -> String {
+        """
+        \(formatMealTime(meal.mealTime))
+        Carbs: \(meal.carbs) g
+        Fat: \(meal.fat) g
+        Protein: \(meal.protein) g
+
+        Any associated bolus will not be changed.
+        """
     }
 
     private func formatNavigationTitle(_ timeInterval: TimeInterval) -> String {
@@ -832,9 +1051,18 @@ class TreatmentDetailViewModel: ObservableObject {
 
 struct TreatmentRow: View {
     let treatment: Treatment
+    let rootMealTreatment: Treatment?
+
+    init(treatment: Treatment, rootMealTreatment: Treatment? = nil) {
+        self.treatment = treatment
+        self.rootMealTreatment = rootMealTreatment
+    }
 
     var body: some View {
-        NavigationLink(destination: TreatmentDetailView(treatment: treatment)) {
+        NavigationLink(destination: TreatmentDetailView(
+            treatment: treatment,
+            rootMealTreatment: rootMealTreatment
+        )) {
             HStack {
                 Image(systemName: treatment.icon)
                     .foregroundColor(treatment.color)
@@ -947,8 +1175,9 @@ struct Treatment: Identifiable {
     let icon: String
     let color: Color
     let bgValue: Int
+    let trioMeal: TrioMealTreatment?
 
-    init(id: String? = nil, type: TreatmentType, date: TimeInterval, title: String, subtitle: String?, icon: String, color: Color, bgValue: Int) {
+    init(id: String? = nil, type: TreatmentType, date: TimeInterval, title: String, subtitle: String?, icon: String, color: Color, bgValue: Int, trioMeal: TrioMealTreatment? = nil) {
         self.id = id ?? "\(type)-\(date)-\(title)"
         self.type = type
         self.date = date
@@ -957,6 +1186,7 @@ struct Treatment: Identifiable {
         self.icon = icon
         self.color = color
         self.bgValue = bgValue
+        self.trioMeal = trioMeal
     }
 
     var hourKey: String {
@@ -981,6 +1211,35 @@ class TreatmentsViewModel: ObservableObject {
     private let pageSize = 100
     private var isFetching = false
 
+    func loadedFPURoot(for treatment: Treatment) -> Treatment? {
+        Self.uniqueFPURoot(for: treatment, among: allTreatments)
+    }
+
+    static func uniqueFPURoot(for treatment: Treatment, among candidates: [Treatment]) -> Treatment? {
+        guard let meal = treatment.trioMeal,
+              case let .generatedChild(fpuID) = meal.fpuClassification
+        else {
+            return nil
+        }
+
+        var matchingRoot: Treatment?
+        for candidate in candidates {
+            guard let candidateMeal = candidate.trioMeal,
+                  case let .familyRoot(candidateFPUID) = candidateMeal.fpuClassification,
+                  candidateFPUID == fpuID
+            else {
+                continue
+            }
+
+            guard matchingRoot == nil else {
+                return nil
+            }
+            matchingRoot = candidate
+        }
+
+        return matchingRoot
+    }
+
     func loadInitialTreatments() {
         guard !isInitialLoading, !isFetching else {
             return
@@ -995,11 +1254,19 @@ class TreatmentsViewModel: ObservableObject {
         hasSMBEntries = false
         hasAutomaticEntries = false
 
-        // Start from now and go backwards
-        fetchTreatments(endDate: Date()) { [weak self] treatments, rawCount in
+        // Include the mutation window only when this installation can use Trio
+        // Remote Control, preserving the historical query for everyone else.
+        let includesFutureMutationWindow = Self.includesFutureMutationWindow(
+            remoteType: Storage.shared.remoteType.value,
+            device: Storage.shared.device.value
+        )
+        let now = Date()
+        let endDate = includesFutureMutationWindow ? Self.initialFetchEndDate(at: now) : now
+        fetchTreatments(endDate: endDate, inclusiveEnd: includesFutureMutationWindow) { [weak self] treatments, rawCount in
             guard let self = self else { return }
 
             DispatchQueue.main.async {
+                Self.reconcileAppliedEdits(in: treatments)
                 self.allTreatments = treatments
                 self.regroupTreatments()
 
@@ -1023,6 +1290,32 @@ class TreatmentsViewModel: ObservableObject {
         hasMoreData = true
         isFetching = false
         loadInitialTreatments()
+    }
+
+    static func initialFetchEndDate(at date: Date = Date()) -> Date {
+        date.addingTimeInterval(TRCMealMutationTimePolicy.maximumOffset)
+    }
+
+    static func includesFutureMutationWindow(remoteType: RemoteType, device: String) -> Bool {
+        remoteType == .trc && device == "Trio"
+    }
+
+    @MainActor
+    static func reconcileAppliedEdits(
+        in treatments: [Treatment],
+        using coordinator: TRCMealMutationCoordinator = .shared,
+        at date: Date = Date()
+    ) {
+        for meal in treatments.compactMap(\.trioMeal) {
+            coordinator.reconcileAppliedEdit(
+                mealID: meal.mealID.uuidString,
+                carbs: meal.carbs,
+                fat: meal.fat,
+                protein: meal.protein,
+                mealTime: meal.mealTime,
+                at: date
+            )
+        }
     }
 
     func loadMoreIfNeeded() {
@@ -1054,7 +1347,11 @@ class TreatmentsViewModel: ObservableObject {
         }
     }
 
-    private func fetchTreatments(endDate: Date, completion: @escaping ([Treatment], Int) -> Void) {
+    private func fetchTreatments(
+        endDate: Date,
+        inclusiveEnd: Bool = false,
+        completion: @escaping ([Treatment], Int) -> Void
+    ) {
         guard IsNightscoutEnabled() else {
             completion([], 0)
             return
@@ -1073,18 +1370,20 @@ class TreatmentsViewModel: ObservableObject {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         formatter.timeZone = TimeZone(abbreviation: "UTC")
 
-        // For pagination: fetch treatments with created_at < endDate
+        // The initial request includes the exact future mutation boundary;
+        // pagination remains exclusive so pages cannot repeat their boundary.
         // Go back up to 365 days from endDate to ensure we get enough data
         let startDate = Calendar.current.date(byAdding: .day, value: -365, to: endDate)!
         let endDateString = formatter.string(from: endDate)
         let startDateString = formatter.string(from: startDate)
 
         // Build parameters with date filtering
-        let parameters: [String: String] = [
-            "find[created_at][$gte]": startDateString,
-            "find[created_at][$lt]": endDateString,
-            "count": "\(pageSize)",
-        ]
+        let parameters = Self.treatmentQueryParameters(
+            startDateString: startDateString,
+            endDateString: endDateString,
+            pageSize: pageSize,
+            inclusiveEnd: inclusiveEnd
+        )
 
         // Construct URL
         guard let url = NightscoutUtils.constructURL(
@@ -1145,6 +1444,20 @@ class TreatmentsViewModel: ObservableObject {
         task.resume()
     }
 
+    static func treatmentQueryParameters(
+        startDateString: String,
+        endDateString: String,
+        pageSize: Int,
+        inclusiveEnd: Bool
+    ) -> [String: String] {
+        let upperBoundKey = inclusiveEnd ? "find[created_at][$lte]" : "find[created_at][$lt]"
+        return [
+            "find[created_at][$gte]": startDateString,
+            upperBoundKey: endDateString,
+            "count": "\(pageSize)",
+        ]
+    }
+
     private func parseTreatments(from entries: [[String: AnyObject]]) -> (treatments: [Treatment], detectedSMB: Bool, detectedAutomatic: Bool) {
         var treatments: [Treatment] = []
         var detectedSMB = false
@@ -1153,13 +1466,15 @@ class TreatmentsViewModel: ObservableObject {
 
         for entry in entries {
             guard let eventType = entry["eventType"] as? String,
-                  let createdAt = entry["created_at"] as? String,
-                  let date = NightscoutUtils.parseDate(createdAt)
+                  let createdAt = entry["created_at"] as? String
             else {
                 continue
             }
 
-            let timestamp = date.timeIntervalSince1970
+            let trioMeal = TrioMealTreatment(nightscoutEntry: entry)
+            guard let timestamp = trioMeal?.mealTime ?? NightscoutUtils.parseDate(createdAt)?.timeIntervalSince1970 else {
+                continue
+            }
             let nsId = entry["_id"] as? String ?? "unknown-\(timestamp)"
 
             // Skip if we've already processed this Nightscout entry
@@ -1172,18 +1487,14 @@ class TreatmentsViewModel: ObservableObject {
 
             switch eventType {
             case "Carb Correction", "Meal Bolus":
-                if let carbs = entry["carbs"] as? Double, carbs > 0 {
-                    let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
-                    let treatment = Treatment(
-                        id: "\(nsId)-carb",
-                        type: .carb,
-                        date: timestamp,
-                        title: "\(Int(carbs))g",
-                        subtitle: "Carbs",
-                        icon: "circle.fill",
-                        color: .orange,
-                        bgValue: actualBG
-                    )
+                let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
+                if let treatment = Self.makeCarbTreatment(
+                    from: entry,
+                    trioMeal: trioMeal,
+                    nightscoutID: nsId,
+                    timestamp: timestamp,
+                    actualBG: actualBG
+                ) {
                     treatments.append(treatment)
                 }
 
@@ -1349,6 +1660,43 @@ class TreatmentsViewModel: ObservableObject {
 
         // Sort by date descending (most recent first)
         return (treatments.sorted { $0.date > $1.date }, detectedSMB, detectedAutomatic)
+    }
+
+    static func makeCarbTreatment(
+        from entry: [String: AnyObject],
+        trioMeal: TrioMealTreatment?,
+        nightscoutID: String,
+        timestamp: TimeInterval,
+        actualBG: Int
+    ) -> Treatment? {
+        let carbs = trioMeal.map { Double($0.carbs) } ?? (entry["carbs"] as? Double)
+        let hasPositiveNutrients = (carbs ?? 0) > 0 || (trioMeal.map { $0.fat > 0 || $0.protein > 0 } ?? false)
+        guard let carbs, hasPositiveNutrients else { return nil }
+
+        let title: String
+        let subtitle: String
+        if let trioMeal, trioMeal.carbs == 0 {
+            title = "Meal"
+            subtitle = [
+                trioMeal.fat > 0 ? "\(trioMeal.fat)g Fat" : nil,
+                trioMeal.protein > 0 ? "\(trioMeal.protein)g Protein" : nil,
+            ].compactMap { $0 }.joined(separator: " • ")
+        } else {
+            title = "\(Int(carbs))g"
+            subtitle = "Carbs"
+        }
+
+        return Treatment(
+            id: "\(nightscoutID)-carb",
+            type: .carb,
+            date: timestamp,
+            title: title,
+            subtitle: subtitle,
+            icon: "circle.fill",
+            color: .orange,
+            bgValue: actualBG,
+            trioMeal: trioMeal
+        )
     }
 
     private func regroupTreatments() {

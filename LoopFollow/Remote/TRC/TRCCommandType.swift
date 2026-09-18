@@ -8,6 +8,8 @@ enum TRCCommandType: String, Encodable {
     case tempTarget = "temp_target"
     case cancelTempTarget = "cancel_temp_target"
     case meal
+    case editMeal = "edit_meal"
+    case deleteMeal = "delete_meal"
     case startOverride = "start_override"
     case cancelOverride = "cancel_override"
 
@@ -17,8 +19,14 @@ enum TRCCommandType: String, Encodable {
         case .tempTarget: return "Temp Target"
         case .cancelTempTarget: return "Cancel Temp Target"
         case .meal: return "Meal"
+        case .editMeal: return "Edit Meal"
+        case .deleteMeal: return "Delete Meal"
         case .startOverride: return "Start Override"
         case .cancelOverride: return "Cancel Override"
         }
+    }
+
+    var isMealMutation: Bool {
+        self == .editMeal || self == .deleteMeal
     }
 }
