@@ -68,6 +68,7 @@ class Storage {
     // General Settings [BEGIN]
     var appBadge = StorageValue<Bool>(key: "appBadge", defaultValue: true)
     var colorBGText = StorageValue<Bool>(key: "colorBGText", defaultValue: true)
+    var dynamicBGColor = StorageValue<Bool>(key: "dynamicBGColor", defaultValue: false)
     var appearanceMode = StorageValue<AppearanceMode>(key: "appearanceMode", defaultValue: .dark)
     var showStats = StorageValue<Bool>(key: "showStats", defaultValue: true)
     var useIFCC = StorageValue<Bool>(key: "useIFCC", defaultValue: false)

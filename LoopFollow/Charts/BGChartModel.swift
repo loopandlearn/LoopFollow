@@ -259,6 +259,9 @@ final class BGChartModel: ObservableObject {
     }
 
     private func colorFor(_ sgv: Int, thresholds: (low: Double, high: Double)) -> Color {
+        if Storage.shared.dynamicBGColor.value {
+            return bgDynamicColor(Double(sgv))
+        }
         if Double(sgv) >= thresholds.high {
             return .yellow
         } else if Double(sgv) <= thresholds.low {
