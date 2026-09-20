@@ -14,6 +14,7 @@ struct MoreMenuView: View {
     @State private var currentVersion: String = AppVersionManager().version()
     @State private var searchText = ""
     @ObservedObject private var nightscoutURL = Storage.shared.url
+    @ObservedObject private var pendingTreatmentDetail = Observable.shared.pendingTreatmentDetail
 
     private var isSearching: Bool {
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -46,6 +47,12 @@ struct MoreMenuView: View {
                 }
                 .padding(.horizontal)
             }
+        }
+        .onAppear {
+            openPendingTreatmentIfNeeded()
+        }
+        .onChange(of: pendingTreatmentDetail.value) { _ in
+            openPendingTreatmentIfNeeded()
         }
         .task {
             await fetchVersionInfo()
@@ -141,6 +148,15 @@ struct MoreMenuView: View {
         } else {
             pendingRoute = MenuRoute(item)
         }
+    }
+
+    private func openPendingTreatmentIfNeeded() {
+        guard pendingTreatmentDetail.value != nil,
+              Storage.shared.position(for: .treatments).normalized == .menu
+        else {
+            return
+        }
+        pendingRoute = .treatments
     }
 
     // MARK: - Search

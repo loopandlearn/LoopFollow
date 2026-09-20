@@ -127,6 +127,9 @@ private struct MainBGChart: View {
     /// Measured size of the visible selection pill (see PillSizePreferenceKey).
     @State private var pillSize: CGSize = .zero
 
+    @ScaledMetric(relativeTo: .caption) private var scaledPillWidth = SelectionPillLayout.width
+    @ScaledMetric(relativeTo: .caption) private var scaledPillHeight = SelectionPillLayout.height
+
     // Pinch state: live preview stretch plus the anchor captured at pinch
     // start so the zoom stays anchored under the pinch centroid.
     @State private var pinchScale: CGFloat = 1
@@ -145,6 +148,9 @@ private struct MainBGChart: View {
     /// Anchor selected by tapping a mark; sticky until the user taps empty
     /// space, taps another mark, or starts a pan/zoom/inspect.
     @State private var tapped: SelectionAnchor?
+
+    /// Detail route for a supported treatment selected by an explicit tap.
+    @State private var tappedTreatmentDetail: TreatmentDetailRequest?
 
     /// True once a held press has engaged inspect; from then on finger
     /// movement scrubs the selection instead of panning, until the finger lifts.
@@ -227,7 +233,8 @@ private struct MainBGChart: View {
                 .allowsHitTesting(false)
 
             selectionOverlay(viewportWidth: viewportWidth)
-                .allowsHitTesting(false)
+                .environment(\.treatmentPillAction, activeTreatmentPillAction)
+                .environment(\.selectionPillLayoutSize, selectionPillLayoutSize(viewportWidth: viewportWidth))
 
             overrideBandLabelsOverlay(viewportWidth: viewportWidth)
                 .allowsHitTesting(false)
@@ -809,7 +816,76 @@ private struct MainBGChart: View {
 
     private func handleTap(at location: CGPoint, viewportWidth: CGFloat) {
         guard plotFrame.height > 0 else { return }
+        if let buttonFrame = actionablePillFrame(viewportWidth: viewportWidth),
+           buttonFrame.contains(location)
+        {
+            return
+        }
         tapped = tappedAnchor(at: location, viewportWidth: viewportWidth)
+        tappedTreatmentDetail = tapped.flatMap {
+            treatmentDetailRequest(for: $0)
+        }
+    }
+
+    private func treatmentDetailRequest(for anchor: SelectionAnchor) -> TreatmentDetailRequest? {
+        func matchesPill(_ pillText: String) -> Bool {
+            guard let selectedText = anchor.texts.first else { return false }
+            if selectedText == pillText { return true }
+            guard let finalLineBreak = pillText.lastIndex(of: "\n") else { return false }
+            return selectedText == pillText[..<finalLineBreak]
+        }
+
+        func matches(_ point: BGChartModel.TreatmentPoint) -> Bool {
+            anchor.date == point.drawnDate
+                && anchor.value == point.sgv
+                && matchesPill(point.pillText)
+        }
+
+        if let point = model.boluses.first(where: matches) {
+            return TreatmentDetailRequest(
+                kind: .bolus,
+                timestamp: point.date.timeIntervalSince1970,
+                amount: point.value
+            )
+        }
+        if let point = model.carbs.first(where: matches) {
+            return TreatmentDetailRequest(
+                kind: .carb,
+                timestamp: point.date.timeIntervalSince1970,
+                amount: point.value
+            )
+        }
+        if let point = model.smbs.first(where: matches) {
+            return TreatmentDetailRequest(
+                kind: .automaticBolus,
+                timestamp: point.date.timeIntervalSince1970,
+                amount: point.value
+            )
+        }
+
+        if let band = model.overrides.first(where: {
+            anchor.date >= $0.start && anchor.date <= $0.end
+                && anchor.value == ($0.yTop + $0.yBottom) / 2
+                && matchesPill($0.pillText)
+        }) {
+            return TreatmentDetailRequest(
+                kind: .override,
+                timestamp: band.start.timeIntervalSince1970,
+                amount: nil
+            )
+        }
+        if let band = model.tempTargets.first(where: {
+            anchor.date >= $0.start && anchor.date <= $0.end
+                && anchor.value == ($0.yTop + $0.yBottom) / 2
+                && matchesPill($0.pillText)
+        }) {
+            return TreatmentDetailRequest(
+                kind: .tempTarget,
+                timestamp: band.start.timeIntervalSince1970,
+                amount: nil
+            )
+        }
+        return nil
     }
 
     /// The anchor the overlay should show: a live scrub wins over a sticky tap.
@@ -874,11 +950,8 @@ private struct MainBGChart: View {
     /// shell with the same linear maps the canvas uses — neither scrubbing
     /// nor a tapped pill ever re-lays the canvas.
     ///
-    /// The pill wraps long texts (notes) at its max width; placement uses the
-    /// measured pill size so the pill always sits fully on screen, below the
-    /// anchor when there is room and above it otherwise. Wrapping relies on
-    /// SwiftUI's word wrapping, which respects the actual font metrics, so
-    /// there is no manual line splitting.
+    /// The fixed-size pill starts just below the override-banner lane and is
+    /// clamped inside the plot.
     @ViewBuilder
     private func selectionOverlay(viewportWidth: CGFloat) -> some View {
         if plotFrame.height > 0, let anchor = activeAnchor() {
@@ -890,13 +963,14 @@ private struct MainBGChart: View {
                     .fill(Color.primary.opacity(0.5))
                     .frame(width: 1, height: plotFrame.height)
                     .position(x: x, y: plotFrame.midY)
+                    .allowsHitTesting(false)
 
-                // Measured size lags the text by one frame; fall back to a
-                // small nominal size until the first measurement lands.
-                let pillW = max(pillSize.width, 60)
-                let pillH = max(pillSize.height, 28)
-                let labelX = min(max(x, pillW / 2 + 4), viewportWidth - pillW / 2 - 4)
-                let below = y + 14 + pillH / 2
+                let layoutSize = selectionPillLayoutSize(viewportWidth: viewportWidth)
+                let pillW = layoutSize.width
+                let pillH = layoutSize.height
+                let fixedPosition = pillPosition(viewportWidth: viewportWidth, width: pillW, height: pillH)
+                let labelX = fixedPosition.x
+                let below = fixedPosition.y
                 let above = y - 14 - pillH / 2
                 let fitsBelow = below + pillH / 2 <= plotFrame.maxY - 4
                 let labelY = fitsBelow ? below : max(above, plotFrame.minY + pillH / 2 + 4)
@@ -904,6 +978,47 @@ private struct MainBGChart: View {
                     .position(x: labelX, y: labelY)
             }
         }
+    }
+
+    private func selectionPillLayoutSize(viewportWidth: CGFloat) -> CGSize {
+        let availableWidth = max(min(300, viewportWidth - 16), 1)
+        let availableHeight = max(plotFrame.height - 8, 1)
+        return CGSize(
+            width: min(scaledPillWidth, availableWidth),
+            height: min(scaledPillHeight, availableHeight)
+        )
+    }
+
+    private func pillPosition(viewportWidth: CGFloat, width: CGFloat, height: CGFloat) -> CGPoint {
+        let x = min(max(plotFrame.midX, width / 2 + 4), viewportWidth - width / 2 - 4)
+        let preferredY = yPosition(forValue: model.maxBG - 25) + 8 + height / 2
+        let y = min(max(preferredY, plotFrame.minY + height / 2 + 4), plotFrame.maxY - height / 2 - 4)
+        return CGPoint(x: x, y: y)
+    }
+
+    private func actionablePillFrame(viewportWidth: CGFloat) -> CGRect? {
+        guard !isInspectLatched, tapped != nil, tappedTreatmentDetail != nil else { return nil }
+        let layoutSize = selectionPillLayoutSize(viewportWidth: viewportWidth)
+        let width = layoutSize.width
+        let height = layoutSize.height
+        let center = pillPosition(viewportWidth: viewportWidth, width: width, height: height)
+        return CGRect(
+            x: center.x - width / 2,
+            y: center.y - height / 2,
+            width: width,
+            height: height
+        )
+    }
+
+    private var activeTreatmentPillAction: (() -> Void)? {
+        guard !isInspectLatched, let request = tappedTreatmentDetail else { return nil }
+        return { openTreatmentDetail(request) }
+    }
+
+    private func openTreatmentDetail(_ request: TreatmentDetailRequest) {
+        Observable.shared.pendingTreatmentDetail.value = request
+        let tabs = Storage.shared.orderedTabBarItems()
+        Observable.shared.selectedTabIndex.value = tabs.firstIndex(of: .treatments) ?? 4
     }
 }
 
@@ -1570,6 +1685,58 @@ private struct PillSizePreferenceKey: PreferenceKey {
     }
 }
 
+private enum SelectionPillLayout {
+    static let width: CGFloat = 152
+    static let height: CGFloat = 76
+}
+
+private struct SelectionPillLayoutSizeKey: EnvironmentKey {
+    static let defaultValue = CGSize(width: SelectionPillLayout.width, height: SelectionPillLayout.height)
+}
+
+private struct TreatmentPillActionKey: EnvironmentKey {
+    static let defaultValue: (() -> Void)? = nil
+}
+
+private extension EnvironmentValues {
+    var selectionPillLayoutSize: CGSize {
+        get { self[SelectionPillLayoutSizeKey.self] }
+        set { self[SelectionPillLayoutSizeKey.self] = newValue }
+    }
+
+    var treatmentPillAction: (() -> Void)? {
+        get { self[TreatmentPillActionKey.self] }
+        set { self[TreatmentPillActionKey.self] = newValue }
+    }
+}
+
+private struct TreatmentPillButtonModifier: ViewModifier {
+    let action: (() -> Void)?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let action {
+            Button(action: action) {
+                content.contentShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(TreatmentPillButtonStyle())
+            .accessibilityHint("Opens this treatment in Treatments")
+        } else {
+            content
+                .allowsHitTesting(false)
+        }
+    }
+}
+
+private struct TreatmentPillButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .brightness(configuration.isPressed ? -0.08 : 0)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
 // MARK: - Shared pieces
 
 private struct DownwardTriangle: ChartSymbolShape {
@@ -1586,6 +1753,9 @@ private struct DownwardTriangle: ChartSymbolShape {
 }
 
 private struct PillLabel: View {
+    @Environment(\.selectionPillLayoutSize) private var selectionPillLayoutSize
+    @Environment(\.treatmentPillAction) private var treatmentPillAction
+
     /// One entry per selected item. A lone entry keeps its multi-line layout;
     /// several stack as compact one-line-per-item rows so the pill stays
     /// readable over a busy cluster.
@@ -1593,26 +1763,47 @@ private struct PillLabel: View {
     let maxWidth: CGFloat
 
     var body: some View {
-        content
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color(.secondarySystemBackground))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color.primary, lineWidth: 0.5)
-                    )
-            )
-            .background(
-                GeometryReader { geo in
-                    Color.clear.preference(key: PillSizePreferenceKey.self, value: geo.size)
-                }
-            )
-            // Transparent flexible container: it caps the width the text can
-            // wrap to, while the visible pill above still hugs its content.
-            .frame(maxWidth: maxWidth)
+        HStack(spacing: 5) {
+            content
+            if isActionable {
+                Image(systemName: "chevron.right")
+                    .font(.caption.bold())
+                    .foregroundStyle(.white)
+                    .accessibilityHidden(true)
+            }
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .frame(
+            width: min(selectionPillLayoutSize.width, max(maxWidth, 1)),
+            height: selectionPillLayoutSize.height
+        )
+        .clipped()
+        .background(
+            RoundedRectangle(cornerRadius: isActionable ? 8 : 6)
+                .fill(isActionable ? Color.blue : Color(.secondarySystemBackground))
+                .overlay(
+                    RoundedRectangle(cornerRadius: isActionable ? 8 : 6)
+                        .strokeBorder(
+                            isActionable ? Color.white.opacity(0.55) : Color.primary,
+                            lineWidth: isActionable ? 1 : 0.5
+                        )
+                )
+        )
+        .shadow(
+            color: isActionable ? Color.black.opacity(0.4) : .clear,
+            radius: isActionable ? 2 : 0,
+            y: isActionable ? 1 : 0
+        )
+        .background(
+            GeometryReader { geo in
+                Color.clear.preference(key: PillSizePreferenceKey.self, value: geo.size)
+            }
+        )
+        .modifier(TreatmentPillButtonModifier(action: treatmentPillAction))
     }
+
+    private var isActionable: Bool { treatmentPillAction != nil }
 
     @ViewBuilder
     private var content: some View {
@@ -1639,8 +1830,8 @@ private struct PillLabel: View {
 
     private func entry(_ text: String, lineLimit: Int) -> some View {
         Text(text)
-            .font(.caption2)
-            .foregroundColor(.primary)
+            .font(.caption)
+            .foregroundColor(isActionable ? .white : .primary)
             .multilineTextAlignment(.center)
             .lineLimit(lineLimit)
     }
