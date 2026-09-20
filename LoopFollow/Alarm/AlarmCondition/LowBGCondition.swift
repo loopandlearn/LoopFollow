@@ -8,6 +8,17 @@ import Foundation
 /// • any predicted BG within `predictiveMinutes` is ≤ `belowBG`.
 struct LowBGCondition: AlarmCondition {
     static let type: AlarmType = .low
+
+    /// Longest predictive look-ahead offered by the alarm editor, in minutes.
+    static let maxPredictiveMinutes = 60
+
+    /// Number of forecast points (5-minute spacing) needed to look `minutes`
+    /// ahead: the first point is the current value, so the horizon takes
+    /// ceil(minutes / 5) points beyond it.
+    static func forecastPoints(forMinutes minutes: Int) -> Int {
+        Int(ceil(Double(minutes) / 5.0)) + 1
+    }
+
     init() {}
 
     /// `belowBG` is this alarm's trigger threshold, not an activation limit:
@@ -34,15 +45,9 @@ struct LowBGCondition: AlarmCondition {
            predictiveMinutes > 0,
            !data.predictionData.isEmpty
         {
-            let lookAhead = min(
-                data.predictionData.count,
-                Int(ceil(Double(predictiveMinutes) / 5.0))
-            )
+            let points = Self.forecastPoints(forMinutes: predictiveMinutes)
 
-            for i in 0 ..< lookAhead where isLow(data.predictionData[i]) {
-                predictiveTrigger = true
-                break
-            }
+            predictiveTrigger = data.predictionData.prefix(points).contains(where: isLow)
         }
 
         // ────────────────────────────────
