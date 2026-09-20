@@ -220,8 +220,8 @@ struct Alarm: Identifiable, Codable, Equatable {
 
     /// Function for when the alarm is triggered.
     /// If this alarm, all alarms is disabled or snoozed, then should not be called. This or all alarmd could be muted, then this function will just generate a notification.
-    func trigger(config: AlarmConfiguration, now: Date) {
-        LogManager.shared.log(category: .alarm, message: "Alarm triggered: \(type.rawValue)")
+    func trigger(config: AlarmConfiguration, now: Date, titleOverride: String? = nil) {
+        LogManager.shared.log(category: .alarm, message: "Alarm triggered: \(titleOverride ?? type.rawValue)")
 
         var playSound = true
 
@@ -277,7 +277,7 @@ struct Alarm: Identifiable, Codable, Equatable {
             }
         }()
 
-        AlarmManager.shared.sendNotification(title: type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
+        AlarmManager.shared.sendNotification(title: titleOverride ?? type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
 
         if playSound {
             AlarmSound.setSoundFile(soundFile)

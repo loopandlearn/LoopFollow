@@ -102,7 +102,7 @@ struct SnoozerView: View {
                 if let alarm = vm.activeAlarm {
                     VStack(spacing: 16) {
                         // Alarm name at the top
-                        Text(alarm.name)
+                        Text(vm.alarmTitle)
                             .font(.system(size: 30, weight: .semibold))
                             .foregroundColor(.white)
                             .lineLimit(1)

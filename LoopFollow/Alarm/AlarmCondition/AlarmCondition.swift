@@ -8,6 +8,9 @@ protocol AlarmCondition {
     init()
     /// pure, per-alarm logic against `AlarmData`
     func evaluate(alarm: Alarm, data: AlarmData, now: Date) -> Bool
+    /// Title for the firing `evaluate` just reported; nil (the default) uses
+    /// the alarm type's name.
+    var firedTitle: String? { get }
     /// `true` when `belowBG`/`aboveBG` are this condition's own trigger
     /// threshold, checked in `evaluate`; `false` (the default) treats them
     /// as activation limits enforced by `passesBGLimits`.
@@ -16,6 +19,8 @@ protocol AlarmCondition {
 
 extension AlarmCondition {
     var checksOwnBGLimits: Bool { false }
+
+    var firedTitle: String? { nil }
 
     /// Returns `true` when the alarm is allowed to continue evaluating
     /// after BG-limit checks; `false` blocks it immediately.
