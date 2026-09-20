@@ -22,6 +22,12 @@ private struct APNSCredentialSnapshot: Equatable {
     let lfKeyId: String
 }
 
+private struct SmoothedBgConfiguration: Equatable {
+    let url: String
+    let token: String
+    let device: String
+}
+
 class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     /// The single, long-lived MainViewController that owns the app's data
     /// pipeline (scheduleAllTasks). Held strongly so it stays alive — and the
@@ -93,6 +99,10 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var uamPredictionData: [ShareGlucoseData] = []
     var openAPSPredBGs: [String: [Double]]?
     var openAPSPredUpdatedTime: TimeInterval?
+    var smoothedBgData: [SmoothedBgPoint] = []
+    var hasFetchedSmoothedBgHistory: Bool = false
+    var lastSmoothedBgBulkRefreshAt: Date?
+    var smoothedBgFetchGeneration: UInt = 0
     var bgCheckData: [ShareGlucoseData] = []
     var suspendGraphData: [DataStructs.timestampOnlyStruct] = []
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
@@ -254,6 +264,68 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateBGTextAppearance()
+            }
+            .store(in: &cancellables)
+
+        // Refetch the smoothed-BG history when the graph day-range setting changes,
+        // so the popup history covers the newly visible window. The fetch itself
+        // bails when the feature toggle is off, so this is cheap when unused.
+        Storage.shared.downloadDays.$value
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                guard Storage.shared.displaySmoothedBG.value else { return }
+                self.invalidateSmoothedBgCache()
+                self.webLoadNSSmoothedBgHistory()
+            }
+            .store(in: &cancellables)
+
+        // React to the smoothed-BG toggle: fetch on ON, drop the cached history on OFF
+        // and refresh the chart so popups stop showing smoothed values immediately.
+        Storage.shared.displaySmoothedBG.$value
+            .dropFirst()
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] enabled in
+                guard let self = self else { return }
+                if enabled {
+                    self.invalidateSmoothedBgCache()
+                    self.webLoadNSSmoothedBgHistory()
+                } else {
+                    self.invalidateSmoothedBgCache()
+                }
+            }
+            .store(in: &cancellables)
+
+        // Never carry smoothed history across Nightscout accounts or looping
+        // systems. The generation token also makes stale in-flight responses inert.
+        let smoothedBgConfigurationChanges = Publishers.CombineLatest3(
+            Storage.shared.url.$value,
+            Storage.shared.token.$value,
+            Storage.shared.device.$value
+        )
+        .map { url, token, device in
+            SmoothedBgConfiguration(url: url, token: token, device: device)
+        }
+        .dropFirst()
+        .removeDuplicates()
+        .receive(on: DispatchQueue.main)
+        .eraseToAnyPublisher()
+
+        smoothedBgConfigurationChanges
+            .sink { [weak self] _ in
+                self?.invalidateSmoothedBgCache()
+            }
+            .store(in: &cancellables)
+
+        smoothedBgConfigurationChanges
+            .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                if Storage.shared.displaySmoothedBG.value {
+                    self.webLoadNSSmoothedBgHistory()
+                }
             }
             .store(in: &cancellables)
 

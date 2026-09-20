@@ -114,6 +114,7 @@ final class BGChartModel: ObservableObject {
     /// Scrub timeline on the BG cadence; rebuilt together with `bg`.
     private(set) var scrubSlots = BGChartScrubSlots(readingDates: [])
     @Published var bgRuns: [BGRun] = []
+    @Published var smoothedBg: [BGPoint] = []
     @Published var yesterday: [BGPoint] = []
     @Published var prediction: [BGPoint] = []
     @Published var ztPrediction: [BGPoint] = []
@@ -174,9 +175,11 @@ final class BGChartModel: ObservableObject {
     private(set) var generation: Int = 0
 
     private var rebuildScheduled = false
+    private var smoothedBgHistory: [SmoothedBgPoint] = []
 
     @Published var showLines: Bool = true
     @Published var showDots: Bool = true
+    @Published var showSmoothedBg: Bool = false
     @Published var showDIA: Bool = true
     @Published var show30Min: Bool = false
     @Published var show90Min: Bool = false
@@ -217,6 +220,14 @@ final class BGChartModel: ObservableObject {
     /// The pill's time line for a given point in time.
     func pillTimeString(for date: Date) -> String {
         pillTimeFormatter.string(from: date)
+    }
+
+    func smoothedBgValue(near date: Date, tolerance: TimeInterval = 150) -> Double? {
+        SmoothedBgSeries.nearestValue(
+            in: smoothedBgHistory,
+            to: date.timeIntervalSince1970,
+            tolerance: tolerance
+        )
     }
 
     /// Nightscout remote-command error notes embed a JSON payload after
@@ -410,6 +421,10 @@ final class BGChartModel: ObservableObject {
 
         showLines = Storage.shared.showLines.value
         showDots = Storage.shared.showDots.value
+        showSmoothedBg = Storage.shared.displaySmoothedBG.value
+            && IsNightscoutEnabled()
+            && Storage.shared.device.value != "Loop"
+            && !vc.smoothedBgData.isEmpty
         showDIA = Storage.shared.showDIALines.value
         show30Min = Storage.shared.show30MinLine.value
         show90Min = Storage.shared.show90MinLine.value
@@ -438,6 +453,27 @@ final class BGChartModel: ObservableObject {
         scrubSlots = BGChartScrubSlots(readingDates: vc.bgData.map { Date(timeIntervalSince1970: $0.date) })
         bg = vc.bgData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: clampSgv($0.sgv), color: colorFor($0.sgv, thresholds: thresholds)) }
         bgRuns = Self.makeRuns(bg)
+
+        if showSmoothedBg,
+           let firstBgTime = vc.bgData.first?.date,
+           let lastBgTime = vc.bgData.last?.date
+        {
+            smoothedBgHistory = vc.smoothedBgData
+            smoothedBg = SmoothedBgSeries.chartPoints(
+                from: smoothedBgHistory,
+                startingAt: firstBgTime,
+                endingAt: lastBgTime + 150
+            ).map {
+                BGPoint(
+                    date: Date(timeIntervalSince1970: $0.time),
+                    value: min(max($0.bgMgdl, Double(minDisplay)), Double(maxDisplay)),
+                    color: .cyan
+                )
+            }
+        } else {
+            smoothedBgHistory = []
+            smoothedBg = []
+        }
 
         // Yesterday comparison overlay (#665): already +24h shifted, dimmed gray, no dots.
         if Storage.shared.showYesterdayLine.value {

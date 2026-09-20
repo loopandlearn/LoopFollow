@@ -50,6 +50,12 @@ class AdvancedSettingsViewModel: ObservableObject {
         }
     }
 
+    @Published var displaySmoothedBG: Bool {
+        didSet {
+            Storage.shared.displaySmoothedBG.value = displaySmoothedBG
+        }
+    }
+
     @Published var debugLogLevel: Bool {
         didSet {
             Storage.shared.debugLogLevel.value = debugLogLevel
@@ -64,6 +70,7 @@ class AdvancedSettingsViewModel: ObservableObject {
         graphCarbs = Storage.shared.graphCarbs.value
         graphOtherTreatments = Storage.shared.graphOtherTreatments.value
         bgUpdateDelay = Storage.shared.bgUpdateDelay.value
+        displaySmoothedBG = Storage.shared.displaySmoothedBG.value
         debugLogLevel = Storage.shared.debugLogLevel.value
     }
 }

@@ -692,7 +692,14 @@ private struct MainBGChart: View {
 
     /// Pill entry for a BG reading. Shared by the scrub lookup and the tap hit test.
     private func bgPillText(for point: BGChartModel.BGPoint) -> String {
-        "BG\n\(Localizer.toDisplayUnits(String(Int(point.value))))\n\(model.pillTimeString(for: point.date))"
+        let rawBg = Localizer.toDisplayUnits(String(Int(point.value)))
+        let time = model.pillTimeString(for: point.date)
+        if model.showSmoothedBg,
+           let smoothed = model.smoothedBgValue(near: point.date)
+        {
+            return "✨ \(Localizer.toDisplayUnits(String(smoothed))) ✨\n\(rawBg)\n\(time)"
+        }
+        return "BG\n\(rawBg)\n\(time)"
     }
 
     private func bandPillTexts(at date: Date) -> [String] {
@@ -1048,6 +1055,7 @@ private struct BGChartCanvas: View, Equatable {
                 yesterdayMarks
             }
             bgLineMarks
+            smoothedBgMarks
             bgPointsMark
             predictionLineMark
             predictionVariantMarks
@@ -1240,7 +1248,7 @@ private struct BGChartCanvas: View, Equatable {
 
     @ChartContentBuilder
     private var bgLineMarks: some ChartContent {
-        if model.showLines {
+        if model.showLines, isSmall || !model.showSmoothedBg {
             ForEach(model.bgRuns) { run in
                 if let first = run.points.first, let last = run.points.last,
                    last.date >= windowStart, first.date <= windowEnd
@@ -1261,8 +1269,24 @@ private struct BGChartCanvas: View, Equatable {
     }
 
     @ChartContentBuilder
+    private var smoothedBgMarks: some ChartContent {
+        if model.showSmoothedBg, !isSmall {
+            ForEach(windowedLine(model.smoothedBg) { $0.date }) { point in
+                LineMark(
+                    x: .value("time", point.date),
+                    y: .value("bg", point.value),
+                    series: .value("series", "smoothed-bg")
+                )
+                .foregroundStyle(.cyan)
+                .lineStyle(StrokeStyle(lineWidth: 1.5))
+                .interpolationMethod(.linear)
+            }
+        }
+    }
+
+    @ChartContentBuilder
     private var bgPointsMark: some ChartContent {
-        if model.showDots {
+        if model.showDots || (model.showSmoothedBg && !isSmall) {
             ForEach(windowed(model.bg) { $0.date }) { pt in
                 PointMark(
                     x: .value("time", pt.date),

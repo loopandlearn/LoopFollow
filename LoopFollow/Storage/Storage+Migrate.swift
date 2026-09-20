@@ -80,12 +80,20 @@ extension Storage {
 
         let sort = legacySort.value
         let visible = legacyVisible.value
+        // The private smoothing branch used raw value 20 for Smoothed BG before
+        // upstream added DB Size at 20. A persisted smoothing preference proves
+        // which lineage produced that legacy index; remap it while leaving
+        // upstream DB Size users untouched.
+        let remapLegacySmoothedBG = displaySmoothedBG.exists
 
         var items: [InfoDisplayItem] = []
         var seen = Set<Int>()
         // Honor the saved order and per-index visibility.
         for index in sort {
-            guard let type = InfoType(rawValue: index), seen.insert(index).inserted else { continue }
+            let type = remapLegacySmoothedBG && index == 20
+                ? InfoType.smoothedBg
+                : InfoType(rawValue: index)
+            guard let type, seen.insert(type.rawValue).inserted else { continue }
             let isVisible = index < visible.count ? visible[index] : type.defaultVisible
             items.append(InfoDisplayItem(type: type, isVisible: isVisible, coloring: InfoColoring()))
         }
