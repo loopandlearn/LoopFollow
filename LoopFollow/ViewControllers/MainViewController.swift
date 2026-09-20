@@ -103,7 +103,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
     var latestBasal = ""
-    var latestPumpVolume: Double = 50.0
+    var latestPumpVolume: Double?
     var latestIOB: InsulinMetric?
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
