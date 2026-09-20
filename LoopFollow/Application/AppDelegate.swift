@@ -87,6 +87,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
+        PhoneSessionManager.shared.startSession()
+
         return true
     }
 
