@@ -189,7 +189,7 @@ struct TempTargetView: View {
                     )
                 case .statusSuccess:
                     return Alert(
-                        title: Text("Status"),
+                        title: Text("Command Sent"),
                         message: Text(statusMessage ?? ""),
                         dismissButton: .default(Text("OK"), action: {
                             presentationMode.wrappedValue.dismiss()
@@ -261,7 +261,7 @@ struct TempTargetView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
-                    self.statusMessage = "Temp target command successfully sent."
+                    self.statusMessage = RemoteCommandMessage.sent
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendTempTargetPushNotification succeeded with target: \(newHKTarget), duration: \(duration)")
                 } else {
@@ -281,7 +281,7 @@ struct TempTargetView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
-                    self.statusMessage = "Cancel temp target command successfully sent."
+                    self.statusMessage = RemoteCommandMessage.sent
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendCancelTempTargetPushNotification succeeded")
                 } else {
