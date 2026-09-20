@@ -22,6 +22,15 @@ extension MainViewController {
 
     func updateBGGraphSettings() {
         chartModel.rebuild()
+
+        // Re-route the stored predBGs in case the prediction style
+        // (cone/lines) changed; rebuild() alone only redraws what was
+        // already routed.
+        updateOpenAPSPredictionDisplay()
+
+        // The yesterday overlay is built during the BG fetch and needs an
+        // extra day of history, so reload the BG window when it's toggled.
+        TaskScheduler.shared.rescheduleTask(id: .fetchBG, to: Date())
     }
 
     private func recomputeTopBG() {

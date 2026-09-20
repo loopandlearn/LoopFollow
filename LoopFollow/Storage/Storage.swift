@@ -99,6 +99,7 @@ class Storage {
     // Live Activity extended InfoType data
     var lastBasal = StorageValue<String>(key: "lastBasal", defaultValue: "")
     var lastPumpReservoirU = StorageValue<Double?>(key: "lastPumpReservoirU", defaultValue: nil)
+    var pumpReservoirCache = StorageValue<PumpReservoirCache?>(key: "pumpReservoirCache", defaultValue: nil)
     var lastAutosens = StorageValue<Double?>(key: "lastAutosens", defaultValue: nil)
     var lastTdd = StorageValue<Double?>(key: "lastTdd", defaultValue: nil)
     var lastTargetLowMgdl = StorageValue<Double?>(key: "lastTargetLowMgdl", defaultValue: nil)
@@ -128,6 +129,7 @@ class Storage {
     var show30MinLine = StorageValue<Bool>(key: "show30MinLine", defaultValue: false)
     var show90MinLine = StorageValue<Bool>(key: "show90MinLine", defaultValue: false)
     var showMidnightLines = StorageValue<Bool>(key: "showMidnightMarkers", defaultValue: false)
+    var showPriorDayTimeLines = StorageValue<Bool>(key: "showPriorDayTimeMarkers", defaultValue: false)
     var showYesterdayLine = StorageValue<Bool>(key: "showYesterdayLine", defaultValue: false)
     var smallGraphTreatments = StorageValue<Bool>(key: "smallGraphTreatments", defaultValue: true)
 

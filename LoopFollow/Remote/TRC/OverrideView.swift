@@ -147,7 +147,7 @@ struct OverrideView: View {
                     )
                 case .statusSuccess:
                     return Alert(
-                        title: Text("Success"),
+                        title: Text("Command Sent"),
                         message: Text(statusMessage ?? ""),
                         dismissButton: .default(Text("OK"), action: {
                             presentationMode.wrappedValue.dismiss()
@@ -181,7 +181,7 @@ struct OverrideView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
-                    self.statusMessage = "Override command sent successfully."
+                    self.statusMessage = RemoteCommandMessage.sent
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendOverridePushNotification succeeded for override: \(override.name)")
                 } else {
@@ -201,7 +201,7 @@ struct OverrideView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
-                    self.statusMessage = "Cancel override command sent successfully."
+                    self.statusMessage = RemoteCommandMessage.sent
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendCancelOverridePushNotification succeeded")
                 } else {

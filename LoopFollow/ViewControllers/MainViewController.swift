@@ -103,7 +103,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
     var latestBasal = ""
-    var latestPumpVolume: Double = 50.0
+    var latestPumpVolume: Double?
     var latestIOB: InsulinMetric?
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
@@ -579,6 +579,11 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     }
 
     @objc func appMovedToBackground() {
+        LogManager.shared.log(
+            category: .general,
+            message: "App moved to background (refreshType=\(Storage.shared.backgroundRefreshType.value.rawValue), lowPowerMode=\(ProcessInfo.processInfo.isLowPowerModeEnabled), backgroundRefreshStatus=\(Self.describe(UIApplication.shared.backgroundRefreshStatus)))"
+        )
+
         // Allow screen to turn off
         UIApplication.shared.isIdleTimerDisabled = false
 
@@ -688,7 +693,18 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         scheduleAllTasks()
     }
 
+    private static func describe(_ status: UIBackgroundRefreshStatus) -> String {
+        switch status {
+        case .available: "available"
+        case .denied: "denied"
+        case .restricted: "restricted"
+        @unknown default: "unknown"
+        }
+    }
+
     @objc func appCameToForeground() {
+        LogManager.shared.log(category: .general, message: "App came to foreground")
+
         // BFU recovery (StorageReadiness.recover) is driven by AppDelegate before this
         // controller exists (the readiness gate), so handleBFUReloadCompleted() above
         // is a vestigial no-op in the gated flow.

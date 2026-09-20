@@ -270,7 +270,7 @@ struct LoopAPNSBolusView: View {
                 switch alertType {
                 case .success:
                     return Alert(
-                        title: Text("Success"),
+                        title: Text("Command Sent"),
                         message: Text(alertMessage),
                         dismissButton: .default(Text("OK")) {
                             presentationMode.wrappedValue.dismiss()
@@ -409,7 +409,7 @@ struct LoopAPNSBolusView: View {
                     }
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
-                    self.alertMessage = "Insulin sent successfully!"
+                    self.alertMessage = RemoteCommandMessage.sent
                     self.alertType = .success
                     LogManager.shared.log(
                         category: .apns,

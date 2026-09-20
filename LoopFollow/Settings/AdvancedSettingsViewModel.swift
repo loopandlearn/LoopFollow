@@ -19,24 +19,28 @@ class AdvancedSettingsViewModel: ObservableObject {
     @Published var graphBasal: Bool {
         didSet {
             Storage.shared.graphBasal.value = graphBasal
+            Observable.shared.chartSettingsChanged.value = true
         }
     }
 
     @Published var graphBolus: Bool {
         didSet {
             Storage.shared.graphBolus.value = graphBolus
+            Observable.shared.chartSettingsChanged.value = true
         }
     }
 
     @Published var graphCarbs: Bool {
         didSet {
             Storage.shared.graphCarbs.value = graphCarbs
+            Observable.shared.chartSettingsChanged.value = true
         }
     }
 
     @Published var graphOtherTreatments: Bool {
         didSet {
             Storage.shared.graphOtherTreatments.value = graphOtherTreatments
+            Observable.shared.chartSettingsChanged.value = true
         }
     }
 
