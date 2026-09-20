@@ -4,6 +4,61 @@
 import Foundation
 import HealthKit
 
+private enum ReturnNotificationConfigurationError: LocalizedError {
+    case incomplete
+    case invalid
+
+    var errorDescription: String? {
+        switch self {
+        case .incomplete:
+            return "Return notifications are not fully configured. Configure LoopFollow APNS credentials in App Settings → APN."
+        case .invalid:
+            return "Return-notification APNS credentials are malformed. Check the LoopFollow Key ID, Team ID, and private key in App Settings → APN."
+        }
+    }
+}
+
+enum APNSCredentialValidator {
+    static func validationErrors(keyID: String, teamID: String, apnsKey: String) -> [String]? {
+        var errors = [String]()
+        let identifierPattern = "^[A-Z0-9]{10}$"
+        if !matchesRegex(keyID, pattern: identifierPattern) {
+            errors.append("APNS Key ID (\(keyID)) must be 10 uppercase alphanumeric characters.")
+        }
+        if !matchesRegex(teamID, pattern: identifierPattern) {
+            errors.append("Team ID (\(teamID)) must be 10 uppercase alphanumeric characters.")
+        }
+        if !apnsKey.contains("-----BEGIN PRIVATE KEY-----") || !apnsKey.contains("-----END PRIVATE KEY-----") {
+            errors.append("APNS Key must be a valid PEM-formatted private key.")
+        } else if let keyData = extractKeyData(from: apnsKey) {
+            if Data(base64Encoded: keyData) == nil {
+                errors.append("APNS Key contains invalid Base64 key data.")
+            }
+        } else {
+            errors.append("APNS Key has invalid formatting.")
+        }
+        return errors.isEmpty ? nil : errors
+    }
+
+    private static func matchesRegex(_ text: String, pattern: String) -> Bool {
+        let regex = try? NSRegularExpression(pattern: pattern)
+        let range = NSRange(location: 0, length: text.utf16.count)
+        return regex?.firstMatch(in: text, options: [], range: range) != nil
+    }
+
+    private static func extractKeyData(from pemString: String) -> String? {
+        let lines = pemString.components(separatedBy: "\n")
+        guard let startIndex = lines.firstIndex(of: "-----BEGIN PRIVATE KEY-----"),
+              let endIndex = lines.firstIndex(of: "-----END PRIVATE KEY-----"),
+              startIndex < endIndex
+        else {
+            return nil
+        }
+        let keyLines = lines[(startIndex + 1) ..< endIndex]
+        return keyLines.joined()
+    }
+}
+
 class PushNotificationManager {
     private var deviceToken: String
     private var sharedSecret: String
@@ -64,6 +119,20 @@ class PushNotificationManager {
             keyId: lfKeyId,
             apnsKey: lfApnsKey
         )
+    }
+
+    func requireReturnNotificationInfo() throws -> CommandPayload.ReturnNotificationInfo {
+        guard let info = createReturnNotificationInfo(), info.isComplete else {
+            throw ReturnNotificationConfigurationError.incomplete
+        }
+        guard APNSCredentialValidator.validationErrors(
+            keyID: info.keyId,
+            teamID: info.teamId,
+            apnsKey: info.apnsKey
+        ) == nil else {
+            throw ReturnNotificationConfigurationError.invalid
+        }
+        return info
     }
 
     func sendOverridePushNotification(override: ProfileManager.TrioOverride, completion: @escaping (Bool, String?) -> Void) {
@@ -164,46 +233,31 @@ class PushNotificationManager {
         sendEncryptedCommand(payload: payload, completion: completion)
     }
 
-    private func validateCredentials() -> [String]? {
-        var errors = [String]()
-        let keyIdPattern = "^[A-Z0-9]{10}$"
-        if !matchesRegex(keyId, pattern: keyIdPattern) {
-            errors.append("APNS Key ID (\(keyId)) must be 10 uppercase alphanumeric characters.")
-        }
-        let teamIdPattern = "^[A-Z0-9]{10}$"
-        if !matchesRegex(teamId, pattern: teamIdPattern) {
-            errors.append("Team ID (\(teamId)) must be 10 uppercase alphanumeric characters.")
-        }
-        if !apnsKey.contains("-----BEGIN PRIVATE KEY-----") || !apnsKey.contains("-----END PRIVATE KEY-----") {
-            errors.append("APNS Key must be a valid PEM-formatted private key.")
-        } else {
-            if let keyData = extractKeyData(from: apnsKey) {
-                if Data(base64Encoded: keyData) == nil {
-                    errors.append("APNS Key contains invalid Base64 key data.")
-                }
-            } else {
-                errors.append("APNS Key has invalid formatting.")
-            }
-        }
-        return errors.isEmpty ? nil : errors
-    }
-
-    private func matchesRegex(_ text: String, pattern: String) -> Bool {
-        let regex = try? NSRegularExpression(pattern: pattern)
-        let range = NSRange(location: 0, length: text.utf16.count)
-        return regex?.firstMatch(in: text, options: [], range: range) != nil
-    }
-
-    private func extractKeyData(from pemString: String) -> String? {
-        let lines = pemString.components(separatedBy: "\n")
-        guard let startIndex = lines.firstIndex(of: "-----BEGIN PRIVATE KEY-----"),
-              let endIndex = lines.firstIndex(of: "-----END PRIVATE KEY-----"),
-              startIndex < endIndex
+    /// A successful completion means APNs accepted the command for delivery, not that Trio applied the mutation.
+    func sendPreparedMealMutationPayload(
+        _ payload: CommandPayload,
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        guard payload.commandType.isMealMutation,
+              let returnNotification = payload.returnNotification,
+              returnNotification.isComplete,
+              APNSCredentialValidator.validationErrors(
+                  keyID: returnNotification.keyId,
+                  teamID: returnNotification.teamId,
+                  apnsKey: returnNotification.apnsKey
+              ) == nil
         else {
-            return nil
+            let errorMessage = "A prepared meal mutation and usable return-notification configuration are required."
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
         }
-        let keyLines = lines[(startIndex + 1) ..< endIndex]
-        return keyLines.joined()
+
+        sendEncryptedCommand(payload: payload, completion: completion)
+    }
+
+    private func validateCredentials() -> [String]? {
+        APNSCredentialValidator.validationErrors(keyID: keyId, teamID: teamId, apnsKey: apnsKey)
     }
 
     private func sendEncryptedCommand(payload: CommandPayload, completion: @escaping (Bool, String?) -> Void) {
@@ -211,7 +265,7 @@ class PushNotificationManager {
         if sharedSecret.isEmpty { missingFields.append("sharedSecret") }
         if apnsKey.isEmpty { missingFields.append("apnsKey") }
         if keyId.isEmpty { missingFields.append("keyId") }
-        if user.isEmpty { missingFields.append("user") }
+        if payload.user.isEmpty { missingFields.append("user") }
         if deviceToken.isEmpty { missingFields.append("deviceToken") }
         if bundleId.isEmpty { missingFields.append("bundleId") }
         if teamId.isEmpty { missingFields.append("teamId") }
@@ -263,7 +317,9 @@ class PushNotificationManager {
             request.setValue("600", forHTTPHeaderField: "apns-expiration")
             request.setValue(bundleId, forHTTPHeaderField: "apns-topic")
             request.setValue("alert", forHTTPHeaderField: "apns-push-type")
-            request.setValue(payload.commandType.rawValue, forHTTPHeaderField: "apns-collapse-id")
+            if let collapseID = payload.apnsCollapseID {
+                request.setValue(collapseID, forHTTPHeaderField: "apns-collapse-id")
+            }
 
             request.httpBody = try JSONEncoder().encode(finalMessage)
 

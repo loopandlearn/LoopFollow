@@ -246,6 +246,7 @@ class Storage {
 
     var remoteBolusHistory = StorageValue<[RemoteBolusHistoryEntry]>(key: "remoteBolusHistory", defaultValue: [])
     var remoteMealHistory = StorageValue<[RemoteMealHistoryEntry]>(key: "remoteMealHistory", defaultValue: [])
+    var pendingTRCMealMutations = StorageValue<[TRCMealMutationOperation]>(key: "pendingTRCMealMutations", defaultValue: [])
     // Statistics display preferences
     var showGMI = StorageValue<Bool>(key: "showGMI", defaultValue: true)
     var showStdDev = StorageValue<Bool>(key: "showStdDev", defaultValue: true)
