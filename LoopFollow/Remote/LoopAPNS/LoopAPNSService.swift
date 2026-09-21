@@ -122,6 +122,80 @@ class LoopAPNSService {
         return hasFullSetup
     }
 
+    /// Fields every Loop remote command carries, plus the return-notification block encrypted with the OTP.
+    private func remoteCommandPayload(otp: String, alert: String) -> [String: Any] {
+        let now = Date()
+        var payload: [String: Any] = [
+            "otp": otp,
+            "remote-address": "LoopFollow",
+            "notes": "Sent via LoopFollow APNS",
+            "entered-by": "LoopFollow",
+            "sent-at": formatDateForAPNS(now),
+            "expiration": formatDateForAPNS(now.addingTimeInterval(5 * 60)),
+            "alert": alert,
+        ]
+        if let returnInfo = createReturnNotificationInfo(),
+           let encryptedReturnInfo = encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: otp)
+        {
+            payload["encrypted_return_notification"] = encryptedReturnInfo
+        }
+        return payload
+    }
+
+    private func sendRemoteCommand(_ payload: [String: Any], completion: @escaping (Bool, String?) -> Void) {
+        guard validateSetup() else {
+            let errorMessage = "Loop APNS Configuration not valid"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
+        }
+        let creds = effectiveCredentials()
+        sendAPNSNotification(
+            deviceToken: Storage.shared.deviceToken.value,
+            bundleIdentifier: Storage.shared.bundleId.value,
+            keyId: creds.keyId,
+            apnsKey: creds.apnsKey,
+            teamId: creds.teamId,
+            payload: payload,
+            completion: completion
+        )
+    }
+
+    /// Deletes the Loop carb entry with this `syncIdentifier`. Requires the Loop remote carb edit patch.
+    func sendCarbsDelete(syncIdentifier: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        var payload = remoteCommandPayload(otp: otp, alert: "Remote Carbs Delete")
+        payload["carbs-delete"] = syncIdentifier
+        LogManager.shared.log(category: .apns, message: "Sending carbs delete for syncIdentifier=\(LogRedactor.tail(syncIdentifier))")
+        sendRemoteCommand(payload, completion: completion)
+    }
+
+    /// Replaces the Loop carb entry with this `syncIdentifier`. Keys are prefixed so an unpatched Loop rejects the command.
+    func sendCarbsEdit(
+        syncIdentifier: String,
+        carbsAmount: Double,
+        absorptionTimeHours: Double,
+        foodType: String?,
+        consumedDate: Date?,
+        otp: String,
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        var payload = remoteCommandPayload(
+            otp: otp,
+            alert: "Remote Carbs Edit: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTimeHours)) hours"
+        )
+        payload["carbs-edit"] = syncIdentifier
+        payload["carbs-edit-entry"] = carbsAmount
+        payload["carbs-edit-absorption-time"] = absorptionTimeHours
+        if let foodType, !foodType.isEmpty {
+            payload["carbs-edit-food-type"] = foodType
+        }
+        if let consumedDate {
+            payload["carbs-edit-start-time"] = formatDateForAPNS(consumedDate)
+        }
+        LogManager.shared.log(category: .apns, message: "Sending carbs edit for syncIdentifier=\(LogRedactor.tail(syncIdentifier)): \(String(format: "%.1f", carbsAmount))g, absorption \(String(format: "%.1f", absorptionTimeHours))h")
+        sendRemoteCommand(payload, completion: completion)
+    }
+
     /// Sends carbs via APNS push notification
     /// - Parameters:
     ///   - payload: The carbs payload to send

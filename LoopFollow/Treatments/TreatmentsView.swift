@@ -400,6 +400,7 @@ struct TreatmentDetailView: View {
     @StateObject private var viewModel = TreatmentDetailViewModel()
     @Environment(\.presentationMode) private var presentationMode
     @ObservedObject private var commandTracker = TRCCommandTracker.shared
+    @ObservedObject private var loopCarbTracker = LoopCarbActionTracker.shared
     @ObservedObject private var remoteType = Storage.shared.remoteType
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject private var remoteCommands = Storage.shared.remoteCommands
@@ -431,6 +432,13 @@ struct TreatmentDetailView: View {
                 trioMealSection(meal)
                 if TrioMealTreatment.remoteActionsAvailable(remoteType: remoteType.value, device: device.value, remoteCommands: remoteCommands.value) {
                     trioRemoteActionsSection(meal)
+                }
+            }
+
+            if let carb = treatment.loopCarb {
+                loopCarbSection(carb)
+                if LoopCarbTreatment.remoteActionsAvailable(remoteType: remoteType.value, device: device.value) {
+                    loopRemoteActionsSection(carb)
                 }
             }
 
@@ -580,19 +588,14 @@ struct TreatmentDetailView: View {
         .sheet(isPresented: $showEditSheet) {
             if let meal = treatment.trioMeal {
                 TRCMealEditView(meal: meal)
+            } else if let carb = treatment.loopCarb {
+                LoopCarbEditSheet(carb: carb)
             }
         }
-        .confirmationDialog("Delete this meal in Trio?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
-            Button("Delete meal", role: .destructive) {
-                guard let meal = treatment.trioMeal else { return }
-                TRCCommandTracker.shared.sendDelete(mealID: meal.mealID.uuidString) { success, error in
-                    DispatchQueue.main.async {
-                        sendError = success ? nil : (error ?? "Failed to send the delete command.")
-                    }
-                }
-            }
+        .confirmationDialog(deleteDialogTitle, isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+            Button(treatment.trioMeal != nil ? "Delete meal" : "Delete carbs", role: .destructive, action: sendDelete)
         } message: {
-            Text("This removes the carb entry and any fat/protein entries Trio created from it.")
+            Text(deleteDialogMessage)
         }
         .onReceive(commandTracker.$lastCompleted) { completed in
             guard let meal = treatment.trioMeal,
@@ -601,6 +604,91 @@ struct TreatmentDetailView: View {
             else { return }
             presentationMode.wrappedValue.dismiss()
         }
+        .onReceive(loopCarbTracker.$states) { states in
+            guard let carb = treatment.loopCarb, states[carb.syncIdentifier] == .confirmed else { return }
+            presentationMode.wrappedValue.dismiss()
+        }
+    }
+
+    private var deleteDialogTitle: String {
+        treatment.trioMeal != nil ? "Delete this meal in Trio?" : "Delete this carb entry in Loop?"
+    }
+
+    private var deleteDialogMessage: String {
+        treatment.trioMeal != nil
+            ? "This removes the carb entry and any fat/protein entries Trio created from it."
+            : "This removes the carb entry from Loop. Loop recalculates carbs on board right away."
+    }
+
+    private func sendDelete() {
+        let completion: (Bool, String?) -> Void = { success, error in
+            DispatchQueue.main.async {
+                sendError = success ? nil : (error ?? "Failed to send the delete command.")
+            }
+        }
+        if let meal = treatment.trioMeal {
+            TRCCommandTracker.shared.sendDelete(mealID: meal.mealID.uuidString, completion: completion)
+        } else if let carb = treatment.loopCarb {
+            LoopCarbActionTracker.shared.sendDelete(carb: carb, completion: completion)
+        }
+    }
+
+    @ViewBuilder
+    private func loopCarbSection(_ carb: LoopCarbTreatment) -> some View {
+        Section(header: Text("Carb entry")) {
+            HStack {
+                Text("Carbs")
+                Spacer()
+                Text(String(format: "%.0f g", carb.carbs)).foregroundColor(.secondary)
+            }
+            if let hours = carb.absorptionHours {
+                HStack {
+                    Text("Absorption")
+                    Spacer()
+                    Text(String(format: "%.1f h", hours)).foregroundColor(.secondary)
+                }
+            }
+            if let foodType = carb.foodType {
+                HStack {
+                    Text("Food type")
+                    Spacer()
+                    Text(foodType).foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func loopRemoteActionsSection(_ carb: LoopCarbTreatment) -> some View {
+        let state = loopCarbTracker.state(forSyncIdentifier: carb.syncIdentifier)
+        let busy = loopCarbTracker.isBusy(syncIdentifier: carb.syncIdentifier)
+        let withinWindow = carb.isWithinEditWindow()
+
+        Section(header: Text("Remote actions"), footer: loopRemoteActionsFooter(withinWindow: withinWindow)) {
+            if busy, let message = state.message {
+                HStack {
+                    ProgressView().scaleEffect(0.8)
+                    Text(message).foregroundColor(.secondary)
+                }
+            } else if state.isTerminal, state != .confirmed, let message = state.message {
+                Text(message)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+            } else if let sendError {
+                Text(sendError)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+            }
+
+            Button("Edit carbs") { showEditSheet = true }
+                .disabled(!withinWindow || busy)
+            Button("Delete carbs", role: .destructive) { showDeleteConfirmation = true }
+                .disabled(!withinWindow || busy)
+        }
+    }
+
+    private func loopRemoteActionsFooter(withinWindow: Bool) -> Text? {
+        withinWindow ? Text("Requires a Loop build with remote carb editing.") : Text("Carb entries can be changed remotely for 23 hours.")
     }
 
     @ViewBuilder
@@ -1046,8 +1134,9 @@ struct Treatment: Identifiable {
     let color: Color
     let bgValue: Int
     let trioMeal: TrioMealTreatment?
+    let loopCarb: LoopCarbTreatment?
 
-    init(id: String? = nil, type: TreatmentType, date: TimeInterval, title: String, subtitle: String?, icon: String, color: Color, bgValue: Int, trioMeal: TrioMealTreatment? = nil) {
+    init(id: String? = nil, type: TreatmentType, date: TimeInterval, title: String, subtitle: String?, icon: String, color: Color, bgValue: Int, trioMeal: TrioMealTreatment? = nil, loopCarb: LoopCarbTreatment? = nil) {
         self.id = id ?? "\(type)-\(date)-\(title)"
         self.type = type
         self.date = date
@@ -1057,6 +1146,7 @@ struct Treatment: Identifiable {
         self.color = color
         self.bgValue = bgValue
         self.trioMeal = trioMeal
+        self.loopCarb = loopCarb
     }
 
     var hourKey: String {
@@ -1285,6 +1375,7 @@ class TreatmentsViewModel: ObservableObject {
                 let trioMeal = eventType == "Carb Correction"
                     ? TrioMealTreatment(nightscoutEntry: entry, date: timestamp, siblingIDCount: siblingIDCounts[entry["id"] as? String ?? ""] ?? 0)
                     : nil
+                let loopCarb = trioMeal == nil ? LoopCarbTreatment(nightscoutEntry: entry, date: timestamp) : nil
                 let carbs = entry["carbs"] as? Double ?? 0
                 if carbs > 0 || trioMeal != nil {
                     let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
@@ -1298,7 +1389,8 @@ class TreatmentsViewModel: ObservableObject {
                         icon: "circle.fill",
                         color: .orange,
                         bgValue: actualBG,
-                        trioMeal: trioMeal
+                        trioMeal: trioMeal,
+                        loopCarb: loopCarb
                     )
                     treatments.append(treatment)
                 }
