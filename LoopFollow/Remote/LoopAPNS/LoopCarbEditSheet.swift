@@ -173,14 +173,12 @@ struct LoopCarbEditSheet: View {
 
     private func send() {
         isSending = true
-        let originalDate = Date(timeIntervalSince1970: carb.date)
-        let dateChanged = abs(consumedDate.timeIntervalSince(originalDate)) >= 60
         RemoteCommandTracker.shared.sendLoopCarbEdit(
             carb: carb,
             carbsAmount: carbsAmount.doubleValue(for: .gram()),
             absorptionHours: absorptionTimeValue,
             foodType: foodType.isEmpty ? nil : foodType,
-            consumedDate: dateChanged ? consumedDate : nil
+            consumedDate: consumedDate
         ) { success, error in
             DispatchQueue.main.async {
                 isSending = false

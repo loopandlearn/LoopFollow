@@ -207,7 +207,7 @@ extension RemoteCommandTracker {
         }
     }
 
-    func sendLoopCarbEdit(carb: LoopCarbTreatment, carbsAmount: Double, absorptionHours: Double, foodType: String?, consumedDate: Date?, completion: @escaping (Bool, String?) -> Void) {
+    func sendLoopCarbEdit(carb: LoopCarbTreatment, carbsAmount: Double, absorptionHours: Double, foodType: String?, consumedDate: Date, completion: @escaping (Bool, String?) -> Void) {
         let key = carb.syncIdentifier
         begin(key: key)
         guard let otp = loopOTP(key: key, completion: completion) else { return }
