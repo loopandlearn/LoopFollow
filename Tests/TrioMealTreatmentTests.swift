@@ -28,7 +28,7 @@ struct TrioMealTreatmentTests {
 
     @Test("root with fpuID is not a child")
     func root() {
-        let meal = TrioMealTreatment(nightscoutEntry: entry(id: rootID, fpuID: familyID, fat: 20, protein: 15, notes: " 📡 "), date: 0, siblingIDCount: 1)
+        let meal = TrioMealTreatment(nightscoutEntry: entry(id: rootID, fpuID: familyID, fat: 20, protein: 15, notes: " 📡 "), date: 0)
         #expect(meal?.isFPUChild == false)
         #expect(meal?.mealID.uuidString == rootID)
         #expect(meal?.fpuID?.uuidString == familyID)
@@ -40,43 +40,30 @@ struct TrioMealTreatmentTests {
 
     @Test("child carries the family id as both id and fpuID")
     func child() {
-        let meal = TrioMealTreatment(nightscoutEntry: entry(id: familyID, fpuID: familyID, carbs: 12), date: 0, siblingIDCount: 3)
+        let meal = TrioMealTreatment(nightscoutEntry: entry(id: familyID, fpuID: familyID, carbs: 12), date: 0)
         #expect(meal?.isFPUChild == true)
         #expect(meal?.mealID.uuidString == familyID)
     }
 
-    @Test("without fpuID, shared ids mean children and unique ids mean roots")
-    func legacy() {
-        #expect(TrioMealTreatment(nightscoutEntry: entry(id: familyID, carbs: 12), date: 0, siblingIDCount: 3)?.isFPUChild == true)
-        #expect(TrioMealTreatment(nightscoutEntry: entry(id: rootID), date: 0, siblingIDCount: 1)?.isFPUChild == false)
+    @Test("without fpuID the document is a root")
+    func missingFPUID() {
+        #expect(TrioMealTreatment(nightscoutEntry: entry(id: rootID), date: 0)?.isFPUChild == false)
+        #expect(TrioMealTreatment(nightscoutEntry: entry(id: rootID), date: 0)?.fpuID == nil)
     }
 
     @Test("rejects non-Trio, non-carb, non-UUID and empty entries")
     func rejects() {
-        #expect(TrioMealTreatment(nightscoutEntry: entry(id: rootID, enteredBy: "loop://phone"), date: 0, siblingIDCount: 1) == nil)
-        #expect(TrioMealTreatment(nightscoutEntry: entry(id: rootID, eventType: "Meal Bolus"), date: 0, siblingIDCount: 1) == nil)
-        #expect(TrioMealTreatment(nightscoutEntry: entry(id: "not-a-uuid"), date: 0, siblingIDCount: 1) == nil)
-        #expect(TrioMealTreatment(nightscoutEntry: entry(id: rootID, carbs: 0), date: 0, siblingIDCount: 1) == nil)
-    }
-
-    @Test("sibling counts only count Trio carb documents")
-    func siblingCounts() {
-        let counts = TrioMealTreatment.siblingIDCounts(in: [
-            entry(id: familyID, carbs: 10),
-            entry(id: familyID, carbs: 10),
-            entry(id: rootID),
-            entry(id: rootID, enteredBy: "mock"),
-            entry(id: rootID, eventType: "Note"),
-        ])
-        #expect(counts[familyID] == 2)
-        #expect(counts[rootID] == 1)
+        #expect(TrioMealTreatment(nightscoutEntry: entry(id: rootID, enteredBy: "loop://phone"), date: 0) == nil)
+        #expect(TrioMealTreatment(nightscoutEntry: entry(id: rootID, eventType: "Meal Bolus"), date: 0) == nil)
+        #expect(TrioMealTreatment(nightscoutEntry: entry(id: "not-a-uuid"), date: 0) == nil)
+        #expect(TrioMealTreatment(nightscoutEntry: entry(id: rootID, carbs: 0), date: 0) == nil)
     }
 
     @Test("edit window is 24 h back and 12 h ahead")
     func window() {
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         func meal(offsetHours: Double) -> TrioMealTreatment? {
-            TrioMealTreatment(nightscoutEntry: entry(id: rootID), date: now.timeIntervalSince1970 + offsetHours * 3600, siblingIDCount: 1)
+            TrioMealTreatment(nightscoutEntry: entry(id: rootID), date: now.timeIntervalSince1970 + offsetHours * 3600)
         }
         #expect(meal(offsetHours: -23)?.isWithinEditWindow(now: now) == true)
         #expect(meal(offsetHours: -25)?.isWithinEditWindow(now: now) == false)

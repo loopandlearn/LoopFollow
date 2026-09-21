@@ -1340,7 +1340,6 @@ class TreatmentsViewModel: ObservableObject {
         var detectedSMB = false
         var detectedAutomatic = false
         guard let mainVC = getMainViewController() else { return ([], false, false) }
-        let siblingIDCounts = TrioMealTreatment.siblingIDCounts(in: entries)
 
         for entry in entries {
             guard let eventType = entry["eventType"] as? String,
@@ -1363,9 +1362,7 @@ class TreatmentsViewModel: ObservableObject {
 
             switch eventType {
             case "Carb Correction", "Meal Bolus":
-                let trioMeal = eventType == "Carb Correction"
-                    ? TrioMealTreatment(nightscoutEntry: entry, date: timestamp, siblingIDCount: siblingIDCounts[entry["id"] as? String ?? ""] ?? 0)
-                    : nil
+                let trioMeal = eventType == "Carb Correction" ? TrioMealTreatment(nightscoutEntry: entry, date: timestamp) : nil
                 let loopCarb = trioMeal == nil ? LoopCarbTreatment(nightscoutEntry: entry, date: timestamp) : nil
                 let carbs = entry["carbs"] as? Double ?? 0
                 if carbs > 0 || trioMeal != nil {
