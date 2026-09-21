@@ -14,6 +14,8 @@ struct MealMacroInputs: View {
     @FocusState.Binding var fatFocused: Bool
     @FocusState.Binding var proteinFocused: Bool
     var onValidationError: (String) -> Void
+    /// Values already in the meal stay editable even when they exceed the guardrail maxima.
+    var currentValues: (carbs: HKQuantity, fat: HKQuantity, protein: HKQuantity)? = nil
 
     @ObservedObject private var maxCarbs = Storage.shared.maxCarbs
     @ObservedObject private var maxProtein = Storage.shared.maxProtein
@@ -26,7 +28,7 @@ struct MealMacroInputs: View {
             unit: .gram(),
             maxLength: 4,
             minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-            maxValue: maxCarbs.value,
+            maxValue: ceiling(maxCarbs.value, currentValues?.carbs),
             isFocused: $carbsFocused,
             onValidationError: onValidationError
         )
@@ -38,7 +40,7 @@ struct MealMacroInputs: View {
                 unit: .gram(),
                 maxLength: 4,
                 minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                maxValue: maxFat.value,
+                maxValue: ceiling(maxFat.value, currentValues?.fat),
                 isFocused: $fatFocused,
                 onValidationError: onValidationError
             )
@@ -49,10 +51,15 @@ struct MealMacroInputs: View {
                 unit: .gram(),
                 maxLength: 4,
                 minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                maxValue: maxProtein.value,
+                maxValue: ceiling(maxProtein.value, currentValues?.protein),
                 isFocused: $proteinFocused,
                 onValidationError: onValidationError
             )
         }
+    }
+
+    private func ceiling(_ limit: HKQuantity, _ current: HKQuantity?) -> HKQuantity {
+        guard let current, current.compare(limit) == .orderedDescending else { return limit }
+        return current
     }
 }

@@ -73,7 +73,12 @@ struct TRCMealEditView: View {
                         carbsFocused: $carbsFocused,
                         fatFocused: $fatFocused,
                         proteinFocused: $proteinFocused,
-                        onValidationError: { alertType = .validation($0) }
+                        onValidationError: { alertType = .validation($0) },
+                        currentValues: (
+                            HKQuantity(unit: .gram(), doubleValue: meal.carbs),
+                            HKQuantity(unit: .gram(), doubleValue: Double(meal.fat)),
+                            HKQuantity(unit: .gram(), doubleValue: Double(meal.protein))
+                        )
                     )
                     DatePicker("Meal time", selection: $mealDate, in: dateRange, displayedComponents: [.date, .hourAndMinute])
                         .environment(\.timeZone, dateTimeUtils.displayTimeZone())
