@@ -398,6 +398,14 @@ struct TreatmentDetailView: View {
     let treatment: Treatment
     var rootMeal: Treatment? = nil
     @StateObject private var viewModel = TreatmentDetailViewModel()
+    @Environment(\.presentationMode) private var presentationMode
+    @ObservedObject private var commandTracker = TRCCommandTracker.shared
+    @ObservedObject private var remoteType = Storage.shared.remoteType
+    @ObservedObject private var device = Storage.shared.device
+    @ObservedObject private var remoteCommands = Storage.shared.remoteCommands
+    @State private var showEditSheet = false
+    @State private var showDeleteConfirmation = false
+    @State private var sendError: String?
 
     var body: some View {
         List {
@@ -416,6 +424,13 @@ struct TreatmentDetailView: View {
                             .foregroundColor(.secondary)
                     }
                     Spacer()
+                }
+            }
+
+            if let meal = treatment.trioMeal {
+                trioMealSection(meal)
+                if TrioMealTreatment.remoteActionsAvailable(remoteType: remoteType.value, device: device.value, remoteCommands: remoteCommands.value) {
+                    trioRemoteActionsSection(meal)
                 }
             }
 
@@ -562,6 +577,84 @@ struct TreatmentDetailView: View {
         .onAppear {
             viewModel.loadDetails(for: treatment)
         }
+        .sheet(isPresented: $showEditSheet) {
+            if let meal = treatment.trioMeal {
+                TRCMealEditView(meal: meal)
+            }
+        }
+        .confirmationDialog("Delete this meal in Trio?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+            Button("Delete meal", role: .destructive) {
+                guard let meal = treatment.trioMeal else { return }
+                TRCCommandTracker.shared.sendDelete(mealID: meal.mealID.uuidString) { success, error in
+                    DispatchQueue.main.async {
+                        sendError = success ? nil : (error ?? "Failed to send the delete command.")
+                    }
+                }
+            }
+        } message: {
+            Text("This removes the carb entry and any fat/protein entries Trio created from it.")
+        }
+        .onReceive(commandTracker.$lastCompleted) { completed in
+            guard let meal = treatment.trioMeal,
+                  let result = completed[meal.mealID.uuidString],
+                  result.isSuccess
+            else { return }
+            presentationMode.wrappedValue.dismiss()
+        }
+    }
+
+    @ViewBuilder
+    private func trioMealSection(_ meal: TrioMealTreatment) -> some View {
+        Section(header: Text("Meal"), footer: meal.isFPUChild ? Text("One of the small carb entries Trio created from this meal's fat and protein. Editing or deleting affects the whole meal.") : nil) {
+            TRCMealMacroRows(carbs: meal.carbs, fat: meal.fat, protein: meal.protein, date: meal.date)
+            if let note = meal.note {
+                HStack(alignment: .top) {
+                    Text("Note")
+                    Spacer()
+                    Text(note)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.trailing)
+                }
+            }
+            if meal.isFPUChild, let rootMeal {
+                NavigationLink("Show original meal", destination: TreatmentDetailView(treatment: rootMeal))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func trioRemoteActionsSection(_ meal: TrioMealTreatment) -> some View {
+        let mealID = meal.mealID.uuidString
+        let pending = commandTracker.pendingCommand(forMealID: mealID)
+        let lastResult = commandTracker.lastResult(forMealID: mealID)
+        let withinWindow = meal.isWithinEditWindow()
+
+        Section(header: Text("Remote actions"), footer: remoteActionsFooter(withinWindow: withinWindow)) {
+            if pending != nil {
+                HStack {
+                    ProgressView().scaleEffect(0.8)
+                    Text("Sent, awaiting confirmation from Trio…")
+                        .foregroundColor(.secondary)
+                }
+            } else if let lastResult, !lastResult.isSuccess {
+                Text(lastResult.displayMessage)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+            } else if let sendError {
+                Text(sendError)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+            }
+
+            Button("Edit meal") { showEditSheet = true }
+                .disabled(!withinWindow || pending != nil)
+            Button("Delete meal", role: .destructive) { showDeleteConfirmation = true }
+                .disabled(!withinWindow || pending != nil)
+        }
+    }
+
+    private func remoteActionsFooter(withinWindow: Bool) -> Text? {
+        withinWindow ? nil : Text("Meals can be changed remotely up to 24 hours after and 12 hours before their time.")
     }
 
     private func formatNavigationTitle(_ timeInterval: TimeInterval) -> String {
