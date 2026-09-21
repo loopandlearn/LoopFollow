@@ -150,7 +150,7 @@ struct TRCMealEditView: View {
 
     private func send() {
         isSending = true
-        TRCCommandTracker.shared.sendEdit(
+        RemoteCommandTracker.shared.sendTrioMealEdit(
             mealID: meal.mealID.uuidString,
             carbs: carbsValue,
             fat: fatValue,

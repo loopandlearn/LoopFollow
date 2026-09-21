@@ -399,14 +399,21 @@ struct TreatmentDetailView: View {
     var rootMeal: Treatment? = nil
     @StateObject private var viewModel = TreatmentDetailViewModel()
     @Environment(\.presentationMode) private var presentationMode
-    @ObservedObject private var commandTracker = TRCCommandTracker.shared
-    @ObservedObject private var loopCarbTracker = LoopCarbActionTracker.shared
+    @ObservedObject private var commandTracker = RemoteCommandTracker.shared
     @ObservedObject private var remoteType = Storage.shared.remoteType
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject private var remoteCommands = Storage.shared.remoteCommands
     @State private var showEditSheet = false
     @State private var showDeleteConfirmation = false
-    @State private var sendError: String?
+
+    /// Key under which the tracker follows this treatment's remote commands.
+    private var commandKey: String? {
+        treatment.trioMeal?.mealID.uuidString ?? treatment.loopCarb?.syncIdentifier
+    }
+
+    private var commandState: RemoteCommandTracker.State? {
+        commandKey.flatMap { commandTracker.states[$0] }
+    }
 
     var body: some View {
         List {
@@ -597,15 +604,9 @@ struct TreatmentDetailView: View {
         } message: {
             Text(deleteDialogMessage)
         }
-        .onReceive(commandTracker.$lastCompleted) { completed in
-            guard let meal = treatment.trioMeal,
-                  let result = completed[meal.mealID.uuidString],
-                  result.isSuccess
-            else { return }
-            presentationMode.wrappedValue.dismiss()
-        }
-        .onReceive(loopCarbTracker.$states) { states in
-            guard let carb = treatment.loopCarb, states[carb.syncIdentifier] == .confirmed else { return }
+        .onChange(of: commandState) { _, state in
+            guard let commandKey, case .done(success: true, message: _) = state else { return }
+            commandTracker.consume(key: commandKey)
             presentationMode.wrappedValue.dismiss()
         }
     }
@@ -621,15 +622,28 @@ struct TreatmentDetailView: View {
     }
 
     private func sendDelete() {
-        let completion: (Bool, String?) -> Void = { success, error in
-            DispatchQueue.main.async {
-                sendError = success ? nil : (error ?? "Failed to send the delete command.")
-            }
-        }
         if let meal = treatment.trioMeal {
-            TRCCommandTracker.shared.sendDelete(mealID: meal.mealID.uuidString, completion: completion)
+            commandTracker.sendTrioMealDelete(mealID: meal.mealID.uuidString) { _, _ in }
         } else if let carb = treatment.loopCarb {
-            LoopCarbActionTracker.shared.sendDelete(carb: carb, completion: completion)
+            commandTracker.sendLoopCarbDelete(carb: carb) { _, _ in }
+        }
+    }
+
+    /// Pending indicator or last failure for this treatment's remote command.
+    @ViewBuilder
+    private func commandStatusRow(pendingText: String) -> some View {
+        switch commandState {
+        case .pending:
+            HStack {
+                ProgressView().scaleEffect(0.8)
+                Text(pendingText).foregroundColor(.secondary)
+            }
+        case let .done(success, message) where !success:
+            Text(message)
+                .font(.footnote)
+                .foregroundColor(.red)
+        default:
+            EmptyView()
         }
     }
 
@@ -660,25 +674,11 @@ struct TreatmentDetailView: View {
 
     @ViewBuilder
     private func loopRemoteActionsSection(_ carb: LoopCarbTreatment) -> some View {
-        let state = loopCarbTracker.state(forSyncIdentifier: carb.syncIdentifier)
-        let busy = loopCarbTracker.isBusy(syncIdentifier: carb.syncIdentifier)
+        let busy = commandTracker.isBusy(key: carb.syncIdentifier)
         let withinWindow = carb.isWithinEditWindow()
 
         Section(header: Text("Remote actions"), footer: loopRemoteActionsFooter(withinWindow: withinWindow)) {
-            if busy, let message = state.message {
-                HStack {
-                    ProgressView().scaleEffect(0.8)
-                    Text(message).foregroundColor(.secondary)
-                }
-            } else if state.isTerminal, state != .confirmed, let message = state.message {
-                Text(message)
-                    .font(.footnote)
-                    .foregroundColor(.red)
-            } else if let sendError {
-                Text(sendError)
-                    .font(.footnote)
-                    .foregroundColor(.red)
-            }
+            commandStatusRow(pendingText: "Sent, awaiting confirmation from Loop…")
 
             Button("Edit carbs") { showEditSheet = true }
                 .disabled(!withinWindow || busy)
@@ -712,32 +712,16 @@ struct TreatmentDetailView: View {
 
     @ViewBuilder
     private func trioRemoteActionsSection(_ meal: TrioMealTreatment) -> some View {
-        let mealID = meal.mealID.uuidString
-        let pending = commandTracker.pendingCommand(forMealID: mealID)
-        let lastResult = commandTracker.lastResult(forMealID: mealID)
+        let busy = commandTracker.isBusy(key: meal.mealID.uuidString)
         let withinWindow = meal.isWithinEditWindow()
 
         Section(header: Text("Remote actions"), footer: remoteActionsFooter(withinWindow: withinWindow)) {
-            if pending != nil {
-                HStack {
-                    ProgressView().scaleEffect(0.8)
-                    Text("Sent, awaiting confirmation from Trio…")
-                        .foregroundColor(.secondary)
-                }
-            } else if let lastResult, !lastResult.isSuccess {
-                Text(lastResult.displayMessage)
-                    .font(.footnote)
-                    .foregroundColor(.red)
-            } else if let sendError {
-                Text(sendError)
-                    .font(.footnote)
-                    .foregroundColor(.red)
-            }
+            commandStatusRow(pendingText: "Sent, awaiting confirmation from Trio…")
 
             Button("Edit meal") { showEditSheet = true }
-                .disabled(!withinWindow || pending != nil)
+                .disabled(!withinWindow || busy)
             Button("Delete meal", role: .destructive) { showDeleteConfirmation = true }
-                .disabled(!withinWindow || pending != nil)
+                .disabled(!withinWindow || busy)
         }
     }
 

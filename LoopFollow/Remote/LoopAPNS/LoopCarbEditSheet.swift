@@ -175,7 +175,7 @@ struct LoopCarbEditSheet: View {
         isSending = true
         let originalDate = Date(timeIntervalSince1970: carb.date)
         let dateChanged = abs(consumedDate.timeIntervalSince(originalDate)) >= 60
-        LoopCarbActionTracker.shared.sendEdit(
+        RemoteCommandTracker.shared.sendLoopCarbEdit(
             carb: carb,
             carbsAmount: carbsAmount.doubleValue(for: .gram()),
             absorptionHours: absorptionTimeValue,

@@ -122,6 +122,8 @@ class LoopAPNSService {
         return hasFullSetup
     }
 
+    private static let returnNotificationRequiredMessage = "Editing or deleting a carb entry needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."
+
     /// Fields every Loop remote command carries, plus the return-notification block encrypted with the OTP.
     private func remoteCommandPayload(otp: String, alert: String) -> [String: Any] {
         let now = Date()
@@ -138,6 +140,16 @@ class LoopAPNSService {
            let encryptedReturnInfo = encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: otp)
         {
             payload["encrypted_return_notification"] = encryptedReturnInfo
+        }
+        return payload
+    }
+
+    /// Carb delete/edit are confirmed only through Loop's return push, so the encrypted return block is mandatory.
+    private func confirmedCommandPayload(otp: String, alert: String) -> [String: Any]? {
+        let payload = remoteCommandPayload(otp: otp, alert: alert)
+        guard payload["encrypted_return_notification"] != nil else {
+            LogManager.shared.log(category: .apns, message: "Carb command not sent: return notification info unavailable")
+            return nil
         }
         return payload
     }
@@ -163,7 +175,10 @@ class LoopAPNSService {
 
     /// Deletes the Loop carb entry with this `syncIdentifier`. Requires the Loop remote carb edit patch.
     func sendCarbsDelete(syncIdentifier: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
-        var payload = remoteCommandPayload(otp: otp, alert: "Remote Carbs Delete")
+        guard var payload = confirmedCommandPayload(otp: otp, alert: "Remote Carbs Delete") else {
+            completion(false, Self.returnNotificationRequiredMessage)
+            return
+        }
         payload["carbs-delete"] = syncIdentifier
         LogManager.shared.log(category: .apns, message: "Sending carbs delete for syncIdentifier=\(LogRedactor.tail(syncIdentifier))")
         sendRemoteCommand(payload, completion: completion)
@@ -179,10 +194,13 @@ class LoopAPNSService {
         otp: String,
         completion: @escaping (Bool, String?) -> Void
     ) {
-        var payload = remoteCommandPayload(
+        guard var payload = confirmedCommandPayload(
             otp: otp,
             alert: "Remote Carbs Edit: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTimeHours)) hours"
-        )
+        ) else {
+            completion(false, Self.returnNotificationRequiredMessage)
+            return
+        }
         payload["carbs-edit"] = syncIdentifier
         payload["carbs-edit-entry"] = carbsAmount
         payload["carbs-edit-absorption-time"] = absorptionTimeHours
