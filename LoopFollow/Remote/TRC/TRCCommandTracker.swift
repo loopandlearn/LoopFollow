@@ -178,7 +178,9 @@ final class TRCCommandTracker: ObservableObject {
             guard self.pending[command.id] != nil else { return }
             self.pending[command.id] = nil
             self.lastCompleted[command.mealID] = CompletedCommand(command: command, outcome: outcome, message: message, completedAt: Date())
-            NotificationCenter.default.post(name: .remoteMealCommandDidComplete, object: nil, userInfo: ["mealID": command.mealID])
+            if outcome != .sendFailed {
+                NotificationCenter.default.post(name: .remoteMealCommandDidComplete, object: nil, userInfo: ["mealID": command.mealID])
+            }
         }
     }
 }
