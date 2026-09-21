@@ -10,6 +10,13 @@ enum TRCCommandType: String, Encodable {
     case meal
     case startOverride = "start_override"
     case cancelOverride = "cancel_override"
+    case editMeal = "edit_meal"
+    case deleteMeal = "delete_meal"
+
+    /// Meal mutations get one APNs collapse id per command so two sends never collapse into one.
+    var usesCommandIDAsCollapseID: Bool {
+        self == .editMeal || self == .deleteMeal
+    }
 
     var displayName: String {
         switch self {
@@ -19,6 +26,8 @@ enum TRCCommandType: String, Encodable {
         case .meal: return "Meal"
         case .startOverride: return "Start Override"
         case .cancelOverride: return "Cancel Override"
+        case .editMeal: return "Edit Meal"
+        case .deleteMeal: return "Delete Meal"
         }
     }
 }

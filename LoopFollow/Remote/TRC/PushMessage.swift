@@ -43,7 +43,16 @@ struct CommandPayload: Encodable {
     var fat: Int?
     var overrideName: String?
     var scheduledTime: TimeInterval?
+    var commandID: String?
+    var mealID: String?
     var returnNotification: ReturnNotificationInfo?
+
+    var apnsCollapseID: String {
+        if commandType.usesCommandIDAsCollapseID, let commandID {
+            return commandID
+        }
+        return commandType.rawValue
+    }
 
     struct ReturnNotificationInfo: Encodable {
         let productionEnvironment: Bool
@@ -75,6 +84,8 @@ struct CommandPayload: Encodable {
         case fat
         case overrideName
         case scheduledTime = "scheduled_time"
+        case commandID = "command_id"
+        case mealID = "meal_id"
         case returnNotification = "return_notification"
     }
 }
