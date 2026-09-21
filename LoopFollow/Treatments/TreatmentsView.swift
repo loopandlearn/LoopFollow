@@ -121,7 +121,7 @@ struct TreatmentsView: View {
                                             .padding(.bottom, 2)
                                             .background(Color(.systemBackground))
                                     } else if let treatment = row.treatment {
-                                        TreatmentRow(treatment: treatment)
+                                        TreatmentRow(treatment: treatment, rootMeal: viewModel.rootMeal(forFPUChild: treatment))
                                     }
                                 }
                             } header: {
@@ -198,6 +198,9 @@ struct TreatmentsView: View {
                 }
                 .onChange(of: device.value) { newValue in
                     normalizeSelectedFilter(for: newValue)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .remoteMealCommandDidComplete)) { _ in
+                    viewModel.refreshTreatments()
                 }
             }
         }
@@ -393,6 +396,7 @@ private struct DayRow: Identifiable {
 
 struct TreatmentDetailView: View {
     let treatment: Treatment
+    var rootMeal: Treatment? = nil
     @StateObject private var viewModel = TreatmentDetailViewModel()
 
     var body: some View {
@@ -832,9 +836,10 @@ class TreatmentDetailViewModel: ObservableObject {
 
 struct TreatmentRow: View {
     let treatment: Treatment
+    var rootMeal: Treatment? = nil
 
     var body: some View {
-        NavigationLink(destination: TreatmentDetailView(treatment: treatment)) {
+        NavigationLink(destination: TreatmentDetailView(treatment: treatment, rootMeal: rootMeal)) {
             HStack {
                 Image(systemName: treatment.icon)
                     .foregroundColor(treatment.color)
@@ -947,8 +952,9 @@ struct Treatment: Identifiable {
     let icon: String
     let color: Color
     let bgValue: Int
+    let trioMeal: TrioMealTreatment?
 
-    init(id: String? = nil, type: TreatmentType, date: TimeInterval, title: String, subtitle: String?, icon: String, color: Color, bgValue: Int) {
+    init(id: String? = nil, type: TreatmentType, date: TimeInterval, title: String, subtitle: String?, icon: String, color: Color, bgValue: Int, trioMeal: TrioMealTreatment? = nil) {
         self.id = id ?? "\(type)-\(date)-\(title)"
         self.type = type
         self.date = date
@@ -957,6 +963,7 @@ struct Treatment: Identifiable {
         self.icon = icon
         self.color = color
         self.bgValue = bgValue
+        self.trioMeal = trioMeal
     }
 
     var hourKey: String {
@@ -1013,6 +1020,15 @@ class TreatmentsViewModel: ObservableObject {
                 self.isInitialLoading = false
                 self.isFetching = false
             }
+        }
+    }
+
+    /// The root meal for an FPU child, when the Trio build publishes `fpuID` and the root is loaded.
+    func rootMeal(forFPUChild treatment: Treatment) -> Treatment? {
+        guard let child = treatment.trioMeal, child.isFPUChild, let fpuID = child.fpuID else { return nil }
+        return allTreatments.first { candidate in
+            guard let meal = candidate.trioMeal, !meal.isFPUChild else { return false }
+            return meal.fpuID == fpuID
         }
     }
 
@@ -1150,6 +1166,7 @@ class TreatmentsViewModel: ObservableObject {
         var detectedSMB = false
         var detectedAutomatic = false
         guard let mainVC = getMainViewController() else { return ([], false, false) }
+        let siblingIDCounts = TrioMealTreatment.siblingIDCounts(in: entries)
 
         for entry in entries {
             guard let eventType = entry["eventType"] as? String,
@@ -1172,17 +1189,23 @@ class TreatmentsViewModel: ObservableObject {
 
             switch eventType {
             case "Carb Correction", "Meal Bolus":
-                if let carbs = entry["carbs"] as? Double, carbs > 0 {
+                let trioMeal = eventType == "Carb Correction"
+                    ? TrioMealTreatment(nightscoutEntry: entry, date: timestamp, siblingIDCount: siblingIDCounts[entry["id"] as? String ?? ""] ?? 0)
+                    : nil
+                let carbs = entry["carbs"] as? Double ?? 0
+                if carbs > 0 || trioMeal != nil {
                     let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
+                    let title = carbs > 0 ? "\(Int(carbs))g" : "F\(trioMeal?.fat ?? 0) P\(trioMeal?.protein ?? 0)"
                     let treatment = Treatment(
                         id: "\(nsId)-carb",
                         type: .carb,
                         date: timestamp,
-                        title: "\(Int(carbs))g",
-                        subtitle: "Carbs",
+                        title: title,
+                        subtitle: trioMeal?.isFPUChild == true ? "Carbs • FPU" : "Carbs",
                         icon: "circle.fill",
                         color: .orange,
-                        bgValue: actualBG
+                        bgValue: actualBG,
+                        trioMeal: trioMeal
                     )
                     treatments.append(treatment)
                 }
