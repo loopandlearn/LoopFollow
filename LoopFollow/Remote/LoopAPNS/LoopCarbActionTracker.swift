@@ -3,12 +3,14 @@
 
 import Foundation
 
-/// Sends carb delete/edit commands to Loop and confirms them by watching Nightscout.
+/// Sends carb delete/edit commands to Loop and tracks their outcome.
 ///
-/// Loop sends no acknowledgement push, so the treatment is polled by `syncIdentifier`:
-/// a delete is confirmed when it disappears, an edit when the new values are published.
-/// Loop reports failures as Nightscout Notes whose `enteredBy` names the action.
+/// Loop's return push (`command_type` `carbs_delete`/`carbs_edit`, `sync_identifier`,
+/// `command_status`) is the primary confirmation. Nightscout is polled by `syncIdentifier`
+/// as a fallback: a delete is confirmed when the entry disappears, an edit when the new
+/// values are published, and a failure Note from Loop reports the error.
 final class LoopCarbActionTracker: ObservableObject {
+    static let ackCommandTypes: Set<String> = ["carbs_delete", "carbs_edit"]
     static let shared = LoopCarbActionTracker()
     static let pollInterval: TimeInterval = 10
     static let timeout: TimeInterval = 120
@@ -104,6 +106,26 @@ final class LoopCarbActionTracker: ObservableObject {
                 completion: completion
             )
         }
+    }
+
+    /// Returns true when the notification is a Loop carb command ack (matched or not).
+    @discardableResult
+    func handleNotification(userInfo: [AnyHashable: Any]) -> Bool {
+        guard let commandType = userInfo["command_type"] as? String,
+              Self.ackCommandTypes.contains(commandType),
+              let status = userInfo["command_status"] as? String
+        else { return false }
+        let syncIdentifier = userInfo["sync_identifier"] as? String
+        let alert = (userInfo["aps"] as? [String: Any])?["alert"] as? [String: Any]
+        let message = alert?["body"] as? String
+        LogManager.shared.log(
+            category: .apns,
+            message: "Loop ack: type=\(commandType) status=\(status) sync_identifier=\(syncIdentifier.map { LogRedactor.tail($0) } ?? "-")"
+        )
+        guard let syncIdentifier, operations[syncIdentifier] != nil else { return true }
+        let state: State = status == "success" ? .confirmed : .failed(message ?? "Loop reported a failure.")
+        DispatchQueue.main.async { self.finish(syncIdentifier, state: state) }
+        return true
     }
 
     // MARK: - Internal

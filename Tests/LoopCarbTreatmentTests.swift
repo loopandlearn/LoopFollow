@@ -58,3 +58,14 @@ struct LoopCarbTreatmentTests {
         #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .trc, device: "Loop") == false)
     }
 }
+
+struct LoopCarbAckTests {
+    @Test("only Loop carb command acks are consumed")
+    func routing() {
+        let tracker = LoopCarbActionTracker.shared
+        #expect(tracker.handleNotification(userInfo: ["command_type": "carbs_delete", "command_status": "success", "sync_identifier": "unknown"]) == true)
+        #expect(tracker.handleNotification(userInfo: ["command_type": "delete_meal", "command_status": "success"]) == false)
+        #expect(tracker.handleNotification(userInfo: ["command_type": "carbs_edit"]) == false)
+        #expect(tracker.state(forSyncIdentifier: "unknown") == .idle)
+    }
+}
