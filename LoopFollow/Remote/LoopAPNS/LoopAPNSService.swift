@@ -378,7 +378,7 @@ class LoopAPNSService {
 
         // Determine APNS environment
         let isProduction = storage.productionEnvironment.value
-        let apnsURL = isProduction ? "https://api.push.apple.com" : "https://api.sandbox.push.apple.com"
+        let apnsURL = APNSEnvironment.baseURL(production: isProduction)
         guard let requestURL = URL(string: "\(apnsURL)/3/device/\(deviceToken)") else {
             let errorMessage = "Failed to construct APNs URL"
             LogManager.shared.log(category: .apns, message: errorMessage)

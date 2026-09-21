@@ -378,8 +378,6 @@ class PushNotificationManager {
     }
 
     private func constructAPNsURL() -> URL? {
-        let host = productionEnvironment ? "api.push.apple.com" : "api.sandbox.push.apple.com"
-        let urlString = "https://\(host)/3/device/\(deviceToken)"
-        return URL(string: urlString)
+        URL(string: "\(APNSEnvironment.baseURL(production: productionEnvironment))/3/device/\(deviceToken)")
     }
 }
