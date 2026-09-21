@@ -406,9 +406,15 @@ struct TreatmentDetailView: View {
     @State private var showEditSheet = false
     @State private var showDeleteConfirmation = false
 
+    /// The Trio meal remote commands act on: the root meal for an FPU child whose root is loaded.
+    private var commandMeal: TrioMealTreatment? {
+        guard let meal = treatment.trioMeal else { return nil }
+        return meal.isFPUChild ? (rootMeal?.trioMeal ?? meal) : meal
+    }
+
     /// Key under which the tracker follows this treatment's remote commands.
     private var commandKey: String? {
-        treatment.trioMeal?.mealID.uuidString ?? treatment.loopCarb?.syncIdentifier
+        commandMeal?.mealID.uuidString ?? treatment.loopCarb?.syncIdentifier
     }
 
     private var commandState: RemoteCommandTracker.State? {
@@ -593,7 +599,7 @@ struct TreatmentDetailView: View {
             viewModel.loadDetails(for: treatment)
         }
         .sheet(isPresented: $showEditSheet) {
-            if let meal = treatment.trioMeal {
+            if let meal = commandMeal {
                 TRCMealEditView(meal: meal)
             } else if let carb = treatment.loopCarb {
                 LoopCarbEditSheet(carb: carb)
@@ -622,7 +628,7 @@ struct TreatmentDetailView: View {
     }
 
     private func sendDelete() {
-        if let meal = treatment.trioMeal {
+        if let meal = commandMeal {
             commandTracker.sendTrioMealDelete(mealID: meal.mealID.uuidString) { _, _ in }
         } else if let carb = treatment.loopCarb {
             commandTracker.sendLoopCarbDelete(carb: carb) { _, _ in }
@@ -712,14 +718,17 @@ struct TreatmentDetailView: View {
 
     @ViewBuilder
     private func trioRemoteActionsSection(_ meal: TrioMealTreatment) -> some View {
-        let busy = commandTracker.isBusy(key: meal.mealID.uuidString)
-        let withinWindow = meal.isWithinEditWindow()
+        let target = commandMeal ?? meal
+        let busy = commandTracker.isBusy(key: target.mealID.uuidString)
+        let withinWindow = target.isWithinEditWindow()
 
         Section(header: Text("Remote actions"), footer: remoteActionsFooter(withinWindow: withinWindow)) {
             commandStatusRow(pendingText: "Sent, awaiting confirmation from Trio…")
 
-            Button("Edit meal") { showEditSheet = true }
-                .disabled(!withinWindow || busy)
+            if !target.isFPUChild {
+                Button("Edit meal") { showEditSheet = true }
+                    .disabled(!withinWindow || busy)
+            }
             Button("Delete meal", role: .destructive) { showDeleteConfirmation = true }
                 .disabled(!withinWindow || busy)
         }
@@ -1150,6 +1159,7 @@ class TreatmentsViewModel: ObservableObject {
     @Published var hasAutomaticEntries = false
 
     private var allTreatments: [Treatment] = []
+    private var rootMealsByFPUID: [UUID: Treatment] = [:]
     private var processedNightscoutIds = Set<String>() // Track which NS entries we've already processed
     private var oldestFetchedDate: Date? // Track the oldest treatment date we've fetched
     private let pageSize = 100
@@ -1193,10 +1203,7 @@ class TreatmentsViewModel: ObservableObject {
     /// The root meal for an FPU child, when the Trio build publishes `fpuID` and the root is loaded.
     func rootMeal(forFPUChild treatment: Treatment) -> Treatment? {
         guard let child = treatment.trioMeal, child.isFPUChild, let fpuID = child.fpuID else { return nil }
-        return allTreatments.first { candidate in
-            guard let meal = candidate.trioMeal, !meal.isFPUChild else { return false }
-            return meal.fpuID == fpuID
-        }
+        return rootMealsByFPUID[fpuID]
     }
 
     func refreshTreatments() {
@@ -1545,6 +1552,7 @@ class TreatmentsViewModel: ObservableObject {
 
     private func regroupTreatments() {
         var grouped: [String: [Treatment]] = [:]
+        var roots: [UUID: Treatment] = [:]
 
         for treatment in allTreatments {
             let key = treatment.hourKey
@@ -1552,7 +1560,11 @@ class TreatmentsViewModel: ObservableObject {
                 grouped[key] = []
             }
             grouped[key]?.append(treatment)
+            if let meal = treatment.trioMeal, !meal.isFPUChild, let fpuID = meal.fpuID {
+                roots[fpuID] = treatment
+            }
         }
+        rootMealsByFPUID = roots
 
         // Sort treatments within each hour
         for key in grouped.keys {
