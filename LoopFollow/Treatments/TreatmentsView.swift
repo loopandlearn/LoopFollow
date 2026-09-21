@@ -442,8 +442,10 @@ struct TreatmentDetailView: View {
             }
 
             if let meal = treatment.trioMeal {
-                trioMealSection(meal)
-                if TrioMealTreatment.remoteActionsAvailable(remoteType: remoteType.value, device: device.value, remoteCommands: remoteCommands.value) {
+                let controlActive = TrioMealTreatment.remoteControlActive(remoteType: remoteType.value, device: device.value)
+                let actionsAvailable = TrioMealTreatment.remoteActionsAvailable(remoteType: remoteType.value, device: device.value, remoteCommands: remoteCommands.value)
+                trioMealSection(meal, needsNewerTrio: controlActive && !actionsAvailable)
+                if actionsAvailable {
                     trioRemoteActionsSection(meal)
                 }
             }
@@ -656,24 +658,12 @@ struct TreatmentDetailView: View {
     @ViewBuilder
     private func loopCarbSection(_ carb: LoopCarbTreatment) -> some View {
         Section(header: Text("Carb entry")) {
-            HStack {
-                Text("Carbs")
-                Spacer()
-                Text(String(format: "%.0f g", carb.carbs)).foregroundColor(.secondary)
-            }
+            LabeledValueRow(label: "Carbs", value: String(format: "%.0f g", carb.carbs))
             if let hours = carb.absorptionHours {
-                HStack {
-                    Text("Absorption")
-                    Spacer()
-                    Text(String(format: "%.1f h", hours)).foregroundColor(.secondary)
-                }
+                LabeledValueRow(label: "Absorption", value: String(format: "%.1f h", hours))
             }
             if let foodType = carb.foodType {
-                HStack {
-                    Text("Food type")
-                    Spacer()
-                    Text(foodType).foregroundColor(.secondary)
-                }
+                LabeledValueRow(label: "Food type", value: foodType)
             }
         }
     }
@@ -698,8 +688,8 @@ struct TreatmentDetailView: View {
     }
 
     @ViewBuilder
-    private func trioMealSection(_ meal: TrioMealTreatment) -> some View {
-        Section(header: Text("Meal"), footer: meal.isFPUChild ? Text("One of the small carb entries Trio created from this meal's fat and protein. Editing or deleting affects the whole meal.") : nil) {
+    private func trioMealSection(_ meal: TrioMealTreatment, needsNewerTrio: Bool) -> some View {
+        Section(header: Text("Meal"), footer: trioMealFooter(meal, needsNewerTrio: needsNewerTrio)) {
             TRCMealMacroRows(carbs: meal.carbs, fat: meal.fat, protein: meal.protein, date: meal.date)
             if let note = meal.note {
                 HStack(alignment: .top) {
@@ -714,6 +704,17 @@ struct TreatmentDetailView: View {
                 NavigationLink("Show original meal", destination: TreatmentDetailView(treatment: rootMeal))
             }
         }
+    }
+
+    private func trioMealFooter(_ meal: TrioMealTreatment, needsNewerTrio: Bool) -> Text? {
+        var lines: [String] = []
+        if meal.isFPUChild {
+            lines.append("One of the small carb entries Trio created from this meal's fat and protein. Editing or deleting affects the whole meal.")
+        }
+        if needsNewerTrio {
+            lines.append("Editing meals needs a newer Trio version.")
+        }
+        return lines.isEmpty ? nil : Text(lines.joined(separator: "\n"))
     }
 
     @ViewBuilder
@@ -1367,13 +1368,12 @@ class TreatmentsViewModel: ObservableObject {
                 let carbs = entry["carbs"] as? Double ?? 0
                 if carbs > 0 || trioMeal != nil {
                     let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
-                    let title = carbs > 0 ? "\(Int(carbs))g" : "F\(trioMeal?.fat ?? 0) P\(trioMeal?.protein ?? 0)"
                     let treatment = Treatment(
                         id: "\(nsId)-carb",
                         type: .carb,
                         date: timestamp,
-                        title: title,
-                        subtitle: trioMeal?.isFPUChild == true ? "Carbs • FPU" : "Carbs",
+                        title: carbs > 0 ? "\(Int(carbs))g" : "Meal",
+                        subtitle: carbSubtitle(carbs: carbs, trioMeal: trioMeal),
                         icon: "circle.fill",
                         color: .orange,
                         bgValue: actualBG,
@@ -1545,6 +1545,17 @@ class TreatmentsViewModel: ObservableObject {
 
         // Sort by date descending (most recent first)
         return (treatments.sorted { $0.date > $1.date }, detectedSMB, detectedAutomatic)
+    }
+
+    /// "Carbs" for a carb entry, "Carbs • FPU" for a Trio FPU child, and the fat/protein grams for a Trio meal without carbs.
+    private func carbSubtitle(carbs: Double, trioMeal: TrioMealTreatment?) -> String {
+        if trioMeal?.isFPUChild == true { return "Carbs • FPU" }
+        guard carbs == 0, let trioMeal else { return "Carbs" }
+        let parts = [
+            trioMeal.fat > 0 ? "\(trioMeal.fat) g fat" : nil,
+            trioMeal.protein > 0 ? "\(trioMeal.protein) g protein" : nil,
+        ]
+        return parts.compactMap { $0 }.joined(separator: " • ")
     }
 
     private func regroupTreatments() {

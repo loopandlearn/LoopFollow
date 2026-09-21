@@ -13,7 +13,7 @@ enum TRCCommandType: String, Encodable {
     case editMeal = "edit_meal"
     case deleteMeal = "delete_meal"
 
-    /// Meal mutations get one APNs collapse id per command so two sends never collapse into one.
+    /// One collapse id per command.
     var usesCommandIDAsCollapseID: Bool {
         self == .editMeal || self == .deleteMeal
     }

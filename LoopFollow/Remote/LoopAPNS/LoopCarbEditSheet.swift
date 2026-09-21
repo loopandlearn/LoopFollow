@@ -61,12 +61,12 @@ struct LoopCarbEditSheet: View {
         NavigationView {
             Form {
                 Section(header: Text("Current")) {
-                    row("Carbs", String(format: "%.0f g", carb.carbs))
+                    LabeledValueRow(label: "Carbs", value: String(format: "%.0f g", carb.carbs))
                     if let hours = carb.absorptionHours {
-                        row("Absorption", String(format: "%.1f h", hours))
+                        LabeledValueRow(label: "Absorption", value: String(format: "%.1f h", hours))
                     }
                     if let foodType = carb.foodType {
-                        row("Food type", foodType)
+                        LabeledValueRow(label: "Food type", value: foodType)
                     }
                 }
 
@@ -188,14 +188,6 @@ struct LoopCarbEditSheet: View {
                     alertType = .sendFailed(error ?? "Failed to send the carb update.")
                 }
             }
-        }
-    }
-
-    private func row(_ label: String, _ value: String) -> some View {
-        HStack {
-            Text(label)
-            Spacer()
-            Text(value).foregroundColor(.secondary)
         }
     }
 }

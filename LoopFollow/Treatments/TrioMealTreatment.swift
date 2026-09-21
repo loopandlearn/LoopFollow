@@ -60,9 +60,14 @@ struct TrioMealTreatment: Equatable {
         return age <= Self.pastEditWindow && age >= -Self.futureEditWindow
     }
 
+    /// Trio Remote Control targets a Trio device, whatever commands that build advertises.
+    static func remoteControlActive(remoteType: RemoteType, device: String) -> Bool {
+        remoteType == .trc && device == "Trio"
+    }
+
     /// Remote edit/delete is offered only when Trio Remote Control targets a Trio that lists both commands.
     static func remoteActionsAvailable(remoteType: RemoteType, device: String, remoteCommands: [String]) -> Bool {
-        remoteType == .trc && device == "Trio" && requiredRemoteCommands.isSubset(of: remoteCommands)
+        remoteControlActive(remoteType: remoteType, device: device) && requiredRemoteCommands.isSubset(of: remoteCommands)
     }
 
     private static func number(_ value: AnyObject?) -> Double? {

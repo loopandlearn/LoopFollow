@@ -79,5 +79,7 @@ struct TrioMealTreatmentTests {
         #expect(TrioMealTreatment.remoteActionsAvailable(remoteType: .trc, device: "Loop", remoteCommands: both) == false)
         #expect(TrioMealTreatment.remoteActionsAvailable(remoteType: .loopAPNS, device: "Trio", remoteCommands: both) == false)
         #expect(TrioMealTreatment.remoteActionsAvailable(remoteType: .none, device: "Trio", remoteCommands: both) == false)
+        #expect(TrioMealTreatment.remoteControlActive(remoteType: .trc, device: "Trio") == true)
+        #expect(TrioMealTreatment.remoteControlActive(remoteType: .trc, device: "Loop") == false)
     }
 }

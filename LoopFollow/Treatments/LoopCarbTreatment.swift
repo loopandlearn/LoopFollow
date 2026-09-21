@@ -8,7 +8,6 @@ import Foundation
 /// `syncIdentifier` is Loop's stable handle for the entry; it survives edits on the phone,
 /// so it addresses the entry in remote delete/edit commands.
 struct LoopCarbTreatment: Equatable {
-    /// Loop's Nightscout object-id cache expires after 24 h, so stop one hour short of it.
     static let editWindow: TimeInterval = 23 * 3600
 
     let nightscoutID: String

@@ -177,10 +177,10 @@ struct TRCMealMacroRows: View {
     let date: TimeInterval
 
     var body: some View {
-        row("Carbs", carbs == carbs.rounded() ? String(format: "%.0f g", carbs) : String(format: "%.1f g", carbs))
-        if fat > 0 { row("Fat", "\(fat) g") }
-        if protein > 0 { row("Protein", "\(protein) g") }
-        row("Time", formattedTime)
+        LabeledValueRow(label: "Carbs", value: carbs == carbs.rounded() ? String(format: "%.0f g", carbs) : String(format: "%.1f g", carbs))
+        if fat > 0 { LabeledValueRow(label: "Fat", value: "\(fat) g") }
+        if protein > 0 { LabeledValueRow(label: "Protein", value: "\(protein) g") }
+        LabeledValueRow(label: "Time", value: formattedTime)
     }
 
     private var formattedTime: String {
@@ -189,13 +189,5 @@ struct TRCMealMacroRows: View {
         formatter.timeStyle = .short
         dateTimeUtils.applyDisplayTimeZone(to: formatter)
         return formatter.string(from: Date(timeIntervalSince1970: date))
-    }
-
-    private func row(_ label: String, _ value: String) -> some View {
-        HStack {
-            Text(label)
-            Spacer()
-            Text(value).foregroundColor(.secondary)
-        }
     }
 }
