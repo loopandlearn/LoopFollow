@@ -1042,6 +1042,7 @@ private struct BGChartCanvas: View, Equatable {
                 bgBandMarks
                 basalMarks
                 scheduledBasalMarks
+                scheduledTargetMarks
             }
             coneMarks
             if !isSmall {
@@ -1207,6 +1208,19 @@ private struct BGChartCanvas: View, Equatable {
             )
             .lineStyle(StrokeStyle(lineWidth: 2, dash: [10, 5]))
             .foregroundStyle(Color.blue.opacity(0.8))
+        }
+    }
+    
+    @ChartContentBuilder
+    private var scheduledTargetMarks: some ChartContent {
+        ForEach(windowedLine(model.targetScheduled) { $0.date }) { pt in
+            LineMark(
+                x: .value("time", pt.date),
+                y: .value("target", pt.value),
+                series: .value("series", "targetScheduled")
+            )
+            .lineStyle(StrokeStyle(lineWidth: 2, dash: [10, 5]))
+            .foregroundStyle(Color.green.opacity(0.8))
         }
     }
 
