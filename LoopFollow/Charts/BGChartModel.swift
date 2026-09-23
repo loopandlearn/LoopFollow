@@ -82,6 +82,12 @@ final class BGChartModel: ObservableObject {
         var id: TimeInterval { date.timeIntervalSince1970 }
     }
 
+    struct ScheduledTargetPoint: Identifiable {
+        let date: Date
+        let value: Double
+        var id: TimeInterval { date.timeIntervalSince1970 }
+    }
+
     struct BandRect: Identifiable {
         let start: Date
         let end: Date
@@ -131,6 +137,7 @@ final class BGChartModel: ObservableObject {
 
     @Published var basal: [BasalStep] = []
     @Published var basalScheduled: [ScheduledBasalPoint] = []
+    @Published var targetScheduled: [ScheduledTargetPoint] = []
 
     @Published var boluses: [TreatmentPoint] = []
     @Published var carbs: [TreatmentPoint] = []
@@ -421,6 +428,7 @@ final class BGChartModel: ObservableObject {
         // collect the data regardless (it also feeds the info rows), so hidden
         // kinds are dropped here at render time.
         let showBasal = Storage.shared.graphBasal.value
+        let showTargetLine = Storage.shared.graphTargetLine.value
         let showBolus = Storage.shared.graphBolus.value
         let showCarbs = Storage.shared.graphCarbs.value
         let showOtherTreatments = Storage.shared.graphOtherTreatments.value
@@ -519,6 +527,10 @@ final class BGChartModel: ObservableObject {
 
         basalScheduled = (showBasal ? vc.basalScheduleData : []).map {
             ScheduledBasalPoint(date: Date(timeIntervalSince1970: $0.date), rate: $0.basalRate)
+        }
+        
+        targetScheduled = (showTargetLine ? vc.targetScheduleData : []).map {
+            ScheduledTargetPoint(date: Date(timeIntervalSince1970: $0.date), value: $0.targetHigh)
         }
 
         var steps: [BasalStep] = []
