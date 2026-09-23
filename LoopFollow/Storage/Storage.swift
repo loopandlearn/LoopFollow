@@ -168,6 +168,7 @@ class Storage {
     var downloadPrediction = StorageValue<Bool>(key: "downloadPrediction", defaultValue: true)
     var graphOtherTreatments = StorageValue<Bool>(key: "graphOtherTreatments", defaultValue: true)
     var graphBasal = StorageValue<Bool>(key: "graphBasal", defaultValue: true)
+    var graphTargetLine = StorageValue<Bool>(key: "graphTargetLine", defaultValue: true)
     var graphBolus = StorageValue<Bool>(key: "graphBolus", defaultValue: true)
     var graphCarbs = StorageValue<Bool>(key: "graphCarbs", defaultValue: true)
     var bgUpdateDelay = StorageValue<Int>(key: "bgUpdateDelay", defaultValue: 10)
