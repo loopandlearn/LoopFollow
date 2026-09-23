@@ -17,6 +17,12 @@ class DataStructs {
         var endDate: TimeInterval
     }
 
+    struct targetProfileSegment: Codable {
+        var targetHigh: Double
+        var startDate: TimeInterval
+        var endDate: TimeInterval
+    }
+
     // NS Timestamp Only Data  Struct
     struct timestampOnlyStruct: Codable {
         var date: TimeInterval

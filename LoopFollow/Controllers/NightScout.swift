@@ -30,6 +30,12 @@ extension MainViewController {
         var date: TimeInterval
     }
 
+    // NS Target Data Struct
+    struct targetGraphStruct: Codable {
+        var targetHigh: Double
+        var date: TimeInterval
+    }
+
     // NS Bolus Data  Struct
     struct bolusGraphStruct: Codable {
         var value: Double

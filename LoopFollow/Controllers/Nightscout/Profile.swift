@@ -123,8 +123,10 @@ extension MainViewController {
             }
         }
 
-        if Storage.shared.graphBasal.value {
+                if Storage.shared.graphBasal.value {
             updateBasalScheduledGraph()
         }
+
+        updateTargetScheduleData()
     }
 }

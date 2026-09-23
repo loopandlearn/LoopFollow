@@ -12,6 +12,7 @@ struct AdvancedSettingsView: View {
                 Toggle("Download Treatments", isOn: $viewModel.downloadTreatments)
                 Toggle("Download Prediction", isOn: $viewModel.downloadPrediction)
                 Toggle("Graph Basal", isOn: $viewModel.graphBasal)
+                Toggle("Graph Target Line", isOn: $viewModel.graphTargetLine)
                 Toggle("Graph Bolus", isOn: $viewModel.graphBolus)
                 Toggle("Graph Carbs", isOn: $viewModel.graphCarbs)
                 Toggle("Graph Other Treatments", isOn: $viewModel.graphOtherTreatments)

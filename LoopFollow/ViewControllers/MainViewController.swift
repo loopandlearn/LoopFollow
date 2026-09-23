@@ -74,6 +74,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var basalProfile: [basalProfileStruct] = []
     var basalData: [basalGraphStruct] = []
     var basalScheduleData: [basalGraphStruct] = []
+    var targetScheduleData: [targetGraphStruct] = []
     var bolusData: [bolusGraphStruct] = []
     var smbData: [bolusGraphStruct] = []
     var carbData: [carbGraphStruct] = []
