@@ -22,6 +22,13 @@ class AdvancedSettingsViewModel: ObservableObject {
             Observable.shared.chartSettingsChanged.value = true
         }
     }
+    
+    @Published var graphTargetLine: Bool {
+        didSet {
+            Storage.shared.graphTargetLine.value = graphTargetLine
+            Observable.shared.chartSettingsChanged.value = true
+        }
+    }
 
     @Published var graphBolus: Bool {
         didSet {
@@ -60,6 +67,7 @@ class AdvancedSettingsViewModel: ObservableObject {
         downloadTreatments = Storage.shared.downloadTreatments.value
         downloadPrediction = Storage.shared.downloadPrediction.value
         graphBasal = Storage.shared.graphBasal.value
+        graphTargetLine = Storage.shared.graphTargetLine.value
         graphBolus = Storage.shared.graphBolus.value
         graphCarbs = Storage.shared.graphCarbs.value
         graphOtherTreatments = Storage.shared.graphOtherTreatments.value
