@@ -192,6 +192,7 @@ extension MainViewController {
     func updateBolusGraph() { chartModel.rebuild() }
     func updateCarbGraph() { chartModel.rebuild() }
     func updateBasalScheduledGraph() { chartModel.rebuild() }
+    func updateTargetScheduledGraph() { chartModel.rebuild() }
     func updateOverrideGraph() { chartModel.rebuild() }
     func updateBGCheckGraph() { chartModel.rebuild() }
     func updateSuspendGraph() { chartModel.rebuild() }
