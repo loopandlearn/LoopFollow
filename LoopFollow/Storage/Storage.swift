@@ -22,6 +22,10 @@ class Storage {
     var lfKeyId = StorageValue<String>(key: "lfKeyId", defaultValue: "")
     var bundleId = StorageValue<String>(key: "bundleId", defaultValue: "")
     var user = StorageValue<String>(key: "user", defaultValue: "")
+    /// Remote command types the AID app advertises in its Nightscout profile.
+    var remoteCommands = StorageValue<[String]>(key: "remoteCommands", defaultValue: [])
+    /// Remote command types the Loop build advertises in its devicestatus.
+    var loopRemoteCommands = StorageValue<[String]>(key: "loopRemoteCommands", defaultValue: [])
 
     var maxBolus = SecureStorageValue<HKQuantity>(key: "maxBolus", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 1.0))
     var maxCarbs = SecureStorageValue<HKQuantity>(key: "maxCarbs", defaultValue: HKQuantity(unit: .gram(), doubleValue: 30.0))

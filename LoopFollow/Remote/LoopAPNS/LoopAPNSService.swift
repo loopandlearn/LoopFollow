@@ -122,73 +122,153 @@ class LoopAPNSService {
         return hasFullSetup
     }
 
-    /// Sends carbs via APNS push notification
-    /// - Parameters:
-    ///   - payload: The carbs payload to send
-    ///   - completion: Completion handler with success status and error message
-    func sendCarbsViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
+    private static let returnNotificationRequiredMessage = "Editing or deleting a carb entry needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."
+
+    // MARK: - Command payloads (matching Nightscout's loop.js format)
+
+    /// Fields every Loop remote command carries.
+    static func commandHeader(otp: String, alert: String, now: Date) -> [String: Any] {
+        [
+            "otp": otp,
+            "remote-address": "LoopFollow",
+            "notes": "Sent via LoopFollow APNS",
+            "entered-by": "LoopFollow",
+            "sent-at": formatDateForAPNS(now),
+            "expiration": formatDateForAPNS(now.addingTimeInterval(5 * 60)),
+            "alert": alert,
+        ]
+    }
+
+    static func carbsCommandPayload(_ payload: LoopAPNSPayload, now: Date = Date()) -> [String: Any] {
+        let carbsAmount = payload.carbsAmount ?? 0.0
+        let absorptionTime = payload.absorptionTime ?? 3.0
+        var fields = commandHeader(
+            otp: payload.otp,
+            alert: "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
+            now: now
+        )
+        fields["carbs-entry"] = carbsAmount
+        fields["absorption-time"] = absorptionTime
+        fields["start-time"] = formatDateForAPNS(payload.consumedDate ?? now)
+        return fields
+    }
+
+    static func bolusCommandPayload(_ payload: LoopAPNSPayload, now: Date = Date()) -> [String: Any] {
+        let bolusAmount = payload.bolusAmount ?? 0.0
+        var fields = commandHeader(otp: payload.otp, alert: "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U", now: now)
+        fields["bolus-entry"] = bolusAmount
+        return fields
+    }
+
+    static func carbsDeleteCommandPayload(syncIdentifier: String, otp: String, now: Date = Date()) -> [String: Any] {
+        var fields = commandHeader(otp: otp, alert: "Remote Carbs Delete", now: now)
+        fields["carbs-delete"] = syncIdentifier
+        return fields
+    }
+
+    /// Keys are prefixed so an unpatched Loop rejects the command. Amount, absorption time and start time are always sent; food type only when set.
+    static func carbsEditCommandPayload(
+        syncIdentifier: String,
+        carbsAmount: Double,
+        absorptionTimeHours: Double,
+        foodType: String?,
+        consumedDate: Date,
+        otp: String,
+        now: Date = Date()
+    ) -> [String: Any] {
+        var fields = commandHeader(
+            otp: otp,
+            alert: "Remote Carbs Edit: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTimeHours)) hours",
+            now: now
+        )
+        fields["carbs-edit"] = syncIdentifier
+        fields["carbs-edit-entry"] = carbsAmount
+        fields["carbs-edit-absorption-time"] = absorptionTimeHours
+        fields["carbs-edit-start-time"] = formatDateForAPNS(consumedDate)
+        if let foodType, !foodType.isEmpty {
+            fields["carbs-edit-food-type"] = foodType
+        }
+        return fields
+    }
+
+    /// The return-notification block encrypted with the OTP, when LoopFollow's own credentials are configured.
+    private func encryptedReturnNotification(otp: String) -> String? {
+        guard let returnInfo = createReturnNotificationInfo() else {
+            LogManager.shared.log(category: .apns, message: "Return notification info unavailable; Loop cannot confirm this command")
+            return nil
+        }
+        return encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: otp)
+    }
+
+    private func sendRemoteCommand(_ payload: [String: Any], completion: @escaping (Bool, String?) -> Void) {
         guard validateSetup() else {
             let errorMessage = "Loop APNS Configuration not valid"
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
-
-        let deviceToken = Storage.shared.deviceToken.value
-        let bundleIdentifier = Storage.shared.bundleId.value
         let creds = effectiveCredentials()
-
-        // Create APNS notification payload (matching Loop's expected format)
-        let now = Date()
-        let expiration = Date(timeIntervalSinceNow: 5 * 60) // 5 minutes from now
-
-        // Create the complete notification payload (matching Nightscout's exact format)
-        // Based on Nightscout's loop.js implementation
-        let carbsAmount = payload.carbsAmount ?? 0.0
-        let absorptionTime = payload.absorptionTime ?? 3.0
-        let startTime = payload.consumedDate ?? now
-        var finalPayload = [
-            "carbs-entry": carbsAmount,
-            "absorption-time": absorptionTime,
-            "otp": String(payload.otp),
-            "remote-address": "LoopFollow",
-            "notes": "Sent via LoopFollow APNS",
-            "entered-by": "LoopFollow",
-            "sent-at": formatDateForAPNS(now),
-            "expiration": formatDateForAPNS(expiration),
-            "start-time": formatDateForAPNS(startTime),
-            "alert": "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
-        ] as [String: Any]
-
-        // Encrypt and include return notification info using OTP
-        if let returnInfo = createReturnNotificationInfo() {
-            LogManager.shared.log(category: .apns, message: "Created return notification info for carbs - deviceToken: \(LogRedactor.head(returnInfo.deviceToken)), bundleId: \(LogRedactor.bundleId(returnInfo.bundleId))")
-            if let encryptedReturnInfo = encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: String(payload.otp)) {
-                finalPayload["encrypted_return_notification"] = encryptedReturnInfo
-                LogManager.shared.log(category: .apns, message: "Added encrypted_return_notification to carbs payload, length: \(encryptedReturnInfo.count)")
-            } else {
-                LogManager.shared.log(category: .apns, message: "Failed to encrypt return notification info for carbs command")
-            }
-        } else {
-            LogManager.shared.log(category: .apns, message: "Failed to create return notification info for carbs command")
-        }
-
-        // Log the exact carbs amount for debugging precision issues
-        LogManager.shared.log(category: .apns, message: "Carbs amount - Raw: \(payload.carbsAmount ?? 0.0), Formatted: \(String(format: "%.1f", carbsAmount)), JSON: \(carbsAmount)")
-        LogManager.shared.log(category: .apns, message: "Absorption time - Raw: \(payload.absorptionTime ?? 3.0), Formatted: \(String(format: "%.1f", absorptionTime)), JSON: \(absorptionTime)")
-
-        // Log carbs entry attempt
-        LogManager.shared.log(category: .apns, message: "Sending carbs: \(String(format: "%.1f", carbsAmount))g, absorption: \(String(format: "%.1f", absorptionTime))h")
-
         sendAPNSNotification(
-            deviceToken: deviceToken,
-            bundleIdentifier: bundleIdentifier,
+            deviceToken: Storage.shared.deviceToken.value,
+            bundleIdentifier: Storage.shared.bundleId.value,
             keyId: creds.keyId,
             apnsKey: creds.apnsKey,
             teamId: creds.teamId,
-            payload: finalPayload,
+            payload: payload,
             completion: completion
         )
+    }
+
+    /// Sends a command whose only confirmation is Loop's return push, so the encrypted return block is mandatory.
+    private func sendConfirmedCommand(_ payload: [String: Any], otp: String, completion: @escaping (Bool, String?) -> Void) {
+        guard let encryptedReturnInfo = encryptedReturnNotification(otp: otp) else {
+            completion(false, Self.returnNotificationRequiredMessage)
+            return
+        }
+        var payload = payload
+        payload["encrypted_return_notification"] = encryptedReturnInfo
+        sendRemoteCommand(payload, completion: completion)
+    }
+
+    /// Deletes the Loop carb entry with this `syncIdentifier`. Requires the Loop remote carb edit patch.
+    func sendCarbsDelete(syncIdentifier: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        LogManager.shared.log(category: .apns, message: "Sending carbs delete for syncIdentifier=\(LogRedactor.tail(syncIdentifier))")
+        sendConfirmedCommand(Self.carbsDeleteCommandPayload(syncIdentifier: syncIdentifier, otp: otp), otp: otp, completion: completion)
+    }
+
+    /// Replaces the Loop carb entry with this `syncIdentifier`. Requires the Loop remote carb edit patch.
+    func sendCarbsEdit(
+        syncIdentifier: String,
+        carbsAmount: Double,
+        absorptionTimeHours: Double,
+        foodType: String?,
+        consumedDate: Date,
+        otp: String,
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        LogManager.shared.log(category: .apns, message: "Sending carbs edit for syncIdentifier=\(LogRedactor.tail(syncIdentifier)): \(String(format: "%.1f", carbsAmount))g, absorption \(String(format: "%.1f", absorptionTimeHours))h")
+        let payload = Self.carbsEditCommandPayload(
+            syncIdentifier: syncIdentifier,
+            carbsAmount: carbsAmount,
+            absorptionTimeHours: absorptionTimeHours,
+            foodType: foodType,
+            consumedDate: consumedDate,
+            otp: otp
+        )
+        sendConfirmedCommand(payload, otp: otp, completion: completion)
+    }
+
+    /// Sends carbs via APNS push notification
+    /// - Parameters:
+    ///   - payload: The carbs payload to send
+    ///   - completion: Completion handler with success status and error message
+    func sendCarbsViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
+        var finalPayload = Self.carbsCommandPayload(payload)
+        if let encryptedReturnInfo = encryptedReturnNotification(otp: payload.otp) {
+            finalPayload["encrypted_return_notification"] = encryptedReturnInfo
+        }
+        LogManager.shared.log(category: .apns, message: "Sending carbs: \(String(format: "%.1f", payload.carbsAmount ?? 0.0))g, absorption: \(String(format: "%.1f", payload.absorptionTime ?? 3.0))h")
+        sendRemoteCommand(finalPayload, completion: completion)
     }
 
     /// Sends bolus via APNS push notification
@@ -196,63 +276,12 @@ class LoopAPNSService {
     ///   - payload: The bolus payload to send
     ///   - completion: Completion handler with success status and error message
     func sendBolusViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
-        guard validateSetup() else {
-            let errorMessage = "Loop APNS Configuration not valid"
-            LogManager.shared.log(category: .apns, message: errorMessage)
-            completion(false, errorMessage)
-            return
+        var finalPayload = Self.bolusCommandPayload(payload)
+        if let encryptedReturnInfo = encryptedReturnNotification(otp: payload.otp) {
+            finalPayload["encrypted_return_notification"] = encryptedReturnInfo
         }
-
-        let deviceToken = Storage.shared.deviceToken.value
-        let bundleIdentifier = Storage.shared.bundleId.value
-        let creds = effectiveCredentials()
-
-        // Create APNS notification payload (matching Loop's expected format)
-        let now = Date()
-        let expiration = Date(timeIntervalSinceNow: 5 * 60) // 5 minutes from now
-
-        // Create the complete notification payload (matching Nightscout's exact format)
-        // Based on Nightscout's loop.js implementation
-        let bolusAmount = payload.bolusAmount ?? 0.0
-        var finalPayload = [
-            "bolus-entry": bolusAmount,
-            "otp": String(payload.otp),
-            "remote-address": "LoopFollow",
-            "notes": "Sent via LoopFollow APNS",
-            "entered-by": "LoopFollow",
-            "sent-at": formatDateForAPNS(now),
-            "expiration": formatDateForAPNS(expiration),
-            "alert": "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U",
-        ] as [String: Any]
-
-        // Encrypt and include return notification info using OTP
-        if let returnInfo = createReturnNotificationInfo() {
-            LogManager.shared.log(category: .apns, message: "Created return notification info for carbs - deviceToken: \(LogRedactor.head(returnInfo.deviceToken)), bundleId: \(LogRedactor.bundleId(returnInfo.bundleId))")
-            if let encryptedReturnInfo = encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: String(payload.otp)) {
-                finalPayload["encrypted_return_notification"] = encryptedReturnInfo
-                LogManager.shared.log(category: .apns, message: "Added encrypted_return_notification to carbs payload, length: \(encryptedReturnInfo.count)")
-            } else {
-                LogManager.shared.log(category: .apns, message: "Failed to encrypt return notification info for carbs command")
-            }
-        } else {
-            LogManager.shared.log(category: .apns, message: "Failed to create return notification info for carbs command")
-        }
-
-        // Log the exact bolus amount for debugging precision issues
-        LogManager.shared.log(category: .apns, message: "Bolus amount - Raw: \(payload.bolusAmount ?? 0.0), Formatted: \(String(format: "%.2f", bolusAmount)), JSON: \(bolusAmount)")
-
-        // Log bolus entry attempt
-        LogManager.shared.log(category: .apns, message: "Sending bolus: \(String(format: "%.2f", bolusAmount))U")
-
-        sendAPNSNotification(
-            deviceToken: deviceToken,
-            bundleIdentifier: bundleIdentifier,
-            keyId: creds.keyId,
-            apnsKey: creds.apnsKey,
-            teamId: creds.teamId,
-            payload: finalPayload,
-            completion: completion
-        )
+        LogManager.shared.log(category: .apns, message: "Sending bolus: \(String(format: "%.2f", payload.bolusAmount ?? 0.0))U")
+        sendRemoteCommand(finalPayload, completion: completion)
     }
 
     /// Validates APNS credentials similar to PushNotificationManager
@@ -349,7 +378,7 @@ class LoopAPNSService {
 
         // Determine APNS environment
         let isProduction = storage.productionEnvironment.value
-        let apnsURL = isProduction ? "https://api.push.apple.com" : "https://api.sandbox.push.apple.com"
+        let apnsURL = APNSEnvironment.baseURL(production: isProduction)
         guard let requestURL = URL(string: "\(apnsURL)/3/device/\(deviceToken)") else {
             let errorMessage = "Failed to construct APNs URL"
             LogManager.shared.log(category: .apns, message: errorMessage)
@@ -632,7 +661,7 @@ class LoopAPNSService {
     /// Creates a properly formatted ISO8601 date string with milliseconds (matching Nightscout's format)
     /// - Parameter date: The date to format
     /// - Returns: Formatted date string like "2022-12-24T21:34:02.090Z"
-    private func formatDateForAPNS(_ date: Date) -> String {
+    private static func formatDateForAPNS(_ date: Date) -> String {
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return dateFormatter.string(from: date)
@@ -677,8 +706,8 @@ class LoopAPNSService {
             "override-name": presetName,
             "remote-address": "LoopFollow",
             "entered-by": "LoopFollow",
-            "sent-at": formatDateForAPNS(now),
-            "expiration": formatDateForAPNS(expiration),
+            "sent-at": Self.formatDateForAPNS(now),
+            "expiration": Self.formatDateForAPNS(expiration),
             "alert": alertText,
         ]
 
@@ -737,8 +766,8 @@ class LoopAPNSService {
             "cancel-temporary-override": "true",
             "remote-address": "LoopFollow",
             "entered-by": "LoopFollow",
-            "sent-at": formatDateForAPNS(now),
-            "expiration": formatDateForAPNS(expiration),
+            "sent-at": Self.formatDateForAPNS(now),
+            "expiration": Self.formatDateForAPNS(expiration),
             "alert": "Cancel Temporary Override",
         ]
 

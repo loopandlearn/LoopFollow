@@ -121,7 +121,7 @@ struct TreatmentsView: View {
                                             .padding(.bottom, 2)
                                             .background(Color(.systemBackground))
                                     } else if let treatment = row.treatment {
-                                        TreatmentRow(treatment: treatment)
+                                        TreatmentRow(treatment: treatment, rootMeal: viewModel.rootMeal(forFPUChild: treatment))
                                     }
                                 }
                             } header: {
@@ -198,6 +198,9 @@ struct TreatmentsView: View {
                 }
                 .onChange(of: device.value) { newValue in
                     normalizeSelectedFilter(for: newValue)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .remoteMealCommandDidComplete)) { _ in
+                    viewModel.refreshTreatments()
                 }
             }
         }
@@ -393,7 +396,31 @@ private struct DayRow: Identifiable {
 
 struct TreatmentDetailView: View {
     let treatment: Treatment
+    var rootMeal: Treatment? = nil
     @StateObject private var viewModel = TreatmentDetailViewModel()
+    @Environment(\.presentationMode) private var presentationMode
+    @ObservedObject private var commandTracker = RemoteCommandTracker.shared
+    @ObservedObject private var remoteType = Storage.shared.remoteType
+    @ObservedObject private var device = Storage.shared.device
+    @ObservedObject private var remoteCommands = Storage.shared.remoteCommands
+    @ObservedObject private var loopRemoteCommands = Storage.shared.loopRemoteCommands
+    @State private var showEditSheet = false
+    @State private var showDeleteConfirmation = false
+
+    /// The Trio meal remote commands act on: the root meal for an FPU child whose root is loaded.
+    private var commandMeal: TrioMealTreatment? {
+        guard let meal = treatment.trioMeal else { return nil }
+        return meal.isFPUChild ? (rootMeal?.trioMeal ?? meal) : meal
+    }
+
+    /// Key under which the tracker follows this treatment's remote commands.
+    private var commandKey: String? {
+        commandMeal?.mealID.uuidString ?? treatment.loopCarb?.syncIdentifier
+    }
+
+    private var commandState: RemoteCommandTracker.State? {
+        commandKey.flatMap { commandTracker.states[$0] }
+    }
 
     var body: some View {
         List {
@@ -412,6 +439,24 @@ struct TreatmentDetailView: View {
                             .foregroundColor(.secondary)
                     }
                     Spacer()
+                }
+            }
+
+            if let meal = treatment.trioMeal {
+                let controlActive = TrioMealTreatment.remoteControlActive(remoteType: remoteType.value, device: device.value)
+                let actionsAvailable = TrioMealTreatment.remoteActionsAvailable(remoteType: remoteType.value, device: device.value, remoteCommands: remoteCommands.value)
+                trioMealSection(meal, needsNewerTrio: controlActive && !actionsAvailable)
+                if actionsAvailable {
+                    trioRemoteActionsSection(meal)
+                }
+            }
+
+            if let carb = treatment.loopCarb {
+                let controlActive = LoopCarbTreatment.remoteControlActive(remoteType: remoteType.value, device: device.value)
+                let actionsAvailable = LoopCarbTreatment.remoteActionsAvailable(remoteType: remoteType.value, device: device.value, remoteCommands: loopRemoteCommands.value)
+                loopCarbSection(carb, needsCustomization: controlActive && !actionsAvailable)
+                if actionsAvailable {
+                    loopRemoteActionsSection(carb)
                 }
             }
 
@@ -558,6 +603,143 @@ struct TreatmentDetailView: View {
         .onAppear {
             viewModel.loadDetails(for: treatment)
         }
+        .sheet(isPresented: $showEditSheet) {
+            if let meal = commandMeal {
+                TRCMealEditView(meal: meal)
+            } else if let carb = treatment.loopCarb {
+                LoopCarbEditSheet(carb: carb)
+            }
+        }
+        .confirmationDialog(deleteDialogTitle, isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+            Button(treatment.trioMeal != nil ? "Delete meal" : "Delete carbs", role: .destructive, action: sendDelete)
+        } message: {
+            Text(deleteDialogMessage)
+        }
+        .onChange(of: commandState) { _, state in
+            guard let commandKey, case .done(success: true, message: _) = state else { return }
+            commandTracker.consume(key: commandKey)
+            presentationMode.wrappedValue.dismiss()
+        }
+    }
+
+    private var deleteDialogTitle: String {
+        treatment.trioMeal != nil ? "Delete this meal in Trio?" : "Delete this carb entry in Loop?"
+    }
+
+    private var deleteDialogMessage: String {
+        treatment.trioMeal != nil
+            ? "This removes the carb entry and any fat/protein entries Trio created from it."
+            : "This removes the carb entry from Loop. Loop recalculates carbs on board right away."
+    }
+
+    private func sendDelete() {
+        if let meal = commandMeal {
+            commandTracker.sendTrioMealDelete(mealID: meal.mealID.uuidString) { _, _ in }
+        } else if let carb = treatment.loopCarb {
+            commandTracker.sendLoopCarbDelete(carb: carb) { _, _ in }
+        }
+    }
+
+    /// Pending indicator or last failure for this treatment's remote command.
+    @ViewBuilder
+    private func commandStatusRow(pendingText: String) -> some View {
+        switch commandState {
+        case .pending:
+            HStack {
+                ProgressView().scaleEffect(0.8)
+                Text(pendingText).foregroundColor(.secondary)
+            }
+        case let .done(success, message) where !success:
+            Text(message)
+                .font(.footnote)
+                .foregroundColor(.red)
+        default:
+            EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private func loopCarbSection(_ carb: LoopCarbTreatment, needsCustomization: Bool) -> some View {
+        Section(header: Text("Carb entry"), footer: needsCustomization ? Text("Editing carbs needs the remote carb edit customization in Loop.") : nil) {
+            LabeledValueRow(label: "Carbs", value: String(format: "%.0f g", carb.carbs))
+            if let hours = carb.absorptionHours {
+                LabeledValueRow(label: "Absorption", value: String(format: "%.1f h", hours))
+            }
+            if let foodType = carb.foodType {
+                LabeledValueRow(label: "Food type", value: foodType)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func loopRemoteActionsSection(_ carb: LoopCarbTreatment) -> some View {
+        let busy = commandTracker.isBusy(key: carb.syncIdentifier)
+        let withinWindow = carb.isWithinEditWindow()
+
+        Section(header: Text("Remote actions"), footer: loopRemoteActionsFooter(withinWindow: withinWindow)) {
+            commandStatusRow(pendingText: "Sent, awaiting confirmation from Loop…")
+
+            Button("Edit carbs") { showEditSheet = true }
+                .disabled(!withinWindow || busy)
+            Button("Delete carbs", role: .destructive) { showDeleteConfirmation = true }
+                .disabled(!withinWindow || busy)
+        }
+    }
+
+    private func loopRemoteActionsFooter(withinWindow: Bool) -> Text? {
+        withinWindow ? nil : Text("Carb entries can be changed remotely for 23 hours.")
+    }
+
+    @ViewBuilder
+    private func trioMealSection(_ meal: TrioMealTreatment, needsNewerTrio: Bool) -> some View {
+        Section(header: Text("Meal"), footer: trioMealFooter(meal, needsNewerTrio: needsNewerTrio)) {
+            TRCMealMacroRows(carbs: meal.carbs, fat: meal.fat, protein: meal.protein, date: meal.date)
+            if let note = meal.note {
+                HStack(alignment: .top) {
+                    Text("Note")
+                    Spacer()
+                    Text(note)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.trailing)
+                }
+            }
+            if meal.isFPUChild, let rootMeal {
+                NavigationLink("Show original meal", destination: TreatmentDetailView(treatment: rootMeal))
+            }
+        }
+    }
+
+    private func trioMealFooter(_ meal: TrioMealTreatment, needsNewerTrio: Bool) -> Text? {
+        var lines: [String] = []
+        if meal.isFPUChild {
+            lines.append("One of the small carb entries Trio created from this meal's fat and protein. Editing or deleting affects the whole meal.")
+        }
+        if needsNewerTrio {
+            lines.append("Editing meals needs a newer Trio version.")
+        }
+        return lines.isEmpty ? nil : Text(lines.joined(separator: "\n"))
+    }
+
+    @ViewBuilder
+    private func trioRemoteActionsSection(_ meal: TrioMealTreatment) -> some View {
+        let target = commandMeal ?? meal
+        let busy = commandTracker.isBusy(key: target.mealID.uuidString)
+        let withinWindow = target.isWithinEditWindow()
+
+        Section(header: Text("Remote actions"), footer: remoteActionsFooter(withinWindow: withinWindow)) {
+            commandStatusRow(pendingText: "Sent, awaiting confirmation from Trio…")
+
+            if !target.isFPUChild {
+                Button("Edit meal") { showEditSheet = true }
+                    .disabled(!withinWindow || busy)
+            }
+            Button("Delete meal", role: .destructive) { showDeleteConfirmation = true }
+                .disabled(!withinWindow || busy)
+        }
+    }
+
+    private func remoteActionsFooter(withinWindow: Bool) -> Text? {
+        withinWindow ? nil : Text("Meals can be changed remotely up to 24 hours after and 12 hours before their time.")
     }
 
     private func formatNavigationTitle(_ timeInterval: TimeInterval) -> String {
@@ -832,9 +1014,10 @@ class TreatmentDetailViewModel: ObservableObject {
 
 struct TreatmentRow: View {
     let treatment: Treatment
+    var rootMeal: Treatment? = nil
 
     var body: some View {
-        NavigationLink(destination: TreatmentDetailView(treatment: treatment)) {
+        NavigationLink(destination: TreatmentDetailView(treatment: treatment, rootMeal: rootMeal)) {
             HStack {
                 Image(systemName: treatment.icon)
                     .foregroundColor(treatment.color)
@@ -947,8 +1130,10 @@ struct Treatment: Identifiable {
     let icon: String
     let color: Color
     let bgValue: Int
+    let trioMeal: TrioMealTreatment?
+    let loopCarb: LoopCarbTreatment?
 
-    init(id: String? = nil, type: TreatmentType, date: TimeInterval, title: String, subtitle: String?, icon: String, color: Color, bgValue: Int) {
+    init(id: String? = nil, type: TreatmentType, date: TimeInterval, title: String, subtitle: String?, icon: String, color: Color, bgValue: Int, trioMeal: TrioMealTreatment? = nil, loopCarb: LoopCarbTreatment? = nil) {
         self.id = id ?? "\(type)-\(date)-\(title)"
         self.type = type
         self.date = date
@@ -957,6 +1142,8 @@ struct Treatment: Identifiable {
         self.icon = icon
         self.color = color
         self.bgValue = bgValue
+        self.trioMeal = trioMeal
+        self.loopCarb = loopCarb
     }
 
     var hourKey: String {
@@ -976,6 +1163,7 @@ class TreatmentsViewModel: ObservableObject {
     @Published var hasAutomaticEntries = false
 
     private var allTreatments: [Treatment] = []
+    private var rootMealsByFPUID: [UUID: Treatment] = [:]
     private var processedNightscoutIds = Set<String>() // Track which NS entries we've already processed
     private var oldestFetchedDate: Date? // Track the oldest treatment date we've fetched
     private let pageSize = 100
@@ -1014,6 +1202,12 @@ class TreatmentsViewModel: ObservableObject {
                 self.isFetching = false
             }
         }
+    }
+
+    /// The root meal for an FPU child, when the Trio build publishes `fpuID` and the root is loaded.
+    func rootMeal(forFPUChild treatment: Treatment) -> Treatment? {
+        guard let child = treatment.trioMeal, child.isFPUChild, let fpuID = child.fpuID else { return nil }
+        return rootMealsByFPUID[fpuID]
     }
 
     func refreshTreatments() {
@@ -1172,17 +1366,22 @@ class TreatmentsViewModel: ObservableObject {
 
             switch eventType {
             case "Carb Correction", "Meal Bolus":
-                if let carbs = entry["carbs"] as? Double, carbs > 0 {
+                let trioMeal = eventType == "Carb Correction" ? TrioMealTreatment(nightscoutEntry: entry, date: timestamp) : nil
+                let loopCarb = trioMeal == nil ? LoopCarbTreatment(nightscoutEntry: entry, date: timestamp) : nil
+                let carbs = entry["carbs"] as? Double ?? 0
+                if carbs > 0 || trioMeal != nil {
                     let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
                     let treatment = Treatment(
                         id: "\(nsId)-carb",
                         type: .carb,
                         date: timestamp,
-                        title: "\(Int(carbs))g",
-                        subtitle: "Carbs",
+                        title: carbs > 0 ? "\(Int(carbs))g" : "Meal",
+                        subtitle: carbSubtitle(carbs: carbs, trioMeal: trioMeal),
                         icon: "circle.fill",
                         color: .orange,
-                        bgValue: actualBG
+                        bgValue: actualBG,
+                        trioMeal: trioMeal,
+                        loopCarb: loopCarb
                     )
                     treatments.append(treatment)
                 }
@@ -1351,8 +1550,20 @@ class TreatmentsViewModel: ObservableObject {
         return (treatments.sorted { $0.date > $1.date }, detectedSMB, detectedAutomatic)
     }
 
+    /// "Carbs" for a carb entry, "Carbs • FPU" for a Trio FPU child, and the fat/protein grams for a Trio meal without carbs.
+    private func carbSubtitle(carbs: Double, trioMeal: TrioMealTreatment?) -> String {
+        if trioMeal?.isFPUChild == true { return "Carbs • FPU" }
+        guard carbs == 0, let trioMeal else { return "Carbs" }
+        let parts = [
+            trioMeal.fat > 0 ? "\(trioMeal.fat) g fat" : nil,
+            trioMeal.protein > 0 ? "\(trioMeal.protein) g protein" : nil,
+        ]
+        return parts.compactMap { $0 }.joined(separator: " • ")
+    }
+
     private func regroupTreatments() {
         var grouped: [String: [Treatment]] = [:]
+        var roots: [UUID: Treatment] = [:]
 
         for treatment in allTreatments {
             let key = treatment.hourKey
@@ -1360,7 +1571,11 @@ class TreatmentsViewModel: ObservableObject {
                 grouped[key] = []
             }
             grouped[key]?.append(treatment)
+            if let meal = treatment.trioMeal, !meal.isFPUChild, let fpuID = meal.fpuID {
+                roots[fpuID] = treatment
+            }
         }
+        rootMealsByFPUID = roots
 
         // Sort treatments within each hour
         for key in grouped.keys {
