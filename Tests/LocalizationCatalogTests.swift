@@ -85,9 +85,11 @@ struct LocalizationCatalogTests {
                     problems.append("[\(language)] \(key) -> \(t.value)")
                     continue
                 }
-                let reordered = source.map(\.1) != target.map(\.1)
-                if source.count > 1, reordered, target.contains(where: { $0.0 == nil }) {
-                    problems.append("[\(language)] reordered without positional indexes: \(key) -> \(t.value)")
+                // Word order differs between languages, so every multi-placeholder translation must
+                // address its arguments explicitly (%1$@, %2$lld ...); mixing positional and
+                // non-positional specifiers is undefined at runtime.
+                if source.count > 1, target.contains(where: { $0.0 == nil }) {
+                    problems.append("[\(language)] multi-placeholder value must use positional indexes: \(key) -> \(t.value)")
                 }
             }
         }

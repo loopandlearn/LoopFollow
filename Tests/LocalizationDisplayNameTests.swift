@@ -83,4 +83,14 @@ struct LocalizationDisplayNameTests {
         }
         #expect(bundle.localizedString(forKey: "Day & Night", value: "MISSING", table: nil) == "Gündüz ve Gece")
     }
+
+    @Test("English plural variation resolves through the compiled catalog")
+    func englishPluralVariationApplies() throws {
+        let path = try #require(Bundle.main.path(forResource: "en", ofType: "lproj"))
+        let bundle = try #require(Bundle(path: path))
+        let one = String(localized: "Calculated \(1) minutes ago", bundle: bundle)
+        let many = String(localized: "Calculated \(5) minutes ago", bundle: bundle)
+        #expect(one == "Calculated 1 minute ago")
+        #expect(many == "Calculated 5 minutes ago")
+    }
 }

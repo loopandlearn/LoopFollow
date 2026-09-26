@@ -114,10 +114,6 @@
     "%@g" : {
       "shouldTranslate" : false
     },
-    "(" : {
-      "extractionState" : "manual",
-      "shouldTranslate" : false
-    },
     "(%@ days)" : {
       "localizations" : {
         "tr" : {
@@ -178,11 +174,25 @@
       }
     },
     "API Secret" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API Secret"
+          }
+        }
+      }
     },
     "APN" : {
       "extractionState" : "manual",
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APN"
+          }
+        }
+      }
     },
     "APNS Environment: %@" : {
       "localizations" : {
@@ -670,7 +680,14 @@
     },
     "Bolus" : {
       "extractionState" : "manual",
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus"
+          }
+        }
+      }
     },
     "Bolus Filter" : {
       "extractionState" : "manual",
@@ -745,7 +762,14 @@
       }
     },
     "COB" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COB"
+          }
+        }
+      }
     },
     "COB Alert" : {
       "comment" : "Alarm type name",
@@ -760,7 +784,14 @@
       }
     },
     "CV" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CV"
+          }
+        }
+      }
     },
     "Calculated %lld minutes ago" : {
       "comment" : "Age of the recommended bolus calculation",
@@ -1385,7 +1416,14 @@
       }
     },
     "Delta" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delta"
+          }
+        }
+      }
     },
     "Description" : {
       "localizations" : {
@@ -1454,7 +1492,14 @@
       }
     },
     "Dexcom Share" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dexcom Share"
+          }
+        }
+      }
     },
     "Diagnostics" : {
       "extractionState" : "manual",
@@ -2101,7 +2146,14 @@
       }
     },
     "GMI" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GMI"
+          }
+        }
+      }
     },
     "GRI (Glucose Risk Index)" : {
       "localizations" : {
@@ -2378,7 +2430,14 @@
       }
     },
     "IOB" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IOB"
+          }
+        }
+      }
     },
     "IOB Alert" : {
       "comment" : "Alarm type name",
@@ -2945,10 +3004,24 @@
       }
     },
     "Min" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min"
+          }
+        }
+      }
     },
     "Minimum" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimum"
+          }
+        }
+      }
     },
     "Minutes" : {
       "extractionState" : "manual",
@@ -3028,7 +3101,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yeni Hedef: %@ %@\nSüre: %@ dakika"
+            "value" : "Yeni Hedef: %1$@ %2$@\nSüre: %3$@ dakika"
           }
         }
       }
@@ -3302,7 +3375,14 @@
       }
     },
     "Override" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override"
+          }
+        }
+      }
     },
     "Override Ended" : {
       "comment" : "Alarm type name",
@@ -3411,13 +3491,13 @@
         }
       }
     },
-    "Pick when your day period begins and when your night period begins. " : {
+    "Pick when your day period begins and when your night period begins. Any time from your Day-starts time up until your Night-starts time will count as day; from Night-starts until the next Day-starts will count as night." : {
       "extractionState" : "manual",
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gündüz ve gece dönemlerinizin ne zaman başladığını seçin. "
+            "value" : "Gündüz ve gece dönemlerinizin ne zaman başladığını seçin. Gündüz başlangıcından gece başlangıcına kadar olan süre gündüz, gece başlangıcından bir sonraki gündüz başlangıcına kadar olan süre gece sayılır."
           }
         }
       }
@@ -3543,14 +3623,21 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öngörülü Düşük"
+            "value" : "Tahmini Düşük"
           }
         }
       }
     },
     "Production" : {
       "extractionState" : "manual",
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Production"
+          }
+        }
+      }
     },
     "Production is used for browser builders and should be switched off for Xcode builders" : {
       "localizations" : {
@@ -3701,7 +3788,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uzaktan"
+            "value" : "Uzaktan Kumanda"
           }
         }
       }
@@ -4056,7 +4143,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@g karbonhidrat, %@sa emilim süresiyle, %@ zamanında gönderilsin mi?"
+            "value" : "%1$@g karbonhidrat, %2$@sa emilim süresiyle, %3$@ zamanında gönderilsin mi?"
           }
         }
       }
@@ -4534,7 +4621,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ tarihine kadar ertelendi"
+            "value" : "%@ saatine kadar ertelendi"
           }
         }
       }
@@ -4706,7 +4793,14 @@
       }
     },
     "TIR" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TIR"
+          }
+        }
+      }
     },
     "TIR — Time in Range, the share of readings within %@.\nTITR — Time in Tight Range, within %@.\nCustom — set your own low and high." : {
       "localizations" : {
@@ -4719,13 +4813,20 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TIR — Hedef Aralıkta Süre, %@ içindeki okumaların payı.\nTITR — Dar Hedef Aralıkta Süre, %@ içindeki pay.\nÖzel — kendi düşük ve yüksek değerlerinizi belirleyin."
+            "value" : "TIR — Hedef Aralıkta Süre, %1$@ içindeki okumaların payı.\nTITR — Dar Hedef Aralıkta Süre, %2$@ içindeki pay.\nÖzel — kendi düşük ve yüksek değerlerinizi belirleyin."
           }
         }
       }
     },
     "TITR" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TITR"
+          }
+        }
+      }
     },
     "TOTP Code Already Used" : {
       "localizations" : {
@@ -4829,7 +4930,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hedef: %@ %@"
+            "value" : "Hedef: %1$@ %2$@"
           }
         }
       }
@@ -4845,7 +4946,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hedef: %@-%@"
+            "value" : "Hedef: %1$@-%2$@"
           }
         }
       }
@@ -5071,7 +5172,14 @@
       }
     },
     "Trend" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend"
+          }
+        }
+      }
     },
     "Trio Remote Control Settings" : {
       "localizations" : {
@@ -5108,7 +5216,14 @@
       "shouldTranslate" : false
     },
     "URL" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL"
+          }
+        }
+      }
     },
     "URL/Token Update" : {
       "localizations" : {
@@ -5394,7 +5509,14 @@
       }
     },
     "eHbA1c" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eHbA1c"
+          }
+        }
+      }
     },
     "eHbA1c — an A1c estimate from your average glucose. GMI — Glucose Management Indicator, another A1c estimate from average glucose. % and mmol/mol (IFCC) are two scales for the result." : {
       "localizations" : {
