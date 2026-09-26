@@ -136,6 +136,10 @@
     "Basal / BG Scale" : {
       "extractionState" : "manual"
     },
+    "Battery Drop" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "Below is the exact JSON object that LoopFollow would send to lf.bjorkert.se right now." : {},
     "Below: %@" : {},
     "Bolus" : {
@@ -153,6 +157,10 @@
     "Bundle ID: %@" : {},
     "CHARGING" : {},
     "COB" : {},
+    "COB Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "CV" : {},
     "Calculated %@ minute%@ ago" : {
       "localizations" : {
@@ -235,6 +243,14 @@
     "Custom sounds stay on this device and aren't included in settings export." : {},
     "Cutoffs in %@" : {},
     "Data Availability" : {},
+    "Day" : {
+      "comment" : "Alarm schedule option: daytime only",
+      "extractionState" : "manual"
+    },
+    "Day & Night" : {
+      "comment" : "Alarm schedule option: at any time of day",
+      "extractionState" : "manual"
+    },
     "Day / Night" : {},
     "Day / Night Schedule" : {},
     "Day starts" : {
@@ -380,6 +396,14 @@
     },
     "FALLING BG" : {},
     "Failed to generate QR code" : {},
+    "Fast Drop Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
+    "Fast Rise Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "Features" : {
       "extractionState" : "manual"
     },
@@ -393,6 +417,10 @@
     },
     "French" : {},
     "Frequency" : {},
+    "Future Carbs Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "GMI" : {},
     "GRI (Glucose Risk Index)" : {},
     "General" : {},
@@ -431,6 +459,10 @@
     "High" : {
       "extractionState" : "manual"
     },
+    "High BG Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "History" : {
       "extractionState" : "manual"
     },
@@ -444,6 +476,10 @@
     "Hypoglycemia Component (%)" : {},
     "I have a token" : {},
     "IOB" : {},
+    "IOB Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "Import Settings" : {},
     "Import Settings from QR Code" : {},
     "Import Sound…" : {
@@ -501,7 +537,19 @@
     "LoopFollow APNs Credentials" : {},
     "LoopFollow uses notifications to deliver your alarms — like low or high glucose, or a missed reading. Without them, alarms can't reach you when the app is in the background." : {},
     "LoopFollow/Helpers/Telemetry.swift on GitHub." : {},
+    "Looping app expiration" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "Low" : {
+      "extractionState" : "manual"
+    },
+    "Low BG Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
+    "Low Battery" : {
+      "comment" : "Alarm type name",
       "extractionState" : "manual"
     },
     "Max" : {},
@@ -531,8 +579,20 @@
     "Minutes" : {
       "extractionState" : "manual"
     },
+    "Missed Bolus Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
+    "Missed Reading Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "Multiple devices uploading profiles" : {},
     "Name" : {},
+    "Never" : {
+      "comment" : "Alarm schedule option: never",
+      "extractionState" : "manual"
+    },
     "New Target: %@ %@\nDuration: %@ minutes" : {
       "localizations" : {
         "en" : {
@@ -543,7 +603,15 @@
         }
       }
     },
+    "Night" : {
+      "comment" : "Alarm schedule option: nighttime only",
+      "extractionState" : "manual"
+    },
     "Night starts" : {
+      "extractionState" : "manual"
+    },
+    "Nightscout Database Size" : {
+      "comment" : "Alarm type name",
       "extractionState" : "manual"
     },
     "Nightscout URL" : {},
@@ -558,6 +626,10 @@
     "No overrides available." : {},
     "No recent treatments" : {},
     "No thanks" : {},
+    "Not Looping Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "Not now" : {},
     "Note: The meal will be scheduled, but the bolus is enacted immediately." : {},
     "OK" : {},
@@ -571,6 +643,14 @@
     },
     "Outside US" : {},
     "Override" : {},
+    "Override Ended" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
+    "Override Started" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "Override system volume" : {
       "extractionState" : "manual"
     },
@@ -616,6 +696,18 @@
       "extractionState" : "manual"
     },
     "Production is used for browser builders and should be switched off for Xcode builders" : {},
+    "Pump Battery Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
+    "Pump Change Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
+    "Pump Insulin Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "QR Code URL" : {},
     "RISING BG" : {},
     "RSSI: %@ dBm" : {},
@@ -624,6 +716,10 @@
       "extractionState" : "manual"
     },
     "Real-time Updates" : {},
+    "Rec. Bolus" : {
+      "comment" : "Alarm type name: recommended bolus",
+      "extractionState" : "manual"
+    },
     "Recommended Bolus" : {},
     "Reconnecting..." : {},
     "Refresh" : {
@@ -704,6 +800,10 @@
     "Sending Meal Data..." : {},
     "Sending..." : {},
     "Sensitivity" : {},
+    "Sensor Change Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "Server" : {
       "extractionState" : "manual"
     },
@@ -861,6 +961,18 @@
       }
     },
     "Team ID: %@" : {},
+    "Temp Target Ended" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
+    "Temp Target Started" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
+    "Temporary Alert" : {
+      "comment" : "Alarm type name",
+      "extractionState" : "manual"
+    },
     "Temporary Target" : {},
     "Text Color" : {
       "extractionState" : "manual"
