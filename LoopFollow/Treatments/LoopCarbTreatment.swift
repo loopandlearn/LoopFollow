@@ -9,6 +9,7 @@ import Foundation
 /// so it addresses the entry in remote delete/edit commands.
 struct LoopCarbTreatment: Equatable {
     static let editWindow: TimeInterval = 23 * 3600
+    static let requiredRemoteCommands: Set<String> = ["carbs-delete", "carbs-edit"]
 
     let nightscoutID: String
     let syncIdentifier: String
@@ -49,7 +50,13 @@ struct LoopCarbTreatment: Equatable {
         return age <= Self.editWindow && age >= -3600
     }
 
-    static func remoteActionsAvailable(remoteType: RemoteType, device: String) -> Bool {
+    /// Loop APNS targets a Loop device, whatever commands that build advertises.
+    static func remoteControlActive(remoteType: RemoteType, device: String) -> Bool {
         remoteType == .loopAPNS && device == "Loop"
+    }
+
+    /// Remote edit/delete is offered only when Loop APNS targets a Loop that lists both commands.
+    static func remoteActionsAvailable(remoteType: RemoteType, device: String, remoteCommands: [String]) -> Bool {
+        remoteControlActive(remoteType: remoteType, device: device) && requiredRemoteCommands.isSubset(of: remoteCommands)
     }
 }

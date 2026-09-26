@@ -51,10 +51,16 @@ struct LoopCarbTreatmentTests {
         #expect(carb(offsetHours: 2)?.isWithinEditWindow(now: now) == false)
     }
 
-    @Test("actions need Loop APNS and a Loop device")
+    @Test("actions need Loop APNS, a Loop device and both commands advertised")
     func gating() {
-        #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .loopAPNS, device: "Loop") == true)
-        #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .loopAPNS, device: "Trio") == false)
-        #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .trc, device: "Loop") == false)
+        let both = ["carbs-delete", "carbs-edit"]
+        #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .loopAPNS, device: "Loop", remoteCommands: both) == true)
+        #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .loopAPNS, device: "Loop", remoteCommands: ["carbs-delete"]) == false)
+        #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .loopAPNS, device: "Loop", remoteCommands: []) == false)
+        #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .loopAPNS, device: "Trio", remoteCommands: both) == false)
+        #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .trc, device: "Loop", remoteCommands: both) == false)
+        #expect(LoopCarbTreatment.remoteActionsAvailable(remoteType: .none, device: "Loop", remoteCommands: both) == false)
+        #expect(LoopCarbTreatment.remoteControlActive(remoteType: .loopAPNS, device: "Loop") == true)
+        #expect(LoopCarbTreatment.remoteControlActive(remoteType: .loopAPNS, device: "Trio") == false)
     }
 }

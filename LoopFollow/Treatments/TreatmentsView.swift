@@ -403,6 +403,7 @@ struct TreatmentDetailView: View {
     @ObservedObject private var remoteType = Storage.shared.remoteType
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject private var remoteCommands = Storage.shared.remoteCommands
+    @ObservedObject private var loopRemoteCommands = Storage.shared.loopRemoteCommands
     @State private var showEditSheet = false
     @State private var showDeleteConfirmation = false
 
@@ -451,8 +452,10 @@ struct TreatmentDetailView: View {
             }
 
             if let carb = treatment.loopCarb {
-                loopCarbSection(carb)
-                if LoopCarbTreatment.remoteActionsAvailable(remoteType: remoteType.value, device: device.value) {
+                let controlActive = LoopCarbTreatment.remoteControlActive(remoteType: remoteType.value, device: device.value)
+                let actionsAvailable = LoopCarbTreatment.remoteActionsAvailable(remoteType: remoteType.value, device: device.value, remoteCommands: loopRemoteCommands.value)
+                loopCarbSection(carb, needsCustomization: controlActive && !actionsAvailable)
+                if actionsAvailable {
                     loopRemoteActionsSection(carb)
                 }
             }
@@ -656,8 +659,8 @@ struct TreatmentDetailView: View {
     }
 
     @ViewBuilder
-    private func loopCarbSection(_ carb: LoopCarbTreatment) -> some View {
-        Section(header: Text("Carb entry")) {
+    private func loopCarbSection(_ carb: LoopCarbTreatment, needsCustomization: Bool) -> some View {
+        Section(header: Text("Carb entry"), footer: needsCustomization ? Text("Editing carbs needs the remote carb edit customization in Loop.") : nil) {
             LabeledValueRow(label: "Carbs", value: String(format: "%.0f g", carb.carbs))
             if let hours = carb.absorptionHours {
                 LabeledValueRow(label: "Absorption", value: String(format: "%.1f h", hours))
@@ -684,7 +687,7 @@ struct TreatmentDetailView: View {
     }
 
     private func loopRemoteActionsFooter(withinWindow: Bool) -> Text? {
-        withinWindow ? Text("Requires a Loop build with remote carb editing.") : Text("Carb entries can be changed remotely for 23 hours.")
+        withinWindow ? nil : Text("Carb entries can be changed remotely for 23 hours.")
     }
 
     @ViewBuilder
