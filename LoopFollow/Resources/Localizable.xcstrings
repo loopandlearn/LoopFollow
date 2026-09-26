@@ -1,0 +1,955 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    " U" : {},
+    "#WeAreNotWaitingAnymore" : {},
+    "#WeAreWaitingForData" : {},
+    "%" : {},
+    "%@" : {},
+    "%@  %@ → %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@  %2$@ → %3$@"
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ - %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ - %2$@"
+          }
+        }
+      }
+    },
+    "%@ gaps" : {},
+    "%@ hr" : {},
+    "%@ min" : {},
+    "%@ of %@ expected readings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ of %2$@ expected readings"
+          }
+        }
+      }
+    },
+    "%@ sec" : {},
+    "%@%%" : {},
+    "%@U" : {},
+    "%@g" : {},
+    "(" : {
+      "extractionState" : "manual"
+    },
+    "(%@ days)" : {},
+    "+ 30m" : {},
+    "---" : {},
+    "...because the data could not be loaded" : {},
+    "00" : {},
+    "15m" : {},
+    "24h" : {},
+    "A silent tune will play in the background, keeping the app active. May be interrupted by other apps. Allows continuous updates but consumes more battery." : {},
+    "API Secret" : {},
+    "APN" : {
+      "extractionState" : "manual"
+    },
+    "APNS Environment: %@" : {},
+    "APNS Key" : {},
+    "APNS Key ID" : {},
+    "APNS warning: importing APNS settings will overwrite your existing APNS Key ID and APNS Key." : {},
+    "APNs credentials are missing or invalid — Live Activity updates will not work. Open Settings → APN to fix." : {},
+    "Above: %@" : {},
+    "Absorption Time" : {},
+    "Access Token" : {},
+    "Activate Override" : {},
+    "Active" : {},
+    "Active During" : {},
+    "Active Override" : {},
+    "Add Alarm" : {
+      "extractionState" : "manual"
+    },
+    "Add the Apple-Calendar complication to your watch or CarPlay to see BG readings. Create a separate calendar (e.g. “Follow”) — this view will **delete** events on the same calendar each time it writes new readings." : {},
+    "Add the contact named '%@' to your watch face to show the current BG value in real time. Make sure to give the app full access to Contacts when prompted." : {},
+    "Adding this alarm would exceed the QR code character limit. Please remove some alarms first." : {},
+    "Additional Information" : {},
+    "Adjust the background refresh type." : {},
+    "Advanced Settings" : {},
+    "Alarm Name" : {
+      "extractionState" : "manual"
+    },
+    "Alarm Settings" : {},
+    "Alarm not found" : {},
+    "Alarms can behave differently during the day and at night." : {},
+    "Alert Sound" : {},
+    "All" : {},
+    "All Alerts Snoozed" : {
+      "extractionState" : "manual"
+    },
+    "All Sounds Muted" : {
+      "extractionState" : "manual"
+    },
+    "All alerts snoozed" : {},
+    "All glucose, insulin, and carb data. Your Nightscout URL and API token. Your Dexcom credentials. Remote-command secrets and APNS keys. Time zone. Location data. Logs — these are never sent automatically; the Settings → Logs sharing flow is unchanged and only triggered by you." : {},
+    "Always" : {
+      "extractionState" : "manual"
+    },
+    "Ambulatory Glucose Profile (AGP)" : {},
+    "App Settings" : {
+      "extractionState" : "manual"
+    },
+    "App version, build date, whether this is a TestFlight build, the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), and iOS version. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent." : {},
+    "Appearance" : {
+      "extractionState" : "manual"
+    },
+    "Are you sure you want to cancel the active override?" : {},
+    "Are you sure you want to cancel the existing temp target?" : {},
+    "Are you sure you want to send %@ U?" : {},
+    "Available Overrides" : {},
+    "Available Variables" : {
+      "extractionState" : "manual"
+    },
+    "BG Update Delay (Sec): %@" : {},
+    "Back" : {
+      "extractionState" : "manual"
+    },
+    "Background Color" : {
+      "extractionState" : "manual"
+    },
+    "Background Refresh Type" : {
+      "extractionState" : "manual"
+    },
+    "Basal / BG Scale" : {
+      "extractionState" : "manual"
+    },
+    "Below is the exact JSON object that LoopFollow would send to lf.bjorkert.se right now." : {},
+    "Below: %@" : {},
+    "Bolus" : {
+      "extractionState" : "manual"
+    },
+    "Bolus Filter" : {
+      "extractionState" : "manual"
+    },
+    "Bolus Increment" : {},
+    "Bolus Increment: %.3f U" : {},
+    "Build Information" : {
+      "extractionState" : "manual"
+    },
+    "Built-in" : {},
+    "Bundle ID: %@" : {},
+    "CHARGING" : {},
+    "COB" : {},
+    "CV" : {},
+    "Calculated %@ minute%@ ago" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Calculated %1$@ minute%2$@ ago"
+          }
+        }
+      }
+    },
+    "Calendar" : {
+      "extractionState" : "manual"
+    },
+    "Calendar Text" : {
+      "extractionState" : "manual"
+    },
+    "Calendar access denied" : {},
+    "Cancel" : {},
+    "Cancel Active Override" : {},
+    "Cancel Override" : {},
+    "Cancel Temp Target" : {},
+    "Carbs" : {
+      "extractionState" : "manual"
+    },
+    "Category" : {
+      "extractionState" : "manual"
+    },
+    "Character Limit Reached" : {
+      "extractionState" : "manual"
+    },
+    "Checking Nightscout profile history…" : {},
+    "Choose Tone" : {
+      "extractionState" : "manual"
+    },
+    "Close" : {
+      "extractionState" : "manual"
+    },
+    "Color" : {},
+    "Color BG Text" : {
+      "extractionState" : "manual"
+    },
+    "Color Mode" : {
+      "extractionState" : "manual"
+    },
+    "Color Options" : {},
+    "Coloring enabled" : {
+      "extractionState" : "manual"
+    },
+    "Command Sent" : {},
+    "Configure Loop APNS" : {},
+    "Confirm" : {},
+    "Confirm & Import" : {
+      "extractionState" : "manual"
+    },
+    "Confirm Bolus" : {},
+    "Confirm Cancellation" : {},
+    "Confirm Carbs" : {},
+    "Confirm Command" : {},
+    "Confirm Insulin" : {},
+    "Confirm Meal" : {},
+    "Connected" : {},
+    "Consumption Time" : {
+      "extractionState" : "manual"
+    },
+    "Contact Integration" : {},
+    "Continue" : {},
+    "Copy JSON" : {
+      "extractionState" : "manual"
+    },
+    "Create Read-Only Token" : {},
+    "Create one for me" : {},
+    "Creating read-only token…" : {},
+    "Current OTP Code" : {},
+    "Current TOTP Code:" : {},
+    "Current Target" : {},
+    "Current Token:" : {},
+    "Current URL:" : {},
+    "Custom" : {},
+    "Custom sounds stay on this device and aren't included in settings export." : {},
+    "Cutoffs in %@" : {},
+    "Data Availability" : {},
+    "Day / Night" : {},
+    "Day / Night Schedule" : {},
+    "Day starts" : {
+      "extractionState" : "manual"
+    },
+    "Debug / Info" : {},
+    "Debug Log Level" : {
+      "extractionState" : "manual"
+    },
+    "Default Snooze:" : {},
+    "Delay Between Sounds" : {},
+    "Delete" : {
+      "extractionState" : "manual"
+    },
+    "Delete Alarm" : {
+      "extractionState" : "manual"
+    },
+    "Delete this alarm?" : {
+      "extractionState" : "manual"
+    },
+    "Delta" : {},
+    "Description" : {},
+    "Developer Team ID" : {},
+    "Device Data" : {},
+    "Device Token: %@" : {},
+    "Device tokens are alternating in recent profile uploads (%@ tokens involved across %@ records). This usually means more than one app installation is uploading to the same Nightscout. Remove the app from spare or unused phones." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Device tokens are alternating in recent profile uploads (%1$@ tokens involved across %2$@ records). This usually means more than one app installation is uploading to the same Nightscout. Remove the app from spare or unused phones."
+          }
+        }
+      }
+    },
+    "Dexcom Settings" : {},
+    "Dexcom Share" : {},
+    "Diagnostics" : {
+      "extractionState" : "manual"
+    },
+    "Diagnostics unavailable: %@" : {},
+    "Disconnect" : {},
+    "Disconnected for %@" : {},
+    "Dismiss" : {
+      "extractionState" : "manual"
+    },
+    "Display" : {
+      "extractionState" : "manual"
+    },
+    "Display App Badge" : {
+      "extractionState" : "manual"
+    },
+    "Display Dots" : {
+      "extractionState" : "manual"
+    },
+    "Display Lines" : {
+      "extractionState" : "manual"
+    },
+    "Display Small Graph" : {
+      "extractionState" : "manual"
+    },
+    "Display Stats" : {
+      "extractionState" : "manual"
+    },
+    "Do you want to activate the override '%@'?" : {},
+    "Done" : {
+      "extractionState" : "manual"
+    },
+    "Download Prediction" : {
+      "extractionState" : "manual"
+    },
+    "Download Treatments" : {
+      "extractionState" : "manual"
+    },
+    "Drag to reorder" : {},
+    "Drag to reorder. Tap a row to set its visibility and colors." : {},
+    "Duration" : {},
+    "Duration: %@" : {},
+    "Duration: %@ minutes" : {},
+    "Dynamic mode colors text based on BG range: Green (in range), Yellow (high), Red (low)" : {},
+    "Enable Contact BG Updates" : {
+      "extractionState" : "manual"
+    },
+    "Enable Live Activity" : {
+      "extractionState" : "manual"
+    },
+    "Enable Notifications" : {},
+    "Enable WebSocket" : {
+      "extractionState" : "manual"
+    },
+    "Enable coloring" : {
+      "extractionState" : "manual"
+    },
+    "Enable indefinitely" : {
+      "extractionState" : "manual"
+    },
+    "Enable this alarm" : {
+      "extractionState" : "manual"
+    },
+    "Enabled" : {
+      "extractionState" : "manual"
+    },
+    "Enact" : {},
+    "End Date" : {},
+    "End now" : {},
+    "Endpoint" : {},
+    "English" : {},
+    "Enter QR code URL or scan from Loop app" : {
+      "extractionState" : "manual"
+    },
+    "Enter URL" : {
+      "extractionState" : "manual"
+    },
+    "Enter User" : {
+      "extractionState" : "manual"
+    },
+    "Enter Username" : {
+      "extractionState" : "manual"
+    },
+    "Enter or paste your full Nightscout address. If the link already includes a token, we'll fill both in for you." : {},
+    "Environment" : {},
+    "Error" : {},
+    "Eventual" : {},
+    "Existing Temp Target" : {},
+    "Expected bg delay: %@" : {},
+    "Expected: 1 CGM reading every 5 minutes" : {},
+    "Export" : {
+      "extractionState" : "manual"
+    },
+    "Export %@" : {},
+    "Export Settings To QR Code" : {
+      "extractionState" : "manual"
+    },
+    "F%@ P%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "F%1$@ P%2$@"
+          }
+        }
+      }
+    },
+    "FALLING BG" : {},
+    "Failed to generate QR code" : {},
+    "Features" : {
+      "extractionState" : "manual"
+    },
+    "Filter" : {
+      "extractionState" : "manual"
+    },
+    "Finish" : {},
+    "Food Type" : {},
+    "Force portrait mode" : {
+      "extractionState" : "manual"
+    },
+    "French" : {},
+    "Frequency" : {},
+    "GMI" : {},
+    "GRI (Glucose Risk Index)" : {},
+    "General" : {},
+    "Give each alarm a unique name—especially if you’ve added more than one of the same kind—so you can tell them apart at a glance." : {},
+    "Glucose" : {
+      "extractionState" : "manual"
+    },
+    "Glucose Unit" : {
+      "extractionState" : "manual"
+    },
+    "Glucose value" : {},
+    "Glycemic Metrics" : {},
+    "Graph Basal" : {
+      "extractionState" : "manual"
+    },
+    "Graph Bolus" : {
+      "extractionState" : "manual"
+    },
+    "Graph Carbs" : {
+      "extractionState" : "manual"
+    },
+    "Graph Display" : {
+      "extractionState" : "manual"
+    },
+    "Graph Other Treatments" : {
+      "extractionState" : "manual"
+    },
+    "Grid Slot - CarPlay / Watch" : {},
+    "Grid Slots - Live Activity" : {},
+    "Guardrails" : {},
+    "Help us help you" : {},
+    "Help us help you!" : {
+      "extractionState" : "manual"
+    },
+    "Hide Information Table" : {},
+    "High" : {
+      "extractionState" : "manual"
+    },
+    "History" : {
+      "extractionState" : "manual"
+    },
+    "Home" : {
+      "extractionState" : "manual"
+    },
+    "Hours" : {
+      "extractionState" : "manual"
+    },
+    "Hyperglycemia Component (%)" : {},
+    "Hypoglycemia Component (%)" : {},
+    "I have a token" : {},
+    "IOB" : {},
+    "Import Settings" : {},
+    "Import Settings from QR Code" : {},
+    "Import Sound…" : {
+      "extractionState" : "manual"
+    },
+    "Import/Export Settings" : {},
+    "In Menu" : {},
+    "Inactive" : {},
+    "Include Delta in" : {
+      "extractionState" : "manual"
+    },
+    "Include IOB in" : {
+      "extractionState" : "manual"
+    },
+    "Include Trend in" : {
+      "extractionState" : "manual"
+    },
+    "Increment" : {},
+    "Information Display Settings" : {},
+    "Insulin" : {
+      "extractionState" : "manual"
+    },
+    "Insulin Totals" : {},
+    "Insulin: %@%%" : {},
+    "Invalid QR code URL" : {},
+    "Italian" : {},
+    "Keep Screen Active" : {
+      "extractionState" : "manual"
+    },
+    "Key ID must be exactly 10 uppercase letters or digits." : {},
+    "Language" : {
+      "extractionState" : "manual"
+    },
+    "Last connection: %@" : {},
+    "Line 1" : {
+      "extractionState" : "manual"
+    },
+    "Line 2" : {
+      "extractionState" : "manual"
+    },
+    "Live Activity" : {},
+    "Live Activity updates require APNs credentials. Configure them in Settings → APN." : {},
+    "Load More" : {},
+    "Loading data..." : {
+      "extractionState" : "manual"
+    },
+    "Loading override presets..." : {},
+    "Loading stats..." : {},
+    "Logging" : {
+      "extractionState" : "manual"
+    },
+    "Logging Options" : {},
+    "Loop APNS Configuration" : {},
+    "Loop APNS Not Configured" : {},
+    "LoopFollow APNs Credentials" : {},
+    "LoopFollow uses notifications to deliver your alarms — like low or high glucose, or a missed reading. Without them, alarms can't reach you when the app is in the background." : {},
+    "LoopFollow/Helpers/Telemetry.swift on GitHub." : {},
+    "Low" : {
+      "extractionState" : "manual"
+    },
+    "Max" : {},
+    "Max %@ alarms at a time" : {},
+    "Max Bolus" : {},
+    "Max Carbs" : {},
+    "Max Fat" : {},
+    "Max Protein" : {},
+    "Maximum" : {},
+    "Meal" : {
+      "extractionState" : "manual"
+    },
+    "Meal Data" : {},
+    "Meal Settings" : {},
+    "Meal with Bolus" : {
+      "extractionState" : "manual"
+    },
+    "Meal with Fat/Protein" : {
+      "extractionState" : "manual"
+    },
+    "Menu" : {},
+    "Metric" : {
+      "extractionState" : "manual"
+    },
+    "Min" : {},
+    "Minimum" : {},
+    "Minutes" : {
+      "extractionState" : "manual"
+    },
+    "Multiple devices uploading profiles" : {},
+    "Name" : {},
+    "New Target: %@ %@\nDuration: %@ minutes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "New Target: %1$@ %2$@\nDuration: %3$@ minutes"
+          }
+        }
+      }
+    },
+    "Night starts" : {
+      "extractionState" : "manual"
+    },
+    "Nightscout URL" : {},
+    "No Results" : {},
+    "No alarms match “%@”." : {},
+    "No background refresh. Alarms and updates will not work unless the app is open in the foreground." : {},
+    "No data available" : {},
+    "No devices found yet. They'll appear here when discovered." : {},
+    "No issues detected" : {},
+    "No matches for “%@”." : {},
+    "No override presets found. Configure presets in your Loop app." : {},
+    "No overrides available." : {},
+    "No recent treatments" : {},
+    "No thanks" : {},
+    "Not now" : {},
+    "Note: The meal will be scheduled, but the bolus is enacted immediately." : {},
+    "OK" : {},
+    "Off" : {},
+    "Old Calculation Warning" : {},
+    "Once a day (or after a new build), the app sends a small JSON object to https://lf.bjorkert.se. The endpoint is self-hosted by the maintainer; no third-party analytics service is involved." : {},
+    "Once every 24 hours, plus once after installing a new build. The check runs in the background while the app is active or refreshing in the background." : {},
+    "Opt out" : {},
+    "Output Unit" : {
+      "extractionState" : "manual"
+    },
+    "Outside US" : {},
+    "Override" : {},
+    "Override system volume" : {
+      "extractionState" : "manual"
+    },
+    "Overrides" : {
+      "extractionState" : "manual"
+    },
+    "Overriding the system volume lets alarms be heard even when your phone is silenced or in a Focus mode." : {},
+    "Password" : {},
+    "Paste a Nightscout token. If your site needs one and you only have the API secret, paste that instead — LoopFollow can create a read-only token for you." : {},
+    "Paste the full .p8 contents — must include the BEGIN PRIVATE KEY and END PRIVATE KEY lines." : {},
+    "Percentage: %@%%" : {},
+    "Persistent Notification" : {
+      "extractionState" : "manual"
+    },
+    "Pick when your day period begins and when your night period begins. " : {
+      "extractionState" : "manual"
+    },
+    "Play sound during calls" : {
+      "extractionState" : "manual"
+    },
+    "Please configure Loop APNS settings in Remote Settings to use APNS commands." : {},
+    "Please enter your Nightscout URL in Settings." : {},
+    "Please select a Remote Type in Settings." : {},
+    "Please wait..." : {
+      "extractionState" : "manual"
+    },
+    "Prediction" : {},
+    "Prediction Style" : {
+      "extractionState" : "manual"
+    },
+    "Preset Name" : {
+      "extractionState" : "manual"
+    },
+    "Preset: %@" : {},
+    "Presets" : {},
+    "Privacy" : {
+      "extractionState" : "manual"
+    },
+    "Proactive Low" : {
+      "extractionState" : "manual"
+    },
+    "Production" : {
+      "extractionState" : "manual"
+    },
+    "Production is used for browser builders and should be switched off for Xcode builders" : {},
+    "QR Code URL" : {},
+    "RISING BG" : {},
+    "RSSI: %@ dBm" : {},
+    "Range" : {},
+    "Range Mode" : {
+      "extractionState" : "manual"
+    },
+    "Real-time Updates" : {},
+    "Recommended Bolus" : {},
+    "Reconnecting..." : {},
+    "Refresh" : {
+      "extractionState" : "manual"
+    },
+    "Remote" : {
+      "extractionState" : "manual"
+    },
+    "Remote Settings" : {
+      "extractionState" : "manual"
+    },
+    "Requires a Dexcom G6/ONE/G7/ONE+ transmitter within Bluetooth range. Provides updates every 5 minutes and uses less battery than the silent tune method. If you have more than one device to choose from, select the one with the smallest expected bg delay." : {},
+    "Requires a RileyLink-compatible device within Bluetooth range. Provides updates once per minute and uses less battery than the silent tune method." : {},
+    "Requires an OmniPod DASH pod paired with this device within Bluetooth range. Provides updates once every 3 minutes and uses less battery than the silent tune method." : {},
+    "Review setup anyway" : {},
+    "Review the settings that will be imported" : {},
+    "Right slot" : {
+      "extractionState" : "manual"
+    },
+    "Run diagnostics" : {},
+    "Run diagnostics again" : {},
+    "SNOOZE" : {},
+    "Save" : {
+      "extractionState" : "manual"
+    },
+    "Save BG to Calendar" : {
+      "extractionState" : "manual"
+    },
+    "Save Preset" : {},
+    "Save as Preset" : {},
+    "Scan QR Code from Loop App" : {},
+    "Scan QR Code to Import Settings" : {},
+    "Scan this QR code with another LoopFollow app to import %@" : {},
+    "Scanned Token:" : {},
+    "Scanned URL:" : {},
+    "Scanning for %@..." : {},
+    "Schedule" : {},
+    "Schedule for later" : {
+      "extractionState" : "manual"
+    },
+    "Search" : {
+      "extractionState" : "manual"
+    },
+    "Search alarms" : {
+      "extractionState" : "manual"
+    },
+    "Secret" : {},
+    "Security" : {},
+    "See exactly what's sent" : {
+      "extractionState" : "manual"
+    },
+    "Select Alarms to Export" : {
+      "extractionState" : "manual"
+    },
+    "Select the colors for your BG values. Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors." : {},
+    "Selected Alarms: %@" : {},
+    "Selected Device" : {},
+    "Send" : {},
+    "Send %@ units of insulin?" : {},
+    "Send %@g of carbs with %@h absorption time at %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Send %1$@g of carbs with %2$@h absorption time at %3$@?"
+          }
+        }
+      }
+    },
+    "Send Bolus" : {},
+    "Send Carbs" : {},
+    "Send Insulin" : {},
+    "Send Meal" : {},
+    "Send anonymous usage stats" : {
+      "extractionState" : "manual"
+    },
+    "Sending Bolus..." : {},
+    "Sending Meal Data..." : {},
+    "Sending..." : {},
+    "Sensitivity" : {},
+    "Server" : {
+      "extractionState" : "manual"
+    },
+    "Set Up Units" : {
+      "extractionState" : "manual"
+    },
+    "Settings" : {
+      "extractionState" : "manual"
+    },
+    "Settings imported — you're connected." : {
+      "extractionState" : "manual"
+    },
+    "Settings to Import" : {},
+    "Share" : {
+      "extractionState" : "manual"
+    },
+    "Share Logs" : {
+      "extractionState" : "manual"
+    },
+    "Shared Secret" : {},
+    "Show Carb Absorption" : {
+      "extractionState" : "manual"
+    },
+    "Show Carb/Bolus Values" : {
+      "extractionState" : "manual"
+    },
+    "Show DIA Lines" : {
+      "extractionState" : "manual"
+    },
+    "Show Delta" : {
+      "extractionState" : "manual"
+    },
+    "Show Display Name" : {
+      "extractionState" : "manual"
+    },
+    "Show IOB" : {
+      "extractionState" : "manual"
+    },
+    "Show Midnight Lines" : {
+      "extractionState" : "manual"
+    },
+    "Show Prior Day Time Lines" : {
+      "extractionState" : "manual"
+    },
+    "Show Trend" : {
+      "extractionState" : "manual"
+    },
+    "Show Yesterday's BG" : {
+      "extractionState" : "manual"
+    },
+    "Show in Info Display" : {
+      "extractionState" : "manual"
+    },
+    "Show −30 min Line" : {
+      "extractionState" : "manual"
+    },
+    "Show −90 min Line" : {
+      "extractionState" : "manual"
+    },
+    "Site URL" : {},
+    "Skip" : {},
+    "Skip if BG is falling" : {
+      "extractionState" : "manual"
+    },
+    "Skip if BG is rising" : {
+      "extractionState" : "manual"
+    },
+    "Skip while charging" : {
+      "extractionState" : "manual"
+    },
+    "Slovak" : {},
+    "Small Graph" : {
+      "extractionState" : "manual"
+    },
+    "Snooze & Mute Options" : {},
+    "Snooze Date" : {
+      "extractionState" : "manual"
+    },
+    "Snooze Time" : {
+      "extractionState" : "manual"
+    },
+    "Snooze all · 1h" : {},
+    "Snooze for" : {},
+    "Snoozed" : {},
+    "Snoozed until %@" : {},
+    "Snoozer emoji" : {
+      "extractionState" : "manual"
+    },
+    "Sound" : {},
+    "Source" : {},
+    "Speak BG" : {
+      "extractionState" : "manual"
+    },
+    "Start Date" : {},
+    "Statistics" : {},
+    "Status" : {},
+    "Stay informed" : {},
+    "Stay silent while BG is falling. The alert only sounds " : {
+      "extractionState" : "manual"
+    },
+    "Stay silent while BG is rising. The alert only sounds " : {
+      "extractionState" : "manual"
+    },
+    "Stay silent while the phone is charging. Requires the " : {
+      "extractionState" : "manual"
+    },
+    "Std Dev" : {},
+    "Std Dev — Standard Deviation, how much glucose swings around the average. CV — Coefficient of Variation, that swing relative to the average (Std Dev ÷ mean)." : {},
+    "Success" : {},
+    "Support & Community" : {
+      "extractionState" : "manual"
+    },
+    "Swedish" : {},
+    "TIR" : {},
+    "TIR — Time in Range, the share of readings within %@.\nTITR — Time in Tight Range, within %@.\nCustom — set your own low and high." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "TIR — Time in Range, the share of readings within %1$@.\nTITR — Time in Tight Range, within %2$@.\nCustom — set your own low and high."
+          }
+        }
+      }
+    },
+    "TITR" : {},
+    "TOTP Code Already Used" : {},
+    "TOTP Code: Invalid QR code URL" : {},
+    "Tab %@" : {},
+    "Tab 5" : {},
+    "Tab Order" : {},
+    "Tabs" : {
+      "extractionState" : "manual"
+    },
+    "Tap to load older treatments" : {},
+    "Target" : {},
+    "Target Range" : {},
+    "Target: %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Target: %1$@ %2$@"
+          }
+        }
+      }
+    },
+    "Target: %@-%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Target: %1$@-%2$@"
+          }
+        }
+      }
+    },
+    "Team ID: %@" : {},
+    "Temporary Target" : {},
+    "Text Color" : {
+      "extractionState" : "manual"
+    },
+    "Thanks for sharing these logs to help us find the problem. Please describe it in as much detail as possible — what time did it happen, what did you do, and what did you expect to happen that didn't?" : {},
+    "That's your API secret — create a read-only token" : {},
+    "The order of Fat and Protein inputs has changed." : {},
+    "The top 4 items appear in the tab bar. The Menu can always open every feature." : {},
+    "This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command." : {},
+    "This will overwrite your current settings" : {},
+    "Time" : {},
+    "Time Remaining" : {},
+    "Time Zone" : {
+      "extractionState" : "manual"
+    },
+    "Time Zone Override" : {
+      "extractionState" : "manual"
+    },
+    "To see your trend, delta, or IOB, include them in another contact or create separate contacts. When using 'Include', select which contact to add the value to." : {},
+    "Token" : {},
+    "Tone" : {},
+    "Treatments" : {},
+    "Treatments on Small Graph" : {
+      "extractionState" : "manual"
+    },
+    "Trend" : {},
+    "Trio Remote Control Settings" : {},
+    "Trio Remote Control is only supported for 'Trio'" : {},
+    "Type or paste a token, or a full Nightscout URL that includes a token." : {},
+    "U" : {
+      "comment" : "The short unit display string for international units of insulin"
+    },
+    "URL" : {},
+    "URL/Token Update" : {},
+    "URL/Token Validation" : {},
+    "US" : {},
+    "Units and Metrics" : {
+      "extractionState" : "manual"
+    },
+    "Unknown Alert" : {},
+    "Use Anyway" : {},
+    "Use the Send anonymous usage stats toggle above. Turning it off is immediate and persistent." : {},
+    "User" : {},
+    "User Information" : {},
+    "Username" : {},
+    "Validation Error" : {},
+    "Variability" : {},
+    "View Log" : {
+      "extractionState" : "manual"
+    },
+    "WARNING: New treatments may have occurred since the last recommended bolus was calculated %@ ago." : {},
+    "Warning" : {},
+    "We'll ask iOS for permission next. You can change this any time in the Settings app." : {},
+    "Welcome to LoopFollow" : {},
+    "What is sent" : {},
+    "What stays on your device" : {},
+    "What's sent" : {
+      "extractionState" : "manual"
+    },
+    "When enabled, LoopFollow maintains a live connection to your Nightscout server using WebSocket while the app is in the foreground. Data updates (new glucose readings, treatments, device status) arrive within seconds instead of waiting for the next polling cycle.\n\nThe WebSocket disconnects when LoopFollow moves to the background and reconnects when you return to the app. Polling continues to handle updates while the app is in the background.\n\nIn the foreground, polling continues at a reduced frequency as a safety net. If the WebSocket connection drops, normal polling resumes immediately." : {},
+    "Yes, send anonymous stats" : {},
+    "You can change this any time in Settings → General → Diagnostics." : {},
+    "You can choose to share anonymous information with the developers to help improve LoopFollow — such as app and iOS version, device type, which app you're following, and a few settings. Your health data, credentials, time zone, and logs remain on your device." : {},
+    "You can choose to share anonymous information with the developers to help improve LoopFollow—such as app and iOS version, device type, which app you're following, and a few settings. Your health data, credentials, time zone, and logs remain on your device." : {},
+    "You're all set" : {},
+    "You're ready to go. Adjust everything later from the Menu — and when you have a moment, these are worth a look:" : {},
+    "Your API secret is used once to create a read-only access token and is never stored." : {},
+    "eHbA1c" : {},
+    "eHbA1c — an A1c estimate from your average glucose. GMI — Glucose Management Indicator, another A1c estimate from average glucose. % and mmol/mol (IFCC) are two scales for the result." : {},
+    "g" : {
+      "comment" : "The short unit display string for grams"
+    },
+    "mg/dL" : {
+      "comment" : "The short unit display string for milligrams of glucose per decilter"
+    },
+    "minutes" : {},
+    "mmol/L" : {
+      "comment" : "The short unit display string for millimoles of glucose per liter"
+    },
+    "mmol/mol" : {},
+    "“Default Snooze” controls the default value for how long the alert stays quiet after you press Snooze. \"A snooze duration of 0 means the alarm is acknowledged (silenced), and will alert again next time the condition applies, without time limitation. \" Toggle “Snoozed” to mute this alarm right now." : {},
+    "“Snooze All” disables every alarm. “Mute All” silences phone sounds but still vibrates and shows iOS notifications." : {},
+    "••••••••" : {},
+    "− 30m" : {},
+    "⚠️ Please enable at least one limit." : {},
+    "🌮" : {},
+    "🍕" : {},
+    "🍭" : {},
+    "🍽️" : {}
+  },
+  "version" : "1.0"
+}
