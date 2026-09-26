@@ -13,7 +13,7 @@ struct TrioMealTreatment: Codable, Equatable {
     static let futureEditWindow: TimeInterval = 12 * 3600
     static let requiredRemoteCommands: Set<String> = [TRCCommandType.editMeal.rawValue, TRCCommandType.deleteMeal.rawValue]
 
-    let nightscoutID: String
+    let nightscoutID: String?
     let mealID: UUID
     let fpuID: UUID?
     let date: TimeInterval
@@ -42,7 +42,7 @@ struct TrioMealTreatment: Codable, Equatable {
         let rawNote = (entry["notes"] as? String) ?? (entry["foodType"] as? String)
         let trimmedNote = rawNote?.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        nightscoutID = entry["_id"] as? String ?? ""
+        nightscoutID = entry["_id"] as? String
         self.mealID = mealID
         self.fpuID = fpuID
         self.date = date
