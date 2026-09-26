@@ -219,6 +219,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // (this controller is built only after storage is ready, so it never fires
         // while we're alive); retained one release as a safety net.
         notificationCenter.addObserver(self, selector: #selector(handleBFUReloadCompleted), name: .bfuReloadCompleted, object: nil)
+        // A remote meal edit/delete changes the carb marks on the chart, whichever screen sent it.
+        notificationCenter.addObserver(self, selector: #selector(handleRemoteMealCommandDidComplete), name: .remoteMealCommandDidComplete, object: nil)
 
         #if !targetEnvironment(macCatalyst)
             notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
@@ -679,6 +681,10 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // runMigrationsIfNeeded() will always pass. Catches the case where viewDidLoad
         // ran during a BGAppRefreshTask background launch and deferred migrations.
         runMigrationsIfNeeded()
+    }
+
+    @objc func handleRemoteMealCommandDidComplete() {
+        TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date())
     }
 
     @objc func handleBFUReloadCompleted() {

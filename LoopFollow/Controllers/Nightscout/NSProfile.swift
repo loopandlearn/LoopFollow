@@ -50,6 +50,7 @@ struct NSProfile: Decodable {
     let expirationDate: String?
     let startDate: String?
     let createdAt: String?
+    let remoteCommands: [String]?
 
     struct TrioOverrideEntry: Decodable {
         let name: String
@@ -101,5 +102,6 @@ struct NSProfile: Decodable {
         case expirationDate
         case startDate
         case createdAt = "created_at"
+        case remoteCommands
     }
 }

@@ -44,7 +44,13 @@ extension MainViewController {
 
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (3600 * Storage.shared.predictionToLoad.value)) {
                 // Make the dot
-                let dot = carbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv + Double(offset)), absorptionTime: absorptionTime)
+                let dot = carbGraphStruct(
+                    value: Double(carbs),
+                    date: Double(dateTimeStamp),
+                    sgv: Int(sgv.sgv + Double(offset)),
+                    absorptionTime: absorptionTime,
+                    treatment: CarbTreatment(nightscoutEntry: currentEntry, date: dateTimeStamp)
+                )
                 carbData.append(dot)
             }
         }

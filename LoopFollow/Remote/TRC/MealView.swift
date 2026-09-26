@@ -100,46 +100,16 @@ struct MealView: View {
                             .transition(.opacity)
                         }
 
-                        HKQuantityInputView(
-                            label: "Carbs",
-                            quantity: $carbs,
-                            unit: .gram(),
-                            maxLength: 4,
-                            minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                            maxValue: maxCarbs.value,
-                            isFocused: $carbsFieldIsFocused,
-                            onValidationError: { message in
-                                handleValidationError(message)
-                            }
+                        MealMacroInputs(
+                            carbs: $carbs,
+                            fat: $fat,
+                            protein: $protein,
+                            showFatProtein: mealWithFatProtein.value,
+                            carbsFocused: $carbsFieldIsFocused,
+                            fatFocused: $fatFieldIsFocused,
+                            proteinFocused: $proteinFieldIsFocused,
+                            onValidationError: handleValidationError
                         )
-
-                        if mealWithFatProtein.value {
-                            HKQuantityInputView(
-                                label: "Fat",
-                                quantity: $fat,
-                                unit: .gram(),
-                                maxLength: 4,
-                                minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                                maxValue: maxFat.value,
-                                isFocused: $fatFieldIsFocused,
-                                onValidationError: { message in
-                                    handleValidationError(message)
-                                }
-                            )
-
-                            HKQuantityInputView(
-                                label: "Protein",
-                                quantity: $protein,
-                                unit: .gram(),
-                                maxLength: 4,
-                                minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                                maxValue: maxProtein.value,
-                                isFocused: $proteinFieldIsFocused,
-                                onValidationError: { message in
-                                    handleValidationError(message)
-                                }
-                            )
-                        }
 
                         if mealWithBolus.value {
                             HKQuantityInputView(
