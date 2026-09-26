@@ -241,7 +241,7 @@ struct BolusView: View {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("\(InsulinFormatter.shared.string(steppedRec))U")
-                                    Text("Calculated \(mins) minute\(mins == 1 ? "" : "s") ago")
+                                    Text("Calculated \(mins) minutes ago")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
