@@ -220,7 +220,9 @@ extension MainViewController {
             }
 
             if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
-                if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
+                if let tempBasalString = loopStatus["timestamp"] as? String,
+                   let tempBasalTime = formatter.date(from: tempBasalString)?.timeIntervalSince1970
+                {
                     var lastBGTime = updatedTime ?? Date().timeIntervalSince1970
                     if bgData.count > 0 {
                         lastBGTime = bgData[bgData.count - 1].date

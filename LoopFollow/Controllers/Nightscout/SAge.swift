@@ -36,14 +36,18 @@ extension MainViewController {
             return
         }
         currentSage = data[0]
-        var lastSageString = data[0].created_at
+        let lastSageString = data[0].created_at
 
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate,
                                    .withTime,
                                    .withDashSeparatorInDate,
                                    .withColonSeparatorInTime]
-        Storage.shared.sageInsertTime.value = formatter.date(from: lastSageString)?.timeIntervalSince1970 as! TimeInterval
+        guard let sageInsertTime = formatter.date(from: lastSageString)?.timeIntervalSince1970 else {
+            LogManager.shared.log(category: .nightscout, message: "updateSage: unparseable created_at '\(lastSageString)'")
+            return
+        }
+        Storage.shared.sageInsertTime.value = sageInsertTime
 
         // -- Auto-snooze CGM start ────────────────────────────────────────────────
         let now = Date()
@@ -62,7 +66,7 @@ extension MainViewController {
             }
         }
 
-        if let sageTime = formatter.date(from: (lastSageString as! String))?.timeIntervalSince1970 {
+        if let sageTime = formatter.date(from: lastSageString)?.timeIntervalSince1970 {
             let now = dateTimeUtils.getNowTimeIntervalUTC()
             let secondsAgo = now - sageTime
 
