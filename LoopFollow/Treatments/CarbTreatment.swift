@@ -22,33 +22,9 @@ enum CarbTreatment: Codable, Equatable {
     var detailTreatment: Treatment {
         switch self {
         case let .loop(carb):
-            return Treatment(
-                id: "\(carb.nightscoutID)-carb",
-                type: .carb,
-                date: carb.date,
-                title: "\(Int(carb.carbs))g",
-                subtitle: "Carbs",
-                icon: "circle.fill",
-                color: .orange,
-                bgValue: 0,
-                loopCarb: carb
-            )
+            return .carb(nightscoutID: carb.nightscoutID, date: carb.date, carbs: carb.carbs, bgValue: 0, loopCarb: carb)
         case let .trio(meal):
-            let macros = [
-                meal.fat > 0 ? "\(meal.fat) g fat" : nil,
-                meal.protein > 0 ? "\(meal.protein) g protein" : nil,
-            ].compactMap { $0 }.joined(separator: " • ")
-            return Treatment(
-                id: "\(meal.nightscoutID)-carb",
-                type: .carb,
-                date: meal.date,
-                title: meal.carbs > 0 ? "\(Int(meal.carbs))g" : "Meal",
-                subtitle: meal.isFPUChild ? "Carbs • FPU" : (meal.carbs > 0 ? "Carbs" : macros),
-                icon: "circle.fill",
-                color: .orange,
-                bgValue: 0,
-                trioMeal: meal
-            )
+            return .carb(nightscoutID: meal.nightscoutID, date: meal.date, carbs: meal.carbs, bgValue: 0, trioMeal: meal)
         }
     }
 }

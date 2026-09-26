@@ -1154,6 +1154,52 @@ struct Treatment: Identifiable {
     }
 }
 
+extension Treatment {
+    /// A carb entry; `trioMeal` / `loopCarb` carry the AID app's handle for remote edit and delete.
+    static func carb(nightscoutID: String?, date: TimeInterval, carbs: Double, bgValue: Int, trioMeal: TrioMealTreatment? = nil, loopCarb: LoopCarbTreatment? = nil) -> Treatment {
+        Treatment(
+            id: "\(nightscoutID ?? "unknown-\(date)")-carb",
+            type: .carb,
+            date: date,
+            title: carbs > 0 ? "\(Int(carbs))g" : "Meal",
+            subtitle: carbSubtitle(carbs: carbs, trioMeal: trioMeal),
+            icon: "circle.fill",
+            color: .orange,
+            bgValue: bgValue,
+            trioMeal: trioMeal,
+            loopCarb: loopCarb
+        )
+    }
+
+    /// "Carbs" for a carb entry, "Carbs • FPU" for a Trio FPU child, and the fat/protein grams for a Trio meal without carbs.
+    private static func carbSubtitle(carbs: Double, trioMeal: TrioMealTreatment?) -> String {
+        if trioMeal?.isFPUChild == true { return "Carbs • FPU" }
+        guard carbs == 0, let trioMeal else { return "Carbs" }
+        let parts = [
+            trioMeal.fat > 0 ? "\(trioMeal.fat) g fat" : nil,
+            trioMeal.protein > 0 ? "\(trioMeal.protein) g protein" : nil,
+        ]
+        return parts.compactMap { $0 }.joined(separator: " • ")
+    }
+
+    /// Trio root meals keyed by the `fpuID` their FPU children carry.
+    static func rootMealsByFPUID(_ treatments: some Sequence<Treatment>) -> [UUID: Treatment] {
+        var roots: [UUID: Treatment] = [:]
+        for treatment in treatments {
+            if let meal = treatment.trioMeal, !meal.isFPUChild, let fpuID = meal.fpuID {
+                roots[fpuID] = treatment
+            }
+        }
+        return roots
+    }
+
+    /// The root meal for an FPU child, when the Trio build publishes `fpuID` and `roots` holds it.
+    func rootMeal(in roots: [UUID: Treatment]) -> Treatment? {
+        guard let child = trioMeal, child.isFPUChild, let fpuID = child.fpuID else { return nil }
+        return roots[fpuID]
+    }
+}
+
 class TreatmentsViewModel: ObservableObject {
     @Published var groupedTreatments: [String: [Treatment]] = [:]
     @Published var isInitialLoading = false
@@ -1204,10 +1250,9 @@ class TreatmentsViewModel: ObservableObject {
         }
     }
 
-    /// The root meal for an FPU child, when the Trio build publishes `fpuID` and the root is loaded.
+    /// The root meal for an FPU child, when it is loaded.
     func rootMeal(forFPUChild treatment: Treatment) -> Treatment? {
-        guard let child = treatment.trioMeal, child.isFPUChild, let fpuID = child.fpuID else { return nil }
-        return rootMealsByFPUID[fpuID]
+        treatment.rootMeal(in: rootMealsByFPUID)
     }
 
     func refreshTreatments() {
@@ -1371,14 +1416,10 @@ class TreatmentsViewModel: ObservableObject {
                 let carbs = entry["carbs"] as? Double ?? 0
                 if carbs > 0 || trioMeal != nil {
                     let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
-                    let treatment = Treatment(
-                        id: "\(nsId)-carb",
-                        type: .carb,
+                    let treatment = Treatment.carb(
+                        nightscoutID: nsId,
                         date: timestamp,
-                        title: carbs > 0 ? "\(Int(carbs))g" : "Meal",
-                        subtitle: carbSubtitle(carbs: carbs, trioMeal: trioMeal),
-                        icon: "circle.fill",
-                        color: .orange,
+                        carbs: carbs,
                         bgValue: actualBG,
                         trioMeal: trioMeal,
                         loopCarb: loopCarb
@@ -1550,20 +1591,8 @@ class TreatmentsViewModel: ObservableObject {
         return (treatments.sorted { $0.date > $1.date }, detectedSMB, detectedAutomatic)
     }
 
-    /// "Carbs" for a carb entry, "Carbs • FPU" for a Trio FPU child, and the fat/protein grams for a Trio meal without carbs.
-    private func carbSubtitle(carbs: Double, trioMeal: TrioMealTreatment?) -> String {
-        if trioMeal?.isFPUChild == true { return "Carbs • FPU" }
-        guard carbs == 0, let trioMeal else { return "Carbs" }
-        let parts = [
-            trioMeal.fat > 0 ? "\(trioMeal.fat) g fat" : nil,
-            trioMeal.protein > 0 ? "\(trioMeal.protein) g protein" : nil,
-        ]
-        return parts.compactMap { $0 }.joined(separator: " • ")
-    }
-
     private func regroupTreatments() {
         var grouped: [String: [Treatment]] = [:]
-        var roots: [UUID: Treatment] = [:]
 
         for treatment in allTreatments {
             let key = treatment.hourKey
@@ -1571,11 +1600,8 @@ class TreatmentsViewModel: ObservableObject {
                 grouped[key] = []
             }
             grouped[key]?.append(treatment)
-            if let meal = treatment.trioMeal, !meal.isFPUChild, let fpuID = meal.fpuID {
-                roots[fpuID] = treatment
-            }
         }
-        rootMealsByFPUID = roots
+        rootMealsByFPUID = Treatment.rootMealsByFPUID(allTreatments)
 
         // Sort treatments within each hour
         for key in grouped.keys {
