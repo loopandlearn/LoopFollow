@@ -7,11 +7,11 @@ import Foundation
 ///
 /// `syncIdentifier` is Loop's stable handle for the entry; it survives edits on the phone,
 /// so it addresses the entry in remote delete/edit commands.
-struct LoopCarbTreatment: Equatable {
+struct LoopCarbTreatment: Codable, Equatable {
     static let editWindow: TimeInterval = 23 * 3600
     static let requiredRemoteCommands: Set<String> = ["carbs-delete", "carbs-edit"]
 
-    let nightscoutID: String
+    let nightscoutID: String?
     let syncIdentifier: String
     let enteredBy: String
     let date: TimeInterval
@@ -31,7 +31,7 @@ struct LoopCarbTreatment: Equatable {
             return nil
         }
 
-        nightscoutID = entry["_id"] as? String ?? ""
+        nightscoutID = entry["_id"] as? String
         self.syncIdentifier = syncIdentifier
         self.enteredBy = enteredBy
         self.date = date

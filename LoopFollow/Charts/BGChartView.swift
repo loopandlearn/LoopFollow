@@ -70,18 +70,36 @@ struct BGChartView: View {
     /// attachments while BGChartInteraction preserves the viewport.
     @State private var gestureMountEpoch = 0
 
+    /// Carb entry opened by a double-tap on the main chart. Owned here, outside
+    /// the remounted subtree, so the sheet survives a foregrounding remount.
+    @State private var selectedTreatment: Treatment?
+
     var body: some View {
         Group {
             if config == .small {
                 SmallBGChart(model: model, interaction: model.interaction)
             } else {
-                MainBGChart(model: model, interaction: model.interaction)
+                MainBGChart(model: model, interaction: model.interaction, selectedTreatment: $selectedTreatment)
             }
         }
         .id(gestureMountEpoch)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             gestureMountEpoch &+= 1
         }
+        .sheet(item: $selectedTreatment) { treatment in
+            NavigationStack {
+                TreatmentDetailView(treatment: treatment, rootMeal: rootMeal(for: treatment))
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { selectedTreatment = nil }
+                        }
+                    }
+            }
+        }
+    }
+
+    private func rootMeal(for treatment: Treatment) -> Treatment? {
+        treatment.rootMeal(in: Treatment.rootMealsByFPUID(model.carbs.compactMap { $0.treatment?.detailTreatment }))
     }
 }
 
@@ -98,11 +116,14 @@ struct BGChartView: View {
 /// whose live preview is a `.scaleEffect(x:)` stretch anchored under the
 /// pinch centroid, committed on a geometric zoom grid. A one-finger press
 /// held stationary latches into inspect mode and scrubs a selection that is
-/// rendered by a shell overlay (never re-laying the canvas). Double-tap
-/// cycles zoom presets. No `.chartScrollableAxes`, no UIKit gesture hacks.
+/// rendered by a shell overlay (never re-laying the canvas). Double-tap on a
+/// carb mark opens its details; elsewhere it cycles zoom presets.
+/// No `.chartScrollableAxes`, no UIKit gesture hacks.
 private struct MainBGChart: View {
     @ObservedObject var model: BGChartModel
     @ObservedObject var interaction: BGChartInteraction
+    /// Carb entry to show in the detail sheet; the shell owns the sheet.
+    @Binding var selectedTreatment: Treatment?
 
     /// Rendered slice of the domain. The canvas covers only this window
     /// (visible ± `renderWindowPadFactor` viewports), bounding canvas width
@@ -110,9 +131,10 @@ private struct MainBGChart: View {
     @State private var renderWindowStart: Date
     @State private var renderWindowEnd: Date
 
-    init(model: BGChartModel, interaction: BGChartInteraction) {
+    init(model: BGChartModel, interaction: BGChartInteraction, selectedTreatment: Binding<Treatment?>) {
         _model = ObservedObject(wrappedValue: model)
         _interaction = ObservedObject(wrappedValue: interaction)
+        _selectedTreatment = selectedTreatment
         // Seed the render window around the current viewport so a remount's
         // first frame draws in place.
         let pad = BGChartConfig.renderWindowPadFactor * interaction.visibleSeconds
@@ -241,15 +263,15 @@ private struct MainBGChart: View {
         .contentShape(Rectangle())
         .simultaneousGesture(panAndInspectGesture(viewportWidth: viewportWidth))
         .simultaneousGesture(magnifyGesture(viewportWidth: viewportWidth))
-        // Double-tap zooms; a single tap (only recognized once the double-tap
-        // window lapses) selects the mark under the finger, or clears the pill.
+        // Double-tap opens carb treatment details, otherwise zooms. Single-tap
+        // waits for the double-tap window before selecting a mark.
         .simultaneousGesture(
-            TapGesture(count: 2)
+            SpatialTapGesture(count: 2)
                 .exclusively(before: SpatialTapGesture())
                 .onEnded { value in
                     switch value {
-                    case .first:
-                        cycleZoomPreset()
+                    case let .first(tap):
+                        handleDoubleTap(at: tap.location, viewportWidth: viewportWidth)
                     case let .second(tap):
                         handleTap(at: tap.location, viewportWidth: viewportWidth)
                     }
@@ -810,6 +832,39 @@ private struct MainBGChart: View {
     private func handleTap(at location: CGPoint, viewportWidth: CGFloat) {
         guard plotFrame.height > 0 else { return }
         tapped = tappedAnchor(at: location, viewportWidth: viewportWidth)
+    }
+
+    /// Double-tap hit test (screen-space, 2D) over carb marks only, at their
+    /// drawn (decluttered) positions. Returns nil when no carb is under the
+    /// finger — which cycles the zoom preset.
+    private func tappedCarb(at location: CGPoint, viewportWidth: CGFloat) -> BGChartModel.TreatmentPoint? {
+        let radius = BGChartConfig.tapHitRadius
+        var best: BGChartModel.TreatmentPoint?
+        var bestDistance2 = radius * radius
+
+        for point in model.carbs {
+            let dx = xPosition(for: point.drawnDate, viewportWidth: viewportWidth) - location.x
+            let dy = yPosition(forValue: point.sgv) - location.y
+            let d2 = dx * dx + dy * dy
+            if d2 <= bestDistance2 {
+                bestDistance2 = d2
+                best = point
+            }
+        }
+        return best
+    }
+
+    private func handleDoubleTap(at location: CGPoint, viewportWidth: CGFloat) {
+        // A carb mark without AID metadata (no remote handle) has no details to show.
+        guard plotFrame.height > 0, let carb = tappedCarb(at: location, viewportWidth: viewportWidth)?.treatment else {
+            cycleZoomPreset()
+            return
+        }
+        momentumTask?.cancel()
+        momentumTask = nil
+        resetGestureState()
+        tapped = nil
+        selectedTreatment = carb.detailTreatment
     }
 
     /// The anchor the overlay should show: a live scrub wins over a sticky tap.
