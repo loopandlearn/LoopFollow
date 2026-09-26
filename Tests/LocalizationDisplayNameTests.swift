@@ -49,19 +49,38 @@ struct LocalizationDisplayNameTests {
         #expect(ActiveOption.allCases.map(\.rawValue) == ["always", "day", "night"])
     }
 
-    @Test("AlarmType.displayName falls back to the English raw value in the test host language")
-    func alarmTypeDisplayNameEnglish() {
+    /// The test host runs in whatever language the simulator uses, so compare against the
+    /// catalog lookup for the same key instead of hardcoding English.
+    private func localized(_ key: String) -> String {
+        Bundle.main.localizedString(forKey: key, value: nil, table: nil)
+    }
+
+    @Test("AlarmType.displayName resolves its raw value through the String Catalog")
+    func alarmTypeDisplayNameUsesCatalog() {
         for type in AlarmType.allCases {
-            #expect(type.displayName == type.rawValue)
+            #expect(type.displayName == localized(type.rawValue))
+            #expect(!type.displayName.isEmpty)
         }
     }
 
-    @Test("day/night displayName keeps the English wording")
-    func dayNightDisplayNameEnglish() {
-        #expect(PlaySoundOption.always.displayName == "Day & Night")
-        #expect(PlaySoundOption.day.displayName == "Day")
-        #expect(PlaySoundOption.night.displayName == "Night")
-        #expect(PlaySoundOption.never.displayName == "Never")
-        #expect(ActiveOption.always.displayName == "Day & Night")
+    @Test("day/night displayName resolves its English key through the String Catalog")
+    func dayNightDisplayNameUsesCatalog() {
+        #expect(PlaySoundOption.always.displayName == localized("Day & Night"))
+        #expect(PlaySoundOption.day.displayName == localized("Day"))
+        #expect(PlaySoundOption.night.displayName == localized("Night"))
+        #expect(PlaySoundOption.never.displayName == localized("Never"))
+        #expect(ActiveOption.always.displayName == localized("Day & Night"))
+    }
+
+    @Test("Turkish strings are compiled into the app bundle")
+    func turkishBundleContainsAlarmTypeNames() throws {
+        let path = try #require(Bundle.main.path(forResource: "tr", ofType: "lproj"), "tr.lproj missing: check knownRegions and catalog target membership")
+        let bundle = try #require(Bundle(path: path))
+        for type in AlarmType.allCases {
+            let localized = bundle.localizedString(forKey: type.rawValue, value: "MISSING", table: nil)
+            #expect(localized != "MISSING", Comment(rawValue: "no Turkish value for \(type.rawValue)"))
+            #expect(localized != type.rawValue, Comment(rawValue: "Turkish value equals English for \(type.rawValue)"))
+        }
+        #expect(bundle.localizedString(forKey: "Day & Night", value: "MISSING", table: nil) == "Gündüz ve Gece")
     }
 }

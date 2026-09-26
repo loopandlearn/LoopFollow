@@ -1,11 +1,21 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    " U" : {},
-    "#WeAreNotWaitingAnymore" : {},
-    "#WeAreWaitingForData" : {},
-    "%" : {},
-    "%@" : {},
+    " U" : {
+      "shouldTranslate" : false
+    },
+    "#WeAreNotWaitingAnymore" : {
+      "shouldTranslate" : false
+    },
+    "#WeAreWaitingForData" : {
+      "shouldTranslate" : false
+    },
+    "%" : {
+      "shouldTranslate" : false
+    },
+    "%@" : {
+      "shouldTranslate" : false
+    },
     "%@  %@ → %@" : {
       "localizations" : {
         "en" : {
@@ -14,7 +24,8 @@
             "value" : "%1$@  %2$@ → %3$@"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%@ %@" : {
       "localizations" : {
@@ -24,7 +35,8 @@
             "value" : "%1$@ %2$@"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%@ - %@" : {
       "localizations" : {
@@ -34,11 +46,39 @@
             "value" : "%1$@ - %2$@"
           }
         }
+      },
+      "shouldTranslate" : false
+    },
+    "%@ gaps" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ boşluk"
+          }
+        }
       }
     },
-    "%@ gaps" : {},
-    "%@ hr" : {},
-    "%@ min" : {},
+    "%@ hr" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sa"
+          }
+        }
+      }
+    },
+    "%@ min" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ dk"
+          }
+        }
+      }
+    },
     "%@ of %@ expected readings" : {
       "localizations" : {
         "en" : {
@@ -46,236 +86,1347 @@
             "state" : "new",
             "value" : "%1$@ of %2$@ expected readings"
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "beklenen %2$@ okumanın %1$@ tanesi"
+          }
         }
       }
     },
-    "%@ sec" : {},
-    "%@%%" : {},
-    "%@U" : {},
-    "%@g" : {},
+    "%@ sec" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sn"
+          }
+        }
+      }
+    },
+    "%@%%" : {
+      "shouldTranslate" : false
+    },
+    "%@U" : {
+      "shouldTranslate" : false
+    },
+    "%@g" : {
+      "shouldTranslate" : false
+    },
     "(" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "shouldTranslate" : false
     },
-    "(%@ days)" : {},
-    "+ 30m" : {},
-    "---" : {},
-    "...because the data could not be loaded" : {},
-    "00" : {},
-    "15m" : {},
-    "24h" : {},
-    "A silent tune will play in the background, keeping the app active. May be interrupted by other apps. Allows continuous updates but consumes more battery." : {},
-    "API Secret" : {},
+    "(%@ days)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%@ gün)"
+          }
+        }
+      }
+    },
+    "+ 30m" : {
+      "shouldTranslate" : false
+    },
+    "---" : {
+      "shouldTranslate" : false
+    },
+    "...because the data could not be loaded" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "...çünkü veriler yüklenemedi"
+          }
+        }
+      }
+    },
+    "00" : {
+      "shouldTranslate" : false
+    },
+    "15m" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15dk"
+          }
+        }
+      }
+    },
+    "24h" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24sa"
+          }
+        }
+      }
+    },
+    "A silent tune will play in the background, keeping the app active. May be interrupted by other apps. Allows continuous updates but consumes more battery." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arka planda sessiz bir melodi çalarak uygulamayı etkin tutar. Başka uygulamalar tarafından kesilebilir. Sürekli güncelleme sağlar ama daha fazla pil tüketir."
+          }
+        }
+      }
+    },
+    "API Secret" : {
+      "shouldTranslate" : false
+    },
     "APN" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "shouldTranslate" : false
     },
-    "APNS Environment: %@" : {},
-    "APNS Key" : {},
-    "APNS Key ID" : {},
-    "APNS warning: importing APNS settings will overwrite your existing APNS Key ID and APNS Key." : {},
-    "APNs credentials are missing or invalid — Live Activity updates will not work. Open Settings → APN to fix." : {},
-    "Above: %@" : {},
-    "Absorption Time" : {},
-    "Access Token" : {},
-    "Activate Override" : {},
-    "Active" : {},
-    "Active During" : {},
-    "Active Override" : {},
+    "APNS Environment: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APNS Ortamı: %@"
+          }
+        }
+      }
+    },
+    "APNS Key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APNS Anahtarı"
+          }
+        }
+      }
+    },
+    "APNS Key ID" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APNS Anahtar Kimliği"
+          }
+        }
+      }
+    },
+    "APNS warning: importing APNS settings will overwrite your existing APNS Key ID and APNS Key." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APNS uyarısı: APNS ayarlarını içe aktarmak mevcut APNS Anahtar Kimliğinizin ve APNS Anahtarınızın üzerine yazar."
+          }
+        }
+      }
+    },
+    "APNs credentials are missing or invalid — Live Activity updates will not work. Open Settings → APN to fix." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APNs kimlik bilgileri eksik veya geçersiz — Canlı Etkinlik güncellemeleri çalışmayacak. Düzeltmek için Ayarlar → APN'ye gidin."
+          }
+        }
+      }
+    },
+    "Above: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üst: %@"
+          }
+        }
+      }
+    },
+    "Absorption Time" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emilim Süresi"
+          }
+        }
+      }
+    },
+    "Access Token" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erişim Belirteci"
+          }
+        }
+      }
+    },
+    "Activate Override" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override'ı Etkinleştir"
+          }
+        }
+      }
+    },
+    "Active" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin"
+          }
+        }
+      }
+    },
+    "Active During" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin Olduğu Zaman"
+          }
+        }
+      }
+    },
+    "Active Override" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin Override"
+          }
+        }
+      }
+    },
     "Add Alarm" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alarm Ekle"
+          }
+        }
+      }
     },
-    "Add the Apple-Calendar complication to your watch or CarPlay to see BG readings. Create a separate calendar (e.g. “Follow”) — this view will **delete** events on the same calendar each time it writes new readings." : {},
-    "Add the contact named '%@' to your watch face to show the current BG value in real time. Make sure to give the app full access to Contacts when prompted." : {},
-    "Adding this alarm would exceed the QR code character limit. Please remove some alarms first." : {},
-    "Additional Information" : {},
-    "Adjust the background refresh type." : {},
-    "Advanced Settings" : {},
+    "Add the Apple-Calendar complication to your watch or CarPlay to see BG readings. Create a separate calendar (e.g. “Follow”) — this view will **delete** events on the same calendar each time it writes new readings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ okumalarını görmek için saatinize veya CarPlay'e Apple Takvim komplikasyonunu ekleyin. Ayrı bir takvim oluşturun (ör. “Follow”) — bu görünüm, her yeni okuma yazdığında aynı takvimdeki etkinlikleri **siler**."
+          }
+        }
+      }
+    },
+    "Add the contact named '%@' to your watch face to show the current BG value in real time. Make sure to give the app full access to Contacts when prompted." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel KŞ değerini gerçek zamanlı görmek için '%@' adlı kişiyi saat kadranınıza ekleyin. İstendiğinde uygulamaya Kişiler için tam erişim verdiğinizden emin olun."
+          }
+        }
+      }
+    },
+    "Adding this alarm would exceed the QR code character limit. Please remove some alarms first." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu alarmı eklemek QR kodu karakter sınırını aşar. Lütfen önce bazı alarmları kaldırın."
+          }
+        }
+      }
+    },
+    "Additional Information" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ek Bilgiler"
+          }
+        }
+      }
+    },
+    "Adjust the background refresh type." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arka plan yenileme türünü ayarlayın."
+          }
+        }
+      }
+    },
+    "Advanced Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelişmiş Ayarlar"
+          }
+        }
+      }
+    },
     "Alarm Name" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alarm Adı"
+          }
+        }
+      }
     },
-    "Alarm Settings" : {},
-    "Alarm not found" : {},
-    "Alarms can behave differently during the day and at night." : {},
-    "Alert Sound" : {},
-    "All" : {},
+    "Alarm Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alarm Ayarları"
+          }
+        }
+      }
+    },
+    "Alarm not found" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alarm bulunamadı"
+          }
+        }
+      }
+    },
+    "Alarms can behave differently during the day and at night." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alarmlar gündüz ve gece farklı davranabilir."
+          }
+        }
+      }
+    },
+    "Alert Sound" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyarı Sesi"
+          }
+        }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tümü"
+          }
+        }
+      }
+    },
     "All Alerts Snoozed" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm Uyarılar Ertelendi"
+          }
+        }
+      }
     },
     "All Sounds Muted" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm Sesler Kapalı"
+          }
+        }
+      }
     },
-    "All alerts snoozed" : {},
-    "All glucose, insulin, and carb data. Your Nightscout URL and API token. Your Dexcom credentials. Remote-command secrets and APNS keys. Time zone. Location data. Logs — these are never sent automatically; the Settings → Logs sharing flow is unchanged and only triggered by you." : {},
+    "All alerts snoozed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm uyarılar ertelendi"
+          }
+        }
+      }
+    },
+    "All glucose, insulin, and carb data. Your Nightscout URL and API token. Your Dexcom credentials. Remote-command secrets and APNS keys. Time zone. Location data. Logs — these are never sent automatically; the Settings → Logs sharing flow is unchanged and only triggered by you." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm glukoz, insülin ve karbonhidrat verileri. Nightscout URL'niz ve API belirteciniz. Dexcom kimlik bilgileriniz. Uzaktan komut sırları ve APNS anahtarları. Saat dilimi. Konum verileri. Günlükler — bunlar asla otomatik gönderilmez; Ayarlar → Günlükler paylaşım akışı değişmedi ve yalnızca siz tetiklediğinizde çalışır."
+          }
+        }
+      }
+    },
     "Always" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her Zaman"
+          }
+        }
+      }
     },
-    "Ambulatory Glucose Profile (AGP)" : {},
+    "Ambulatory Glucose Profile (AGP)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ambulatuvar Glukoz Profili (AGP)"
+          }
+        }
+      }
+    },
     "App Settings" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama Ayarları"
+          }
+        }
+      }
     },
-    "App version, build date, whether this is a TestFlight build, the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), and iOS version. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent." : {},
+    "App version, build date, whether this is a TestFlight build, the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), and iOS version. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama sürümü, derleme tarihi, TestFlight derlemesi olup olmadığı, kurulum örnek numarası, bu geliştiricinin tüm uygulamaları cihazdan kaldırıldığında sıfırlanan Apple tarafından sağlanan satıcı bazlı bir tanımlayıcı (IDFV), donanım tanımlayıcısı (ör. iPhone15,2) ve iOS sürümü. Nightscout ve Dexcom'un yapılandırılıp yapılandırılmadığı (evet/hayır — URL veya kullanıcı adı yok). Biliniyorsa hangi uygulamayı takip ettiğiniz (Loop, Trio vb.). Küçük bir tercih bayrağı kümesi (birimler, görünüm modu, takvim/kişi entegrasyonunun açık olup olmadığı, uzaktan komut türü, arka plan yenileme yöntemi). JSON'un tamamı Tanılama → Neler gönderiliyor altında görülebilir."
+          }
+        }
+      }
+    },
     "Appearance" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görünüm"
+          }
+        }
+      }
     },
-    "Are you sure you want to cancel the active override?" : {},
-    "Are you sure you want to cancel the existing temp target?" : {},
-    "Are you sure you want to send %@ U?" : {},
-    "Available Overrides" : {},
+    "Are you sure you want to cancel the active override?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin override'ı iptal etmek istediğinizden emin misiniz?"
+          }
+        }
+      }
+    },
+    "Are you sure you want to cancel the existing temp target?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut geçici hedefi iptal etmek istediğinizden emin misiniz?"
+          }
+        }
+      }
+    },
+    "Are you sure you want to send %@ U?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ U göndermek istediğinizden emin misiniz?"
+          }
+        }
+      }
+    },
+    "Available Overrides" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanılabilir Override'lar"
+          }
+        }
+      }
+    },
     "Available Variables" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanılabilir Değişkenler"
+          }
+        }
+      }
     },
-    "BG Update Delay (Sec): %@" : {},
+    "BG Update Delay (Sec): %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ Güncelleme Gecikmesi (sn): %@"
+          }
+        }
+      }
+    },
     "Back" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geri"
+          }
+        }
+      }
     },
     "Background Color" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arka Plan Rengi"
+          }
+        }
+      }
     },
     "Background Refresh Type" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arka Plan Yenileme Türü"
+          }
+        }
+      }
     },
     "Basal / BG Scale" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bazal / KŞ Ölçeği"
+          }
+        }
+      }
     },
     "Battery Drop" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pil Düşüşü"
+          }
+        }
+      }
     },
-    "Below is the exact JSON object that LoopFollow would send to lf.bjorkert.se right now." : {},
-    "Below: %@" : {},
+    "Below is the exact JSON object that LoopFollow would send to lf.bjorkert.se right now." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LoopFollow'un şu anda lf.bjorkert.se adresine göndereceği JSON nesnesinin tamamı aşağıdadır."
+          }
+        }
+      }
+    },
+    "Below: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alt: %@"
+          }
+        }
+      }
+    },
     "Bolus" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "shouldTranslate" : false
     },
     "Bolus Filter" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus Filtresi"
+          }
+        }
+      }
     },
-    "Bolus Increment" : {},
-    "Bolus Increment: %.3f U" : {},
+    "Bolus Increment" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus Artışı"
+          }
+        }
+      }
+    },
+    "Bolus Increment: %.3f U" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus Artışı: %.3f U"
+          }
+        }
+      }
+    },
     "Build Information" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Derleme Bilgileri"
+          }
+        }
+      }
     },
-    "Built-in" : {},
-    "Bundle ID: %@" : {},
-    "CHARGING" : {},
-    "COB" : {},
+    "Built-in" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yerleşik"
+          }
+        }
+      }
+    },
+    "Bundle ID: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paket Kimliği: %@"
+          }
+        }
+      }
+    },
+    "CHARGING" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ŞARJ OLUYOR"
+          }
+        }
+      }
+    },
+    "COB" : {
+      "shouldTranslate" : false
+    },
     "COB Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COB Uyarısı"
+          }
+        }
+      }
     },
-    "CV" : {},
-    "Calculated %@ minute%@ ago" : {
+    "CV" : {
+      "shouldTranslate" : false
+    },
+    "Calculated %lld minutes ago" : {
+      "comment" : "Age of the recommended bolus calculation",
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Calculated %lld minute ago"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Calculated %lld minutes ago"
+                }
+              }
+            }
+          }
+        },
+        "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Calculated %1$@ minute%2$@ ago"
+            "state" : "translated",
+            "value" : "%lld dakika önce hesaplandı"
           }
         }
       }
     },
     "Calendar" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takvim"
+          }
+        }
+      }
     },
     "Calendar Text" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takvim Metni"
+          }
+        }
+      }
     },
-    "Calendar access denied" : {},
-    "Cancel" : {},
-    "Cancel Active Override" : {},
-    "Cancel Override" : {},
-    "Cancel Temp Target" : {},
+    "Calendar access denied" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takvim erişimi reddedildi"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İptal"
+          }
+        }
+      }
+    },
+    "Cancel Active Override" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin Override'ı İptal Et"
+          }
+        }
+      }
+    },
+    "Cancel Override" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override'ı İptal Et"
+          }
+        }
+      }
+    },
+    "Cancel Temp Target" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçici Hedefi İptal Et"
+          }
+        }
+      }
+    },
     "Carbs" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbonhidrat"
+          }
+        }
+      }
     },
     "Category" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kategori"
+          }
+        }
+      }
     },
     "Character Limit Reached" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karakter Sınırına Ulaşıldı"
+          }
+        }
+      }
     },
-    "Checking Nightscout profile history…" : {},
+    "Checking Nightscout profile history…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nightscout profil geçmişi denetleniyor…"
+          }
+        }
+      }
+    },
     "Choose Tone" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton Seç"
+          }
+        }
+      }
     },
     "Close" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapat"
+          }
+        }
+      }
     },
-    "Color" : {},
+    "Color" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renk"
+          }
+        }
+      }
+    },
     "Color BG Text" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ Metnini Renklendir"
+          }
+        }
+      }
     },
     "Color Mode" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renk Modu"
+          }
+        }
+      }
     },
-    "Color Options" : {},
+    "Color Options" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renk Seçenekleri"
+          }
+        }
+      }
+    },
     "Coloring enabled" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renklendirme açık"
+          }
+        }
+      }
     },
-    "Command Sent" : {},
-    "Configure Loop APNS" : {},
-    "Confirm" : {},
+    "Command Sent" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Komut Gönderildi"
+          }
+        }
+      }
+    },
+    "Configure Loop APNS" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop APNS'i Yapılandır"
+          }
+        }
+      }
+    },
+    "Confirm" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onayla"
+          }
+        }
+      }
+    },
     "Confirm & Import" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onayla ve İçe Aktar"
+          }
+        }
+      }
     },
-    "Confirm Bolus" : {},
-    "Confirm Cancellation" : {},
-    "Confirm Carbs" : {},
-    "Confirm Command" : {},
-    "Confirm Insulin" : {},
-    "Confirm Meal" : {},
-    "Connected" : {},
+    "Confirm Bolus" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolusu Onayla"
+          }
+        }
+      }
+    },
+    "Confirm Cancellation" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İptali Onayla"
+          }
+        }
+      }
+    },
+    "Confirm Carbs" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbonhidratı Onayla"
+          }
+        }
+      }
+    },
+    "Confirm Command" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Komutu Onayla"
+          }
+        }
+      }
+    },
+    "Confirm Insulin" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İnsülini Onayla"
+          }
+        }
+      }
+    },
+    "Confirm Meal" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğünü Onayla"
+          }
+        }
+      }
+    },
+    "Connected" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlı"
+          }
+        }
+      }
+    },
     "Consumption Time" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüketim Zamanı"
+          }
+        }
+      }
     },
-    "Contact Integration" : {},
-    "Continue" : {},
+    "Contact Integration" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kişi Entegrasyonu"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devam"
+          }
+        }
+      }
+    },
     "Copy JSON" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JSON'u Kopyala"
+          }
+        }
+      }
     },
-    "Create Read-Only Token" : {},
-    "Create one for me" : {},
-    "Creating read-only token…" : {},
-    "Current OTP Code" : {},
-    "Current TOTP Code:" : {},
-    "Current Target" : {},
-    "Current Token:" : {},
-    "Current URL:" : {},
-    "Custom" : {},
-    "Custom sounds stay on this device and aren't included in settings export." : {},
-    "Cutoffs in %@" : {},
-    "Data Availability" : {},
+    "Create Read-Only Token" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salt Okunur Belirteç Oluştur"
+          }
+        }
+      }
+    },
+    "Create one for me" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benim için oluştur"
+          }
+        }
+      }
+    },
+    "Creating read-only token…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salt okunur belirteç oluşturuluyor…"
+          }
+        }
+      }
+    },
+    "Current OTP Code" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel OTP Kodu"
+          }
+        }
+      }
+    },
+    "Current TOTP Code:" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel TOTP Kodu:"
+          }
+        }
+      }
+    },
+    "Current Target" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel Hedef"
+          }
+        }
+      }
+    },
+    "Current Token:" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel Belirteç:"
+          }
+        }
+      }
+    },
+    "Current URL:" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel URL:"
+          }
+        }
+      }
+    },
+    "Custom" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel"
+          }
+        }
+      }
+    },
+    "Custom sounds stay on this device and aren't included in settings export." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel sesler bu cihazda kalır ve ayar dışa aktarımına dahil edilmez."
+          }
+        }
+      }
+    },
+    "Cutoffs in %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sınırlar (%@)"
+          }
+        }
+      }
+    },
+    "Data Availability" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veri Kullanılabilirliği"
+          }
+        }
+      }
+    },
     "Day" : {
       "comment" : "Alarm schedule option: daytime only",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gündüz"
+          }
+        }
+      }
     },
     "Day & Night" : {
       "comment" : "Alarm schedule option: at any time of day",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gündüz ve Gece"
+          }
+        }
+      }
     },
-    "Day / Night" : {},
-    "Day / Night Schedule" : {},
+    "Day / Night" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gündüz / Gece"
+          }
+        }
+      }
+    },
+    "Day / Night Schedule" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gündüz / Gece Programı"
+          }
+        }
+      }
+    },
     "Day starts" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gündüz başlangıcı"
+          }
+        }
+      }
     },
-    "Debug / Info" : {},
+    "Debug / Info" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hata Ayıklama / Bilgi"
+          }
+        }
+      }
+    },
     "Debug Log Level" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hata Ayıklama Günlük Düzeyi"
+          }
+        }
+      }
     },
-    "Default Snooze:" : {},
-    "Delay Between Sounds" : {},
+    "Default Snooze:" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsayılan Erteleme:"
+          }
+        }
+      }
+    },
+    "Delay Between Sounds" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesler Arası Gecikme"
+          }
+        }
+      }
+    },
     "Delete" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sil"
+          }
+        }
+      }
     },
     "Delete Alarm" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alarmı Sil"
+          }
+        }
+      }
     },
     "Delete this alarm?" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu alarm silinsin mi?"
+          }
+        }
+      }
     },
-    "Delta" : {},
-    "Description" : {},
-    "Developer Team ID" : {},
-    "Device Data" : {},
-    "Device Token: %@" : {},
+    "Delta" : {
+      "shouldTranslate" : false
+    },
+    "Description" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açıklama"
+          }
+        }
+      }
+    },
+    "Developer Team ID" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geliştirici Ekip Kimliği"
+          }
+        }
+      }
+    },
+    "Device Data" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihaz Verileri"
+          }
+        }
+      }
+    },
+    "Device Token: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihaz Belirteci: %@"
+          }
+        }
+      }
+    },
     "Device tokens are alternating in recent profile uploads (%@ tokens involved across %@ records). This usually means more than one app installation is uploading to the same Nightscout. Remove the app from spare or unused phones." : {
       "localizations" : {
         "en" : {
@@ -283,106 +1434,531 @@
             "state" : "new",
             "value" : "Device tokens are alternating in recent profile uploads (%1$@ tokens involved across %2$@ records). This usually means more than one app installation is uploading to the same Nightscout. Remove the app from spare or unused phones."
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son profil yüklemelerinde cihaz belirteçleri dönüşümlü olarak değişiyor (%2$@ kayıtta %1$@ belirteç). Bu genellikle aynı Nightscout'a birden fazla uygulama kurulumunun yükleme yaptığı anlamına gelir. Uygulamayı yedek veya kullanılmayan telefonlardan kaldırın."
+          }
         }
       }
     },
-    "Dexcom Settings" : {},
-    "Dexcom Share" : {},
-    "Diagnostics" : {
-      "extractionState" : "manual"
+    "Dexcom Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dexcom Ayarları"
+          }
+        }
+      }
     },
-    "Diagnostics unavailable: %@" : {},
-    "Disconnect" : {},
-    "Disconnected for %@" : {},
+    "Dexcom Share" : {
+      "shouldTranslate" : false
+    },
+    "Diagnostics" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tanılama"
+          }
+        }
+      }
+    },
+    "Diagnostics unavailable: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tanılama kullanılamıyor: %@"
+          }
+        }
+      }
+    },
+    "Disconnect" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantıyı Kes"
+          }
+        }
+      }
+    },
+    "Disconnected for %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ süredir bağlantı yok"
+          }
+        }
+      }
+    },
     "Dismiss" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapat"
+          }
+        }
+      }
     },
     "Display" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görüntüleme"
+          }
+        }
+      }
     },
     "Display App Badge" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama Rozetini Göster"
+          }
+        }
+      }
     },
     "Display Dots" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noktaları Göster"
+          }
+        }
+      }
     },
     "Display Lines" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çizgileri Göster"
+          }
+        }
+      }
     },
     "Display Small Graph" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük Grafiği Göster"
+          }
+        }
+      }
     },
     "Display Stats" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İstatistikleri Göster"
+          }
+        }
+      }
     },
-    "Do you want to activate the override '%@'?" : {},
+    "Do you want to activate the override '%@'?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' override'ını etkinleştirmek istiyor musunuz?"
+          }
+        }
+      }
+    },
     "Done" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitti"
+          }
+        }
+      }
     },
     "Download Prediction" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahmini İndir"
+          }
+        }
+      }
     },
     "Download Treatments" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tedavileri İndir"
+          }
+        }
+      }
     },
-    "Drag to reorder" : {},
-    "Drag to reorder. Tap a row to set its visibility and colors." : {},
-    "Duration" : {},
-    "Duration: %@" : {},
-    "Duration: %@ minutes" : {},
-    "Dynamic mode colors text based on BG range: Green (in range), Yellow (high), Red (low)" : {},
+    "Drag to reorder" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıralamak için sürükleyin"
+          }
+        }
+      }
+    },
+    "Drag to reorder. Tap a row to set its visibility and colors." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıralamak için sürükleyin. Görünürlüğü ve renkleri ayarlamak için bir satıra dokunun."
+          }
+        }
+      }
+    },
+    "Duration" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süre"
+          }
+        }
+      }
+    },
+    "Duration: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süre: %@"
+          }
+        }
+      }
+    },
+    "Duration: %@ minutes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süre: %@ dakika"
+          }
+        }
+      }
+    },
+    "Dynamic mode colors text based on BG range: Green (in range), Yellow (high), Red (low)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dinamik mod metni KŞ aralığına göre renklendirir: Yeşil (aralıkta), Sarı (yüksek), Kırmızı (düşük)"
+          }
+        }
+      }
+    },
     "Enable Contact BG Updates" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kişi KŞ Güncellemelerini Aç"
+          }
+        }
+      }
     },
     "Enable Live Activity" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı Etkinliği Aç"
+          }
+        }
+      }
     },
-    "Enable Notifications" : {},
+    "Enable Notifications" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimleri Aç"
+          }
+        }
+      }
+    },
     "Enable WebSocket" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WebSocket'i Aç"
+          }
+        }
+      }
     },
     "Enable coloring" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renklendirmeyi aç"
+          }
+        }
+      }
     },
     "Enable indefinitely" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süresiz etkinleştir"
+          }
+        }
+      }
     },
     "Enable this alarm" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu alarmı aç"
+          }
+        }
+      }
     },
     "Enabled" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık"
+          }
+        }
+      }
     },
-    "Enact" : {},
-    "End Date" : {},
-    "End now" : {},
-    "Endpoint" : {},
-    "English" : {},
+    "Enact" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygula"
+          }
+        }
+      }
+    },
+    "End Date" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitiş Tarihi"
+          }
+        }
+      }
+    },
+    "End now" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi bitir"
+          }
+        }
+      }
+    },
+    "Endpoint" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uç Nokta"
+          }
+        }
+      }
+    },
+    "English" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İngilizce"
+          }
+        }
+      }
+    },
     "Enter QR code URL or scan from Loop app" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR kodu URL'sini girin veya Loop uygulamasından tarayın"
+          }
+        }
+      }
     },
     "Enter URL" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL girin"
+          }
+        }
+      }
     },
     "Enter User" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanıcı girin"
+          }
+        }
+      }
     },
     "Enter Username" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanıcı adı girin"
+          }
+        }
+      }
     },
-    "Enter or paste your full Nightscout address. If the link already includes a token, we'll fill both in for you." : {},
-    "Environment" : {},
-    "Error" : {},
-    "Eventual" : {},
-    "Existing Temp Target" : {},
-    "Expected bg delay: %@" : {},
-    "Expected: 1 CGM reading every 5 minutes" : {},
+    "Enter or paste your full Nightscout address. If the link already includes a token, we'll fill both in for you." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tam Nightscout adresinizi girin veya yapıştırın. Bağlantı zaten bir belirteç içeriyorsa ikisini de sizin için dolduracağız."
+          }
+        }
+      }
+    },
+    "Environment" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ortam"
+          }
+        }
+      }
+    },
+    "Error" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hata"
+          }
+        }
+      }
+    },
+    "Eventual" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nihai"
+          }
+        }
+      }
+    },
+    "Existing Temp Target" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut Geçici Hedef"
+          }
+        }
+      }
+    },
+    "Expected bg delay: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beklenen KŞ gecikmesi: %@"
+          }
+        }
+      }
+    },
+    "Expected: 1 CGM reading every 5 minutes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beklenen: her 5 dakikada 1 CGM okuması"
+          }
+        }
+      }
+    },
     "Export" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dışa Aktar"
+          }
+        }
+      }
     },
-    "Export %@" : {},
+    "Export %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Dışa Aktar"
+          }
+        }
+      }
+    },
     "Export Settings To QR Code" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarları QR Koduna Aktar"
+          }
+        }
+      }
     },
     "F%@ P%@" : {
       "localizations" : {
@@ -392,206 +1968,1054 @@
             "value" : "F%1$@ P%2$@"
           }
         }
+      },
+      "shouldTranslate" : false
+    },
+    "FALLING BG" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ DÜŞÜYOR"
+          }
+        }
       }
     },
-    "FALLING BG" : {},
-    "Failed to generate QR code" : {},
+    "Failed to generate QR code" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR kodu oluşturulamadı"
+          }
+        }
+      }
+    },
     "Fast Drop Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hızlı Düşüş Uyarısı"
+          }
+        }
+      }
     },
     "Fast Rise Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hızlı Yükseliş Uyarısı"
+          }
+        }
+      }
     },
     "Features" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özellikler"
+          }
+        }
+      }
     },
     "Filter" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtre"
+          }
+        }
+      }
     },
-    "Finish" : {},
-    "Food Type" : {},
+    "Finish" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitir"
+          }
+        }
+      }
+    },
+    "Food Type" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yiyecek Türü"
+          }
+        }
+      }
+    },
     "Force portrait mode" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dikey modu zorla"
+          }
+        }
+      }
     },
-    "French" : {},
-    "Frequency" : {},
+    "French" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fransızca"
+          }
+        }
+      }
+    },
+    "Frequency" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıklık"
+          }
+        }
+      }
+    },
     "Future Carbs Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelecek Karbonhidrat Uyarısı"
+          }
+        }
+      }
     },
-    "GMI" : {},
-    "GRI (Glucose Risk Index)" : {},
-    "General" : {},
-    "Give each alarm a unique name—especially if you’ve added more than one of the same kind—so you can tell them apart at a glance." : {},
+    "GMI" : {
+      "shouldTranslate" : false
+    },
+    "GRI (Glucose Risk Index)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GRI (Glukoz Risk İndeksi)"
+          }
+        }
+      }
+    },
+    "General" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel"
+          }
+        }
+      }
+    },
+    "Give each alarm a unique name—especially if you’ve added more than one of the same kind—so you can tell them apart at a glance." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her alarma benzersiz bir ad verin — özellikle aynı türden birden fazla eklediyseniz — böylece bir bakışta ayırt edebilirsiniz."
+          }
+        }
+      }
+    },
     "Glucose" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukoz"
+          }
+        }
+      }
     },
     "Glucose Unit" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukoz Birimi"
+          }
+        }
+      }
     },
-    "Glucose value" : {},
-    "Glycemic Metrics" : {},
+    "Glucose value" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukoz değeri"
+          }
+        }
+      }
+    },
+    "Glycemic Metrics" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glisemik Ölçütler"
+          }
+        }
+      }
+    },
     "Graph Basal" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bazal Grafiği"
+          }
+        }
+      }
     },
     "Graph Bolus" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus Grafiği"
+          }
+        }
+      }
     },
     "Graph Carbs" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbonhidrat Grafiği"
+          }
+        }
+      }
     },
     "Graph Display" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grafik Görünümü"
+          }
+        }
+      }
     },
     "Graph Other Treatments" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diğer Tedavilerin Grafiği"
+          }
+        }
+      }
     },
-    "Grid Slot - CarPlay / Watch" : {},
-    "Grid Slots - Live Activity" : {},
-    "Guardrails" : {},
-    "Help us help you" : {},
+    "Grid Slot - CarPlay / Watch" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izgara Yuvası - CarPlay / Watch"
+          }
+        }
+      }
+    },
+    "Grid Slots - Live Activity" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izgara Yuvaları - Canlı Etkinlik"
+          }
+        }
+      }
+    },
+    "Guardrails" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güvenlik Sınırları"
+          }
+        }
+      }
+    },
+    "Help us help you" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Size yardımcı olmamıza yardım edin"
+          }
+        }
+      }
+    },
     "Help us help you!" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Size yardımcı olmamıza yardım edin!"
+          }
+        }
+      }
     },
-    "Hide Information Table" : {},
+    "Hide Information Table" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilgi Tablosunu Gizle"
+          }
+        }
+      }
+    },
     "High" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek"
+          }
+        }
+      }
     },
     "High BG Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek KŞ Uyarısı"
+          }
+        }
+      }
     },
     "History" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçmiş"
+          }
+        }
+      }
     },
     "Home" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana Sayfa"
+          }
+        }
+      }
     },
     "Hours" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat"
+          }
+        }
+      }
     },
-    "Hyperglycemia Component (%)" : {},
-    "Hypoglycemia Component (%)" : {},
-    "I have a token" : {},
-    "IOB" : {},
+    "Hyperglycemia Component (%)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiperglisemi Bileşeni (%)"
+          }
+        }
+      }
+    },
+    "Hypoglycemia Component (%)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hipoglisemi Bileşeni (%)"
+          }
+        }
+      }
+    },
+    "I have a token" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirtecim var"
+          }
+        }
+      }
+    },
+    "IOB" : {
+      "shouldTranslate" : false
+    },
     "IOB Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IOB Uyarısı"
+          }
+        }
+      }
     },
-    "Import Settings" : {},
-    "Import Settings from QR Code" : {},
+    "Import Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarları İçe Aktar"
+          }
+        }
+      }
+    },
+    "Import Settings from QR Code" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarları QR Kodundan İçe Aktar"
+          }
+        }
+      }
+    },
     "Import Sound…" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses İçe Aktar…"
+          }
+        }
+      }
     },
-    "Import/Export Settings" : {},
-    "In Menu" : {},
-    "Inactive" : {},
+    "Import/Export Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarları İçe/Dışa Aktar"
+          }
+        }
+      }
+    },
+    "In Menu" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menüde"
+          }
+        }
+      }
+    },
+    "Inactive" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin Değil"
+          }
+        }
+      }
+    },
     "Include Delta in" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delta'yı şuraya ekle"
+          }
+        }
+      }
     },
     "Include IOB in" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IOB'yi şuraya ekle"
+          }
+        }
+      }
     },
     "Include Trend in" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trendi şuraya ekle"
+          }
+        }
+      }
     },
-    "Increment" : {},
-    "Information Display Settings" : {},
+    "Increment" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Artış"
+          }
+        }
+      }
+    },
+    "Information Display Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilgi Görüntüleme Ayarları"
+          }
+        }
+      }
+    },
     "Insulin" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İnsülin"
+          }
+        }
+      }
     },
-    "Insulin Totals" : {},
-    "Insulin: %@%%" : {},
-    "Invalid QR code URL" : {},
-    "Italian" : {},
+    "Insulin Totals" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İnsülin Toplamları"
+          }
+        }
+      }
+    },
+    "Insulin: %@%%" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İnsülin: %@%%"
+          }
+        }
+      }
+    },
+    "Invalid QR code URL" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz QR kodu URL'si"
+          }
+        }
+      }
+    },
+    "Italian" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İtalyanca"
+          }
+        }
+      }
+    },
     "Keep Screen Active" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekranı Açık Tut"
+          }
+        }
+      }
     },
-    "Key ID must be exactly 10 uppercase letters or digits." : {},
+    "Key ID must be exactly 10 uppercase letters or digits." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar Kimliği tam olarak 10 büyük harf veya rakamdan oluşmalıdır."
+          }
+        }
+      }
+    },
     "Language" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dil"
+          }
+        }
+      }
     },
-    "Last connection: %@" : {},
+    "Last connection: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son bağlantı: %@"
+          }
+        }
+      }
+    },
     "Line 1" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satır 1"
+          }
+        }
+      }
     },
     "Line 2" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satır 2"
+          }
+        }
+      }
     },
-    "Live Activity" : {},
-    "Live Activity updates require APNs credentials. Configure them in Settings → APN." : {},
-    "Load More" : {},
+    "Live Activity" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı Etkinlik"
+          }
+        }
+      }
+    },
+    "Live Activity updates require APNs credentials. Configure them in Settings → APN." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı Etkinlik güncellemeleri APNs kimlik bilgileri gerektirir. Ayarlar → APN'den yapılandırın."
+          }
+        }
+      }
+    },
+    "Load More" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha Fazla Yükle"
+          }
+        }
+      }
+    },
     "Loading data..." : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veriler yükleniyor..."
+          }
+        }
+      }
     },
-    "Loading override presets..." : {},
-    "Loading stats..." : {},
+    "Loading override presets..." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override ön ayarları yükleniyor..."
+          }
+        }
+      }
+    },
+    "Loading stats..." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İstatistikler yükleniyor..."
+          }
+        }
+      }
+    },
     "Logging" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük Kaydı"
+          }
+        }
+      }
     },
-    "Logging Options" : {},
-    "Loop APNS Configuration" : {},
-    "Loop APNS Not Configured" : {},
-    "LoopFollow APNs Credentials" : {},
-    "LoopFollow uses notifications to deliver your alarms — like low or high glucose, or a missed reading. Without them, alarms can't reach you when the app is in the background." : {},
-    "LoopFollow/Helpers/Telemetry.swift on GitHub." : {},
+    "Logging Options" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük Seçenekleri"
+          }
+        }
+      }
+    },
+    "Loop APNS Configuration" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop APNS Yapılandırması"
+          }
+        }
+      }
+    },
+    "Loop APNS Not Configured" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop APNS Yapılandırılmamış"
+          }
+        }
+      }
+    },
+    "LoopFollow APNs Credentials" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LoopFollow APNs Kimlik Bilgileri"
+          }
+        }
+      }
+    },
+    "LoopFollow uses notifications to deliver your alarms — like low or high glucose, or a missed reading. Without them, alarms can't reach you when the app is in the background." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LoopFollow alarmlarınızı — düşük veya yüksek glukoz, kaçırılan okuma gibi — bildirimlerle iletir. Bildirimler olmadan uygulama arka plandayken alarmlar size ulaşamaz."
+          }
+        }
+      }
+    },
+    "LoopFollow/Helpers/Telemetry.swift on GitHub." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub'da LoopFollow/Helpers/Telemetry.swift."
+          }
+        }
+      }
+    },
     "Looping app expiration" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop uygulaması süre sonu"
+          }
+        }
+      }
     },
     "Low" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düşük"
+          }
+        }
+      }
     },
     "Low BG Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düşük KŞ Uyarısı"
+          }
+        }
+      }
     },
     "Low Battery" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düşük Pil"
+          }
+        }
+      }
     },
-    "Max" : {},
-    "Max %@ alarms at a time" : {},
-    "Max Bolus" : {},
-    "Max Carbs" : {},
-    "Max Fat" : {},
-    "Max Protein" : {},
-    "Maximum" : {},
+    "Max" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maks"
+          }
+        }
+      }
+    },
+    "Max %@ alarms at a time" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aynı anda en fazla %@ alarm"
+          }
+        }
+      }
+    },
+    "Max Bolus" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maks Bolus"
+          }
+        }
+      }
+    },
+    "Max Carbs" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maks Karbonhidrat"
+          }
+        }
+      }
+    },
+    "Max Fat" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maks Yağ"
+          }
+        }
+      }
+    },
+    "Max Protein" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maks Protein"
+          }
+        }
+      }
+    },
+    "Maximum" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maksimum"
+          }
+        }
+      }
+    },
     "Meal" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğün"
+          }
+        }
+      }
     },
-    "Meal Data" : {},
-    "Meal Settings" : {},
+    "Meal Data" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğün Verileri"
+          }
+        }
+      }
+    },
+    "Meal Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğün Ayarları"
+          }
+        }
+      }
+    },
     "Meal with Bolus" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boluslu Öğün"
+          }
+        }
+      }
     },
     "Meal with Fat/Protein" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağ/Proteinli Öğün"
+          }
+        }
+      }
     },
-    "Menu" : {},
+    "Menu" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menü"
+          }
+        }
+      }
+    },
     "Metric" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ölçüt"
+          }
+        }
+      }
     },
-    "Min" : {},
-    "Minimum" : {},
+    "Min" : {
+      "shouldTranslate" : false
+    },
+    "Minimum" : {
+      "shouldTranslate" : false
+    },
     "Minutes" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dakika"
+          }
+        }
+      }
     },
     "Missed Bolus Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaçırılan Bolus Uyarısı"
+          }
+        }
+      }
     },
     "Missed Reading Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaçırılan Okuma Uyarısı"
+          }
+        }
+      }
     },
-    "Multiple devices uploading profiles" : {},
-    "Name" : {},
+    "Multiple devices uploading profiles" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birden fazla cihaz profil yüklüyor"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ad"
+          }
+        }
+      }
+    },
     "Never" : {
       "comment" : "Alarm schedule option: never",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiçbir Zaman"
+          }
+        }
+      }
     },
     "New Target: %@ %@\nDuration: %@ minutes" : {
       "localizations" : {
@@ -600,185 +3024,1027 @@
             "state" : "new",
             "value" : "New Target: %1$@ %2$@\nDuration: %3$@ minutes"
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Hedef: %@ %@\nSüre: %@ dakika"
+          }
         }
       }
     },
     "Night" : {
       "comment" : "Alarm schedule option: nighttime only",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gece"
+          }
+        }
+      }
     },
     "Night starts" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gece başlangıcı"
+          }
+        }
+      }
     },
     "Nightscout Database Size" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nightscout Veritabanı Boyutu"
+          }
+        }
+      }
     },
-    "Nightscout URL" : {},
-    "No Results" : {},
-    "No alarms match “%@”." : {},
-    "No background refresh. Alarms and updates will not work unless the app is open in the foreground." : {},
-    "No data available" : {},
-    "No devices found yet. They'll appear here when discovered." : {},
-    "No issues detected" : {},
-    "No matches for “%@”." : {},
-    "No override presets found. Configure presets in your Loop app." : {},
-    "No overrides available." : {},
-    "No recent treatments" : {},
-    "No thanks" : {},
+    "Nightscout URL" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nightscout URL'si"
+          }
+        }
+      }
+    },
+    "No Results" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonuç Yok"
+          }
+        }
+      }
+    },
+    "No alarms match “%@”." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” ile eşleşen alarm yok."
+          }
+        }
+      }
+    },
+    "No background refresh. Alarms and updates will not work unless the app is open in the foreground." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arka plan yenilemesi yok. Uygulama ön planda açık olmadıkça alarmlar ve güncellemeler çalışmaz."
+          }
+        }
+      }
+    },
+    "No data available" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veri yok"
+          }
+        }
+      }
+    },
+    "No devices found yet. They'll appear here when discovered." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz cihaz bulunamadı. Bulunduklarında burada görünecekler."
+          }
+        }
+      }
+    },
+    "No issues detected" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorun saptanmadı"
+          }
+        }
+      }
+    },
+    "No matches for “%@”." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” için eşleşme yok."
+          }
+        }
+      }
+    },
+    "No override presets found. Configure presets in your Loop app." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override ön ayarı bulunamadı. Ön ayarları Loop uygulamanızda yapılandırın."
+          }
+        }
+      }
+    },
+    "No overrides available." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanılabilir override yok."
+          }
+        }
+      }
+    },
+    "No recent treatments" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakın zamanda tedavi yok"
+          }
+        }
+      }
+    },
+    "No thanks" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hayır, teşekkürler"
+          }
+        }
+      }
+    },
     "Not Looping Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop Çalışmıyor Uyarısı"
+          }
+        }
+      }
     },
-    "Not now" : {},
-    "Note: The meal will be scheduled, but the bolus is enacted immediately." : {},
-    "OK" : {},
-    "Off" : {},
-    "Old Calculation Warning" : {},
-    "Once a day (or after a new build), the app sends a small JSON object to https://lf.bjorkert.se. The endpoint is self-hosted by the maintainer; no third-party analytics service is involved." : {},
-    "Once every 24 hours, plus once after installing a new build. The check runs in the background while the app is active or refreshing in the background." : {},
-    "Opt out" : {},
+    "Not now" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi değil"
+          }
+        }
+      }
+    },
+    "Note: The meal will be scheduled, but the bolus is enacted immediately." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not: Öğün planlanır ancak bolus hemen uygulanır."
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamam"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapalı"
+          }
+        }
+      }
+    },
+    "Old Calculation Warning" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eski Hesaplama Uyarısı"
+          }
+        }
+      }
+    },
+    "Once a day (or after a new build), the app sends a small JSON object to https://lf.bjorkert.se. The endpoint is self-hosted by the maintainer; no third-party analytics service is involved." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günde bir kez (veya yeni bir derlemeden sonra) uygulama https://lf.bjorkert.se adresine küçük bir JSON nesnesi gönderir. Uç nokta proje sorumlusu tarafından barındırılır; üçüncü taraf bir analiz hizmeti kullanılmaz."
+          }
+        }
+      }
+    },
+    "Once every 24 hours, plus once after installing a new build. The check runs in the background while the app is active or refreshing in the background." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 saatte bir, ayrıca yeni bir derleme kurulduktan sonra bir kez. Denetim, uygulama etkinken veya arka planda yenilenirken arka planda çalışır."
+          }
+        }
+      }
+    },
+    "Opt out" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vazgeç"
+          }
+        }
+      }
+    },
     "Output Unit" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çıkış Birimi"
+          }
+        }
+      }
     },
-    "Outside US" : {},
-    "Override" : {},
+    "Outside US" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ABD Dışı"
+          }
+        }
+      }
+    },
+    "Override" : {
+      "shouldTranslate" : false
+    },
     "Override Ended" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override Sona Erdi"
+          }
+        }
+      }
     },
     "Override Started" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override Başladı"
+          }
+        }
+      }
     },
     "Override system volume" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem ses düzeyini geçersiz kıl"
+          }
+        }
+      }
     },
     "Overrides" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override'lar"
+          }
+        }
+      }
     },
-    "Overriding the system volume lets alarms be heard even when your phone is silenced or in a Focus mode." : {},
-    "Password" : {},
-    "Paste a Nightscout token. If your site needs one and you only have the API secret, paste that instead — LoopFollow can create a read-only token for you." : {},
-    "Paste the full .p8 contents — must include the BEGIN PRIVATE KEY and END PRIVATE KEY lines." : {},
-    "Percentage: %@%%" : {},
+    "Overriding the system volume lets alarms be heard even when your phone is silenced or in a Focus mode." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem ses düzeyini geçersiz kılmak, telefonunuz sessizdeyken veya Odaklanma modundayken bile alarmların duyulmasını sağlar."
+          }
+        }
+      }
+    },
+    "Password" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parola"
+          }
+        }
+      }
+    },
+    "Paste a Nightscout token. If your site needs one and you only have the API secret, paste that instead — LoopFollow can create a read-only token for you." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir Nightscout belirteci yapıştırın. Siteniz belirteç gerektiriyor ve elinizde yalnızca API secret varsa onu yapıştırın — LoopFollow sizin için salt okunur bir belirteç oluşturabilir."
+          }
+        }
+      }
+    },
+    "Paste the full .p8 contents — must include the BEGIN PRIVATE KEY and END PRIVATE KEY lines." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ".p8 dosyasının tüm içeriğini yapıştırın — BEGIN PRIVATE KEY ve END PRIVATE KEY satırlarını içermelidir."
+          }
+        }
+      }
+    },
+    "Percentage: %@%%" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüzde: %@%%"
+          }
+        }
+      }
+    },
     "Persistent Notification" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalıcı Bildirim"
+          }
+        }
+      }
     },
     "Pick when your day period begins and when your night period begins. " : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gündüz ve gece dönemlerinizin ne zaman başladığını seçin. "
+          }
+        }
+      }
     },
     "Play sound during calls" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aramalar sırasında ses çal"
+          }
+        }
+      }
     },
-    "Please configure Loop APNS settings in Remote Settings to use APNS commands." : {},
-    "Please enter your Nightscout URL in Settings." : {},
-    "Please select a Remote Type in Settings." : {},
+    "Please configure Loop APNS settings in Remote Settings to use APNS commands." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APNS komutlarını kullanmak için lütfen Uzaktan Ayarlar'da Loop APNS ayarlarını yapılandırın."
+          }
+        }
+      }
+    },
+    "Please enter your Nightscout URL in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lütfen Ayarlar'da Nightscout URL'nizi girin."
+          }
+        }
+      }
+    },
+    "Please select a Remote Type in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lütfen Ayarlar'da bir Uzaktan Kumanda Türü seçin."
+          }
+        }
+      }
+    },
     "Please wait..." : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lütfen bekleyin..."
+          }
+        }
+      }
     },
-    "Prediction" : {},
+    "Prediction" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahmin"
+          }
+        }
+      }
+    },
     "Prediction Style" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahmin Stili"
+          }
+        }
+      }
     },
     "Preset Name" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ön Ayar Adı"
+          }
+        }
+      }
     },
-    "Preset: %@" : {},
-    "Presets" : {},
+    "Preset: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ön ayar: %@"
+          }
+        }
+      }
+    },
+    "Presets" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ön Ayarlar"
+          }
+        }
+      }
+    },
     "Privacy" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gizlilik"
+          }
+        }
+      }
     },
     "Proactive Low" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öngörülü Düşük"
+          }
+        }
+      }
     },
     "Production" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "shouldTranslate" : false
     },
-    "Production is used for browser builders and should be switched off for Xcode builders" : {},
+    "Production is used for browser builders and should be switched off for Xcode builders" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Production tarayıcı derleyicileri içindir; Xcode ile derleyenler için kapatılmalıdır"
+          }
+        }
+      }
+    },
     "Pump Battery Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pompa Pili Uyarısı"
+          }
+        }
+      }
     },
     "Pump Change Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pompa Değişimi Uyarısı"
+          }
+        }
+      }
     },
     "Pump Insulin Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pompa İnsülini Uyarısı"
+          }
+        }
+      }
     },
-    "QR Code URL" : {},
-    "RISING BG" : {},
-    "RSSI: %@ dBm" : {},
-    "Range" : {},
+    "QR Code URL" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR Kodu URL'si"
+          }
+        }
+      }
+    },
+    "RISING BG" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ YÜKSELİYOR"
+          }
+        }
+      }
+    },
+    "RSSI: %@ dBm" : {
+      "shouldTranslate" : false
+    },
+    "Range" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aralık"
+          }
+        }
+      }
+    },
     "Range Mode" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aralık Modu"
+          }
+        }
+      }
     },
-    "Real-time Updates" : {},
+    "Real-time Updates" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gerçek Zamanlı Güncellemeler"
+          }
+        }
+      }
+    },
     "Rec. Bolus" : {
       "comment" : "Alarm type name: recommended bolus",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öner. Bolus"
+          }
+        }
+      }
     },
-    "Recommended Bolus" : {},
-    "Reconnecting..." : {},
+    "Recommended Bolus" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önerilen Bolus"
+          }
+        }
+      }
+    },
+    "Reconnecting..." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden bağlanıyor..."
+          }
+        }
+      }
+    },
     "Refresh" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yenile"
+          }
+        }
+      }
     },
     "Remote" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzaktan"
+          }
+        }
+      }
     },
     "Remote Settings" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzaktan Ayarlar"
+          }
+        }
+      }
     },
-    "Requires a Dexcom G6/ONE/G7/ONE+ transmitter within Bluetooth range. Provides updates every 5 minutes and uses less battery than the silent tune method. If you have more than one device to choose from, select the one with the smallest expected bg delay." : {},
-    "Requires a RileyLink-compatible device within Bluetooth range. Provides updates once per minute and uses less battery than the silent tune method." : {},
-    "Requires an OmniPod DASH pod paired with this device within Bluetooth range. Provides updates once every 3 minutes and uses less battery than the silent tune method." : {},
-    "Review setup anyway" : {},
-    "Review the settings that will be imported" : {},
+    "Requires a Dexcom G6/ONE/G7/ONE+ transmitter within Bluetooth range. Provides updates every 5 minutes and uses less battery than the silent tune method. If you have more than one device to choose from, select the one with the smallest expected bg delay." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth menzilinde bir Dexcom G6/ONE/G7/ONE+ vericisi gerektirir. Her 5 dakikada bir güncelleme sağlar ve sessiz melodi yönteminden daha az pil kullanır. Birden fazla cihaz seçeneğiniz varsa beklenen KŞ gecikmesi en küçük olanı seçin."
+          }
+        }
+      }
+    },
+    "Requires a RileyLink-compatible device within Bluetooth range. Provides updates once per minute and uses less battery than the silent tune method." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth menzilinde RileyLink uyumlu bir cihaz gerektirir. Dakikada bir güncelleme sağlar ve sessiz melodi yönteminden daha az pil kullanır."
+          }
+        }
+      }
+    },
+    "Requires an OmniPod DASH pod paired with this device within Bluetooth range. Provides updates once every 3 minutes and uses less battery than the silent tune method." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth menzilinde bu cihazla eşleşmiş bir OmniPod DASH pod gerektirir. Her 3 dakikada bir güncelleme sağlar ve sessiz melodi yönteminden daha az pil kullanır."
+          }
+        }
+      }
+    },
+    "Review setup anyway" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurulumu yine de gözden geçir"
+          }
+        }
+      }
+    },
+    "Review the settings that will be imported" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İçe aktarılacak ayarları gözden geçirin"
+          }
+        }
+      }
+    },
     "Right slot" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağ yuva"
+          }
+        }
+      }
     },
-    "Run diagnostics" : {},
-    "Run diagnostics again" : {},
-    "SNOOZE" : {},
+    "Run diagnostics" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tanılamayı çalıştır"
+          }
+        }
+      }
+    },
+    "Run diagnostics again" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tanılamayı yeniden çalıştır"
+          }
+        }
+      }
+    },
+    "SNOOZE" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ERTELE"
+          }
+        }
+      }
+    },
     "Save" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydet"
+          }
+        }
+      }
     },
     "Save BG to Calendar" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ'yi Takvime Kaydet"
+          }
+        }
+      }
     },
-    "Save Preset" : {},
-    "Save as Preset" : {},
-    "Scan QR Code from Loop App" : {},
-    "Scan QR Code to Import Settings" : {},
-    "Scan this QR code with another LoopFollow app to import %@" : {},
-    "Scanned Token:" : {},
-    "Scanned URL:" : {},
-    "Scanning for %@..." : {},
-    "Schedule" : {},
+    "Save Preset" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ön Ayarı Kaydet"
+          }
+        }
+      }
+    },
+    "Save as Preset" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ön Ayar Olarak Kaydet"
+          }
+        }
+      }
+    },
+    "Scan QR Code from Loop App" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop Uygulamasından QR Kodu Tara"
+          }
+        }
+      }
+    },
+    "Scan QR Code to Import Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarları İçe Aktarmak için QR Kodu Tara"
+          }
+        }
+      }
+    },
+    "Scan this QR code with another LoopFollow app to import %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ içe aktarmak için bu QR kodunu başka bir LoopFollow uygulamasıyla tarayın"
+          }
+        }
+      }
+    },
+    "Scanned Token:" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taranan Belirteç:"
+          }
+        }
+      }
+    },
+    "Scanned URL:" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taranan URL:"
+          }
+        }
+      }
+    },
+    "Scanning for %@..." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ aranıyor..."
+          }
+        }
+      }
+    },
+    "Schedule" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Program"
+          }
+        }
+      }
+    },
     "Schedule for later" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonrası için planla"
+          }
+        }
+      }
     },
     "Search" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ara"
+          }
+        }
+      }
     },
     "Search alarms" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alarmlarda ara"
+          }
+        }
+      }
     },
-    "Secret" : {},
-    "Security" : {},
+    "Secret" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gizli Anahtar"
+          }
+        }
+      }
+    },
+    "Security" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güvenlik"
+          }
+        }
+      }
+    },
     "See exactly what's sent" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tam olarak neyin gönderildiğini gör"
+          }
+        }
+      }
     },
     "Select Alarms to Export" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dışa Aktarılacak Alarmları Seç"
+          }
+        }
+      }
     },
-    "Select the colors for your BG values. Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors." : {},
-    "Selected Alarms: %@" : {},
-    "Selected Device" : {},
-    "Send" : {},
-    "Send %@ units of insulin?" : {},
+    "Select the colors for your BG values. Note: not all watch faces allow control over colors. Recommend options like Activity or Modular Duo if you want to customize colors." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ değerleriniz için renkleri seçin. Not: her saat kadranı renk denetimine izin vermez. Renkleri özelleştirmek istiyorsanız Aktivite veya Modüler Duo gibi seçenekler önerilir."
+          }
+        }
+      }
+    },
+    "Selected Alarms: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçilen Alarmlar: %@"
+          }
+        }
+      }
+    },
+    "Selected Device" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçilen Cihaz"
+          }
+        }
+      }
+    },
+    "Send" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gönder"
+          }
+        }
+      }
+    },
+    "Send %@ units of insulin?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ünite insülin gönderilsin mi?"
+          }
+        }
+      }
+    },
     "Send %@g of carbs with %@h absorption time at %@?" : {
       "localizations" : {
         "en" : {
@@ -786,138 +4052,662 @@
             "state" : "new",
             "value" : "Send %1$@g of carbs with %2$@h absorption time at %3$@?"
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@g karbonhidrat, %@sa emilim süresiyle, %@ zamanında gönderilsin mi?"
+          }
         }
       }
     },
-    "Send Bolus" : {},
-    "Send Carbs" : {},
-    "Send Insulin" : {},
-    "Send Meal" : {},
-    "Send anonymous usage stats" : {
-      "extractionState" : "manual"
+    "Send Bolus" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus Gönder"
+          }
+        }
+      }
     },
-    "Sending Bolus..." : {},
-    "Sending Meal Data..." : {},
-    "Sending..." : {},
-    "Sensitivity" : {},
+    "Send Carbs" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbonhidrat Gönder"
+          }
+        }
+      }
+    },
+    "Send Insulin" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İnsülin Gönder"
+          }
+        }
+      }
+    },
+    "Send Meal" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğün Gönder"
+          }
+        }
+      }
+    },
+    "Send anonymous usage stats" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anonim kullanım istatistikleri gönder"
+          }
+        }
+      }
+    },
+    "Sending Bolus..." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus gönderiliyor..."
+          }
+        }
+      }
+    },
+    "Sending Meal Data..." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğün verileri gönderiliyor..."
+          }
+        }
+      }
+    },
+    "Sending..." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gönderiliyor..."
+          }
+        }
+      }
+    },
+    "Sensitivity" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duyarlılık"
+          }
+        }
+      }
+    },
     "Sensor Change Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensör Değişimi Uyarısı"
+          }
+        }
+      }
     },
     "Server" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu"
+          }
+        }
+      }
     },
     "Set Up Units" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birimleri Ayarla"
+          }
+        }
+      }
     },
     "Settings" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar"
+          }
+        }
+      }
     },
     "Settings imported — you're connected." : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar içe aktarıldı — bağlandınız."
+          }
+        }
+      }
     },
-    "Settings to Import" : {},
+    "Settings to Import" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İçe Aktarılacak Ayarlar"
+          }
+        }
+      }
+    },
     "Share" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paylaş"
+          }
+        }
+      }
     },
     "Share Logs" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlükleri Paylaş"
+          }
+        }
+      }
     },
-    "Shared Secret" : {},
+    "Shared Secret" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paylaşılan Gizli Anahtar"
+          }
+        }
+      }
+    },
     "Show Carb Absorption" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbonhidrat Emilimini Göster"
+          }
+        }
+      }
     },
     "Show Carb/Bolus Values" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbonhidrat/Bolus Değerlerini Göster"
+          }
+        }
+      }
     },
     "Show DIA Lines" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DIA Çizgilerini Göster"
+          }
+        }
+      }
     },
     "Show Delta" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delta'yı Göster"
+          }
+        }
+      }
     },
     "Show Display Name" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görünen Adı Göster"
+          }
+        }
+      }
     },
     "Show IOB" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IOB'yi Göster"
+          }
+        }
+      }
     },
     "Show Midnight Lines" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gece Yarısı Çizgilerini Göster"
+          }
+        }
+      }
     },
     "Show Prior Day Time Lines" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önceki Gün Zaman Çizgilerini Göster"
+          }
+        }
+      }
     },
     "Show Trend" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trendi Göster"
+          }
+        }
+      }
     },
     "Show Yesterday's BG" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dünkü KŞ'yi Göster"
+          }
+        }
+      }
     },
     "Show in Info Display" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilgi Ekranında Göster"
+          }
+        }
+      }
     },
     "Show −30 min Line" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−30 dk Çizgisini Göster"
+          }
+        }
+      }
     },
     "Show −90 min Line" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−90 dk Çizgisini Göster"
+          }
+        }
+      }
     },
-    "Site URL" : {},
-    "Skip" : {},
+    "Site URL" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Site URL'si"
+          }
+        }
+      }
+    },
+    "Skip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atla"
+          }
+        }
+      }
+    },
     "Skip if BG is falling" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ düşüyorsa atla"
+          }
+        }
+      }
     },
     "Skip if BG is rising" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ yükseliyorsa atla"
+          }
+        }
+      }
     },
     "Skip while charging" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şarj olurken atla"
+          }
+        }
+      }
     },
-    "Slovak" : {},
+    "Slovak" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slovakça"
+          }
+        }
+      }
+    },
     "Small Graph" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük Grafik"
+          }
+        }
+      }
     },
-    "Snooze & Mute Options" : {},
+    "Snooze & Mute Options" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erteleme ve Sessize Alma Seçenekleri"
+          }
+        }
+      }
+    },
     "Snooze Date" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erteleme Tarihi"
+          }
+        }
+      }
     },
     "Snooze Time" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erteleme Saati"
+          }
+        }
+      }
     },
-    "Snooze all · 1h" : {},
-    "Snooze for" : {},
-    "Snoozed" : {},
-    "Snoozed until %@" : {},
+    "Snooze all · 1h" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tümünü ertele · 1sa"
+          }
+        }
+      }
+    },
+    "Snooze for" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erteleme süresi"
+          }
+        }
+      }
+    },
+    "Snoozed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ertelendi"
+          }
+        }
+      }
+    },
+    "Snoozed until %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tarihine kadar ertelendi"
+          }
+        }
+      }
+    },
     "Snoozer emoji" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erteleyici emojisi"
+          }
+        }
+      }
     },
-    "Sound" : {},
-    "Source" : {},
+    "Sound" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses"
+          }
+        }
+      }
+    },
+    "Source" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaynak"
+          }
+        }
+      }
+    },
     "Speak BG" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ'yi Seslendir"
+          }
+        }
+      }
     },
-    "Start Date" : {},
-    "Statistics" : {},
-    "Status" : {},
-    "Stay informed" : {},
-    "Stay silent while BG is falling. The alert only sounds " : {
-      "extractionState" : "manual"
+    "Start Date" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlangıç Tarihi"
+          }
+        }
+      }
     },
-    "Stay silent while BG is rising. The alert only sounds " : {
-      "extractionState" : "manual"
+    "Statistics" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İstatistikler"
+          }
+        }
+      }
     },
-    "Stay silent while the phone is charging. Requires the " : {
-      "extractionState" : "manual"
+    "Status" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durum"
+          }
+        }
+      }
     },
-    "Std Dev" : {},
-    "Std Dev — Standard Deviation, how much glucose swings around the average. CV — Coefficient of Variation, that swing relative to the average (Std Dev ÷ mean)." : {},
-    "Success" : {},
+    "Stay informed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haberdar olun"
+          }
+        }
+      }
+    },
+    "Stay silent while BG is falling. The alert only sounds when the latest reading is flat or still rising." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ düşerken sessiz kal. Uyarı yalnızca son okuma düz seyrederken veya hâlâ yükselirken çalar."
+          }
+        }
+      }
+    },
+    "Stay silent while BG is rising. The alert only sounds when the latest reading is flat or still falling." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ yükselirken sessiz kal. Uyarı yalnızca son okuma düz seyrederken veya hâlâ düşerken çalar."
+          }
+        }
+      }
+    },
+    "Stay silent while the phone is charging. Requires the uploader to report charging status; if it doesn't, the alert still sounds." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telefon şarj olurken sessiz kal. Yükleyicinin şarj durumunu bildirmesi gerekir; bildirmiyorsa uyarı yine çalar."
+          }
+        }
+      }
+    },
+    "Std Dev" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Std Sapma"
+          }
+        }
+      }
+    },
+    "Std Dev — Standard Deviation, how much glucose swings around the average. CV — Coefficient of Variation, that swing relative to the average (Std Dev ÷ mean)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Std Sapma — Standart Sapma, glukozun ortalama etrafında ne kadar dalgalandığı. CV — Varyasyon Katsayısı, bu dalgalanmanın ortalamaya oranı (Std Sapma ÷ ortalama)."
+          }
+        }
+      }
+    },
+    "Success" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başarılı"
+          }
+        }
+      }
+    },
     "Support & Community" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destek ve Topluluk"
+          }
+        }
+      }
     },
-    "Swedish" : {},
-    "TIR" : {},
+    "Swedish" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İsveççe"
+          }
+        }
+      }
+    },
+    "TIR" : {
+      "shouldTranslate" : false
+    },
     "TIR — Time in Range, the share of readings within %@.\nTITR — Time in Tight Range, within %@.\nCustom — set your own low and high." : {
       "localizations" : {
         "en" : {
@@ -925,27 +4715,121 @@
             "state" : "new",
             "value" : "TIR — Time in Range, the share of readings within %1$@.\nTITR — Time in Tight Range, within %2$@.\nCustom — set your own low and high."
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TIR — Hedef Aralıkta Süre, %@ içindeki okumaların payı.\nTITR — Dar Hedef Aralıkta Süre, %@ içindeki pay.\nÖzel — kendi düşük ve yüksek değerlerinizi belirleyin."
+          }
         }
       }
     },
-    "TITR" : {},
-    "TOTP Code Already Used" : {},
-    "TOTP Code: Invalid QR code URL" : {},
-    "Tab %@" : {},
-    "Tab 5" : {},
-    "Tab Order" : {},
-    "Tabs" : {
-      "extractionState" : "manual"
+    "TITR" : {
+      "shouldTranslate" : false
     },
-    "Tap to load older treatments" : {},
-    "Target" : {},
-    "Target Range" : {},
+    "TOTP Code Already Used" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOTP Kodu Zaten Kullanıldı"
+          }
+        }
+      }
+    },
+    "TOTP Code: Invalid QR code URL" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOTP Kodu: Geçersiz QR kodu URL'si"
+          }
+        }
+      }
+    },
+    "Tab %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme %@"
+          }
+        }
+      }
+    },
+    "Tab 5" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme 5"
+          }
+        }
+      }
+    },
+    "Tab Order" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme Sırası"
+          }
+        }
+      }
+    },
+    "Tabs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekmeler"
+          }
+        }
+      }
+    },
+    "Tap to load older treatments" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eski tedavileri yüklemek için dokunun"
+          }
+        }
+      }
+    },
+    "Target" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hedef"
+          }
+        }
+      }
+    },
+    "Target Range" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hedef Aralığı"
+          }
+        }
+      }
+    },
     "Target: %@ %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Target: %1$@ %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hedef: %@ %@"
           }
         }
       }
@@ -957,111 +4841,644 @@
             "state" : "new",
             "value" : "Target: %1$@-%2$@"
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hedef: %@-%@"
+          }
         }
       }
     },
-    "Team ID: %@" : {},
+    "Team ID: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekip Kimliği: %@"
+          }
+        }
+      }
+    },
     "Temp Target Ended" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçici Hedef Sona Erdi"
+          }
+        }
+      }
     },
     "Temp Target Started" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçici Hedef Başladı"
+          }
+        }
+      }
     },
     "Temporary Alert" : {
       "comment" : "Alarm type name",
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçici Uyarı"
+          }
+        }
+      }
     },
-    "Temporary Target" : {},
+    "Temporary Target" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçici Hedef"
+          }
+        }
+      }
+    },
     "Text Color" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metin Rengi"
+          }
+        }
+      }
     },
-    "Thanks for sharing these logs to help us find the problem. Please describe it in as much detail as possible — what time did it happen, what did you do, and what did you expect to happen that didn't?" : {},
-    "That's your API secret — create a read-only token" : {},
-    "The order of Fat and Protein inputs has changed." : {},
-    "The top 4 items appear in the tab bar. The Menu can always open every feature." : {},
-    "This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command." : {},
-    "This will overwrite your current settings" : {},
-    "Time" : {},
-    "Time Remaining" : {},
+    "Thanks for sharing these logs to help us find the problem. Please describe it in as much detail as possible — what time did it happen, what did you do, and what did you expect to happen that didn't?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorunu bulmamıza yardımcı olmak için bu günlükleri paylaştığınız için teşekkürler. Lütfen olabildiğince ayrıntılı anlatın — ne zaman oldu, ne yaptınız ve ne olmasını bekliyordunuz da olmadı?"
+          }
+        }
+      }
+    },
+    "That's your API secret — create a read-only token" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu sizin API secret'ınız — salt okunur bir belirteç oluşturun"
+          }
+        }
+      }
+    },
+    "The order of Fat and Protein inputs has changed." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağ ve Protein girişlerinin sırası değişti."
+          }
+        }
+      }
+    },
+    "The top 4 items appear in the tab bar. The Menu can always open every feature." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İlk 4 öğe sekme çubuğunda görünür. Menü her zaman tüm özellikleri açabilir."
+          }
+        }
+      }
+    },
+    "This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu TOTP kodu zaten bir komut için kullanıldı. Başka bir komut göndermeden önce lütfen sonraki kodun üretilmesini bekleyin."
+          }
+        }
+      }
+    },
+    "This will overwrite your current settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu, mevcut ayarlarınızın üzerine yazacak"
+          }
+        }
+      }
+    },
+    "Time" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaman"
+          }
+        }
+      }
+    },
+    "Time Remaining" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalan Süre"
+          }
+        }
+      }
+    },
     "Time Zone" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat Dilimi"
+          }
+        }
+      }
     },
     "Time Zone Override" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat Dilimi Geçersiz Kılma"
+          }
+        }
+      }
     },
-    "To see your trend, delta, or IOB, include them in another contact or create separate contacts. When using 'Include', select which contact to add the value to." : {},
-    "Token" : {},
-    "Tone" : {},
-    "Treatments" : {},
+    "To see your trend, delta, or IOB, include them in another contact or create separate contacts. When using 'Include', select which contact to add the value to." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend, delta veya IOB'yi görmek için bunları başka bir kişiye ekleyin veya ayrı kişiler oluşturun. 'Ekle' seçeneğini kullanırken değerin hangi kişiye ekleneceğini seçin."
+          }
+        }
+      }
+    },
+    "Token" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirteç"
+          }
+        }
+      }
+    },
+    "Tone" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton"
+          }
+        }
+      }
+    },
+    "Treatments" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tedaviler"
+          }
+        }
+      }
+    },
     "Treatments on Small Graph" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük Grafikte Tedaviler"
+          }
+        }
+      }
     },
-    "Trend" : {},
-    "Trio Remote Control Settings" : {},
-    "Trio Remote Control is only supported for 'Trio'" : {},
-    "Type or paste a token, or a full Nightscout URL that includes a token." : {},
+    "Trend" : {
+      "shouldTranslate" : false
+    },
+    "Trio Remote Control Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trio Uzaktan Kumanda Ayarları"
+          }
+        }
+      }
+    },
+    "Trio Remote Control is only supported for 'Trio'" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trio Uzaktan Kumanda yalnızca 'Trio' için desteklenir"
+          }
+        }
+      }
+    },
+    "Type or paste a token, or a full Nightscout URL that includes a token." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir belirteç ya da belirteç içeren tam bir Nightscout URL'si yazın veya yapıştırın."
+          }
+        }
+      }
+    },
     "U" : {
-      "comment" : "The short unit display string for international units of insulin"
+      "comment" : "The short unit display string for international units of insulin",
+      "shouldTranslate" : false
     },
-    "URL" : {},
-    "URL/Token Update" : {},
-    "URL/Token Validation" : {},
-    "US" : {},
+    "URL" : {
+      "shouldTranslate" : false
+    },
+    "URL/Token Update" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL/Belirteç Güncelleme"
+          }
+        }
+      }
+    },
+    "URL/Token Validation" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL/Belirteç Doğrulama"
+          }
+        }
+      }
+    },
+    "US" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ABD"
+          }
+        }
+      }
+    },
     "Units and Metrics" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birimler ve Ölçütler"
+          }
+        }
+      }
     },
-    "Unknown Alert" : {},
-    "Use Anyway" : {},
-    "Use the Send anonymous usage stats toggle above. Turning it off is immediate and persistent." : {},
-    "User" : {},
-    "User Information" : {},
-    "Username" : {},
-    "Validation Error" : {},
-    "Variability" : {},
+    "Unknown Alert" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilinmeyen Uyarı"
+          }
+        }
+      }
+    },
+    "Use Anyway" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yine de Kullan"
+          }
+        }
+      }
+    },
+    "Use the Send anonymous usage stats toggle above. Turning it off is immediate and persistent." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yukarıdaki Anonim kullanım istatistikleri gönder anahtarını kullanın. Kapatmak anında ve kalıcıdır."
+          }
+        }
+      }
+    },
+    "User" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanıcı"
+          }
+        }
+      }
+    },
+    "User Information" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanıcı Bilgileri"
+          }
+        }
+      }
+    },
+    "Username" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanıcı Adı"
+          }
+        }
+      }
+    },
+    "Validation Error" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doğrulama Hatası"
+          }
+        }
+      }
+    },
+    "Variability" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değişkenlik"
+          }
+        }
+      }
+    },
     "View Log" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlüğü Görüntüle"
+          }
+        }
+      }
     },
-    "WARNING: New treatments may have occurred since the last recommended bolus was calculated %@ ago." : {},
-    "Warning" : {},
-    "We'll ask iOS for permission next. You can change this any time in the Settings app." : {},
-    "Welcome to LoopFollow" : {},
-    "What is sent" : {},
-    "What stays on your device" : {},
+    "WARNING: New treatments may have occurred since the last recommended bolus was calculated %@ ago." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UYARI: Son önerilen bolus %@ önce hesaplandığından beri yeni tedaviler gerçekleşmiş olabilir."
+          }
+        }
+      }
+    },
+    "Warning" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyarı"
+          }
+        }
+      }
+    },
+    "We'll ask iOS for permission next. You can change this any time in the Settings app." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sırada iOS'tan izin isteyeceğiz. Bunu istediğiniz zaman Ayarlar uygulamasından değiştirebilirsiniz."
+          }
+        }
+      }
+    },
+    "Welcome to LoopFollow" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LoopFollow'a Hoş Geldiniz"
+          }
+        }
+      }
+    },
+    "What is sent" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neler gönderiliyor"
+          }
+        }
+      }
+    },
+    "What stays on your device" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihazınızda neler kalıyor"
+          }
+        }
+      }
+    },
     "What's sent" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neler gönderiliyor"
+          }
+        }
+      }
     },
-    "When enabled, LoopFollow maintains a live connection to your Nightscout server using WebSocket while the app is in the foreground. Data updates (new glucose readings, treatments, device status) arrive within seconds instead of waiting for the next polling cycle.\n\nThe WebSocket disconnects when LoopFollow moves to the background and reconnects when you return to the app. Polling continues to handle updates while the app is in the background.\n\nIn the foreground, polling continues at a reduced frequency as a safety net. If the WebSocket connection drops, normal polling resumes immediately." : {},
-    "Yes, send anonymous stats" : {},
-    "You can change this any time in Settings → General → Diagnostics." : {},
-    "You can choose to share anonymous information with the developers to help improve LoopFollow — such as app and iOS version, device type, which app you're following, and a few settings. Your health data, credentials, time zone, and logs remain on your device." : {},
-    "You can choose to share anonymous information with the developers to help improve LoopFollow—such as app and iOS version, device type, which app you're following, and a few settings. Your health data, credentials, time zone, and logs remain on your device." : {},
-    "You're all set" : {},
-    "You're ready to go. Adjust everything later from the Menu — and when you have a moment, these are worth a look:" : {},
-    "Your API secret is used once to create a read-only access token and is never stored." : {},
-    "eHbA1c" : {},
-    "eHbA1c — an A1c estimate from your average glucose. GMI — Glucose Management Indicator, another A1c estimate from average glucose. % and mmol/mol (IFCC) are two scales for the result." : {},
+    "When enabled, LoopFollow maintains a live connection to your Nightscout server using WebSocket while the app is in the foreground. Data updates (new glucose readings, treatments, device status) arrive within seconds instead of waiting for the next polling cycle.\n\nThe WebSocket disconnects when LoopFollow moves to the background and reconnects when you return to the app. Polling continues to handle updates while the app is in the background.\n\nIn the foreground, polling continues at a reduced frequency as a safety net. If the WebSocket connection drops, normal polling resumes immediately." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açıkken LoopFollow, uygulama ön plandayken Nightscout sunucunuzla WebSocket üzerinden canlı bir bağlantı sürdürür. Veri güncellemeleri (yeni glukoz okumaları, tedaviler, cihaz durumu) bir sonraki yoklama döngüsünü beklemek yerine saniyeler içinde gelir.\n\nLoopFollow arka plana geçtiğinde WebSocket bağlantısı kesilir ve uygulamaya döndüğünüzde yeniden bağlanır. Uygulama arka plandayken güncellemeleri yoklama sürdürür.\n\nÖn planda, güvenlik ağı olarak yoklama daha düşük sıklıkla devam eder. WebSocket bağlantısı koparsa normal yoklama hemen sürdürülür."
+          }
+        }
+      }
+    },
+    "Yes, send anonymous stats" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evet, anonim istatistik gönder"
+          }
+        }
+      }
+    },
+    "You can change this any time in Settings → General → Diagnostics." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bunu istediğiniz zaman Ayarlar → Genel → Tanılama'dan değiştirebilirsiniz."
+          }
+        }
+      }
+    },
+    "You can choose to share anonymous information with the developers to help improve LoopFollow — such as app and iOS version, device type, which app you're following, and a few settings. Your health data, credentials, time zone, and logs remain on your device." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LoopFollow'u geliştirmeye yardımcı olmak için geliştiricilerle anonim bilgiler paylaşmayı seçebilirsiniz — uygulama ve iOS sürümü, cihaz türü, hangi uygulamayı takip ettiğiniz ve birkaç ayar gibi. Sağlık verileriniz, kimlik bilgileriniz, saat diliminiz ve günlükleriniz cihazınızda kalır."
+          }
+        }
+      }
+    },
+    "You can choose to share anonymous information with the developers to help improve LoopFollow—such as app and iOS version, device type, which app you're following, and a few settings. Your health data, credentials, time zone, and logs remain on your device." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LoopFollow'u geliştirmeye yardımcı olmak için geliştiricilerle anonim bilgiler paylaşmayı seçebilirsiniz — uygulama ve iOS sürümü, cihaz türü, hangi uygulamayı takip ettiğiniz ve birkaç ayar gibi. Sağlık verileriniz, kimlik bilgileriniz, saat diliminiz ve günlükleriniz cihazınızda kalır."
+          }
+        }
+      }
+    },
+    "You're all set" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her şey hazır"
+          }
+        }
+      }
+    },
+    "You're ready to go. Adjust everything later from the Menu — and when you have a moment, these are worth a look:" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlamaya hazırsınız. Her şeyi daha sonra Menü'den ayarlayabilirsiniz — vaktiniz olduğunda şunlara göz atmaya değer:"
+          }
+        }
+      }
+    },
+    "Your API secret is used once to create a read-only access token and is never stored." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API secret'ınız salt okunur bir erişim belirteci oluşturmak için bir kez kullanılır ve asla saklanmaz."
+          }
+        }
+      }
+    },
+    "eHbA1c" : {
+      "shouldTranslate" : false
+    },
+    "eHbA1c — an A1c estimate from your average glucose. GMI — Glucose Management Indicator, another A1c estimate from average glucose. % and mmol/mol (IFCC) are two scales for the result." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eHbA1c — ortalama glukozunuzdan bir A1c tahmini. GMI — Glukoz Yönetim Göstergesi, ortalama glukozdan başka bir A1c tahmini. % ve mmol/mol (IFCC), sonucun iki farklı ölçeğidir."
+          }
+        }
+      }
+    },
     "g" : {
-      "comment" : "The short unit display string for grams"
+      "comment" : "The short unit display string for grams",
+      "shouldTranslate" : false
     },
     "mg/dL" : {
-      "comment" : "The short unit display string for milligrams of glucose per decilter"
+      "comment" : "The short unit display string for milligrams of glucose per decilter",
+      "shouldTranslate" : false
     },
-    "minutes" : {},
+    "minutes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dakika"
+          }
+        }
+      }
+    },
     "mmol/L" : {
-      "comment" : "The short unit display string for millimoles of glucose per liter"
+      "comment" : "The short unit display string for millimoles of glucose per liter",
+      "shouldTranslate" : false
     },
-    "mmol/mol" : {},
-    "“Default Snooze” controls the default value for how long the alert stays quiet after you press Snooze. \"A snooze duration of 0 means the alarm is acknowledged (silenced), and will alert again next time the condition applies, without time limitation. \" Toggle “Snoozed” to mute this alarm right now." : {},
-    "“Snooze All” disables every alarm. “Mute All” silences phone sounds but still vibrates and shows iOS notifications." : {},
-    "••••••••" : {},
-    "− 30m" : {},
-    "⚠️ Please enable at least one limit." : {},
-    "🌮" : {},
-    "🍕" : {},
-    "🍭" : {},
-    "🍽️" : {}
+    "mmol/mol" : {
+      "shouldTranslate" : false
+    },
+    "“Default Snooze” controls the default value for how long the alert stays quiet after you press Snooze. \"A snooze duration of 0 means the alarm is acknowledged (silenced), and will alert again next time the condition applies, without time limitation. \" Toggle “Snoozed” to mute this alarm right now." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Varsayılan Erteleme”, Ertele'ye bastıktan sonra uyarının ne kadar süre sessiz kalacağının varsayılan değerini belirler. \"0 erteleme süresi, alarmın onaylandığı (susturulduğu) ve koşul yeniden oluştuğunda süre sınırı olmadan tekrar uyaracağı anlamına gelir. \" Bu alarmı hemen susturmak için “Ertelendi” anahtarını açın."
+          }
+        }
+      }
+    },
+    "“Snooze All” disables every alarm. “Mute All” silences phone sounds but still vibrates and shows iOS notifications." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Tümünü Ertele” her alarmı devre dışı bırakır. “Tümünü Sessize Al” telefon seslerini kapatır ama yine de titreşir ve iOS bildirimlerini gösterir."
+          }
+        }
+      }
+    },
+    "••••••••" : {
+      "shouldTranslate" : false
+    },
+    "− 30m" : {
+      "shouldTranslate" : false
+    },
+    "⚠️ Please enable at least one limit." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Lütfen en az bir sınır etkinleştirin."
+          }
+        }
+      }
+    },
+    "🌮" : {
+      "shouldTranslate" : false
+    },
+    "🍕" : {
+      "shouldTranslate" : false
+    },
+    "🍭" : {
+      "shouldTranslate" : false
+    },
+    "🍽️" : {
+      "shouldTranslate" : false
+    }
   },
   "version" : "1.0"
 }

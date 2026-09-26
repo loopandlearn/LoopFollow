@@ -45,8 +45,9 @@ struct LocalizationCatalogTests {
 
     /// printf-style specifiers, e.g. %lld, %@, %.1f, %2$@. Returns (positionalIndex?, specifier).
     /// The positional group only matches digits followed by "$", so a width like "%2d" is not positional.
+    /// The space flag is deliberately not accepted so prose such as "% and" is not read as a specifier.
     private static func placeholders(in s: String) -> [(Int?, String)] {
-        let pattern = #"%(?:(\d+)\$)?([-+ 0#]*\d*(?:\.\d+)?(?:ll|l|h)?[@dDiuUxXoOfeEgGcCsSpaAF])"#
+        let pattern = #"%(?:(\d+)\$)?([-+0#]*\d*(?:\.\d+)?(?:ll|l|h)?[@dDiuUxXoOfeEgGcCsSpaAF])"#
         let regex = try! NSRegularExpression(pattern: pattern)
         return regex.matches(in: s, range: NSRange(s.startIndex..., in: s)).compactMap { m in
             guard let specRange = Range(m.range(at: 2), in: s) else { return nil }
