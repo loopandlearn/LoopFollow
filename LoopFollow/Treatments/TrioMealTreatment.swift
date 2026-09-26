@@ -8,7 +8,7 @@ import Foundation
 /// Nightscout's `_id` identifies the document; `id` is Trio's meal UUID. FPU children are
 /// separate documents whose `id` equals the root's `fpuID`, so either value works as a handle
 /// for Trio's remote edit/delete commands. A document without `fpuID` is a root.
-struct TrioMealTreatment: Equatable {
+struct TrioMealTreatment: Codable, Equatable {
     static let pastEditWindow: TimeInterval = 24 * 3600
     static let futureEditWindow: TimeInterval = 12 * 3600
     static let requiredRemoteCommands: Set<String> = [TRCCommandType.editMeal.rawValue, TRCCommandType.deleteMeal.rawValue]

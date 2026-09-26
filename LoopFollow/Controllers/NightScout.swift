@@ -43,6 +43,7 @@ extension MainViewController {
         var date: TimeInterval
         var sgv: Int
         var absorptionTime: Int
+        var treatment: CarbTreatment? = nil
     }
 
     func clearOldTempBasal() {

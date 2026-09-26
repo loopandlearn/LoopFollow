@@ -99,10 +99,12 @@ struct BGChartView: View {
 /// pinch centroid, committed on a geometric zoom grid. A one-finger press
 /// held stationary latches into inspect mode and scrubs a selection that is
 /// rendered by a shell overlay (never re-laying the canvas). Double-tap
-/// cycles zoom presets. No `.chartScrollableAxes`, no UIKit gesture hacks.
+/// opens carb treatment details or cycles zoom presets elsewhere.
+/// No `.chartScrollableAxes`, no UIKit gesture hacks.
 private struct MainBGChart: View {
     @ObservedObject var model: BGChartModel
     @ObservedObject var interaction: BGChartInteraction
+    @State private var selectedTreatment: Treatment?
 
     /// Rendered slice of the domain. The canvas covers only this window
     /// (visible ± `renderWindowPadFactor` viewports), bounding canvas width
@@ -186,6 +188,18 @@ private struct MainBGChart: View {
             chart(viewport: geo.size)
         }
         .background(Color(.systemBackground))
+        .sheet(item: $selectedTreatment, onDismiss: {
+            MainViewController.shared?.WebLoadNSTreatments()
+        }) { treatment in
+            NavigationStack {
+                TreatmentDetailView(treatment: treatment, rootMeal: rootMeal(for: treatment))
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { selectedTreatment = nil }
+                        }
+                    }
+            }
+        }
     }
 
     private func chart(viewport: CGSize) -> some View {
@@ -241,15 +255,15 @@ private struct MainBGChart: View {
         .contentShape(Rectangle())
         .simultaneousGesture(panAndInspectGesture(viewportWidth: viewportWidth))
         .simultaneousGesture(magnifyGesture(viewportWidth: viewportWidth))
-        // Double-tap zooms; a single tap (only recognized once the double-tap
-        // window lapses) selects the mark under the finger, or clears the pill.
+        // Double-tap opens carb treatment details, otherwise zooms. Single-tap
+        // waits for the double-tap window before selecting a mark.
         .simultaneousGesture(
-            TapGesture(count: 2)
+            SpatialTapGesture(count: 2)
                 .exclusively(before: SpatialTapGesture())
                 .onEnded { value in
                     switch value {
-                    case .first:
-                        cycleZoomPreset()
+                    case let .first(tap):
+                        handleDoubleTap(at: tap.location, viewportWidth: viewportWidth)
                     case let .second(tap):
                         handleTap(at: tap.location, viewportWidth: viewportWidth)
                     }
@@ -810,6 +824,50 @@ private struct MainBGChart: View {
     private func handleTap(at location: CGPoint, viewportWidth: CGFloat) {
         guard plotFrame.height > 0 else { return }
         tapped = tappedAnchor(at: location, viewportWidth: viewportWidth)
+    }
+
+    private func handleDoubleTap(at location: CGPoint, viewportWidth: CGFloat) {
+        // Hit-test the drawn positions, including decluttering offsets. Keep
+        // the original entry metadata so nearby entries cannot be confused.
+        guard plotFrame.height > 0 else {
+            cycleZoomPreset()
+            return
+        }
+
+        var nearest: BGChartModel.TreatmentPoint?
+        var bestDistance = BGChartConfig.tapHitRadius * BGChartConfig.tapHitRadius
+        forEachTreatmentAnchor { point in
+            let x = xPosition(for: point.drawnDate, viewportWidth: viewportWidth)
+            let y = yPosition(forValue: point.sgv)
+            guard x >= 0, x <= viewportWidth, y >= plotFrame.minY, y <= plotFrame.maxY else { return }
+            let dx = x - location.x
+            let dy = y - location.y
+            let distance = dx * dx + dy * dy
+            if distance <= bestDistance {
+                nearest = point
+                bestDistance = distance
+            }
+        }
+
+        guard let treatment = nearest?.treatment else {
+            cycleZoomPreset()
+            return
+        }
+        momentumTask?.cancel()
+        momentumTask = nil
+        resetGestureState()
+        tapped = nil
+        selectedTreatment = treatment.detailTreatment
+    }
+
+    private func rootMeal(for treatment: Treatment) -> Treatment? {
+        guard let child = treatment.trioMeal, child.isFPUChild, let fpuID = child.fpuID else { return nil }
+        return model.carbs.compactMap { point -> Treatment? in
+            guard case let .trio(meal) = point.treatment,
+                  !meal.isFPUChild, meal.fpuID == fpuID
+            else { return nil }
+            return point.treatment?.detailTreatment
+        }.first
     }
 
     /// The anchor the overlay should show: a live scrub wins over a sticky tap.
