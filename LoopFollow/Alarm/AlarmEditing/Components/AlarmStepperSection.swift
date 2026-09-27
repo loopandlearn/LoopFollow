@@ -6,9 +6,9 @@ import SwiftUI
 struct AlarmStepperSection: View {
     // MARK: – public parameters
 
-    let header: String?
-    let footer: String?
-    let title: String
+    let header: LocalizedStringKey?
+    let footer: LocalizedStringKey?
+    let title: LocalizedStringKey
     let range: ClosedRange<Double>
     let step: Double
     let unitLabel: String?
@@ -21,9 +21,9 @@ struct AlarmStepperSection: View {
     // MARK: – designated initialiser (Double?)
 
     init(
-        header: String? = nil,
-        footer: String? = nil,
-        title: String,
+        header: LocalizedStringKey? = nil,
+        footer: LocalizedStringKey? = nil,
+        title: LocalizedStringKey,
         range: ClosedRange<Double>,
         step: Double,
         unitLabel: String? = nil,
@@ -42,9 +42,9 @@ struct AlarmStepperSection: View {
 
     /// Same API but for **`Binding<Int?>`** — it bridges to Double internally.
     init(
-        header: String? = nil,
-        footer: String? = nil,
-        title: String,
+        header: LocalizedStringKey? = nil,
+        footer: LocalizedStringKey? = nil,
+        title: LocalizedStringKey,
         range: ClosedRange<Double>,
         step: Double,
         unitLabel: String? = nil,
@@ -90,8 +90,8 @@ struct AlarmStepperSection: View {
 
     var body: some View {
         Section(
-            header: header.map(Text.init),
-            footer: footer.map(Text.init)
+            header: header.map { Text($0) },
+            footer: footer.map { Text($0) }
         ) {
             Stepper(value: nonOptional, in: range, step: step) {
                 HStack {

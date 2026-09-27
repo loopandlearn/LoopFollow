@@ -9,9 +9,7 @@ struct PumpChangeAlarmEditor: View {
     var body: some View {
         Group {
             InfoBanner(
-                text: "Alerts when the pump / cannula is within the time "
-                    + "window you choose below (relative to the 3-day change "
-                    + "limit).",
+                text: "Alerts when the pump / cannula is within the time window you choose below (relative to the 3-day change limit).",
                 alarmType: alarm.type
             )
 

@@ -7,9 +7,9 @@ import SwiftUI
 struct AlarmBGSection: View {
     // MARK: – public parameters
 
-    let header: String?
-    let footer: String?
-    let title: String
+    let header: LocalizedStringKey?
+    let footer: LocalizedStringKey?
+    let title: LocalizedStringKey
     let range: ClosedRange<Double>
 
     // MARK: – underlying optional binding
@@ -19,9 +19,9 @@ struct AlarmBGSection: View {
     // MARK: – designated initialiser
 
     init(
-        header: String? = nil,
-        footer: String? = nil,
-        title: String,
+        header: LocalizedStringKey? = nil,
+        footer: LocalizedStringKey? = nil,
+        title: LocalizedStringKey,
         range: ClosedRange<Double>,
         value: Binding<Double?>
     ) {
@@ -45,8 +45,8 @@ struct AlarmBGSection: View {
 
     var body: some View {
         Section(
-            header: header.map(Text.init),
-            footer: footer.map(Text.init)
+            header: header.map { Text($0) },
+            footer: footer.map { Text($0) }
         ) {
             BGPicker(
                 title: title,

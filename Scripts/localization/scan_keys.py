@@ -17,31 +17,97 @@ HERE = pathlib.Path(__file__).resolve().parent
 API_LIST = HERE / "localized_apis.txt"
 
 
+def read_api_list():
+    apis, ignored = [], set()
+    for line in API_LIST.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("!"):
+            ignored.add(line[1:])
+        else:
+            apis.append(line.rstrip("(").rstrip(":"))
+    return apis, ignored
+
+
+def call_literals(src, open_paren):
+    """Yield (label, literal, interpolated) for direct string-literal arguments of the call whose
+    "(" is at open_paren. Nested calls/arrays are skipped; interpolated literals are flagged."""
+    i = open_paren + 1
+    depth_paren, depth_bracket = 0, 0
+    label = None
+    expect_value = True  # right after "(" or ","
+    n = len(src)
+    while i < n:
+        c = src[i]
+        if c == '"':
+            j = i + 1
+            interpolated = False
+            while j < n and src[j] != '"':
+                if src[j] == "\\":
+                    if j + 1 < n and src[j + 1] == "(":
+                        interpolated = True
+                    j += 2
+                    continue
+                j += 1
+            lit = src[i + 1:j]
+            if depth_paren == 0 and depth_bracket == 0 and expect_value:
+                yield label, lit, interpolated
+            expect_value = False
+            i = j + 1
+            continue
+        if c == "(":
+            depth_paren += 1
+        elif c == ")":
+            if depth_paren == 0:
+                return
+            depth_paren -= 1
+        elif c == "[":
+            depth_bracket += 1
+        elif c == "]":
+            depth_bracket -= 1
+        elif c == "," and depth_paren == 0 and depth_bracket == 0:
+            label = None
+            expect_value = True
+        elif c == ":" and depth_paren == 0 and depth_bracket == 0 and expect_value:
+            m = re.search(r"(\w+)\s*$", src[max(0, i - 40):i])
+            label = m.group(1) if m else None
+        elif not c.isspace() and c not in ":" and expect_value:
+            # an identifier/expression as the value (e.g. `title: route.title`) is not a literal
+            m = re.match(r"\w+\s*:", src[i:i + 40])
+            if not m:
+                expect_value = False
+        i += 1
+
+
 def literal_keys(roots):
-    apis = [a.strip() for a in API_LIST.read_text().splitlines() if a.strip()]
-    names = [re.escape(a.rstrip("(").rstrip(":")) for a in apis]
-    pat = re.compile(r'(?<![\w.])\.?(' + "|".join(names) + r')\((?:localized:\s*)?"((?:[^"\\]|\\.)*)"')
-    prompt = re.compile(r'prompt:\s*"((?:[^"\\]|\\.)*)"')
+    apis, ignored = read_api_list()
+    names = "|".join(re.escape(a) for a in apis)
+    call = re.compile(r"(?<![\w.])\.?(" + names + r")\(")
     keys, skipped = {}, []
     for root in roots:
         for f in sorted(pathlib.Path(root).rglob("*.swift")):
             src = f.read_text(encoding="utf-8")
-            for m in pat.finditer(src):
-                api, s = m.group(1), m.group(2)
-                if api == "Text" and src[m.start():m.start() + 14].startswith("Text(verbatim"):
+            for m in call.finditer(src):
+                if m.group(1) == "Text" and src[m.start():m.start() + 14].startswith("Text(verbatim"):
                     continue
-                if not s.strip():
-                    continue
-                if src[m.end():m.end() + 8].lstrip().startswith("+"):
-                    continue  # "a" + b: String concatenation, never looked up in the catalog
-                if "\\(" in s:
-                    skipped.append((f.name, s))
-                    continue
-                keys.setdefault(s.replace('\\"', '"').replace("\\n", "\n"), f.name)
-            for m in prompt.finditer(src):
-                s = m.group(1)
-                if s.strip() and "\\(" not in s:
-                    keys.setdefault(s, f.name)
+                for label, lit, interpolated in call_literals(src, m.end() - 1):
+                    if label in ignored or not lit.strip():
+                        continue
+                    after = src[src.index('"', m.end()) :]
+                    if interpolated:
+                        skipped.append((f.name, lit))
+                        continue
+                    keys.setdefault(lit.replace('\\"', '"').replace("\\n", "\n"), f.name)
+                    if label is None and m.group(1) != "String":
+                        pass
+            # "…" + x concatenation is never looked up: drop any key that only appears before a "+"
+    # remove literals that are immediately followed by a "+" (String concatenation)
+    for root in roots:
+        for f in sorted(pathlib.Path(root).rglob("*.swift")):
+            src = f.read_text(encoding="utf-8")
+            for m in re.finditer(r'"((?:[^"\\]|\\.)*)"\s*\+', src):
+                keys.pop(m.group(1).replace('\\"', '"').replace("\\n", "\n"), None)
     return keys, skipped
 
 

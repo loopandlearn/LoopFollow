@@ -22,8 +22,7 @@ struct LowBgAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "PERSISTENCE",
-                footer: "Glucose must stay below the threshold for this many minutes "
-                    + "before the alert sounds. Set 0 to alert immediately.",
+                footer: "Glucose must stay below the threshold for this many minutes before the alert sounds. Set 0 to alert immediately.",
                 title: "Persistent",
                 range: 0 ... 120,
                 step: 5,
@@ -33,9 +32,7 @@ struct LowBgAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "PREDICTION",
-                footer: "Look ahead this many minutes in the forecast; "
-                    + "if any future value is at or below the threshold, "
-                    + "you’ll be warned early. Set 0 to disable.",
+                footer: "Look ahead this many minutes in the forecast; if any future value is at or below the threshold, you’ll be warned early. Set 0 to disable.",
                 title: "Predictive",
                 range: 0 ... 60,
                 step: 5,

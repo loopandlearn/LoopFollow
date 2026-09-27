@@ -136,7 +136,7 @@ struct AlarmsStepView: View {
 
     private func bgPicker(
         _ seed: Binding<OnboardingViewModel.SeedAlarm>,
-        title: String,
+        title: LocalizedStringKey,
         range: ClosedRange<Double>,
         keyPath: WritableKeyPath<Alarm, Double?>
     ) -> some View {
