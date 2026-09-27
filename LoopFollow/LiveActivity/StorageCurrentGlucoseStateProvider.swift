@@ -141,6 +141,10 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
         return Date().timeIntervalSince1970 - lastLoopTime >= 15 * 60
     }
 
+    var cgmSensorState: String? {
+        Observable.shared.cgmSensorState.value?.summary
+    }
+
     // MARK: - Renewal
 
     var showRenewalOverlay: Bool {

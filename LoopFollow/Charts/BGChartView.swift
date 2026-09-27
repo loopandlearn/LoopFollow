@@ -682,7 +682,7 @@ private struct MainBGChart: View {
     /// lookup and the tap hit test.
     private func forEachTreatmentAnchor(_ body: (BGChartModel.TreatmentPoint) -> Void) {
         for group in [model.boluses, model.carbs, model.smbs, model.bgChecks,
-                      model.notes, model.suspends, model.resumes, model.sensorStarts]
+                      model.notes, model.sensorStates, model.suspends, model.resumes, model.sensorStarts]
         {
             for t in group {
                 body(t)
@@ -1421,6 +1421,16 @@ private struct BGChartCanvas: View, Equatable {
             )
             .symbolSize(isSmall ? 22 : 54)
             .foregroundStyle(Color.gray.opacity(0.75))
+        }
+
+        ForEach(windowed(model.sensorStates) { $0.drawnDate }) { pt in
+            PointMark(
+                x: .value("time", pt.drawnDate),
+                y: .value("sgv", pt.sgv)
+            )
+            .symbol(.triangle)
+            .symbolSize(isSmall ? 22 : 54)
+            .foregroundStyle(Color.orange.opacity(0.85))
         }
     }
 

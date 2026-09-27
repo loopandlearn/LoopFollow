@@ -237,6 +237,16 @@ private struct LockScreenLiveActivityView: View {
 
             ActiveAdjustmentsView(snapshot: s)
 
+            if let sensorState = s.cgmSensorState {
+                Text("CGM: \(sensorState)")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+
             Text(LAAppGroupSettings.showDisplayName()
                 ? "\(LAAppGroupSettings.displayName()) — \(LAFormat.updated(s))"
                 : "Last Update: \(LAFormat.updated(s))")
@@ -260,10 +270,22 @@ private struct LockScreenLiveActivityView: View {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(Color(uiColor: UIColor.systemRed).opacity(0.85))
 
-                        Text("Not Looping")
-                            .font(.system(size: 20, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .tracking(1.5)
+                        VStack(spacing: 4) {
+                            Text("Not Looping")
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .tracking(1.5)
+
+                            if let sensorState = state.snapshot.cgmSensorState {
+                                Text("CGM: \(sensorState)")
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.8)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                        .padding(.horizontal, 12)
                     }
                 }
             }
@@ -507,16 +529,31 @@ private struct DynamicIslandTrailingView: View {
 private struct DynamicIslandBottomView: View {
     let snapshot: GlucoseSnapshot
 
-    var body: some View {
-        if snapshot.isNotLooping {
-            Text("Loop has not reported in 15+ minutes")
+    @ViewBuilder
+    private var sensorStateText: some View {
+        if let sensorState = snapshot.cgmSensorState {
+            Text("CGM: \(sensorState)")
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.92))
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
+        }
+    }
+
+    var body: some View {
+        if snapshot.isNotLooping {
+            VStack(spacing: 2) {
+                Text("Loop has not reported in 15+ minutes")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.92))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                sensorStateText
+            }
         } else {
             VStack(spacing: 2) {
                 ActiveAdjustmentsView(snapshot: snapshot)
+                sensorStateText
                 Text("Updated at: \(LAFormat.updated(snapshot))")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.92))
